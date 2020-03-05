@@ -33,4 +33,4 @@ for i in range(length):  #para cada sub link vuelvo a hacer lo mismo
                     response = requests.get(DOMAIN + file_link) #descargo el archivo
                     file.write(response.content) 
 
-#FUNCIONA
+#FUNCIONA, falta pasar a .png
