@@ -24,10 +24,10 @@ for i in range(length):  #para cada sub link vuelvo a hacer lo mismo
     for sub_link2 in soup.find_all('a'): #busco todo lo que tenga 'a'
         file_link = sub_link2.get('href') #me guardo el link del archivo .fits
         if FILETYPE in file_link: # si el tipo de archivo(.fits) esta en el link
-            if ((soup.title.string + ".fits") == file_name): #para que no descargue duplicado
+            if ((soup.title.string.split()[4] + '-' + soup.title.string.split()[9] + soup.title.string.split()[10] + ".fits") == file_name): #para que no descargue duplicado
                 continue
             else:
-                file_name = soup.title.string + ".fits"  #le asigno como nombre al archivo el titulo + .fits
+                file_name = soup.title.string.split()[4] + '-' + soup.title.string.split()[9] + soup.title.string.split()[10] + ".fits"  #le asigno como nombre al archivo el titulo + .fits
                 print('Descargando el archivo: ' + file_name + '\n' +'del link: ' + DOMAIN+file_link + '\n') #imprimo que lo voy a descargar
                 with open(file_name, 'wb') as file:
                     response = requests.get(DOMAIN + file_link) #descargo el archivo
