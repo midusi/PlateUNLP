@@ -1,7 +1,11 @@
 #%%
+#import sys
+#sys.path.append("..") #Es necesario para importar Recursos.py
+#import Recursos.py
 import sys
-sys.path.append("..") #Es necesario para importar Recursos.py
-import Recursos
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src import Recursos
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
