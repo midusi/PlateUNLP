@@ -1,3 +1,5 @@
+"""@outhor Katherine Canaza"""
+
 import os
 from astropy.io import fits
 import numpy as np 
@@ -43,12 +45,12 @@ def normalize_Zscore(datos):
 	return (datos - np.mean(datos)) / np.std(datos)
 
 def normalize_MinMax_2d(pixels):
-	print('Data Type: %s' % pixels.dtype)
-	print('Min: %.3f, Max: %.3f' % (pixels.min(), pixels.max()))
-	pixels = pixels.astype('float32')
+	#print('Data Type: %s' % pixels.dtype)
+	#print('Min: %.3f, Max: %.3f' % (pixels.min(), pixels.max()))
+	pixels = pixels.astype('float')
 	pixels -= pixels.min()
 	pixels /= (pixels.max() - pixels.min())
-	print('Min: %.3f, Max: %.3f' % (pixels.min(), pixels.max()))
+	#print('Min: %.3f, Max: %.3f' % (pixels.min(), pixels.max()))
 	return pixels
 
 def ajustarMarcosGraficos(tamanio):
@@ -90,6 +92,22 @@ def graficarPicos_Max(dirImg, imagen, cantEspectros):
 def obtenerDatos(dirImg, nombreImg):
 	hdu_list = fits.open(dirImg+'\\'+nombreImg, ignore_missing_end=True)
 	return asarray(hdu_list[0].data)
+
+def getInfo(nombreImg):
+	#DIRECTORIO_IMG =  "f:\\GITHUB_TRABAJOS\\proyecto_astro_PPS\\notebooks\\fits"
+	path =  "f:\\GITHUB_TRABAJOS\\proyecto_astro_PPS\\notebooks\\fits"+"\\"+nombreImg
+	#print(path)
+	data = fits.getdata(path, ignore_missing_end=True)
+	#print("get datos..ok")
+	clusters = getNroEspectros(path)
+	return data, clusters
+
+def getImagen(nombreImg):
+	path =  "f:\\GITHUB_TRABAJOS\\proyecto_astro_PPS\\notebooks\\png"
+	return path
+
+def getNroEspectros(nombreImg):
+	return np.int((fits.getheader(nombreImg, ignore_missing_end=True))['SPEC-AMO'])
 
 def sumarizarPixels(pixels):
 	#se sumariza las columnas para graficar 
@@ -136,6 +154,16 @@ def graficarResultado_v2(pixels, nombre, datos, rango):
 	ax2.axvline(x= rango[1], color='red', linestyle='--', linewidth=1)
 	plt.show()
 	return 1
+
+def graficarResultadosConValores(pixels, nombre, datos, valores):
+	fig, ax = plt.subplots()
+	ax.imshow(pixels)
+	ax.plot(datos*pixels.shape[0], '--', linewidth=1, color='red')
+	for i in valores:
+		ax.axvline(x= i * pixels.shape[0], color='white', linestyle='-.', linewidth=2)
+	plt.show()
+	return 1
+
 
 def graficar_3d(pixels):
 	from mpl_toolkits.mplot3d import Axes3D
