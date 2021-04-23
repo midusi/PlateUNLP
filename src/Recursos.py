@@ -1,4 +1,4 @@
-"""@outhor Katherine Canaza"""
+"""@author Katherine Canaza"""
 
 import os
 from astropy.io import fits
@@ -9,7 +9,10 @@ from scipy.signal import savgol_filter
 from scipy.signal import find_peaks 
 import bisect as sort
 import pandas as pd 
-
+import scipy.stats as stats
+#Modelos
+from sklearn.mixture import GaussianMixture
+import seaborn as sns
 
 def obtenerNombre(plateN, nomObject):
 	# .replace(" ", "")	#para eliminar todos los espacios en blanco
@@ -38,6 +41,14 @@ def obtenerListaNombres(directorio):
                 listaArchivos.append(os.path.join(filename))
     return listaArchivos
 
+def obtenerListaNombres():
+    pathDir =  "f:\\GITHUB_TRABAJOS\\proyecto_astro_PPS\\notebooks\\fits"
+    listaArchivos = []
+    for dirname, _,filenames in os.walk(pathDir):
+        for filename in filenames:
+            listaArchivos.append(os.path.join(filename))
+    return listaArchivos
+
 def normalize_MinMax_1d(datos):
 	return (datos-min(datos)) / (max(datos)-min(datos))
 	
@@ -52,6 +63,10 @@ def normalize_MinMax_2d(pixels):
 	pixels /= (pixels.max() - pixels.min())
 	#print('Min: %.3f, Max: %.3f' % (pixels.min(), pixels.max()))
 	return pixels
+
+def normalize(vector):
+    v = np.array(vector.copy(), dtype=np.float64)
+    return(v - v.min()) / (v.max() - v.min())
 
 def ajustarMarcosGraficos(tamanio):
 	fig = plt.figure(figsize = (tamanio,tamanio))
@@ -102,9 +117,9 @@ def getInfo(nombreImg):
 	clusters = getNroEspectros(path)
 	return data, clusters
 
-def getImagen(nombreImg):
+"""def getImagen(nombreImg):
 	path =  "f:\\GITHUB_TRABAJOS\\proyecto_astro_PPS\\notebooks\\png"
-	return path
+	return path"""
 
 def getNroEspectros(nombreImg):
 	return np.int((fits.getheader(nombreImg, ignore_missing_end=True))['SPEC-AMO'])
@@ -231,3 +246,82 @@ def obtenerPosicionMedio(vector):
 	if not(esPar(len(vector))):
 		mitad = mitad - 0.5
 	return int(mitad)
+
+"""MODELO GMM"""
+def modelo_gmm(datos, clusters):
+    #Se configura el modelo
+    gmm = GaussianMixture(
+    n_components=clusters, 
+    covariance_type='full')
+    #n_init= nro_iters)
+
+    #Se estima el modelo
+    gmm.fit(datos.reshape(-1,1))
+   
+    print("Datos del modelo:")
+    print("centroides")
+    print(gmm.means_)
+    print("%")
+    print(gmm.weights_)
+    print("std")
+    print(np.sqrt(gmm.covariances_))
+    return gmm
+
+def generar_nuevos_datos(Y):
+    
+    Y -= int(Y.min()*0.8)
+    #se crean los nuevos datos
+    nuevo_dataset = []   #nueva funcion
+    for i in range(Y.size):
+        #Y[i] es un valor decimal entonces se aplica int
+        #se genera tantos datos como diga Y[i]  con el valor i
+        nuevos = np.ones( int(Y[i])) *i   
+        nuevo_dataset = np.append(nuevo_dataset, nuevos)
+
+    #se muestra la nueva dimension de los datos generados
+    print('Dimension de los nuevos datos: '+str(nuevo_dataset.shape))
+    return nuevo_dataset
+
+def graficar_regiones(Y,Y_nuevo, modelo, clusters):
+    mu = np.abs(modelo.means_.flatten())
+    std = np.sqrt(np.abs(modelo.covariances_.flatten()))
+    ax = sns.kdeplot(Y_nuevo, shade=False, color='crimson')
+    kdeline = ax.lines[0]
+    xs = kdeline.get_xdata()
+    ys = kdeline.get_ydata()
+    
+    for i in range(clusters):
+        y_values = stats.norm(mu[i], std[i])
+        x0 = mu[i]-std[i]
+        x1 = mu[i]+std[i]        
+        ax.set_ylabel("Densidad de nuevos datos",color="crimson",fontsize=6)
+        ax.set_title('Media & desvío estándar del modelo vs distr. KDE')
+        ax.vlines(mu[i], 0, np.interp(mu[i], xs, ys), color='crimson', ls=':')
+        ax.fill_between(xs, 0, ys, alpha=0.2)
+        ax.fill_between(xs, 0, ys, where=(x0 <= xs) & (xs <= x1), interpolate=True, facecolor='crimson', alpha=0.2)
+    #se grafica con otro eje y para la funcion reducida de los datos 
+    ax2=ax.twinx()
+    ax2.plot(Y, color="blue",ls='-')
+    ax2.set_ylabel("Y(valores de los datos)",color="blue",fontsize=6)
+    #plt.show()
+    return ax2
+    
+def graficar_region_kde(Y, Y_nuevo):
+    ax = sns.kdeplot(Y_nuevo, shade=False, color='crimson')
+    kdeline = ax.lines[0]
+    xs = kdeline.get_xdata()
+    ys = kdeline.get_ydata()
+    middle = Y_nuevo.mean()
+    sdev = Y_nuevo.std()
+    left = middle - sdev
+    right = middle + sdev
+    plt.title('Media & desvío estándar de distr. KDE')
+    plt.vlines(middle, 0, np.interp(middle, xs, ys), color='crimson', ls=':')
+    plt.fill_between(xs, 0, ys, facecolor='crimson', alpha=0.2)
+    plt.fill_between(xs, 0, ys, where=(left <= xs) & (xs <= right), interpolate=True, facecolor='crimson', alpha=0.2)
+    #se grafica con otro eje y para la funcion reducida de los datos 
+    ax2=ax.twinx()
+    ax2.plot(Y, color="blue",ls='-')
+    ax2.set_ylabel("Y(valores de los datos)",color="blue",fontsize=6)
+    #plt.show()
+    return plt
