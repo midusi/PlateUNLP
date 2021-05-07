@@ -282,6 +282,23 @@ def generar_nuevos_datos(Y):
     print('Dimension de los nuevos datos: '+str(nuevo_dataset.shape))
     return nuevo_dataset
 
+def generar_nuevos_datos_reduc(Y):
+    cant = 0
+    media = np.mean(Y)
+    nuevo_dataset = []   #nueva funcion
+    for i in range(Y.size):
+        #Y[i] es un valor decimal entonces se aplica int
+        #se genera tantos datos como diga Y[i]  con el valor i
+        if(Y[i] > media):
+            nuevos = np.ones( int(Y[i])) *i   
+            nuevo_dataset = np.append(nuevo_dataset, nuevos)
+            cant +=1
+    
+    #se muestra la nueva dimension de los datos generados
+    print('Dimension de los nuevos datos: '+str(nuevo_dataset.shape))
+    print(str(Y.size - cant)+' datos eliminados')
+    return nuevo_dataset
+
 def graficar_regiones(Y,Y_nuevo, modelo, clusters):
     mu = np.abs(modelo.means_.flatten())
     std = np.sqrt(np.abs(modelo.covariances_.flatten()))
