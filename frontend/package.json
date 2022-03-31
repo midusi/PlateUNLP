@@ -5,7 +5,12 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
+    "start": "sirv public --no-clear",
+    "pm2-start": "pm2 start ecosystem.config.js",
+    "pm2-stop": "pm2 stop ecosystem.config.js",
+    "pm2-restart": "pm2 restart ecosystem.config.js",
+    "pm2-reload": "pm2 reload ecosystem.config.js",
+    "pm2-delete": "pm2 delete ecosystem.config.js"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
@@ -24,6 +29,7 @@
     "axios": "^0.21.1",
     "fabric": "^4.6.0",
     "file-saver": "^2.0.5",
+    "pm2": "^5.2.0",
     "sirv-cli": "^1.0.0",
     "svelte": "^3.0.0",
     "sweetalert2": "^11.1.10"

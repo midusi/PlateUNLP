@@ -33,7 +33,7 @@ Para instalar las dependencias del frontend es necesario posicionarse en la carp
 npm install
 ```
 
-## Ejecutar el software
+## Ejecutar el software en desarrollo
 
 En la carpeta `/backend` una vez activado el entorno virtual, ejecutar:
 
@@ -46,5 +46,14 @@ En la carpeta `/frontend`, ejecutar:
 ```bash
 npm run dev
 ```
+
+Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráfica del software.
+
+## Ejecutar el software en producción
+Para ejecutar el software en producción se debe posicionar en la carpeta `/frontend` y ejecutar el siguiente comando:
+```bash
+npm run pm2-start
+```
+Se dispone de los siguientes scripts: `pm2-start`, `pm2-stop`, `pm2-restart`,`pm2-reload` y `pm2-delete`.
 
 Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráfica del software.
