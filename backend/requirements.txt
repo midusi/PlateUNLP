@@ -30,3 +30,4 @@ seaborn>=0.11.0
 astroquery>=0.4.5
 astroplan>=0.8
 timezonefinder>=5.2.0
+julian>=0.14

@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from astroquery.simbad import Simbad
-from app.helpers.metadatalib import simbad_sptype,epoca, simbad_cooJ1950, hora_local, tiempo_sidereo, angulo_horario
+from app.helpers.metadatalib import simbad_sptype,epoca, simbad_cooJ1950, hora_local, tiempo_sidereo, angulo_horario, calculate_jd, calculate_airmass
 import sys
 import traceback
 from astropy.coordinates.errors import UnknownSiteException as USE
@@ -72,7 +72,7 @@ def api_get_metadata():
         }
         return jsonify(data), 400   
 
-    
+    ha = angulo_horario(ra1950, st)
     metadata = {**metadata, **{
     "RA": ra,
     "DEC": dec,
@@ -80,14 +80,12 @@ def api_get_metadata():
     "DEC1950": dec1950,
     "TIME-OBS": time_obs,
     "ST": st,
-    "HA": angulo_horario(ra1950, st),
-    "AIRMASS": "",
-    "JD": ""
+    "HA": ha,
+    "AIRMASS": calculate_airmass(metadata["OBSERVAT"].split(':')[0], ha, ra, dec),
+    "JD": calculate_jd(metadata['DATE-OBS'], time_obs)
     }}
-
-    # Data formatting
-    # metadata['EXPTIME'] = str(int(float(metadata['EXPTIME'])))
-    # metadata['OBSERVAT'] = metadata['OBSERVAT'].split(sep=":")[0]
+    
+    
     metadata.pop('OBSERVAT', None)
 
     # api response data

@@ -5,9 +5,10 @@ from astropy.coordinates import FK4
 import astropy.units as unit
 from astroplan import Observer
 from timezonefinder import TimezoneFinder
+import julian
 import pytz, datetime
 from datetime import timedelta
-
+import math
 
 def simbad_sptype(obj_metadata):    
     s = Simbad()
@@ -123,3 +124,52 @@ def angulo_horario(ra, ts):
     ha= "{0:0>2d}:{1:0>2d}:{2:.2f}".format(ha_h, ha_m, ha_s)                    
     
     return ha
+
+def calculate_jd(dateobs, timeObs):
+        fecha= []
+        for f in dateobs.split('-'):
+            fecha.append(int(f))
+        hora_timeObs= []
+        for h in timeObs.split(':'):
+            hora_timeObs.append(int(h))
+        
+        if len(hora_timeObs) < 3:
+          for x in range(len(hora_timeObs) - 1, 2):
+            hora_timeObs.append(0)
+            
+        dt= datetime.datetime(fecha[0], fecha[1], fecha[2], hora_timeObs[0], hora_timeObs[1], hora_timeObs[2])
+        jd= julian.to_jd(dt + datetime.timedelta(hours=0), fmt='jd')
+
+        return "{:.5f}".format(jd)
+
+def calculate_airmass(observat, ha, ra, dec):
+
+        observatory= Observer.at_site(observat)
+        lat= str(observatory.location.lat)
+        
+        lat_d= int(lat.split('d')[0])
+        lat_m= int(lat.split('d')[1].split('m')[0])
+        lat_s= float(lat.split('d')[1].split('m')[1].split('s')[0])
+        lat_deg= (lat_s/60. + lat_m)/60. + lat_d
+
+        ha_h= int(ha.split(':')[0])
+        ha_m= int(ha.split(':')[1])
+        ha_s= float(ha.split(':')[2])
+        ha_hs= (ha_s/60. + ha_m)/60. + ha_h
+        ha_deg= ha_hs * 24. / 360.
+
+        ra_h= int(ra.split(':')[0])
+        ra_m= int(ra.split(':')[1])
+        ra_s= float(ra.split(':')[2])
+        ra_hs= (ra_s/60. + ra_m)/60. + ra_h
+        # ra_deg= ra_hs * 24. / 360.
+        
+        dec_d= int(dec.split(':')[0])
+        dec_m= int(dec.split(':')[1])
+        dec_s= float(dec.split(':')[2])
+        dec_deg= (dec_s/60. + dec_m)/60. + dec_d
+
+        zz= math.sin(lat_deg) * math.sin(dec_deg) - math.cos(lat_deg) * math.cos(dec_deg) * math.cos(ha_deg)
+        secz= 1./zz
+
+        return "{:.5f}".format(secz)

@@ -192,14 +192,14 @@ function getMetadataFields() {
     airmass: {
       label: 'AIRMASS',
       type: 'text',
-      info: '',
+      info: 'Air mass measure',
       required: false,
       remote: true
     },
     jd: {
       label: 'JD',
       type: 'text',
-      info: '',
+      info: 'Geocentric Julian day (Greenwich)',
       required: false,
       remote: true
     },
@@ -214,8 +214,7 @@ function getMetadataFields() {
       label: 'PLATE-N',
       type: 'text',
       info: 'Identification number',
-      required: false,
-      options: getObservat()
+      required: false
     },
     gain: {
       label: 'GAIN',
