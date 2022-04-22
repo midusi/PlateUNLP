@@ -70,6 +70,53 @@ function getObservat() {
     'Otro']
 }
 
+function getObserver(){
+  if(localStorage.getItem("observers")){
+    return JSON.parse(localStorage.getItem("observers"));
+  }
+}
+
+function getObserverDef(){
+  if(localStorage.getItem("observerDefault")){
+    return JSON.parse(localStorage.getItem("observerDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+
+function getDigitaliDef(){
+  if(localStorage.getItem("digitaliDefault")){
+    return JSON.parse(localStorage.getItem("digitaliDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+function getDigitali(){
+  if(localStorage.getItem("digitalis")){
+    return JSON.parse(localStorage.getItem("digitalis"));
+  }
+}
+
+function getImageTyp(){
+  if(localStorage.getItem("imageTypes")){
+    return JSON.parse(localStorage.getItem("imageTypes"));
+  }
+}
+
+function getImageTypDef(){
+  if(localStorage.getItem("imageTypeDefault")){
+    return JSON.parse(localStorage.getItem("imageTypeDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+
 function getMetadataFields() {
   return {
     object_: {
@@ -233,19 +280,25 @@ function getMetadataFields() {
       label: 'IMAGETYP',
       type: 'text',
       info: 'Object, dark, zero, etc',
-      required: false
+      required: false,
+      options: getImageTyp(),
+      default: getImageTypDef()
     },
     observer: {
       label: 'OBSERVER',
       type: 'text',
       info: 'Observer name',
-      required: false
+      required: false,
+      options: getObserver(),
+      default: getObserverDef()
     },
     digitali: {
       label: 'DIGITALI',
       type: 'text',
       info: 'Digitalizer name',
-      required: false
+      required: false,
+      options: getDigitali(),
+      default: getDigitaliDef()
     },
     scanner: {
       label: 'SCANNER',
@@ -280,4 +333,4 @@ function getMetadataFields() {
   }
 }
 
-export { getMetadataFields }
+export { getMetadataFields,getDigitaliDef,getImageTypDef,getObserverDef}

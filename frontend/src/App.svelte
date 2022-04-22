@@ -9,6 +9,7 @@
     Field,
     ImageInfoCard,
     ConfigModal,
+    SetParams
   } from "./components";
   import { confirmAlert } from "./helpers/Alert";
 
@@ -63,6 +64,7 @@
       UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
     };
     metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+
   }
 
   function initializeCanvas() {
@@ -80,6 +82,7 @@
   }
 
   function generateFits() {
+
     confirmAlert({
       succesFunc: () => {
         spectrogramStore.generateFits(
@@ -96,6 +99,9 @@
 
   function getPaths() {
     workspaceStore.getPaths(pathDir);
+  }
+  function updateLists(){
+    metadataStore.initFields();
   }
 
   function getMetadata(fields, required) {
@@ -192,14 +198,17 @@
       metadataStore.setOption("OBSERVAT", config.fields["OBSERVAT"].options);
     }
   }
+
 </script>
 
 <main>
   <div class="card">
-    <h5 class="card-header">Localizador de espectros</h5>
+    <div class="card-header">
+    <h5>Localizador de espectros</h5>
+    </div>
     <div class="card-body">
       <div class="row">
-        <div class="col-lg-7 col-xl-5">
+        <div class="col-lg-7 col-xl-6">
           <div class="row">
             <div class="d-flex flex-column col-9">
               <span>Directorio de trabajo</span>
@@ -270,6 +279,9 @@
                     />
                   {/each}
                   <div class="row mt-4 ml-1 mb-4">
+                    <div class="controls mr-2">
+                      
+                    </div>
                     <div class="controls  mr-2">
                       <NButton click={setRemoteMetadata} disabled={invalidForm}>
                         Buscar metadatos
@@ -297,7 +309,7 @@
             </Tabs>
           {/if}
         </div>
-        <div class="col-lg-5 col-xl-4">
+        <div class="col-lg-4 col-xl-5">
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
             <canvas
               id="canvas-container"
@@ -309,6 +321,12 @@
             />
           </div>
         </div>
+        <div class="col-lg-1 col-xl-1"><div class="mt-2">
+          <div class="d-flex justify-content-end"> 
+            <SetParams updateParent={updateLists}/>
+          </div>
+         
+        </div></div>
       </div>
     </div>
   </div>

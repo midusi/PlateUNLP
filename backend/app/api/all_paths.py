@@ -16,7 +16,7 @@ def api_all_paths():
     all_paths = os.listdir(dir_path)
 
     #formats = ['png', 'tif', 'tiff']
-    formats = ['tif']
+    formats = ['tiff']
     all_paths = all_paths.select(lambda item: item.split(sep='.').last() in formats)
     
     # api response data

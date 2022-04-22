@@ -11,6 +11,8 @@ def api_generate_fits():
     fields = request.json["fields"]
 
     image_path = os.path.join(path_dir, img_name)
+    img_name = img_name[0:img_name.rfind(".")];
+
     # test
     print(image_path)
     print(image_path)
@@ -41,7 +43,7 @@ def api_generate_fits():
         crop_img = crop_img[:,:]
 
         # saved image crop
-        cv2.imwrite(os.path.join(output_path, f'{bbox["OBJECT"]}.png'), crop_img)
+        cv2.imwrite(os.path.join(output_path, f'{img_name}_{bbox["OBJECT"]}.png'), crop_img)
 
         # generated fit
         prihdr = fits.Header()
@@ -52,7 +54,7 @@ def api_generate_fits():
             prihdr[key] = (bbox[key], comment)
         print('Format to Save', crop_img.dtype)
         fits.writeto(
-            (os.path.join(output_path, f'{bbox["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
+            (os.path.join(output_path, f'{img_name}_{bbox["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
 
     # api response data
     data = {
