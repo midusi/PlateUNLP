@@ -35,8 +35,9 @@ def api_predict():
     width = 512
     height = 512
     dsize = (width, height)
-
     img = cv2.imread(image_path)
+    img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+
     original_height, original_width, _ = img.shape
 
     # size ratio between original and training image
@@ -58,8 +59,14 @@ def api_predict():
     # results
     print(detections.pandas().xyxy[0])
 
+    
     # inference processing
     results = detections.pandas().xyxy[0].to_dict(orient="records")
+
+    #aux = proportional_width
+    #proportional_width = proportional_height 
+    #proportional_height = aux
+    
     bboxs = []
     for result in results:
         # con = result['confidence']
@@ -68,13 +75,19 @@ def api_predict():
         y1 = int(result['ymin']) * proportional_height
         x2 = int(result['xmax']) * proportional_width
         y2 = int(result['ymax']) * proportional_height
+        #x1 = int(result['ymin']) * proportional_height #x1 
+        #y1 = int(result['xmax']) * proportional_width
+        #x2 = int(result['ymax']) * proportional_height
+        #y2 = int(result['xmin']) * proportional_width #y2 
+     
+
         img_width = x2 - x1
         img_heigth = y2 - y1
 
-        bboxs.append({'x': (2 * x1 + img_width) / (2 * original_width),
-                      'y': (2 * y1 + img_heigth) / (2 * original_height),
-                      'w': img_width / original_width,
-                      'h': img_heigth / original_height})
+        bboxs.append({'x':(2 * y1 + img_heigth) / (2 * original_height),
+                      'y': 1 - (2 * x1 + img_width) / (2 * original_width),
+                      'w': img_heigth / original_height,
+                      'h': img_width / original_width })
 
     # api response data
     data = {

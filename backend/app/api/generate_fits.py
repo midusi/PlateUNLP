@@ -15,7 +15,7 @@ def api_generate_fits():
 
     # test
     print(image_path)
-    print(image_path)
+    print("image path",image_path)
 
     # generate dir output
     output_path = os.path.join(path_dir, "output")
@@ -29,21 +29,28 @@ def api_generate_fits():
         bbox.pop('color', None)
         
         # The flag to -1 loads the image as is
+        rotated = False;
         img = cv2.imread(image_path, -1)
         original_height, original_width = img.shape
-        if (original_width > original_height):
+        if((original_width < original_height)):
             img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+            original_height, original_width = img.shape
+            rotated = True;
+        
+        #if (original_width > original_height):
+            
         x = int(bbox["x"])
         y = int(bbox["y"])
         w = int(bbox["w"])
         h = int(bbox["h"])
-
+        
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:,:]
-
+        if(rotated):
+            crop_img = cv2.rotate(crop_img,cv2.ROTATE_90_COUNTERCLOCKWISE)
         # saved image crop
-        cv2.imwrite(os.path.join(output_path, f'{img_name}_{bbox["OBJECT"]}.png'), crop_img)
+        cv2.imwrite(os.path.join(output_path, f'{img_name}_{bbox["OBJECT"]}.png'),crop_img)
 
         # generated fit
         prihdr = fits.Header()

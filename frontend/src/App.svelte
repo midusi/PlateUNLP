@@ -309,24 +309,25 @@
             </Tabs>
           {/if}
         </div>
-        <div class="col-lg-4 col-xl-5">
-          <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <canvas
-              id="canvas-container"
-              width="300"
-              height="300"
-              style="border-width: 1px;
-			              border-style: solid;
-			              border-color: black;"
-            />
+        <div class="col-lg-1 col-xl-1">
+          <div class="mt-2">
+            <div class="d-flex justify-content-end"> 
+              <SetParams updateParent={updateLists}/>
+            </div>
           </div>
         </div>
-        <div class="col-lg-1 col-xl-1"><div class="mt-2">
-          <div class="d-flex justify-content-end"> 
-            <SetParams updateParent={updateLists}/>
-          </div>
-         
-        </div></div>
+      </div>
+      <div >
+        <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
+          <canvas
+            id="canvas-container"
+            width="300"
+            height="300"
+            style="border-width: 1px;
+                  border-style: solid;
+                  border-color: black;"
+          />
+        </div>
       </div>
     </div>
   </div>
