@@ -8,6 +8,7 @@ def api_generate_fits():
     img_name = request.json["img_name"]
     path_dir = request.json["path_dir"]
     bbox_arr = request.json["bbox_arr"]
+    data_arr = request.json["data_arr"]
     fields = request.json["fields"]
 
     image_path = os.path.join(path_dir, img_name)
@@ -24,7 +25,7 @@ def api_generate_fits():
     print(output_path)
 
     # cropped
-    for bbox in bbox_arr:
+    for bbox,data in zip(bbox_arr,data_arr):
         bbox.pop('id', None)
         bbox.pop('color', None)
         
@@ -50,7 +51,7 @@ def api_generate_fits():
         if(rotated):
             crop_img = cv2.rotate(crop_img,cv2.ROTATE_90_COUNTERCLOCKWISE)
         # saved image crop
-        cv2.imwrite(os.path.join(output_path, f'{img_name}_{bbox["OBJECT"]}.png'),crop_img)
+        cv2.imwrite(os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.png'),crop_img)
 
         # generated fit
         prihdr = fits.Header()
@@ -58,10 +59,11 @@ def api_generate_fits():
             comment = ''
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]
-            prihdr[key] = (bbox[key], comment)
+            prihdr[key] = (data[key], comment)
         print('Format to Save', crop_img.dtype)
+        print("PRI HDR: ---->",prihdr)
         fits.writeto(
-            (os.path.join(output_path, f'{img_name}_{bbox["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
+            (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
 
     # api response data
     data = {

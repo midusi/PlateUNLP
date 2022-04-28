@@ -178,11 +178,9 @@ export default class SpectrogramCanvas {
     this.canvas.renderAll()
   }
 
-  getSpectroData(element) {
-    console.log(element)
+  getBbox(element) {
     const bbox = this.canvas.getItem(element.id)
     return {
-      ...element,
       x: bbox.aCoords.tl.x,
       y: bbox.aCoords.tl.y,
       h: bbox.aCoords.bl.y - bbox.aCoords.tl.y,

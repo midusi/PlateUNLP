@@ -82,13 +82,14 @@
   }
 
   function generateFits() {
-
     confirmAlert({
       succesFunc: () => {
         spectrogramStore.generateFits(
-          spectrogramCanvas.getSpectroData(
+          spectrogramCanvas.getBbox(
             $metadataStore.spectraData[bboxSelected - 1]
           ),
+          $metadataStore.spectraData[bboxSelected - 1]
+          ,
           pathDir,
           imageName,
           $metadataStore.fields

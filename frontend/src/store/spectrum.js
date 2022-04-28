@@ -47,7 +47,7 @@ function createStoreSpectrogram() {
         return prev
       })
     },
-    generateFits: async (bboxArr, pathArr, imgArr, fields) => {
+    generateFits: async (bboxArr,dataArr, pathArr, imgArr, fields) => {
       update((prev) => {
         prev.stateGeneratingFits.loading = true
         return prev
@@ -56,6 +56,7 @@ function createStoreSpectrogram() {
       try {
         await apiSpectrum.generatefits({
           path_dir: pathArr,
+          data_arr: [dataArr],
           bbox_arr: [bboxArr],
           img_name: imgArr,
           fields
