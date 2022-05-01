@@ -14,6 +14,4 @@ def set_routes(app):
                      get_metadata.api_get_metadata, methods=["POST"])
     
     #registro usando Blueprints
-    app.register_blueprint(autosave_api)
-    # app.add_url_rule("/api/autosave", "api_get_metadata",
-    #                  autosave.save, methods=["POST"])
+    app.register_blueprint(autosave_api) #path = /api/autosave

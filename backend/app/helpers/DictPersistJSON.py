@@ -14,7 +14,7 @@ class DictPersistJSON(dict):
 
     def _dump(self):
         with open(self.filename, 'w') as fh:
-            json.dump(self, fh)
+            json.dump(self, fh, indent=4)
 
     def __getitem__(self, key):
         return dict.__getitem__(self, key)
