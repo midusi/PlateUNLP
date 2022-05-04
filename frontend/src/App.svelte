@@ -63,8 +63,9 @@
     if (selectedImage != "") {
       imageName = selectedImage;
       initializeCanvas();
+      let data;
       try{
-        let data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
+        data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
       }
       catch(err){
       }
@@ -109,6 +110,7 @@
   }
 
   function AutoSaveData(){
+    console.log(spectrogramCanvas.getBboxes());
     spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
         $metadataStore.spectraData,

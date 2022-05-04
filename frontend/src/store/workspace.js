@@ -48,18 +48,18 @@ function createStoreWorkspace() {
           dir_path: dirPath,
           img_name: imgName
         })
-        const { data } = response
-        if(data.nombreDeAutosave){
+        const {data} = response
+        /*if(data && data.nombreDeAutosave){
           //no predigo nada y cargo las bboxes
           spectrogramCanvas.setPredictions(data.bboxes);
-        }
-        else{
-          spectrogramStore.getPredictions(
-            spectrogramCanvas,
-            dirPath,
-            imgName
-          )
-        }
+        }*/
+        
+        spectrogramStore.getPredictions(
+          spectrogramCanvas,
+          dirPath,
+          imgName
+        )
+        
     
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
 
