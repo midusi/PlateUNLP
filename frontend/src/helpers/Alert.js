@@ -29,6 +29,24 @@ function confirmAlert({
     })
 }
 
+function deleteAlert({
+  title = '¿Seguro que quieres borrar el espectro? Se perderan los datos relacionados',
+  confirmButtonText = 'Borrar',
+  denyButtonText = 'Cancelar',
+  succesFunc = () => {}
+} = {}) {
+  Swal.fire({
+    title,
+    showDenyButton: true,
+    showCancelButton: false,
+    confirmButtonText,
+    denyButtonText
+  })
+    .then((result) => {
+      if (result.isConfirmed) succesFunc()
+    })
+}
+
 function showAlert({ title = 'Cargado', message = 'Se cargo con éxito', type = 'success' } = {}) {
   Swal.close()
   Swal.fire(title, message, type)
@@ -44,5 +62,5 @@ function closeAlert() {
 }
 
 export {
-  loadingAlert, closeAlert, errorAlert, showAlert, confirmAlert
+  loadingAlert, closeAlert, errorAlert, showAlert, confirmAlert,deleteAlert
 }

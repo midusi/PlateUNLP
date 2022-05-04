@@ -1,5 +1,5 @@
 import { fabric } from 'fabric'
-
+import { deleteAlert } from "../helpers/Alert";
 // eslint-disable-next-line func-names
 fabric.Canvas.prototype.getItem = function (id) {
   let target = null
@@ -24,10 +24,14 @@ fabric.Object.prototype.controls.deleteControl = new fabric.Control({
 })
 
 function deleteBBbox(eventData, transform) {
-  const { target } = transform
-  const { canvas } = target
-  canvas.remove(target)
-  canvas.requestRenderAll()
+  deleteAlert({
+    succesFunc: () => {
+      const { target } = transform
+      const { canvas } = target
+      canvas.remove(target)
+      canvas.requestRenderAll()
+    }
+  });
 }
 
 function renderIconDelete(icon) {
