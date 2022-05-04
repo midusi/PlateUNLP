@@ -12,6 +12,7 @@
     SetParams
   } from "./components";
   import { confirmAlert } from "./helpers/Alert";
+  import {setContext} from "svelte";
 
   let spectrogramCanvas;
   let uploadedImage = false;
@@ -22,10 +23,20 @@
   let bboxSelected = 1;
   let invalidForm = true;
   let selectedImage = "";
+  let changeFlag = false;
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
     $metadataStore.formActions.selectForIndex(bboxSelected - 1);
+
+  async function checkChangeFlag(){
+    if(changeFlag){
+      AutoSaveData();
+      changeFlag = false;
+    }
+  }
+
+  const checkChangeFlagInterval = setInterval(checkChangeFlag,5000); 
 
   onMount(async () => {
     const events = {
@@ -39,13 +50,29 @@
     spectrogramCanvas = new SpectrogramCanvas(events);
     canvas = spectrogramCanvas.getCanvas();
     loadConfig();
+    checkChangeFlag();
   });
 
-  function getImg() {
+  function setChangeFlag(){
+      changeFlag = true;
+  }
+
+  setContext("setChangeFlag",setChangeFlag);
+
+  async function getImg() {
     if (selectedImage != "") {
       imageName = selectedImage;
       initializeCanvas();
-      workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
+      try{
+        let data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
+      }
+      catch(err){
+      }
+
+      if(data){
+        metadataStore.setSpectraData(data);
+      }
+
       uploadedImage = true;
     }
   }
@@ -81,12 +108,22 @@
     spectrogramCanvas.addBbox();
   }
 
+  function AutoSaveData(){
+    spectrogramStore.autoSaveValues(
+        spectrogramCanvas.getBboxes(),
+        $metadataStore.spectraData,
+        pathDir,
+        imageName,
+        $metadataStore.fields
+    );
+  }
+
   function generateFits() {
     confirmAlert({
       succesFunc: () => {
         spectrogramStore.generateFits(
           spectrogramCanvas.getBbox(
-            $metadataStore.spectraData[bboxSelected - 1]
+            $metadataStore.spectraData[bboxSelected - 1].id
           ),
           $metadataStore.spectraData[bboxSelected - 1]
           ,

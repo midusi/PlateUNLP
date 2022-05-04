@@ -44,17 +44,23 @@ function createStoreWorkspace() {
       loadingAlert()
       try {
         spectrogramCanvas.deleteAllBbox()
-        spectrogramStore.getPredictions(
-          spectrogramCanvas,
-          dirPath,
-          imgName
-        )
         const response = await apiWorkspace.getImg({
           dir_path: dirPath,
           img_name: imgName
         })
         const { data } = response
-
+        if(data.nombreDeAutosave){
+          //no predigo nada y cargo las bboxes
+          spectrogramCanvas.setPredictions(data.bboxes);
+        }
+        else{
+          spectrogramStore.getPredictions(
+            spectrogramCanvas,
+            dirPath,
+            imgName
+          )
+        }
+    
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
 
         update((prev) => {
@@ -73,6 +79,8 @@ function createStoreWorkspace() {
         prev.state.loading = false
         return prev
       })
+
+      //return data 
     },
     saveConfig: async (config) => {
       loadingAlert()

@@ -178,11 +178,12 @@ export default class SpectrogramCanvas {
     this.canvas.renderAll()
   }
 
-  getBbox(element) {
-    const bbox = this.canvas.getItem(element.id)
+  getBbox(id) {
+    const bbox = this.canvas.getItem(id)
     return {
+      id: id,
       x: bbox.aCoords.tl.x,
-      y: bbox.aCoords.tl.y,
+      y: bbox.aCoords.tl.y, 
       h: bbox.aCoords.bl.y - bbox.aCoords.tl.y,
       w: bbox.aCoords.tr.x - bbox.aCoords.tl.x
     }
@@ -198,6 +199,18 @@ export default class SpectrogramCanvas {
       }
     })
     */
+  }
+
+  getBboxes(){
+
+    let bboxes = [];
+    let cant = this.canvas.getObjects().length;
+
+    for( let id = 1 ; id <= cant ; id++){
+      bboxes.push(this.getBbox(id))
+    }
+
+    return bboxes;
   }
 
   /* Convertir bbox a coordenadas YoLov5 */
