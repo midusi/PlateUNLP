@@ -200,13 +200,13 @@ export default class SpectrogramCanvas {
   }
 
   getBboxes(){
-
     let bboxes = [];
-    let cant = this.canvas.getObjects().length;
-
-    for( let id = 1 ; id <= cant ; id++){
-      bboxes.push(this.getBbox(id))
-    }
+    
+    this.canvas.getObjects().forEach((bbox) => {
+      bboxes.push(this.getBbox(bbox.id));
+    })
+    
+    console.log(bboxes);
 
     return bboxes;
   }

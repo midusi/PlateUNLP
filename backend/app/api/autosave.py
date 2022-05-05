@@ -6,9 +6,10 @@ from app.helpers.DictPersistJSON import DictPersistJSON
 def save():
     # params
     body = request.get_json()
+  
     #body = request.json["body"]
-    img_name = body["name"]
-    img_data = body["data"]
+    img_name = body["img_name"]
+
     
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
@@ -18,6 +19,7 @@ def save():
     if not os.path.exists(full_path):
         os.mkdir(full_path)
     save_path = os.path.join(full_path, img_name+".json")
+ 
     db = DictPersistJSON(save_path)
     db["body"] = body
     

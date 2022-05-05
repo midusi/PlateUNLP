@@ -47,14 +47,13 @@ function createStoreSpectrogram() {
         return prev
       })
     },
-    autoSaveValues: async(bboxArr,dataArr,path,imgName,fields) => {
+    autoSaveValues: async(bboxArr,dataArr,path,imgName) => {
       try {
         await apiSpectrum.autoSave({
           path_dir: path,
           data_arr: [dataArr],
           bbox_arr: [bboxArr],
-          img_name: imgName,
-          fields
+          img_name: imgName
         })
       } catch (error) {
         console.log(error);
