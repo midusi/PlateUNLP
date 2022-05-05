@@ -1,16 +1,12 @@
-from email import message
-from flask import jsonify, Blueprint, request, current_app as app
-import json
+from flask import jsonify, request, current_app as app
 import os
 from app.helpers.DictPersistJSON import DictPersistJSON
 
-autosave_api = Blueprint("autosave", __name__, url_prefix="/api/autosave")
-
-@autosave_api.put("/")
 # Receives the information of an image and saves it in a local file
 def save():
     # params
     body = request.get_json()
+    #body = request.json["body"]
     img_name = body["name"]
     img_data = body["data"]
     
@@ -30,5 +26,5 @@ def save():
         'message': "success"
     }
     resp = jsonify(message)
-    resp.status_code = 200
+    resp.status_code = 201
     return resp
