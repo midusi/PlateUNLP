@@ -24,10 +24,7 @@ def api_all_paths():
     cache_path = aux_path = os.path.join(app.static_folder, 'cache')
     cache_files = [file_name[:-5] for file_name in os.listdir(cache_path)] # Removes .json extensions
     have_data = []
-    for file in all_paths:
-        if (file in cache_files):
-            have_data.append(file)
-            
+    
     # Counts the number of spectra in each file
     paths = []
    
@@ -36,7 +33,7 @@ def api_all_paths():
             "fileName": file,
             "number_of_spectra": 0
         })
-        if(file in have_data):
+        if(file in cache_files):
             aux_path = os.path.join(cache_path, file+".json")
             paths[i]["number_of_spectra"] = len(DictPersistJSON(aux_path)["body"]["bbox_arr"])
         
