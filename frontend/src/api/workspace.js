@@ -2,7 +2,7 @@ import { axiosApi } from './axios'
 
 const paths = {
   allPaths: '/allPaths',
-  getImg: '/getImg',
+  getImg: '/image/load',
   saveConfig: '/saveConfig',
   loadConfig: '/loadConfig'
 }
