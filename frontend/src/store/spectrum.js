@@ -51,8 +51,8 @@ function createStoreSpectrogram() {
       try {
         await apiSpectrum.autoSave({
           path_dir: path,
-          data_arr: [dataArr],
-          bbox_arr: [bboxArr],
+          data_arr: dataArr,
+          bbox_arr: bboxArr,
           img_name: imgName
         })
       } catch (error) {

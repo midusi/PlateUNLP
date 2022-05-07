@@ -108,21 +108,19 @@ export default class SpectrogramCanvas {
   }
 
   loadBboxYoloFormatJson(predictions) {
+    console.log(predictions);
     predictions.forEach((prediction) => {
       const x1 = prediction.x
       const y1 = prediction.y
       const { w } = prediction
       const { h } = prediction
-
-      const res = this._convertCoordinates(x1, y1, w, h)
-
       this.IDBBOX += 1
       const rect = new fabric.Rect({
         id: this.IDBBOX,
-        top: res[1],
-        left: res[0],
-        width: res[2],
-        height: res[3],
+        top: y1,
+        left: x1,
+        width: w,
+        height: h,
         opacity: 1,
         fill: '',
         stroke: getColor(this.IDBBOX-1),
@@ -172,7 +170,9 @@ export default class SpectrogramCanvas {
   setPredictions(json) {
     this.IDBBOX = 0
     this.deleteAllBbox()
-    this.loadBboxYoloFormatJson(json.sort((a, b) => a.x - b.x))
+    console.log(json)
+    let predictions = json.sort((a, b) => a.x - b.x).map((bbox) => {return this._convertCoordinates(bbox)});
+    this.loadBboxYoloFormatJson(predictions);
     this.canvas.setActiveObject(this.canvas.item(0))
     this.canvas.renderAll()
   }
@@ -221,11 +221,11 @@ export default class SpectrogramCanvas {
   }
 
   /* Convertir coordenadas de Yolov5 a coordenadas de la imagen actual */
-  _convertCoordinates(x1, y1, w, h) {
-    const wl = w * this.widthOriginal
-    const hl = h * this.heightOriginal
-    const x = (x1 * (2 * this.widthOriginal) - wl) / 2
-    const y = (y1 * (2 * this.heightOriginal) - hl) / 2
-    return [x, y, wl, hl]
+  _convertCoordinates(bbox) {
+    const w = bbox.w * this.widthOriginal
+    const h = bbox.h * this.heightOriginal
+    const x = (bbox.x * (2 * this.widthOriginal) - w) / 2
+    const y = (bbox.y * (2 * this.heightOriginal) - h) / 2
+    return {x, y, w, h}
   }
 }
