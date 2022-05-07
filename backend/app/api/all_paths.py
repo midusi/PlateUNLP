@@ -22,23 +22,29 @@ def api_all_paths():
     
     # Separates the names of the files of which information is stored in the cache
     cache_path = aux_path = os.path.join(app.static_folder, 'cache')
-    cache_files = [file_name.removesuffix('.json') for file_name in os.listdir(cache_path)]
+    cache_files = [file_name[0:len(file_name)-5] for file_name in os.listdir(cache_path)]
     have_data = []
     for file in all_paths:
         if (file in cache_files):
             have_data.append(file)
             
     # Counts the number of spectra in each file
-    cants_spectra = []
-    for file in have_data:
-        aux_path = os.path.join(cache_path, file+".json")
-        cants_spectra.append(len(DictPersistJSON(aux_path)["body"]["bbox_arr"]))
+    paths = []
+   
+    for i,file in enumerate(all_paths):
+        paths.append({
+            "fileName": file,
+            "number_of_spectra": 0
+        })
+        if(file in have_data):
+            aux_path = os.path.join(cache_path, file+".json")
+            paths[i]["number_of_spectra"] = len(DictPersistJSON(aux_path)["body"]["bbox_arr"])
+        
+
         
     # API response messaje
     message = {
-        "paths": all_paths,
-        "have_data_names": have_data,
-        "number_of_spectra": cants_spectra
+        "paths":paths,
     }
 
     resp = jsonify(message)

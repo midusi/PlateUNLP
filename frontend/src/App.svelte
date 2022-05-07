@@ -284,7 +284,7 @@
               style="width:100%"
             >
               {#each $workspaceStore.paths as path}
-                <option value={path}>{path}</option>
+                <option value={path.fileName}>{path.fileName}</option>
               {/each}
             </select>
           {/if}

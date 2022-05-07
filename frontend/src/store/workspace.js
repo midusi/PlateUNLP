@@ -20,10 +20,12 @@ function createStoreWorkspace() {
     subscribe,
     getPaths: async (dirPath) => {
       loadingAlert()
+      let response;
       try {
-        const response = await apiWorkspace.allPaths({
+          response = await apiWorkspace.allPaths({
           path_dir: dirPath
         })
+        console.log(response);
         update((prev) => {
           prev.paths = response.data.paths
           return prev
