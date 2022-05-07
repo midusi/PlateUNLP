@@ -70,13 +70,12 @@
       catch(err){
       }
       
-      data = data.map((val,i) => {
-        val["id"] = $metadataStore.spectraData[i]["id"]
-        val["color"] = $metadataStore.spectraData[i]["color"]
-        return val;
-      });
-
       if(data){
+        data = data.map((val,i) => {
+          val["id"] = $metadataStore.spectraData[i]["id"]
+          val["color"] = $metadataStore.spectraData[i]["color"]
+          return val;
+        });
         metadataStore.setSpectraData(data);
       }
 
