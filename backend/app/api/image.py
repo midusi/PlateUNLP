@@ -48,16 +48,17 @@ def load():
     # if it exists it adds its information to data
     cache_path = os.path.join(app.static_folder, 'cache', img_name+".json")
     if (os.path.isfile(cache_path)):
-        dataList = DictPersistJSON(cache_path)["body"]["data"]
-        bbox = []
-        metadata = []
-        for i in dataList:
-            bbox.append(i["bbox"])
-            metadata.append(i["metadata"])
-        data["info"]["bbox"] = bbox
+        print("Entre al if")
+        dataList = DictPersistJSON(cache_path)["body"]
+        print(dataList)
+        bbox = dataList["bbox_arr"]
+        metadata = dataList["data_arr"]
+        data["info"]["bboxes"] = bbox
         data["info"]["metadata"] = metadata
         
     # API response messaje
+    print("--Data--")
+    print(data)
     resp = jsonify(data)
     resp.status_code = 200
     

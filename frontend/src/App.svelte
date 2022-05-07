@@ -69,6 +69,12 @@
       }
       catch(err){
       }
+      
+      data = data.map((val,i) => {
+        val["id"] = $metadataStore.spectraData[i]["id"]
+        val["color"] = $metadataStore.spectraData[i]["color"]
+        return val;
+      });
 
       if(data){
         metadataStore.setSpectraData(data);
@@ -110,7 +116,7 @@
   }
 
   function AutoSaveData(){
-
+    console.log(spectrogramCanvas.getBboxes());
     console.log($metadataStore.spectraData);
     spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
