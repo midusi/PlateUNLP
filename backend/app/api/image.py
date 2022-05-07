@@ -83,10 +83,7 @@ def save():
     db["body"] = body
     
     # API response messaje
-    message = {
-        'message': "success"
-    }
-    resp = jsonify(message)
+    resp = jsonify(body)
     resp.status_code = 201
     return resp
 

@@ -4,7 +4,7 @@ const paths = {
   predic: '/predict',
   generatefits: '/generatefits',
   getMetadata: '/getMetadata',
-  autoSave: '/autosave'
+  autoSave: '/image/save'
 }
 
 export default {
