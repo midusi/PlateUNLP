@@ -110,7 +110,7 @@
   }
 
   function AutoSaveData(){
-
+    console.log(spectrogramCanvas.getBboxes());
     console.log($metadataStore.spectraData);
     spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
