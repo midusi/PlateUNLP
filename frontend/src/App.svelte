@@ -69,9 +69,7 @@
       }
       catch(err){
       }
-
       
-
       if(data){
         data = data.map((val,i) => {
           val["id"] = $metadataStore.spectraData[i]["id"]
