@@ -54,6 +54,7 @@
   });
 
   function setChangeFlag(){
+      validateForm();
       changeFlag = true;
   }
 
@@ -77,6 +78,7 @@
           return val;
         });
         metadataStore.setSpectraData(data);
+        validateForm();
       }
 
       uploadedImage = true;
@@ -284,7 +286,8 @@
               style="width:100%"
             >
               {#each $workspaceStore.paths as path}
-                <option value={path.fileName}>{path.fileName}</option>
+                <option value={path.fileName}>{path.fileName}</option>>
+                
               {/each}
             </select>
           {/if}
@@ -320,7 +323,6 @@
                     <Field
                       name={field}
                       bind:value={item[field]}
-                      onchange={validateForm}
                     />
                   {/each}
                   <div class="row mt-4 ml-1 mb-4">

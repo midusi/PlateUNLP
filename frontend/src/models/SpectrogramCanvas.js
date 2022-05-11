@@ -36,7 +36,8 @@ export default class SpectrogramCanvas {
       opacity: 1,
       fill: '',
       stroke: getColor(this.IDBBOX-1),
-      strokeWidth: 10
+      strokeWidth: 10,
+      lockRotation: true
     })
 
     this.canvas.add(rect)
@@ -99,7 +100,8 @@ export default class SpectrogramCanvas {
           width: res[2],
           height: res[3],
           opacity: 0.5,
-          fill: 'green'
+          fill: 'green',
+          lockRotation: true
         })
 
         this.canvas.add(rect)
@@ -108,7 +110,6 @@ export default class SpectrogramCanvas {
   }
 
   loadBboxYoloFormatJson(predictions) {
-    console.log(predictions);
     predictions.forEach((prediction) => {
       const x1 = prediction.x
       const y1 = prediction.y
@@ -124,7 +125,8 @@ export default class SpectrogramCanvas {
         opacity: 1,
         fill: '',
         stroke: getColor(this.IDBBOX-1),
-        strokeWidth: 10
+        strokeWidth: 10,
+        lockRotation: true
       })
 
       this.canvas.add(rect)
