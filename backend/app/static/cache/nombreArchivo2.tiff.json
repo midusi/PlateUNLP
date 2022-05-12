@@ -4,7 +4,7 @@
         "data_arr": [
             {
                 "AIRMASS": "",
-                "DATE-OBS": "0001-01-01",
+                "DATE-OBS": "2022-05-12",
                 "DEC": "",
                 "DEC1950": "",
                 "DEC2000": "",
@@ -19,7 +19,7 @@
                 "JD": "",
                 "MAIN-ID": "",
                 "NOISE": "",
-                "OBJECT": "dasdasdas",
+                "OBJECT": "asdasda",
                 "OBSERVAT": "ctio: Cerro Tololo Interamerican Observatory",
                 "OBSERVER": "Observer1",
                 "PLATE-N": "",
@@ -33,9 +33,9 @@
                 "SPTYPE": "",
                 "ST": "",
                 "TIME-OBS": "",
-                "UT": "00:00:00",
-                "color": "#44FF2B",
-                "id": 3
+                "UT": "",
+                "color": "#FF2B2B",
+                "id": 1
             },
             {
                 "AIRMASS": "",
@@ -50,7 +50,7 @@
                 "EXPTIME": "",
                 "GAIN": "",
                 "HA": "",
-                "IMAGETYP": "ImageType1",
+                "IMAGETYP": "",
                 "JD": "",
                 "MAIN-ID": "",
                 "NOISE": "",
@@ -69,22 +69,22 @@
                 "ST": "",
                 "TIME-OBS": "",
                 "UT": "",
-                "color": "#2BFFEF",
-                "id": 4
+                "color": "#FFFC2B",
+                "id": 2
             }
         ],
         "bbox_arr": [
             {
-                "x": 85.4296875,
-                "y": -76.94513682347338,
-                "h": 565.8591993234734,
-                "w": 2850.5703125
+                "x": 290.0000000000001,
+                "y": 167.3125,
+                "h": 159.2109375,
+                "w": 1932
             },
             {
-                "x": 165.1640625,
-                "y": 635.9765625,
-                "h": 234.5234375,
-                "w": 2708.1875
+                "x": 576,
+                "y": 385.3125,
+                "h": 503.2109375,
+                "w": 1405.3515625
             }
         ],
         "img_name": "nombreArchivo2.tiff"

@@ -110,6 +110,7 @@ export default class SpectrogramCanvas {
   }
 
   loadBboxYoloFormatJson(predictions) {
+    this.IDBBOX = 0;
     predictions.forEach((prediction) => {
       const x1 = prediction.x
       const y1 = prediction.y

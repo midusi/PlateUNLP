@@ -45,6 +45,7 @@
       "before:selection:cleared": handleSelectionCleared,
       "object:added": handlerAdded,
       "object:removed": handlerRemoved,
+      "object:modified": handlerModified
     };
     metadataStore.initFields();
     spectrogramCanvas = new SpectrogramCanvas(events);
@@ -53,7 +54,7 @@
     checkChangeFlag();
   });
 
-  function setChangeFlag(){
+  export function setChangeFlag(){
       validateForm();
       changeFlag = true;
   }
@@ -114,6 +115,7 @@
 
   function addBox() {
     spectrogramCanvas.addBbox();
+    setChangeFlag();
   }
 
   function AutoSaveData(){
@@ -169,6 +171,10 @@
     });
   }
 
+  function handlerModified(){
+    setChangeFlag();
+  }
+
   function handleCreatedUpdate(obj) {
     if (obj != undefined) {
       bboxSelected =
@@ -211,6 +217,7 @@
     } else {
       metadataStore.setSpectraData([]);
     }
+    changeFlag = true;
   }
 
   function setBbox(event) {
