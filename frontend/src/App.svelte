@@ -30,7 +30,7 @@
     $metadataStore.formActions.selectForIndex(bboxSelected - 1);
 
   async function checkChangeFlag(){
-    if(changeFlag){
+    if(changeFlag && $metadataStore.spectraData.length > 0){
       AutoSaveData();
       changeFlag = false;
     }
@@ -114,6 +114,7 @@
   }
 
   function addBox() {
+    console.log("se ejecuto addbox")
     spectrogramCanvas.addBbox();
     setChangeFlag();
   }
@@ -172,6 +173,7 @@
   }
 
   function handlerModified(){
+    console.log("se ejecuto handlerModified")
     setChangeFlag();
   }
 
@@ -206,6 +208,7 @@
   }
 
   function handlerRemoved(obj) {
+    console.log("se ejecuto handlerRemoved")
     if (canvas.getObjects().length > 0) {
       metadataStore.setSpectraData(
         $metadataStore.spectraData.filter(

@@ -19,9 +19,9 @@
                 "JD": "",
                 "MAIN-ID": "",
                 "NOISE": "",
-                "OBJECT": "dsfsdf",
+                "OBJECT": "pruebat",
                 "OBSERVAT": "kpno: Kitt Peak National Observatory",
-                "OBSERVER": "Observer1",
+                "OBSERVER": "Observer2",
                 "PLATE-N": "",
                 "RA": "",
                 "RA1950": "",
@@ -34,12 +34,12 @@
                 "ST": "",
                 "TIME-OBS": "",
                 "UT": "00:00:00",
-                "color": "#FFFC2B",
-                "id": 2
+                "color": "#FF2B2B",
+                "id": 1
             },
             {
                 "AIRMASS": "",
-                "DATE-OBS": "",
+                "DATE-OBS": "2022-05-21",
                 "DEC": "",
                 "DEC1950": "",
                 "DEC2000": "",
@@ -56,7 +56,7 @@
                 "NOISE": "",
                 "OBJECT": "dada",
                 "OBSERVAT": "ctio: Cerro Tololo Interamerican Observatory",
-                "OBSERVER": "Observer1",
+                "OBSERVER": "Observer2",
                 "PLATE-N": "",
                 "RA": "",
                 "RA1950": "",
@@ -68,23 +68,23 @@
                 "SPTYPE": "",
                 "ST": "",
                 "TIME-OBS": "",
-                "UT": "",
-                "color": "#44FF2B",
-                "id": 3
+                "UT": "45",
+                "color": "#FFFC2B",
+                "id": 2
             }
         ],
         "bbox_arr": [
             {
-                "x": 165.1640625,
-                "y": 635.9765625,
-                "h": 364.5234375,
-                "w": 2838.1875
+                "x": 56.49243780067786,
+                "y": 565.6506410210596,
+                "h": 404.5234375,
+                "w": 2878.1875
             },
             {
-                "x": -16.000000000000455,
-                "y": 476,
-                "h": 1294,
-                "w": 3236.008004068115
+                "x": 61.8684318921612,
+                "y": 49.67384588466223,
+                "h": 498.8078123889354,
+                "w": 2838.809201821118
             }
         ],
         "img_name": "nombreArchivo.tiff"
