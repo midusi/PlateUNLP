@@ -1,12 +1,18 @@
 <script>
   import { metadataStore } from "../store/metadata";
-  export let name, value, onchange;
-  let aux = "";
+  import {getContext} from "svelte";
+  export let name, value;
 
+  const setChangeFlag = getContext("setChangeFlag");
+  let aux = "";
 
   const setType = (node) => {
     node.type = $metadataStore.fields[name].type;
   };
+
+  function cambio(){
+    console.log("CAMBIO");
+  }
 
 </script>
 
@@ -22,7 +28,7 @@
       class="form-control"
       use:setType
       bind:value
-      on:change={onchange}
+      on:change={setChangeFlag}
       placeholder={$metadataStore.fields[name].info}
     />
 
@@ -31,7 +37,7 @@
       bind:value
       class="browser-default custom-select"
       aria-label="Select Obsevat"
-      on:change={onchange}
+      on:change={setChangeFlag}
     >
       {#each $metadataStore.fields[name].options as observat}
         <option value={observat}> {observat} </option>
@@ -43,7 +49,7 @@
       class="form-control"
       use:setType
       bind:value
-      on:change={onchange}
+      on:change={setChangeFlag}
       placeholder={$metadataStore.fields[name].info}
     />
     <datalist id={`${name}Options`}>

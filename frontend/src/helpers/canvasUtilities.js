@@ -1,6 +1,9 @@
 import { fabric } from 'fabric'
-
+import { deleteAlert } from "../helpers/Alert";
 // eslint-disable-next-line func-names
+
+const colors = ["#FF2B2B","#FFFC2B","#44FF2B","#2BFFEF","#2B34FF","#E52BFF","white"];
+
 fabric.Canvas.prototype.getItem = function (id) {
   let target = null
   this.getObjects().forEach((item) => {
@@ -24,10 +27,14 @@ fabric.Object.prototype.controls.deleteControl = new fabric.Control({
 })
 
 function deleteBBbox(eventData, transform) {
-  const { target } = transform
-  const { canvas } = target
-  canvas.remove(target)
-  canvas.requestRenderAll()
+  deleteAlert({
+    succesFunc: () => {
+      const { target } = transform
+      const { canvas } = target
+      canvas.remove(target)
+      canvas.requestRenderAll()
+    }
+  });
 }
 
 function renderIconDelete(icon) {
@@ -63,14 +70,9 @@ function getDeleteIcon() {
   return deleteImg
 }
 
-function getColor() {
-  let color = '#'
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < 3; i++) color += (
-    `0${
-      Math.floor(((1 + Math.random()) * 16 ** 2) / 2).toString(16)}`
-  ).slice(-2)
-  return color
+function getColor(id) {
+  console.log(colors[id % colors.length])
+  return colors[id % colors.length];
 }
 
 export { getColor }

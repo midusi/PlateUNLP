@@ -45,11 +45,23 @@ def api_generate_fits():
         w = int(bbox["w"])
         h = int(bbox["h"])
         
+        print(x+w,y+h)
+        print(x,y)
+        if(y < 0 or y>original_height):
+            y = 0
+        if(y+h > original_height):
+            h = original_height - y 
+        if(x<0 or x > original_width):
+            x = 0
+        if(x+w > original_width):
+            w = original_width - x 
+
+        print(x+w,y+h)
+        print(x,y)
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:,:]
-        if(rotated):
-            crop_img = cv2.rotate(crop_img,cv2.ROTATE_90_COUNTERCLOCKWISE)
+
         # saved image crop
         cv2.imwrite(os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.png'),crop_img)
 

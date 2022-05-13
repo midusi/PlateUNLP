@@ -12,6 +12,7 @@
     SetParams
   } from "./components";
   import { confirmAlert } from "./helpers/Alert";
+  import {setContext} from "svelte";
 
   let spectrogramCanvas;
   let uploadedImage = false;
@@ -22,10 +23,20 @@
   let bboxSelected = 1;
   let invalidForm = true;
   let selectedImage = "";
+  let changeFlag = false;
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
     $metadataStore.formActions.selectForIndex(bboxSelected - 1);
+
+  async function checkChangeFlag(){
+    if(changeFlag && $metadataStore.spectraData.length > 0){
+      AutoSaveData();
+      changeFlag = false;
+    }
+  }
+
+  const checkChangeFlagInterval = setInterval(checkChangeFlag,5000); 
 
   onMount(async () => {
     const events = {
@@ -34,18 +45,43 @@
       "before:selection:cleared": handleSelectionCleared,
       "object:added": handlerAdded,
       "object:removed": handlerRemoved,
+      "object:modified": handlerModified
     };
     metadataStore.initFields();
     spectrogramCanvas = new SpectrogramCanvas(events);
     canvas = spectrogramCanvas.getCanvas();
     loadConfig();
+    checkChangeFlag();
   });
 
-  function getImg() {
+  export function setChangeFlag(){
+      validateForm();
+      changeFlag = true;
+  }
+
+  setContext("setChangeFlag",setChangeFlag);
+
+  async function getImg() {
     if (selectedImage != "") {
       imageName = selectedImage;
       initializeCanvas();
-      workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
+      let data;
+      try{
+        data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
+      }
+      catch(err){
+      }
+      
+      if(data){
+        data = data.map((val,i) => {
+          val["id"] = $metadataStore.spectraData[i]["id"]
+          val["color"] = $metadataStore.spectraData[i]["color"]
+          return val;
+        });
+        metadataStore.setSpectraData(data);
+        validateForm();
+      }
+
       uploadedImage = true;
     }
   }
@@ -78,7 +114,20 @@
   }
 
   function addBox() {
+    console.log("se ejecuto addbox")
     spectrogramCanvas.addBbox();
+    setChangeFlag();
+  }
+
+  function AutoSaveData(){
+    console.log(spectrogramCanvas.getBboxes());
+    console.log($metadataStore.spectraData);
+    spectrogramStore.autoSaveValues(
+        spectrogramCanvas.getBboxes(),
+        $metadataStore.spectraData,
+        pathDir,
+        imageName
+    );
   }
 
   function generateFits() {
@@ -86,7 +135,7 @@
       succesFunc: () => {
         spectrogramStore.generateFits(
           spectrogramCanvas.getBbox(
-            $metadataStore.spectraData[bboxSelected - 1]
+            $metadataStore.spectraData[bboxSelected - 1].id
           ),
           $metadataStore.spectraData[bboxSelected - 1]
           ,
@@ -123,6 +172,11 @@
     });
   }
 
+  function handlerModified(){
+    console.log("se ejecuto handlerModified")
+    setChangeFlag();
+  }
+
   function handleCreatedUpdate(obj) {
     if (obj != undefined) {
       bboxSelected =
@@ -154,6 +208,7 @@
   }
 
   function handlerRemoved(obj) {
+    console.log("se ejecuto handlerRemoved")
     if (canvas.getObjects().length > 0) {
       metadataStore.setSpectraData(
         $metadataStore.spectraData.filter(
@@ -165,6 +220,7 @@
     } else {
       metadataStore.setSpectraData([]);
     }
+    changeFlag = true;
   }
 
   function setBbox(event) {
@@ -240,7 +296,8 @@
               style="width:100%"
             >
               {#each $workspaceStore.paths as path}
-                <option value={path}>{path}</option>
+                <option value={path.fileName}>{path.fileName}</option>>
+                
               {/each}
             </select>
           {/if}
@@ -276,7 +333,6 @@
                     <Field
                       name={field}
                       bind:value={item[field]}
-                      onchange={validateForm}
                     />
                   {/each}
                   <div class="row mt-4 ml-1 mb-4">

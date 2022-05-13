@@ -1,0 +1,92 @@
+{
+    "body": {
+        "path_dir": "C:\\Users\\Joaquin\\Desktop",
+        "data_arr": [
+            {
+                "AIRMASS": "",
+                "DATE-OBS": "2022-05-13",
+                "DEC": "",
+                "DEC1950": "",
+                "DEC2000": "",
+                "DETECTOR": "",
+                "DIGITALI": "Digitali1",
+                "EPOCH": "",
+                "EQUINOX": "",
+                "EXPTIME": "",
+                "GAIN": "",
+                "HA": "",
+                "IMAGETYP": "",
+                "JD": "",
+                "MAIN-ID": "",
+                "NOISE": "",
+                "OBJECT": "pruebat",
+                "OBSERVAT": "kpno: Kitt Peak National Observatory",
+                "OBSERVER": "Observer2",
+                "PLATE-N": "",
+                "RA": "",
+                "RA1950": "",
+                "RA2000": "",
+                "SCAN-COL": "",
+                "SCAN-RES": "",
+                "SCANNER": "",
+                "SOFTWARE": "",
+                "SPTYPE": "",
+                "ST": "",
+                "TIME-OBS": "",
+                "UT": "00:00:00",
+                "color": "#FF2B2B",
+                "id": 1
+            },
+            {
+                "AIRMASS": "",
+                "DATE-OBS": "2022-05-21",
+                "DEC": "",
+                "DEC1950": "",
+                "DEC2000": "",
+                "DETECTOR": "",
+                "DIGITALI": "Digitali1",
+                "EPOCH": "",
+                "EQUINOX": "",
+                "EXPTIME": "",
+                "GAIN": "",
+                "HA": "",
+                "IMAGETYP": "",
+                "JD": "",
+                "MAIN-ID": "",
+                "NOISE": "",
+                "OBJECT": "dada",
+                "OBSERVAT": "ctio: Cerro Tololo Interamerican Observatory",
+                "OBSERVER": "Observer2",
+                "PLATE-N": "",
+                "RA": "",
+                "RA1950": "",
+                "RA2000": "",
+                "SCAN-COL": "",
+                "SCAN-RES": "",
+                "SCANNER": "",
+                "SOFTWARE": "",
+                "SPTYPE": "",
+                "ST": "",
+                "TIME-OBS": "",
+                "UT": "45",
+                "color": "#FFFC2B",
+                "id": 2
+            }
+        ],
+        "bbox_arr": [
+            {
+                "x": 56.49243780067786,
+                "y": 565.6506410210596,
+                "h": 404.5234375,
+                "w": 2878.1875
+            },
+            {
+                "x": 61.8684318921612,
+                "y": 49.67384588466223,
+                "h": 498.8078123889354,
+                "w": 2838.809201821118
+            }
+        ],
+        "img_name": "nombreArchivo.tiff"
+    }
+}

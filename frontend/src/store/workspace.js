@@ -5,6 +5,7 @@ import {
   loadingAlert, errorAlert, closeAlert, showAlert
 } from '../helpers/Alert'
 
+
 function createStoreWorkspace() {
   const { subscribe, update } = writable({
     state: {
@@ -19,10 +20,12 @@ function createStoreWorkspace() {
     subscribe,
     getPaths: async (dirPath) => {
       loadingAlert()
+      let response;
       try {
-        const response = await apiWorkspace.allPaths({
+          response = await apiWorkspace.allPaths({
           path_dir: dirPath
         })
+        console.log(response);
         update((prev) => {
           prev.paths = response.data.paths
           return prev
@@ -42,19 +45,29 @@ function createStoreWorkspace() {
     },
     getImg: async (spectrogramCanvas, dirPath, imgName) => {
       loadingAlert()
+      let data;
       try {
         spectrogramCanvas.deleteAllBbox()
-        spectrogramStore.getPredictions(
-          spectrogramCanvas,
-          dirPath,
-          imgName
-        )
         const response = await apiWorkspace.getImg({
           dir_path: dirPath,
           img_name: imgName
         })
-        const { data } = response
 
+        data = response.data;
+        
+        if(data.info.bboxes){
+          //no predigo nada y cargo las bboxes
+          spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes);
+
+        }
+        else{
+          spectrogramStore.getPredictions(
+            spectrogramCanvas,
+            dirPath,
+            imgName
+          )
+        }
+    
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
 
         update((prev) => {
@@ -73,6 +86,8 @@ function createStoreWorkspace() {
         prev.state.loading = false
         return prev
       })
+      console.log("metadata")
+      return data.info.metadata
     },
     saveConfig: async (config) => {
       loadingAlert()
