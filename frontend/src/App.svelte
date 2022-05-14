@@ -114,7 +114,6 @@
   }
 
   function addBox() {
-    console.log("se ejecuto addbox")
     spectrogramCanvas.addBbox();
     setChangeFlag();
   }
@@ -154,18 +153,20 @@
     metadataStore.initFields();
   }
 
-  function getMetadata(fields, required) {
+  function getMetadata(fields) {
     return Object.keys(fields)
-      .map((label) => {
-        if (required === undefined) return label;
-        else if (fields[label].required === required) return label;
-      })
-      .filter((x) => x !== undefined);
+  }
+
+  function getRequiredMetadata(fields) {
+    return Object.keys(fields)
+    .map((label) => {
+        if (fields[label].required) return label;
+    })
   }
 
   function validateForm() {
     invalidForm = false;
-    getMetadata($metadataStore.fields, true).forEach((metadata) => {
+    getRequiredMetadata($metadataStore.fields).forEach((metadata) => {
       if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
         invalidForm = true;
       }
@@ -258,7 +259,7 @@
 
 </script>
 
-<main>
+<main style="background-image: url(https://fondosmil.com/fondo/5464.jpg); background-repeat: repeat; background-size: 100% 100%;">
   <div class="card">
     <div class="card-header">
     <h5>Localizador de espectros</h5>
@@ -345,12 +346,12 @@
               </TabList>
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
-                  {#each getMetadata($metadataStore.fields, true) as field}
-                    <Field
-                      name={field}
-                      bind:value={item[field]}
+                  <div class="controls">
+                    <MetadataModal
+                      spectraData={item}
+                      metadata={getMetadata($metadataStore.fields)}
                     />
-                  {/each}
+                  </div>
                   <div class="row mt-4 ml-1 mb-4">
                     <div class="controls mr-2">
                       
@@ -359,12 +360,6 @@
                       <NButton click={setRemoteMetadata} disabled={invalidForm}>
                         Buscar metadatos
                       </NButton>
-                    </div>
-                    <div class="controls mr-2">
-                      <MetadataModal
-                        spectraData={item}
-                        metadata={getMetadata($metadataStore.fields, false)}
-                      />
                     </div>
                     <div class="controls mr-2">
                       <NButton click={generateFits} disabled={invalidForm}>

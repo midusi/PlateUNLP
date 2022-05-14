@@ -15,8 +15,7 @@
 
 </script>
 
-<Modal bottonText="Más metadatos" titleModal="Metadatos" key="metadatos">
-    <div slot="modalBody">
+    <div class="px-4" style="overflow-y: scroll; overflow-x:hidden ; border: 1px solid  ; height: 400px;">
         {#each arr as field}
             <div class="form-row">
                 <div class="form-group col-md-4">
@@ -46,10 +45,3 @@
             </div>
         {/each}
     </div>
-
-    <div slot="footerBody">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"
-            >Cerrar</button
-        >
-    </div>
-</Modal>
