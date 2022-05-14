@@ -25,21 +25,38 @@ export default class SpectrogramCanvas {
 
   addBbox() {
     this.IDBBOX += 1
-    const clone = this.canvas.item(0)
+    let rect;
+    if(this.canvas.getObjects().length > 0){
+      
+      const clone = this.canvas.getObjects()[0]
 
-    const rect = new fabric.Rect({
-      id: this.IDBBOX,
-      top: this.getCanvasWidth()/3,
-      left: clone.left,
-      width: clone.width,
-      height: clone.height,
-      opacity: 1,
-      fill: '',
-      stroke: getColor(this.IDBBOX-1),
-      strokeWidth: 10,
-      lockRotation: true
-    })
-
+      rect = new fabric.Rect({
+        id: this.IDBBOX,
+        top: this.getCanvasWidth()/4,
+        left: clone.left,
+        width: clone.width,
+        height: clone.height,
+        opacity: 1,
+        fill: '',
+        stroke: getColor(this.IDBBOX-1),
+        strokeWidth: 10,
+        lockRotation: true
+      })
+    }
+    else{
+      rect = new fabric.Rect({
+        id: this.IDBBOX,
+        top: this.getCanvasWidth()/4,
+        left: this.getCanvasHeight()/2,
+        width: this.getCanvasWidth()*1.5,
+        height: this.getCanvasHeight()/2,
+        opacity: 1,
+        fill: '',
+        stroke: getColor(this.IDBBOX-1),
+        strokeWidth: 10,
+        lockRotation: true
+      })
+    }
     this.canvas.add(rect)
     this.canvas.setActiveObject(rect)
   }
