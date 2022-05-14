@@ -370,12 +370,11 @@
                 </TabPanel>
               {/each}
             </Tabs>
-          {/if}
-        </div>
-        <div class="col-lg-1 col-xl-1">
-          <div class="mt-2">
-            
+          {:else}
+          <div class="controls mt-6">
+            <NButton style="display:{uploadedImage === true ? 'inline' : 'none'} ; margin-top:0.5em" click={addBox}>+</NButton>
           </div>
+          {/if}
         </div>
       </div>
     </div>
