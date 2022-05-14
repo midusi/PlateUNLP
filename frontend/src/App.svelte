@@ -234,7 +234,7 @@
     }
   }
 
-  function saveConfig() {
+  /*function saveConfig() {
     const config = {
       global: {
         workspace_path: pathDir,
@@ -246,7 +246,7 @@
       },
     };
     workspaceStore.saveConfig(config);
-  }
+  }*/
 
   async function loadConfig() {
     const config = await workspaceStore.loadConfig();
@@ -265,14 +265,14 @@
     </div>
     <div class="card-body">
       <div class="row">
-        <div class="col-lg-7 col-xl-6">
+        <div class="col-lg-2 col-xl-2">
           <div class="row">
             <div class="d-flex flex-column col-9">
               <span>Directorio de trabajo</span>
               <input bind:value={pathDir} />
             </div>
             <div class="d-flex flex-column col-3 mt-4">
-              <NButton click={getPaths}>Listar archivos</NButton>
+              <NButton click={getPaths}>&#x1F50D;</NButton>
             </div>
           </div>
           <div class="d-xl-flex flex-column justify-content-xl-start">
@@ -303,29 +303,45 @@
           {/if}
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
             <div class="row mt-2 mb-2 ml-1">
-              <div class="controls mr-2">
+              <div class="d-flex justify-content-center">
                 <NButton click={searchSpectro}>Buscar espectros</NButton>
-              </div>
-              <div class="controls mr-2">
-                <NButton click={addBox}>Agregar espectro</NButton>
               </div>
             </div>
             <ImageInfoCard />
           </div>
           <hr />
+          <div class="d-flex justify-content-start"> 
+            <SetParams updateParent={updateLists}/>
+          </div>
+        </div>
+          <div class="col-lg-10 col-xl-10">
+            <div >
+              <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
+                <canvas
+                  id="canvas-container"
+                  width="300"
+                  height="300"
+                  style="border-width: 1px;
+                        border-style: solid;
+                        border-color: black;"
+                />
+              </div>
+            </div>
           {#if $metadataStore.spectraData.length != 0}
             <Tabs on:selectTab={setBbox}>
               <TabList>
                 {#each $metadataStore.spectraData as item, index}
                   <Tab>
                     <NButton
-                      style={`background-color:${item.color} !important; border-color:${item.color}; width:40px; height:40px; border-radius:5px`}
+                      style={`background-color:${item.color} !important; border-color: black; width:40px; height:40px; border-radius:1px`}
                       classStyle={""}
                     >
                       {index + 1}
                     </NButton>
                   </Tab>
                 {/each}
+                  <NButton click={addBox}>+</NButton>
+             
               </TabList>
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
@@ -355,11 +371,6 @@
                         Guardar Fits
                       </NButton>
                     </div>
-                    <div class="controls mr-2">
-                      <NButton click={saveConfig}>
-                        Guardar configuración
-                      </NButton>
-                    </div>
                   </div>
                 </TabPanel>
               {/each}
@@ -368,22 +379,8 @@
         </div>
         <div class="col-lg-1 col-xl-1">
           <div class="mt-2">
-            <div class="d-flex justify-content-end"> 
-              <SetParams updateParent={updateLists}/>
-            </div>
+            
           </div>
-        </div>
-      </div>
-      <div >
-        <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-          <canvas
-            id="canvas-container"
-            width="300"
-            height="300"
-            style="border-width: 1px;
-                  border-style: solid;
-                  border-color: black;"
-          />
         </div>
       </div>
     </div>
