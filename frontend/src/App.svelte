@@ -363,7 +363,7 @@
                     </div>
                     <div class="controls mr-2">
                       <NButton click={generateFits} disabled={invalidForm}>
-                        Guardar Fits
+                        Exportar Fits
                       </NButton>
                     </div>
                   </div>
