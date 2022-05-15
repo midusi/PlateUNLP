@@ -114,7 +114,6 @@
   }
 
   function addBox() {
-    console.log("se ejecuto addbox")
     spectrogramCanvas.addBbox();
     setChangeFlag();
   }
@@ -154,18 +153,20 @@
     metadataStore.initFields();
   }
 
-  function getMetadata(fields, required) {
+  function getMetadata(fields) {
     return Object.keys(fields)
-      .map((label) => {
-        if (required === undefined) return label;
-        else if (fields[label].required === required) return label;
-      })
-      .filter((x) => x !== undefined);
+  }
+
+  function getRequiredMetadata(fields) {
+    return Object.keys(fields)
+    .map((label) => {
+        if (fields[label].required) return label;
+    })
   }
 
   function validateForm() {
     invalidForm = false;
-    getMetadata($metadataStore.fields, true).forEach((metadata) => {
+    getRequiredMetadata($metadataStore.fields).forEach((metadata) => {
       if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
         invalidForm = true;
       }
@@ -234,7 +235,7 @@
     }
   }
 
-  function saveConfig() {
+  /*function saveConfig() {
     const config = {
       global: {
         workspace_path: pathDir,
@@ -246,7 +247,7 @@
       },
     };
     workspaceStore.saveConfig(config);
-  }
+  }*/
 
   async function loadConfig() {
     const config = await workspaceStore.loadConfig();
@@ -258,21 +259,21 @@
 
 </script>
 
-<main>
+<main style="background-image: url(https://fondosmil.com/fondo/5464.jpg); background-repeat: repeat; background-size: 100% 100%;">
   <div class="card">
     <div class="card-header">
     <h5>Localizador de espectros</h5>
     </div>
     <div class="card-body">
       <div class="row">
-        <div class="col-lg-7 col-xl-6">
+        <div class="col-lg-2 col-xl-2">
           <div class="row">
             <div class="d-flex flex-column col-9">
               <span>Directorio de trabajo</span>
               <input bind:value={pathDir} />
             </div>
             <div class="d-flex flex-column col-3 mt-4">
-              <NButton click={getPaths}>Listar archivos</NButton>
+              <NButton click={getPaths}>&#x1F50D;</NButton>
             </div>
           </div>
           <div class="d-xl-flex flex-column justify-content-xl-start">
@@ -303,38 +304,54 @@
           {/if}
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
             <div class="row mt-2 mb-2 ml-1">
-              <div class="controls mr-2">
+              <div class="d-flex justify-content-center">
                 <NButton click={searchSpectro}>Buscar espectros</NButton>
-              </div>
-              <div class="controls mr-2">
-                <NButton click={addBox}>Agregar espectro</NButton>
               </div>
             </div>
             <ImageInfoCard />
           </div>
           <hr />
+          <div class="d-flex justify-content-start"> 
+            <SetParams updateParent={updateLists}/>
+          </div>
+        </div>
+          <div class="col-lg-10 col-xl-10">
+            <div >
+              <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
+                <canvas
+                  id="canvas-container"
+                  width="300"
+                  height="300"
+                  style="border-width: 1px;
+                        border-style: solid;
+                        border-color: black;"
+                />
+              </div>
+            </div>
           {#if $metadataStore.spectraData.length != 0}
             <Tabs on:selectTab={setBbox}>
               <TabList>
                 {#each $metadataStore.spectraData as item, index}
                   <Tab>
                     <NButton
-                      style={`background-color:${item.color} !important; border-color:${item.color}; width:40px; height:40px; border-radius:5px`}
+                      style={`background-color:${item.color} !important; border-color: black; width:40px; height:40px; border-radius:1px`}
                       classStyle={""}
                     >
                       {index + 1}
                     </NButton>
                   </Tab>
                 {/each}
+                  <NButton click={addBox}>+</NButton>
+             
               </TabList>
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
-                  {#each getMetadata($metadataStore.fields, true) as field}
-                    <Field
-                      name={field}
-                      bind:value={item[field]}
+                  <div class="controls">
+                    <MetadataModal
+                      spectraData={item}
+                      metadata={getMetadata($metadataStore.fields)}
                     />
-                  {/each}
+                  </div>
                   <div class="row mt-4 ml-1 mb-4">
                     <div class="controls mr-2">
                       
@@ -345,19 +362,8 @@
                       </NButton>
                     </div>
                     <div class="controls mr-2">
-                      <MetadataModal
-                        spectraData={item}
-                        metadata={getMetadata($metadataStore.fields, false)}
-                      />
-                    </div>
-                    <div class="controls mr-2">
                       <NButton click={generateFits} disabled={invalidForm}>
-                        Guardar Fits
-                      </NButton>
-                    </div>
-                    <div class="controls mr-2">
-                      <NButton click={saveConfig}>
-                        Guardar configuración
+                        Exportar Fits
                       </NButton>
                     </div>
                   </div>
@@ -368,22 +374,8 @@
         </div>
         <div class="col-lg-1 col-xl-1">
           <div class="mt-2">
-            <div class="d-flex justify-content-end"> 
-              <SetParams updateParent={updateLists}/>
-            </div>
+            
           </div>
-        </div>
-      </div>
-      <div >
-        <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-          <canvas
-            id="canvas-container"
-            width="300"
-            height="300"
-            style="border-width: 1px;
-                  border-style: solid;
-                  border-color: black;"
-          />
         </div>
       </div>
     </div>
