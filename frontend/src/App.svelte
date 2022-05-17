@@ -14,6 +14,10 @@
   import { confirmAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
 
+
+
+  let imageSaved = false
+
   let spectrogramCanvas;
   let uploadedImage = false;
   let pathDir = "";
@@ -33,6 +37,7 @@
     if(changeFlag && $metadataStore.spectraData.length > 0){
       AutoSaveData();
       changeFlag = false;
+      imageSaved = true
     }
   }
 
@@ -57,6 +62,7 @@
   export function setChangeFlag(){
       validateForm();
       changeFlag = true;
+      imageSaved = false;
   }
 
   setContext("setChangeFlag",setChangeFlag);
@@ -73,6 +79,7 @@
       }
       
       if(data){
+        imageSaved = true
         data = data.map((val,i) => {
           val["id"] = $metadataStore.spectraData[i]["id"]
           val["color"] = $metadataStore.spectraData[i]["color"]
@@ -80,6 +87,9 @@
         });
         metadataStore.setSpectraData(data);
         validateForm();
+      }
+      else{
+        setChangeFlag();
       }
 
       uploadedImage = true;
@@ -166,11 +176,13 @@
 
   function validateForm() {
     invalidForm = false;
-    getRequiredMetadata($metadataStore.fields).forEach((metadata) => {
-      if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
-        invalidForm = true;
-      }
-    });
+    if ($metadataStore.spectraData.length > 0) {
+      getRequiredMetadata($metadataStore.fields).forEach((metadata) => {
+        if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
+          invalidForm = true;
+        }
+      });
+    }
   }
 
   function handlerModified(){
@@ -303,8 +315,9 @@
             </select>
           {/if}
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <ImageInfoCard />
+            <ImageInfoCard state={imageSaved} />
           </div>
+         
         </div>
           <div class="col-lg-10 col-xl-10">
             <div >
@@ -316,24 +329,34 @@
                   style="border-width: 1px;
                         border-style: solid;
                         border-color: black;"
-                />
+                />  
               </div>
             </div>
           {#if $metadataStore.spectraData.length != 0}
+            
             <Tabs on:selectTab={setBbox}>
               <TabList>
-                {#each $metadataStore.spectraData as item, index}
-                  <Tab>
-                    <NButton
-                      style={`background-color:${item.color} !important; border-color: black; width:40px; height:40px; border-radius:1px`}
-                      classStyle={""}
-                    >
-                      {index + 1}
-                    </NButton>
-                  </Tab>
-                {/each}
-                  <NButton click={addBox}>+</NButton>
-             
+                <div class="row">
+                  <div class="col-10">
+                    {#each $metadataStore.spectraData as item, index}
+                      <Tab>
+                        <NButton
+                          style={`background-color:${item.color} !important; border-color: black; width:40px; height:40px; border-radius:1px`}
+                          classStyle={""}
+                        >
+                          {index + 1}
+                        </NButton>
+                      </Tab>
+                    {/each}
+                    <NButton click={addBox}>+</NButton>
+                  </div> 
+                
+                <div class="col-2 py-2">
+                  <NButton click={setRemoteMetadata} disabled={invalidForm}>
+                    Buscar metadatos
+                  </NButton>
+                </div>  
+              </div>
               </TabList>
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
@@ -350,14 +373,9 @@
                     <div class="controls  mr-2"> 
                       <SetParams updateParent={updateLists}/>
                     </div>
-                    <div class="controls  mr-2">
-                      <NButton click={setRemoteMetadata} disabled={invalidForm}>
-                        Buscar metadatos
-                      </NButton>
-                    </div>
                     <div class="controls mr-2">
                       <NButton click={generateFits} disabled={invalidForm}>
-                        Exportar Fits
+                        &#11123; Exportar Fits
                       </NButton>
                     </div>
                   </div>
