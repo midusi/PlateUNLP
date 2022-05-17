@@ -30,13 +30,15 @@ function confirmAlert({
 }
 
 function deleteAlert({
-  title = '¿Seguro que quieres borrar el espectro? Se perderan los datos relacionados',
+  title = '¿Seguro que quieres borrar el espectro?',
+  text =  'Se perderan los datos relacionados',
   confirmButtonText = 'Borrar',
   denyButtonText = 'Cancelar',
   succesFunc = () => {}
 } = {}) {
   Swal.fire({
     title,
+    text,
     showDenyButton: true,
     showCancelButton: false,
     confirmButtonText,
