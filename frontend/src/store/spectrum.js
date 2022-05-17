@@ -48,15 +48,27 @@ function createStoreSpectrogram() {
       })
     },
     autoSaveValues: async(bboxArr,dataArr,path,imgName) => {
-      try {
-        await apiSpectrum.autoSave({
-          path_dir: path,
-          data_arr: dataArr,
-          bbox_arr: bboxArr,
-          img_name: imgName
-        })
-      } catch (error) {
-        console.log(error);
+      if (bboxArr.length === 0){
+        try{
+          await apiSpectrum.delete({
+            img_name: imgName
+          })
+        }
+        catch (error) {
+          console.log(error);
+        }
+      }
+      else{
+        try {
+          await apiSpectrum.autoSave({
+            path_dir: path,
+            data_arr: dataArr,
+            bbox_arr: bboxArr,
+            img_name: imgName
+          })
+        } catch (error) {
+          console.log(error);
+        }
       }
     }
     ,

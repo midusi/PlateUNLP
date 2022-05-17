@@ -34,10 +34,10 @@
     $metadataStore.formActions.selectForIndex(bboxSelected - 1);
 
   async function checkChangeFlag(){
-    if(changeFlag && $metadataStore.spectraData.length > 0){
+    if(changeFlag){
       AutoSaveData();
+      imageSaved = true;
       changeFlag = false;
-      imageSaved = true
     }
   }
 
@@ -234,6 +234,7 @@
       metadataStore.setSpectraData([]);
     }
     changeFlag = true;
+    imageSaved = false;
   }
 
   function setBbox(event) {

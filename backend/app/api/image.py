@@ -90,8 +90,11 @@ def save():
 # Receives the information of an image and saves it in a local file
 def delete():
     # params
-    img_name = request.values["img_name"]
-    
+    print("BORRANDOOOOOOOOO")
+    body = request.get_json()
+    print(body)
+    img_name = body["img_name"]
+    print(img_name)
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
     
