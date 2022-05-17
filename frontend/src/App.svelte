@@ -86,11 +86,11 @@
     }
   }
 
-  function searchSpectro() {
-    initializeCanvas();
-    spectrogramCanvas.deleteAllBbox();
-    spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
-  }
+  // function searchSpectro() {
+  //   initializeCanvas();
+  //   spectrogramCanvas.deleteAllBbox();
+  //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
+  // }
 
   function setRemoteMetadata() {
     const data = {
@@ -303,16 +303,7 @@
             </select>
           {/if}
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <div class="row mt-2 mb-2 ml-1">
-              <div class="d-flex justify-content-center">
-                <NButton click={searchSpectro}>Buscar espectros</NButton>
-              </div>
-            </div>
             <ImageInfoCard />
-          </div>
-          <hr />
-          <div class="d-flex justify-content-start"> 
-            <SetParams updateParent={updateLists}/>
           </div>
         </div>
           <div class="col-lg-10 col-xl-10">
@@ -356,6 +347,9 @@
                     <div class="controls mr-2">
                       
                     </div>
+                    <div class="controls  mr-2"> 
+                      <SetParams updateParent={updateLists}/>
+                    </div>
                     <div class="controls  mr-2">
                       <NButton click={setRemoteMetadata} disabled={invalidForm}>
                         Buscar metadatos
@@ -363,7 +357,7 @@
                     </div>
                     <div class="controls mr-2">
                       <NButton click={generateFits} disabled={invalidForm}>
-                        Guardar Fits
+                        Exportar Fits
                       </NButton>
                     </div>
                   </div>
