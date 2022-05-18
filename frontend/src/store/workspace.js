@@ -44,7 +44,7 @@ function createStoreWorkspace() {
       })
     },
     getImg: async (spectrogramCanvas, dirPath, imgName) => {
-      loadingAlert()
+      loadingAlert("Cargando imagen...")
       let data;
       try {
         spectrogramCanvas.deleteAllBbox()
@@ -61,13 +61,13 @@ function createStoreWorkspace() {
 
         }
         else{
-          spectrogramStore.getPredictions(
+          await spectrogramStore.getPredictions(
             spectrogramCanvas,
             dirPath,
             imgName
           )
         }
-    
+        console.log("GET PREDICTIONS")
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
 
         update((prev) => {

@@ -3,6 +3,7 @@
   import SpectrogramCanvas from "./models/SpectrogramCanvas";
   import { spectrogramStore, workspaceStore, metadataStore } from "./store";
   import { onMount } from "svelte";
+  import { slide,fly } from 'svelte/transition';
   import {
     MetadataModal,
     NButton,
@@ -272,7 +273,7 @@
 
 </script>
 
-<main style="background-image: url(https://fondosmil.com/fondo/5464.jpg); background-repeat: repeat; background-size: 100% 100%;">
+<main>
   <div class="card">
     <div class="card-header">
     <h5>Localizador de espectros</h5>
@@ -308,6 +309,7 @@
               size="10"
               aria-label=""
               style="width:100%"
+              in:slide="{{duration:1000}}"
             >
               {#each $workspaceStore.paths as path}
                 <option value={path.fileName}>{path.fileName}</option>>
@@ -315,13 +317,15 @@
               {/each}
             </select>
           {/if}
-          <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <ImageInfoCard state={imageSaved} />
-          </div>
-         
+          {#if uploadedImage}
+            <div style="display:inline">
+              <div in:slide="{{duration:1000}}">
+                <ImageInfoCard state={imageSaved} />
+              </div>
+            </div>
+          {/if}
         </div>
           <div class="col-lg-10 col-xl-10">
-            <div >
               <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
                 <canvas
                   id="canvas-container"
@@ -332,9 +336,8 @@
                         border-color: black;"
                 />  
               </div>
-            </div>
           {#if $metadataStore.spectraData.length != 0}
-            
+            <div in:slide="{{duration:1000}}" out:slide="{{duration:700}}">
             <Tabs on:selectTab={setBbox}>
               <TabList>
                 <div class="row">
@@ -383,6 +386,7 @@
                 </TabPanel>
               {/each}
             </Tabs>
+          </div>
           {:else}
           <div class="controls mt-6">
             <NButton style="display:{uploadedImage === true ? 'inline' : 'none'} ; margin-top:0.5em" click={addBox}>+</NButton>

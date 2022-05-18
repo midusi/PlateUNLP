@@ -20,7 +20,7 @@ function createStoreSpectrogram() {
   return {
     subscribe,
     getPredictions: async (spectrogramCanvas, pathDir, imageName) => {
-      loadingAlert()
+      loadingAlert("Detectando Espectros...")
       try {
         const response = await apiSpectrum.predict({
           img_path: pathDir,
