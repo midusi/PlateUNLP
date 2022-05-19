@@ -5,6 +5,7 @@ import SetParams from './SetParams.svelte'
 import ImageInfoCard from './ImageInfoCard.svelte'
 import MetadataModal from './MetadataModal.svelte'
 import ConfigModal from './ConfigModal.svelte'
+import FolderSelector from './FolderSelector.svelte'
 
 export {
   Modal,
@@ -13,5 +14,6 @@ export {
   ImageInfoCard,
   MetadataModal,
   ConfigModal,
-  SetParams
+  SetParams,
+  FolderSelector
 }
