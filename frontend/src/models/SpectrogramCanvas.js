@@ -190,7 +190,7 @@ export default class SpectrogramCanvas {
   setPredictions(json) {
     this.IDBBOX = 0
     this.deleteAllBbox()
-    console.log(json)
+    console.log("Prediccions" , json)
     let predictions = json.sort((a, b) => a.x - b.x).map((bbox) => {return this._convertCoordinates(bbox)});
     this.loadBboxYoloFormatJson(predictions);
     this.canvas.setActiveObject(this.canvas.item(0))

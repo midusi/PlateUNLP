@@ -66,10 +66,11 @@ function createStoreWorkspace() {
             dirPath,
             imgName
           )
+          
         }
         console.log("GET PREDICTIONS")
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
-
+ 
         update((prev) => {
           prev.imageProperties = data.info
           return prev
