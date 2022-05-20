@@ -61,7 +61,7 @@ function createStoreWorkspace() {
 
         }
         else{
-          await spectrogramStore.getPredictions(
+          spectrogramStore.getPredictions(
             spectrogramCanvas,
             dirPath,
             imgName
