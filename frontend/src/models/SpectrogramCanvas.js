@@ -127,6 +127,7 @@ export default class SpectrogramCanvas {
   }
 
   loadBboxYoloFormatJson(predictions) {
+    console.log(predictions);
     this.IDBBOX = 0;
     predictions.forEach((prediction) => {
       const x1 = prediction.x
@@ -148,6 +149,7 @@ export default class SpectrogramCanvas {
       })
 
       this.canvas.add(rect)
+      console.log(rect)
     })
   }
 
@@ -192,6 +194,7 @@ export default class SpectrogramCanvas {
     this.deleteAllBbox()
     console.log(json)
     let predictions = json.sort((a, b) => a.x - b.x).map((bbox) => {return this._convertCoordinates(bbox)});
+    console.log(predictions);
     this.loadBboxYoloFormatJson(predictions);
     this.canvas.setActiveObject(this.canvas.item(0))
     this.canvas.renderAll()
@@ -242,6 +245,8 @@ export default class SpectrogramCanvas {
 
   /* Convertir coordenadas de Yolov5 a coordenadas de la imagen actual */
   _convertCoordinates(bbox) {
+    console.log(this.widthOriginal)
+    console.log(this.heightOriginal)
     const w = bbox.w * this.widthOriginal
     const h = bbox.h * this.heightOriginal
     const x = (bbox.x * (2 * this.widthOriginal) - w) / 2

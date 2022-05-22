@@ -187,7 +187,6 @@
   }
 
   function handlerModified(){
-    console.log("se ejecuto handlerModified")
     setChangeFlag();
   }
 

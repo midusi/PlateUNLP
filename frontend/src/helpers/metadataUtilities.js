@@ -261,7 +261,7 @@ function getMetadataFields() {
       label: 'PLATE-N',
       type: 'text',
       info: 'Identification number',
-      required: false
+      required: true
     },
     gain: {
       label: 'GAIN',
