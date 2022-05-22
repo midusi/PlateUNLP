@@ -52,24 +52,24 @@ function createStoreWorkspace() {
           dir_path: dirPath,
           img_name: imgName
         })
-
+        
         data = response.data;
         
+        spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
+
         if(data.info.bboxes){
           //no predigo nada y cargo las bboxes
           spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes);
 
         }
         else{
-          spectrogramStore.getPredictions(
+          await spectrogramStore.getPredictions(
             spectrogramCanvas,
             dirPath,
             imgName
           )
         }
-        console.log("GET PREDICTIONS")
-        spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
-
+        
         update((prev) => {
           prev.imageProperties = data.info
           return prev
