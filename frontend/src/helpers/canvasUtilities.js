@@ -71,7 +71,6 @@ function getDeleteIcon() {
 }
 
 function getColor(id) {
-  console.log(colors[id % colors.length])
   return colors[id % colors.length];
 }
 

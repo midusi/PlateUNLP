@@ -10,9 +10,10 @@
     Field,
     ImageInfoCard,
     ConfigModal,
-    SetParams
+    SetParams,
+    FileList
   } from "./components";
-  import { confirmAlert } from "./helpers/Alert";
+  import { confirmAlert,showAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
 
 
@@ -27,7 +28,6 @@
   let canvas = undefined;
   let bboxSelected = 1;
   let invalidForm = true;
-  let selectedImage = "";
   let changeFlag = false;
 
   $: bboxSelected &&
@@ -68,7 +68,7 @@
 
   setContext("setChangeFlag",setChangeFlag);
 
-  async function getImg() {
+  async function getImg(selectedImage) {
     if (selectedImage != "") {
       imageName = selectedImage;
       initializeCanvas();
@@ -129,36 +129,50 @@
     setChangeFlag();
   }
 
-  function AutoSaveData(){
-    console.log(spectrogramCanvas.getBboxes());
-    console.log($metadataStore.spectraData);
-    spectrogramStore.autoSaveValues(
+  async function AutoSaveData(reload = true){
+    const resp = await spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
         $metadataStore.spectraData,
         pathDir,
         imageName
     );
+    if(resp && reload){
+      getPaths(false);
+    }
   }
 
-  function generateFits() {
+  async function generateFits() {
+    changeFlag = false;
+    imageSaved = true;
+    AutoSaveData(false);
+
     confirmAlert({
-      succesFunc: () => {
-        spectrogramStore.generateFits(
-          spectrogramCanvas.getBbox(
-            $metadataStore.spectraData[bboxSelected - 1].id
-          ),
-          $metadataStore.spectraData[bboxSelected - 1]
-          ,
+      succesFunc: async () => {
+        const status = await spectrogramStore.generateFits(
+          spectrogramCanvas.getBboxes(),
+          $metadataStore.spectraData,
           pathDir,
           imageName,
           $metadataStore.fields
         );
+        if(status){ 
+          metadataStore.initFields();
+          uploadedImage = false;
+          initializeCanvas();
+          loadConfig();
+          await workspaceStore.getPaths(pathDir);
+          showAlert({ title: 'Guardado', message: 'Se guardo con éxito.' })
+        }
+        else{
+          errorAlert()
+        }
       },
     });
+    
   }
 
-  function getPaths() {
-    workspaceStore.getPaths(pathDir);
+  function getPaths(load = true) {
+    workspaceStore.getPaths(pathDir,load);
   }
   function updateLists(){
     metadataStore.initFields();
@@ -179,11 +193,12 @@
     invalidForm = false;
     if ($metadataStore.spectraData.length > 0) {
       getRequiredMetadata($metadataStore.fields).forEach((metadata) => {
-        if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
+        $metadataStore.spectraData.forEach((spectro) => {if (spectro[metadata] === "") {
           invalidForm = true;
-        }
+        }})
       });
     }
+    console.log("invalidForm: " ,invalidForm)
   }
 
   function handlerModified(){
@@ -221,7 +236,6 @@
   }
 
   function handlerRemoved(obj) {
-    console.log("se ejecuto handlerRemoved")
     if (canvas.getObjects().length > 0) {
       metadataStore.setSpectraData(
         $metadataStore.spectraData.filter(
@@ -235,6 +249,7 @@
     }
     changeFlag = true;
     imageSaved = false;
+    validateForm();
   }
 
   function setBbox(event) {
@@ -301,20 +316,7 @@
             />
           </div>
           {#if $workspaceStore.paths.length > 0}
-            <select
-              bind:value={selectedImage}
-              on:change={getImg}
-              class="form-select"
-              size="10"
-              aria-label=""
-              style="width:100%"
-              in:slide="{{duration:1000}}"
-            >
-              {#each $workspaceStore.paths as path}
-                <option value={path.fileName}>{path.fileName}</option>>
-                
-              {/each}
-            </select>
+            <FileList paths={$workspaceStore.paths} getImg={getImg}/>
           {/if}
           {#if uploadedImage}
             <div style="display:inline">

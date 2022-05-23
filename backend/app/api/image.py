@@ -3,6 +3,7 @@ import os
 import base64
 import cv2
 from app.helpers.DictPersistJSON import DictPersistJSON
+import shutil
 
 def load():
 
@@ -46,19 +47,24 @@ def load():
     
     # It checks if there is information saved for that image and 
     # if it exists it adds its information to data
-    cache_path = os.path.join(app.static_folder, 'cache', img_name+".json")
-    if (os.path.isfile(cache_path)):
+    saved_path = os.path.join(app.static_folder, 'cache/saved', img_name+".json")
+    working_path = os.path.join(app.static_folder, 'cache/working', img_name+".json")
+    
+    if (os.path.isfile(working_path) or os.path.isfile(saved_path)):
+        if (os.path.isfile(working_path)):
+            dataList = DictPersistJSON(working_path)["body"]
+        else:
+            dataList = DictPersistJSON(saved_path)["body"]
         print("Entre al if")
-        dataList = DictPersistJSON(cache_path)["body"]
+        
         print(dataList)
         bbox = dataList["bbox_arr"]
         metadata = dataList["data_arr"]
         data["info"]["bboxes"] = bbox
         data["info"]["metadata"] = metadata
+
         
     # API response messaje
-    print("--Data--")
-    print(data)
     resp = jsonify(data)
     resp.status_code = 200
     
@@ -69,22 +75,28 @@ def save():
     # params
     body = request.get_json()
     img_name = body["img_name"]
-
+    moved = False
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
     
     # Save image data in .json files
-    full_path = os.path.join(app.static_folder, 'cache')
+    full_path = os.path.join(app.static_folder, 'cache/working')
     if not os.path.exists(full_path):
         os.mkdir(full_path)
     save_path = os.path.join(full_path, img_name+".json")
- 
+    saved_path = os.path.join(app.static_folder, 'cache/saved',img_name+".json")
+    if(os.path.isfile(saved_path)):
+        os.remove(saved_path) 
+        moved = True
     db = DictPersistJSON(save_path)
     db["body"] = body
     
     # API response messaje
     resp = jsonify(body)
-    resp.status_code = 201
+    if(moved):
+        resp.status_code = 201
+    else:
+        resp.status_code = 200
     return resp
 
 # Receives the information of an image and saves it in a local file
@@ -99,7 +111,7 @@ def delete():
     # Por ahora no realiza ninguna verificacion
     
     # Delete the information of an image if it exists
-    delete_path = os.path.join(app.static_folder, 'cache', img_name+".json")
+    delete_path = os.path.join(app.static_folder, 'cache/working', img_name+".json")
     if (os.path.isfile(delete_path)):
         os.remove(delete_path)
         

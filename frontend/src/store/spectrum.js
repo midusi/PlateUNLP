@@ -48,27 +48,30 @@ function createStoreSpectrogram() {
       })
     },
     autoSaveValues: async(bboxArr,dataArr,path,imgName) => {
+      let resp;
       if (bboxArr.length === 0){
         try{
-          await apiSpectrum.delete({
+          resp = await apiSpectrum.delete({
             img_name: imgName
           })
         }
         catch (error) {
-          console.log(error);
+          return console.log(error);
         }
+        return (resp.status === 201);
       }
       else{
         try {
-          await apiSpectrum.autoSave({
+          resp = await apiSpectrum.autoSave({
             path_dir: path,
             data_arr: dataArr,
             bbox_arr: bboxArr,
             img_name: imgName
           })
         } catch (error) {
-          console.log(error);
+          return console.log(error);
         }
+          return (resp.status === 201);
       }
     }
     ,
@@ -81,23 +84,23 @@ function createStoreSpectrogram() {
       try {
         await apiSpectrum.generatefits({
           path_dir: path,
-          data_arr: [dataArr],
-          bbox_arr: [bboxArr],
+          data_arr: dataArr,
+          bbox_arr: bboxArr,
           img_name: imgName,
           fields
         })
-        showAlert({ title: 'Guardado', message: 'Se guardo con éxito.' })
       } catch (error) {
         update((prev) => {
           prev.stateGeneratingFits.error = error
           return prev
         })
-        errorAlert()
+        return 0
       }
       update((prev) => {
         prev.stateGeneratingFits.loading = false
         return prev
       })
+      return 1
     }
   }
 }
