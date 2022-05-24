@@ -160,6 +160,17 @@ export default class SpectrogramCanvas {
     this.canvas.setZoom(this.scale)
   }
 
+  /* 
+  Recibe un numerico indicando un nivel de brillo y modifica la imagen de fondo 
+  para que refleje el nivel de brillo recibido
+  */
+  setBrightness(brightness) {
+    let context = this.canvas.getContext( '2d' );
+    let width,height;
+    let image = context.getImageData( 0, 0, this.canvas.getWidth(), this.canvas.getHeight());
+    console.log("dataImage = "+image+"\ndataLength = "+image.data.length);
+  }
+
   loadImage(src, width, height) {
     if (src !== '') {
       this.originalImage = src

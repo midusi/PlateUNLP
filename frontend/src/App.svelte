@@ -34,7 +34,7 @@
   let brightness = 0.5;
 
   function updateBrightness() {
-    
+    spectrogramCanvas.setBrightness(brightness);
   }
 
   $: bboxSelected &&
