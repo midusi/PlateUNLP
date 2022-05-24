@@ -30,6 +30,13 @@
   let selectedImage = "";
   let changeFlag = false;
 
+  // variables importantes para El ajuste del brillo de la imagen
+  let brightness = 0.5;
+
+  function updateBrightness() {
+    
+  }
+
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
     $metadataStore.formActions.selectForIndex(bboxSelected - 1);
@@ -326,6 +333,17 @@
         </div>
           <div class="col-lg-10 col-xl-10">
               <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
+                <div class="d-xl-flex flex-column justify-content-xl-start">
+                  <span>Brillo</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    bind:value={brightness}
+                    on:change={updateBrightness} 
+                  />
+                </div>
                 <canvas
                   id="canvas-container"
                   width="300"

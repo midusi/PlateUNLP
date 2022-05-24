@@ -167,6 +167,9 @@ export default class SpectrogramCanvas {
       this.heightOriginal = height
       this.canvas.setHeight(this.getCanvasHeight())
       this.canvas.setWidth(this.getCanvasWidth())
+
+      var imageObj = new Image();
+      imageObj.src = src;
       this.canvas.setBackgroundImage(
         src,
         this.canvas.renderAll.bind(this.canvas),
