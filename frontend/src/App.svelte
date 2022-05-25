@@ -17,7 +17,7 @@
   import {setContext} from "svelte";
 
 
-
+  let imageChanged = true
   let imageSaved = false
 
   let spectrogramCanvas;
@@ -70,6 +70,7 @@
 
   async function getImg(selectedImage) {
     if (selectedImage != "") {
+      imageChanged = true
       imageName = selectedImage;
       initializeCanvas();
       let data;
@@ -94,6 +95,8 @@
       }
 
       uploadedImage = true;
+      changeFlag = false;
+      imageChanged = false;
     }
   }
 
@@ -130,6 +133,7 @@
   }
 
   async function AutoSaveData(reload = true){
+    console.log("AUTOSAVE")
     const resp = await spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
         $metadataStore.spectraData,
@@ -248,8 +252,10 @@
       metadataStore.setSpectraData([]);
     }
     changeFlag = true;
-    imageSaved = false;
-    validateForm();
+      imageSaved = false;
+    if(!imageChanged)
+
+      validateForm();
   }
 
   function setBbox(event) {
@@ -383,6 +389,7 @@
                         &#11123; Exportar Fits
                       </NButton>
                     </div>
+                    
                   </div>
                 </TabPanel>
               {/each}
