@@ -11,7 +11,8 @@
     ImageInfoCard,
     ConfigModal,
     SetParams,
-    FileList
+    FileList,
+    PlateForm
   } from "./components";
   import { confirmAlert,showAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
@@ -26,7 +27,7 @@
   let imageName = "";
   let scale = 0.5;
   let canvas = undefined;
-  let bboxSelected = 1;
+  let bboxSelected = -1;
   let invalidForm = true;
   let changeFlag = false;
 
@@ -182,8 +183,23 @@
     metadataStore.initFields();
   }
 
-  function getMetadata(fields) {
-    return Object.keys(fields)
+  function getMetadata(fields,global) {
+    let data;
+    if(global){
+      data = Object.keys(fields)
+      .filter((label) => {
+          if (fields[label].global) return label;
+      })
+      console.log(data);
+      return data;
+    }
+    else{
+    data = Object.keys(fields)
+      .filter((label) => {
+          if (!fields[label].global) return label;
+      })
+      return data;
+    }
   }
 
   function getRequiredMetadata(fields) {
@@ -224,11 +240,26 @@
 
   function handlerAdded(obj) {
     const fields = {};
-    Object.keys($metadataStore.fields).map((field) => {
-      if ($metadataStore.fields[field].options === undefined)
-        fields[field] = "";
-      else fields[field] = $metadataStore.fields[field].options[0];
+
+    if(canvas.getObjects().length === 1){
+      console.log("ENTRE")
+      const globalFields = {};
+      Object.keys($metadataStore.fields).map((field) => {
+      if($metadataStore.fields[field].global)
+        if ($metadataStore.fields[field].options === undefined)
+          globalFields[field] = "";
+        else globalFields[field] = $metadataStore.fields[field].options[0];
     });
+    metadataStore.setPlateData(globalFields);
+    }
+    
+    Object.keys($metadataStore.fields).map((field) => {
+      if(!$metadataStore.fields[field].global)
+        if ($metadataStore.fields[field].options === undefined)
+          fields[field] = "";
+        else fields[field] = $metadataStore.fields[field].options[0];
+    });
+
     metadataStore.setSpectraData([
       ...$metadataStore.spectraData,
       {
@@ -359,6 +390,7 @@
                         </NButton>
                       </Tab>
                     {/each}
+                    <NButton click={()=>bboxSelected=-1}>P</NButton>
                     <NButton click={addBox}>+</NButton>
                   </div> 
                 
@@ -369,31 +401,42 @@
                 </div>  
               </div>
               </TabList>
+              {#if bboxSelected === -1 }
+                <TabPanel>
+                 <div class="controls">
+                    <PlateForm
+                      plateData={$metadataStore.plateData}
+                      metadata={getMetadata($metadataStore.fields,true)}
+                    />
+                  </div>
+                </TabPanel>
+              {/if}
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
+                 
                   <div class="controls">
                     <MetadataModal
                       spectraData={item}
-                      metadata={getMetadata($metadataStore.fields)}
+                      metadata={getMetadata($metadataStore.fields,false)}
                     />
-                  </div>
-                  <div class="row mt-4 ml-1 mb-4">
-                    <div class="controls mr-2">
-                      
-                    </div>
-                    <div class="controls  mr-2"> 
-                      <SetParams updateParent={updateLists}/>
-                    </div>
-                    <div class="controls mr-2">
-                      <NButton click={generateFits} disabled={invalidForm}>
-                        &#11123; Exportar Fits
-                      </NButton>
-                    </div>
-                    
                   </div>
                 </TabPanel>
               {/each}
             </Tabs>
+            <div class="row mt-4 ml-1 mb-4">
+              <div class="controls mr-2">
+                
+              </div>
+              <div class="controls  mr-2"> 
+                <SetParams updateParent={updateLists}/>
+              </div>
+              <div class="controls mr-2">
+                <NButton click={generateFits} disabled={invalidForm}>
+                  &#11123; Exportar Fits
+                </NButton>
+              </div>
+              
+            </div>
           </div>
           {:else}
           <div class="controls mt-6">

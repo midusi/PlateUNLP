@@ -6,8 +6,10 @@ import { getMetadataFields } from '../helpers/metadataUtilities'
 function createStoreMetadata() {
   const { subscribe, update, set } = writable({
     spectraData: [],
+    plateData: {},
     formActions: undefined,
-    fields: {}
+    fields: {},
+    globalFields: {}
   })
 
   return {
@@ -16,6 +18,7 @@ function createStoreMetadata() {
     initFields: () => {
       const fields = getMetadataFields()
       const labelFormat = {}
+      const labelFormatGlobal = {}
       Object.keys(fields).map((field) => {
         labelFormat[fields[field].label] = fields[field]
       })
@@ -52,6 +55,12 @@ function createStoreMetadata() {
     setSpectraData: (data) => {
       update((prev) => {
         prev.spectraData = data
+        return prev
+      })
+    },
+    setPlateData: (data) => {
+      update((prev) => {
+        prev.plateData = data
         return prev
       })
     },

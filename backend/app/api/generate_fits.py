@@ -70,6 +70,8 @@ def api_generate_fits():
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]
             prihdr[key] = (data[key], comment)
+        prihdr["GAIN"] = ("","Gain, electrons per adu")
+        prihdr["NOISE"] = ("","Read noise")
         print('Format to Save', crop_img.dtype)
         print("PRI HDR: ---->",prihdr)
         fits.writeto(
