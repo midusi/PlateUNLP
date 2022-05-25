@@ -166,9 +166,16 @@ export default class SpectrogramCanvas {
   */
   setBrightness(brightness) {
     let context = this.canvas.getContext( '2d' );
-    let width,height;
-    let image = context.getImageData( 0, 0, this.canvas.getWidth(), this.canvas.getHeight());
+    let image = context.getImageData( 0, 0, this.canvas.getWidth(), this.canvas.getHeight()); //Recupera la informacion de la imagen
+    let pixels = image.data;
+    // let numPixels = image.width * image.height;
+    // for ( var i = 0; i < numPixels; i++ ) {
+    //   var r = pixels[ i * 4 ],
+    //       g = pixels[ i * 4 + 1 ],
+    //       b = pixels[ i * 4 + 2 ];
+    // }
     console.log("dataImage = "+image+"\ndataLength = "+image.data.length);
+    context.putImageData(image, 0, 0 ); //Actualiza la informacion de la imagen imagen
   }
 
   loadImage(src, width, height) {
