@@ -148,6 +148,7 @@ export default class SpectrogramCanvas {
       })
 
       this.canvas.add(rect)
+      console.log(rect)
     })
   }
 
@@ -190,7 +191,10 @@ export default class SpectrogramCanvas {
   setPredictions(json) {
     this.IDBBOX = 0
     this.deleteAllBbox()
+<<<<<<< HEAD
     console.log("Prediccions" , json)
+=======
+>>>>>>> 6cab905a6e049408dfc6cfc579f41fc32fb9f98a
     let predictions = json.sort((a, b) => a.x - b.x).map((bbox) => {return this._convertCoordinates(bbox)});
     this.loadBboxYoloFormatJson(predictions);
     this.canvas.setActiveObject(this.canvas.item(0))
@@ -225,8 +229,6 @@ export default class SpectrogramCanvas {
     this.canvas.getObjects().forEach((bbox) => {
       bboxes.push(this.getBbox(bbox.id));
     })
-    
-    console.log(bboxes);
 
     return bboxes;
   }

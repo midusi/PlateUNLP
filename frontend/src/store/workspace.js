@@ -18,14 +18,14 @@ function createStoreWorkspace() {
 
   return {
     subscribe,
-    getPaths: async (dirPath) => {
-      loadingAlert()
+    getPaths: async (dirPath,load = true) => {
+      if(load)
+        loadingAlert()
       let response;
       try {
           response = await apiWorkspace.allPaths({
           path_dir: dirPath
         })
-        console.log(response);
         update((prev) => {
           prev.paths = response.data.paths
           return prev
@@ -52,9 +52,11 @@ function createStoreWorkspace() {
           dir_path: dirPath,
           img_name: imgName
         })
-
+        
         data = response.data;
         
+        spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
+
         if(data.info.bboxes){
           //no predigo nada y cargo las bboxes
           spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes);
@@ -68,9 +70,13 @@ function createStoreWorkspace() {
           )
           
         }
+<<<<<<< HEAD
         console.log("GET PREDICTIONS")
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
  
+=======
+        
+>>>>>>> 6cab905a6e049408dfc6cfc579f41fc32fb9f98a
         update((prev) => {
           prev.imageProperties = data.info
           return prev
@@ -87,7 +93,6 @@ function createStoreWorkspace() {
         prev.state.loading = false
         return prev
       })
-      console.log("metadata")
       return data.info.metadata
     },
     saveConfig: async (config) => {
