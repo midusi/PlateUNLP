@@ -18,14 +18,14 @@ function createStoreWorkspace() {
 
   return {
     subscribe,
-    getPaths: async (dirPath) => {
-      loadingAlert()
+    getPaths: async (dirPath,load = true) => {
+      if(load)
+        loadingAlert()
       let response;
       try {
           response = await apiWorkspace.allPaths({
           path_dir: dirPath
         })
-        console.log(response);
         update((prev) => {
           prev.paths = response.data.paths
           return prev
@@ -86,7 +86,6 @@ function createStoreWorkspace() {
         prev.state.loading = false
         return prev
       })
-      console.log("metadata")
       return data.info.metadata
     },
     saveConfig: async (config) => {

@@ -2,7 +2,8 @@ from flask import request, json, Response, abort, current_app as app
 from astropy.io import fits
 import os
 import cv2
-
+import shutil
+ 
 def api_generate_fits():
 
     img_name = request.json["img_name"]
@@ -17,17 +18,14 @@ def api_generate_fits():
     # test
     print(image_path)
     print("image path",image_path)
-
     # generate dir output
     output_path = os.path.join(path_dir, "output")
     if not (os.path.exists(output_path)):
         os.mkdir(output_path)
-    print(output_path)
-
     # cropped
     for bbox,data in zip(bbox_arr,data_arr):
-        bbox.pop('id', None)
-        bbox.pop('color', None)
+        data.pop('id', None)
+        data.pop('color', None)
         
         # The flag to -1 loads the image as is
         rotated = False;
@@ -77,6 +75,9 @@ def api_generate_fits():
         fits.writeto(
             (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
 
+    working_path = os.path.join(app.static_folder, 'cache\working', img_name+".tiff.json")
+    saved_path = os.path.join(app.static_folder, 'cache\saved', img_name+".tiff.json")
+    shutil.move(working_path, saved_path)
     # api response data
     data = {
         "status": True
