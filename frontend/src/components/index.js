@@ -7,6 +7,7 @@ import ImageInfoCard from './ImageInfoCard.svelte'
 import MetadataModal from './MetadataModal.svelte'
 import ConfigModal from './ConfigModal.svelte'
 import FolderSelector from './FolderSelector.svelte'
+import PlateForm from './PlateForm.svelte'
 
 export {
   Modal,
@@ -17,5 +18,6 @@ export {
   ConfigModal,
   SetParams,
   FolderSelector,
-  FileList
+  FileList,
+  PlateForm
 }

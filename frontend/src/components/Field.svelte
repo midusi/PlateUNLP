@@ -10,10 +10,6 @@
     node.type = $metadataStore.fields[name].type;
   };
 
-  function cambio(){
-    console.log("CAMBIO");
-  }
-
 </script>
 
 <div class="mt-2">

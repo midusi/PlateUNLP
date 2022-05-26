@@ -47,7 +47,7 @@ function createStoreSpectrogram() {
         return prev
       })
     },
-    autoSaveValues: async(bboxArr,dataArr,path,imgName) => {
+    autoSaveValues: async(bboxArr,dataArr,plateData,path,imgName) => {
       let resp;
       if (bboxArr.length === 0){
         try{
@@ -66,6 +66,7 @@ function createStoreSpectrogram() {
             path_dir: path,
             data_arr: dataArr,
             bbox_arr: bboxArr,
+            plate_data: plateData,
             img_name: imgName
           })
         } catch (error) {
@@ -75,7 +76,7 @@ function createStoreSpectrogram() {
       }
     }
     ,
-    generateFits: async (bboxArr,dataArr, path, imgName, fields) => {
+    generateFits: async (bboxArr,dataArr,plateData, path, imgName, fields) => {
       update((prev) => {
         prev.stateGeneratingFits.loading = true
         return prev
@@ -87,6 +88,7 @@ function createStoreSpectrogram() {
           data_arr: dataArr,
           bbox_arr: bboxArr,
           img_name: imgName,
+          plate_data: plateData,
           fields
         })
       } catch (error) {

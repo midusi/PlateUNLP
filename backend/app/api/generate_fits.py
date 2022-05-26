@@ -10,6 +10,7 @@ def api_generate_fits():
     path_dir = request.json["path_dir"]
     bbox_arr = request.json["bbox_arr"]
     data_arr = request.json["data_arr"]
+    plate_data = request.json["plate_data"]
     fields = request.json["fields"]
 
     image_path = os.path.join(path_dir, img_name)
@@ -43,8 +44,6 @@ def api_generate_fits():
         w = int(bbox["w"])
         h = int(bbox["h"])
         
-        print(x+w,y+h)
-        print(x,y)
         if(y < 0 or y>original_height):
             y = 0
         if(y+h > original_height):
@@ -54,8 +53,6 @@ def api_generate_fits():
         if(x+w > original_width):
             w = original_width - x 
 
-        print(x+w,y+h)
-        print(x,y)
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:,:]
@@ -69,7 +66,13 @@ def api_generate_fits():
             comment = ''
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]
-            prihdr[key] = (data[key], comment)
+            if fields[key]["global"]:
+                prihdr[key] = (plate_data[key], comment)
+            else:
+                prihdr[key] = (data[key], comment)
+            
+        prihdr["GAIN"] = ("","Gain, electrons per adu")
+        prihdr["NOISE"] = ("","Read noise")
         print('Format to Save', crop_img.dtype)
         print("PRI HDR: ---->",prihdr)
         fits.writeto(

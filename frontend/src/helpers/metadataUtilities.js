@@ -123,26 +123,30 @@ function getMetadataFields() {
       label: 'OBJECT',
       type: 'text',
       info: 'Name of the object observed',
-      required: true
+      required: true,
+      global: false
     },
     observat: {
       label: 'OBSERVAT',
       type: 'text',
       info: 'Organization or institution',
       required: true,
-      options: getObservat()
+      options: getObservat(),
+      global: false
     },
     dateObs: {
       label: 'DATE-OBS',
       type: 'date',
       info: 'Date of observation (yyyy-mm-dd)',
-      required: true
+      required: true,
+      global: false
     },
     ut: {
       label: 'UT',
       type: 'text',
       info: 'Universal time (hh:mm:ss)',
-      required: true
+      required: true,
+      global: false
     },
     // Remote Metadata
     mainId: {
@@ -150,120 +154,137 @@ function getMetadataFields() {
       type: 'text',
       info: 'Simbad main ID object name',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     ra2000: {
       label: 'RA2000',
       type: 'text',
       info: 'Right ascension J2000',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     dec2000: {
       label: 'DEC2000',
       type: 'text',
       info: 'Declination J2000',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     sptype: {
       label: 'SPTYPE',
       type: 'text',
       info: 'Simbad spectral type',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     equinox: {
       label: 'EQUINOX',
       type: 'text',
       info: 'Equinox of ra y dec',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     epoch: {
       label: 'EPOCH',
       type: 'text',
       info: 'Epoch of ra y dec',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     ra: {
       label: 'RA',
       type: 'text',
       info: 'Right ascension',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     dec: {
       label: 'DEC',
       type: 'text',
       info: 'Declination',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     ra1950: {
       label: 'RA1950',
       type: 'text',
       info: 'RA2000 precessed to ep.1950 eq.1950',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     dec1950: {
       label: 'DEC1950',
       type: 'text',
       info: 'DEC2000 precessed to ep.1950 eq.1950',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     timeObs: {
       label: 'TIME-OBS',
       type: 'text',
       info: 'Local time at the start of the observation',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     st: {
       label: 'ST',
       type: 'text',
       info: 'Local mean sidereal time',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     ha: {
       label: 'HA',
       type: 'text',
       info: 'Hour angle',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     airmass: {
       label: 'AIRMASS',
       type: 'text',
       info: 'Air mass measure',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     jd: {
       label: 'JD',
       type: 'text',
       info: 'Geocentric Julian day (Greenwich)',
       required: false,
-      remote: true
+      remote: true,
+      global: false
     },
     // End Remote Metadata
     exptime: {
       label: 'EXPTIME',
       type: 'number',
       info: 'Integration time in seconds',
-      required: false
+      required: false,
+      global: false
     },
     plateN: {
       label: 'PLATE-N',
       type: 'text',
       info: 'Identification number',
-      required: true
+      required: true,
+      global: true
     },
-    gain: {
+    /*gain: {
       label: 'GAIN',
       type: 'text',
       info: 'Gain, electrons per adu',
@@ -274,7 +295,7 @@ function getMetadataFields() {
       type: 'text',
       info: 'Read noise',
       required: false
-    },
+    },*/
     // selector
     imageTyp: {
       label: 'IMAGETYP',
@@ -282,7 +303,8 @@ function getMetadataFields() {
       info: 'Object, dark, zero, etc',
       required: false,
       options: getImageTyp(),
-      default: getImageTypDef()
+      default: getImageTypDef(),
+      global: false
     },
     observer: {
       label: 'OBSERVER',
@@ -290,7 +312,8 @@ function getMetadataFields() {
       info: 'Observer name',
       required: false,
       options: getObserver(),
-      default: getObserverDef()
+      default: getObserverDef(),
+      global: false
     },
     digitali: {
       label: 'DIGITALI',
@@ -298,37 +321,43 @@ function getMetadataFields() {
       info: 'Digitalizer name',
       required: false,
       options: getDigitali(),
-      default: getDigitaliDef()
+      default: getDigitaliDef(),
+      global: true
     },
     scanner: {
       label: 'SCANNER',
       type: 'text',
       info: 'Scanner name',
-      required: false
+      required: false,
+      global: true
     },
     scanRes: {
       label: 'SCAN-RES',
       type: 'text',
       info: 'Scanner dpi resolution',
-      required: false
+      required: false,
+      global: true
     },
     scanCol: {
       label: 'SCAN-COL',
       type: 'text',
       info: 'Scanner color resolution',
-      required: false
+      required: false,
+      global: true
     },
     software: {
       label: 'SOFTWARE',
       type: 'text',
       info: 'Scan software',
-      required: false
+      required: false,
+      global: true
     },
     detector: {
       label: 'DETECTOR',
       type: 'text',
       info: 'Detector',
-      required: false
+      required: false,
+      global: false
     }
   }
 }

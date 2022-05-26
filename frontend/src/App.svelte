@@ -11,7 +11,8 @@
     ImageInfoCard,
     ConfigModal,
     SetParams,
-    FileList
+    FileList,
+    PlateForm
   } from "./components";
   import { confirmAlert,showAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
@@ -26,7 +27,7 @@
   let imageName = "";
   let scale = 0.5;
   let canvas = undefined;
-  let bboxSelected = 1;
+  let bboxSelected = -1;
   let invalidForm = true;
   let changeFlag = false;
 
@@ -69,6 +70,7 @@
   setContext("setChangeFlag",setChangeFlag);
 
   async function getImg(selectedImage) {
+    getPaths();
     if (selectedImage != "") {
       imageChanged = true
       imageName = selectedImage;
@@ -76,27 +78,31 @@
       let data;
       try{
         data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
+
       }
       catch(err){
       }
-      
-      if(data){
+
+      if(data.metadata){
         imageSaved = true
-        data = data.map((val,i) => {
+        let spectraData = data.metadata.map((val,i) => {
           val["id"] = $metadataStore.spectraData[i]["id"]
           val["color"] = $metadataStore.spectraData[i]["color"]
           return val;
         });
-        metadataStore.setSpectraData(data);
+        
+        metadataStore.setSpectraData(spectraData);
+        metadataStore.setPlateData(data.plateData);
         validateForm();
+
+        changeFlag = false;
+        
       }
       else{
         setChangeFlag();
       }
-
-      uploadedImage = true;
-      changeFlag = false;
       imageChanged = false;
+      uploadedImage = true;
     }
   }
 
@@ -133,10 +139,10 @@
   }
 
   async function AutoSaveData(reload = true){
-    console.log("AUTOSAVE")
     const resp = await spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
         $metadataStore.spectraData,
+        $metadataStore.plateData,
         pathDir,
         imageName
     );
@@ -155,6 +161,7 @@
         const status = await spectrogramStore.generateFits(
           spectrogramCanvas.getBboxes(),
           $metadataStore.spectraData,
+          $metadataStore.plateData,
           pathDir,
           imageName,
           $metadataStore.fields
@@ -182,27 +189,57 @@
     metadataStore.initFields();
   }
 
-  function getMetadata(fields) {
-    return Object.keys(fields)
+  function getMetadata(fields,global) {
+    let data;
+    if(global){
+      data = Object.keys(fields)
+      .filter((label) => {
+          if (fields[label].global) return label;
+      })
+      return data;
+    }
+    else{
+    data = Object.keys(fields)
+      .filter((label) => {
+          if (!fields[label].global) return label;
+      })
+      return data;
+    }
   }
 
-  function getRequiredMetadata(fields) {
-    return Object.keys(fields)
-    .map((label) => {
-        if (fields[label].required) return label;
-    })
+  function getRequiredMetadata(fields,global) {
+    if(global){
+      return Object.keys(fields).map((label) => {
+        if (fields[label].required && fields[label].global) 
+          return label;
+      })
+    }
+    else{
+      return Object.keys(fields).map((label) => {
+        if (fields[label].required && !fields[label].global) 
+          return label;
+      })
+    }
   }
 
   function validateForm() {
     invalidForm = false;
     if ($metadataStore.spectraData.length > 0) {
-      getRequiredMetadata($metadataStore.fields).forEach((metadata) => {
-        $metadataStore.spectraData.forEach((spectro) => {if (spectro[metadata] === "") {
+      $metadataStore.spectraData.forEach((spectro) => {
+        getRequiredMetadata($metadataStore.fields,false).forEach((metadata) => {
+          if (spectro[metadata] === "") {
+            invalidForm = true;
+          }
+        });
+      });
+
+      getRequiredMetadata($metadataStore.fields,true).forEach((metadata) => {
+        if ($metadataStore.plateData[metadata] === "") {
           invalidForm = true;
-        }})
+        }
       });
     }
-    console.log("invalidForm: " ,invalidForm)
+
   }
 
   function handlerModified(){
@@ -224,11 +261,25 @@
 
   function handlerAdded(obj) {
     const fields = {};
-    Object.keys($metadataStore.fields).map((field) => {
-      if ($metadataStore.fields[field].options === undefined)
-        fields[field] = "";
-      else fields[field] = $metadataStore.fields[field].options[0];
+
+    if(canvas.getObjects().length === 1){
+      const globalFields = {};
+      Object.keys($metadataStore.fields).map((field) => {
+      if($metadataStore.fields[field].global)
+        if ($metadataStore.fields[field].options === undefined)
+          globalFields[field] = "";
+        else globalFields[field] = $metadataStore.fields[field].options[0];
     });
+    metadataStore.setPlateData(globalFields);
+    }
+    
+    Object.keys($metadataStore.fields).map((field) => {
+      if(!$metadataStore.fields[field].global)
+        if ($metadataStore.fields[field].options === undefined)
+          fields[field] = "";
+        else fields[field] = $metadataStore.fields[field].options[0];
+    });
+
     metadataStore.setSpectraData([
       ...$metadataStore.spectraData,
       {
@@ -359,9 +410,9 @@
                         </NButton>
                       </Tab>
                     {/each}
-                    <NButton click={addBox}>+</NButton>
+                    <NButton classStyle={""} style={`background-color:white !important; border-color: black; width:40px; height:40px; border-radius:1px`} click={()=>bboxSelected=-1}>P</NButton>
+                    <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
-                
                 <div class="col-2 py-2">
                   <NButton click={setRemoteMetadata} disabled={invalidForm}>
                     Buscar metadatos
@@ -369,36 +420,42 @@
                 </div>  
               </div>
               </TabList>
+              {#if bboxSelected === -1 }
+                <TabPanel>
+                 <div class="controls">
+                    <PlateForm
+                      plateData={$metadataStore.plateData}
+                      metadata={getMetadata($metadataStore.fields,true)}
+                    />
+                  </div>
+                </TabPanel>
+              {/if}
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
                   <div class="controls">
                     <MetadataModal
                       spectraData={item}
-                      metadata={getMetadata($metadataStore.fields)}
+                      metadata={getMetadata($metadataStore.fields,false)}
                     />
-                  </div>
-                  <div class="row mt-4 ml-1 mb-4">
-                    <div class="controls mr-2">
-                      
-                    </div>
-                    <div class="controls  mr-2"> 
-                      <SetParams updateParent={updateLists}/>
-                    </div>
-                    <div class="controls mr-2">
-                      <NButton click={generateFits} disabled={invalidForm}>
-                        &#11123; Exportar Fits
-                      </NButton>
-                    </div>
-                    
                   </div>
                 </TabPanel>
               {/each}
             </Tabs>
+            <div class="row mt-4 ml-1 mb-4">
+              <div class="controls  mr-2"> 
+                <SetParams updateParent={updateLists}/>
+              </div>
+              <div class="controls mr-2">
+                <NButton click={generateFits} disabled={invalidForm}>
+                  &#11123; Exportar Fits
+                </NButton>
+              </div>
+            </div>
           </div>
           {:else}
-          <div class="controls mt-6">
-            <NButton style="display:{uploadedImage === true ? 'inline' : 'none'} ; margin-top:0.5em" click={addBox}>+</NButton>
-          </div>
+            <div class="controls mt-6">
+              <NButton style="display:{uploadedImage === true ? 'inline' : 'none'} ; margin-top:0.5em" click={addBox}>+</NButton>
+            </div>
           {/if}
         </div>
       </div>
