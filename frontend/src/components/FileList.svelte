@@ -22,7 +22,6 @@ function handleSelect(){
       aria-label=""
       style="width:100%"
     >
-    {console.log("render")}
       {#each paths as path}
         {#if showFinished}
             {#if path.number_of_spectra === -1}

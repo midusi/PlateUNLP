@@ -77,9 +77,6 @@ export default class SpectrogramCanvas {
     let text = ''
     const objs = this.canvas.getObjects()
     objs.forEach((obj) => {
-      console.log(
-        `Original: width: ${obj.cacheTranslationX} height: ${obj.cacheTranslationY} x1: ${obj.aCoords.tl.x} y1: ${obj.aCoords.tl.y}`
-      )
       const coord = this._convertYoloBbox(
         obj.aCoords.tl.x,
         obj.aCoords.tl.y,
@@ -96,7 +93,6 @@ export default class SpectrogramCanvas {
     const file = inputText.files[0]
     if (file) {
       const text = await file.text()
-      console.log(text)
       const lines = text.split('\n')
       lines.pop()
       lines.forEach((line) => {
@@ -108,9 +104,6 @@ export default class SpectrogramCanvas {
         const h = parseFloat(values[4])
 
         const res = this._convertCoordinates(x1, y1, w, h)
-        console.log(
-          `Invert: width: ${res[2]} height: ${res[3]} x1: ${res[0]} y1: ${res[1]}`
-        )
         const rect = new fabric.Rect({
           top: res[1],
           left: res[0],
@@ -146,9 +139,7 @@ export default class SpectrogramCanvas {
         strokeWidth: 10,
         lockRotation: true
       })
-
       this.canvas.add(rect)
-      console.log(rect)
     })
   }
 

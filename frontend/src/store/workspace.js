@@ -87,7 +87,7 @@ function createStoreWorkspace() {
         prev.state.loading = false
         return prev
       })
-      return data.info.metadata
+      return data.info
     },
     saveConfig: async (config) => {
       loadingAlert()

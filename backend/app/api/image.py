@@ -9,7 +9,6 @@ def load():
 
     dir_path = request.values["dir_path"]
     img_name = request.values["img_name"]
-    
     filename = os.path.join(dir_path, img_name)
     img_info = cv2.imread(filename, -1)
     img = cv2.imread(filename)
@@ -55,13 +54,15 @@ def load():
             dataList = DictPersistJSON(working_path)["body"]
         else:
             dataList = DictPersistJSON(saved_path)["body"]
-        print("Entre al if")
+      
         
         print(dataList)
         bbox = dataList["bbox_arr"]
+        plateData = dataList["plate_data"]
         metadata = dataList["data_arr"]
         data["info"]["bboxes"] = bbox
         data["info"]["metadata"] = metadata
+        data["info"]["plateData"] = plateData
 
         
     # API response messaje
@@ -78,7 +79,6 @@ def save():
     moved = False
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
-    
     # Save image data in .json files
     full_path = os.path.join(app.static_folder, 'cache/working')
     if not os.path.exists(full_path):
@@ -102,11 +102,8 @@ def save():
 # Receives the information of an image and saves it in a local file
 def delete():
     # params
-    print("BORRANDOOOOOOOOO")
     body = request.get_json()
-    print(body)
     img_name = body["img_name"]
-    print(img_name)
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
     
