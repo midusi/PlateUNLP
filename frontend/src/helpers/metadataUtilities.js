@@ -132,7 +132,7 @@ function getMetadataFields() {
       info: 'Organization or institution',
       required: true,
       options: getObservat(),
-      global: false
+      global: true
     },
     dateObs: {
       label: 'DATE-OBS',

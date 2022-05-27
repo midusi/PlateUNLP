@@ -3,7 +3,8 @@ from astropy.io import fits
 import os
 import cv2
 import shutil
- 
+from app.helpers.generate_txt import generate_txt
+
 def api_generate_fits():
 
     img_name = request.json["img_name"]
@@ -77,7 +78,7 @@ def api_generate_fits():
         print("PRI HDR: ---->",prihdr)
         fits.writeto(
             (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
-
+        generate_txt(fields,data)
     working_path = os.path.join(app.static_folder, 'cache\working', img_name+".tiff.json")
     saved_path = os.path.join(app.static_folder, 'cache\saved', img_name+".tiff.json")
     shutil.move(working_path, saved_path)
