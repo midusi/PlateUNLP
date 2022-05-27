@@ -46,8 +46,8 @@ def load():
     
     # It checks if there is information saved for that image and 
     # if it exists it adds its information to data
-    saved_path = os.path.join(app.static_folder, 'cache/saved', img_name+".json")
-    working_path = os.path.join(app.static_folder, 'cache/working', img_name+".json")
+    saved_path = os.path.join(app.static_folder, 'cache' ,'saved', img_name+".json")
+    working_path = os.path.join(app.static_folder, 'cache', 'working', img_name+".json")
     
     if (os.path.isfile(working_path) or os.path.isfile(saved_path)):
         if (os.path.isfile(working_path)):
@@ -80,11 +80,11 @@ def save():
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
     # Save image data in .json files
-    full_path = os.path.join(app.static_folder, 'cache/working')
+    full_path = os.path.join(app.static_folder, 'cache','working')
     if not os.path.exists(full_path):
         os.mkdir(full_path)
     save_path = os.path.join(full_path, img_name+".json")
-    saved_path = os.path.join(app.static_folder, 'cache/saved',img_name+".json")
+    saved_path = os.path.join(app.static_folder, 'cache','saved',img_name+".json")
     if(os.path.isfile(saved_path)):
         os.remove(saved_path) 
         moved = True
@@ -108,7 +108,7 @@ def delete():
     # Por ahora no realiza ninguna verificacion
     
     # Delete the information of an image if it exists
-    delete_path = os.path.join(app.static_folder, 'cache/working', img_name+".json")
+    delete_path = os.path.join(app.static_folder, 'cache','working', img_name+".json")
     if (os.path.isfile(delete_path)):
         os.remove(delete_path)
         
