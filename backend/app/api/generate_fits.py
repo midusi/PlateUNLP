@@ -3,7 +3,8 @@ from astropy.io import fits
 import os
 import cv2
 import shutil
- 
+from app.helpers.generate_txt import generate_txt
+
 def api_generate_fits():
 
     img_name = request.json["img_name"]
@@ -56,9 +57,9 @@ def api_generate_fits():
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:,:]
-
+        file_output_name = f'{img_name}_{data["OBJECT"]}'
         # saved image crop
-        cv2.imwrite(os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.png'),crop_img)
+        cv2.imwrite(os.path.join(output_path, f'{file_output_name}.png'),crop_img)
 
         # generated fit
         prihdr = fits.Header()
@@ -73,11 +74,9 @@ def api_generate_fits():
             
         prihdr["GAIN"] = ("","Gain, electrons per adu")
         prihdr["NOISE"] = ("","Read noise")
-        print('Format to Save', crop_img.dtype)
-        print("PRI HDR: ---->",prihdr)
         fits.writeto(
             (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
-
+        generate_txt(plate_data,data,output_path,file_output_name)
     working_path = os.path.join(app.static_folder, 'cache', 'working', img_name+".tiff.json")
     saved_path = os.path.join(app.static_folder, 'cache' ,'saved', img_name+".tiff.json")
     shutil.move(working_path, saved_path)
