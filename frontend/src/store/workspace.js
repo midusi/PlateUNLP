@@ -18,9 +18,8 @@ function createStoreWorkspace() {
 
   return {
     subscribe,
-    getPaths: async (dirPath,load = true) => {
-      if(load)
-        loadingAlert()
+    getPaths: async (dirPath) => {
+      loadingAlert()
       let response;
       try {
           response = await apiWorkspace.allPaths({
@@ -43,11 +42,21 @@ function createStoreWorkspace() {
         return prev
       })
     },
+    setPath: (fileName,cantSpectra) => {
+      update((prev) => {
+        prev.paths = prev.paths.map((file) => {
+          if(file.fileName === fileName)
+            file.number_of_spectra = cantSpectra
+          return file
+        })
+        return prev
+      })
+    }
+    ,
     getImg: async (spectrogramCanvas, dirPath, imgName) => {
       loadingAlert("Cargando imagen...")
       let data;
       try {
-        spectrogramCanvas.deleteAllBbox()
         const response = await apiWorkspace.getImg({
           dir_path: dirPath,
           img_name: imgName

@@ -20,7 +20,7 @@
 
   let imageChanged = true
   let imageSaved = false
-
+  let cantSpectra = 0;
   let spectrogramCanvas;
   let uploadedImage = false;
   let pathDir = "";
@@ -70,8 +70,9 @@
   setContext("setChangeFlag",setChangeFlag);
 
   async function getImg(selectedImage) {
-    getPaths();
-    if (selectedImage != "") {
+    if (selectedImage != "" && selectedImage != imageName) {
+      spectrogramCanvas.deleteAllBbox();
+      changeFlag = false
       imageChanged = true
       imageName = selectedImage;
       initializeCanvas();
@@ -104,6 +105,7 @@
       imageChanged = false;
       uploadedImage = true;
     }
+    console.log("FINALIZO")
   }
 
   // function searchSpectro() {
@@ -138,23 +140,21 @@
     setChangeFlag();
   }
 
-  async function AutoSaveData(reload = true){
-    const resp = await spectrogramStore.autoSaveValues(
+ function AutoSaveData(){
+    spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
         $metadataStore.spectraData,
         $metadataStore.plateData,
         pathDir,
         imageName
     );
-    if(resp && reload){
-      getPaths(false);
-    }
+    workspaceStore.setPath(imageName,cantSpectra)
   }
 
   async function generateFits() {
     changeFlag = false;
     imageSaved = true;
-    AutoSaveData(false);
+    AutoSaveData();
 
     confirmAlert({
       succesFunc: async () => {
@@ -167,6 +167,8 @@
           $metadataStore.fields
         );
         if(status){ 
+          cantSpectra = 0;
+          imageName = ""
           metadataStore.initFields();
           uploadedImage = false;
           initializeCanvas();
@@ -182,8 +184,8 @@
     
   }
 
-  function getPaths(load = true) {
-    workspaceStore.getPaths(pathDir,load);
+  function getPaths() {
+    workspaceStore.getPaths(pathDir);
   }
   function updateLists(){
     metadataStore.initFields();
@@ -224,7 +226,7 @@
 
   function validateForm() {
     invalidForm = false;
-    if ($metadataStore.spectraData.length > 0) {
+    if (cantSpectra > 0) {
       $metadataStore.spectraData.forEach((spectro) => {
         getRequiredMetadata($metadataStore.fields,false).forEach((metadata) => {
           if (spectro[metadata] === "") {
@@ -260,9 +262,10 @@
   }
 
   function handlerAdded(obj) {
+    cantSpectra++;
     const fields = {};
 
-    if(canvas.getObjects().length === 1){
+    if(cantSpectra === 1){
       const globalFields = {};
       Object.keys($metadataStore.fields).map((field) => {
       if($metadataStore.fields[field].global)
@@ -291,7 +294,8 @@
   }
 
   function handlerRemoved(obj) {
-    if (canvas.getObjects().length > 0) {
+    cantSpectra--;
+    if (cantSpectra > 0) {
       metadataStore.setSpectraData(
         $metadataStore.spectraData.filter(
           (element) => element.id !== obj.target.id
@@ -303,9 +307,8 @@
       metadataStore.setSpectraData([]);
     }
     changeFlag = true;
-      imageSaved = false;
+    imageSaved = false;
     if(!imageChanged)
-
       validateForm();
   }
 
@@ -394,7 +397,7 @@
                         border-color: black;"
                 />  
               </div>
-          {#if $metadataStore.spectraData.length != 0}
+          {#if cantSpectra != 0}
             <div in:slide="{{duration:1000}}" out:slide="{{duration:700}}">
             <Tabs on:selectTab={setBbox}>
               <TabList>
