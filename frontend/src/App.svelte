@@ -12,13 +12,13 @@
     ConfigModal,
     SetParams,
     FileList,
-    PlateForm
+    PlateForm,
+    FilterZone
   } from "./components";
   import { confirmAlert,showAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
 
-
-  let imageChanged = true
+  let imageChanged = true;
   let imageSaved = false
   let cantSpectra = 0;
   let spectrogramCanvas;
@@ -388,6 +388,7 @@
         </div>
           <div class="col-lg-10 col-xl-10">
               <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
+                <FilterZone spectrogramCanvas={spectrogramCanvas} />
                 <canvas
                   id="canvas-container"
                   width="300"
