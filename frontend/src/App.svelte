@@ -10,12 +10,11 @@
     Field,
     ImageInfoCard,
     ConfigModal,
-    SetParams
+    SetParams,
+    FilterZone
   } from "./components";
   import { confirmAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
-
-
 
   let imageSaved = false
 
@@ -29,13 +28,6 @@
   let invalidForm = true;
   let selectedImage = "";
   let changeFlag = false;
-
-  // variables importantes para El ajuste del brillo de la imagen
-  let brightness = 0.5;
-
-  function updateBrightness() {
-    spectrogramCanvas.setBrightness(brightness);
-  }
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
@@ -333,17 +325,7 @@
         </div>
           <div class="col-lg-10 col-xl-10">
               <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-                <div class="d-xl-flex flex-column justify-content-xl-start">
-                  <span>Brillo</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    bind:value={brightness}
-                    on:change={updateBrightness} 
-                  />
-                </div>
+                <FilterZone spectrogramCanvas={spectrogramCanvas} />
                 <canvas
                   id="canvas-container"
                   width="300"

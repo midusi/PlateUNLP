@@ -1,6 +1,7 @@
 import { fabric } from 'fabric'
 import { saveAs } from 'file-saver'
 import { getColor } from '../helpers/canvasUtilities'
+import { imagedata_to_src, src_to_imagedata } from '../helpers/Image'
 
 export default class SpectrogramCanvas {
   constructor(events) {
@@ -160,10 +161,6 @@ export default class SpectrogramCanvas {
     this.canvas.setZoom(this.scale)
   }
 
-  /* 
-  Recibe un numerico indicando un nivel de brillo y modifica la imagen de fondo 
-  para que refleje el nivel de brillo recibido
-  */
   setBrightness(brightness) {
     let context = this.canvas.getContext( '2d' );
     let image = context.getImageData( 0, 0, this.canvas.getWidth(), this.canvas.getHeight()); //Recupera la informacion de la imagen
@@ -178,8 +175,40 @@ export default class SpectrogramCanvas {
     context.putImageData(image, 0, 0 ); //Actualiza la informacion de la imagen imagen
   }
 
+  setContrast(contrast) {
+
+    //Recupera un ImageData de la imagen original
+    let src_original = this.originalImage;
+    let imagedata = src_to_imagedata(src_original);
+    let pixels = imagedata.data;
+    let numPixels = imagedata.width * imagedata.height;
+
+    // Aplica el contraste al ImageData
+    let factor = ( 259 * ( contrast + 255 ) ) / ( 255 * ( 259 - contrast ) );
+    for ( var i = 0; i < numPixels; i++ ) {
+        var r = pixels[ i * 4 ];
+        var g = pixels[ i * 4 + 1 ];
+        var b = pixels[ i * 4 + 2 ];
+ 
+        pixels[ i * 4 ] = factor * ( r - 128 ) + 128;
+        pixels[ i * 4 + 1 ] = factor * ( g - 128 ) + 128;
+        pixels[ i * 4 + 2 ] = factor * ( b - 128 ) + 128;
+    }
+
+    // Actualizando la imagen de fondo
+    let src_result = imagedata_to_src(imagedata);
+    this.canvas.setBackgroundImage(
+      src_result,
+      this.canvas.renderAll.bind(this.canvas),
+      {
+        backgroundImageOpacity: 0.5,
+        backgroundImageStretch: false
+      }
+    )
+  }
+
   loadImage(src, width, height) {
-    if (src !== '') {
+    if (src !== '') {    
       this.originalImage = src
       this.widthOriginal = width
       this.heightOriginal = height
