@@ -105,7 +105,6 @@
       imageChanged = false;
       uploadedImage = true;
     }
-    console.log("FINALIZO")
   }
 
   // function searchSpectro() {
@@ -167,7 +166,6 @@
           $metadataStore.fields
         );
         if(status){ 
-          cantSpectra = 0;
           imageName = ""
           metadataStore.initFields();
           uploadedImage = false;
@@ -398,7 +396,7 @@
                         border-color: black;"
                 />  
               </div>
-          {#if cantSpectra != 0}
+          {#if $metadataStore.spectraData.length > 0}
             <div in:slide="{{duration:1000}}" out:slide="{{duration:700}}">
             <Tabs on:selectTab={setBbox}>
               <TabList>
