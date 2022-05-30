@@ -1,17 +1,17 @@
 <script>
   export let spectrogramCanvas;
 
-  let brightness = 0.5;
+  let brightness = 1;
   let contrast = 255;
 
   function updateBrightness() {
+      console.log("Brillo = ", brightness);
       spectrogramCanvas.setBrightness(brightness);
   }
 
   function updateContrast() {
-      console.log("Contraste = ", contrast-255);
-      spectrogramCanvas.setContrast(contrast-255);
-      console.log("Ok Contraste");
+      console.log("Contraste = ", contrast);
+      spectrogramCanvas.setContrast(contrast);
     }
 </script>
   
@@ -19,8 +19,8 @@
   <span>Brillo</span>
   <input
     type="range"
-    min="0"
-    max="255"
+    min="-1"
+    max="1"
     step="0.01"
     bind:value={brightness}
     on:change={updateBrightness} 
@@ -30,9 +30,9 @@
   <span>Contraste</span>
   <input
     type="range"
-    min="1"
-    max="510"
-    step="1"
+    min="-1"
+    max="1"
+    step="0.01"
     bind:value={contrast}
     on:change={updateContrast} 
   />

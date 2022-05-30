@@ -152,52 +152,49 @@ export default class SpectrogramCanvas {
   }
 
   setBrightness(brightness) {
-    let context = this.canvas.getContext( '2d' );
-    let image = context.getImageData( 0, 0, this.canvas.getWidth(), this.canvas.getHeight()); //Recupera la informacion de la imagen
-    let pixels = image.data;
-    // let numPixels = image.width * image.height;
-    // for ( var i = 0; i < numPixels; i++ ) {
-    //   var r = pixels[ i * 4 ],
-    //       g = pixels[ i * 4 + 1 ],
-    //       b = pixels[ i * 4 + 2 ];
-    // }
-    console.log("dataImage = "+image+"\ndataLength = "+image.data.length);
-    context.putImageData(image, 0, 0 ); //Actualiza la informacion de la imagen imagen
+    const canvas =  this.canvas;
+    fabric.Image.fromURL(this.originalImage, function(img) {
+      // add filter
+      img.filters.push(new fabric.Image.filters.Brightness({ brightness: brightness }));
+      // apply filters and re-render canvas when done
+      img.applyFilters();
+      // add image onto canvas (it also re-render the canvas)
+      canvas.setBackgroundImage(
+        img,
+        canvas.renderAll.bind(canvas),
+        {
+          backgroundImageOpacity: 0.5,
+          backgroundImageStretch: false
+        }
+      )
+    });
   }
 
   setContrast(contrast) {
-
-    //Recupera un ImageData de la imagen original
-    let src_original = this.originalImage;
-    let imagedata = src_to_imagedata(src_original);
-    let pixels = imagedata.data;
-    let numPixels = imagedata.width * imagedata.height;
-
-    // Aplica el contraste al ImageData
-    let factor = ( 259 * ( contrast + 255 ) ) / ( 255 * ( 259 - contrast ) );
-    for ( var i = 0; i < numPixels; i++ ) {
-        var r = pixels[ i * 4 ];
-        var g = pixels[ i * 4 + 1 ];
-        var b = pixels[ i * 4 + 2 ];
- 
-        pixels[ i * 4 ] = factor * ( r - 128 ) + 128;
-        pixels[ i * 4 + 1 ] = factor * ( g - 128 ) + 128;
-        pixels[ i * 4 + 2 ] = factor * ( b - 128 ) + 128;
-    }
-
-    // Actualizando la imagen de fondo
-    let src_result = imagedata_to_src(imagedata);
-    this.canvas.setBackgroundImage(
-      src_result,
-      this.canvas.renderAll.bind(this.canvas),
-      {
-        backgroundImageOpacity: 0.5,
-        backgroundImageStretch: false
-      }
-    )
+    const canvas =  this.canvas;
+    fabric.Image.fromURL(this.originalImage, function(img) {
+      // add filter
+      img.filters.push(new fabric.Image.filters.Contrast({ contrast: contrast }));
+      // apply filters and re-render canvas when done
+      img.applyFilters();
+      // add image onto canvas (it also re-render the canvas)
+      canvas.setBackgroundImage(
+        img,
+        canvas.renderAll.bind(canvas),
+        {
+          backgroundImageOpacity: 0.5,
+          backgroundImageStretch: false
+        }
+      )
+    });
   }
 
   loadImage(src, width, height) {
+    if (fabric.isWebglSupported()) {
+      fabric.textureSize = 20000;
+      fabric.maxTextureSize = 20000;
+    }
+
     if (src !== '') {    
       this.originalImage = src
       this.widthOriginal = width
