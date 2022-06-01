@@ -163,12 +163,9 @@ export default class SpectrogramCanvas {
       let key = "brightness"
       let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
       filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
-      console.log(filter_dictionary);
-      console.log(img.filters);
       for (let k in filter_dictionary) {
         img.filters.push(filter_dictionary[k]);
       }
-      console.log(img.filters);
       // apply filters and re-render canvas when done
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
@@ -191,12 +188,9 @@ export default class SpectrogramCanvas {
       let key = "contrast"
       let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
       filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
-      console.log(filter_dictionary);
-      console.log(img.filters);
       for (let k in filter_dictionary) {
         img.filters.push(filter_dictionary[k]);
       }
-      console.log(img.filters);
       // apply filters and re-render canvas when done
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
