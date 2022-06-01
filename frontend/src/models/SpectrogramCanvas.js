@@ -11,6 +11,11 @@ export default class SpectrogramCanvas {
     this.scale = 1
     this.IDBBOX = 0
 
+    // Guarda los filtros actuales que se tienen que aplicar sobre el fondo
+    // Prefiero que usar la estructura java en ves de un Map devido a que se 
+    // realizara mucho acceso secuencial para aplicar los filtros
+    this.filter_dictionary = {}
+
     this.canvas = new fabric.Canvas('canvas-container', {
       hoverCursor: 'pointer',
       selection: true,
@@ -153,9 +158,17 @@ export default class SpectrogramCanvas {
 
   setBrightness(brightness) {
     const canvas =  this.canvas;
+    const filter_dictionary = this.filter_dictionary;
     fabric.Image.fromURL(this.originalImage, function(img) {
-      // add filter
-      img.filters.push(new fabric.Image.filters.Brightness({ brightness: brightness }));
+      let key = "brightness"
+      let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
+      filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
+      console.log(filter_dictionary);
+      console.log(img.filters);
+      for (let k in filter_dictionary) {
+        img.filters.push(filter_dictionary[k]);
+      }
+      console.log(img.filters);
       // apply filters and re-render canvas when done
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
@@ -172,9 +185,18 @@ export default class SpectrogramCanvas {
 
   setContrast(contrast) {
     const canvas =  this.canvas;
+    const filter_dictionary = this.filter_dictionary;
     fabric.Image.fromURL(this.originalImage, function(img) {
       // add filter
-      img.filters.push(new fabric.Image.filters.Contrast({ contrast: contrast }));
+      let key = "contrast"
+      let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
+      filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
+      console.log(filter_dictionary);
+      console.log(img.filters);
+      for (let k in filter_dictionary) {
+        img.filters.push(filter_dictionary[k]);
+      }
+      console.log(img.filters);
       // apply filters and re-render canvas when done
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
@@ -199,6 +221,7 @@ export default class SpectrogramCanvas {
       this.originalImage = src
       this.widthOriginal = width
       this.heightOriginal = height
+      this.filter_dictionary = {}
       this.canvas.setHeight(this.getCanvasHeight())
       this.canvas.setWidth(this.getCanvasWidth())
 
