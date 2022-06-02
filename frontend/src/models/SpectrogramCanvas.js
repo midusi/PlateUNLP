@@ -1,7 +1,6 @@
 import { fabric } from 'fabric'
 import { saveAs } from 'file-saver'
 import { getColor } from '../helpers/canvasUtilities'
-import { imagedata_to_src, src_to_imagedata } from '../helpers/Image'
 
 export default class SpectrogramCanvas {
   constructor(events) {
@@ -15,6 +14,7 @@ export default class SpectrogramCanvas {
     // Prefiero que usar la estructura java en ves de un Map devido a que se 
     // realizara mucho acceso secuencial para aplicar los filtros
     this.filter_dictionary = {}
+    this.Ok = false
 
     this.canvas = new fabric.Canvas('canvas-container', {
       hoverCursor: 'pointer',
@@ -187,6 +187,73 @@ export default class SpectrogramCanvas {
       // add filter
       let key = "contrast"
       let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
+      filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
+      for (let k in filter_dictionary) {
+        img.filters.push(filter_dictionary[k]);
+      }
+      // apply filters and re-render canvas when done
+      img.applyFilters();
+      // add image onto canvas (it also re-render the canvas)
+      canvas.setBackgroundImage(
+        img,
+        canvas.renderAll.bind(canvas),
+        {
+          backgroundImageOpacity: 0.5,
+          backgroundImageStretch: false
+        }
+      )
+    });
+  }
+  
+  // Anañade la clase de filtro Color ya que no hay un filtro por defecto que realize esta funcion
+  addFilterColorizeCLass(){
+    fabric.Image.filters.Colorize = fabric.util.createClass(fabric.Image.filters.BaseFilter, {
+      type: 'Colorize',
+      /**
+       * Fragment source for the color program
+       */
+      fragmentSource: 'precision highp float;\n' +
+        'uniform sampler2D uTexture;\n' +
+        'varying vec2 vTexCoord;\n' +
+        'void main() {\n' +
+          'vec4 color = texture2D(uTexture, vTexCoord);\n' +
+          'gl_FragColor = color;\n' +
+        '}',
+      applyTo2d: function(options) {
+        var color = new fabric.Color('rgb(255,0,100)');
+        color = color.getSource();
+        var color_r = (100*color[0])/255; 
+        var color_g = (100*color[1])/255; 
+        var color_b = (100*color[2])/255;
+        var imageData = options.imageData;
+        var data = imageData.data;
+        var len = data.length;
+        let r,g,b, i, percent_white;
+        for (i = 0; i < len; i += 4) {
+          r = data[i];
+          // g = data[i + 1];
+          // b = data[i + 2];
+          percent_white = r / 255 //Solo necesito uel rojo ya que en escala de grices los 3 tendran el mismo valor
+          data[i] = percent_white * color_r;
+          data[i + 1] = percent_white * color_g;
+          data[i + 2] = percent_white * color_b;
+        }
+      }
+    });
+  }
+
+  colorize(color) {
+    const canvas =  this.canvas;
+    const filter_dictionary = this.filter_dictionary;
+    if(!this.OK){
+      this.addFilterColorizeCLass();
+      this.OK = true;
+    }
+
+    fabric.Image.fromURL(this.originalImage, function(img) {
+      // add filter
+      let key = "color";
+      let filter = new fabric.Image.filters.Colorize();
       filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
       for (let k in filter_dictionary) {
         img.filters.push(filter_dictionary[k]);
