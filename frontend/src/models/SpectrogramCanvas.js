@@ -220,23 +220,29 @@ export default class SpectrogramCanvas {
           'gl_FragColor = color;\n' +
         '}',
       applyTo2d: function(options) {
-        var color = new fabric.Color('rgb(255,0,100)');
+        // if (this.color === 0) {
+        //   // early return if the color is 0, since we do not need to change anything
+        //   return;
+        // }
+        var color = this.color;
         color = color.getSource();
-        var color_r = (100*color[0])/255; 
-        var color_g = (100*color[1])/255; 
-        var color_b = (100*color[2])/255;
+        var color_r = color[0]; 
+        var color_g = color[1]; 
+        var color_b = color[2];
         var imageData = options.imageData;
         var data = imageData.data;
         var len = data.length;
-        let r,g,b, i, percent_white;
+        let r,g,b, i, percent_white_r, percent_white_g, percent_white_b;
         for (i = 0; i < len; i += 4) {
           r = data[i];
-          // g = data[i + 1];
-          // b = data[i + 2];
-          percent_white = r / 255 //Solo necesito uel rojo ya que en escala de grices los 3 tendran el mismo valor
-          data[i] = percent_white * color_r;
-          data[i + 1] = percent_white * color_g;
-          data[i + 2] = percent_white * color_b;
+          g = data[i + 1];
+          b = data[i + 2];
+          percent_white_r = r / 255 //Capaz solo necesito uel rojo ya que en escala de grices los 3 tendran el mismo valor, pero por si acaso mejor asi
+          percent_white_g = g / 255 
+          percent_white_b = b / 255 
+          data[i] = percent_white_r * color_r;
+          data[i + 1] = percent_white_g * color_g;
+          data[i + 2] = percent_white_b * color_b;
         }
       }
     });
@@ -245,6 +251,7 @@ export default class SpectrogramCanvas {
   colorize(color) {
     const canvas =  this.canvas;
     const filter_dictionary = this.filter_dictionary;
+    // const color = new fabric.Color('rgb(255,0,100)');
     if(!this.OK){
       this.addFilterColorizeCLass();
       this.OK = true;
@@ -253,7 +260,12 @@ export default class SpectrogramCanvas {
     fabric.Image.fromURL(this.originalImage, function(img) {
       // add filter
       let key = "color";
-      let filter = new fabric.Image.filters.Colorize();
+      // var filter = new fabric.Image.filters.BlendColor({
+      //   color: 'red',
+      //   mode: 'tint',
+      //   alpha: 0.5
+      // });
+      let filter = new fabric.Image.filters.Colorize({ color: color });
       filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
       for (let k in filter_dictionary) {
         img.filters.push(filter_dictionary[k]);

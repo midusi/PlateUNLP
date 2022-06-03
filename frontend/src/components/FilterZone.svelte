@@ -1,22 +1,23 @@
 <script>
   export let spectrogramCanvas;
 
-  let brightness = 0;
-  let contrast = 0;
-  let color = "#ff0000";
+  let brightness_input = 0;
+  let contrast_input = 0;
+  let color_input = "#ffffff";
 
   function setBrightness() {
-    console.log("Brillo = ", brightness);
-    spectrogramCanvas.setBrightness(brightness);
+    console.log("Brillo = ", brightness_input);
+    spectrogramCanvas.setBrightness(brightness_input);
   }
 
   function setContrast() {
-    console.log("Contraste = ", contrast);
-    spectrogramCanvas.setContrast(contrast);
+    console.log("Contraste = ", contrast_input);
+    spectrogramCanvas.setContrast(contrast_input);
   }
 
-  function colorize(color) {
-    // console.log("Color = ", color);
+  function colorize() {
+    console.log("Color = ", color_input);
+    var color = new fabric.Color(color_input);
     spectrogramCanvas.colorize(color);
   }
 </script>
@@ -28,10 +29,10 @@
     min="-1"
     max="1"
     step="0.01"
-    bind:value={brightness}
+    bind:value={brightness_input}
     on:change={setBrightness} 
   />
-  <input type="text" value="{brightness}" readonly/>
+  <input type="text" value="{brightness_input}" readonly/>
 </div>
 
 <div class="d-xl-flex flex-column justify-content-xl-start">
@@ -41,17 +42,17 @@
     min="-1"
     max="1"
     step="0.01"
-    bind:value={contrast}
+    bind:value={contrast_input}
     on:change={setContrast} 
   />
-  <input type="text" value="{contrast}" readonly/>
+  <input type="text" value="{contrast_input}" readonly/>
 </div>
 
 <div class="d-xl-flex flex-column justify-content-xl-start">
   <span>Color</span>
   <input 
     type="color" 
-    bind:value={color}
+    bind:value={color_input}
     on:change={colorize} 
   />
 </div>
