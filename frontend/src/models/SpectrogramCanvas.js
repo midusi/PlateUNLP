@@ -237,6 +237,7 @@ export default class SpectrogramCanvas {
           r = data[i];
           g = data[i + 1];
           b = data[i + 2];
+          // Preguntar: Las imágenes siempre son en blanco y negro, por que si lo son puedo hacer que el filtro de color haga 2/3 de cuentas menos
           percent_white_r = r / 255 //Capaz solo necesito uel rojo ya que en escala de grices los 3 tendran el mismo valor, pero por si acaso mejor asi
           percent_white_g = g / 255 
           percent_white_b = b / 255 
