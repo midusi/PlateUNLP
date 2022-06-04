@@ -71,9 +71,9 @@
 
   async function getImg(selectedImage) {
     if (selectedImage != "" && selectedImage != imageName) {
+      imageChanged = true
       spectrogramCanvas.deleteAllBbox();
       changeFlag = false
-      imageChanged = true
       imageName = selectedImage;
       initializeCanvas();
       let data;

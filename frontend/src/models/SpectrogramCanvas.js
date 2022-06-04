@@ -266,7 +266,8 @@ export default class SpectrogramCanvas {
       //   mode: 'tint',
       //   alpha: 0.5
       // });
-      let filter = new fabric.Image.filters.Colorize({ color: color });
+      //let filter = new fabric.Image.filters.Colorize({ color: color });
+      let filter = new fabric.Image.filters.BlendColor({ color: color });
       filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
       for (let k in filter_dictionary) {
         img.filters.push(filter_dictionary[k]);

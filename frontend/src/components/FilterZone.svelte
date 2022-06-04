@@ -17,8 +17,8 @@
 
   function colorize() {
     console.log("Color = ", color_input);
-    var color = new fabric.Color(color_input);
-    spectrogramCanvas.colorize(color);
+    //var color = new fabric.Color(color_input);
+    spectrogramCanvas.colorize(color_input);
   }
 </script>
   
