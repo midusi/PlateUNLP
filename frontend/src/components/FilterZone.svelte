@@ -5,7 +5,7 @@
   let brightness_input = 0;
   let contrast_input = 0;
   let color_input = "#ffffff";
-
+ gi
   function updatescale() {
     spectrogramCanvas.setScale(scale);
   }
