@@ -26,7 +26,7 @@
   <span>Brillo</span>
   <input
     type="range"
-    min="-1"
+    min="0"
     max="1"
     step="0.01"
     bind:value={brightness_input}
@@ -39,7 +39,7 @@
   <span>Contraste</span>
   <input
     type="range"
-    min="-1"
+    min="0"
     max="1"
     step="0.01"
     bind:value={contrast_input}
