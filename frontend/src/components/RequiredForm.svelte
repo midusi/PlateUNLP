@@ -3,7 +3,7 @@
     import Modal from "./Modal.svelte";
     import NButton from "./NButton.svelte";
     import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
-    export let metadata, spectraData,invalidSpectrum,setRemoteMetadata;
+    export let metadata, spectraData,invalidSpectrum,confirmSearchMetadata;
 
     let arr = [];
     for (let i = 0; i <= metadata.length; i = i + 3) {
@@ -42,7 +42,7 @@
             </div>
         {/each}
         <div class="mb-4">
-            <NButton click={setRemoteMetadata} disabled={invalidSpectrum}>
+            <NButton click={confirmSearchMetadata} disabled={invalidSpectrum}>
                     Buscar metadatos
             </NButton>
         </div>

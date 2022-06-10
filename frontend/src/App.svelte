@@ -16,7 +16,7 @@
     FilterZone,
     MetadataForm
   } from "./components";
-  import { confirmAlert,showAlert } from "./helpers/Alert";
+  import { confirmAlert,showAlert,deleteAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
 
   let imageChanged = true;
@@ -117,17 +117,33 @@
   //   spectrogramCanvas.deleteAllBbox();
   //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
   // }
-
+  async function confirmSearchMetadata(){
+    let value;
+    if(metadataSearched[bboxSelected-1]){
+      deleteAlert({
+      title :'¿Seguro que quieres buscar metadatos?',
+      text :  'Se perderan los datos anteriores',
+      confirmButtonText : 'Buscar',
+      denyButtonText : 'Cancelar',
+      succesFunc: async () => {
+        value = await setRemoteMetadata();
+        metadataSearched[bboxSelected-1] = value;
+      }})             
+    }
+    else{
+      value = await setRemoteMetadata();
+      metadataSearched[bboxSelected-1] = value;
+    }
+  }
   async function setRemoteMetadata() {
     const data = {
-      OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],
-      OBSERVAT: $metadataStore.plateData["OBSERVAT"],
-      "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
-      UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
+    OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],
+    OBSERVAT: $metadataStore.plateData["OBSERVAT"],
+    "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
+    UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
     };
-
-    let value  = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
-    metadataSearched[bboxSelected-1] = value;
+    return await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    
   }
 
   function initializeCanvas() {
@@ -494,7 +510,7 @@
                       spectraData={item}
                       metadata={getRequiredMetadata($metadataStore.fields,false)}
                       invalidSpectrum = {invalidSpectrum}
-                      setRemoteMetadata = {setRemoteMetadata}
+                      confirmSearchMetadata = {confirmSearchMetadata}
                     />
                   </div>
                   {#if metadataSearched[bboxSelected-1]}
