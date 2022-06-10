@@ -301,13 +301,10 @@
   function validateSpectrum(){
     invalidSpectrum = false;
     getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
-      console.log(metadata)
       if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
         invalidSpectrum = true;
       }
     });
-    console.log("invalid:",invalidSpectrum)
-
   }
 
   function handlerModified(){
@@ -362,7 +359,6 @@
 
   function handlerRemoved(obj) {
     cantSpectra--;
-    console.log(obj.target.id)
     if (cantSpectra > 0) {
       metadataStore.setSpectraData(
         $metadataStore.spectraData.filter(
