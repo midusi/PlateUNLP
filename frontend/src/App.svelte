@@ -98,6 +98,7 @@
         
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
+        checkMetadataSearched();
         validateForm();
         validateSpectrum();
         changeFlag = false;
@@ -153,6 +154,19 @@
         imageName
     );
     workspaceStore.setPath(imageName,cantSpectra)
+  }
+
+  function checkMetadataSearched(){
+    $metadataStore.spectraData.forEach((spectro,i) => {
+        getSearchedMetadata($metadataStore.fields,false).every((metadata) => {
+          if (spectro[metadata] !== "") {
+            metadataSearched[i] = true;
+            return false;
+          }
+          return true;
+        });
+      });
+
   }
 
   async function generateFits() {
@@ -226,6 +240,14 @@
       })
     }
   }
+
+  function getSearchedMetadata(fields,global){
+      return Object.keys(fields).filter((label) => {
+        if (!fields[label].required && !fields[label].global && !fields[label].default) 
+          return label;
+      })
+  }
+
 
   function getOptionalMetadata(fields,global){
     if(global){
