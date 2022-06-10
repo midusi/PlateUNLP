@@ -14,7 +14,6 @@ export default class SpectrogramCanvas {
     // Prefiero que usar la estructura java en ves de un Map devido a que se 
     // realizara mucho acceso secuencial para aplicar los filtros
     this.filter_dictionary = {}
-    this.Ok = false
 
     this.canvas = new fabric.Canvas('canvas-container', {
       hoverCursor: 'pointer',
@@ -206,67 +205,57 @@ export default class SpectrogramCanvas {
   }
   
   // Anañade la clase de filtro Color ya que no hay un filtro por defecto que realize esta funcion
-  addFilterColorizeCLass(){
-    fabric.Image.filters.Colorize = fabric.util.createClass(fabric.Image.filters.BaseFilter, {
-      type: 'Colorize',
-      /**
-       * Fragment source for the color program
-       */
-      fragmentSource: 'precision highp float;\n' +
-        'uniform sampler2D uTexture;\n' +
-        'varying vec2 vTexCoord;\n' +
-        'void main() {\n' +
-          'vec4 color = texture2D(uTexture, vTexCoord);\n' +
-          'gl_FragColor = color;\n' +
-        '}',
-      applyTo2d: function(options) {
-        // if (this.color === 0) {
-        //   // early return if the color is 0, since we do not need to change anything
-        //   return;
-        // }
-        var color = this.color;
-        color = color.getSource();
-        var color_r = color[0]; 
-        var color_g = color[1]; 
-        var color_b = color[2];
-        var imageData = options.imageData;
-        var data = imageData.data;
-        var len = data.length;
-        let r,g,b, i, percent_white_r, percent_white_g, percent_white_b;
-        for (i = 0; i < len; i += 4) {
-          r = data[i];
-          g = data[i + 1];
-          b = data[i + 2];
-          // Preguntar: Las imágenes siempre son en blanco y negro, por que si lo son puedo hacer que el filtro de color haga 2/3 de cuentas menos
-          percent_white_r = r / 255 //Capaz solo necesito uel rojo ya que en escala de grices los 3 tendran el mismo valor, pero por si acaso mejor asi
-          percent_white_g = g / 255 
-          percent_white_b = b / 255 
-          data[i] = percent_white_r * color_r;
-          data[i + 1] = percent_white_g * color_g;
-          data[i + 2] = percent_white_b * color_b;
-        }
-      }
-    });
-  }
+  // addFilterColorizeCLass(){
+  //   fabric.Image.filters.Colorize = fabric.util.createClass(fabric.Image.filters.BaseFilter, {
+  //     type: 'Colorize',
+  //     /**
+  //      * Fragment source for the color program
+  //      */
+  //     fragmentSource: 'precision highp float;\n' +
+  //       'uniform sampler2D uTexture;\n' +
+  //       'varying vec2 vTexCoord;\n' +
+  //       'void main() {\n' +
+  //         'vec4 color = texture2D(uTexture, vTexCoord);\n' +
+  //         'gl_FragColor = color;\n' +
+  //       '}',
+  //     applyTo2d: function(options) {
+  //       // if (this.color === 0) {
+  //       //   // early return if the color is 0, since we do not need to change anything
+  //       //   return;
+  //       // }
+  //       var color = this.color;
+  //       color = color.getSource();
+  //       var color_r = color[0]; 
+  //       var color_g = color[1]; 
+  //       var color_b = color[2];
+  //       var imageData = options.imageData;
+  //       var data = imageData.data;
+  //       var len = data.length;
+  //       let r,g,b, i, percent_white_r, percent_white_g, percent_white_b;
+  //       for (i = 0; i < len; i += 4) {
+  //         r = data[i];
+  //         g = data[i + 1];
+  //         b = data[i + 2];
+  //         // Preguntar: Las imágenes siempre son en blanco y negro, por que si lo son puedo hacer que el filtro de color haga 2/3 de cuentas menos
+  //         percent_white_r = r / 255 //Capaz solo necesito uel rojo ya que en escala de grices los 3 tendran el mismo valor, pero por si acaso mejor asi
+  //         percent_white_g = g / 255 
+  //         percent_white_b = b / 255 
+  //         data[i] = percent_white_r * color_r;
+  //         data[i + 1] = percent_white_g * color_g;
+  //         data[i + 2] = percent_white_b * color_b;
+  //       }
+  //     }
+  //   });
+  // }
 
   colorize(color) {
     const canvas =  this.canvas;
     const filter_dictionary = this.filter_dictionary;
     // const color = new fabric.Color('rgb(255,0,100)');
-    if(!this.OK){
-      this.addFilterColorizeCLass();
-      this.OK = true;
-    }
 
     fabric.Image.fromURL(this.originalImage, function(img) {
       // add filter
       let key = "color";
-      // var filter = new fabric.Image.filters.BlendColor({
-      //   color: 'red',
-      //   mode: 'tint',
-      //   alpha: 0.5
-      // });
-      //let filter = new fabric.Image.filters.Colorize({ color: color });
       let filter = new fabric.Image.filters.BlendColor({ color: color });
       filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
       for (let k in filter_dictionary) {

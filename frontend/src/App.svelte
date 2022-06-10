@@ -152,10 +152,6 @@
     spectrogramCanvas.setScale(scale);
   }
 
-  function updatescale() {
-    spectrogramCanvas.setScale(scale);
-  }
-
   function addBox() {
     spectrogramCanvas.addBbox();
     setChangeFlag();
@@ -433,17 +429,6 @@
               <NButton click={getPaths}>&#x1F50D;</NButton>
             </div>
           </div>
-          <div class="d-xl-flex flex-column justify-content-xl-start">
-            <span>Zoom</span>
-            <input
-              type="range"
-              min="0.1"
-              max="1"
-              step="0.01"
-              bind:value={scale}
-              on:change={updatescale}
-            />
-          </div>
           {#if $workspaceStore.paths.length > 0}
             <FileList paths={$workspaceStore.paths} getImg={getImg}/>
           {/if}
@@ -457,7 +442,7 @@
         </div>
           <div class="col-lg-10 col-xl-10">
               <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-                <FilterZone spectrogramCanvas={spectrogramCanvas} />
+                <FilterZone spectrogramCanvas={spectrogramCanvas} scale={scale} />
                 <canvas
                   id="canvas-container"
                   width="300"

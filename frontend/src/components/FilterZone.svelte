@@ -1,9 +1,14 @@
 <script>
   export let spectrogramCanvas;
+  export let scale;
 
   let brightness_input = 0;
   let contrast_input = 0;
   let color_input = "#ffffff";
+
+  function updatescale() {
+    spectrogramCanvas.setScale(scale);
+  }
 
   function setBrightness() {
     console.log("Brillo = ", brightness_input);
@@ -22,6 +27,18 @@
   }
 </script>
   
+<div class="d-xl-flex flex-column justify-content-xl-start">
+  <span>Zoom</span>
+  <input
+    type="range"
+    min="0.1"
+    max="1"
+    step="0.01"
+    bind:value={scale}
+    on:change={updatescale}
+  />
+</div>
+
 <div class="d-xl-flex flex-column justify-content-xl-start">
   <span>Brillo</span>
   <input
