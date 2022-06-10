@@ -51,7 +51,13 @@ function deleteAlert({
 
 function showAlert({ title = 'Cargado', message = 'Se cargo con éxito', type = 'success' } = {}) {
   Swal.close()
-  Swal.fire(title, message, type)
+  Swal.fire({
+  icon: type,
+  title: title,
+  text: message,
+  showConfirmButton: false,
+  timer: 1000
+  })
 }
 
 function errorAlert({ title = 'Sucedio un error!', message = 'Ha ocurrido un error en el servidor.' } = {}) {

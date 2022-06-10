@@ -126,8 +126,7 @@
       confirmButtonText : 'Buscar',
       denyButtonText : 'Cancelar',
       succesFunc: async () => {
-        value = await setRemoteMetadata();
-        metadataSearched[bboxSelected-1] = value;
+        await setRemoteMetadata();
       }})             
     }
     else{
