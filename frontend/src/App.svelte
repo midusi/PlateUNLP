@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
   import { slide,fly } from 'svelte/transition';
   import {
-    MetadataModal,
+    RequiredForm,
     NButton,
     Field,
     ImageInfoCard,
@@ -468,7 +468,7 @@
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
                   <div class="controls">
-                    <MetadataModal
+                    <RequiredForm
                       spectraData={item}
                       metadata={getRequiredMetadata($metadataStore.fields,false)}
                       invalidSpectrum = {invalidSpectrum}

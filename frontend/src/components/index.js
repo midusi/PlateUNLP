@@ -4,7 +4,7 @@ import Field from './Field.svelte'
 import SetParams from './SetParams.svelte'
 import FileList from './FileList.svelte'
 import ImageInfoCard from './ImageInfoCard.svelte'
-import MetadataModal from './MetadataModal.svelte'
+import RequiredForm from './RequiredForm.svelte'
 import ConfigModal from './ConfigModal.svelte'
 import FolderSelector from './FolderSelector.svelte'
 import PlateForm from './PlateForm.svelte'
@@ -16,7 +16,7 @@ export {
   NButton,
   Field,
   ImageInfoCard,
-  MetadataModal,
+  RequiredForm,
   ConfigModal,
   SetParams,
   FolderSelector,
