@@ -9,6 +9,7 @@ import ConfigModal from './ConfigModal.svelte'
 import FolderSelector from './FolderSelector.svelte'
 import PlateForm from './PlateForm.svelte'
 import FilterZone from './FilterZone.svelte'
+import MetadataForm from './MetadataForm.svelte'
 
 export {
   Modal,
@@ -21,5 +22,6 @@ export {
   FolderSelector,
   FileList,
   PlateForm,
-  FilterZone
+  FilterZone,
+  MetadataForm
 }

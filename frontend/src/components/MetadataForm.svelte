@@ -1,18 +1,21 @@
 <script>
     import Field from "./Field.svelte";
     import Modal from "./Modal.svelte";
-    import NButton from "./NButton.svelte";
     import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
-    export let metadata, spectraData,invalidSpectrum,setRemoteMetadata;
+    export let metadata, spectraData;
 
     let arr = [];
     for (let i = 0; i <= metadata.length; i = i + 3) {
         arr.push([metadata[i], metadata[i + 1], metadata[i + 2]]);
     }
+    
+    spectraData["OBSERVER"] = getObserverDef();
+    spectraData["DIGITALI"] = getDigitaliDef();
+    spectraData["IMAGETYP"] = getImageTypDef();
 
 </script>
 
-    <div class="px-4 mb-2" style="border: 1px solid;">
+    <div class="px-4" style="overflow-y: scroll; overflow-x:hidden ; border: 1px solid  ; height: 400px;">
         {#each arr as field}
             <div class="form-row">
                 <div class="form-group col-md-4">
@@ -41,9 +44,4 @@
                 </div>
             </div>
         {/each}
-        <div class="mb-4">
-            <NButton click={setRemoteMetadata} disabled={invalidSpectrum}>
-                    Buscar metadatos
-            </NButton>
-        </div>
     </div>

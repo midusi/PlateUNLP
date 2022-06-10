@@ -13,7 +13,8 @@
     SetParams,
     FileList,
     PlateForm,
-    FilterZone
+    FilterZone,
+    MetadataForm
   } from "./components";
   import { confirmAlert,showAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
@@ -29,7 +30,9 @@
   let canvas = undefined;
   let bboxSelected = -1;
   let invalidForm = true;
+  let invalidSpectrum = true;
   let changeFlag = false;
+  let metadataSearched = []
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
@@ -62,6 +65,7 @@
   });
 
   export function setChangeFlag(){
+      validateSpectrum();
       validateForm();
       changeFlag = true;
       imageSaved = false;
@@ -209,14 +213,29 @@
 
   function getRequiredMetadata(fields,global) {
     if(global){
-      return Object.keys(fields).map((label) => {
+      return Object.keys(fields).filter((label) => {
         if (fields[label].required && fields[label].global) 
           return label;
       })
     }
     else{
-      return Object.keys(fields).map((label) => {
+      return Object.keys(fields).filter((label) => {
         if (fields[label].required && !fields[label].global) 
+          return label;
+      })
+    }
+  }
+
+  function getOptionalMetadata(fields,global){
+    if(global){
+      return Object.keys(fields).filter((label) => {
+        if (!fields[label].required && fields[label].global) 
+          return label;
+      })
+    }
+    else{
+      return Object.keys(fields).filter((label) => {
+        if (!fields[label].required && !fields[label].global) 
           return label;
       })
     }
@@ -239,6 +258,17 @@
         }
       });
     }
+  }
+
+  function validateSpectrum(){
+    invalidSpectrum = false;
+    getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
+      console.log(metadata)
+      if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
+        invalidSpectrum = true;
+      }
+    });
+    console.log("invalid:",invalidSpectrum)
 
   }
 
@@ -289,10 +319,12 @@
         ...fields,
       },
     ]);
+    metadataSearched.push(false);
   }
 
   function handlerRemoved(obj) {
     cantSpectra--;
+    console.log(obj.target.id)
     if (cantSpectra > 0) {
       metadataStore.setSpectraData(
         $metadataStore.spectraData.filter(
@@ -315,7 +347,7 @@
       const item = canvas.item(event.detail.index);
       if (item != undefined) {
         canvas.setActiveObject(item);
-        validateForm();
+        validateSpectrum();
         canvas.renderAll();
       }
     }
@@ -416,8 +448,8 @@
                     <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
                 <div class="col-2 py-2">
-                  <NButton click={setRemoteMetadata} disabled={invalidForm}>
-                    Buscar metadatos
+                  <NButton click={generateFits} disabled={invalidForm}>
+                    &#11123; Exportar Fits
                   </NButton>
                 </div>  
               </div>
@@ -437,7 +469,15 @@
                   <div class="controls">
                     <MetadataModal
                       spectraData={item}
-                      metadata={getMetadata($metadataStore.fields,false)}
+                      metadata={getRequiredMetadata($metadataStore.fields,false)}
+                      invalidSpectrum = {invalidSpectrum}
+                      setRemoteMetadata = {setRemoteMetadata}
+                    />
+                  </div>
+                  <div>
+                    <MetadataForm
+                      spectraData={item}
+                      metadata={getOptionalMetadata($metadataStore.fields,false)}
                     />
                   </div>
                 </TabPanel>
@@ -446,11 +486,6 @@
             <div class="row mt-4 ml-1 mb-4">
               <div class="controls  mr-2"> 
                 <SetParams updateParent={updateLists}/>
-              </div>
-              <div class="controls mr-2">
-                <NButton click={generateFits} disabled={invalidForm}>
-                  &#11123; Exportar Fits
-                </NButton>
               </div>
             </div>
           </div>
