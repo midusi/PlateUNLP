@@ -99,7 +99,7 @@
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
         validateForm();
-
+        validateSpectrum();
         changeFlag = false;
         
       }
@@ -117,15 +117,16 @@
   //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
   // }
 
-  function setRemoteMetadata() {
+  async function setRemoteMetadata() {
     const data = {
       OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],
-      OBSERVAT: $metadataStore.spectraData[bboxSelected - 1]["OBSERVAT"],
+      OBSERVAT: $metadataStore.plateData["OBSERVAT"],
       "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
       UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
     };
-    metadataStore.setRemoteMetadata(data, bboxSelected - 1);
 
+    let value  = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    metadataSearched[bboxSelected-1] = value;
   }
 
   function initializeCanvas() {
@@ -474,12 +475,14 @@
                       setRemoteMetadata = {setRemoteMetadata}
                     />
                   </div>
-                  <div>
-                    <MetadataForm
-                      spectraData={item}
-                      metadata={getOptionalMetadata($metadataStore.fields,false)}
-                    />
-                  </div>
+                  {#if metadataSearched[bboxSelected-1]}
+                    <div>
+                      <MetadataForm
+                        spectraData={item}
+                        metadata={getOptionalMetadata($metadataStore.fields,false)}
+                      />
+                    </div>
+                  {/if}
                 </TabPanel>
               {/each}
             </Tabs>
