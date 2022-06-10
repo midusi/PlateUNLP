@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
   import { slide,fly } from 'svelte/transition';
   import {
-    MetadataModal,
+    RequiredForm,
     NButton,
     Field,
     ImageInfoCard,
@@ -13,9 +13,10 @@
     SetParams,
     FileList,
     PlateForm,
-    FilterZone
+    FilterZone,
+    MetadataForm
   } from "./components";
-  import { confirmAlert,showAlert } from "./helpers/Alert";
+  import { confirmAlert,showAlert,deleteAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
 
   let imageChanged = true;
@@ -29,7 +30,9 @@
   let canvas = undefined;
   let bboxSelected = -1;
   let invalidForm = true;
+  let invalidSpectrum = true;
   let changeFlag = false;
+  let metadataSearched = []
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
@@ -62,6 +65,7 @@
   });
 
   export function setChangeFlag(){
+      validateSpectrum();
       validateForm();
       changeFlag = true;
       imageSaved = false;
@@ -94,8 +98,9 @@
         
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
+        checkMetadataSearched();
         validateForm();
-
+        validateSpectrum();
         changeFlag = false;
         
       }
@@ -112,16 +117,33 @@
   //   spectrogramCanvas.deleteAllBbox();
   //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
   // }
-
-  function setRemoteMetadata() {
+  async function confirmSearchMetadata(){
+    let value;
+    if(metadataSearched[bboxSelected-1]){
+      deleteAlert({
+      title :'¿Seguro que quieres buscar metadatos?',
+      text :  'Se perderan los datos anteriores',
+      confirmButtonText : 'Buscar',
+      denyButtonText : 'Cancelar',
+      succesFunc: async () => {
+        value = await setRemoteMetadata();
+        metadataSearched[bboxSelected-1] = value;
+      }})             
+    }
+    else{
+      value = await setRemoteMetadata();
+      metadataSearched[bboxSelected-1] = value;
+    }
+  }
+  async function setRemoteMetadata() {
     const data = {
-      OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],
-      OBSERVAT: $metadataStore.spectraData[bboxSelected - 1]["OBSERVAT"],
-      "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
-      UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
+    OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],
+    OBSERVAT: $metadataStore.plateData["OBSERVAT"],
+    "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
+    UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
     };
-    metadataStore.setRemoteMetadata(data, bboxSelected - 1);
-
+    return await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    
   }
 
   function initializeCanvas() {
@@ -148,6 +170,19 @@
         imageName
     );
     workspaceStore.setPath(imageName,cantSpectra)
+  }
+
+  function checkMetadataSearched(){
+    $metadataStore.spectraData.forEach((spectro,i) => {
+        getSearchedMetadata($metadataStore.fields,false).every((metadata) => {
+          if (spectro[metadata] !== "") {
+            metadataSearched[i] = true;
+            return false;
+          }
+          return true;
+        });
+      });
+
   }
 
   async function generateFits() {
@@ -209,14 +244,37 @@
 
   function getRequiredMetadata(fields,global) {
     if(global){
-      return Object.keys(fields).map((label) => {
+      return Object.keys(fields).filter((label) => {
         if (fields[label].required && fields[label].global) 
           return label;
       })
     }
     else{
-      return Object.keys(fields).map((label) => {
+      return Object.keys(fields).filter((label) => {
         if (fields[label].required && !fields[label].global) 
+          return label;
+      })
+    }
+  }
+
+  function getSearchedMetadata(fields,global){
+      return Object.keys(fields).filter((label) => {
+        if (!fields[label].required && !fields[label].global && !fields[label].default) 
+          return label;
+      })
+  }
+
+
+  function getOptionalMetadata(fields,global){
+    if(global){
+      return Object.keys(fields).filter((label) => {
+        if (!fields[label].required && fields[label].global) 
+          return label;
+      })
+    }
+    else{
+      return Object.keys(fields).filter((label) => {
+        if (!fields[label].required && !fields[label].global) 
           return label;
       })
     }
@@ -239,6 +297,17 @@
         }
       });
     }
+  }
+
+  function validateSpectrum(){
+    invalidSpectrum = false;
+    getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
+      console.log(metadata)
+      if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
+        invalidSpectrum = true;
+      }
+    });
+    console.log("invalid:",invalidSpectrum)
 
   }
 
@@ -289,10 +358,12 @@
         ...fields,
       },
     ]);
+    metadataSearched.push(false);
   }
 
   function handlerRemoved(obj) {
     cantSpectra--;
+    console.log(obj.target.id)
     if (cantSpectra > 0) {
       metadataStore.setSpectraData(
         $metadataStore.spectraData.filter(
@@ -315,7 +386,7 @@
       const item = canvas.item(event.detail.index);
       if (item != undefined) {
         canvas.setActiveObject(item);
-        validateForm();
+        validateSpectrum();
         canvas.renderAll();
       }
     }
@@ -416,8 +487,8 @@
                     <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
                 <div class="col-2 py-2">
-                  <NButton click={setRemoteMetadata} disabled={invalidForm}>
-                    Buscar metadatos
+                  <NButton click={generateFits} disabled={invalidForm}>
+                    &#11123; Exportar Fits
                   </NButton>
                 </div>  
               </div>
@@ -435,22 +506,27 @@
               {#each $metadataStore.spectraData as item}
                 <TabPanel>
                   <div class="controls">
-                    <MetadataModal
+                    <RequiredForm
                       spectraData={item}
-                      metadata={getMetadata($metadataStore.fields,false)}
+                      metadata={getRequiredMetadata($metadataStore.fields,false)}
+                      invalidSpectrum = {invalidSpectrum}
+                      confirmSearchMetadata = {confirmSearchMetadata}
                     />
                   </div>
+                  {#if metadataSearched[bboxSelected-1]}
+                    <div>
+                      <MetadataForm
+                        spectraData={item}
+                        metadata={getOptionalMetadata($metadataStore.fields,false)}
+                      />
+                    </div>
+                  {/if}
                 </TabPanel>
               {/each}
             </Tabs>
             <div class="row mt-4 ml-1 mb-4">
               <div class="controls  mr-2"> 
                 <SetParams updateParent={updateLists}/>
-              </div>
-              <div class="controls mr-2">
-                <NButton click={generateFits} disabled={invalidForm}>
-                  &#11123; Exportar Fits
-                </NButton>
               </div>
             </div>
           </div>
