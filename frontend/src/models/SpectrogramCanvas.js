@@ -148,6 +148,19 @@ export default class SpectrogramCanvas {
     })
   }
 
+  resetFilters() {
+    this.filter_dictionary = {};
+
+    this.canvas.setBackgroundImage(
+      this.originalImage,
+      this.canvas.renderAll.bind(this.canvas),
+      {
+        backgroundImageOpacity: 0.5,
+        backgroundImageStretch: false
+      }
+    )
+  }
+  
   setScale(scale) {
     this.scale = scale
     this.canvas.setHeight(this.getCanvasHeight())
@@ -204,50 +217,6 @@ export default class SpectrogramCanvas {
     });
   }
   
-  // Anañade la clase de filtro Color ya que no hay un filtro por defecto que realize esta funcion
-  // addFilterColorizeCLass(){
-  //   fabric.Image.filters.Colorize = fabric.util.createClass(fabric.Image.filters.BaseFilter, {
-  //     type: 'Colorize',
-  //     /**
-  //      * Fragment source for the color program
-  //      */
-  //     fragmentSource: 'precision highp float;\n' +
-  //       'uniform sampler2D uTexture;\n' +
-  //       'varying vec2 vTexCoord;\n' +
-  //       'void main() {\n' +
-  //         'vec4 color = texture2D(uTexture, vTexCoord);\n' +
-  //         'gl_FragColor = color;\n' +
-  //       '}',
-  //     applyTo2d: function(options) {
-  //       // if (this.color === 0) {
-  //       //   // early return if the color is 0, since we do not need to change anything
-  //       //   return;
-  //       // }
-  //       var color = this.color;
-  //       color = color.getSource();
-  //       var color_r = color[0]; 
-  //       var color_g = color[1]; 
-  //       var color_b = color[2];
-  //       var imageData = options.imageData;
-  //       var data = imageData.data;
-  //       var len = data.length;
-  //       let r,g,b, i, percent_white_r, percent_white_g, percent_white_b;
-  //       for (i = 0; i < len; i += 4) {
-  //         r = data[i];
-  //         g = data[i + 1];
-  //         b = data[i + 2];
-  //         // Preguntar: Las imágenes siempre son en blanco y negro, por que si lo son puedo hacer que el filtro de color haga 2/3 de cuentas menos
-  //         percent_white_r = r / 255 //Capaz solo necesito uel rojo ya que en escala de grices los 3 tendran el mismo valor, pero por si acaso mejor asi
-  //         percent_white_g = g / 255 
-  //         percent_white_b = b / 255 
-  //         data[i] = percent_white_r * color_r;
-  //         data[i + 1] = percent_white_g * color_g;
-  //         data[i + 2] = percent_white_b * color_b;
-  //       }
-  //     }
-  //   });
-  // }
-
   colorize(color) {
     const canvas =  this.canvas;
     const filter_dictionary = this.filter_dictionary;
