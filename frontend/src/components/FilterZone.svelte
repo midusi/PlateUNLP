@@ -1,8 +1,4 @@
 <script>
-  import Zoom from './Filters/Zoom.svelte'
-  import Brightness from './Filters/Brightness.svelte'
-  import Contrast from './Filters/Contrast.svelte'
-  import Colorize from './Filters/Colorize.svelte'
   import NButton from "./NButton.svelte";
 
   import { createEventDispatcher } from 'svelte';
