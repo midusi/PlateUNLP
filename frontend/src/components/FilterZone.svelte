@@ -1,75 +1,20 @@
 <script>
-  export let spectrogramCanvas;
-  export let scale;
-
-  let brightness_input = 0;
-  let contrast_input = 0;
-  let color_input = "#ffffff";
- gi
-  function updatescale() {
-    spectrogramCanvas.setScale(scale);
-  }
-
-  function setBrightness() {
-    console.log("Brillo = ", brightness_input);
-    spectrogramCanvas.setBrightness(brightness_input);
-  }
-
-  function setContrast() {
-    console.log("Contraste = ", contrast_input);
-    spectrogramCanvas.setContrast(contrast_input);
-  }
-
-  function colorize() {
-    console.log("Color = ", color_input);
-    //var color = new fabric.Color(color_input);
-    spectrogramCanvas.colorize(color_input);
-  }
-</script>
+  import Zoom from './Filters/Zoom.svelte'
+  import Brightness from './Filters/Brightness.svelte'
+  import Contrast from './Filters/Contrast.svelte'
+  import Colorize from './Filters/Colorize.svelte'
   
-<div class="d-xl-flex flex-column justify-content-xl-start">
-  <span>Zoom</span>
-  <input
-    type="range"
-    min="0.1"
-    max="1"
-    step="0.01"
-    bind:value={scale}
-    on:change={updatescale}
-  />
-</div>
+  export let spectrogramCanvas;
+  export let scale;  
+</script>
 
-<div class="d-xl-flex flex-column justify-content-xl-start">
-  <span>Brillo</span>
-  <input
-    type="range"
-    min="0"
-    max="1"
-    step="0.01"
-    bind:value={brightness_input}
-    on:change={setBrightness} 
-  />
-  <input type="text" value="{brightness_input}" readonly/>
+<div class="card">
+  <h5 class="card-header">Filtros</h5>
+  <div class="card-body">
+    <Zoom spectrogramCanvas={spectrogramCanvas} bind:scale={scale}/>
+    <Brightness spectrogramCanvas={spectrogramCanvas}/>
+    <Contrast spectrogramCanvas={spectrogramCanvas}/>
+    <Colorize spectrogramCanvas={spectrogramCanvas}/>
+  </div>
 </div>
-
-<div class="d-xl-flex flex-column justify-content-xl-start">
-  <span>Contraste</span>
-  <input
-    type="range"
-    min="0"
-    max="1"
-    step="0.01"
-    bind:value={contrast_input}
-    on:change={setContrast} 
-  />
-  <input type="text" value="{contrast_input}" readonly/>
-</div>
-
-<div class="d-xl-flex flex-column justify-content-xl-start">
-  <span>Color</span>
-  <input 
-    type="color" 
-    bind:value={color_input}
-    on:change={colorize} 
-  />
-</div>
+<p>&nbsp;</p>    
