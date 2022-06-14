@@ -295,12 +295,14 @@
   }
 
   function validateSpectrum(){
-    invalidSpectrum = false;
-    getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
-      if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
-        invalidSpectrum = true;
-      }
-    });
+    if(bboxSelected != -1){
+      invalidSpectrum = false;
+      getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
+        if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
+          invalidSpectrum = true;
+        }
+      });
+    }
   }
 
   function handlerModified(){
@@ -373,14 +375,16 @@
   }
 
   function setBbox(event) {
-    if (event.detail.index !== bboxSelected - 1) {
-      const item = canvas.item(event.detail.index);
-      if (item != undefined) {
-        canvas.setActiveObject(item);
-        validateSpectrum();
-        canvas.renderAll();
+    const index = event.detail.index
+      if (index !== bboxSelected - 1){
+        const item = canvas.item(index);
+        if (item != undefined) {
+          canvas.setActiveObject(item);
+          bboxSelected = index + 1
+          validateSpectrum();
+          canvas.renderAll();
+        }
       }
-    }
   }
 
   /*function saveConfig() {
@@ -453,6 +457,7 @@
               <TabList>
                 <div class="row">
                   <div class="col-10">
+                    <NButton classStyle={""} style={`background-color:white !important; border-color: black; width:40px; height:40px; border-radius:1px`} click={()=>bboxSelected=-1}>P</NButton>
                     {#each $metadataStore.spectraData as item, index}
                       <Tab>
                         <NButton
@@ -463,7 +468,6 @@
                         </NButton>
                       </Tab>
                     {/each}
-                    <NButton classStyle={""} style={`background-color:white !important; border-color: black; width:40px; height:40px; border-radius:1px`} click={()=>bboxSelected=-1}>P</NButton>
                     <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
                 <div class="col-2 py-2">
