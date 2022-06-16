@@ -22,9 +22,13 @@ def api_all_paths():
     
     # Separates the names of the files of which information is stored in the cache
     working_path = aux_path = os.path.join(app.static_folder, 'cache/working')
+    if not os.path.exists(working_path):
+        os.mkdir(working_path)
     working_files = [file_name[:-5] for file_name in os.listdir(working_path)] # Removes .json extensions
     have_data = []
     saved_path = aux_path = os.path.join(app.static_folder, 'cache/saved')
+    if not os.path.exists(saved_path):
+        os.mkdir(saved_path)
     saved_files = [file_name[:-5] for file_name in os.listdir(saved_path)] # R
     # Counts the number of spectra in each file
     paths = []
