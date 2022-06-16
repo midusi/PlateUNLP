@@ -1,5 +1,5 @@
 <script>
-  import { Tabs, TabList, TabPanel, Tab } from "./components/Tab/tabs";
+  import { Tabs, TabList, TabPanel, Tab,PlateTab } from "./components/Tab/tabs";
   import SpectrogramCanvas from "./models/SpectrogramCanvas";
   import { spectrogramStore, workspaceStore, metadataStore } from "./store";
   import { onMount } from "svelte";
@@ -33,6 +33,7 @@
   let invalidSpectrum = true;
   let changeFlag = false;
   let metadataSearched = []
+  let dataLoaded = false
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
@@ -77,6 +78,7 @@
     if (selectedImage != "" && selectedImage != imageName) {
       imageChanged = true
       spectrogramCanvas.deleteAllBbox();
+      dataLoaded = false
       changeFlag = false
       imageName = selectedImage;
       initializeCanvas();
@@ -327,6 +329,7 @@
     const fields = {};
 
     if(cantSpectra === 1){
+
       const globalFields = {};
       Object.keys($metadataStore.fields).map((field) => {
       if($metadataStore.fields[field].global)
@@ -334,7 +337,10 @@
           globalFields[field] = "";
         else globalFields[field] = $metadataStore.fields[field].options[0];
     });
-    metadataStore.setPlateData(globalFields);
+      if(!dataLoaded) {
+        metadataStore.setPlateData(globalFields);
+        dataLoaded = true;
+      }
     }
     
     Object.keys($metadataStore.fields).map((field) => {
@@ -367,6 +373,7 @@
       canvas.renderAll();
     } else {
       metadataStore.setSpectraData([]);
+      bboxSelected = -1
     }
     changeFlag = true;
     imageSaved = false;
@@ -385,6 +392,10 @@
           canvas.renderAll();
         }
       }
+  }
+
+  function handlePlateSelected(){
+    bboxSelected = -1;
   }
 
   /*function saveConfig() {
@@ -451,26 +462,38 @@
                         border-color: black;"
                 />  
               </div>
-          {#if $metadataStore.spectraData.length > 0}
+          {#if uploadedImage}
             <div in:slide="{{duration:1000}}" out:slide="{{duration:700}}">
             <Tabs on:selectTab={setBbox}>
               <TabList>
                 <div class="row">
-                  <div class="col-10">
-                    <NButton classStyle={""} style={`background-color:white !important; border-color: black; width:40px; height:40px; border-radius:1px`} click={()=>bboxSelected=-1}>P</NButton>
-                    {#each $metadataStore.spectraData as item, index}
-                      <Tab>
-                        <NButton
-                          style={`background-color:${item.color} !important; border-color: black; width:40px; height:40px; border-radius:1px`}
+                  <div class="col-10 my-2">
+                    <PlateTab bboxSelected = {bboxSelected} handlePlateSelected = {handlePlateSelected}>
+                      <NButton
+                          style={`background-color:white !important; border-color: black; width:80px; height:40px; border-radius:1px`}
                           classStyle={""}
                         >
-                          {index + 1}
-                        </NButton>
-                      </Tab>
-                    {/each}
+                        Placa
+                      </NButton>
+                      </PlateTab>
+                    {#if $metadataStore.spectraData.length > 0}
+                    <span style="background-color: darkgray;font-size: 20px; color: darkgray"> .</span>
+                      <span style="font-size: 16px; color: black">  Espectros : </span>
+
+                      {#each $metadataStore.spectraData as item, index}
+                        <Tab>
+                          <NButton
+                            style={`background-color:${item.color} !important; border-color: black; width:40px; height:40px; border-radius:1px`}
+                            classStyle={""}
+                          >
+                            {index + 1}
+                          </NButton>
+                        </Tab>
+                      {/each}
+                    {/if}
                     <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
-                <div class="col-2 py-2">
+                <div class="col-2 py-3">
                   <NButton click={generateFits} disabled={invalidForm}>
                     &#11123; Exportar Fits
                   </NButton>
@@ -514,10 +537,6 @@
               </div>
             </div>
           </div>
-          {:else}
-            <div class="controls mt-6">
-              <NButton style="display:{uploadedImage === true ? 'inline' : 'none'} ; margin-top:0.5em" click={addBox}>+</NButton>
-            </div>
           {/if}
         </div>
       </div>
