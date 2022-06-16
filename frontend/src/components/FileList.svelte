@@ -11,8 +11,11 @@ function handleSelect(){
 </script>
   
 <div in:slide="{{duration:1000}}">
-    <div>
-        <label><input type="checkbox" bind:checked={showFinished}> Mostrar finalizados</label>
+    <div class="my-3">
+        <select bind:value={showFinished}>
+            <option value={false}>En proceso</option>
+            <option value={true}>Exportados</option>
+        </select>
     </div>
     <select
       bind:value={selectedImage}
