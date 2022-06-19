@@ -3,6 +3,7 @@ import apiSpectrum from '../api/spectrum'
 import {
   loadingAlert, errorAlert, showAlert, closeAlert
 } from '../helpers/Alert'
+import {serverUp} from './serverUp'
 
 function createStoreSpectrogram() {
   const { subscribe, update } = writable({
@@ -40,7 +41,8 @@ function createStoreSpectrogram() {
           prev.state.error = error
           return prev
         })
-        errorAlert()
+        if(await serverUp())
+          errorAlert()
       }
       update((prev) => {
         prev.state.loading = false
@@ -56,7 +58,7 @@ function createStoreSpectrogram() {
           })
         }
         catch (error) {
-          return console.log(error);
+          serverUp()
         }
         return (resp.status === 201);
       }
@@ -70,7 +72,7 @@ function createStoreSpectrogram() {
             img_name: imgName
           })
         } catch (error) {
-          return console.log(error);
+          serverUp()
         }
           return (resp.status === 201);
       }
@@ -96,6 +98,7 @@ function createStoreSpectrogram() {
           prev.stateGeneratingFits.error = error
           return prev
         })
+        await serverUp()
         return 0
       }
       update((prev) => {

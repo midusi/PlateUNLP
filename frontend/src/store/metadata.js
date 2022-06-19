@@ -2,6 +2,7 @@ import { writable } from 'svelte/store'
 import { loadingAlert, errorAlert, showAlert } from '../helpers/Alert'
 import apiSpectrum from '../api/spectrum'
 import { getMetadataFields } from '../helpers/metadataUtilities'
+import {serverUp} from './serverUp'
 
 function createStoreMetadata() {
   const { subscribe, update, set } = writable({
@@ -42,7 +43,8 @@ function createStoreMetadata() {
         showAlert({ title: 'Metadatos Cargados', message: 'Los metadatos se cargaron exitosamente.' })
         return true
       } catch (error) {
-        errorAlert({ message: error.response.data.message })
+        if(await serverUp())
+          errorAlert({ message: error.response.data.message })
       }
       return false
     },
