@@ -39,9 +39,7 @@ async function serverAlert({
   await Swal.fire({
     title,
     text,
-    imageUrl: "https://cdn-icons.flaticon.com/png/512/3756/premium/3756620.png?token=exp=1655600396~hmac=ab481900f0cac56c37363c6df46cb1f6",
-    imageWidth: 250,
-    imageHeight: 250,
+    iconHtml: '<img style="padding: 5px;" src="https://cdn-icons.flaticon.com/png/512/3756/premium/3756620.png?token=exp=1655667603~hmac=3fc82d4906ed9a1d3cdf46e955613875" width="190" height="200">',
     confirmButtonText
   })
 }
