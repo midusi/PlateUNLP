@@ -66,12 +66,11 @@ function deleteAlert({
     })
 }
 
-function showAlert({ title = 'Cargado', message = 'Se cargo con éxito', type = 'success' } = {}) {
+function showAlert({ title = 'Se cargo con exito', type = 'success' } = {}) {
   Swal.close()
   Swal.fire({
   icon: type,
   title: title,
-  text: message,
   showConfirmButton: false,
   timer: 1000
   })

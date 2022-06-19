@@ -108,7 +108,7 @@ function createStoreWorkspace() {
         await apiWorkspace.saveConfig({
           config
         })
-        showAlert({ title: 'Configuración Guardada', message: 'Se guardo la configuración exitosamente.' })
+        showAlert({ title: 'Configuración Guardada' })
       } catch (error) {
         errorAlert()
       }
@@ -121,6 +121,7 @@ function createStoreWorkspace() {
           if (response.data !== {}){
             console.log(response.data)
             closeAlert()
+            showAlert({title:"Conexion establecida"})
             return response.data.config
           } 
         } catch (error) {

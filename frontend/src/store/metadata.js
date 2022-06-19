@@ -40,7 +40,7 @@ function createStoreMetadata() {
           })
           return prev
         })
-        showAlert({ title: 'Metadatos Cargados', message: 'Los metadatos se cargaron exitosamente.' })
+        showAlert({ title: 'Metadatos Cargados exitosamente'})
         return true
       } catch (error) {
         if(await serverUp())

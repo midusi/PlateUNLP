@@ -204,7 +204,7 @@
           initializeCanvas();
           loadConfig();
           await workspaceStore.getPaths(pathDir);
-          showAlert({ title: 'Guardado', message: 'Se guardo con éxito.' })
+          showAlert()
         }
         else{
           errorAlert()
