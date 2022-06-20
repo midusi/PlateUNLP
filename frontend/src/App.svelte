@@ -143,7 +143,11 @@
     "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
     UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
     };
-    return await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    if(setted){
+      setChangeFlag();
+    }
+    return setted;
     
   }
 

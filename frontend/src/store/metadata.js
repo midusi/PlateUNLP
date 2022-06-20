@@ -37,6 +37,7 @@ function createStoreMetadata() {
         update((prev) => {
           Object.keys(data.metadata).map((field) => {
             prev.spectraData[index][field] = data.metadata[field]
+            prev.fields[field].loaded = true
           })
           return prev
         })
