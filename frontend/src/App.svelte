@@ -16,7 +16,7 @@
     FilterZone,
     MetadataForm
   } from "./components";
-  import { confirmAlert,showAlert,deleteAlert } from "./helpers/Alert";
+  import { confirmAlert,showAlert,deleteAlert, loadingAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
 
   let imageChanged = true;
@@ -58,10 +58,10 @@
       "object:removed": handlerRemoved,
       "object:modified": handlerModified
     };
+    loadConfig();
     metadataStore.initFields();
     spectrogramCanvas = new SpectrogramCanvas(events);
     canvas = spectrogramCanvas.getCanvas();
-    loadConfig();
     checkChangeFlag();
   });
 
@@ -143,7 +143,11 @@
     "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
     UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
     };
-    return await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    if(setted){
+      setChangeFlag();
+    }
+    return setted;
     
   }
 
@@ -204,7 +208,7 @@
           initializeCanvas();
           loadConfig();
           await workspaceStore.getPaths(pathDir);
-          showAlert({ title: 'Guardado', message: 'Se guardo con éxito.' })
+          showAlert()
         }
         else{
           errorAlert()
@@ -215,7 +219,8 @@
   }
 
   function getPaths() {
-    workspaceStore.getPaths(pathDir);
+    if(pathDir)
+      workspaceStore.getPaths(pathDir);
   }
   function updateLists(){
     metadataStore.initFields();
@@ -432,10 +437,9 @@
         <div class="col-lg-2 col-xl-2">
           <div class="row">
             <div class="d-flex flex-column col-9">
-              <span>Directorio de trabajo</span>
-              <input bind:value={pathDir} />
+              Buscar elementos
             </div>
-            <div class="d-flex flex-column col-3 mt-4">
+            <div class="d-flex flex-column col-3">
               <NButton click={getPaths}>&#x1F50D;</NButton>
             </div>
           </div>

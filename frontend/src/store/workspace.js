@@ -2,8 +2,9 @@ import { writable } from 'svelte/store'
 import apiWorkspace from '../api/workspace'
 import { spectrogramStore } from './index'
 import {
-  loadingAlert, errorAlert, closeAlert, showAlert
+  loadingAlert, errorAlert, closeAlert, showAlert,serverAlert
 } from '../helpers/Alert'
+import {serverUp} from './serverUp'
 
 
 function createStoreWorkspace() {
@@ -35,7 +36,8 @@ function createStoreWorkspace() {
           prev.state.error = error
           return prev
         })
-        errorAlert({ message: error.response.data.message })
+        if(await serverUp())
+          errorAlert({ message: error.response.data.message })
       }
       update((prev) => {
         prev.state.loading = false
@@ -90,8 +92,10 @@ function createStoreWorkspace() {
           prev.state.error = error
           return prev
         })
-        errorAlert()
+        if(await serverUp())
+          errorAlert();
       }
+      
       update((prev) => {
         prev.state.loading = false
         return prev
@@ -104,19 +108,27 @@ function createStoreWorkspace() {
         await apiWorkspace.saveConfig({
           config
         })
-        showAlert({ title: 'Configuración Guardada', message: 'Se guardo la configuración exitosamente.' })
+        showAlert({ title: 'Configuración Guardada' })
       } catch (error) {
         errorAlert()
       }
     },
     loadConfig: async () => {
-      try {
-        const response = await apiWorkspace.loadConfig()
-        if (response.data !== {}) return response.data.config
-      } catch (error) {
-        errorAlert()
+      let response;
+      while(!response){
+        try {
+          response = await apiWorkspace.loadConfig()
+          if (response.data !== {}){
+            console.log(response.data)
+            closeAlert()
+            showAlert({title:"Conexion establecida"})
+            return response.data.config
+          } 
+        } catch (error) {
+          closeAlert();
+          await serverAlert();
+        }
       }
-      return {}
     }
   }
 }

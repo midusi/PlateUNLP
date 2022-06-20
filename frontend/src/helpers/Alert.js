@@ -29,6 +29,21 @@ function confirmAlert({
     })
 }
 
+
+async function serverAlert({
+  title = 'No fue posible conectarse al servidor',
+  text =  '',
+  confirmButtonText = 'Reintentar',
+  succesFunc = () => {}
+} = {}) {
+  await Swal.fire({
+    title,
+    text,
+    iconHtml: '<img style="padding: 5px;" src="https://cdn-icons.flaticon.com/png/512/3756/premium/3756620.png?token=exp=1655667603~hmac=3fc82d4906ed9a1d3cdf46e955613875" width="190" height="200">',
+    confirmButtonText
+  })
+}
+
 function deleteAlert({
   title = '¿Seguro que quieres borrar el espectro?',
   text =  'Se perderan los datos relacionados',
@@ -49,12 +64,11 @@ function deleteAlert({
     })
 }
 
-function showAlert({ title = 'Cargado', message = 'Se cargo con éxito', type = 'success' } = {}) {
+function showAlert({ title = 'Se cargo con exito', type = 'success' } = {}) {
   Swal.close()
   Swal.fire({
   icon: type,
   title: title,
-  text: message,
   showConfirmButton: false,
   timer: 1000
   })
@@ -65,10 +79,10 @@ function errorAlert({ title = 'Sucedio un error!', message = 'Ha ocurrido un err
   Swal.fire(title, message, 'error')
 }
 
-function closeAlert() {
-  Swal.close()
+async function closeAlert() {
+  await Swal.close()
 }
 
 export {
-  loadingAlert, closeAlert, errorAlert, showAlert, confirmAlert,deleteAlert
+  loadingAlert, closeAlert,serverAlert, errorAlert, showAlert, confirmAlert,deleteAlert
 }

@@ -10,6 +10,11 @@
     node.type = $metadataStore.fields[name].type;
   };
 
+  function remoteDataChange(){
+    $metadataStore.fields[name].loaded = false
+    setChangeFlag();
+  }
+
 </script>
 
 <div class="mt-2">
@@ -20,14 +25,24 @@
     </span>
   </span>
   {#if $metadataStore.fields[name].options === undefined}
-    <input
-      class="form-control"
-      use:setType
-      bind:value
-      on:change={setChangeFlag}
-      placeholder={$metadataStore.fields[name].info}
-    />
-
+    {#if $metadataStore.fields[name].remote}
+      <input
+        class="form-control"
+        use:setType
+        style={`background-color: ${$metadataStore.fields[name].loaded ? "lavender" : "white"};`}
+        bind:value
+        on:change={() => remoteDataChange(name)}
+        placeholder={$metadataStore.fields[name].info}
+      />
+    {:else}
+      <input
+        class="form-control"
+        use:setType
+        bind:value
+        on:change={setChangeFlag}
+        placeholder={$metadataStore.fields[name].info}
+      />
+    {/if}
   {:else if $metadataStore.fields[name].label === "OBSERVAT"}
   <select
       bind:value
