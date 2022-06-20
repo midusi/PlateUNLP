@@ -1,6 +1,7 @@
 import { fabric } from 'fabric'
 import { saveAs } from 'file-saver'
 import { getColor } from '../helpers/canvasUtilities'
+import { FilterQueque } from '../models/FiltersQueque'
 
 export default class SpectrogramCanvas {
   constructor(events) {
@@ -13,7 +14,7 @@ export default class SpectrogramCanvas {
     // Guarda los filtros actuales que se tienen que aplicar sobre el fondo
     // Prefiero que usar la estructura java en ves de un Map devido a que se 
     // realizara mucho acceso secuencial para aplicar los filtros
-    this.filter_dictionary = {}
+    this.filter_queque = new FilterQueque()
 
     this.canvas = new fabric.Canvas('canvas-container', {
       hoverCursor: 'pointer',
@@ -149,7 +150,7 @@ export default class SpectrogramCanvas {
   }
 
   resetFilters() {
-    this.filter_dictionary = {};
+    this.filter_queque = new FilterQueque();
 
     this.canvas.setBackgroundImage(
       this.originalImage,
@@ -170,13 +171,13 @@ export default class SpectrogramCanvas {
 
   setBrightness(brightness) {
     const canvas =  this.canvas;
-    const filter_dictionary = this.filter_dictionary;
+    const filter_queque = this.filter_queque;
     fabric.Image.fromURL(this.originalImage, function(img) {
       let key = "brightness"
       let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
-      filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
-      for (let k in filter_dictionary) {
-        img.filters.push(filter_dictionary[k]);
+      filter_queque.push(filter,key);
+      for (let k in filter_queque.filters()) {
+        img.filters.push(filter_queque.filters()[k]);
       }
       // apply filters and re-render canvas when done
       img.applyFilters();
@@ -194,14 +195,14 @@ export default class SpectrogramCanvas {
 
   setContrast(contrast) {
     const canvas =  this.canvas;
-    const filter_dictionary = this.filter_dictionary;
+    const filter_queque = this.filter_queque;
     fabric.Image.fromURL(this.originalImage, function(img) {
       // add filter
       let key = "contrast"
       let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
-      filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
-      for (let k in filter_dictionary) {
-        img.filters.push(filter_dictionary[k]);
+      filter_queque.push(filter,key);
+      for (let k in filter_queque.filters()) {
+        img.filters.push(filter_queque.filters()[k]);
       }
       // apply filters and re-render canvas when done
       img.applyFilters();
@@ -219,16 +220,16 @@ export default class SpectrogramCanvas {
   
   colorize(color) {
     const canvas =  this.canvas;
-    const filter_dictionary = this.filter_dictionary;
+    const filter_queque = this.filter_queque;
     // const color = new fabric.Color('rgb(255,0,100)');
 
     fabric.Image.fromURL(this.originalImage, function(img) {
       // add filter
       let key = "color";
       let filter = new fabric.Image.filters.BlendColor({ color: color });
-      filter_dictionary[key]=filter; //Si ya existe el filtro lo remplaza
-      for (let k in filter_dictionary) {
-        img.filters.push(filter_dictionary[k]);
+      filter_queque.push(filter,key);
+      for (let k in filter_queque.filters()) {
+        img.filters.push(filter_queque.filters()[k]);
       }
       // apply filters and re-render canvas when done
       img.applyFilters();
@@ -254,7 +255,7 @@ export default class SpectrogramCanvas {
       this.originalImage = src
       this.widthOriginal = width
       this.heightOriginal = height
-      this.filter_dictionary = {}
+      this.filter_queque = new FilterQueque()
       this.canvas.setHeight(this.getCanvasHeight())
       this.canvas.setWidth(this.getCanvasWidth())
 
