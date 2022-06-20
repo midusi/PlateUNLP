@@ -28,6 +28,13 @@ function createStoreMetadata() {
         return prev
       })
     },
+    setFields: (fields) => {
+       update((prev) => {
+        prev.fields = fields
+        return prev
+      })
+    }
+    ,
     setRemoteMetadata: async (metadataSend, index) => {
       // Receive all fields of a spectrum to be modified
       loadingAlert()

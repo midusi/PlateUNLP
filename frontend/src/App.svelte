@@ -100,6 +100,7 @@
         
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
+        metadataStore.setFields(data.fields);
         checkMetadataSearched();
         validateForm();
         validateSpectrum();
@@ -168,7 +169,8 @@
         $metadataStore.spectraData,
         $metadataStore.plateData,
         pathDir,
-        imageName
+        imageName,
+        $metadataStore.fields
     );
     workspaceStore.setPath(imageName,cantSpectra)
   }

@@ -66,9 +66,11 @@ def load():
         bbox = dataList["bbox_arr"]
         plateData = dataList["plate_data"]
         metadata = dataList["data_arr"]
+        fields = dataList["fields"]
         data["info"]["bboxes"] = bbox
         data["info"]["metadata"] = metadata
         data["info"]["plateData"] = plateData
+        data["info"]["fields"] = fields
 
         
     # API response messaje

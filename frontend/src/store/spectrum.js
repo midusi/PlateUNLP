@@ -49,7 +49,7 @@ function createStoreSpectrogram() {
         return prev
       })
     },
-    autoSaveValues: async(bboxArr,dataArr,plateData,path,imgName) => {
+    autoSaveValues: async(bboxArr,dataArr,plateData,path,imgName,fields) => {
       let resp;
       if (bboxArr.length === 0){
         try{
@@ -69,7 +69,8 @@ function createStoreSpectrogram() {
             data_arr: dataArr,
             bbox_arr: bboxArr,
             plate_data: plateData,
-            img_name: imgName
+            img_name: imgName,
+            fields
           })
         } catch (error) {
           serverUp()
