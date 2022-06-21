@@ -15,16 +15,19 @@
     let title = "Faltan datos obligatorios ";
     let invalids = "";
     if(!plateValid)
-      title += "de la placa y "
+      title += "de la placa "
     validatedSpectrums.forEach((isValid,index) => {
       if(!isValid){
-        invalids += `${index+1} `
+          invalids += `${index+1} `
       }
     })
     if(invalids !== ""){
-      title = `de los espectros: ${invalids}`
+      if(!plateValid)
+        title += `y de los espectros: ${invalids}`
+      else
+        title += `de los espectros: ${invalids}`
     }
-    else{
+    else if(plateValid){
       title = ""
     }
 

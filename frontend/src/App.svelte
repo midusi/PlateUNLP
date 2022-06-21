@@ -70,7 +70,7 @@
   });
 
   export function setChangeFlag(){
-      validateSpectrum();
+      validateActualSpectrum();
       validateForm();
       changeFlag = true;
       imageSaved = false;
@@ -107,7 +107,7 @@
         metadataStore.setFields(data.fields);
         checkMetadataSearched();
         validateForm();
-        validateSpectrum();
+        validateAllSpectrum();
         changeFlag = false;
         
       }
@@ -309,17 +309,29 @@
     }
   }
 
-  function validateSpectrum(){
-    if(bboxSelected != -1 && cantSpectra > 0){
-      console.log($metadataStore.spectraData[bboxSelected - 1])
-      invalidSpectrum = false;
+  function validateAllSpectrum(){
+    if(cantSpectra > 0){
+      for (let i = 0; i < cantSpectra; i++) 
+        validateSpectrum(i)
+    }
+      
+  }
+
+  function validateActualSpectrum(){
+    if (cantSpectra > 0 && bboxSelected != -1 ){
+      validateSpectrum(bboxSelected-1)
+    }
+  }
+
+  function validateSpectrum(spectrumIndex){
+      let invalidSpectrum = false;
       getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
-        if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
+        if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
           invalidSpectrum = true;
         }
       });
-      validatedSpectrums[bboxSelected-1] = !invalidSpectrum
-    }
+      validatedSpectrums[spectrumIndex] = !invalidSpectrum
+    
   }
 
 
@@ -408,7 +420,7 @@
         if (item != undefined) {
           canvas.setActiveObject(item);
           bboxSelected = index + 1
-          validateSpectrum();
+          validateActualSpectrum();
           canvas.renderAll();
         }
       }
