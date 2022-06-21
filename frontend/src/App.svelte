@@ -12,6 +12,7 @@
     ConfigModal,
     SetParams,
     FileList,
+    ExportButton,
     PlateForm,
     FilterZone,
     MetadataForm
@@ -33,7 +34,10 @@
   let invalidSpectrum = true;
   let changeFlag = false;
   let metadataSearched = []
+  let validatedSpectrums = []
+  let plateValid = false;
   let dataLoaded = false
+
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
@@ -108,6 +112,7 @@
         
       }
       else{
+        console.log("ENTRE ACA")
         setChangeFlag();
       }
       imageChanged = false;
@@ -208,7 +213,6 @@
           metadataStore.initFields();
           uploadedImage = false;
           initializeCanvas();
-          loadConfig();
           await workspaceStore.getPaths(pathDir);
           showAlert()
         }
@@ -220,9 +224,9 @@
     
   }
 
-  function getPaths() {
+  async function getPaths() {
     if(pathDir)
-      workspaceStore.getPaths(pathDir);
+      await workspaceStore.getPaths(pathDir);
   }
   function updateLists(){
     metadataStore.initFields();
@@ -286,6 +290,7 @@
 
   function validateForm() {
     invalidForm = false;
+    plateValid = true;
     if (cantSpectra > 0) {
       $metadataStore.spectraData.forEach((spectro) => {
         getRequiredMetadata($metadataStore.fields,false).forEach((metadata) => {
@@ -298,21 +303,26 @@
       getRequiredMetadata($metadataStore.fields,true).forEach((metadata) => {
         if ($metadataStore.plateData[metadata] === "") {
           invalidForm = true;
+          plateValid = false;
         }
       });
     }
   }
 
   function validateSpectrum(){
-    if(bboxSelected != -1){
+    if(bboxSelected != -1 && cantSpectra > 0){
+      console.log($metadataStore.spectraData[bboxSelected - 1])
       invalidSpectrum = false;
       getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
         if ($metadataStore.spectraData[bboxSelected - 1][metadata] === "") {
           invalidSpectrum = true;
         }
       });
+      validatedSpectrums[bboxSelected-1] = !invalidSpectrum
     }
   }
+
+
 
   function handlerModified(){
     setChangeFlag();
@@ -332,6 +342,7 @@
   }
 
   function handlerAdded(obj) {
+    validatedSpectrums.push(false)
     cantSpectra++;
     const fields = {};
 
@@ -368,7 +379,9 @@
     metadataSearched.push(false);
   }
 
+
   function handlerRemoved(obj) {
+    validatedSpectrums.splice(bboxSelected-1,1)
     cantSpectra--;
     if (cantSpectra > 0) {
       metadataStore.setSpectraData(
@@ -500,9 +513,7 @@
                     <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
                 <div class="col-2 py-3">
-                  <NButton click={generateFits} disabled={invalidForm}>
-                    &#11123; Exportar Fits
-                  </NButton>
+                    <ExportButton plateValid = {plateValid} validatedSpectrums={validatedSpectrums} title={"faltanDatos"} click={generateFits} disabled={invalidForm}/>
                 </div>  
               </div>
               </TabList>

@@ -10,11 +10,13 @@ import FolderSelector from './FolderSelector.svelte'
 import PlateForm from './PlateForm.svelte'
 import FilterZone from './FilterZone.svelte'
 import MetadataForm from './MetadataForm.svelte'
+import ExportButton from './ExportButton.svelte'
 
 export {
   Modal,
   NButton,
   Field,
+  ExportButton,
   ImageInfoCard,
   RequiredForm,
   ConfigModal,
