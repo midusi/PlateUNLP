@@ -1,6 +1,5 @@
 <script>
     import Field from "./Field.svelte";
-    import Modal from "./Modal.svelte";
     import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
     export let metadata, plateData;
     

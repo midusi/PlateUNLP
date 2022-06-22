@@ -1,5 +1,5 @@
 <script>
-  import { Tabs, TabList, TabPanel, Tab,PlateTab } from "./components/Tab/tabs";
+  import { Tabs, TabList, TabButton, TabPanel, Tab, PlateTab } from "./components/Tab/tabs";
   import SpectrogramCanvas from "./models/SpectrogramCanvas";
   import { spectrogramStore, workspaceStore, metadataStore } from "./store";
   import { onMount } from "svelte";
@@ -33,6 +33,7 @@
   let invalidForm = true;
   let changeFlag = false;
   let metadataSearched = []
+  let names = []
   let validatedSpectrums = []
   let plateValid = false;
   let dataLoaded = false
@@ -50,13 +51,16 @@
     }
   }
 
-  const checkChangeFlagInterval = setInterval(checkChangeFlag,5000); 
+  async function bboxSeleccionada(){
+    console.log("BBOX:",bboxSelected)
+  }
 
+  const checkChangeFlagInterval = setInterval(checkChangeFlag,5000); 
+  const test = setInterval(bboxSeleccionada,1000); 
   onMount(async () => {
     const events = {
       "selection:created": handleCreatedUpdate,
       "selection:updated": handleCreatedUpdate,
-      "before:selection:cleared": handleSelectionCleared,
       "object:added": handlerAdded,
       "object:removed": handlerRemoved,
       "object:modified": handlerModified
@@ -68,9 +72,21 @@
     checkChangeFlag();
   });
 
+  function loadNames(){
+    for (let i = 0; i < cantSpectra; i++) 
+        names[i] = $metadataStore.spectraData[i]["OBJECT"]
+  }
+
+  function updateName(){
+    if(bboxSelected != -1 && cantSpectra > 0)
+      names[bboxSelected-1] = $metadataStore.spectraData[bboxSelected-1]["OBJECT"]
+    console.log(names)
+  }
+
   export function setChangeFlag(){
       validateActualSpectrum();
       validateForm();
+      updateName();
       changeFlag = true;
       imageSaved = false;
   }
@@ -107,6 +123,7 @@
         checkMetadataSearched();
         validateForm();
         validateAllSpectrum();
+        loadNames();
         changeFlag = false;
         
       }
@@ -348,10 +365,6 @@
     }
   }
 
-  function handleSelectionCleared(obj) {
-    bboxSelected = 1;
-  }
-
   function handlerAdded(obj) {
     validatedSpectrums.push(false)
     cantSpectra++;
@@ -388,12 +401,19 @@
       },
     ]);
     metadataSearched.push(false);
+    names.push("")
   }
 
 
   function handlerRemoved(obj) {
-    validatedSpectrums.splice(bboxSelected-1,1)
-    metadataSearched.splice(bboxSelected-1,1)
+    console.log("bbox:", bboxSelected)
+    let index = bboxSelected - 1
+    validatedSpectrums.splice(index,1)
+    if(names[index+1]){
+      names[index] = names[index+1]
+    }
+    names.splice(index,1)
+    metadataSearched.splice(index,1)
     cantSpectra--;
     if (cantSpectra > 0) {
       metadataStore.setSpectraData(
@@ -413,7 +433,7 @@
       validateForm();
       validateActualSpectrum();
     }
-     
+    console.log(names)
   }
 
   function setBbox(event) {
@@ -516,12 +536,11 @@
 
                       {#each $metadataStore.spectraData as item, index}
                         <Tab>
-                          <NButton
-                            style={`background-color:${item.color} !important; border-color: black; width:40px; height:40px; border-radius:1px`}
-                            classStyle={""}
-                          >
-                            {index + 1}
-                          </NButton>
+                          <TabButton
+                            color ={item.color}
+                            index={index}
+                            names ={names}
+                          />
                         </Tab>
                       {/each}
                     {/if}

@@ -4,7 +4,6 @@
   export let name, value;
 
   const setChangeFlag = getContext("setChangeFlag");
-  let aux = "";
 
   const setType = (node) => {
     node.type = $metadataStore.fields[name].type;
