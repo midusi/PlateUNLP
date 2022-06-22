@@ -185,10 +185,11 @@
             metadataSearched[i] = true;
             return false;
           }
+
           return true;
         });
       });
-
+    console.log(metadataSearched)
   }
 
   async function generateFits() {
@@ -392,6 +393,7 @@
 
   function handlerRemoved(obj) {
     validatedSpectrums.splice(bboxSelected-1,1)
+    metadataSearched.splice(bboxSelected-1,1)
     cantSpectra--;
     if (cantSpectra > 0) {
       metadataStore.setSpectraData(
@@ -407,8 +409,11 @@
     }
     changeFlag = true;
     imageSaved = false;
-    if(!imageChanged)
+    if(!imageChanged){
       validateForm();
+      validateActualSpectrum();
+    }
+     
   }
 
   function setBbox(event) {
