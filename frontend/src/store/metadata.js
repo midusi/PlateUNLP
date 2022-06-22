@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store'
-import { loadingAlert, errorAlert, showAlert } from '../helpers/Alert'
+import { loadingAlert, remoteErrorAlert, showAlert } from '../helpers/Alert'
 import apiSpectrum from '../api/spectrum'
 import { getMetadataFields } from '../helpers/metadataUtilities'
 import {serverUp} from './serverUp'
@@ -51,8 +51,9 @@ function createStoreMetadata() {
         showAlert({ title: 'Metadatos Cargados exitosamente'})
         return true
       } catch (error) {
-        if(await serverUp())
-          errorAlert({ message: error.response.data.message })
+        if(await serverUp()){
+          return await remoteErrorAlert({ message: error.response.data.message})
+        }
       }
       return false
     },

@@ -39,7 +39,7 @@ async function serverAlert({
   await Swal.fire({
     title,
     text,
-    iconHtml: '<img style="padding: 5px;" src="https://cdn-icons.flaticon.com/png/512/3756/premium/3756620.png?token=exp=1655667603~hmac=3fc82d4906ed9a1d3cdf46e955613875" width="190" height="200">',
+    iconHtml: '<img style="padding: 5px;" src="https://cdn-icons.flaticon.com/png/512/3756/premium/3756620.png?token=exp=1655849631~hmac=edb45575494b09295929db34b322b6b8" width="190" height="200">',
     confirmButtonText
   })
 }
@@ -79,10 +79,27 @@ function errorAlert({ title = 'Sucedio un error!', message = 'Ha ocurrido un err
   Swal.fire(title, message, 'error')
 }
 
+async function remoteErrorAlert({
+  title = 'Ha ocurrido un error en el servidor', 
+  text = '¿Quiere cargar los datos de forma manual?',
+  } = {}) {
+  let response = false;
+  Swal.close()
+  await Swal.fire({title, text, icon: 'error', showDenyButton: true,
+  showCancelButton: false,
+  confirmButtonText: "Aceptar",
+  denyButtonText: "Cancelar"})
+  .then((result) => {
+    if (result.isConfirmed) response = true;
+  })
+
+  return response;
+}
+
 async function closeAlert() {
   await Swal.close()
 }
 
 export {
-  loadingAlert, closeAlert,serverAlert, errorAlert, showAlert, confirmAlert,deleteAlert
+  loadingAlert, remoteErrorAlert, closeAlert, serverAlert, errorAlert, showAlert, confirmAlert, deleteAlert
 }
