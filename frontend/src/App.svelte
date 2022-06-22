@@ -31,7 +31,6 @@
   let canvas = undefined;
   let bboxSelected = -1;
   let invalidForm = true;
-  let invalidSpectrum = true;
   let changeFlag = false;
   let metadataSearched = []
   let validatedSpectrums = []
@@ -112,7 +111,6 @@
         
       }
       else{
-        console.log("ENTRE ACA")
         setChangeFlag();
       }
       imageChanged = false;
@@ -545,7 +543,7 @@
                     <RequiredForm
                       spectraData={item}
                       metadata={getRequiredMetadata($metadataStore.fields,false)}
-                      invalidSpectrum = {invalidSpectrum}
+                      invalidSpectrum ={!validatedSpectrums[bboxSelected-1]}
                       confirmSearchMetadata = {confirmSearchMetadata}
                     />
                   </div>
