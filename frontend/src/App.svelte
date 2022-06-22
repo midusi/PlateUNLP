@@ -51,12 +51,8 @@
     }
   }
 
-  async function bboxSeleccionada(){
-    console.log("BBOX:",bboxSelected)
-  }
-
   const checkChangeFlagInterval = setInterval(checkChangeFlag,5000); 
-  const test = setInterval(bboxSeleccionada,1000); 
+
   onMount(async () => {
     const events = {
       "selection:created": handleCreatedUpdate,
@@ -80,7 +76,6 @@
   function updateName(){
     if(bboxSelected != -1 && cantSpectra > 0)
       names[bboxSelected-1] = $metadataStore.spectraData[bboxSelected-1]["OBJECT"]
-    console.log(names)
   }
 
   export function setChangeFlag(){
@@ -206,7 +201,6 @@
           return true;
         });
       });
-    console.log(metadataSearched)
   }
 
   async function generateFits() {
@@ -406,7 +400,6 @@
 
 
   function handlerRemoved(obj) {
-    console.log("bbox:", bboxSelected)
     let index = bboxSelected - 1
     validatedSpectrums.splice(index,1)
     if(names[index+1]){
@@ -433,7 +426,6 @@
       validateForm();
       validateActualSpectrum();
     }
-    console.log(names)
   }
 
   function setBbox(event) {
