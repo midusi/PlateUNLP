@@ -175,9 +175,8 @@ export default class SpectrogramCanvas {
     fabric.Image.fromURL(this.originalImage, function(img) {
       let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
       filter_queque.setBrightness(filter);
-      for (let k in filter_queque.getFilters()) {
-        img.filters.push(filter_queque.getFilters()[k]);
-      }
+      img.filters = filter_queque.getFilters(); // Comprobar si funciona
+      // img.filters.push.apply(filter_queque.getFilters()); // Sino probar este
       // apply filters and re-render canvas when done
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
@@ -199,9 +198,8 @@ export default class SpectrogramCanvas {
       // add filter
       let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
       filter_queque.setContrast(filter);
-      for (let k in filter_queque.getFilters()) {
-        img.filters.push(filter_queque.getFilters()[k]);
-      }
+      img.filters = filter_queque.getFilters(); // Comprobar si funciona
+      // img.filters.push.apply(filter_queque.getFilters()); // Sino probar este
       // apply filters and re-render canvas when done
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
@@ -225,9 +223,8 @@ export default class SpectrogramCanvas {
       // add filter
       let filter = new fabric.Image.filters.BlendColor({ color: color });
       filter_queque.setColorize(filter);
-      for (let k in filter_queque.getFilters()) {
-        img.filters.push(filter_queque.getFilters()[k]);
-      }
+      img.filters = filter_queque.getFilters(); // Comprobar si funciona
+      // img.filters.push.apply(filter_queque.getFilters()); // Sino probar este
       // apply filters and re-render canvas when done
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
