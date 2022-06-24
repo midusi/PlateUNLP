@@ -173,9 +173,8 @@ export default class SpectrogramCanvas {
     const canvas =  this.canvas;
     const filter_queque = this.filter_queque;
     fabric.Image.fromURL(this.originalImage, function(img) {
-      let key = "brightness"
       let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
-      filter_queque.push(filter,key);
+      filter_queque.setBrightness(filter);
       for (let k in filter_queque.getFilters()) {
         img.filters.push(filter_queque.getFilters()[k]);
       }
@@ -198,9 +197,8 @@ export default class SpectrogramCanvas {
     const filter_queque = this.filter_queque;
     fabric.Image.fromURL(this.originalImage, function(img) {
       // add filter
-      let key = "contrast"
       let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
-      filter_queque.push(filter,key);
+      filter_queque.setContrast(filter);
       for (let k in filter_queque.getFilters()) {
         img.filters.push(filter_queque.getFilters()[k]);
       }
@@ -225,9 +223,8 @@ export default class SpectrogramCanvas {
 
     fabric.Image.fromURL(this.originalImage, function(img) {
       // add filter
-      let key = "color";
       let filter = new fabric.Image.filters.BlendColor({ color: color });
-      filter_queque.push(filter,key);
+      filter_queque.setColorize(filter);
       for (let k in filter_queque.getFilters()) {
         img.filters.push(filter_queque.getFilters()[k]);
       }
