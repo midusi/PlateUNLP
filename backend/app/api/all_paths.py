@@ -21,10 +21,24 @@ def api_all_paths():
     all_paths = all_paths.select(lambda item: item.split(sep='.').last() in formats)
     
     # Separates the names of the files of which information is stored in the cache
-    cache_path = aux_path = os.path.join(app.static_folder, 'cache')
-    cache_files = [file_name[:-5] for file_name in os.listdir(cache_path)] # Removes .json extensions
-    have_data = []
+    cache_path = os.path.join(app.static_folder,'cache')
+    working_path = aux_path = os.path.join(cache_path, 'working')
+    saved_path = aux_path = os.path.join(cache_path, 'saved')
+
+    if not os.path.exists(cache_path):
+        os.mkdir(cache_path)
+        os.mkdir(working_path)
+        os.mkdir(saved_path)
+    else: 
+        if not os.path.exists(working_path):
+            os.mkdir(working_path)
+        if not os.path.exists(saved_path):
+            os.mkdir(saved_path)
     
+    working_files = [file_name[:-5] for file_name in os.listdir(working_path)] # Removes .json extensions
+    have_data = []
+
+    saved_files = [file_name[:-5] for file_name in os.listdir(saved_path)] # R
     # Counts the number of spectra in each file
     paths = []
    
@@ -33,9 +47,11 @@ def api_all_paths():
             "fileName": file,
             "number_of_spectra": 0
         })
-        if(file in cache_files):
-            aux_path = os.path.join(cache_path, file+".json")
+        if(file in working_files):
+            aux_path = os.path.join(working_path, file+".json")
             paths[i]["number_of_spectra"] = len(DictPersistJSON(aux_path)["body"]["bbox_arr"])
+        elif(file in saved_files):
+            paths[i]["number_of_spectra"] = -1
         
 
         

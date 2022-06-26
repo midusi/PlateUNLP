@@ -2,6 +2,8 @@ from flask import request, json, Response, abort, current_app as app
 from astropy.io import fits
 import os
 import cv2
+import shutil
+from app.helpers.generate_txt import generate_txt
 
 def api_generate_fits():
 
@@ -9,6 +11,7 @@ def api_generate_fits():
     path_dir = request.json["path_dir"]
     bbox_arr = request.json["bbox_arr"]
     data_arr = request.json["data_arr"]
+    plate_data = request.json["plate_data"]
     fields = request.json["fields"]
 
     image_path = os.path.join(path_dir, img_name)
@@ -17,17 +20,14 @@ def api_generate_fits():
     # test
     print(image_path)
     print("image path",image_path)
-
     # generate dir output
     output_path = os.path.join(path_dir, "output")
     if not (os.path.exists(output_path)):
         os.mkdir(output_path)
-    print(output_path)
-
     # cropped
     for bbox,data in zip(bbox_arr,data_arr):
-        bbox.pop('id', None)
-        bbox.pop('color', None)
+        data.pop('id', None)
+        data.pop('color', None)
         
         # The flag to -1 loads the image as is
         rotated = False;
@@ -45,8 +45,6 @@ def api_generate_fits():
         w = int(bbox["w"])
         h = int(bbox["h"])
         
-        print(x+w,y+h)
-        print(x,y)
         if(y < 0 or y>original_height):
             y = 0
         if(y+h > original_height):
@@ -56,14 +54,12 @@ def api_generate_fits():
         if(x+w > original_width):
             w = original_width - x 
 
-        print(x+w,y+h)
-        print(x,y)
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:,:]
-
+        file_output_name = f'{img_name}_{data["OBJECT"]}'
         # saved image crop
-        cv2.imwrite(os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.png'),crop_img)
+        cv2.imwrite(os.path.join(output_path, f'{file_output_name}.png'),crop_img)
 
         # generated fit
         prihdr = fits.Header()
@@ -71,12 +67,19 @@ def api_generate_fits():
             comment = ''
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]
-            prihdr[key] = (data[key], comment)
-        print('Format to Save', crop_img.dtype)
-        print("PRI HDR: ---->",prihdr)
+            if fields[key]["global"]:
+                prihdr[key] = (plate_data[key], comment)
+            else:
+                prihdr[key] = (data[key], comment)
+            
+        prihdr["GAIN"] = ("","Gain, electrons per adu")
+        prihdr["NOISE"] = ("","Read noise")
         fits.writeto(
             (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
-
+        generate_txt(plate_data,data,output_path,file_output_name)
+    working_path = os.path.join(app.static_folder, 'cache', 'working', img_name+".tiff.json")
+    saved_path = os.path.join(app.static_folder, 'cache' ,'saved', img_name+".tiff.json")
+    shutil.move(working_path, saved_path)
     # api response data
     data = {
         "status": True

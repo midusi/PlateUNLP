@@ -1,6 +1,7 @@
 import { fabric } from 'fabric'
 import { saveAs } from 'file-saver'
 import { getColor } from '../helpers/canvasUtilities'
+import { FilterQueque } from '../models/FiltersQueque'
 
 export default class SpectrogramCanvas {
   constructor(events) {
@@ -9,6 +10,11 @@ export default class SpectrogramCanvas {
     this.originalImage = null
     this.scale = 1
     this.IDBBOX = 0
+
+    // Guarda los filtros actuales que se tienen que aplicar sobre el fondo
+    // Prefiero que usar la estructura java en ves de un Map devido a que se 
+    // realizara mucho acceso secuencial para aplicar los filtros
+    this.filter_queque = new FilterQueque()
 
     this.canvas = new fabric.Canvas('canvas-container', {
       hoverCursor: 'pointer',
@@ -25,21 +31,38 @@ export default class SpectrogramCanvas {
 
   addBbox() {
     this.IDBBOX += 1
-    const clone = this.canvas.item(0)
+    let rect;
+    if(this.canvas.getObjects().length > 0){
+      
+      const clone = this.canvas.getObjects()[0]
 
-    const rect = new fabric.Rect({
-      id: this.IDBBOX,
-      top: this.getCanvasWidth()/3,
-      left: clone.left,
-      width: clone.width,
-      height: clone.height,
-      opacity: 1,
-      fill: '',
-      stroke: getColor(this.IDBBOX-1),
-      strokeWidth: 10,
-      lockRotation: true
-    })
-
+      rect = new fabric.Rect({
+        id: this.IDBBOX,
+        top: this.getCanvasWidth()/4,
+        left: clone.left,
+        width: clone.width,
+        height: clone.height,
+        opacity: 1,
+        fill: '',
+        stroke: getColor(this.IDBBOX-1),
+        strokeWidth: 10,
+        lockRotation: true
+      })
+    }
+    else{
+      rect = new fabric.Rect({
+        id: this.IDBBOX,
+        top: this.getCanvasWidth()/4,
+        left: this.getCanvasHeight()/2,
+        width: this.getCanvasWidth()*1.5,
+        height: this.getCanvasHeight()/2,
+        opacity: 1,
+        fill: '',
+        stroke: getColor(this.IDBBOX-1),
+        strokeWidth: 10,
+        lockRotation: true
+      })
+    }
     this.canvas.add(rect)
     this.canvas.setActiveObject(rect)
   }
@@ -60,9 +83,6 @@ export default class SpectrogramCanvas {
     let text = ''
     const objs = this.canvas.getObjects()
     objs.forEach((obj) => {
-      console.log(
-        `Original: width: ${obj.cacheTranslationX} height: ${obj.cacheTranslationY} x1: ${obj.aCoords.tl.x} y1: ${obj.aCoords.tl.y}`
-      )
       const coord = this._convertYoloBbox(
         obj.aCoords.tl.x,
         obj.aCoords.tl.y,
@@ -79,7 +99,6 @@ export default class SpectrogramCanvas {
     const file = inputText.files[0]
     if (file) {
       const text = await file.text()
-      console.log(text)
       const lines = text.split('\n')
       lines.pop()
       lines.forEach((line) => {
@@ -91,9 +110,6 @@ export default class SpectrogramCanvas {
         const h = parseFloat(values[4])
 
         const res = this._convertCoordinates(x1, y1, w, h)
-        console.log(
-          `Invert: width: ${res[2]} height: ${res[3]} x1: ${res[0]} y1: ${res[1]}`
-        )
         const rect = new fabric.Rect({
           top: res[1],
           left: res[0],
@@ -129,11 +145,23 @@ export default class SpectrogramCanvas {
         strokeWidth: 10,
         lockRotation: true
       })
-
       this.canvas.add(rect)
     })
   }
 
+  resetFilters() {
+    this.filter_queque = new FilterQueque();
+
+    this.canvas.setBackgroundImage(
+      this.originalImage,
+      this.canvas.renderAll.bind(this.canvas),
+      {
+        backgroundImageOpacity: 0.5,
+        backgroundImageStretch: false
+      }
+    )
+  }
+  
   setScale(scale) {
     this.scale = scale
     this.canvas.setHeight(this.getCanvasHeight())
@@ -141,13 +169,89 @@ export default class SpectrogramCanvas {
     this.canvas.setZoom(this.scale)
   }
 
+  setBrightness(brightness) {
+    const canvas =  this.canvas;
+    const filter_queque = this.filter_queque;
+    fabric.Image.fromURL(this.originalImage, function(img) {
+      let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
+      filter_queque.setBrightness(filter);
+      img.filters = filter_queque.getFilters(); // Comprobar si funciona
+      // apply filters and re-render canvas when done
+      img.applyFilters();
+      // add image onto canvas (it also re-render the canvas)
+      canvas.setBackgroundImage(
+        img,
+        canvas.renderAll.bind(canvas),
+        {
+          backgroundImageOpacity: 0.5,
+          backgroundImageStretch: false
+        }
+      )
+    });
+  }
+
+  setContrast(contrast) {
+    const canvas =  this.canvas;
+    const filter_queque = this.filter_queque;
+    fabric.Image.fromURL(this.originalImage, function(img) {
+      // add filter
+      let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
+      filter_queque.setContrast(filter);
+      img.filters = filter_queque.getFilters(); // Comprobar si funciona
+      // apply filters and re-render canvas when done
+      img.applyFilters();
+      // add image onto canvas (it also re-render the canvas)
+      canvas.setBackgroundImage(
+        img,
+        canvas.renderAll.bind(canvas),
+        {
+          backgroundImageOpacity: 0.5,
+          backgroundImageStretch: false
+        }
+      )
+    });
+  }
+  
+  colorize(color) {
+    const canvas =  this.canvas;
+    const filter_queque = this.filter_queque;
+    // const color = new fabric.Color('rgb(255,0,100)');
+
+    fabric.Image.fromURL(this.originalImage, function(img) {
+      // add filter
+      let filter = new fabric.Image.filters.BlendColor({ color: color });
+      filter_queque.setColorize(filter);
+      img.filters = filter_queque.getFilters(); // Comprobar si funciona
+      // apply filters and re-render canvas when done
+      img.applyFilters();
+      // add image onto canvas (it also re-render the canvas)
+      canvas.setBackgroundImage(
+        img,
+        canvas.renderAll.bind(canvas),
+        {
+          backgroundImageOpacity: 0.5,
+          backgroundImageStretch: false
+        }
+      )
+    });
+  }
+
   loadImage(src, width, height) {
-    if (src !== '') {
+    if (fabric.isWebglSupported()) {
+      fabric.textureSize = 20000;
+      fabric.maxTextureSize = 20000;
+    }
+
+    if (src !== '') {    
       this.originalImage = src
       this.widthOriginal = width
       this.heightOriginal = height
+      this.filter_queque = new FilterQueque()
       this.canvas.setHeight(this.getCanvasHeight())
       this.canvas.setWidth(this.getCanvasWidth())
+
+      var imageObj = new Image();
+      imageObj.src = src;
       this.canvas.setBackgroundImage(
         src,
         this.canvas.renderAll.bind(this.canvas),
@@ -173,7 +277,6 @@ export default class SpectrogramCanvas {
   setPredictions(json) {
     this.IDBBOX = 0
     this.deleteAllBbox()
-    console.log(json)
     let predictions = json.sort((a, b) => a.x - b.x).map((bbox) => {return this._convertCoordinates(bbox)});
     this.loadBboxYoloFormatJson(predictions);
     this.canvas.setActiveObject(this.canvas.item(0))
@@ -208,8 +311,6 @@ export default class SpectrogramCanvas {
     this.canvas.getObjects().forEach((bbox) => {
       bboxes.push(this.getBbox(bbox.id));
     })
-    
-    console.log(bboxes);
 
     return bboxes;
   }

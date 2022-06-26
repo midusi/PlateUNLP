@@ -2,7 +2,7 @@ import { fabric } from 'fabric'
 import { deleteAlert } from "../helpers/Alert";
 // eslint-disable-next-line func-names
 
-const colors = ["#FF2B2B","#FFFC2B","#44FF2B","#2BFFEF","#2B34FF","#E52BFF","white"];
+const colors = ["#FF2B2B","#FFFC2B","#44FF2B","#2BFFEF","#2B34FF","#E52BFF"];
 
 fabric.Canvas.prototype.getItem = function (id) {
   let target = null
@@ -71,7 +71,6 @@ function getDeleteIcon() {
 }
 
 function getColor(id) {
-  console.log(colors[id % colors.length])
   return colors[id % colors.length];
 }
 

@@ -101,7 +101,7 @@
     
 </script>
 
-<Modal bottonText="Config Params" titleModal="Editar parametros por defecto" key="parameters">
+<Modal bottonText="⚙ Valores por defecto" titleModal="Editar valores por defecto" key="parameters">
     <div slot="modalBody">
         <h4 class="mt-2">OBSERVER</h4>
             <Param bind:this={observerComponent} paramNameLists="observers"  paramNameDef="observerDefault"

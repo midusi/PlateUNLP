@@ -16,4 +16,4 @@ def set_routes(app):
     app.add_url_rule("/api/image/save", "save_img", 
                      image.save, methods=["PUT"])
     app.add_url_rule("/api/image/delete", "delete_img", 
-                     image.delete, methods=["DELETE"])
+                     image.delete, methods=["PUT"])

@@ -4,14 +4,14 @@
   export let name, value;
 
   const setChangeFlag = getContext("setChangeFlag");
-  let aux = "";
 
   const setType = (node) => {
     node.type = $metadataStore.fields[name].type;
   };
 
-  function cambio(){
-    console.log("CAMBIO");
+  function remoteDataChange(){
+    $metadataStore.fields[name].loaded = false
+    setChangeFlag();
   }
 
 </script>
@@ -24,14 +24,24 @@
     </span>
   </span>
   {#if $metadataStore.fields[name].options === undefined}
-    <input
-      class="form-control"
-      use:setType
-      bind:value
-      on:change={setChangeFlag}
-      placeholder={$metadataStore.fields[name].info}
-    />
-
+    {#if $metadataStore.fields[name].remote}
+      <input
+        class="form-control"
+        use:setType
+        style={`background-color: ${$metadataStore.fields[name].loaded ? "lavender" : "white"};`}
+        bind:value
+        on:change={() => remoteDataChange(name)}
+        placeholder={$metadataStore.fields[name].info}
+      />
+    {:else}
+      <input
+        class="form-control"
+        use:setType
+        bind:value
+        on:change={setChangeFlag}
+        placeholder={$metadataStore.fields[name].info}
+      />
+    {/if}
   {:else if $metadataStore.fields[name].label === "OBSERVAT"}
   <select
       bind:value

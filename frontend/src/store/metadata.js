@@ -1,13 +1,16 @@
 import { writable } from 'svelte/store'
-import { loadingAlert, errorAlert, showAlert } from '../helpers/Alert'
+import { loadingAlert, remoteErrorAlert, showAlert } from '../helpers/Alert'
 import apiSpectrum from '../api/spectrum'
 import { getMetadataFields } from '../helpers/metadataUtilities'
+import {serverUp} from './serverUp'
 
 function createStoreMetadata() {
   const { subscribe, update, set } = writable({
     spectraData: [],
+    plateData: {},
     formActions: undefined,
-    fields: {}
+    fields: {},
+    globalFields: {}
   })
 
   return {
@@ -16,6 +19,7 @@ function createStoreMetadata() {
     initFields: () => {
       const fields = getMetadataFields()
       const labelFormat = {}
+      const labelFormatGlobal = {}
       Object.keys(fields).map((field) => {
         labelFormat[fields[field].label] = fields[field]
       })
@@ -24,6 +28,13 @@ function createStoreMetadata() {
         return prev
       })
     },
+    setFields: (fields) => {
+       update((prev) => {
+        prev.fields = fields
+        return prev
+      })
+    }
+    ,
     setRemoteMetadata: async (metadataSend, index) => {
       // Receive all fields of a spectrum to be modified
       loadingAlert()
@@ -33,13 +44,16 @@ function createStoreMetadata() {
         update((prev) => {
           Object.keys(data.metadata).map((field) => {
             prev.spectraData[index][field] = data.metadata[field]
+            prev.fields[field].loaded = true
           })
           return prev
         })
-        showAlert({ title: 'Metadatos Cargados', message: 'Los metadatos se cargaron exitosamente.' })
+        showAlert({ title: 'Metadatos Cargados exitosamente'})
         return true
       } catch (error) {
-        errorAlert({ message: error.response.data.message })
+        if(await serverUp()){
+          return await remoteErrorAlert({ message: error.response.data.message})
+        }
       }
       return false
     },
@@ -52,6 +66,12 @@ function createStoreMetadata() {
     setSpectraData: (data) => {
       update((prev) => {
         prev.spectraData = data
+        return prev
+      })
+    },
+    setPlateData: (data) => {
+      update((prev) => {
+        prev.plateData = data
         return prev
       })
     },

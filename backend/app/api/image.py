@@ -3,12 +3,12 @@ import os
 import base64
 import cv2
 from app.helpers.DictPersistJSON import DictPersistJSON
+import shutil
 
 def load():
 
     dir_path = request.values["dir_path"]
     img_name = request.values["img_name"]
-    
     filename = os.path.join(dir_path, img_name)
     img_info = cv2.imread(filename, -1)
     img = cv2.imread(filename)
@@ -46,19 +46,34 @@ def load():
     
     # It checks if there is information saved for that image and 
     # if it exists it adds its information to data
-    cache_path = os.path.join(app.static_folder, 'cache', img_name+".json")
-    if (os.path.isfile(cache_path)):
-        print("Entre al if")
-        dataList = DictPersistJSON(cache_path)["body"]
+    saved_path = os.path.join(app.static_folder, 'cache' ,'saved')
+    working_path = os.path.join(app.static_folder, 'cache', 'working')
+    if not os.path.exists(saved_path):
+        os.mkdir(saved_path)
+    if not os.path.exists(working_path):
+        os.mkdir(working_path)
+    saved_path = os.path.join(saved_path, img_name+".json")
+    working_path =  os.path.join(working_path,img_name+".json")
+    
+    if (os.path.isfile(working_path) or os.path.isfile(saved_path)):
+        if (os.path.isfile(working_path)):
+            dataList = DictPersistJSON(working_path)["body"]
+        else:
+            dataList = DictPersistJSON(saved_path)["body"]
+      
+        
         print(dataList)
         bbox = dataList["bbox_arr"]
+        plateData = dataList["plate_data"]
         metadata = dataList["data_arr"]
+        fields = dataList["fields"]
         data["info"]["bboxes"] = bbox
         data["info"]["metadata"] = metadata
+        data["info"]["plateData"] = plateData
+        data["info"]["fields"] = fields
+
         
     # API response messaje
-    print("--Data--")
-    print(data)
     resp = jsonify(data)
     resp.status_code = 200
     
@@ -69,34 +84,46 @@ def save():
     # params
     body = request.get_json()
     img_name = body["img_name"]
-
+    moved = False
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
-    
     # Save image data in .json files
-    full_path = os.path.join(app.static_folder, 'cache')
+    saved_path = os.path.join(app.static_folder, 'cache' ,'saved')
+    if not os.path.exists(saved_path):
+        os.mkdir(saved_path)
+
+    full_path = os.path.join(app.static_folder, 'cache','working')
     if not os.path.exists(full_path):
         os.mkdir(full_path)
+
     save_path = os.path.join(full_path, img_name+".json")
- 
+    saved_path = os.path.join(saved_path,img_name+".json")
+    if(os.path.isfile(saved_path)):
+        os.remove(saved_path) 
+        moved = True
     db = DictPersistJSON(save_path)
     db["body"] = body
     
     # API response messaje
     resp = jsonify(body)
-    resp.status_code = 201
+    if(moved):
+        resp.status_code = 201
+    else:
+        resp.status_code = 200
     return resp
 
 # Receives the information of an image and saves it in a local file
 def delete():
     # params
-    img_name = request.values["img_name"]
-    
+    body = request.get_json()
+    img_name = body["img_name"]
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
-    
+    delete_path = os.path.join(app.static_folder, 'cache','working')
+    if not os.path.exists(delete_path):
+        os.mkdir(delete_path)
     # Delete the information of an image if it exists
-    delete_path = os.path.join(app.static_folder, 'cache', img_name+".json")
+    delete_path = os.path.join(delete_path, img_name+".json")
     if (os.path.isfile(delete_path)):
         os.remove(delete_path)
         

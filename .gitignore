@@ -468,5 +468,6 @@ dist
 
 ### End Node ###
 
-
+/backend/app/static/cache
 /frontend/node_modules
+backend/app/static/.config/db.json
