@@ -1,10 +1,10 @@
 <script>
     export let spectrogramCanvas;
-    export let color_input = 0;
+    export let colorize_input = 0;
   
     function colorize() {
-        console.log("Color = ", color_input);
-        spectrogramCanvas.colorize(color_input);
+        console.log("Color = ", colorize_input);
+        spectrogramCanvas.colorize(colorize_input);
     }
 </script>
   
@@ -12,7 +12,7 @@
     <span>Color</span>
     <input 
         type="color" 
-        bind:value={color_input}
+        bind:value={colorize_input}
         on:change={colorize} 
     />
 </div>
