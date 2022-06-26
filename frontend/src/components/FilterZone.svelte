@@ -13,13 +13,13 @@
   
   let brightness_input = 0;
   let contrast_input = 0;
-  let color_input = "#ffffff";
+  let colorize_input = "#ffffff";
 
   function resetSpectrogramCanvas() {
       dispatch('reset')
       brightness_input = 0;
       contrast_input = 0;
-      color_input = "#ffffff";
+      colorize_input = "#ffffff";
       spectrogramCanvas.resetFilters();
       console.log("Reset Filters");
   }
@@ -31,7 +31,7 @@
     <Zoom spectrogramCanvas={spectrogramCanvas} bind:scake={scale}/>
     <Brightness spectrogramCanvas={spectrogramCanvas} bind:brightness_input={brightness_input}/>
     <Contrast spectrogramCanvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
-    <Colorize spectrogramCanvas={spectrogramCanvas} bind:color_input={contrast_input}/>
+    <Colorize spectrogramCanvas={spectrogramCanvas} bind:color_input={colorize_input}/>
     <p>&nbsp;</p>   
     <NButton click={resetSpectrogramCanvas}>
       Reiniciar Filtros
