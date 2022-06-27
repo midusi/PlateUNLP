@@ -403,10 +403,9 @@
   function handlerRemoved(obj) {
     let index = bboxSelected - 1
     validatedSpectrums.splice(index,1)
-    if(names[index+1]){
-      names[index] = names[index+1]
-    }
-    names.splice(index,1)
+    let namesAux = names;
+    namesAux.splice(index,1);
+    names = namesAux
     metadataSearched.splice(index,1)
     cantSpectra--;
     if (cantSpectra > 0) {
