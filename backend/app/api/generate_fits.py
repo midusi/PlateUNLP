@@ -28,6 +28,7 @@ def api_generate_fits():
     for bbox,data in zip(bbox_arr,data_arr):
         data.pop('id', None)
         data.pop('color', None)
+        data.pop('loaded', None)
         
         # The flag to -1 loads the image as is
         rotated = False;
