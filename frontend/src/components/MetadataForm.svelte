@@ -2,7 +2,7 @@
     import Field from "./Field.svelte";
     import Modal from "./Modal.svelte";
     import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
-    export let metadata, spectraData;
+    export let metadata, spectraData,index;
 
     let arr = [];
     for (let i = 0; i <= metadata.length; i = i + 3) {
@@ -23,6 +23,7 @@
                         <Field
                             name={field[0]}
                             bind:value={spectraData[field[0]]}
+                            index={index}
                         />
                     {/if}
                 </div>
@@ -31,6 +32,7 @@
                         <Field
                             name={field[1]}
                             bind:value={spectraData[field[1]]}
+                            index={index}
                         />
                     {/if}
                 </div>
@@ -39,6 +41,7 @@
                         <Field
                             name={field[2]}
                             bind:value={spectraData[field[2]]}
+                            index={index}
                         />
                     {/if}
                 </div>

@@ -70,7 +70,6 @@ function createStoreWorkspace() {
 
         if(data.info.bboxes){
           //no predigo nada y cargo las bboxes
-          console.log(data.info)
           spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes);
 
         }

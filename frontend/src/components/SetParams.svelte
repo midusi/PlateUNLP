@@ -1,7 +1,7 @@
 <script>
     import Modal from "./Modal.svelte";
     import Param from "./Param.svelte";
-    export let updateParent;
+    import { metadataStore } from "../store/metadata";
 
     let lists = {
         observers : [],
@@ -95,7 +95,7 @@
         observerComponent.reset(defaults.observerDefault);
         imageTypeComponent.reset(defaults.imageTypeDefault);
         digitaliComponent.reset(defaults.digitaliDefault);
-        updateParent();
+        metadataStore.updateDefaults();
     }
 
     

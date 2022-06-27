@@ -28,9 +28,12 @@ function createStoreMetadata() {
         return prev
       })
     },
-    setFields: (fields) => {
+    setRemoteFields: (fields) => {
+
        update((prev) => {
-        prev.fields = fields
+        Object.keys(fields).map((field) => {
+          prev.fields[field] = fields[field]
+        })
         return prev
       })
     }
@@ -42,9 +45,10 @@ function createStoreMetadata() {
         const response = await apiSpectrum.getMetadata(metadataSend)
         const { data } = response
         update((prev) => {
+          prev.spectraData[index]["loaded"] = []
           Object.keys(data.metadata).map((field) => {
             prev.spectraData[index][field] = data.metadata[field]
-            prev.fields[field].loaded = true
+            prev.spectraData[index]["loaded"].push(field)
           })
           return prev
         })
@@ -86,6 +90,23 @@ function createStoreMetadata() {
         prev.fields[key].options = options
         return prev
       })
+    },
+    updateDefaults: () => {
+      update((prev) => {
+        let fields = getMetadataFields();
+        let newFields =  {}
+        Object.keys(fields).map((field) => {
+          newFields[fields[field].label] = fields[field]
+        })
+        let oldFields = prev.fields;
+        Object.keys(prev.fields).map((field) => {
+          if(oldFields[field].default != undefined){
+            oldFields[field].options = newFields[field].options
+            oldFields[field].default = newFields[field].default
+          }
+      })
+       return prev
+    })
     }
   }
 }

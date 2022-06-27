@@ -1,7 +1,7 @@
 <script>
   import { metadataStore } from "../store/metadata";
   import {getContext} from "svelte";
-  export let name, value;
+  export let name, value, index;
 
   const setChangeFlag = getContext("setChangeFlag");
 
@@ -9,8 +9,15 @@
     node.type = $metadataStore.fields[name].type;
   };
 
-  function remoteDataChange(){
-    $metadataStore.fields[name].loaded = false
+  function remoteDataChange(name){
+
+    let array = $metadataStore.spectraData[index]["loaded"]
+    const arrayIndex = array.indexOf(name);
+      if (arrayIndex !== -1) {
+        array.splice(arrayIndex, 1);
+      }
+    $metadataStore.spectraData[index]["loaded"] = array
+    console.log(array)
     setChangeFlag();
   }
 
@@ -28,9 +35,9 @@
       <input
         class="form-control"
         use:setType
-        style={`background-color: ${$metadataStore.fields[name].loaded ? "lavender" : "white"};`}
+        style={`background-color: ${$metadataStore.spectraData[index]["loaded"].includes($metadataStore.fields[name].label) ? "lavender" : "white"};`}
         bind:value
-        on:change={() => remoteDataChange(name)}
+        on:change={() => remoteDataChange($metadataStore.fields[name].label)}
         placeholder={$metadataStore.fields[name].info}
       />
     {:else}

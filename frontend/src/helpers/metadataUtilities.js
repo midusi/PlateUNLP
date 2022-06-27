@@ -155,7 +155,6 @@ function getMetadataFields() {
       info: 'Simbad main ID object name',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     ra2000: {
@@ -164,7 +163,6 @@ function getMetadataFields() {
       info: 'Right ascension J2000',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     dec2000: {
@@ -173,7 +171,6 @@ function getMetadataFields() {
       info: 'Declination J2000',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     sptype: {
@@ -182,7 +179,6 @@ function getMetadataFields() {
       info: 'Simbad spectral type',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     equinox: {
@@ -191,7 +187,6 @@ function getMetadataFields() {
       info: 'Equinox of ra y dec',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     epoch: {
@@ -200,7 +195,6 @@ function getMetadataFields() {
       info: 'Epoch of ra y dec',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     ra: {
@@ -209,7 +203,6 @@ function getMetadataFields() {
       info: 'Right ascension',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     dec: {
@@ -218,7 +211,6 @@ function getMetadataFields() {
       info: 'Declination',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     ra1950: {
@@ -227,7 +219,6 @@ function getMetadataFields() {
       info: 'RA2000 precessed to ep.1950 eq.1950',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     dec1950: {
@@ -236,7 +227,6 @@ function getMetadataFields() {
       info: 'DEC2000 precessed to ep.1950 eq.1950',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     timeObs: {
@@ -245,7 +235,6 @@ function getMetadataFields() {
       info: 'Local time at the start of the observation',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     st: {
@@ -254,7 +243,6 @@ function getMetadataFields() {
       info: 'Local mean sidereal time',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     ha: {
@@ -263,7 +251,6 @@ function getMetadataFields() {
       info: 'Hour angle',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     airmass: {
@@ -272,7 +259,6 @@ function getMetadataFields() {
       info: 'Air mass measure',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     jd: {
@@ -281,7 +267,6 @@ function getMetadataFields() {
       info: 'Geocentric Julian day (Greenwich)',
       required: false,
       remote: true,
-      loaded: false,
       global: false
     },
     // End Remote Metadata

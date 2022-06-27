@@ -114,7 +114,6 @@
         
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
-        metadataStore.setFields(data.fields);
         checkMetadataSearched();
         validateForm();
         validateAllSpectrum();
@@ -161,6 +160,7 @@
     };
     const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
     if(setted){
+      console.log("SETTED")
       setChangeFlag();
     }
     return setted;
@@ -184,8 +184,7 @@
         $metadataStore.spectraData,
         $metadataStore.plateData,
         pathDir,
-        imageName,
-        $metadataStore.fields
+        imageName
     );
     workspaceStore.setPath(imageName,cantSpectra)
   }
@@ -238,8 +237,9 @@
     if(pathDir)
       await workspaceStore.getPaths(pathDir);
   }
-  function updateLists(){
-    metadataStore.initFields();
+
+  function updateDefaults(){
+    console.log("HOLA")
   }
 
   function getMetadata(fields,global) {
@@ -389,6 +389,7 @@
     metadataStore.setSpectraData([
       ...$metadataStore.spectraData,
       {
+        loaded: [],
         id: obj.target.id,
         color: obj.target.stroke,
         ...fields,
@@ -553,7 +554,7 @@
                   </div>
                 </TabPanel>
               {/if}
-              {#each $metadataStore.spectraData as item}
+              {#each $metadataStore.spectraData as item,index}
                 <TabPanel>
                   <div class="controls">
                     <RequiredForm
@@ -568,6 +569,7 @@
                       <MetadataForm
                         spectraData={item}
                         metadata={getOptionalMetadata($metadataStore.fields,false)}
+                        index={index}
                       />
                     </div>
                   {/if}
@@ -576,7 +578,7 @@
             </Tabs>
             <div class="row mt-4 ml-1 mb-4">
               <div class="controls  mr-2"> 
-                <SetParams updateParent={updateLists}/>
+                <SetParams/>
               </div>
             </div>
           </div>
