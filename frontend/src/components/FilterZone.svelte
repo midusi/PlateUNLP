@@ -4,9 +4,7 @@
   import Contrast from "./Filters/Contrast.svelte";
   import Colorize from "./Filters/Colorize.svelte";
   import Zoom from "./Filters/Zoom.svelte";  
-
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
+  import FiltersGlobalValuesModal from "./Modals/FiltersGlobalValuesModal.svelte";  
   
   export let spectrogramCanvas;
   export let scale;  
@@ -16,7 +14,6 @@
   let colorize_input = "#ffffff";
 
   function resetSpectrogramCanvas() {
-      dispatch('reset')
       brightness_input = 0;
       contrast_input = 0;
       colorize_input = "#ffffff";
@@ -36,6 +33,7 @@
     <NButton click={resetSpectrogramCanvas}>
       Reiniciar Filtros
     </NButton>
+    <!-- <FiltersGlobalValuesModal/> -->
   </div>
 </div>
 <p>&nbsp;</p>    
