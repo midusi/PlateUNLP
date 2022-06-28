@@ -12,6 +12,7 @@ export default class SimpleCanvas {
             selectionBorderColor: 'green',
             backgroundColor: null
         })
+        var ctx = this.canvas.getContext("2d");
 
         if (fabric.isWebglSupported()) {
             fabric.textureSize = 20000;
@@ -22,14 +23,17 @@ export default class SimpleCanvas {
         imageObj.src = this.src_img;
         this.canvas.setHeight(imageObj.height)
         this.canvas.setWidth(imageObj.width)
-        this.canvas.setBackgroundImage(
-            this.src_img,
-            this.canvas.renderAll.bind(this.canvas),
-            {
-                backgroundImageOpacity: 0.5,
-                backgroundImageStretch: false
-            }
-        )
+        imageObj.onload = function () {
+            ctx.drawImage(imageObj  ,0,0);   
+        }
+        // this.canvas.setBackgroundImage(
+        //     this.src_img,
+        //     this.canvas.renderAll.bind(this.canvas),
+        //     {
+        //         backgroundImageOpacity: 0.5,
+        //         backgroundImageStretch: false
+        //     }
+        // )
     }
 
     resetFilters() {
