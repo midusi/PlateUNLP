@@ -1,7 +1,7 @@
 import { fabric } from 'fabric'
 import { saveAs } from 'file-saver'
 import { getColor } from '../helpers/canvasUtilities'
-import { FilterQueque } from '../models/FiltersQueque'
+import { FilterQueque } from './FiltersQueque'
 
 export default class SpectrogramCanvas {
   constructor(events) {
@@ -10,10 +10,6 @@ export default class SpectrogramCanvas {
     this.originalImage = null
     this.scale = 1
     this.IDBBOX = 0
-
-    // Guarda los filtros actuales que se tienen que aplicar sobre el fondo
-    // Prefiero que usar la estructura java en ves de un Map devido a que se 
-    // realizara mucho acceso secuencial para aplicar los filtros
     this.filter_queque = new FilterQueque()
 
     this.canvas = new fabric.Canvas('canvas-container', {

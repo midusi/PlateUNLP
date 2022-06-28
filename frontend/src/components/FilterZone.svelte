@@ -25,15 +25,15 @@
 <div class="card">
   <h5 class="card-header">Filtros</h5>
   <div class="card-body">
-    <Zoom spectrogramCanvas={spectrogramCanvas} bind:scake={scale}/>
-    <Brightness spectrogramCanvas={spectrogramCanvas} bind:brightness_input={brightness_input}/>
-    <Contrast spectrogramCanvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
-    <Colorize spectrogramCanvas={spectrogramCanvas} bind:color_input={colorize_input}/>
+    <Zoom canvas={spectrogramCanvas} bind:scale={scale}/>
+    <Brightness canvas={spectrogramCanvas} bind:brightness_input={brightness_input}/>
+    <Contrast canvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
+    <Colorize canvas={spectrogramCanvas} bind:colorize_input={colorize_input}/>
     <p>&nbsp;</p>   
-    <NButton click={resetSpectrogramCanvas}>
+    <NButton click={resetSpectrogramCanvas} >
       Reiniciar Filtros
     </NButton>
-    <!-- <FiltersGlobalValuesModal/> -->
+    <FiltersGlobalValuesModal/>
   </div>
 </div>
 <p>&nbsp;</p>    

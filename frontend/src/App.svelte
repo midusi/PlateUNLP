@@ -99,7 +99,6 @@
       let data;
       try{
         data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
-
       }
       catch(err){
       }

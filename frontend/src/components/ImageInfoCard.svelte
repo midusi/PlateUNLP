@@ -16,7 +16,7 @@
       {#if state}
         <div class="d-flex justify-content-end">&#9989</div>
       {:else}
-        <div class="d-flex justify-content-end"><img src="https://c.tenor.com/On7kvXhzml4AAAAi/loading-gif.gif" width="25" height="25"></div>
+        <div class="d-flex justify-content-end"><img src="https://c.tenor.com/On7kvXhzml4AAAAi/loading-gif.gif" width="25" height="25" alt="Icono de carga"></div>
       {/if}
     </div>
   </div>

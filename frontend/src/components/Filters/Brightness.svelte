@@ -1,10 +1,10 @@
 <script>
-    export let spectrogramCanvas;
+    export let canvas;
     export let brightness_input = 0;
   
     function setBrightness() {
         console.log("Brillo = ", brightness_input);
-        spectrogramCanvas.setBrightness(brightness_input);
+        canvas.setBrightness(brightness_input);
     }
 </script>
   

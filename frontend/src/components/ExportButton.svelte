@@ -4,7 +4,7 @@
     validatedSpectrums,
     plateValid,
     disabled = false,
-    style,
+    style = {},
     classStyle = "btn btn-outline-dark";
 
   let title = ""
