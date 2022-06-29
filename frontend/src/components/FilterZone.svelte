@@ -33,7 +33,7 @@
     <NButton click={resetSpectrogramCanvas} >
       Reiniciar Filtros
     </NButton>
-    <FiltersGlobalValuesModal canvas={spectrogramCanvas}/>
+    <FiltersGlobalValuesModal/>
   </div>
 </div>
 <p>&nbsp;</p>    

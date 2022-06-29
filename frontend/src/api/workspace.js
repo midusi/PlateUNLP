@@ -4,7 +4,8 @@ const paths = {
   allPaths: '/allPaths',
   getImg: '/image/load',
   saveConfig: '/saveConfig',
-  loadConfig: '/loadConfig'
+  loadConfig: '/loadConfig',
+  getResource: '/api/resources/'
 }
 
 export default {
@@ -15,5 +16,8 @@ export default {
     params: data
   }),
   saveConfig: async (data) => axiosApi.post(paths.saveConfig, data),
-  loadConfig: async () => axiosApi.get(paths.loadConfig)
+  loadConfig: async () => axiosApi.get(paths.loadConfig),
+  getResource: async (data) => axiosApi.get(paths.getResource, {
+    params: data
+  })
 }

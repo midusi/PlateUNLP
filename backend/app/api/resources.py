@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint, current_app as app
-import cv2
+import base64
 import os
 from app.helpers.DictPersistJSON import DictPersistJSON
 
@@ -7,19 +7,25 @@ resources_api = Blueprint("resources", __name__, url_prefix="/api/resources")
 
 @resources_api.get("/")
 def get_resource():
-    resource_name = request.json["resource_name"]
+    print("OK_1")
+    resource_name = request.values["resource_name"]
+    print("Se recibio ", resource_name," como parametro")
 
     full_path = os.path.join(app.static_folder, 'resources')
     filename = os.path.join(full_path, resource_name)
+    print("Se buscara el archivo en la ruta ", filename)
     
-    if (os.path.isfile(full_path)):
-        resource = cv2.imread(filename)
+    if (os.path.isfile(filename)):
+        with open(filename, "rb") as f:
+            resource_binary = f.read()
+        
+        resource = base64.b64encode(resource_binary).decode("utf-8")
         
         # api response data
         data = {
             "resource": resource
         }
-        # API response messaje
+        # API response message
         resp = jsonify(data)
         resp.status_code = 200
     
