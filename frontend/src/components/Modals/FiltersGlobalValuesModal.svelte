@@ -4,14 +4,17 @@
     import Brightness from "../Filters/Brightness.svelte";
     import Contrast from "../Filters/Contrast.svelte";
     import Colorize from "../Filters/Colorize.svelte";
-    import NButton from "../NButton.svelte"
-import { update_await_block_branch } from "svelte/internal";
 
     let brightness_global = 0;
     let contrast_global = 0;
     let colorize_global = "#ffffff";
     let simpleCanvas;
-    let disabled = false;
+
+    let disabled_save = true;
+    // Reacciones reactivas de disable_save respecto a cambios en otras variables
+    $: disabled_save = (brightness_global === localStorage.getItem('Defect_brightness_global'))
+    $: disabled_save = (contrast_global === localStorage.getItem('Defect_contrast_global'))
+    $: disabled_save = (colorize_global === localStorage.getItem('Defect_colorize_global'))
 
     function clearSelection(){
         //cosas
@@ -19,22 +22,24 @@ import { update_await_block_branch } from "svelte/internal";
 
     function init() {
         simpleCanvas = new SimpleCanvas();
-        // var micanvas = document.getElementById("canvas-global-filters");
-        // var ctx = micanvas.getContext("2d");
-        // var img = new Image();
-        // img.src = "/Luna.jpg";
-        // ctx.drawImage(img,0,0);  
-
+        let aux
+        aux = localStorage.getItem('Defect_brightness_global')
+        if(aux){ brightness_global = aux }
+        aux = localStorage.getItem('Defect_contrast_global')
+        if(aux){ contrast_global = aux }
+        aux = localStorage.getItem('Defect_colorize_global')
+        if(aux){ colorize_global = aux }
     }
 
     document.addEventListener("DOMContentLoaded", init, false)
 
     function save_changes(){
-        // Se guardan los nuevos valores mediante localstorage
+        // Se guardan los nuevos valores mediante localStorage
         // Todas las los parametros guardados usaran de llava Defect_{NombreP};
         localStorage.setItem('Defect_brightness_global', brightness_global);
         localStorage.setItem('Defect_contrast_global', contrast_global);
         localStorage.setItem('Defect_colorize_global', colorize_global);
+        disabled_save = true  //Deshabilita el boton de guardar hasta que ocurra otra modificacion
     }
 
 </script>
@@ -51,7 +56,7 @@ import { update_await_block_branch } from "svelte/internal";
         <Brightness canvas={simpleCanvas} bind:brightness_input={brightness_global}/>
         <Contrast canvas={simpleCanvas} bind:contrast_input={contrast_global}/>
         <Colorize canvas={simpleCanvas} bind:colorize_input={colorize_global}/>
-        <hr/>  
+        <!-- <hr/>  
         <center>
             <canvas
                 id="canvas-global-filters"
@@ -61,11 +66,11 @@ import { update_await_block_branch } from "svelte/internal";
                     border-style: solid;
                     border-color: black;"
             />       
-        </center>
+        </center> -->
     </div>
 
     <div slot="footerBody">
-        <button type="button" class="btn btn-secondary" disabled={disabled} on:click={save_changes}>
+        <button type="button" class="btn btn-secondary" disabled={disabled_save} on:click={save_changes}>
             Guardar Cambios
         </button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" on:click={clearSelection}>
