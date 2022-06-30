@@ -6,19 +6,33 @@
   import Zoom from "./Filters/Zoom.svelte";  
   import FiltersGlobalValuesModal from "./Modals/FiltersGlobalValuesModal.svelte";  
   
-  export let spectrogramCanvas;
-  export let scale;  
+  export let spectrogramCanvas
+  export let scale
   
-  let brightness_input = 0;
-  let contrast_input = 0;
-  let colorize_input = "#ffffff";
+  let brightness_input = 0
+  let contrast_input = 0
+  let colorize_input = "#ffffff"
 
+  function setValues(){
+    let aux
+    aux = localStorage.getItem('Defect_brightness_global')
+    if(aux){ brightness_input = aux } else { brightness_input = 0 }
+    aux = localStorage.getItem('Defect_contrast_global')
+    if(aux){ contrast_input = aux } else { contrast_input = 0 }
+    aux = localStorage.getItem('Defect_colorize_global')
+    if(aux){ colorize_input = aux } else { colorize_input = "#ffffff" }
+  }
+
+  function init() {
+    setValues()
+  }
+
+  document.addEventListener("DOMContentLoaded", init, false)
+  
   function resetSpectrogramCanvas() {
-      brightness_input = 0;
-      contrast_input = 0;
-      colorize_input = "#ffffff";
-      spectrogramCanvas.resetFilters();
-      console.log("Reset Filters");
+    setValues()
+    spectrogramCanvas.resetFilters()
+    console.log("Reset Filters")
   }
 </script>
 

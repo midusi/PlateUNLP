@@ -16,19 +16,20 @@
     $: disabled_save = (contrast_global === localStorage.getItem('Defect_contrast_global'))
     $: disabled_save = (colorize_global === localStorage.getItem('Defect_colorize_global'))
 
-    function clearSelection(){
-        //cosas
+    // IMPORTANTE: Ejecutar al cerrar el modal
+    function setValues(){
+        let aux
+        aux = localStorage.getItem('Defect_brightness_global')
+        if(aux){ brightness_global = aux } else { brightness_global = 0 }
+        aux = localStorage.getItem('Defect_contrast_global')
+        if(aux){ contrast_global = aux } else { contrast_global = 0 }
+        aux = localStorage.getItem('Defect_colorize_global')
+        if(aux){ colorize_global = aux } else { colorize_global = "#ffffff" }
     }
 
     function init() {
         simpleCanvas = new SimpleCanvas();
-        let aux
-        aux = localStorage.getItem('Defect_brightness_global')
-        if(aux){ brightness_global = aux }
-        aux = localStorage.getItem('Defect_contrast_global')
-        if(aux){ contrast_global = aux }
-        aux = localStorage.getItem('Defect_colorize_global')
-        if(aux){ colorize_global = aux }
+        setValues()
     }
 
     document.addEventListener("DOMContentLoaded", init, false)
@@ -51,7 +52,7 @@
     }
 </style> -->
 <!-- <img class="imagen_muestra" src = {"/Luna.png"} alt = "imagen de referencia para ver como aplican los valores de los filtros"> -->
-<Modal bottonText="⚙ Valores por defecto de los filtros" titleModal="Editar valores por defecto de los filtros" key="filtersValues">
+<Modal bottonText="⚙ Valores por defecto de los filtros" titleModal="Editar valores por defecto de los filtros" key="glovalFiltersValues">
     <div slot="modalBody">
         <Brightness canvas={simpleCanvas} bind:brightness_input={brightness_global}/>
         <Contrast canvas={simpleCanvas} bind:contrast_input={contrast_global}/>
@@ -73,7 +74,7 @@
         <button type="button" class="btn btn-secondary" disabled={disabled_save} on:click={save_changes}>
             Guardar Cambios
         </button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" on:click={clearSelection}>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" on:click={setValues}>
             Close
         </button>
     </div>
