@@ -32,6 +32,9 @@
   function resetSpectrogramCanvas() {
     setValues()
     spectrogramCanvas.resetFilters()
+    spectrogramCanvas.setBrightness(brightness_input)
+    spectrogramCanvas.setContrast(contrast_input)
+    spectrogramCanvas.colorize(colorize_input)
     console.log("Reset Filters")
   }
 </script>
