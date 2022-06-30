@@ -39,8 +39,8 @@
 
     Object.entries(defaultKeys).forEach(([key]) => {
         if(localStorage.getItem(key)){
-        defaults[key] = JSON.parse(localStorage.getItem(key));
-    }
+            defaults[key] = JSON.parse(localStorage.getItem(key));
+        }
     })
 
     export function updateLists(obs,img,digis){

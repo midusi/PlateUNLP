@@ -1,10 +1,10 @@
 <script>
-    export let spectrogramCanvas;
+    export let canvas;
     export let colorize_input = 0;
   
     function colorize() {
         console.log("Color = ", colorize_input);
-        spectrogramCanvas.colorize(colorize_input);
+        canvas.colorize(colorize_input);
     }
 </script>
   

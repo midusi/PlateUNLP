@@ -1,4 +1,4 @@
-class FilterQueque {
+export class FilterQueque {
 	constructor() {
 		this.mapa = new Map(); //Guarda que indice le corresponde a cada filtro (Orden de aplicacion)
 		this.mapa.set("brightness",0);
@@ -25,5 +25,3 @@ class FilterQueque {
 		return this.filters.filter(filter => filter != null); //Devuelve solo los filtros configurados
     }
 }
-
-export { FilterQueque }

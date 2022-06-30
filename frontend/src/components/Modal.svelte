@@ -2,6 +2,10 @@
   export let bottonText = "Example",
     titleModal = "Title",
     key = (Math.random() + 1).toString(36).substring(5);
+    // function close(){
+    //   console.log("cerrando modal")
+    // }
+    // //poner "on:blur={close}" en lo que se quiera enlazar
 </script>
 
 <!-- Button trigger modal  on:click|stopPropagation={()=>{}}-->

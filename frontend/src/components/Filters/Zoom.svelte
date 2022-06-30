@@ -1,10 +1,10 @@
 <script>
-    export let spectrogramCanvas;
+    export let canvas;
     export let scale;
   
     function updatescale() {
         console.log("Scale = ", scale);
-        spectrogramCanvas.setScale(scale);
+        canvas.setScale(scale);
     }
 </script>
   

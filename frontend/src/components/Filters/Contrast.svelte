@@ -1,10 +1,10 @@
 <script>
-    export let spectrogramCanvas;
+    export let canvas;
     export let contrast_input = 0;
   
     function setContrast() {
         console.log("Contraste = ", contrast_input);
-        spectrogramCanvas.setContrast(contrast_input);
+        canvas.setContrast(contrast_input);
     }
 </script>
   
