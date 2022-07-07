@@ -65,6 +65,7 @@ def api_generate_fits():
         # generated fit
         prihdr = fits.Header()
         for key in fields.keys():
+            print("KEY:",key)
             comment = ''
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]

@@ -1,9 +1,9 @@
 <script>
     import Field from "./Field.svelte";
     import Modal from "./Modal.svelte";
+    import { metadataStore } from "../store/metadata";
     import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
     export let metadata, spectraData,index;
-
     let arr = [];
     for (let i = 0; i <= metadata.length; i = i + 3) {
         arr.push([metadata[i], metadata[i + 1], metadata[i + 2]]);
@@ -14,7 +14,7 @@
     spectraData["IMAGETYP"] = getImageTypDef();
 
 </script>
-
+    {#if $metadataStore.spectraData[index]}
     <div class="px-4" style="overflow-y: scroll; overflow-x:hidden ; border: 1px solid  ; height: 400px;">
         {#each arr as field}
             <div class="form-row">
@@ -48,3 +48,4 @@
             </div>
         {/each}
     </div>
+    {/if}

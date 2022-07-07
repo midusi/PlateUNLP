@@ -17,7 +17,7 @@
     FilterZone,
     MetadataForm
   } from "./components";
-  import { confirmAlert,showAlert,deleteAlert, loadingAlert } from "./helpers/Alert";
+  import { confirmAlert,showAlert,deleteAlert,errorAlert, loadingAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
 
   let imageChanged = true;
@@ -90,6 +90,7 @@
 
   async function getImg(selectedImage) {
     if (selectedImage != "" && selectedImage != imageName) {
+      uploadedImage = false
       imageChanged = true
       spectrogramCanvas.deleteAllBbox();
       dataLoaded = false
@@ -110,7 +111,7 @@
           val["color"] = $metadataStore.spectraData[i]["color"]
           return val;
         });
-        
+        console.log("SPECTRADATA:",spectraData);
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
         checkMetadataSearched();
@@ -125,6 +126,7 @@
       }
       imageChanged = false;
       uploadedImage = true;
+      
     }
   }
 
@@ -167,7 +169,7 @@
   }
 
   function initializeCanvas() {
-    bboxSelected = 1;
+    bboxSelected = -1;
     metadataStore.setSpectraData([]);
     spectrogramCanvas.setScale(scale);
   }
@@ -208,6 +210,7 @@
 
     confirmAlert({
       succesFunc: async () => {
+        console.log($metadataStore.spectraData)
         const status = await spectrogramStore.generateFits(
           spectrogramCanvas.getBboxes(),
           $metadataStore.spectraData,
@@ -543,14 +546,12 @@
               </div>
               </TabList>
               {#if bboxSelected === -1 }
-                <TabPanel>
                  <div class="controls">
                     <PlateForm
                       plateData={$metadataStore.plateData}
                       metadata={getMetadata($metadataStore.fields,true)}
                     />
                   </div>
-                </TabPanel>
               {/if}
               {#each $metadataStore.spectraData as item,index}
                 <TabPanel>

@@ -17,11 +17,11 @@
         array.splice(arrayIndex, 1);
       }
     $metadataStore.spectraData[index]["loaded"] = array
-    console.log(array)
     setChangeFlag();
   }
 
 </script>
+
 
 <div class="mt-2">
   <span>
@@ -75,4 +75,6 @@
       {/each}
     </datalist>
   {/if}
+
 </div>
+

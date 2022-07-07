@@ -11,7 +11,7 @@
     plateData["OBSERVER"] = getObserverDef();
     plateData["DIGITALI"] = getDigitaliDef();
     plateData["IMAGETYP"] = getImageTypDef();
-
+    console.log(arr);
 </script>
 
     <div class="px-4" style=" border: 1px solid  ;">
