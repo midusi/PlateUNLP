@@ -14,7 +14,6 @@
     spectraData["IMAGETYP"] = getImageTypDef();
 
 </script>
-    {#if $metadataStore.spectraData[index]}
     <div class="px-4" style="overflow-y: scroll; overflow-x:hidden ; border: 1px solid  ; height: 400px;">
         {#each arr as field}
             <div class="form-row">
@@ -48,4 +47,3 @@
             </div>
         {/each}
     </div>
-    {/if}

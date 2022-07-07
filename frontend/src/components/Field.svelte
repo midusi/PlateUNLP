@@ -22,7 +22,6 @@
 
 </script>
 
-
 <div class="mt-2">
   <span>
     {$metadataStore.fields[name].label}
@@ -31,7 +30,7 @@
     </span>
   </span>
   {#if $metadataStore.fields[name].options === undefined}
-    {#if $metadataStore.fields[name].remote}
+    {#if $metadataStore.fields[name].remote && $metadataStore.spectraData[index] !== undefined}
       <input
         class="form-control"
         use:setType

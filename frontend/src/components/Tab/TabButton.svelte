@@ -4,7 +4,6 @@
     index,
     names
 
-    console.log("render")
     let name;
     $: name = names[index] ? names[index] : `Nuevo#${index+1}`
     

@@ -68,7 +68,6 @@ function createStoreMetadata() {
       })
     },
     setSpectraData: (data) => {
-      console.log("DATA:",data)
       update((prev) => {
         prev.spectraData = data
         return prev

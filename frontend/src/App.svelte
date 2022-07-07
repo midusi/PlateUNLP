@@ -111,7 +111,6 @@
           val["color"] = $metadataStore.spectraData[i]["color"]
           return val;
         });
-        console.log("SPECTRADATA:",spectraData);
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
         checkMetadataSearched();
@@ -126,7 +125,6 @@
       }
       imageChanged = false;
       uploadedImage = true;
-      
     }
   }
 
@@ -161,7 +159,6 @@
     };
     const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
     if(setted){
-      console.log("SETTED")
       setChangeFlag();
     }
     return setted;
@@ -169,7 +166,7 @@
   }
 
   function initializeCanvas() {
-    bboxSelected = -1;
+    bboxSelected = 1;
     metadataStore.setSpectraData([]);
     spectrogramCanvas.setScale(scale);
   }
@@ -210,7 +207,6 @@
 
     confirmAlert({
       succesFunc: async () => {
-        console.log($metadataStore.spectraData)
         const status = await spectrogramStore.generateFits(
           spectrogramCanvas.getBboxes(),
           $metadataStore.spectraData,
@@ -241,7 +237,7 @@
   }
 
   function updateDefaults(){
-    console.log("HOLA")
+
   }
 
   function getMetadata(fields,global) {

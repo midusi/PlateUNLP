@@ -119,7 +119,6 @@ function createStoreWorkspace() {
         try {
           response = await apiWorkspace.loadConfig()
           if (response.data !== {}){
-            console.log(response.data)
             closeAlert()
             showAlert({title:"Conexion establecida"})
             return response.data.config
