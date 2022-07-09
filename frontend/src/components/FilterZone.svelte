@@ -3,8 +3,7 @@
   import Brightness from "./Filters/Brightness.svelte";
   import Contrast from "./Filters/Contrast.svelte";
   import Colorize from "./Filters/Colorize.svelte";
-  import Zoom from "./Filters/Zoom.svelte";  
-  import FiltersGlobalValuesModal from "./Modals/FiltersGlobalValuesModal.svelte";  
+  import Zoom from "./Filters/Zoom.svelte";
   
   export let spectrogramCanvas
   export let reset_filters_flag
@@ -20,16 +19,14 @@
     (contrast_input != localStorage.getItem('Defect_contrast')) | 
     (colorize_input != localStorage.getItem('Defect_colorize')))
 
-  $: if (reset_filters_flag) {
-    resetFilters()
-    reset_filters_flag=false
-  }
+  let enabled_filters = true
+  let enabled_filters_icon='🕶'
 
-  function resetFilters() {
+  $: if (reset_filters_flag) {
     loadValues()
     resetSpectrogramCanvas()
+    reset_filters_flag=false
   }
-
 
   function loadValues(){
     let aux
@@ -56,6 +53,19 @@
     localStorage.setItem('Defect_contrast', contrast_input);
     localStorage.setItem('Defect_colorize', colorize_input);
   }
+
+  function alter_enable_filters(){
+    if(enabled_filters) {
+      enabled_filters_icon='👓'
+      spectrogramCanvas.resetFilters()
+      spectrogramCanvas.ReRender()    
+    } else {
+      enabled_filters_icon='🕶'
+      resetSpectrogramCanvas()
+    }
+    enabled_filters = !enabled_filters
+  }
+
 </script>
 
 <div class="card">
@@ -64,6 +74,9 @@
     <NButton click={save_changes} disabled={!enabled_save} style="float: right;">
       💾
     </NButton>
+    <NButton click={alter_enable_filters} style="float: right;">
+      {enabled_filters_icon}
+    </NButton>
   </h5>
   <div class="card-body">
     <Zoom canvas={spectrogramCanvas} bind:scale={scale}/>
@@ -71,10 +84,6 @@
     <Contrast canvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
     <Colorize canvas={spectrogramCanvas} bind:colorize_input={colorize_input}/>
     <p>&nbsp;</p>   
-    <NButton click={resetFilters} >
-      Reiniciar Filtros
-    </NButton>
-    <!-- <FiltersGlobalValuesModal/> -->
   </div>
 </div>
 <p>&nbsp;</p>    
