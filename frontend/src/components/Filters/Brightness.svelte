@@ -1,10 +1,11 @@
 <script>
-    export let canvas;
-    export let brightness_input = 0;
+    export let canvas
+    export let brightness_input = 0
   
     function setBrightness() {
-        console.log("Brillo = ", brightness_input);
-        canvas.setBrightness(brightness_input);
+        // console.log("Brillo = ", brightness_input)
+        canvas.setBrightness(brightness_input)
+        canvas.ReRender()
     }
 </script>
   

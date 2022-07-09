@@ -128,24 +128,6 @@ function createStoreWorkspace() {
           await serverAlert();
         }
       }
-    },
-    getResource: async (resource_name) => {
-      let response;
-      while(!response){
-        try {
-          response = await apiWorkspace.getResource({
-            resource_name: resource_name
-          })
-
-          data = response.data;
-          src_resource = `data:image/png;base64,${data.resource}`
-
-          return src_resource
-        }
-        catch {
-          errorAlert()
-        }
-      }
     }
   }
 }

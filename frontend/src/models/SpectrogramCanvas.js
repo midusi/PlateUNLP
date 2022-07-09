@@ -166,59 +166,25 @@ export default class SpectrogramCanvas {
   }
 
   setBrightness(brightness) {
-    const canvas =  this.canvas;
-    const filter_queque = this.filter_queque;
-    fabric.Image.fromURL(this.originalImage, function(img) {
-      let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
-      filter_queque.setBrightness(filter);
-      img.filters = filter_queque.getFilters(); // Comprobar si funciona
-      // apply filters and re-render canvas when done
-      img.applyFilters();
-      // add image onto canvas (it also re-render the canvas)
-      canvas.setBackgroundImage(
-        img,
-        canvas.renderAll.bind(canvas),
-        {
-          backgroundImageOpacity: 0.5,
-          backgroundImageStretch: false
-        }
-      )
-    });
+    let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
+    this.filter_queque.setBrightness(filter);
   }
 
   setContrast(contrast) {
-    const canvas =  this.canvas;
-    const filter_queque = this.filter_queque;
-    fabric.Image.fromURL(this.originalImage, function(img) {
-      // add filter
-      let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
-      filter_queque.setContrast(filter);
-      img.filters = filter_queque.getFilters(); // Comprobar si funciona
-      // apply filters and re-render canvas when done
-      img.applyFilters();
-      // add image onto canvas (it also re-render the canvas)
-      canvas.setBackgroundImage(
-        img,
-        canvas.renderAll.bind(canvas),
-        {
-          backgroundImageOpacity: 0.5,
-          backgroundImageStretch: false
-        }
-      )
-    });
+    let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
+    this.filter_queque.setContrast(filter);
   }
   
-  colorize(color) {
+  setColorize(color) {
+    let filter = new fabric.Image.filters.BlendColor({ color: color });
+    this.filter_queque.setColorize(filter);
+  }
+
+  ReRender() {
     const canvas =  this.canvas;
     const filter_queque = this.filter_queque;
-    // const color = new fabric.Color('rgb(255,0,100)');
-
     fabric.Image.fromURL(this.originalImage, function(img) {
-      // add filter
-      let filter = new fabric.Image.filters.BlendColor({ color: color });
-      filter_queque.setColorize(filter);
-      img.filters = filter_queque.getFilters(); // Comprobar si funciona
-      // apply filters and re-render canvas when done
+      img.filters = filter_queque.getFilters(); 
       img.applyFilters();
       // add image onto canvas (it also re-render the canvas)
       canvas.setBackgroundImage(

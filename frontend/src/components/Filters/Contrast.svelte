@@ -3,8 +3,9 @@
     export let contrast_input = 0;
   
     function setContrast() {
-        console.log("Contraste = ", contrast_input);
+        // console.log("Contraste = ", contrast_input);
         canvas.setContrast(contrast_input);
+        canvas.ReRender()
     }
 </script>
   

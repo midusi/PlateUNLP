@@ -3,8 +3,9 @@
     export let colorize_input = 0;
   
     function colorize() {
-        console.log("Color = ", colorize_input);
-        canvas.colorize(colorize_input);
+        // console.log("Color = ", colorize_input);
+        canvas.setColorize(colorize_input);
+        canvas.ReRender()
     }
 </script>
   
