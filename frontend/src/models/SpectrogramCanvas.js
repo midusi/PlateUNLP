@@ -11,6 +11,7 @@ export default class SpectrogramCanvas {
     this.scale = 1
     this.IDBBOX = 0
     this.filter_queque = new FilterQueque()
+    this.enabled_filters = true
 
     this.canvas = new fabric.Canvas('canvas-container', {
       hoverCursor: 'pointer',
@@ -146,16 +147,7 @@ export default class SpectrogramCanvas {
   }
 
   resetFilters() {
-    this.filter_queque = new FilterQueque();
-
-    this.canvas.setBackgroundImage(
-      this.originalImage,
-      this.canvas.renderAll.bind(this.canvas),
-      {
-        backgroundImageOpacity: 0.5,
-        backgroundImageStretch: false
-      }
-    )
+    this.filter_queque = new FilterQueque()
   }
   
   setScale(scale) {
@@ -180,22 +172,32 @@ export default class SpectrogramCanvas {
     this.filter_queque.setColorize(filter);
   }
 
+  enable_filters() {
+    this.enabled_filters = true
+  }
+
+  disable_filters() {
+    this.enabled_filters = false
+  }
+
   ReRender() {
-    const canvas =  this.canvas;
-    const filter_queque = this.filter_queque;
-    fabric.Image.fromURL(this.originalImage, function(img) {
-      img.filters = filter_queque.getFilters(); 
-      img.applyFilters();
-      // add image onto canvas (it also re-render the canvas)
-      canvas.setBackgroundImage(
-        img,
-        canvas.renderAll.bind(canvas),
-        {
-          backgroundImageOpacity: 0.5,
-          backgroundImageStretch: false
-        }
-      )
-    });
+    if(this.enabled_filters){
+      const canvas =  this.canvas;
+      const filter_queque = this.filter_queque;
+      fabric.Image.fromURL(this.originalImage, function(img) {
+        img.filters = filter_queque.getFilters(); 
+        img.applyFilters();
+        // add image onto canvas (it also re-render the canvas)
+        canvas.setBackgroundImage(
+          img,
+          canvas.renderAll.bind(canvas),
+          {
+            backgroundImageOpacity: 0.5,
+            backgroundImageStretch: false
+          }
+        )
+      });
+    }
   }
 
   loadImage(src, width, height) {

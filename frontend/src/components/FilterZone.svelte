@@ -59,8 +59,10 @@
       enabled_filters_icon='👓'
       spectrogramCanvas.resetFilters()
       spectrogramCanvas.ReRender()    
+      spectrogramCanvas.disable_filters()
     } else {
       enabled_filters_icon='🕶'
+      spectrogramCanvas.enable_filters()
       resetSpectrogramCanvas()
     }
     enabled_filters = !enabled_filters
@@ -83,7 +85,6 @@
     <Brightness canvas={spectrogramCanvas} bind:brightness_input={brightness_input}/>
     <Contrast canvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
     <Colorize canvas={spectrogramCanvas} bind:colorize_input={colorize_input}/>
-    <p>&nbsp;</p>   
   </div>
 </div>
 <p>&nbsp;</p>    
