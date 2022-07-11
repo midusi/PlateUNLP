@@ -17,7 +17,6 @@
     let invalids = "";
     if(!plateValid)
       title += "de la placa "
-    console.log(spectrums)
     let invalidSpectrums = []
     
     validatedSpectrums.forEach((isValid,index) => {
