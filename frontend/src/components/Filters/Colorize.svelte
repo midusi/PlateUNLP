@@ -35,9 +35,9 @@
     }
 </script>
   
-<div class="d-xl-flex flex-column justify-content-xl-start">
+<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 20px; width: 300px;">
     <span>Color</span>
-    <div>
+    <div class="linea">
         <button style="background:{original};" on:click={set_original}/>
         <button style="background:{cian};" on:click={set_cian}/>
         <button style="background:{yellow};" on:click={set_yellow}/>

@@ -9,7 +9,7 @@
     }
 </script>
   
-<div class="d-xl-flex flex-column justify-content-xl-start">
+<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 20px; width: 300px;">
     <span>Contraste</span>
     <input
         type="range"
@@ -19,5 +19,4 @@
         bind:value={contrast_input}
         on:change={setContrast} 
     />
-    <input type="text" value="{contrast_input}" readonly/>
 </div>

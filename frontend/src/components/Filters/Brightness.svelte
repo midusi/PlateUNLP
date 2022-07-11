@@ -9,8 +9,8 @@
     }
 </script>
   
-<div class="d-xl-flex flex-column justify-content-xl-start">
-<span>Brillo</span>
+<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 20px; width: 300px;">
+    <span>Brillo</span>
     <input
         type="range"
         min="0"
@@ -19,5 +19,4 @@
         bind:value={brightness_input}
         on:change={setBrightness} 
     />
-    <input type="text" value="{brightness_input}" readonly/>
 </div>
