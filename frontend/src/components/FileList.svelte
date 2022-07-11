@@ -29,7 +29,7 @@ function handleSelect(){
         {#if showFinished}
             {#if path.number_of_spectra === -1}
             
-                <option style="background-color:LightBlue" value={path.fileName}>{path.fileName}</option>
+                <option style="background-color:LightBlue" value={path.fileName}>ASD {path.fileName}</option>
             {/if}
         {:else}
             {#if path.number_of_spectra !== -1}
