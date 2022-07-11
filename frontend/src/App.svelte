@@ -19,6 +19,8 @@
   } from "./components";
   import { confirmAlert,showAlert,deleteAlert,errorAlert, loadingAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
+  import { createEventDispatcher } from 'svelte'
+  const dispatch = createEventDispatcher()
 
   let imageChanged = true;
   let imageSaved = false
@@ -38,6 +40,7 @@
   let validatedSpectrums = []
   let plateValid = false;
   let dataLoaded = false
+  let reset_filters_flag = false
 
 
   $: bboxSelected &&
@@ -104,6 +107,7 @@
       }
       catch(err){
       }
+      reset_filters_flag = true
 
       if(data.metadata){
         imageSaved = true
@@ -496,7 +500,7 @@
         </div>
           <div class="col-lg-10 col-xl-10">
               <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-                <FilterZone spectrogramCanvas={spectrogramCanvas} scale={scale} />
+                <FilterZone spectrogramCanvas={spectrogramCanvas} scale={scale} bind:reset_filters_flag={reset_filters_flag}/>
                 <canvas
                   id="canvas-container"
                   width="300"

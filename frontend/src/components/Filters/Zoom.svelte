@@ -8,7 +8,7 @@
     }
 </script>
   
-<div class="d-xl-flex flex-column justify-content-xl-start">
+<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 20px; width: 300px;">
     <span>Zoom</span>
     <input
         type="range"
@@ -18,4 +18,4 @@
         bind:value={scale}
         on:change={updatescale}
     />
-  </div>
+</div>

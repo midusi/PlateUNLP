@@ -11,6 +11,7 @@ export default class SpectrogramCanvas {
     this.scale = 1
     this.IDBBOX = 0
     this.filter_queque = new FilterQueque()
+    this.enabled_filters = true
 
     this.canvas = new fabric.Canvas('canvas-container', {
       hoverCursor: 'pointer',
@@ -146,16 +147,7 @@ export default class SpectrogramCanvas {
   }
 
   resetFilters() {
-    this.filter_queque = new FilterQueque();
-
-    this.canvas.setBackgroundImage(
-      this.originalImage,
-      this.canvas.renderAll.bind(this.canvas),
-      {
-        backgroundImageOpacity: 0.5,
-        backgroundImageStretch: false
-      }
-    )
+    this.filter_queque = new FilterQueque()
   }
   
   setScale(scale) {
@@ -166,70 +158,46 @@ export default class SpectrogramCanvas {
   }
 
   setBrightness(brightness) {
-    const canvas =  this.canvas;
-    const filter_queque = this.filter_queque;
-    fabric.Image.fromURL(this.originalImage, function(img) {
-      let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
-      filter_queque.setBrightness(filter);
-      img.filters = filter_queque.getFilters(); // Comprobar si funciona
-      // apply filters and re-render canvas when done
-      img.applyFilters();
-      // add image onto canvas (it also re-render the canvas)
-      canvas.setBackgroundImage(
-        img,
-        canvas.renderAll.bind(canvas),
-        {
-          backgroundImageOpacity: 0.5,
-          backgroundImageStretch: false
-        }
-      )
-    });
+    let filter = new fabric.Image.filters.Brightness({ brightness: brightness });
+    this.filter_queque.setBrightness(filter);
   }
 
   setContrast(contrast) {
-    const canvas =  this.canvas;
-    const filter_queque = this.filter_queque;
-    fabric.Image.fromURL(this.originalImage, function(img) {
-      // add filter
-      let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
-      filter_queque.setContrast(filter);
-      img.filters = filter_queque.getFilters(); // Comprobar si funciona
-      // apply filters and re-render canvas when done
-      img.applyFilters();
-      // add image onto canvas (it also re-render the canvas)
-      canvas.setBackgroundImage(
-        img,
-        canvas.renderAll.bind(canvas),
-        {
-          backgroundImageOpacity: 0.5,
-          backgroundImageStretch: false
-        }
-      )
-    });
+    let filter = new fabric.Image.filters.Contrast({ contrast: contrast })
+    this.filter_queque.setContrast(filter);
   }
   
-  colorize(color) {
-    const canvas =  this.canvas;
-    const filter_queque = this.filter_queque;
-    // const color = new fabric.Color('rgb(255,0,100)');
+  setColorize(color) {
+    let filter = new fabric.Image.filters.BlendColor({ color: color });
+    this.filter_queque.setColorize(filter);
+  }
 
-    fabric.Image.fromURL(this.originalImage, function(img) {
-      // add filter
-      let filter = new fabric.Image.filters.BlendColor({ color: color });
-      filter_queque.setColorize(filter);
-      img.filters = filter_queque.getFilters(); // Comprobar si funciona
-      // apply filters and re-render canvas when done
-      img.applyFilters();
-      // add image onto canvas (it also re-render the canvas)
-      canvas.setBackgroundImage(
-        img,
-        canvas.renderAll.bind(canvas),
-        {
-          backgroundImageOpacity: 0.5,
-          backgroundImageStretch: false
-        }
-      )
-    });
+  enable_filters() {
+    this.enabled_filters = true
+  }
+
+  disable_filters() {
+    this.enabled_filters = false
+  }
+
+  ReRender() {
+    if(this.enabled_filters){
+      const canvas =  this.canvas;
+      const filter_queque = this.filter_queque;
+      fabric.Image.fromURL(this.originalImage, function(img) {
+        img.filters = filter_queque.getFilters(); 
+        img.applyFilters();
+        // add image onto canvas (it also re-render the canvas)
+        canvas.setBackgroundImage(
+          img,
+          canvas.renderAll.bind(canvas),
+          {
+            backgroundImageOpacity: 0.5,
+            backgroundImageStretch: false
+          }
+        )
+      });
+    }
   }
 
   loadImage(src, width, height) {
