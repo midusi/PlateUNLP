@@ -1,6 +1,7 @@
 <script>
   import { metadataStore } from "../store/metadata";
   export let click,
+    spectrums,
     validatedSpectrums,
     plateValid,
     disabled = false,
@@ -9,23 +10,27 @@
 
   let title = ""
 
-  $: title = getHover(validatedSpectrums,plateValid);
+  $: title = getHover(spectrums,validatedSpectrums,plateValid);
 
   export function getHover(){
     let title = "Faltan datos obligatorios ";
     let invalids = "";
     if(!plateValid)
       title += "de la placa "
+    console.log(spectrums)
+    let invalidSpectrums = []
+    
     validatedSpectrums.forEach((isValid,index) => {
       if(!isValid){
-          invalids += `${index+1} `
+          invalids += `${spectrums[index]["OBJECT"]} `
+          invalidSpectrums.push(spectrums[index])
       }
     })
+
     if(invalids !== ""){
       if(!plateValid)
-        title += `y de los espectros: ${invalids}`
-      else
-        title += `de los espectros: ${invalids}`
+        title += `y `
+      title += `de los espectros: ${invalids}`
     }
     else if(plateValid){
       title = ""

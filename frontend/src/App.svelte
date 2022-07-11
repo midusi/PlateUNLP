@@ -80,7 +80,7 @@
   }
 
   export function setChangeFlag(){
-      validateActualSpectrum();
+      validateSelectedSpectrum();
       validateForm();
       updateName();
       changeFlag = true;
@@ -328,7 +328,7 @@
       
   }
 
-  function validateActualSpectrum(){
+  function validateSelectedSpectrum(){
     if (cantSpectra > 0 && bboxSelected != -1 ){
       validateSpectrum(bboxSelected-1)
     }
@@ -425,7 +425,7 @@
     imageSaved = false;
     if(!imageChanged){
       validateForm();
-      validateActualSpectrum();
+      validateSelectedSpectrum();
     }
   }
 
@@ -436,7 +436,7 @@
         if (item != undefined) {
           canvas.setActiveObject(item);
           bboxSelected = index + 1
-          validateActualSpectrum();
+          validateSelectedSpectrum();
           canvas.renderAll();
         }
       }
@@ -537,7 +537,7 @@
                     <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
                 <div class="col-2 py-3">
-                    <ExportButton plateValid = {plateValid} validatedSpectrums={validatedSpectrums} title={"faltanDatos"} click={generateFits} disabled={invalidForm}/>
+                    <ExportButton plateValid = {plateValid} spectrums={$metadataStore.spectraData} validatedSpectrums={validatedSpectrums} title={"faltanDatos"} click={generateFits} disabled={invalidForm}/>
                 </div>  
               </div>
               </TabList>
