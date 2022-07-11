@@ -25,6 +25,7 @@
   let cantSpectra = 0;
   let spectrogramCanvas;
   let uploadedImage = false;
+  let pathsLoaded = false;
   let pathDir = "";
   let imageName = "";
   let scale = 0.5;
@@ -232,8 +233,10 @@
   }
 
   async function getPaths() {
-    if(pathDir)
+    if(pathDir){
       await workspaceStore.getPaths(pathDir);
+      pathsLoaded = true;
+    }
   }
 
   function updateDefaults(){
@@ -275,8 +278,8 @@
 
   function getSearchedMetadata(fields,global){
       return Object.keys(fields).filter((label) => {
-        if (!fields[label].required && !fields[label].global && !fields[label].default) 
-          return label;
+        if (!fields[label].required && !fields[label].global && fields[label].default === undefined)
+          return label;  
       })
   }
 
@@ -469,9 +472,6 @@
 
 <main>
   <div class="card">
-    <div class="card-header">
-    <h5>Localizador de espectros</h5>
-    </div>
     <div class="card-body">
       <div class="row">
         <div class="col-lg-2 col-xl-2">
@@ -483,7 +483,7 @@
               <NButton click={getPaths}>&#x1F50D;</NButton>
             </div>
           </div>
-          {#if $workspaceStore.paths.length > 0}
+          {#if pathsLoaded}
             <FileList paths={$workspaceStore.paths} getImg={getImg}/>
           {/if}
           {#if uploadedImage}
