@@ -66,17 +66,22 @@ def api_generate_fits():
         # generated fit
         prihdr = fits.Header()
         for key in fields.keys():
-            print("KEY:",key)
             comment = ''
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]
             if fields[key]["global"]:
-                if fields[key]["numeric"]:
-                  plate_data[key] = float(plate_data[key])
+                if fields[key]["numeric"]: 
+                  if plate_data[key] != '':  
+                    plate_data[key] = float(plate_data[key])
+                  else:
+                    plate_data[key] = None
                 prihdr[key] = (plate_data[key], comment)
             else:
                 if fields[key]["numeric"]:
-                  data[key] = float(data[key])
+                  if data[key] != '':  
+                    data[key] = float(data[key])
+                  else:
+                    data[key] = None
                 prihdr[key] = (data[key], comment)
             
         prihdr["GAIN"] = ("","Gain, electrons per adu")

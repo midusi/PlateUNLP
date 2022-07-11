@@ -70,10 +70,11 @@ function createStoreWorkspace() {
 
         if(data.info.bboxes){
           //no predigo nada y cargo las bboxes
-          spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes);
+          spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes,data.info.metadata);
 
         }
         else{
+          console.log("aca")
           await spectrogramStore.getPredictions(
             spectrogramCanvas,
             dirPath,

@@ -186,7 +186,8 @@ function getMetadataFields() {
       info: 'Simbad spectral type',
       required: false,
       remote: true,
-      global: false
+      global: false,
+      numeric: false
     },
     equinox: {
       label: 'EQUINOX',

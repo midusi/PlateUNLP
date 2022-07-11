@@ -75,8 +75,10 @@
   }
 
   function updateName(){
-    if(bboxSelected != -1 && cantSpectra > 0)
+    if(bboxSelected != -1 && cantSpectra > 0 && names[bboxSelected-1] !== $metadataStore.spectraData[bboxSelected-1]["OBJECT"]){
       names[bboxSelected-1] = $metadataStore.spectraData[bboxSelected-1]["OBJECT"]
+      spectrogramCanvas.updateLabel(bboxSelected-1,names[bboxSelected-1])
+    }
   }
 
   export function setChangeFlag(){
@@ -173,7 +175,8 @@
   }
 
   function addBox() {
-    spectrogramCanvas.addBbox();
+    console.log(cantSpectra+1)
+    spectrogramCanvas.addBbox(cantSpectra+1);
     setChangeFlag();
   }
 
@@ -415,6 +418,7 @@
           (element) => element.id !== obj.target.id
         )
       );
+      spectrogramCanvas.updateAllLabels(names);
       canvas.setActiveObject(canvas.item(0));
       canvas.renderAll();
     } else {

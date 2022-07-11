@@ -2,6 +2,7 @@ import { fabric } from 'fabric'
 import { saveAs } from 'file-saver'
 import { getColor } from '../helpers/canvasUtilities'
 import { FilterQueque } from './FiltersQueque'
+import LabeledRect from './LabeledRect'
 
 export default class SpectrogramCanvas {
   constructor(events) {
@@ -25,14 +26,46 @@ export default class SpectrogramCanvas {
     return this.canvas
   }
 
-  addBbox() {
+  updateAllLabels(names){
+    for(let i = 0 ; i < this.canvas.getObjects().length ; i++){
+      this.updateLabel(i,names[i]);
+    }
+  }
+
+  updateLabel(id,name){
+    const color = this.canvas.getObjects()[id].stroke
+
+    if(!name){
+      name = `Nuevo#${id+1}`
+    }
+
+    this.canvas.getObjects()[id].set({
+      stroke: 'white'
+    })
+
+    this.canvas.getObjects()[id].set({
+      label: name,
+      stroke: color
+    })
+
+  
+    this.canvas.renderAll()
+    
+  }
+
+  addBbox(id,name = "") {
     this.IDBBOX += 1
+
+    if(!name){
+      name = `Nuevo#${id}`
+    }
+
     let rect;
     if(this.canvas.getObjects().length > 0){
-      
+
       const clone = this.canvas.getObjects()[0]
 
-      rect = new fabric.Rect({
+      rect = new LabeledRect({
         id: this.IDBBOX,
         top: this.getCanvasWidth()/4,
         left: clone.left,
@@ -42,11 +75,12 @@ export default class SpectrogramCanvas {
         fill: '',
         stroke: getColor(this.IDBBOX-1),
         strokeWidth: 10,
-        lockRotation: true
+        lockRotation: true,
+        label: name
       })
     }
     else{
-      rect = new fabric.Rect({
+      rect = new LabeledRect({
         id: this.IDBBOX,
         top: this.getCanvasWidth()/4,
         left: this.getCanvasHeight()/2,
@@ -56,9 +90,11 @@ export default class SpectrogramCanvas {
         fill: '',
         stroke: getColor(this.IDBBOX-1),
         strokeWidth: 10,
-        lockRotation: true
+        lockRotation: true,
+        label: name
       })
     }
+    
     this.canvas.add(rect)
     this.canvas.setActiveObject(rect)
   }
@@ -121,15 +157,24 @@ export default class SpectrogramCanvas {
     }
   }
 
-  loadBboxYoloFormatJson(predictions) {
+  loadBboxYoloFormatJson(predictions,metadata = null) {
     this.IDBBOX = 0;
-    predictions.forEach((prediction) => {
+    predictions.forEach((prediction,index) => {
       const x1 = prediction.x
       const y1 = prediction.y
       const { w } = prediction
       const { h } = prediction
       this.IDBBOX += 1
-      const rect = new fabric.Rect({
+      let name = "";
+      if(metadata){
+        name = metadata[index]["OBJECT"];
+      }
+      
+      if(name === ""){
+        name = `Nuevo#${this.IDBBOX}`
+      }
+
+      const rect = new LabeledRect({
         id: this.IDBBOX,
         top: y1,
         left: x1,
@@ -139,7 +184,8 @@ export default class SpectrogramCanvas {
         fill: '',
         stroke: getColor(this.IDBBOX-1),
         strokeWidth: 10,
-        lockRotation: true
+        lockRotation: true,
+        label: name
       })
       this.canvas.add(rect)
     })
@@ -266,7 +312,7 @@ export default class SpectrogramCanvas {
   deleteAllBbox() {
     const objs = this.canvas.getObjects()
     objs.forEach((obj) => {
-      if (obj.get('type') === 'rect') this.canvas.remove(obj)
+      if (obj.get('type') === 'labeledRect') this.canvas.remove(obj)
     })
   }
 
