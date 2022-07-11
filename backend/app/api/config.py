@@ -5,7 +5,7 @@ from app.helpers.DictPersistJSON import DictPersistJSON
 from pathlib import Path
 
 CONFIG_FOLDERNAME = "config"
-CONFIG_FILENAME = "db.json"
+CONFIG_FILENAME = "db.json.example"
 
 def get_config_folder():
     path = Path(app.static_folder)/ CONFIG_FOLDERNAME 
