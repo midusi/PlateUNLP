@@ -30,6 +30,7 @@ def api_generate_fits():
         data.pop('color', None)
         data.pop('loaded', None)
         
+
         # The flag to -1 loads the image as is
         rotated = False;
         img = cv2.imread(image_path, -1)
@@ -70,8 +71,12 @@ def api_generate_fits():
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]
             if fields[key]["global"]:
+                if fields[key]["numeric"]:
+                  plate_data[key] = float(plate_data[key])
                 prihdr[key] = (plate_data[key], comment)
             else:
+                if fields[key]["numeric"]:
+                  data[key] = float(data[key])
                 prihdr[key] = (data[key], comment)
             
         prihdr["GAIN"] = ("","Gain, electrons per adu")

@@ -1,8 +1,6 @@
 import os
 def generate_txt(plateData,data,path,fileName):
-	path = os.path.join(path,'sedici_txt')
-	if not (os.path.exists(path)):
-		os.mkdir(path)
+	
 	path = os.path.join(path,f'{fileName}.txt')
 	f= open(path,"w+")
 
