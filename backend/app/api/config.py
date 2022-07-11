@@ -1,15 +1,25 @@
+from numpy import full
 from flask import request, json, current_app as app
 import os
 from app.helpers.DictPersistJSON import DictPersistJSON
+from pathlib import Path
+
+CONFIG_FOLDERNAME = "config"
+CONFIG_FILENAME = "db.json"
+
+def get_config_folder():
+    path = Path(app.static_folder)/ CONFIG_FOLDERNAME 
+    path = path.expanduser().absolute()
+    path.mkdir(exist_ok=True,parents=True)
+    return path
+
+def get_config_path():
+    return get_config_folder() / CONFIG_FILENAME
 
 def api_save_config():
     config = request.json["config"]
-
-    full_path = os.path.join(app.static_folder, '.config')
-    if not os.path.exists(full_path):
-            os.mkdir(full_path)
-    save_path = os.path.join(full_path, "db.json")
-    print(save_path)
+    save_path = get_config_path()
+    print(f"Saving config to {save_path}")
     db = DictPersistJSON(save_path)
     db["config"] = config
 
@@ -17,15 +27,17 @@ def api_save_config():
     data = {
         "message": 'success'
     }
-
     return json.jsonify(**data)
 
 def api_load_config():
 
-    full_path = os.path.join(app.static_folder, '.config', "db.json")
+    path =  get_config_path()
+    print(f"Using config path: {path}")
     config = {}
-    if os.path.isfile(full_path):
-        config = DictPersistJSON(full_path)["config"]
+    if path.is_file():
+        config = DictPersistJSON(path)["config"]
+    else:
+        raise Exception(f"File {path} does not exist")
     
     # api response data
     data = {

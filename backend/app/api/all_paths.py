@@ -3,12 +3,14 @@ from flask import request, json, jsonify, current_app as app
 import os
 from app.helpers.DictPersistJSON import DictPersistJSON
 
+from pathlib import Path
 
 def api_all_paths():
 
     dir_path = request.values["path_dir"]
-
-    if not os.path.exists(dir_path):
+    dir_path = Path(dir_path).expanduser().absolute()
+    print(dir_path)
+    if not dir_path.exists():
         data = {
             'message': 'No existe el directorio.'
         }
