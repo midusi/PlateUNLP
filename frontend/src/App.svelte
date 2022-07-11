@@ -19,8 +19,6 @@
   } from "./components";
   import { confirmAlert,showAlert,deleteAlert,errorAlert, loadingAlert } from "./helpers/Alert";
   import {setContext} from "svelte";
-  import { createEventDispatcher } from 'svelte'
-  const dispatch = createEventDispatcher()
 
   let imageChanged = true;
   let imageSaved = false
