@@ -18,17 +18,16 @@ function handleSelect(){
         </select>
     </div>
     <select
-      bind:value={selectedImage}
-      on:change={handleSelect}
-      class="form-select"
-      size="10"
-      aria-label=""
-      style="width:100%"
+        bind:value={selectedImage}
+        on:change={handleSelect}
+        class="form-select"
+        size="10"
+        aria-label=""
+        style="width:100%"
     >
-      {#each paths as path}
+    {#each paths as path}
         {#if showFinished}
             {#if path.number_of_spectra === -1}
-            
                 <option style="background-color:LightBlue" value={path.fileName}>{path.fileName}</option>
             {/if}
         {:else}
@@ -36,6 +35,6 @@ function handleSelect(){
                 <option style="background-color:{path.number_of_spectra > 0 ? "LightBlue" : "white"}" value={path.fileName}>{`${path.fileName} ${path.number_of_spectra > 0 ? `(${path.number_of_spectra})` : ""}`}</option>
             {/if}
         {/if}
-      {/each}
+    {/each}
     </select>
 </div>
