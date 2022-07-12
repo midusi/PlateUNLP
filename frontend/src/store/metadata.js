@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store'
-import { loadingAlert, remoteErrorAlert, showAlert } from '../helpers/Alert'
+import { loadingAlert, remoteErrorAlert, showAlert,errorAlert } from '../helpers/Alert'
 import apiSpectrum from '../api/spectrum'
 import { getMetadataFields } from '../helpers/metadataUtilities'
 import {serverUp} from './serverUp'

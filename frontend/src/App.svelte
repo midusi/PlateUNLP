@@ -139,7 +139,6 @@
   //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
   // }
   async function confirmSearchMetadata(){
-    let value;
     if(metadataSearched[bboxSelected-1]){
       deleteAlert({
       title :'¿Seguro que quieres buscar metadatos?',
@@ -151,10 +150,11 @@
       }})             
     }
     else{
-      value = await setRemoteMetadata();
-      metadataSearched[bboxSelected-1] = value;
+      await setRemoteMetadata();
+      metadataSearched[bboxSelected-1] = true;
     }
   }
+  
   async function setRemoteMetadata() {
     const data = {
     OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],

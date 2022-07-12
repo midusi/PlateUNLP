@@ -79,21 +79,10 @@ function errorAlert({ title = 'Sucedio un error!', message = 'Ha ocurrido un err
   Swal.fire(title, message, 'error')
 }
 
-async function remoteErrorAlert({
-  title = 'Ha ocurrido un error en el servidor', 
-  text = '¿Quiere cargar los datos de forma manual?',
-  } = {}) {
-  let response = false;
+function remoteErrorAlert({ title = 'Sucedio un error!', message = 'Ha ocurrido un error en el servidor.' } = {}) {
   Swal.close()
-  await Swal.fire({title, text, icon: 'error', showDenyButton: true,
-  showCancelButton: false,
-  confirmButtonText: "Aceptar",
-  denyButtonText: "Cancelar"})
-  .then((result) => {
-    if (result.isConfirmed) response = true;
-  })
-
-  return response;
+  Swal.fire({title: title, text: message,icon: 'error', showConfirmButton: false,
+  timer: 1500})
 }
 
 async function closeAlert() {
