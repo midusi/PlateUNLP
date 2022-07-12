@@ -3,7 +3,9 @@ import os
 import base64
 import cv2
 from app.helpers.DictPersistJSON import DictPersistJSON
+from app.api.config import get_workspace_path
 import shutil
+
 
 def load():
 
@@ -46,8 +48,8 @@ def load():
     
     # It checks if there is information saved for that image and 
     # if it exists it adds its information to data
-    saved_path = os.path.join(app.static_folder, 'cache' ,'saved')
-    working_path = os.path.join(app.static_folder, 'cache', 'working')
+    saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved')
+    working_path = os.path.join(get_workspace_path(), 'cache', 'working')
     if not os.path.exists(saved_path):
         os.mkdir(saved_path)
     if not os.path.exists(working_path):
@@ -86,11 +88,11 @@ def save():
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
     # Save image data in .json files
-    saved_path = os.path.join(app.static_folder, 'cache' ,'saved')
+    saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved')
     if not os.path.exists(saved_path):
         os.mkdir(saved_path)
 
-    full_path = os.path.join(app.static_folder, 'cache','working')
+    full_path = os.path.join(get_workspace_path(), 'cache','working')
     if not os.path.exists(full_path):
         os.mkdir(full_path)
 
@@ -117,7 +119,7 @@ def delete():
     img_name = body["img_name"]
     # Valid the information received
     # Por ahora no realiza ninguna verificacion
-    delete_path = os.path.join(app.static_folder, 'cache','working')
+    delete_path = os.path.join(get_workspace_path(), 'cache','working')
     if not os.path.exists(delete_path):
         os.mkdir(delete_path)
     # Delete the information of an image if it exists
