@@ -51,30 +51,16 @@ function createStoreSpectrogram() {
     },
     autoSaveValues: async(bboxArr,dataArr,plateData,path,imgName) => {
       let resp;
-      if (bboxArr.length === 0){
-        try{
-          resp = await apiSpectrum.delete({
-            img_name: imgName
-          })
-        }
-        catch (error) {
-          serverUp()
-        }
-        return (resp.status === 201);
-      }
-      else{
-        try {
-          resp = await apiSpectrum.autoSave({
-            path_dir: path,
-            data_arr: dataArr,
-            bbox_arr: bboxArr,
-            plate_data: plateData,
-            img_name: imgName
-          })
-        } catch (error) {
-          serverUp()
-        }
-          return (resp.status === 201);
+      try {
+        resp = await apiSpectrum.autoSave({
+          path_dir: path,
+          data_arr: dataArr,
+          bbox_arr: bboxArr,
+          plate_data: plateData,
+          img_name: imgName
+        })
+      } catch (error) {
+        serverUp()
       }
     }
     ,

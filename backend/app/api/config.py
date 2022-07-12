@@ -29,6 +29,17 @@ def api_save_config():
     }
     return json.jsonify(**data)
 
+def get_workspace_path():
+    path =  get_config_path()
+    print(f"Using config path: {path}")
+    config = {}
+    if path.is_file():
+        config = DictPersistJSON(path)["config"]
+    else:
+        raise Exception(f"File {path} does not exist")
+    
+    return config['global']['workspace_path']
+
 def api_load_config():
 
     path =  get_config_path()

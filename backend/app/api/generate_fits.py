@@ -3,7 +3,9 @@ from astropy.io import fits
 import os
 import cv2
 import shutil
+from app.helpers.DictPersistJSON import DictPersistJSON
 from app.helpers.generate_txt import generate_txt
+from app.api.config import get_workspace_path
 
 def api_generate_fits():
 
@@ -89,8 +91,8 @@ def api_generate_fits():
         fits.writeto(
             (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
         generate_txt(plate_data,data,output_path,file_output_name)
-    working_path = os.path.join(app.static_folder, 'cache', 'working', img_name+".tiff.json")
-    saved_path = os.path.join(app.static_folder, 'cache' ,'saved', img_name+".tiff.json")
+    working_path = os.path.join(get_workspace_path(), 'cache', 'working', img_name+".tiff.json")
+    saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved', img_name+".tiff.json")
     shutil.move(working_path, saved_path)
     # api response data
     data = {

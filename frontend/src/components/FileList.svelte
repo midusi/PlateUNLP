@@ -32,7 +32,7 @@ function handleSelect(){
             {/if}
         {:else}
             {#if path.number_of_spectra !== -1}
-                <option style="background-color:{path.number_of_spectra > 0 ? "LightBlue" : "white"}" value={path.fileName}>{`${path.fileName} ${path.number_of_spectra > 0 ? `(${path.number_of_spectra})` : ""}`}</option>
+                <option style="background-color:{path.saved ? "LightBlue" : "white"}" value={path.fileName}>{`${path.fileName} ${path.number_of_spectra > 0 ? `(${path.number_of_spectra})` : ""}`}</option>
             {/if}
         {/if}
     {/each}
