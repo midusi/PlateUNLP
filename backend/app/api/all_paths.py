@@ -47,12 +47,15 @@ def api_all_paths():
     for i,file in enumerate(all_paths):
         paths.append({
             "fileName": file,
-            "number_of_spectra": 0
+            "number_of_spectra": 0,
+            "saved": False
         })
         if(file in working_files):
             aux_path = os.path.join(working_path, file+".json")
+            paths[i]["saved"] = True
             paths[i]["number_of_spectra"] = len(DictPersistJSON(aux_path)["body"]["bbox_arr"])
         elif(file in saved_files):
+            paths[i]["saved"] = True
             paths[i]["number_of_spectra"] = -1
         
 
