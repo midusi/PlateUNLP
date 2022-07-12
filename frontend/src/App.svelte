@@ -25,8 +25,10 @@
   let cantSpectra = 0;
   let spectrogramCanvas;
   let uploadedImage = false;
-  let pathsLoaded = false;
   let pathDir = "";
+  $: if(pathDir){
+    getPaths()
+  }
   let imageName = "";
   let scale = 0.5;
   let canvas = undefined;
@@ -240,7 +242,6 @@
   async function getPaths() {
     if(pathDir){
       await workspaceStore.getPaths(pathDir);
-      pathsLoaded = true;
     }
   }
 
@@ -481,17 +482,7 @@
     <div class="card-body">
       <div class="row">
         <div class="col-lg-2 col-xl-2">
-          <div class="row">
-            <div class="d-flex flex-column col-9">
-              Buscar elementos
-            </div>
-            <div class="d-flex flex-column col-3">
-              <NButton click={getPaths}>&#x1F50D;</NButton>
-            </div>
-          </div>
-          {#if pathsLoaded}
-            <FileList paths={$workspaceStore.paths} getImg={getImg}/>
-          {/if}
+          <FileList paths={$workspaceStore.paths} getImg={getImg} getPaths={getPaths}/>
           {#if uploadedImage}
             <div style="display:inline">
               <div in:slide="{{duration:1000}}">
