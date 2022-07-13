@@ -126,13 +126,12 @@
         loadNames();
         changeFlag = false;
         
-      }
-      else{
+      } else {
         setChangeFlag();
+        handlePlateSelected() // Issue #63 | Santiago> esta solucion no es lo mas elegante, pero hasta que entienda mejor el codigo va a ser lo mejor
       }
       imageChanged = false;
       uploadedImage = true;
-      handlePlateSelected() // Issue #63 | Santiago> esta solucion no es lo mas elegante, pero hasta que entienda mejor el codigo va a ser lo mejor
     }
   }
 
