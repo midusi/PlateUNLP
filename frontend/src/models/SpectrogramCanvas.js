@@ -5,10 +5,11 @@ import { FilterQueque } from './FiltersQueque'
 import LabeledRect from './LabeledRect'
 
 export default class SpectrogramCanvas {
-  constructor(events) {
+  constructor(events, max_width) {
     this.widthOriginal = null
     this.heightOriginal = null
     this.originalImage = null
+    this.max_width = max_width - 25
     this.scale = 1
     this.IDBBOX = 0
     this.filter_queque = new FilterQueque()
@@ -196,8 +197,16 @@ export default class SpectrogramCanvas {
     this.filter_queque = new FilterQueque()
   }
   
+  // Desactualizado, se deja aca, por que capaz es util en el futuro
   setScale(scale) {
     this.scale = scale
+    this.canvas.setHeight(this.getCanvasHeight())
+    this.canvas.setWidth(this.getCanvasWidth())
+    this.canvas.setZoom(this.scale)
+  }
+
+  recalculateScale() {
+    this.scale = this.max_width / this.widthOriginal
     this.canvas.setHeight(this.getCanvasHeight())
     this.canvas.setWidth(this.getCanvasWidth())
     this.canvas.setZoom(this.scale)
@@ -257,8 +266,7 @@ export default class SpectrogramCanvas {
       this.widthOriginal = width
       this.heightOriginal = height
       this.filter_queque = new FilterQueque()
-      this.canvas.setHeight(this.getCanvasHeight())
-      this.canvas.setWidth(this.getCanvasWidth())
+      this.recalculateScale()
 
       var imageObj = new Image();
       imageObj.src = src;
@@ -270,7 +278,6 @@ export default class SpectrogramCanvas {
           backgroundImageStretch: false
         }
       )
-      this.canvas.setZoom(this.scale)
 
       return true
     }

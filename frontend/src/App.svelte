@@ -42,7 +42,6 @@
   let dataLoaded = false
   let reset_filters_flag = false
 
-
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
     $metadataStore.formActions.selectForIndex(bboxSelected - 1);
@@ -67,7 +66,8 @@
     };
     loadConfig();
     metadataStore.initFields();
-    spectrogramCanvas = new SpectrogramCanvas(events);
+    let witdh_ruler =  document.getElementById("witdh_ruler").clientWidth
+    spectrogramCanvas = new SpectrogramCanvas(events, witdh_ruler);
     canvas = spectrogramCanvas.getCanvas();
     checkChangeFlag();
   });
@@ -175,7 +175,7 @@
   function initializeCanvas() {
     bboxSelected = 1;
     metadataStore.setSpectraData([]);
-    spectrogramCanvas.setScale(scale);
+    //spectrogramCanvas.setScale(scale);
   }
 
   function addBox() {
@@ -491,13 +491,11 @@
             </div>
           {/if}
         </div>
-          <div class="col-lg-10 col-xl-10">
+          <div id="witdh_ruler" class="col-lg-10 col-xl-10">
               <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
                 <FilterZone spectrogramCanvas={spectrogramCanvas} scale={scale} bind:reset_filters_flag={reset_filters_flag}/>
                 <canvas
                   id="canvas-container"
-                  width="300"
-                  height="300"
                   style="border-width: 1px;
                         border-style: solid;
                         border-color: black;"

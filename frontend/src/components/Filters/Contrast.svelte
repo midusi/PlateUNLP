@@ -9,7 +9,7 @@
     }
 </script>
   
-<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 20px; width: 300px;">
+<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 40px; width: 400px;">
     <span>Contraste</span>
     <input
         type="range"

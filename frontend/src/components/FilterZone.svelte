@@ -82,7 +82,7 @@
   </h5>
   <div class="card-body">
     <div class="row">
-      <Zoom canvas={spectrogramCanvas} bind:scale={scale}/>
+      <!-- <Zoom canvas={spectrogramCanvas} bind:scale={scale}/> -->
       <Brightness canvas={spectrogramCanvas} bind:brightness_input={brightness_input}/>
       <Contrast canvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
       <Colorize canvas={spectrogramCanvas} bind:colorize_input={colorize_input}/>
