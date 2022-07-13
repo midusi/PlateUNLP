@@ -438,9 +438,7 @@
   }
 
   function setBbox(event) {
-    console.log("Ejecutando setBbox")
     const index = event.detail.index
-    console.log("> Index = ", index)
       if (index !== bboxSelected - 1){
         const item = canvas.item(index);
         if (item != undefined) {
