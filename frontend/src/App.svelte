@@ -132,7 +132,7 @@
       }
       imageChanged = false;
       uploadedImage = true;
-      handlePlateSelected()
+      handlePlateSelected() // Issue #63 | Santiago> esta solucion no es lo mas elegante, pero hasta que entienda mejor el codigo va a ser lo mejor
     }
   }
 
