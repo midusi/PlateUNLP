@@ -9,7 +9,7 @@ export default class SpectrogramCanvas {
     this.widthOriginal = null
     this.heightOriginal = null
     this.originalImage = null
-    this.max_width = max_width - 25
+    this.max_width = max_width - 45
     this.scale = 1
     this.IDBBOX = 0
     this.filter_queque = new FilterQueque()
