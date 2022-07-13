@@ -74,7 +74,6 @@ function createStoreWorkspace() {
 
         }
         else{
-          console.log("aca")
           await spectrogramStore.getPredictions(
             spectrogramCanvas,
             dirPath,

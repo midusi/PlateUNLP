@@ -132,6 +132,7 @@
       }
       imageChanged = false;
       uploadedImage = true;
+      handlePlateSelected()
     }
   }
 
@@ -437,7 +438,9 @@
   }
 
   function setBbox(event) {
+    console.log("Ejecutando setBbox")
     const index = event.detail.index
+    console.log("> Index = ", index)
       if (index !== bboxSelected - 1){
         const item = canvas.item(index);
         if (item != undefined) {
@@ -491,16 +494,16 @@
             </div>
           {/if}
         </div>
-          <div id="witdh_ruler" class="col-lg-10 col-xl-10">
-              <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-                <FilterZone spectrogramCanvas={spectrogramCanvas} scale={scale} bind:reset_filters_flag={reset_filters_flag}/>
-                <canvas
-                  id="canvas-container"
-                  style="border-width: 1px;
-                        border-style: solid;
-                        border-color: black;"
-                />  
-              </div>
+        <div id="witdh_ruler" class="col-lg-10 col-xl-10">
+          <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
+            <FilterZone spectrogramCanvas={spectrogramCanvas} scale={scale} bind:reset_filters_flag={reset_filters_flag}/>
+            <canvas
+              id="canvas-container"
+              style="border-width: 1px;
+                    border-style: solid;
+                    border-color: black;"
+            />  
+          </div>
           {#if uploadedImage}
             <div in:slide="{{duration:1000}}" out:slide="{{duration:700}}">
             <Tabs on:selectTab={setBbox}>
@@ -509,14 +512,14 @@
                   <div class="col-10 my-2">
                     <PlateTab bboxSelected = {bboxSelected} handlePlateSelected = {handlePlateSelected}>
                       <NButton
-                          style={`background-color:white !important; border-color: black; width:80px; height:40px; border-radius:1px`}
-                          classStyle={""}
-                        >
+                        style={`background-color:white !important; border-color: black; width:80px; height:40px; border-radius:1px`}
+                        classStyle={""}
+                      >
                         Placa
                       </NButton>
-                      </PlateTab>
+                    </PlateTab>
                     {#if $metadataStore.spectraData.length > 0}
-                    <span style="background-color: darkgray;font-size: 20px; color: darkgray"> .</span>
+                      <span style="background-color: darkgray;font-size: 20px; color: darkgray"> .</span>
                       <span style="font-size: 16px; color: black">  Espectros : </span>
 
                       {#each $metadataStore.spectraData as item, index}
@@ -531,10 +534,10 @@
                     {/if}
                     <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
                   </div> 
-                <div class="col-2 py-3">
+                  <div class="col-2 py-3">
                     <ExportButton plateValid = {plateValid} spectrums={$metadataStore.spectraData} validatedSpectrums={validatedSpectrums} title={"faltanDatos"} click={generateFits} disabled={invalidForm}/>
-                </div>  
-              </div>
+                  </div>  
+                </div>
               </TabList>
               {#if bboxSelected === -1 }
                  <div class="controls">

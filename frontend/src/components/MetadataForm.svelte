@@ -3,7 +3,7 @@
     import Modal from "./Modal.svelte";
     import { metadataStore } from "../store/metadata";
     import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
-    export let metadata, spectraData,index;
+    export let metadata, spectraData, index;
     let arr = [];
     for (let i = 0; i <= metadata.length; i = i + 3) {
         arr.push([metadata[i], metadata[i + 1], metadata[i + 2]]);

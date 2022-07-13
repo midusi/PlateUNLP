@@ -3,7 +3,7 @@
   import Brightness from "./Filters/Brightness.svelte";
   import Contrast from "./Filters/Contrast.svelte";
   import Colorize from "./Filters/Colorize.svelte";
-  import Zoom from "./Filters/Zoom.svelte";
+  // import Zoom from "./Filters/Zoom.svelte";
   
   export let spectrogramCanvas
   export let reset_filters_flag
