@@ -8,7 +8,7 @@
     }
 </script>
   
-<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 40px; width: 400px;">
+<div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 40px; width: 300px;">
     <span>Zoom</span>
     <input
         type="range"
