@@ -1,24 +1,13 @@
 <script>
-	export let handlePlateSelected,bboxSelected;
+	export let click;
 
 </script>
 
-<button class:selected={bboxSelected === -1} on:click={handlePlateSelected}>
-	<slot/>
+
+<button 
+  type="button"  
+  style={`background-color: white !important; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; border-color: black; width:100px; height:40px; border-radius:1px`} 
+  on:click={click}
+>
+  Plate
 </button>
-
-<style>
-	button {
-		background: none;
-		border: none;
-		border-bottom: 2px solid white;
-		border-radius: 0;
-		margin: 0;
-		color: #ccc;
-	}
-
-	.selected {
-		border-bottom: 2px solid black;
-		color: #333;
-	}
-</style>

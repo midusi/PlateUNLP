@@ -99,6 +99,7 @@
       uploadedImage = false
       imageChanged = true
       spectrogramCanvas.deleteAllBbox();
+      validatedSpectrums = []
       dataLoaded = false
       changeFlag = false
       imageName = selectedImage;
@@ -128,7 +129,6 @@
         
       } else {
         setChangeFlag();
-        handlePlateSelected() // Issue #63 | Santiago> esta solucion no es lo mas elegante, pero hasta que entienda mejor el codigo va a ser lo mejor
       }
       imageChanged = false;
       uploadedImage = true;
@@ -437,9 +437,10 @@
   }
 
   function setBbox(event) {
-    const index = event.detail.index
+    let index = event.detail.index
+    console.log("INDEX:",index)
       if (index !== bboxSelected - 1){
-        const item = canvas.item(index);
+        const item = canvas.item(index - 1);
         if (item != undefined) {
           canvas.setActiveObject(item);
           bboxSelected = index + 1
@@ -447,6 +448,7 @@
           canvas.renderAll();
         }
       }
+    
   }
 
   function handlePlateSelected(){
@@ -507,14 +509,9 @@
               <TabList>
                 <div class="row">
                   <div class="col-10 my-2">
-                    <PlateTab bboxSelected = {bboxSelected} handlePlateSelected = {handlePlateSelected}>
-                      <NButton
-                        style={`background-color:white !important; border-color: black; width:80px; height:40px; border-radius:1px`}
-                        classStyle={""}
-                      >
-                        Placa
-                      </NButton>
-                    </PlateTab>
+                    <Tab>
+                      <PlateTab/>
+                    </Tab>
                     {#if $metadataStore.spectraData.length > 0}
                       <span style="background-color: darkgray;font-size: 20px; color: darkgray"> .</span>
                       <span style="font-size: 16px; color: black">  Espectros : </span>
@@ -536,14 +533,14 @@
                   </div>  
                 </div>
               </TabList>
-              {#if bboxSelected === -1 }
+                 <TabPanel>
                  <div class="controls">
                     <PlateForm
                       plateData={$metadataStore.plateData}
                       metadata={getMetadata($metadataStore.fields,true)}
                     />
                   </div>
-              {/if}
+                </TabPanel>
               {#each $metadataStore.spectraData as item,index}
                 <TabPanel>
                   <div class="controls">
@@ -565,6 +562,7 @@
                   {/if}
                 </TabPanel>
               {/each}
+        
             </Tabs>
             <div class="row mt-4 ml-1 mb-4">
               <div class="controls  mr-2"> 

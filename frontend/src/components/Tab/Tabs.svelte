@@ -28,7 +28,7 @@
 		registerTab: (tab) => {
 			tabs.push(tab);
 			selectedTab.update((current) => current || tab);
-
+			console.log("REGISTRA3")
 			onDestroy(() => {
 				const i = tabs.indexOf(tab);
 				tabs.splice(i, 1);
@@ -39,6 +39,7 @@
 		},
 
 		registerPanel: (panel) => {
+			console.log("PANEL REGISTRADO")
 			panels.push(panel);
 			selectedPanel.update((current) => current || panel);
 
