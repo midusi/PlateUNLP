@@ -32,7 +32,7 @@
   let imageName = "";
   let scale = 0.5;
   let canvas = undefined;
-  let bboxSelected = -1;
+  let bboxSelected = 1;
   let invalidForm = true;
   let changeFlag = false;
   let metadataSearched = []
@@ -78,9 +78,9 @@
   }
 
   function updateName(){
-    if(bboxSelected != -1 && cantSpectra > 0 && names[bboxSelected-1] !== $metadataStore.spectraData[bboxSelected-1]["OBJECT"]){
-      names[bboxSelected-1] = $metadataStore.spectraData[bboxSelected-1]["OBJECT"]
-      spectrogramCanvas.updateLabel(bboxSelected-1,names[bboxSelected-1])
+    if(bboxSelected > 0 && cantSpectra > 0 && names[bboxSelected-2] !== $metadataStore.spectraData[bboxSelected-2]["OBJECT"]){
+      names[bboxSelected-2] = $metadataStore.spectraData[bboxSelected-2]["OBJECT"]
+      spectrogramCanvas.updateLabel(bboxSelected-2,names[bboxSelected-2])
     }
   }
 
@@ -141,7 +141,7 @@
   //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
   // }
   async function confirmSearchMetadata(){
-    if(metadataSearched[bboxSelected-1]){
+    if(metadataSearched[bboxSelected-2]){
       deleteAlert({
       title :'¿Seguro que quieres buscar metadatos?',
       text :  'Se perderan los datos anteriores',
@@ -153,18 +153,18 @@
     }
     else{
       await setRemoteMetadata();
-      metadataSearched[bboxSelected-1] = true;
+      metadataSearched[bboxSelected-2] = true;
     }
   }
   
   async function setRemoteMetadata() {
     const data = {
-    OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],
+    OBJECT: $metadataStore.spectraData[bboxSelected - 2]["OBJECT"],
     OBSERVAT: $metadataStore.plateData["OBSERVAT"],
-    "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
-    UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
+    "DATE-OBS": $metadataStore.spectraData[bboxSelected - 2]["DATE-OBS"],
+    UT: $metadataStore.spectraData[bboxSelected - 2]["UT"],
     };
-    const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 2);
     if(setted){
       setChangeFlag();
     }
@@ -179,7 +179,6 @@
   }
 
   function addBox() {
-    console.log(cantSpectra+1)
     spectrogramCanvas.addBbox(cantSpectra+1);
     setChangeFlag();
   }
@@ -324,6 +323,9 @@
         }
       });
     }
+    else{
+      invalidForm = true
+    }
   }
 
   function validateAllSpectrum(){
@@ -335,18 +337,19 @@
   }
 
   function validateSelectedSpectrum(){
-    if (cantSpectra > 0 && bboxSelected != -1 ){
-      validateSpectrum(bboxSelected-1)
+    if (cantSpectra > 0 && bboxSelected > 1 ){
+      validateSpectrum(bboxSelected-2)
     }
   }
 
-  function validateSpectrum(spectrumIndex){
+  function validateSpectrum(spectrumIndex){  
       let invalidSpectrum = false;
       getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
         if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
           invalidSpectrum = true;
         }
       });
+
       validatedSpectrums[spectrumIndex] = !invalidSpectrum
     
   }
@@ -362,7 +365,7 @@
       bboxSelected =
         $metadataStore.spectraData.findIndex(
           (item) => item.id === obj.selected[0].id
-        ) + 1;
+        ) + 2;
     }
   }
 
@@ -426,7 +429,7 @@
       canvas.renderAll();
     } else {
       metadataStore.setSpectraData([]);
-      bboxSelected = -1
+      bboxSelected = 1
     }
     changeFlag = true;
     imageSaved = false;
@@ -438,7 +441,12 @@
 
   function setBbox(event) {
     let index = event.detail.index
-    console.log("INDEX:",index)
+    if(index === 0){
+      canvas.discardActiveObject()
+      bboxSelected = 1
+      canvas.renderAll();
+    }
+    else{
       if (index !== bboxSelected - 1){
         const item = canvas.item(index - 1);
         if (item != undefined) {
@@ -448,7 +456,7 @@
           canvas.renderAll();
         }
       }
-    
+    }
   }
 
   function handlePlateSelected(){
@@ -547,11 +555,11 @@
                     <RequiredForm
                       spectraData={item}
                       metadata={getRequiredMetadata($metadataStore.fields,false)}
-                      invalidSpectrum ={!validatedSpectrums[bboxSelected-1]}
+                      invalidSpectrum ={!validatedSpectrums[bboxSelected-2]}
                       confirmSearchMetadata = {confirmSearchMetadata}
                     />
                   </div>
-                  {#if metadataSearched[bboxSelected-1]}
+                  {#if metadataSearched[bboxSelected-2]}
                     <div>
                       <MetadataForm
                         spectraData={item}

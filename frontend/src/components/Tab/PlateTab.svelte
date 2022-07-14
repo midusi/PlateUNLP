@@ -9,5 +9,5 @@
   style={`background-color: white !important; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; border-color: black; width:100px; height:40px; border-radius:1px`} 
   on:click={click}
 >
-  Plate
+  Placa
 </button>
