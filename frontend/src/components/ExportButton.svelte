@@ -19,12 +19,17 @@
       title += "de la placa "
     let invalidSpectrums = []
     
-    validatedSpectrums.forEach((isValid,index) => {
-      if(!isValid){
-          invalids += `${spectrums[index]["OBJECT"]} `
-          invalidSpectrums.push(spectrums[index])
-      }
-    })
+    if (spectrums.length > 0){
+      validatedSpectrums.forEach((isValid,index) => {
+        if(!isValid){
+            if(spectrums[index]["OBJECT"] !== "")
+              invalids += `${spectrums[index]["OBJECT"]} `
+            else
+              invalids += `Nuevo#${index + 1} `
+            invalidSpectrums.push(spectrums[index])
+        }
+      })
+    }
 
     if(invalids !== ""){
       if(!plateValid)

@@ -32,7 +32,7 @@
   let imageName = "";
   let scale = 0.5;
   let canvas = undefined;
-  let bboxSelected = -1;
+  let bboxSelected = 1;
   let invalidForm = true;
   let changeFlag = false;
   let metadataSearched = []
@@ -78,9 +78,9 @@
   }
 
   function updateName(){
-    if(bboxSelected != -1 && cantSpectra > 0 && names[bboxSelected-1] !== $metadataStore.spectraData[bboxSelected-1]["OBJECT"]){
-      names[bboxSelected-1] = $metadataStore.spectraData[bboxSelected-1]["OBJECT"]
-      spectrogramCanvas.updateLabel(bboxSelected-1,names[bboxSelected-1])
+    if(bboxSelected > 0 && cantSpectra > 0 && names[bboxSelected-2] !== $metadataStore.spectraData[bboxSelected-2]["OBJECT"]){
+      names[bboxSelected-2] = $metadataStore.spectraData[bboxSelected-2]["OBJECT"]
+      spectrogramCanvas.updateLabel(bboxSelected-2,names[bboxSelected-2])
     }
   }
 
@@ -99,6 +99,7 @@
       uploadedImage = false
       imageChanged = true
       spectrogramCanvas.deleteAllBbox();
+      validatedSpectrums = []
       dataLoaded = false
       changeFlag = false
       imageName = selectedImage;
@@ -128,7 +129,6 @@
         
       } else {
         setChangeFlag();
-        handlePlateSelected() // Issue #63 | Santiago> esta solucion no es lo mas elegante, pero hasta que entienda mejor el codigo va a ser lo mejor
       }
       imageChanged = false;
       uploadedImage = true;
@@ -141,7 +141,7 @@
   //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
   // }
   async function confirmSearchMetadata(){
-    if(metadataSearched[bboxSelected-1]){
+    if(metadataSearched[bboxSelected-2]){
       deleteAlert({
       title :'¿Seguro que quieres buscar metadatos?',
       text :  'Se perderan los datos anteriores',
@@ -153,18 +153,18 @@
     }
     else{
       await setRemoteMetadata();
-      metadataSearched[bboxSelected-1] = true;
+      metadataSearched[bboxSelected-2] = true;
     }
   }
   
   async function setRemoteMetadata() {
     const data = {
-    OBJECT: $metadataStore.spectraData[bboxSelected - 1]["OBJECT"],
+    OBJECT: $metadataStore.spectraData[bboxSelected - 2]["OBJECT"],
     OBSERVAT: $metadataStore.plateData["OBSERVAT"],
-    "DATE-OBS": $metadataStore.spectraData[bboxSelected - 1]["DATE-OBS"],
-    UT: $metadataStore.spectraData[bboxSelected - 1]["UT"],
+    "DATE-OBS": $metadataStore.spectraData[bboxSelected - 2]["DATE-OBS"],
+    UT: $metadataStore.spectraData[bboxSelected - 2]["UT"],
     };
-    const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 1);
+    const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 2);
     if(setted){
       setChangeFlag();
     }
@@ -179,7 +179,6 @@
   }
 
   function addBox() {
-    console.log(cantSpectra+1)
     spectrogramCanvas.addBbox(cantSpectra+1);
     setChangeFlag();
   }
@@ -324,6 +323,9 @@
         }
       });
     }
+    else{
+      invalidForm = true
+    }
   }
 
   function validateAllSpectrum(){
@@ -335,18 +337,19 @@
   }
 
   function validateSelectedSpectrum(){
-    if (cantSpectra > 0 && bboxSelected != -1 ){
-      validateSpectrum(bboxSelected-1)
+    if (cantSpectra > 0 && bboxSelected > 1 ){
+      validateSpectrum(bboxSelected-2)
     }
   }
 
-  function validateSpectrum(spectrumIndex){
+  function validateSpectrum(spectrumIndex){  
       let invalidSpectrum = false;
       getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
         if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
           invalidSpectrum = true;
         }
       });
+
       validatedSpectrums[spectrumIndex] = !invalidSpectrum
     
   }
@@ -362,7 +365,7 @@
       bboxSelected =
         $metadataStore.spectraData.findIndex(
           (item) => item.id === obj.selected[0].id
-        ) + 1;
+        ) + 2;
     }
   }
 
@@ -426,7 +429,7 @@
       canvas.renderAll();
     } else {
       metadataStore.setSpectraData([]);
-      bboxSelected = -1
+      bboxSelected = 1
     }
     changeFlag = true;
     imageSaved = false;
@@ -437,9 +440,15 @@
   }
 
   function setBbox(event) {
-    const index = event.detail.index
+    let index = event.detail.index
+    if(index === 0){
+      canvas.discardActiveObject()
+      bboxSelected = 1
+      canvas.renderAll();
+    }
+    else{
       if (index !== bboxSelected - 1){
-        const item = canvas.item(index);
+        const item = canvas.item(index - 1);
         if (item != undefined) {
           canvas.setActiveObject(item);
           bboxSelected = index + 1
@@ -447,6 +456,7 @@
           canvas.renderAll();
         }
       }
+    }
   }
 
   function handlePlateSelected(){
@@ -507,14 +517,9 @@
               <TabList>
                 <div class="row">
                   <div class="col-10 my-2">
-                    <PlateTab bboxSelected = {bboxSelected} handlePlateSelected = {handlePlateSelected}>
-                      <NButton
-                        style={`background-color:white !important; border-color: black; width:80px; height:40px; border-radius:1px`}
-                        classStyle={""}
-                      >
-                        Placa
-                      </NButton>
-                    </PlateTab>
+                    <Tab>
+                      <PlateTab/>
+                    </Tab>
                     {#if $metadataStore.spectraData.length > 0}
                       <span style="background-color: darkgray;font-size: 20px; color: darkgray"> .</span>
                       <span style="font-size: 16px; color: black">  Espectros : </span>
@@ -536,25 +541,25 @@
                   </div>  
                 </div>
               </TabList>
-              {#if bboxSelected === -1 }
+                 <TabPanel>
                  <div class="controls">
                     <PlateForm
                       plateData={$metadataStore.plateData}
                       metadata={getMetadata($metadataStore.fields,true)}
                     />
                   </div>
-              {/if}
+                </TabPanel>
               {#each $metadataStore.spectraData as item,index}
                 <TabPanel>
                   <div class="controls">
                     <RequiredForm
                       spectraData={item}
                       metadata={getRequiredMetadata($metadataStore.fields,false)}
-                      invalidSpectrum ={!validatedSpectrums[bboxSelected-1]}
+                      invalidSpectrum ={!validatedSpectrums[bboxSelected-2]}
                       confirmSearchMetadata = {confirmSearchMetadata}
                     />
                   </div>
-                  {#if metadataSearched[bboxSelected-1]}
+                  {#if metadataSearched[bboxSelected-2]}
                     <div>
                       <MetadataForm
                         spectraData={item}
@@ -565,6 +570,7 @@
                   {/if}
                 </TabPanel>
               {/each}
+        
             </Tabs>
             <div class="row mt-4 ml-1 mb-4">
               <div class="controls  mr-2"> 

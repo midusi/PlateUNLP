@@ -11,3 +11,4 @@
 {#if $selectedPanel === panel}
 	<slot />
 {/if}
+
