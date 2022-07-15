@@ -354,8 +354,6 @@
     
   }
 
-
-
   function handlerModified(){
     setChangeFlag();
   }
@@ -459,9 +457,9 @@
     }
   }
 
-  function handlePlateSelected(){
-    bboxSelected = -1;
-  }
+  // function handlePlateSelected(){
+  //   bboxSelected = -1;
+  // }
 
   /*function saveConfig() {
     const config = {
@@ -484,7 +482,6 @@
       metadataStore.setOption("OBSERVAT", config.fields["OBSERVAT"].options);
     }
   }
-
 </script>
 
 <main>
@@ -503,7 +500,7 @@
         </div>
         <div id="witdh_ruler" class="col-lg-10 col-xl-10">
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <FilterZone spectrogramCanvas={spectrogramCanvas} scale={scale} bind:reset_filters_flag={reset_filters_flag}/>
+            <FilterZone spectrogramCanvas={spectrogramCanvas} bind:reset_filters_flag={reset_filters_flag}/>
             <canvas
               id="canvas-container"
               style="border-width: 1px;
@@ -530,6 +527,7 @@
                             color ={item.color}
                             index={index}
                             names ={names}
+                            bind:validated={validatedSpectrums[index]}
                           />
                         </Tab>
                       {/each}

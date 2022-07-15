@@ -7,7 +7,7 @@
   
   export let spectrogramCanvas
   export let reset_filters_flag
-  export let scale
+  // export let scale
   
   let brightness_input = 0
   let contrast_input = 0
