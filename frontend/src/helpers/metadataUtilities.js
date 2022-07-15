@@ -146,7 +146,7 @@ function getMetadataFields() {
     },
     ut: {
       label: 'UT',
-      type: 'date',
+      type: 'text',
       info: 'Universal time (hh:mm:ss)',
       required: true,
       global: false,
