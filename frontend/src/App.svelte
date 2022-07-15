@@ -78,7 +78,7 @@
   }
 
   function updateName(){
-    if(bboxSelected > 0 && cantSpectra > 0 && names[bboxSelected-2] !== $metadataStore.spectraData[bboxSelected-2]["OBJECT"]){
+    if(bboxSelected > 1 && cantSpectra > 0 && names[bboxSelected-2] !== $metadataStore.spectraData[bboxSelected-2]["OBJECT"]){
       names[bboxSelected-2] = $metadataStore.spectraData[bboxSelected-2]["OBJECT"]
       spectrogramCanvas.updateLabel(bboxSelected-2,names[bboxSelected-2])
     }
@@ -409,7 +409,7 @@
 
 
   function handlerRemoved(obj) {
-    let index = bboxSelected - 1
+    let index = bboxSelected - 2
     validatedSpectrums.splice(index,1)
     let namesAux = names;
     namesAux.splice(index,1);
