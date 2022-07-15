@@ -515,7 +515,7 @@
                 <div class="row">
                   <div class="col-10 my-2">
                     <Tab>
-                      <PlateTab/>
+                      <PlateTab bind:validated={plateValid}/>
                     </Tab>
                     {#if $metadataStore.spectraData.length > 0}
                       <span style="background-color: darkgray;font-size: 20px; color: darkgray"> .</span>
