@@ -26,9 +26,6 @@
   let spectrogramCanvas;
   let uploadedImage = false;
   let pathDir = "";
-  $: if(pathDir){
-    getPaths()
-  }
   let imageName = "";
   let scale = 0.5;
   let canvas = undefined;
@@ -185,7 +182,6 @@
   }
 
  function AutoSaveData(){
-    console.log("spectradata: ",$metadataStore.spectraData)
     spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
         $metadataStore.spectraData,
@@ -383,9 +379,7 @@
         else globalFields[field] = $metadataStore.fields[field].options[0];}
     });
       metadataStore.setPlateData(globalFields);
-      console.log("plateData: ",$metadataStore.plateData);
       dataLoaded = true;
-      
     }
     
     Object.keys($metadataStore.fields).map((field) => {
@@ -481,6 +475,7 @@
     if (Object.keys(config).length !== 0) {
       pathDir = config.global.workspace_path;
       metadataStore.setOption("OBSERVAT", config.fields["OBSERVAT"].options);
+      getPaths();
     }
   }
 </script>
@@ -490,7 +485,7 @@
     <div class="card-body">
       <div class="row">
         <div class="col-lg-2 col-xl-2">
-          <FileList paths={$workspaceStore.paths} getImg={getImg} getPaths={getPaths}/>
+          <FileList paths={$workspaceStore.paths} getImg={getImg} getPaths={getPaths} pathDir={pathDir}/>
           {#if uploadedImage}
             <div style="display:inline">
               <div in:slide="{{duration:1000}}">

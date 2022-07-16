@@ -1,7 +1,7 @@
 <script>
     import { slide } from 'svelte/transition';
     import NButton from "./NButton.svelte";
-    export let paths, getImg, getPaths;
+    export let paths, getImg, getPaths, pathDir;
     let selectedImage = "";
     let showFinished = false;
 
@@ -9,18 +9,18 @@
         getImg(selectedImage);
     }
 
-    function refresh(){
-        getPaths();
-    }
 </script>
 
 <div in:slide="{{duration:1000}}">
+    <div>
+        Ruta: {pathDir}
+    </div>
     <div class="my-3">
         <select bind:value={showFinished}>
             <option value={false}>En proceso</option>
             <option value={true}>Exportados</option>
         </select>
-        <NButton on:click={refresh} style="float: right;">
+        <NButton click={getPaths} style="float: right;">
             <img src="refresh.png" alt="Icono de boton para actualizar lista de archivos"/>
         </NButton>
     </div>
