@@ -124,8 +124,7 @@ function getMetadataFields() {
       type: 'text',
       info: 'Name of the object observed',
       required: true,
-      global: false,
-      numeric: false
+      global: false
     },
     observat: {
       label: 'OBSERVAT',
@@ -133,24 +132,21 @@ function getMetadataFields() {
       info: 'Organization or institution',
       required: true,
       options: getObservat(),
-      global: true,
-      numeric: false
+      global: true
     },
     dateObs: {
       label: 'DATE-OBS',
       type: 'date',
       info: 'Date of observation (yyyy-mm-dd)',
       required: true,
-      global: false,
-      numeric: false
+      global: false
     },
     ut: {
       label: 'UT',
       type: 'text',
       info: 'Universal time (hh:mm:ss)',
       required: true,
-      global: false,
-      numeric: false
+      global: false
     },
     // Remote Metadata
     mainId: {
@@ -158,7 +154,6 @@ function getMetadataFields() {
       type: 'text',
       info: 'Simbad main ID object name',
       required: false,
-      numeric: false,
       remote: true,
       global: false
     },
@@ -167,7 +162,6 @@ function getMetadataFields() {
       type: 'text',
       info: 'Right ascension J2000',
       required: false,
-      numeric: true,
       remote: true,
       global: false
     },
@@ -176,7 +170,6 @@ function getMetadataFields() {
       type: 'text',
       info: 'Declination J2000',
       required: false,
-      numeric: true,
       remote: true,
       global: false
     },
@@ -186,8 +179,7 @@ function getMetadataFields() {
       info: 'Simbad spectral type',
       required: false,
       remote: true,
-      global: false,
-      numeric: false
+      global: false
     },
     equinox: {
       label: 'EQUINOX',
@@ -204,7 +196,6 @@ function getMetadataFields() {
       info: 'Right ascension',
       required: false,
       remote: true,
-      numeric: true,
       global: false
     },
     dec: {
@@ -213,7 +204,6 @@ function getMetadataFields() {
       info: 'Declination',
       required: false,
       remote: true,
-      numeric: true,
       global: false
     },
     ra1950: {
@@ -231,7 +221,6 @@ function getMetadataFields() {
       info: 'DEC2000 precessed to ep.1950 eq.1950',
       required: false,
       remote: true,
-      numeric: true,
       global: false
     },
     timeObs: {
@@ -240,7 +229,6 @@ function getMetadataFields() {
       info: 'Local time at the start of the observation',
       required: false,
       remote: true,
-      numeric: true,
       global: false
     },
     st: {
@@ -249,7 +237,6 @@ function getMetadataFields() {
       info: 'Local mean sidereal time',
       required: false,
       remote: true,
-      numeric: true,
       global: false
     },
     ha: {
@@ -258,7 +245,6 @@ function getMetadataFields() {
       info: 'Hour angle',
       required: false,
       remote: true,
-      numeric: true,
       global: false
     },
     airmass: {
@@ -268,7 +254,6 @@ function getMetadataFields() {
       required: false,
       remote: true,
       global: false,
-      numeric: true,
     },
     jd: {
       label: 'JD',
@@ -276,7 +261,6 @@ function getMetadataFields() {
       info: 'Geocentric Julian day (Greenwich)',
       required: false,
       remote: true,
-      numeric: true,
       global: false
     },
     // End Remote Metadata
@@ -285,16 +269,14 @@ function getMetadataFields() {
       type: 'text',
       info: 'Integration time in seconds',
       required: false,
-      global: false,
-      numeric: true
+      global: false
     },
     plateN: {
       label: 'PLATE-N',
       type: 'text',
       info: 'Identification number',
       required: true,
-      global: true,
-      numeric: false
+      global: true
     },
     /*gain: {
       label: 'GAIN',
@@ -316,8 +298,7 @@ function getMetadataFields() {
       required: false,
       options: getImageTyp(),
       default: getImageTypDef(),
-      global: false,
-      numeric: false
+      global: false
     },
     observer: {
       label: 'OBSERVER',
@@ -326,7 +307,6 @@ function getMetadataFields() {
       required: false,
       options: getObserver(),
       default: getObserverDef(),
-      numeric: false,
       global: false
     },
     digitali: {
@@ -336,48 +316,42 @@ function getMetadataFields() {
       required: false,
       options: getDigitali(),
       default: getDigitaliDef(),
-      global: true,
-      numeric: false
+      global: true
     },
     scanner: {
       label: 'SCANNER',
       type: 'text',
       info: 'Scanner name',
       required: false,
-      global: true,
-      numeric: false
+      global: true
     },
     scanRes: {
       label: 'SCAN-RES',
       type: 'text',
       info: 'Scanner dpi resolution',
       required: false,
-      global: true,
-      numeric: false
+      global: true
     },
     scanCol: {
       label: 'SCAN-COL',
       type: 'text',
       info: 'Scanner color resolution',
       required: false,
-      global: true,
-      numeric: false
+      global: true
     },
     software: {
       label: 'SOFTWARE',
       type: 'text',
       info: 'Scan software',
       required: false,
-      global: true,
-      numeric: false
+      global: true
     },
     detector: {
       label: 'DETECTOR',
       type: 'text',
       info: 'Detector',
       required: false,
-      global: false,
-      numeric: false
+      global: false
     }
   }
 }

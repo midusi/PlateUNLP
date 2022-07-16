@@ -72,22 +72,18 @@ def api_generate_fits():
             if 'info' in fields[key].keys():
                 comment = fields[key]["info"]
             if fields[key]["global"]:
-                if fields[key]["numeric"]: 
-                  if plate_data[key] != '':  
-                    plate_data[key] = float(plate_data[key])
-                  else:
-                    plate_data[key] = None
                 prihdr[key] = (plate_data[key], comment)
             else:
-                if fields[key]["numeric"]:
-                  if data[key] != '':  
-                    data[key] = float(data[key])
-                  else:
-                    data[key] = None
                 prihdr[key] = (data[key], comment)
             
         prihdr["GAIN"] = ("","Gain, electrons per adu")
         prihdr["NOISE"] = ("","Read noise")
+
+        if prihdr["EQUINOX"] != '':  
+          prihdr["EQUINOX"] = float(prihdr["EQUINOX"])
+        else:
+          prihdr["EQUINOX"] = None
+          
         fits.writeto(
             (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
         generate_txt(plate_data,data,output_path,file_output_name)
