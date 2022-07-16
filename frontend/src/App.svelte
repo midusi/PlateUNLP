@@ -118,6 +118,11 @@
         });
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
+        for(let i = 0; i < spectraData.length ; i++){
+          if(spectraData[i]["OBJECT"] === ""){
+            $metadataStore.spectraData[i]["OBJECT"] = `Nuevo#${i+1}`
+          }
+        }
         checkMetadataSearched();
         validateForm();
         validateAllSpectrum();
@@ -340,6 +345,10 @@
     }
   }
 
+  function objectValid(objectID){
+    return !/^Nuevo#/.test(objectID)
+  }
+
   function validateSpectrum(spectrumIndex){  
       let invalidSpectrum = false;
       getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
@@ -347,6 +356,9 @@
           invalidSpectrum = true;
         }
       });
+
+      if(!objectValid($metadataStore.spectraData[spectrumIndex]["OBJECT"]))
+        invalidSpectrum = true
 
       validatedSpectrums[spectrumIndex] = !invalidSpectrum
     
@@ -389,6 +401,10 @@
         else fields[field] = $metadataStore.fields[field].options[0];
     });
 
+    if(!fields["OBJECT"]){ 
+      fields["OBJECT"] = `Nuevo#${cantSpectra}`
+    }
+
     metadataStore.setSpectraData([
       ...$metadataStore.spectraData,
       {
@@ -399,7 +415,7 @@
       },
     ]);
     metadataSearched.push(false);
-    names.push("")
+    names.push(fields["OBJECT"])
   }
 
 
@@ -485,7 +501,8 @@
     <div class="card-body">
       <div class="row">
         <div class="col-lg-2 col-xl-2">
-          <FileList paths={$workspaceStore.paths} getImg={getImg} getPaths={getPaths} pathDir={pathDir}/>
+          <FileList paths={$workspaceStore.paths} getImg={getImg} getPaths={getPaths} pathDir={pathDir
+          }/>
           {#if uploadedImage}
             <div style="display:inline">
               <div in:slide="{{duration:1000}}">
@@ -522,7 +539,7 @@
                           <TabButton
                             color ={item.color}
                             index={index}
-                            names ={names}
+                            bind:names ={names}
                             bind:validated={validatedSpectrums[index]}
                           />
                         </Tab>

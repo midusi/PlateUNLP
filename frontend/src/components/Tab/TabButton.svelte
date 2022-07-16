@@ -6,7 +6,7 @@
     validated
 
     let name;
-    $: name = names[index] ? names[index] : `Nuevo#${index+1}`
+    $: name = names[index]
 
     let prefix
     $: prefix = validated ? "✔ " : ""
