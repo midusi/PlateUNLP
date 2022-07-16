@@ -11,8 +11,6 @@
     
     if(!spectraData["OBSERVER"])
         spectraData["OBSERVER"] = getObserverDef();
-    if(!spectraData["DIGITALI"])
-        spectraData["DIGITALI"] = getDigitaliDef();
     if(!spectraData["IMAGETYP"])
         spectraData["IMAGETYP"] = getImageTypDef();
 

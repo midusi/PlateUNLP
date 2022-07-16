@@ -7,10 +7,8 @@
     for (let i = 0; i <= metadata.length; i = i + 3) {
         arr.push([metadata[i], metadata[i + 1], metadata[i + 2]]);
     }
-    
-    plateData["OBSERVER"] = getObserverDef();
-    plateData["DIGITALI"] = getDigitaliDef();
-    plateData["IMAGETYP"] = getImageTypDef();
+    if(!plateData["DIGITALI"])
+        plateData["DIGITALI"] = getDigitaliDef();
 </script>
 
     <div class="px-4" style=" border: 1px solid  ;">
