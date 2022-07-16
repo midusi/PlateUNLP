@@ -326,8 +326,8 @@ function getMetadataFields() {
       required: false,
       options: getObserver(),
       default: getObserverDef(),
-      global: false,
-      numeric: false
+      numeric: false,
+      global: false
     },
     digitali: {
       label: 'DIGITALI',

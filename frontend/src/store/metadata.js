@@ -74,10 +74,12 @@ function createStoreMetadata() {
       })
     },
     setPlateData: (data) => {
+      console.log("DATA:",data)
       update((prev) => {
         prev.plateData = data
         return prev
       })
+
     },
     addOptionObservat: (key, data) => {
       update((prev) => {

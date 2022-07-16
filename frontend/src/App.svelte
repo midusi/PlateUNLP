@@ -129,6 +129,7 @@
         
       } else {
         setChangeFlag();
+        bboxSelected = 1
       }
       imageChanged = false;
       uploadedImage = true;
@@ -184,6 +185,7 @@
   }
 
  function AutoSaveData(){
+    console.log("spectradata: ",$metadataStore.spectraData)
     spectrogramStore.autoSaveValues(
         spectrogramCanvas.getBboxes(),
         $metadataStore.spectraData,
@@ -317,7 +319,7 @@
       });
 
       getRequiredMetadata($metadataStore.fields,true).forEach((metadata) => {
-        if ($metadataStore.plateData[metadata] === "") {
+        if (!$metadataStore.plateData[metadata]) {
           invalidForm = true;
           plateValid = false;
         }
@@ -372,19 +374,18 @@
     cantSpectra++;
     const fields = {};
 
-    if(cantSpectra === 1){
-
+    if(cantSpectra === 1 && !dataLoaded){
       const globalFields = {};
       Object.keys($metadataStore.fields).map((field) => {
-      if($metadataStore.fields[field].global)
+      if($metadataStore.fields[field].global){
         if ($metadataStore.fields[field].options === undefined)
           globalFields[field] = "";
-        else globalFields[field] = $metadataStore.fields[field].options[0];
+        else globalFields[field] = $metadataStore.fields[field].options[0];}
     });
-      if(!dataLoaded) {
-        metadataStore.setPlateData(globalFields);
-        dataLoaded = true;
-      }
+      metadataStore.setPlateData(globalFields);
+      console.log("plateData: ",$metadataStore.plateData);
+      dataLoaded = true;
+      
     }
     
     Object.keys($metadataStore.fields).map((field) => {
@@ -539,8 +540,8 @@
                   </div>  
                 </div>
               </TabList>
-                 <TabPanel>
-                 <div class="controls">
+                <TabPanel>
+                  <div class="controls">
                     <PlateForm
                       plateData={$metadataStore.plateData}
                       metadata={getMetadata($metadataStore.fields,true)}

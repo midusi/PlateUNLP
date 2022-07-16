@@ -9,9 +9,12 @@
         arr.push([metadata[i], metadata[i + 1], metadata[i + 2]]);
     }
     
-    spectraData["OBSERVER"] = getObserverDef();
-    spectraData["DIGITALI"] = getDigitaliDef();
-    spectraData["IMAGETYP"] = getImageTypDef();
+    if(!spectraData["OBSERVER"])
+        spectraData["OBSERVER"] = getObserverDef();
+    if(!spectraData["DIGITALI"])
+        spectraData["DIGITALI"] = getDigitaliDef();
+    if(!spectraData["IMAGETYP"])
+        spectraData["IMAGETYP"] = getImageTypDef();
 
 </script>
     <div class="px-4" style="overflow-y: scroll; overflow-x:hidden ; border: 1px solid  ; height: 400px;">
