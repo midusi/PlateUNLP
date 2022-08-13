@@ -1,0 +1,115 @@
+{
+    "body": {
+        "path_dir": "../test_db/",
+        "data_arr": [
+            {
+                "loaded": [],
+                "id": 1,
+                "color": "#FF2B2B",
+                "OBJECT": "Nuevo#1",
+                "DATE-OBS": "",
+                "UT": "",
+                "MAIN-ID": "",
+                "RA2000": "",
+                "DEC2000": "",
+                "SPTYPE": "",
+                "EQUINOX": "",
+                "RA": "",
+                "DEC": "",
+                "RA1950": "",
+                "DEC1950": "",
+                "TIME-OBS": "",
+                "ST": "",
+                "HA": "",
+                "AIRMASS": "",
+                "JD": "",
+                "EXPTIME": "",
+                "IMAGETYP": "Jhon Example",
+                "OBSERVER": "Jhon Example",
+                "DETECTOR": ""
+            },
+            {
+                "loaded": [],
+                "id": 2,
+                "color": "#FFFC2B",
+                "OBJECT": "Nuevo#2",
+                "DATE-OBS": "",
+                "UT": "",
+                "MAIN-ID": "",
+                "RA2000": "",
+                "DEC2000": "",
+                "SPTYPE": "",
+                "EQUINOX": "",
+                "RA": "",
+                "DEC": "",
+                "RA1950": "",
+                "DEC1950": "",
+                "TIME-OBS": "",
+                "ST": "",
+                "HA": "",
+                "AIRMASS": "",
+                "JD": "",
+                "EXPTIME": "",
+                "IMAGETYP": "Jhon Example",
+                "OBSERVER": "Jhon Example",
+                "DETECTOR": ""
+            },
+            {
+                "loaded": [],
+                "id": 3,
+                "color": "#44FF2B",
+                "OBJECT": "Nuevo#3",
+                "DATE-OBS": "",
+                "UT": "",
+                "MAIN-ID": "",
+                "RA2000": "",
+                "DEC2000": "",
+                "SPTYPE": "",
+                "EQUINOX": "",
+                "RA": "",
+                "DEC": "",
+                "RA1950": "",
+                "DEC1950": "",
+                "TIME-OBS": "",
+                "ST": "",
+                "HA": "",
+                "AIRMASS": "",
+                "JD": "",
+                "EXPTIME": "",
+                "IMAGETYP": "Jhon Example",
+                "OBSERVER": "Jhon Example",
+                "DETECTOR": ""
+            }
+        ],
+        "bbox_arr": [
+            {
+                "x": 0,
+                "y": 143.275390625,
+                "h": 413.537109375,
+                "w": 2854
+            },
+            {
+                "x": 0,
+                "y": 546.8125,
+                "h": 136.1875,
+                "w": 2854
+            },
+            {
+                "x": 0,
+                "y": 395.650390625,
+                "h": 171.677734375,
+                "w": 2854
+            }
+        ],
+        "plate_data": {
+            "OBSERVAT": "ctio: Cerro Tololo Interamerican Observatory",
+            "PLATE-N": "",
+            "DIGITALI": "Jhon Example",
+            "SCANNER": "",
+            "SCAN-RES": "",
+            "SCAN-COL": "",
+            "SOFTWARE": ""
+        },
+        "img_name": "4405.tiff"
+    }
+}

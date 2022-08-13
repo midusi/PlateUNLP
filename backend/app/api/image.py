@@ -25,7 +25,8 @@ def load():
         filename = os.path.join(dir_path, app.config['PNG_FOLDER'], img_name+'.jpg')
         if not os.path.exists(os.path.join(dir_path, app.config['PNG_FOLDER'])):
             os.mkdir(os.path.join(dir_path, app.config['PNG_FOLDER']))
-        cv2.imwrite(filename, img, [cv2.IMWRITE_JPEG_QUALITY, 50])    
+        # cv2.imwrite(filename, img, [cv2.IMWRITE_JPEG_QUALITY, 50])
+        cv2.imwrite(filename, img)   # <- Hay una reduccion implicita del 95% en la calidad de la imagen
     
     with open(filename, "rb") as f:
         image_binary = f.read()
