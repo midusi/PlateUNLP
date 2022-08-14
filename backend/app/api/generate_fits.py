@@ -85,7 +85,7 @@ def api_generate_fits():
           prihdr["EQUINOX"] = None
           
         fits.writeto(
-            (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, clobber=True)
+            (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, overwrite=True)
         generate_txt(plate_data,data,output_path,file_output_name)
     working_path = os.path.join(get_workspace_path(), 'cache', 'working', img_name+".tiff.json")
     saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved', img_name+".tiff.json")
