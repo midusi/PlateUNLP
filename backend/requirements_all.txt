@@ -1,6 +1,6 @@
 astroid
 astroplan
-astropy
+astropy==5.1
 astroquery
 autopep8==1.5.7
 beautifulsoup4==4.11.1
