@@ -22,7 +22,7 @@ def load():
         if((original_width < original_height)):
             img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
         original_height, original_width, _ = img.shape 
-        filename = os.path.join(dir_path, app.config['PNG_FOLDER'], img_name+'.jpg')
+        filename = os.path.join(dir_path, app.config['PNG_FOLDER'], img_name+'.png')
         if not os.path.exists(os.path.join(dir_path, app.config['PNG_FOLDER'])):
             os.mkdir(os.path.join(dir_path, app.config['PNG_FOLDER']))
         # cv2.imwrite(filename, img, [cv2.IMWRITE_JPEG_QUALITY, 50])

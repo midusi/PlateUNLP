@@ -20,7 +20,7 @@ def api_predict():
     image_path = os.path.join(img_path, img_name)
     
     if not (img_name.split(sep='.')[-1] == 'png'):
-        image_path = os.path.join(img_path, app.config['PNG_FOLDER'], img_name+'.jpg')
+        image_path = os.path.join(img_path, app.config['PNG_FOLDER'], img_name+'.png')
 
     # Maximum time to validate that the file exists
     maxTime = 0
