@@ -5,7 +5,7 @@ import torch
 import time
 
 from app.helpers.forms import PredictForm
-
+from app.static.detector.UI import Detector
 
 def api_predict():
 
@@ -47,14 +47,12 @@ def api_predict():
     # preprocesing
     output = cv2.resize(img, dsize, interpolation=cv2.INTER_AREA)
 
-    # create yolo model
-    model_path = os.path.join(app.static_folder, 'models', "best.pt")
-    yolov5_path = os.path.join(app.static_folder, 'yolov5')
-    model = torch.hub.load(yolov5_path, 'custom',
-                           path=model_path, source='local')
+    # obtain yolo model Detector
+    detector = Detector()
 
     # inference
-    detections = model(output, size=width)
+    detector.saludar()
+    detections = detector.infer(output, width)
 
     # results
     print(detections.pandas().xyxy[0])
