@@ -51,11 +51,10 @@ def api_predict():
     detector = Detector()
 
     # inference
-    detector.saludar()
     detections = detector.infer(output, width)
 
     # results
-    print(detections.pandas().xyxy[0])
+    #print(detections.pandas().xyxy[0])
 
     
     # inference processing
