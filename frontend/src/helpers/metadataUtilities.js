@@ -85,10 +85,15 @@ function getObserverDef(){
   }
 }
 
+function getImageTyp(){
+  if(localStorage.getItem("imageTypes")){
+    return JSON.parse(localStorage.getItem("imageTypes"));
+  }
+}
 
-function getDigitaliDef(){
-  if(localStorage.getItem("digitaliDefault")){
-    return JSON.parse(localStorage.getItem("digitaliDefault"));
+function getImageTypDef(){
+  if(localStorage.getItem("imageTypeDefault")){
+    return JSON.parse(localStorage.getItem("imageTypeDefault"));
   }
   else{
     return ""
@@ -101,15 +106,24 @@ function getDigitali(){
   }
 }
 
-function getImageTyp(){
-  if(localStorage.getItem("imageTypes")){
-    return JSON.parse(localStorage.getItem("imageTypes"));
+function getDigitaliDef(){
+  if(localStorage.getItem("digitaliDefault")){
+    return JSON.parse(localStorage.getItem("digitaliDefault"));
+  }
+  else{
+    return ""
   }
 }
 
-function getImageTypDef(){
-  if(localStorage.getItem("imageTypeDefault")){
-    return JSON.parse(localStorage.getItem("imageTypeDefault"));
+function getScanner(){
+  if(localStorage.getItem("scanners")){
+    return JSON.parse(localStorage.getItem("scanners"));
+  }
+}
+
+function getScannerDef(){
+  if(localStorage.getItem("scannerDefault")){
+    return JSON.parse(localStorage.getItem("scannerDefault"));
   }
   else{
     return ""
@@ -323,6 +337,8 @@ function getMetadataFields() {
       type: 'text',
       info: 'Scanner name',
       required: false,
+      options: getScanner(),
+      default: getScannerDef(),
       global: true
     },
     scanRes: {
@@ -356,4 +372,4 @@ function getMetadataFields() {
   }
 }
 
-export { getMetadataFields,getDigitaliDef,getImageTypDef,getObserverDef}
+export { getMetadataFields,getDigitaliDef,getImageTypDef,getObserverDef, getScannerDef}

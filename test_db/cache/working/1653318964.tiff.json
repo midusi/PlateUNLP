@@ -24,8 +24,8 @@
                 "AIRMASS": "",
                 "JD": "",
                 "EXPTIME": "",
-                "IMAGETYP": "",
-                "OBSERVER": "",
+                "IMAGETYP": "img1",
+                "OBSERVER": "obs1",
                 "DETECTOR": ""
             },
             {
@@ -50,8 +50,8 @@
                 "AIRMASS": "",
                 "JD": "",
                 "EXPTIME": "",
-                "IMAGETYP": "",
-                "OBSERVER": "",
+                "IMAGETYP": "img1",
+                "OBSERVER": "obs1",
                 "DETECTOR": ""
             },
             {
@@ -76,8 +76,8 @@
                 "AIRMASS": "",
                 "JD": "",
                 "EXPTIME": "",
-                "IMAGETYP": "",
-                "OBSERVER": "",
+                "IMAGETYP": "img1",
+                "OBSERVER": "obs1",
                 "DETECTOR": ""
             }
         ],
@@ -104,8 +104,8 @@
         "plate_data": {
             "OBSERVAT": "ctio: Cerro Tololo Interamerican Observatory",
             "PLATE-N": "",
-            "DIGITALI": "",
-            "SCANNER": "",
+            "DIGITALI": "dig",
+            "SCANNER": "sca",
             "SCAN-RES": "",
             "SCAN-COL": "",
             "SOFTWARE": ""
