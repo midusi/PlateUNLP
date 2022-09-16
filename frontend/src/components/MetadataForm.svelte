@@ -2,7 +2,7 @@
     import Field from "./Field.svelte";
     import Modal from "./Modal.svelte";
     import { metadataStore } from "../store/metadata";
-    import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
+    import {getDigitaliDef, getImageTypDef, getObserverDef, getScannerDef} from "../helpers/metadataUtilities" 
     export let metadata, spectraData, index;
     let arr = [];
     for (let i = 0; i <= metadata.length; i = i + 3) {

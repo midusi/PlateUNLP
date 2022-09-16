@@ -372,4 +372,4 @@ function getMetadataFields() {
   }
 }
 
-export { getMetadataFields,getDigitaliDef,getImageTypDef,getObserverDef, getScannerDef}
+export { getMetadataFields, getDigitaliDef, getImageTypDef, getObserverDef, getScannerDef}

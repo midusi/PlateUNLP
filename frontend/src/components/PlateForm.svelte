@@ -1,6 +1,6 @@
 <script>
     import Field from "./Field.svelte";
-    import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
+    import {getDigitaliDef, getImageTypDef, getObserverDef, getScannerDef} from "../helpers/metadataUtilities" 
     export let metadata, plateData;
     
     let arr = [];
@@ -9,6 +9,8 @@
     }
     if(!plateData["DIGITALI"])
         plateData["DIGITALI"] = getDigitaliDef();
+    if(!plateData["SCANNER"])
+        plateData["SCANNER"] = getScannerDef();
 </script>
 
     <div class="px-4" style=" border: 1px solid  ;">
