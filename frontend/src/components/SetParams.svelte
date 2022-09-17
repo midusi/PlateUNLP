@@ -7,14 +7,20 @@
         observers : [],
         imageTypes : [],
         digitalis : [],
-        scanners : []
+        scanners : [],
+        scanress : [],
+        scancols : [],
+        softwares : []
     }
 
     let listsKeys = {
         observers: "observers",
         imageTypes: "imageTypes",
         digitalis: "digitalis",
-        scanners: "scanners"
+        scanners: "scanners",
+        scanress : "scanress",
+        scancols : "scancols",
+        softwares : "softwares"
     }
 
     
@@ -22,20 +28,29 @@
         observerDefault : "",
         imageTypeDefault : "",
         digitaliDefault : "",
-        scannerDefault : ""
+        scannerDefault : "",
+        scanresDefault : "",
+        scancolDefault : "",
+        softwareDefault : ""
     }
 
     let defaultKeys = {
         observerDefault : "observerDefault",
         imageTypeDefault: "imageTypeDefault",
         digitaliDefault: "digitaliDefault",
-        scannerDefault: "scannerDefault"
+        scannerDefault: "scannerDefault",
+        scanresDefault : "scanresDefault",
+        scancolDefault : "scancolDefault",
+        softwareDefault : "softwareDefault"
     }
     
     let observerComponent;
     let imageTypeComponent;
     let digitaliComponent;
     let scannerComponent;
+    let scanresComponent;
+    let scancolComponent;
+    let softwareComponent;
 
     Object.entries(listsKeys).forEach(([key]) => {
         if(localStorage.getItem(key)){
@@ -51,12 +66,16 @@
         }
     })
 
-    export function updateLists(observers,imageTypes,digitalis){
+    /*// Esta funcion NO se usa
+    export function updateLists(observers,imageTypes,digitalis,scanners,scanress,softwares){
         lists.observers = observers;
         lists.imageTypes = imageTypes;
         lists.digitalis = digitalis;
-        lists.scanners = scanners
-    }
+        lists.scanners = scanners;
+        lists.scanress = scanress;
+        lists.scancols = scancols;
+        lists.softwares = softwares;
+    }*/
 
     function setDefault(value,param){
         defaults[param] = value;
@@ -105,6 +124,9 @@
         imageTypeComponent.reset(defaults.imageTypeDefault);
         digitaliComponent.reset(defaults.digitaliDefault);
         scannerComponent.reset(defaults.scannerDefault);
+        scanresComponent.reset(defaults.scanresDefault);
+        scancolComponent.reset(defaults.scancolDefault);
+        softwareComponent.reset(defaults.softwareDefault);
         metadataStore.updateDefaults(); // Problema????
     }
 
@@ -131,6 +153,21 @@
         <h4 class="mt-2">SCANNER</h4>
             <Param bind:this={scannerComponent} paramNameLists="scanners"  paramNameDef="scannerDefault" 
             defaultValue={defaults.scannerDefault} list={lists.scanners} 
+            handleDefault={setDefault} handleDelete={deleteElem} handleAdd={addElem}/>
+        <hr/>
+        <h4 class="mt-2">SCAN-RES</h4>
+            <Param bind:this={scanresComponent} paramNameLists="scanress"  paramNameDef="scanresDefault" 
+            defaultValue={defaults.scanresDefault} list={lists.scanress} 
+            handleDefault={setDefault} handleDelete={deleteElem} handleAdd={addElem}/>
+        <hr/>
+        <h4 class="mt-2">SCAN-COL</h4>
+            <Param bind:this={scancolComponent} paramNameLists="scancols"  paramNameDef="scancolDefault" 
+            defaultValue={defaults.scancolDefault} list={lists.scancols} 
+            handleDefault={setDefault} handleDelete={deleteElem} handleAdd={addElem}/>
+        <hr/>
+        <h4 class="mt-2">SOFTWARE</h4>
+            <Param bind:this={softwareComponent} paramNameLists="softwares"  paramNameDef="softwareDefault" 
+            defaultValue={defaults.softwareDefault} list={lists.softwares} 
             handleDefault={setDefault} handleDelete={deleteElem} handleAdd={addElem}/>
        
     </div>

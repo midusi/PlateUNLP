@@ -130,6 +130,51 @@ function getScannerDef(){
   }
 }
 
+function getScanres(){
+  if(localStorage.getItem("scanress")){
+    return JSON.parse(localStorage.getItem("scanress"));
+  }
+}
+
+function getScanresDef(){
+  if(localStorage.getItem("scanresDefault")){
+    return JSON.parse(localStorage.getItem("scanresDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+function getScancol(){
+  if(localStorage.getItem("scancols")){
+    return JSON.parse(localStorage.getItem("scancols"));
+  }
+}
+
+function getScancolDef(){
+  if(localStorage.getItem("scancolDefault")){
+    return JSON.parse(localStorage.getItem("scancolDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+function getSoftware(){
+  if(localStorage.getItem("softwares")){
+    return JSON.parse(localStorage.getItem("softwares"));
+  }
+}
+
+function getSoftwareDef(){
+  if(localStorage.getItem("softwareDefault")){
+    return JSON.parse(localStorage.getItem("softwareDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
 
 function getMetadataFields() {
   return {
@@ -346,6 +391,8 @@ function getMetadataFields() {
       type: 'text',
       info: 'Scanner dpi resolution',
       required: false,
+      options: getScanres(),
+      default: getScanresDef(),
       global: true
     },
     scanCol: {
@@ -353,6 +400,10 @@ function getMetadataFields() {
       type: 'text',
       info: 'Scanner color resolution',
       required: false,
+      options: getScancol(),
+      default: getScancolDef(),
+      required: false,
+
       global: true
     },
     software: {
@@ -360,6 +411,8 @@ function getMetadataFields() {
       type: 'text',
       info: 'Scan software',
       required: false,
+      options: getSoftware(),
+      default: getSoftwareDef(),
       global: true
     },
     detector: {
@@ -372,4 +425,12 @@ function getMetadataFields() {
   }
 }
 
-export { getMetadataFields, getDigitaliDef, getImageTypDef, getObserverDef, getScannerDef}
+export { 
+  getMetadataFields, 
+  getDigitaliDef, 
+  getImageTypDef, 
+  getObserverDef, 
+  getScannerDef, 
+  getScanresDef, 
+  getScancolDef, 
+  getSoftwareDef}
