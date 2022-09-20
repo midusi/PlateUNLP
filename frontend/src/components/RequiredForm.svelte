@@ -1,8 +1,6 @@
 <script>
     import Field from "./Field.svelte";
-    import Modal from "./Modal.svelte";
     import NButton from "./NButton.svelte";
-    import {getDigitaliDef,getImageTypDef,getObserverDef} from "../helpers/metadataUtilities" 
     export let metadata, spectraData,invalidSpectrum,confirmSearchMetadata;
 
     let arr = [];
