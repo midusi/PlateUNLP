@@ -2,7 +2,7 @@
     let group = 1;
     let valuesCheck = [];
     let newValue = "";
-    export let list,paramNameLists,paramNameDef,defaultValue,handleAdd,handleDelete,handleDefault;
+    export let paramNameLists,paramNameDef, defaultValue, list, handleAdd, handleDelete, handleDefault;
 
     function AddValue(){
         handleAdd(newValue,paramNameLists);

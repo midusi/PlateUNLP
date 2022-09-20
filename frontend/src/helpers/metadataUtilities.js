@@ -403,7 +403,6 @@ function getMetadataFields() {
       options: getScancol(),
       default: getScancolDef(),
       required: false,
-
       global: true
     },
     software: {
