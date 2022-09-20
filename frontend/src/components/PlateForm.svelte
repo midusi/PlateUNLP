@@ -7,20 +7,12 @@
     for (let i = 0; i <= metadata.length; i = i + 3) {
         arr.push([metadata[i], metadata[i + 1], metadata[i + 2]]);
     }
-    //console.log("antes:",plateData)
-    //if(!plateData["DIGITALI"])
+    
     plateData["DIGITALI"] = getDigitaliDef();
-    //if(!plateData["SCANNER"]){
-    //console.log("modificando scanner")
     plateData["SCANNER"] = getScannerDef();
-    //}
-    //if(!plateData["SCAN-RES"])
     plateData["SCAN-RES"] = getScanresDef();
-    //if(!plateData["SCAN-COL"])
     plateData["SCAN-COL"] = getScancolDef();
-    //if(!plateData["SOFTWARE"])
     plateData["SOFTWARE"] = getSoftwareDef();
-    //console.log("despues:",plateData)
 </script>
 
     <div class="px-4" style=" border: 1px solid  ;">
