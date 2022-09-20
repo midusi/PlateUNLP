@@ -21,7 +21,6 @@
 
 </script>
        
-       
     <div class="px-4">
         {#if list.length>0}
             <div><span>Seleccione para eliminar</span></div>
@@ -37,20 +36,12 @@
         <div class="row">
             <div class="col">
                 <span>Seleccionar valor por defecto</span>
-                <form on:submit|preventDefault={() => handleDefault(defaultValue,paramNameDef)}>
-                    <select
-                    bind:value={defaultValue}
-                    class="browser-default custom-select"
-                    >
-                        {#each list as el}
+                <select bind:value={defaultValue} on:change={handleDefault(defaultValue,paramNameDef)} class="browser-default custom-select">
+                    {#each list as el}
                         <option value={el}> {el} </option>
-                        {/each}
-                        <option value="">Ninguno</option>
-                    </select>
-                    <button type="submit" class="btn btn-outline-secondary mt-3">
-                        Seleccionar
-                    </button>
-                </form>
+                    {/each}
+                    <option value=""> Ninguno </option>
+                </select>
             </div>
             <div class="col">
                 <span>Agregar valor</span>
