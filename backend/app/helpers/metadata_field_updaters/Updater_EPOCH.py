@@ -3,7 +3,18 @@ from app.helpers.metadatalib import epoca
 
 class Updater_EPOCH(FieldUpdater):
     
+    DEPENDENCIES = ["DATE-OBS"]
+    
     @classmethod
     def update(cls, metadata):
-        if (True):
+        have_dependencies = True
+        
+        for key in cls.DEPENDENCIES:
+            if (metadata.get(key) == None):
+                have_dependencies = False
+                break
+            
+        if (have_dependencies):
             metadata["EPOCH"] = epoca(metadata['DATE-OBS'])
+        
+        return have_dependencies

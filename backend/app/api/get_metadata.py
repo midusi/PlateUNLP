@@ -1,21 +1,21 @@
 from flask import request, jsonify
-from app.helpers.metadatalib import simbad_cooJ1950, hora_local, tiempo_sidereo, angulo_horario, calculate_jd, calculate_airmass
+from app.helpers.metadatalib import angulo_horario, calculate_jd, calculate_airmass
 from app.helpers.metadata_field_updaters.Updater_mainId_ra2000_dec2000 import Updater_mainId_ra2000_dec2000
 from app.helpers.metadata_field_updaters.Updater_SPTYPE import Updater_SPTYPE
 from app.helpers.metadata_field_updaters.Updater_EQUINOX import Updater_EQUINOX
 from app.helpers.metadata_field_updaters.Updater_EPOCH import Updater_EPOCH
+from app.helpers.metadata_field_updaters.Updater_RA_DEC import Updater_RA_DEC
+from app.helpers.metadata_field_updaters.Updater_RA1950_DEC1950 import Updater_RA1950_DEC1950
+from app.helpers.metadata_field_updaters.Updater_TIMEOBS import Updater_TIMEOBS
+from app.helpers.metadata_field_updaters.Updater_ST import Updater_ST
+from app.helpers.metadata_field_updaters.Updater_HA import Updater_HA
+from app.helpers.metadata_field_updaters.Updater_AIRMASS import Updater_AIRMASS
+from app.helpers.metadata_field_updaters.Updater_JD import Updater_JD
 import sys
 import traceback
 from astropy.coordinates.errors import UnknownSiteException as USE
 
 def api_get_metadata():
-    
-    # Comprobar que metadatos iniciales tiene
-    #if (True):
-        #print("-------------------")
-        #print('OBJECT = '+request.json['OBJECT'])
-        #print('NO_OBJECT = '+request.json['NO_OBJECT'])
-        #print("-------------------")
     
     # Inicialización metadatos iniciales
     metadata = {
@@ -44,9 +44,6 @@ def api_get_metadata():
             stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s" % (trace[0], trace[1], trace[2], trace[3]))
             if 'MAIN-ID' in trace[3]:
                 message = 'El OBJECT es incorrecto.'
-        # print("Exception type : %s " % ex_type.__name__)
-        # print("Exception message : %s" %ex_value)
-        # print("Stack trace : %s" %stack_trace)
         data = {
             'message': message,
             'metadata': {}
@@ -54,12 +51,10 @@ def api_get_metadata():
         return jsonify(data), 400
     
     try:
-        print("OK1")
-        ra, dec = simbad_cooJ1950(metadata["RA2000"], metadata["DEC2000"], metadata["EPOCH"])
-        ra1950, dec1950 = simbad_cooJ1950(metadata["RA2000"], metadata["DEC2000"])
-                
-        time_obs = hora_local(metadata["OBSERVAT"] , metadata["DATE-OBS"], metadata["UT"])
-        st = tiempo_sidereo(metadata["OBSERVAT"], metadata["DATE-OBS"], metadata["UT"])
+        Updater_RA_DEC.update(metadata)
+        Updater_RA1950_DEC1950.update(metadata)
+        Updater_TIMEOBS.update(metadata)   
+        Updater_ST.update(metadata)
     except USE:
         print("NoOK")
         data = {
@@ -75,18 +70,9 @@ def api_get_metadata():
         }
         return jsonify(data), 400   
 
-    ha = angulo_horario(ra1950, st)
-    metadata = {**metadata, **{
-        "RA": ra,
-        "DEC": dec,
-        "RA1950": ra1950,
-        "DEC1950": dec1950,
-        "TIME-OBS": time_obs,
-        "ST": st,
-        "HA": ha,
-        "AIRMASS": calculate_airmass(metadata["OBSERVAT"].split(':')[0], ha, ra, dec),
-        "JD": calculate_jd(metadata['DATE-OBS'], time_obs)
-    }}
+    Updater_HA.update(metadata)
+    Updater_AIRMASS.update(metadata)
+    Updater_JD.update(metadata)
     
     metadata.pop('OBSERVAT', None)
 

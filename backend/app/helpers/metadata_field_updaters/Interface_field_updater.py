@@ -12,6 +12,8 @@ class FieldUpdater(ABC):
     # relacionado entonces no hace nada.
     # Puede levantar alertas bajo ciertas condiciones (Por ejemplo: Si un valor 
     # necesario no es satisfactorio para sus calculos)
+    # Siempre devuelve True o False dependiendo si tenia las dependencias para 
+    # correctas para calcular su respectivo metadato
     @abstractmethod
     def update(cls, metadata):
         pass

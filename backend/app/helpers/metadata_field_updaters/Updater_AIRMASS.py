@@ -1,9 +1,9 @@
 from app.helpers.metadata_field_updaters.Interface_field_updater import FieldUpdater
-from app.helpers.metadatalib import epoca
+from app.helpers.metadatalib import calculate_airmass
 
-class Updater_EQUINOX(FieldUpdater):
+class Updater_AIRMASS(FieldUpdater):    
     
-    DEPENDENCIES = ["DATE-OBS"]
+    DEPENDENCIES = ["OBSERVAT", "HA", "RA", "DEC"]
     
     @classmethod
     def update(cls, metadata):
@@ -15,6 +15,6 @@ class Updater_EQUINOX(FieldUpdater):
                 break
             
         if (have_dependencies):
-            metadata["EQUINOX"] = epoca(metadata['DATE-OBS'])
+            metadata["AIRMASS"] = calculate_airmass(metadata["OBSERVAT"].split(':')[0], metadata["HA"], metadata["RA"], metadata["DEC"])
             
         return have_dependencies

@@ -1,9 +1,9 @@
 from app.helpers.metadata_field_updaters.Interface_field_updater import FieldUpdater
-from app.helpers.metadatalib import epoca
+from app.helpers.metadatalib import hora_local
 
-class Updater_EQUINOX(FieldUpdater):
+class Updater_TIMEOBS(FieldUpdater):
     
-    DEPENDENCIES = ["DATE-OBS"]
+    DEPENDENCIES = ["OBSERVAT", "DATE-OBS", "UT"]
     
     @classmethod
     def update(cls, metadata):
@@ -15,6 +15,4 @@ class Updater_EQUINOX(FieldUpdater):
                 break
             
         if (have_dependencies):
-            metadata["EQUINOX"] = epoca(metadata['DATE-OBS'])
-            
-        return have_dependencies
+            metadata["TIME-OBS"] = hora_local(metadata["OBSERVAT"] , metadata["DATE-OBS"], metadata["UT"])

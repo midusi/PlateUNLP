@@ -3,7 +3,18 @@ from app.helpers.metadatalib import simbad_sptype
 
 class Updater_SPTYPE(FieldUpdater):
     
+    DEPENDENCIES = ["OBJECT"]
+    
     @classmethod
     def update(cls, metadata):
-        if (True):
+        have_dependencies = True
+        
+        for key in cls.DEPENDENCIES:
+            if (metadata.get(key) == None):
+                have_dependencies = False
+                break
+            
+        if (have_dependencies):
             metadata["SPTYPE"] = simbad_sptype(metadata['OBJECT'])
+            
+        return have_dependencies

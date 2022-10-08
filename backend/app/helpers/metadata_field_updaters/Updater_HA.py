@@ -1,9 +1,9 @@
 from app.helpers.metadata_field_updaters.Interface_field_updater import FieldUpdater
-from app.helpers.metadatalib import epoca
+from app.helpers.metadatalib import angulo_horario
 
-class Updater_EQUINOX(FieldUpdater):
+class Updater_HA(FieldUpdater):
     
-    DEPENDENCIES = ["DATE-OBS"]
+    DEPENDENCIES = ["RA1950", "ST"]
     
     @classmethod
     def update(cls, metadata):
@@ -15,6 +15,6 @@ class Updater_EQUINOX(FieldUpdater):
                 break
             
         if (have_dependencies):
-            metadata["EQUINOX"] = epoca(metadata['DATE-OBS'])
-            
+            metadata["HA"] = angulo_horario(metadata["RA1950"], metadata["ST"])
+        
         return have_dependencies
