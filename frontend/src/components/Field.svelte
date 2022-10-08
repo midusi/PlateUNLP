@@ -1,7 +1,7 @@
 <script>
   import { metadataStore } from "../store/metadata";
   import {getContext} from "svelte";
-  export let name, value, index;
+  export let name, value, index, is_void=false;
 
   const setChangeFlag = getContext("setChangeFlag");
 
@@ -20,6 +20,20 @@
     setChangeFlag();
   }
 
+  var voidButtonSelected = false
+  var voidButtonStyle = "float: right;"
+  function clickVoidButton() {
+    voidButtonSelected = !voidButtonSelected
+    if(voidButtonSelected){
+      voidButtonStyle = "float: right; background-color:blue; color:white"
+      //value=""
+      is_void=true
+    } else{
+      voidButtonStyle = "float: right;"
+      is_void=false
+    }
+  }
+
 </script>
 
 <div class="mt-2">
@@ -28,6 +42,7 @@
     <span style="color:red;">
       {$metadataStore.fields[name].required ? "*" : ""}
     </span>
+    <input type="button" value="∅" style={voidButtonStyle} on:click={clickVoidButton}>
   </span>
   {#if $metadataStore.fields[name].options === undefined}
     {#if $metadataStore.fields[name].remote && $metadataStore.spectraData[index] !== undefined}
@@ -38,6 +53,7 @@
         bind:value
         on:change={() => remoteDataChange($metadataStore.fields[name].label)}
         placeholder={$metadataStore.fields[name].info}
+        disabled = {is_void}
       />
     {:else}
       <input
@@ -46,6 +62,7 @@
         bind:value
         on:change={setChangeFlag}
         placeholder={$metadataStore.fields[name].info}
+        disabled = {is_void}
       />
     {/if}
   {:else if $metadataStore.fields[name].label === "OBSERVAT"}
@@ -54,6 +71,7 @@
       class="browser-default custom-select"
       aria-label="Select Obsevat"
       on:change={setChangeFlag}
+      disabled = {is_void}
     >
       {#each $metadataStore.fields[name].options as observat}
         <option value={observat}> {observat} </option>
@@ -67,6 +85,7 @@
       bind:value
       on:change={setChangeFlag}
       placeholder={$metadataStore.fields[name].info}
+      disabled = {is_void}
     />
     <datalist id={`${name}Options`}>
       {#each $metadataStore.fields[name].options as el}
@@ -76,4 +95,3 @@
   {/if}
 
 </div>
-
