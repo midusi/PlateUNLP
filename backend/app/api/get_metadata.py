@@ -18,14 +18,13 @@ from astropy.coordinates.errors import UnknownSiteException as USE
 def api_get_metadata():
     
     # Inicialización metadatos iniciales
-    metadata = {
-        "OBJECT" : request.json['OBJECT'],
-        "OBSERVAT": request.json['OBSERVAT'],
-        "DATE-OBS": request.json['DATE-OBS'],
-        "UT": request.json['UT'],
-        # "EXPTIME": 960, # No usado
-        # "PLATE-N": "A4430" # No usado
-    }
+    request_fields = ["OBJECT", "OBSERVAT", "DATE-OBS", "UT"] # "EXPTIME" y "PLATE-N" no usados
+    metadata = {}
+        
+    for key in request_fields:
+        request_field = request.json[key]
+        if (request_field != "∅"):
+            metadata[key] = request_field
     
     try:
         Updater_mainId_ra2000_dec2000.update(metadata)

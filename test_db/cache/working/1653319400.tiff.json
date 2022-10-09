@@ -1,0 +1,51 @@
+{
+    "body": {
+        "path_dir": "../test_db/",
+        "data_arr": [
+            {
+                "AIRMASS": "",
+                "DATE-OBS": "2022-10-26",
+                "DEC": "",
+                "DEC1950": "",
+                "DEC2000": "",
+                "DETECTOR": "",
+                "EQUINOX": "",
+                "EXPTIME": "",
+                "HA": "",
+                "IMAGETYP": "",
+                "JD": "",
+                "MAIN-ID": "",
+                "OBJECT": "N2",
+                "OBSERVER": "GG_LUSI",
+                "RA": "",
+                "RA1950": "",
+                "RA2000": "",
+                "SPTYPE": "",
+                "ST": "",
+                "TIME-OBS": "",
+                "UT": "2:2:2",
+                "color": "#FF2B2B",
+                "id": 1,
+                "loaded": []
+            }
+        ],
+        "bbox_arr": [
+            {
+                "x": 183.3046875,
+                "y": 156.419921875,
+                "h": 424.8515625,
+                "w": 2458.5078125
+            }
+        ],
+        "plate_data": {
+            "DIGITALI": "",
+            "OBSERVAT": "ctio: Cerro Tololo Interamerican Observatory",
+            "PLATE-N": "",
+            "SCAN-COL": "",
+            "SCAN-RES": "",
+            "SCANNER": "soft1",
+            "SOFTWARE": ""
+        },
+        "img_name": "1653319400.tiff"
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "body": {
+        "path_dir": "../test_db/",
+        "data_arr": [
+            {
+                "loaded": [],
+                "id": 1,
+                "color": "#FF2B2B",
+                "OBJECT": "Nuevo#1",
+                "DATE-OBS": "",
+                "UT": "",
+                "MAIN-ID": "",
+                "RA2000": "",
+                "DEC2000": "",
+                "SPTYPE": "",
+                "EQUINOX": "",
+                "RA": "",
+                "DEC": "",
+                "RA1950": "",
+                "DEC1950": "",
+                "TIME-OBS": "",
+                "ST": "",
+                "HA": "",
+                "AIRMASS": "",
+                "JD": "",
+                "EXPTIME": "",
+                "IMAGETYP": "",
+                "OBSERVER": "GG_LUSI",
+                "DETECTOR": ""
+            }
+        ],
+        "bbox_arr": [
+            {
+                "x": 66.65625,
+                "y": 159.048828125,
+                "h": 408.279296875,
+                "w": 2598.484375
+            }
+        ],
+        "plate_data": {
+            "OBSERVAT": "\u2205",
+            "PLATE-N": "\u2205",
+            "DIGITALI": "",
+            "SCANNER": "soft1",
+            "SCAN-RES": "",
+            "SCAN-COL": "",
+            "SOFTWARE": ""
+        },
+        "img_name": "4405.tiff"
+    }
+}

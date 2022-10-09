@@ -22,14 +22,17 @@
 
   var voidButtonSelected = false
   var voidButtonStyle = "float: right;"
+  var original_value = ""
   function clickVoidButton() {
     voidButtonSelected = !voidButtonSelected
     if(voidButtonSelected){
       voidButtonStyle = "float: right; background-color:blue; color:white"
-      //value=""
+      original_value = value
+      value="∅"
       is_void=true
     } else{
       voidButtonStyle = "float: right;"
+      value = original_value
       is_void=false
     }
   }
@@ -39,10 +42,16 @@
 <div class="mt-2">
   <span>
     {$metadataStore.fields[name].label}
-    <span style="color:red;">
-      {$metadataStore.fields[name].required ? "*" : ""}
-    </span>
-    <input type="button" value="∅" style={voidButtonStyle} on:click={clickVoidButton}>
+    {#if $metadataStore.fields[name].required}
+      <span style="color:red;">
+        *
+      </span>    
+      <input 
+        class="void_button"
+        type="button" value="∅" 
+        style={voidButtonStyle} 
+        on:click={clickVoidButton}>
+    {/if}
   </span>
   {#if $metadataStore.fields[name].options === undefined}
     {#if $metadataStore.fields[name].remote && $metadataStore.spectraData[index] !== undefined}
@@ -95,3 +104,10 @@
   {/if}
 
 </div>
+
+<style>
+.void_button {
+    padding: 0px;
+    border-radius: 5px;
+  }
+</style>
