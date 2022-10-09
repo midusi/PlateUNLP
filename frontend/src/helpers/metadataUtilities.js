@@ -1,4 +1,5 @@
 function getObservat() {
+  console.log("Ejecutando getObservat")
   return [
     'ctio: Cerro Tololo Interamerican Observatory',
     'kpno: Kitt Peak National Observatory',
@@ -66,8 +67,7 @@ function getObservat() {
     'baker: Baker Observatory',
     'het: McDonald Observatory - Hobby-Eberly Telescope',
     'jcdo: Jack C. Davis Observatory, Western Nevada College',
-    'lno: Langkawi National Observatory',
-    'Otro']
+    'lno: Langkawi National Observatory']
 }
 
 function getObserver(){

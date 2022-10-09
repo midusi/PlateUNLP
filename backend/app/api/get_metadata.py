@@ -60,7 +60,7 @@ def api_get_metadata():
             'message': 'El observatorio no esta en la base de datos.',
             'metadata': {}
         }
-        return jsonify(data), 400
+        #return jsonify(data), 400
     except Exception as e:
         print(e)
         data = {

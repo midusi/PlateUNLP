@@ -17,7 +17,7 @@
         array.splice(arrayIndex, 1);
       }
     $metadataStore.spectraData[index]["loaded"] = array
-    setChangeFlag();
+    setChangeFlag()
   }
 
   var voidButtonSelected = false
@@ -35,6 +35,7 @@
       value = original_value
       is_void=false
     }
+    setChangeFlag()
   }
 
 </script>
@@ -82,6 +83,7 @@
       on:change={setChangeFlag}
       disabled = {is_void}
     >
+      <!-- {console.log($metadataStore.fields[name].options)} -->
       {#each $metadataStore.fields[name].options as observat}
         <option value={observat}> {observat} </option>
       {/each}
