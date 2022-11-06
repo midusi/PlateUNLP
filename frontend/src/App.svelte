@@ -345,10 +345,6 @@
     }
   }
 
-  function objectValid(objectID){
-    return !/^Nuevo#/.test(objectID)
-  }
-
   function validateSpectrum(spectrumIndex){  
       let invalidSpectrum = false;
       getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
@@ -357,7 +353,7 @@
         }
       });
 
-      if(!objectValid($metadataStore.spectraData[spectrumIndex]["OBJECT"]))
+      if(/^Nuevo#/.test($metadataStore.spectraData[spectrumIndex]["OBJECT"]))
         invalidSpectrum = true
 
       validatedSpectrums[spectrumIndex] = !invalidSpectrum

@@ -1,5 +1,4 @@
 function getObservat() {
-  console.log("Ejecutando getObservat")
   return [
     'ctio: Cerro Tololo Interamerican Observatory',
     'kpno: Kitt Peak National Observatory',
@@ -195,7 +194,7 @@ function getMetadataFields() {
     },
     dateObs: {
       label: 'DATE-OBS',
-      type: 'date',
+      type: 'text',
       info: 'Date of observation (yyyy-mm-dd)',
       required: true,
       global: false

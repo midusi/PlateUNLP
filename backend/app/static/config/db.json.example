@@ -72,7 +72,8 @@
                     "baker: Baker Observatory",
                     "het: McDonald Observatory - Hobby-Eberly Telescope",
                     "jcdo: Jack C. Davis Observatory, Western Nevada College",
-                    "lno: Langkawi National Observatory"
+                    "lno: Langkawi National Observatory",
+                    "MISSING"
                 ]
             }
         }

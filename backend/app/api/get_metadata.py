@@ -14,6 +14,7 @@ from app.helpers.metadata_field_updaters.Updater_JD import Updater_JD
 import sys
 import traceback
 from astropy.coordinates.errors import UnknownSiteException as USE
+from app.helpers.validators import validate_date, validate_time
 
 def api_get_metadata():
     
@@ -23,8 +24,22 @@ def api_get_metadata():
         
     for key in request_fields:
         request_field = request.json[key]
-        if (request_field != "∅"):
+        if (request_field != "MISSING"):
             metadata[key] = request_field
+            
+    if((request.json["DATE-OBS"] != "MISSING") & (not validate_date(request.json["DATE-OBS"]))):
+        data = {
+            'message': 'DATE-OBS no cumple con el formato "aaaa-mm-dd".',
+            'metadata': {}
+        }
+        return jsonify(data), 400 
+    
+    if((request.json["UT"] != "MISSING") & (not validate_time(request.json["UT"]))):
+        data = {
+            'message': 'UT no cumple con el formato "hh:mm:ss".',
+            'metadata': {}
+        }
+        return jsonify(data), 400   
     
     try:
         Updater_mainId_ra2000_dec2000.update(metadata)
@@ -38,7 +53,7 @@ def api_get_metadata():
         trace_back = traceback.extract_tb(ex_traceback)
         # Format stacktrace
         stack_trace = list()
-        message = ''
+        message = 'El OBJECT es incorrecto.'
         for trace in trace_back:
             stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s" % (trace[0], trace[1], trace[2], trace[3]))
             if 'MAIN-ID' in trace[3]:
@@ -55,7 +70,6 @@ def api_get_metadata():
         Updater_TIMEOBS.update(metadata)   
         Updater_ST.update(metadata)
     except USE:
-        print("NoOK")
         data = {
             'message': 'El observatorio no esta en la base de datos.',
             'metadata': {}
@@ -64,7 +78,7 @@ def api_get_metadata():
     except Exception as e:
         print(e)
         data = {
-            'message': 'El UT es incorrecto.',
+            'message': 'UT no cumple con el formato "hh:mm:ss".',
             'metadata': {}
         }
         return jsonify(data), 400   
