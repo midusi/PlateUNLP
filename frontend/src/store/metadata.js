@@ -45,11 +45,16 @@ function createStoreMetadata() {
       // Receive all fields of a spectrum to be modified
       loadingAlert()
       try {
-        console.log("METADATA-SEND = ",metadataSend)
+        update((prev) => {
+          Object.keys(prev.spectraData[index]).map((field) => {
+            console.log(field)
+            if((field != "OBJECT") & (field != "DATE-OBS") & (field != "UT"))
+              prev.spectraData[index][field] = ""
+          })
+          return prev
+        })
         const response = await apiSpectrum.getMetadata(metadataSend)
         const { data } = response
-        console.log("RESPONSE = ",response)
-        console.log("DATA = ",data)
         update((prev) => {
           prev.spectraData[index]["loaded"] = []
           Object.keys(data.metadata).map((field) => {

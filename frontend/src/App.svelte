@@ -138,11 +138,6 @@
     }
   }
 
-  // function searchSpectro() {
-  //   initializeCanvas();
-  //   spectrogramCanvas.deleteAllBbox();
-  //   spectrogramStore.getPredictions(spectrogramCanvas, pathDir, imageName);
-  // }
   async function confirmSearchMetadata(){
     if(metadataSearched[bboxSelected-2]){
       deleteAlert({
@@ -162,10 +157,10 @@
   
   async function setRemoteMetadata() {
     const data = {
-    OBJECT: $metadataStore.spectraData[bboxSelected - 2]["OBJECT"],
-    OBSERVAT: $metadataStore.plateData["OBSERVAT"],
-    "DATE-OBS": $metadataStore.spectraData[bboxSelected - 2]["DATE-OBS"],
-    UT: $metadataStore.spectraData[bboxSelected - 2]["UT"],
+      OBJECT: $metadataStore.spectraData[bboxSelected - 2]["OBJECT"],
+      OBSERVAT: $metadataStore.plateData["OBSERVAT"],
+      "DATE-OBS": $metadataStore.spectraData[bboxSelected - 2]["DATE-OBS"],
+      UT: $metadataStore.spectraData[bboxSelected - 2]["UT"],
     };
     const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 2);
     if(setted){
