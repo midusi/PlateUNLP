@@ -15,6 +15,7 @@ import sys
 import traceback
 from astropy.coordinates.errors import UnknownSiteException as USE
 from app.helpers.validators import validate_date, validate_time
+from datetime import datetime
 
 def api_get_metadata():
     
@@ -27,12 +28,16 @@ def api_get_metadata():
         if (request_field != "MISSING"):
             metadata[key] = request_field
             
-    if((request.json["DATE-OBS"] != "MISSING") & (not validate_date(request.json["DATE-OBS"]))):
-        data = {
-            'message': 'DATE-OBS no cumple con el formato "aaaa-mm-dd".',
-            'metadata': {}
-        }
-        return jsonify(data), 400 
+    if(request.json["DATE-OBS"] != "MISSING"): 
+        if (validate_date(request.json["DATE-OBS"], format="%d/%m/%Y")):
+            date = datetime.strptime(request.json["DATE-OBS"], '%d/%m/%Y')
+            metadata["DATE-OBS"] = date.strftime('%Y-%m-%d')
+        elif (not validate_date(request.json["DATE-OBS"])):
+            data = {
+                'message': 'DATE-OBS no cumple con el formato "aaaa-mm-dd" o "dd/mm/aaaa".',
+                'metadata': {}
+            }
+            return jsonify(data), 400 
     
     if((request.json["UT"] != "MISSING") & (not validate_time(request.json["UT"]))):
         data = {
