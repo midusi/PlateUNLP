@@ -66,8 +66,7 @@ function getObservat() {
     'baker: Baker Observatory',
     'het: McDonald Observatory - Hobby-Eberly Telescope',
     'jcdo: Jack C. Davis Observatory, Western Nevada College',
-    'lno: Langkawi National Observatory',
-    'Otro']
+    'lno: Langkawi National Observatory']
 }
 
 function getObserver(){
@@ -85,10 +84,15 @@ function getObserverDef(){
   }
 }
 
+function getImageTyp(){
+  if(localStorage.getItem("imageTypes")){
+    return JSON.parse(localStorage.getItem("imageTypes"));
+  }
+}
 
-function getDigitaliDef(){
-  if(localStorage.getItem("digitaliDefault")){
-    return JSON.parse(localStorage.getItem("digitaliDefault"));
+function getImageTypDef(){
+  if(localStorage.getItem("imageTypeDefault")){
+    return JSON.parse(localStorage.getItem("imageTypeDefault"));
   }
   else{
     return ""
@@ -101,15 +105,69 @@ function getDigitali(){
   }
 }
 
-function getImageTyp(){
-  if(localStorage.getItem("imageTypes")){
-    return JSON.parse(localStorage.getItem("imageTypes"));
+function getDigitaliDef(){
+  if(localStorage.getItem("digitaliDefault")){
+    return JSON.parse(localStorage.getItem("digitaliDefault"));
+  }
+  else{
+    return ""
   }
 }
 
-function getImageTypDef(){
-  if(localStorage.getItem("imageTypeDefault")){
-    return JSON.parse(localStorage.getItem("imageTypeDefault"));
+function getScanner(){
+  if(localStorage.getItem("scanners")){
+    return JSON.parse(localStorage.getItem("scanners"));
+  }
+}
+
+function getScannerDef(){
+  if(localStorage.getItem("scannerDefault")){
+    return JSON.parse(localStorage.getItem("scannerDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+function getScanres(){
+  if(localStorage.getItem("scanress")){
+    return JSON.parse(localStorage.getItem("scanress"));
+  }
+}
+
+function getScanresDef(){
+  if(localStorage.getItem("scanresDefault")){
+    return JSON.parse(localStorage.getItem("scanresDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+function getScancol(){
+  if(localStorage.getItem("scancols")){
+    return JSON.parse(localStorage.getItem("scancols"));
+  }
+}
+
+function getScancolDef(){
+  if(localStorage.getItem("scancolDefault")){
+    return JSON.parse(localStorage.getItem("scancolDefault"));
+  }
+  else{
+    return ""
+  }
+}
+
+function getSoftware(){
+  if(localStorage.getItem("softwares")){
+    return JSON.parse(localStorage.getItem("softwares"));
+  }
+}
+
+function getSoftwareDef(){
+  if(localStorage.getItem("softwareDefault")){
+    return JSON.parse(localStorage.getItem("softwareDefault"));
   }
   else{
     return ""
@@ -136,7 +194,7 @@ function getMetadataFields() {
     },
     dateObs: {
       label: 'DATE-OBS',
-      type: 'date',
+      type: 'text',
       info: 'Date of observation (yyyy-mm-dd)',
       required: true,
       global: false
@@ -323,6 +381,8 @@ function getMetadataFields() {
       type: 'text',
       info: 'Scanner name',
       required: false,
+      options: getScanner(),
+      default: getScannerDef(),
       global: true
     },
     scanRes: {
@@ -330,12 +390,17 @@ function getMetadataFields() {
       type: 'text',
       info: 'Scanner dpi resolution',
       required: false,
+      options: getScanres(),
+      default: getScanresDef(),
       global: true
     },
     scanCol: {
       label: 'SCAN-COL',
       type: 'text',
       info: 'Scanner color resolution',
+      required: false,
+      options: getScancol(),
+      default: getScancolDef(),
       required: false,
       global: true
     },
@@ -344,6 +409,8 @@ function getMetadataFields() {
       type: 'text',
       info: 'Scan software',
       required: false,
+      options: getSoftware(),
+      default: getSoftwareDef(),
       global: true
     },
     detector: {
@@ -356,4 +423,12 @@ function getMetadataFields() {
   }
 }
 
-export { getMetadataFields,getDigitaliDef,getImageTypDef,getObserverDef}
+export { 
+  getMetadataFields, 
+  getDigitaliDef, 
+  getImageTypDef, 
+  getObserverDef, 
+  getScannerDef, 
+  getScanresDef, 
+  getScancolDef, 
+  getSoftwareDef}

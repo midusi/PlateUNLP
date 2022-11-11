@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store'
-import { loadingAlert, remoteErrorAlert, showAlert,errorAlert } from '../helpers/Alert'
+import { loadingAlert, remoteErrorAlert, showAlert, errorAlert } from '../helpers/Alert'
 import apiSpectrum from '../api/spectrum'
 import { getMetadataFields } from '../helpers/metadataUtilities'
 import {serverUp} from './serverUp'
@@ -15,7 +15,9 @@ function createStoreMetadata() {
 
   return {
     subscribe,
+
     set,
+
     initFields: () => {
       const fields = getMetadataFields()
       const labelFormat = {}
@@ -28,6 +30,7 @@ function createStoreMetadata() {
         return prev
       })
     },
+
     setRemoteFields: (fields) => {
 
        update((prev) => {
@@ -36,12 +39,20 @@ function createStoreMetadata() {
         })
         return prev
       })
-    }
-    ,
+    },
+
     setRemoteMetadata: async (metadataSend, index) => {
       // Receive all fields of a spectrum to be modified
       loadingAlert()
       try {
+        update((prev) => {
+          Object.keys(prev.spectraData[index]).map((field) => {
+            console.log(field)
+            if((field != "OBJECT") & (field != "DATE-OBS") & (field != "UT"))
+              prev.spectraData[index][field] = ""
+          })
+          return prev
+        })
         const response = await apiSpectrum.getMetadata(metadataSend)
         const { data } = response
         update((prev) => {
@@ -61,18 +72,21 @@ function createStoreMetadata() {
       }
       return false
     },
+
     initFormActions: (actions) => {
       update((prev) => {
         prev.formActions = actions
         return prev
       })
     },
+
     setSpectraData: (data) => {
       update((prev) => {
         prev.spectraData = data
         return prev
       })
     },
+
     setPlateData: (data) => {
       console.log("DATA:",data)
       update((prev) => {
@@ -81,18 +95,21 @@ function createStoreMetadata() {
       })
 
     },
+
     addOptionObservat: (key, data) => {
       update((prev) => {
         prev.fields[key].options = [data, ...prev.fields[key].options]
         return prev
       })
     },
+
     setOption: (key, options) => {
       update((prev) => {
         prev.fields[key].options = options
         return prev
       })
     },
+
     updateDefaults: () => {
       update((prev) => {
         let fields = getMetadataFields();

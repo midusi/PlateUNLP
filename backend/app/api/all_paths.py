@@ -19,7 +19,7 @@ def api_all_paths():
     all_paths = os.listdir(dir_path)
 
     # formats = ['png', 'tif', 'tiff']
-    formats = ['tiff']
+    formats = ['tiff', 'tif']
     all_paths = all_paths.select(lambda item: item.split(sep='.').last() in formats)
     
     # Separates the names of the files of which information is stored in the cache

@@ -33,6 +33,9 @@ Para instalar las dependencias del frontend es necesario posicionarse en la carp
 npm install
 ```
 
+Tambien instalar las BuildTools de VS desde `https://visualstudio.microsoft.com/es/downloads/`
+
+
 ## Patchear la clase Upsample de PyTorch
 
 La versión de YOLO utilizada el modelo entrenado depende de un parámetro de PyTorch de la clase Upsample que no existe más. Un fix temporal es reemplazar la línea 152 (de la versión 1.12 de PyTorch) del archivo `torch.nn.modules.upsampling.py` quitando el parámetro `recompute_scale_factor`, de modo que la línea queda:

@@ -17,7 +17,10 @@ def api_generate_fits():
     fields = request.json["fields"]
 
     image_path = os.path.join(path_dir, img_name)
-    img_name = img_name[0:img_name.rfind(".")];
+    img_name_arr = img_name.split(".")
+    img_ext = img_name_arr[len(img_name_arr) - 1]
+    img_name = img_name[0:img_name.rfind(".")]
+    
 
     # test
     print(image_path)
@@ -87,8 +90,8 @@ def api_generate_fits():
         fits.writeto(
             (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, overwrite=True)
         generate_txt(plate_data,data,output_path,file_output_name)
-    working_path = os.path.join(get_workspace_path(), 'cache', 'working', img_name+".tiff.json")
-    saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved', img_name+".tiff.json")
+    working_path = os.path.join(get_workspace_path(), 'cache', 'working', img_name+"."+img_ext+".json")
+    saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved', img_name+"."+img_ext+".json")
     shutil.move(working_path, saved_path)
     # api response data
     data = {

@@ -1,7 +1,7 @@
 <script>
   import { metadataStore } from "../store/metadata";
   import {getContext} from "svelte";
-  export let name, value, index;
+  export let name, value, index
 
   const setChangeFlag = getContext("setChangeFlag");
 
@@ -17,7 +17,7 @@
         array.splice(arrayIndex, 1);
       }
     $metadataStore.spectraData[index]["loaded"] = array
-    setChangeFlag();
+    setChangeFlag()
   }
 
 </script>
@@ -25,9 +25,11 @@
 <div class="mt-2">
   <span>
     {$metadataStore.fields[name].label}
-    <span style="color:red;">
-      {$metadataStore.fields[name].required ? "*" : ""}
-    </span>
+    {#if $metadataStore.fields[name].required}
+      <span style="color:red;">
+        *
+      </span>    
+    {/if}
   </span>
   {#if $metadataStore.fields[name].options === undefined}
     {#if $metadataStore.fields[name].remote && $metadataStore.spectraData[index] !== undefined}
@@ -55,6 +57,7 @@
       aria-label="Select Obsevat"
       on:change={setChangeFlag}
     >
+      <!-- {console.log($metadataStore.fields[name].options)} -->
       {#each $metadataStore.fields[name].options as observat}
         <option value={observat}> {observat} </option>
       {/each}
@@ -76,4 +79,3 @@
   {/if}
 
 </div>
-

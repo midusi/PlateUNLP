@@ -14,3 +14,4 @@ scipy
 pandas
 tqdm
 seaborn
+torchvision==0.12.0
