@@ -58,7 +58,7 @@ function getObservat() {
     'tug: TUBITAK National Observatory, Turkey',
     'mgo: Mount Graham Observatory',
     'aries: Aryabhatta Research Institute of Observational Sciences',
-    'oalp: Observatorio Astronómico de La Plata',
+    'oalp: Observatorio Astronomico de La Plata',
     'olin: Connecticut',
     'boyden: Boyden',
     'lulin: Lulin Observatory',
