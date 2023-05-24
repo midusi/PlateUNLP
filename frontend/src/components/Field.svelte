@@ -1,13 +1,21 @@
 <script>
   import { metadataStore } from "../store/metadata";
   import {getContext} from "svelte";
-  export let name, value, index
+  export let name, value, index = null
 
   const setChangeFlag = getContext("setChangeFlag");
 
   const setType = (node) => {
     node.type = $metadataStore.fields[name].type;
   };
+
+  const regex = /^[ -~]*$/;
+  $: {
+    let sanitizedValue = value.replace(/[^\x20-\x7E]/g, '');
+    if (regex.test(sanitizedValue)) {
+      value = sanitizedValue;
+    }
+  }
 
   function remoteDataChange(name){
 
@@ -37,7 +45,7 @@
         class="form-control"
         use:setType
         style={`background-color: ${$metadataStore.spectraData[index]["loaded"].includes($metadataStore.fields[name].label) ? "lavender" : "white"};`}
-        bind:value
+        bind:value={value}
         on:change={() => remoteDataChange($metadataStore.fields[name].label)}
         placeholder={$metadataStore.fields[name].info}
       />
@@ -45,14 +53,14 @@
       <input
         class="form-control"
         use:setType
-        bind:value
+        bind:value={value}
         on:change={setChangeFlag}
         placeholder={$metadataStore.fields[name].info}
       />
     {/if}
   {:else if $metadataStore.fields[name].label === "OBSERVAT"}
   <select
-      bind:value
+      bind:value={value}
       class="browser-default custom-select"
       aria-label="Select Obsevat"
       on:change={setChangeFlag}
@@ -67,7 +75,7 @@
       list={`${name}Options`}
       class="form-control"
       use:setType
-      bind:value
+      bind:value={value}
       on:change={setChangeFlag}
       placeholder={$metadataStore.fields[name].info}
     />

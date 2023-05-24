@@ -14,6 +14,14 @@
         defaultValue = def;
     }
 
+    const regex = /^[ -~]*$/;
+    $: {
+        let sanitizedValue = newValue.replace(/[^\x20-\x7E]/g, '');
+        if (regex.test(sanitizedValue)) {
+            newValue = sanitizedValue;
+        }
+    }
+
     function deleteValues(){
         handleDelete(valuesCheck,paramNameLists,paramNameDef);
         valuesCheck = [];

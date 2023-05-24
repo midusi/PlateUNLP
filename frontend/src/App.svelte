@@ -543,14 +543,15 @@
                   </div>  
                 </div>
               </TabList>
-                <TabPanel>
-                  <div class="controls">
-                    <PlateForm
-                      plateData={$metadataStore.plateData}
-                      metadata={getMetadata($metadataStore.fields,true)}
-                    />
-                  </div>
-                </TabPanel>
+              
+              <TabPanel>
+                <div class="controls">
+                  <PlateForm
+                    plateData={$metadataStore.plateData}
+                    metadata={getMetadata($metadataStore.fields,true)}
+                  />
+                </div>
+              </TabPanel>
               {#each $metadataStore.spectraData as item,index}
                 <TabPanel>
                   <div class="controls">
