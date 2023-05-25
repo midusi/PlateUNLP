@@ -212,7 +212,7 @@
 
     confirmAlert({
       succesFunc: async () => {
-        const status = await spectrogramStore.generateFits(
+        const response = await spectrogramStore.generateFits(
           spectrogramCanvas.getBboxes(),
           $metadataStore.spectraData,
           $metadataStore.plateData,
@@ -220,7 +220,9 @@
           imageName,
           $metadataStore.fields
         );
-        if(status){ 
+        console.log("OK 2")
+        console.log(response)
+        if(response["status"]){ 
           imageName = ""
           metadataStore.initFields();
           uploadedImage = false;
@@ -228,7 +230,12 @@
           await workspaceStore.getPaths(pathDir);
           showAlert()
         }
-        else{
+        else if(response["message"]){
+          errorAlert({
+            message: response["message"]
+          });
+          errorAlert(message=response["message"])
+        } else {
           errorAlert()
         }
       },

@@ -15,6 +15,26 @@ def api_generate_fits():
     data_arr = request.json["data_arr"]
     plate_data = request.json["plate_data"]
     fields = request.json["fields"]
+    
+    # Verificar que no solo se esten recibiendo caracteres en formato ASCII
+    bad_format_list = {}
+    for key, value in plate_data.items():
+        if not value.isascii():
+            bad_format_list.add(key)
+    for metadata_dict in data_arr:
+        for key, value in metadata_dict.items():
+            if isinstance(value, str) and not value.isascii():
+                bad_format_list.add(key)
+    if bad_format_list:
+        print("Los campos enviados tienen caracteres ASCII. FITS no acepta este formato")
+        data = {
+            "status": False,
+            "status_code": 400,
+            "message": "Error: Los campos "+str(bad_format_list)+" solo pueden tener caracteres tipo ASCII"
+        }
+        return json.jsonify(**data)
+    else:
+        print("Campos bien")
 
     image_path = os.path.join(path_dir, img_name)
     img_name_arr = img_name.split(".")

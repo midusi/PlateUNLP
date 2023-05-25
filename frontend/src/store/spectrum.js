@@ -70,8 +70,9 @@ function createStoreSpectrogram() {
         return prev
       })
       loadingAlert('Guardando...')
+      let response;
       try {
-        await apiSpectrum.generatefits({
+        response = await apiSpectrum.generatefits({
           path_dir: path,
           data_arr: dataArr,
           bbox_arr: bboxArr,
@@ -85,13 +86,13 @@ function createStoreSpectrogram() {
           return prev
         })
         await serverUp()
-        return 0
+        return response.data
       }
       update((prev) => {
         prev.stateGeneratingFits.loading = false
         return prev
       })
-      return 1
+      return response.data
     }
   }
 }
