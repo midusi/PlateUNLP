@@ -220,8 +220,6 @@
           imageName,
           $metadataStore.fields
         );
-        console.log("OK 2")
-        console.log(response)
         if(response["status"]){ 
           imageName = ""
           metadataStore.initFields();

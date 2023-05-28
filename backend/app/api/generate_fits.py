@@ -50,18 +50,24 @@ def api_generate_fits():
                 return json.jsonify(**data)
         objects.append(metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"])
 
+    # Obtencion de variables utiles
     image_path = os.path.join(path_dir, img_name)
     img_name_arr = img_name.split(".")
     img_ext = img_name_arr[len(img_name_arr) - 1]
     img_name = img_name[0:img_name.rfind(".")]
-
-    # test
-    print(image_path)
-    print("image path",image_path)
     # generate dir output
     output_path = os.path.join(path_dir, "output")
     if not (os.path.exists(output_path)):
         os.mkdir(output_path)
+        
+    # Borrado de archivos viejos de la placa en caso de que los haya
+    files = os.listdir(output_path)
+    print("---------------------------------")
+    for file in files:
+        print(file)
+        if (file.startswith(img_name+"_")):
+            os.remove(os.path.join(output_path, file))
+    
     # cropped
     for bbox,data in zip(bbox_arr,data_arr):
         data.pop('id', None)

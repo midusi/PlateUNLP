@@ -182,6 +182,7 @@ function getMetadataFields() {
       type: 'text',
       info: 'Name of the object observed',
       required: true,
+      pre_fetch: true,
       global: false
     },
     observat: {
@@ -197,6 +198,7 @@ function getMetadataFields() {
       type: 'text',
       info: 'Date of observation (yyyy-mm-dd)',
       required: true,
+      pre_fetch: true,
       global: false
     },
     ut: {
@@ -204,6 +206,15 @@ function getMetadataFields() {
       type: 'text',
       info: 'Universal time (hh:mm:ss)',
       required: true,
+      pre_fetch: true,
+      global: false
+    },
+    suffix: {
+      label: 'SUFFIX',
+      type: 'text',
+      info: 'Suffix for filename',
+      required: false,
+      pre_fetch: true,
       global: false
     },
     // Remote Metadata
