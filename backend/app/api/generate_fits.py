@@ -37,10 +37,8 @@ def api_generate_fits():
         
     # Verificar que no se repita el nombre de OBJECT en 2 espectros distintos
     objects = []
-    print("Se recibieron los siguientes Objects:")
     for metadata_dict in data_arr:
         for object in objects:
-            print(object == metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"])
             if(object == metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"]):
                 print("Se recibio una combinacion de OBJECT_SUFFIX repetida, esto no esta permitido")
                 data = {
