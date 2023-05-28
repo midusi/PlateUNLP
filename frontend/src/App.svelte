@@ -161,6 +161,7 @@
       OBSERVAT: $metadataStore.plateData["OBSERVAT"],
       "DATE-OBS": $metadataStore.spectraData[bboxSelected - 2]["DATE-OBS"],
       UT: $metadataStore.spectraData[bboxSelected - 2]["UT"],
+      SUFFIX: $metadataStore.spectraData[bboxSelected - 2]["SUFFIX"],
     };
     const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 2);
     if(setted){
@@ -278,10 +279,17 @@
     }
     else{
       return Object.keys(fields).filter((label) => {
-        if (fields[label].pre_fetch && !fields[label].global) 
+        if (fields[label].required && !fields[label].global) 
           return label;
       })
     }
+  }
+
+  function getPreFetchEspectreMetadata(fields) {
+    return Object.keys(fields).filter((label) => {
+      if (fields[label].pre_fetch && !fields[label].global) 
+        return label;
+    })
   }
 
   function getSearchedMetadata(fields,global){
@@ -562,7 +570,7 @@
                   <div class="controls">
                     <RequiredForm
                       spectraData={item}
-                      metadata={getRequiredMetadata($metadataStore.fields,false)}
+                      metadata={getPreFetchEspectreMetadata($metadataStore.fields)}
                       invalidSpectrum ={!validatedSpectrums[bboxSelected-2]}
                       confirmSearchMetadata = {confirmSearchMetadata}
                     />

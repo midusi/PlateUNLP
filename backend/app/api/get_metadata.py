@@ -20,9 +20,9 @@ from datetime import datetime
 def api_get_metadata():
     
     # Inicialización metadatos iniciales
-    request_fields = ["OBJECT", "OBSERVAT", "DATE-OBS", "UT"] # "EXPTIME" y "PLATE-N" no usados
+    request_fields = ['OBJECT', 'OBSERVAT', 'DATE-OBS', 'UT', 'SUFFIX'] # "EXPTIME" y "PLATE-N" no usados
     metadata = {}
-        
+    
     for key in request_fields:
         request_field = request.json[key]
         if (request_field != "MISSING"):
