@@ -280,7 +280,7 @@
     }
     else{
       return Object.keys(fields).filter((label) => {
-        if (fields[label].required && !fields[label].global) 
+        if (fields[label].pre_fetch && !fields[label].global) 
           return label;
       })
     }

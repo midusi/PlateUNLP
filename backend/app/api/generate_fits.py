@@ -26,21 +26,34 @@ def api_generate_fits():
             if isinstance(value, str) and not value.isascii():
                 bad_format_list.add(key)
     if bad_format_list:
-        print("Los campos enviados tienen caracteres ASCII. FITS no acepta este formato")
+        print("Los campos enviados tienen caracteres no ASCII. FITS no los soporta")
         data = {
             "status": False,
             "status_code": 400,
             "message": "Error: Los campos "+str(bad_format_list)+" solo pueden tener caracteres tipo ASCII"
         }
         return json.jsonify(**data)
-    else:
-        print("Campos bien")
+
+        
+    # Verificar que no se repita el nombre de OBJECT en 2 espectros distintos
+    objects = []
+    print("Se recibieron los siguientes Objects:")
+    for metadata_dict in data_arr:
+        for object in objects:
+            print(object == metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"])
+            if(object == metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"]):
+                print("Se recibio una combinacion de OBJECT_SUFFIX repetida, esto no esta permitido")
+                data = {
+                    "status": False,
+                    "status_code": 400,
+                    "message": "Error: Cada combinacion OBJECT_SUFFIX solo puede aparecer una vez, revisar cuantos elementos tienen OBJECT="+metadata_dict["OBJECT"]+" y SUFFIX="+metadata_dict["SUFFIX"]}
+                return json.jsonify(**data)
+        objects.append(metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"])
 
     image_path = os.path.join(path_dir, img_name)
     img_name_arr = img_name.split(".")
     img_ext = img_name_arr[len(img_name_arr) - 1]
     img_name = img_name[0:img_name.rfind(".")]
-    
 
     # test
     print(image_path)
@@ -84,7 +97,7 @@ def api_generate_fits():
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:,:]
-        file_output_name = f'{img_name}_{data["OBJECT"]}'
+        file_output_name = f'{img_name}_{data["OBJECT"]}_{data["SUFFIX"]}'
         # saved image crop
         cv2.imwrite(os.path.join(output_path, f'{file_output_name}.png'),crop_img)
 
@@ -108,7 +121,10 @@ def api_generate_fits():
           prihdr["EQUINOX"] = None
           
         fits.writeto(
-            (os.path.join(output_path, f'{img_name}_{data["OBJECT"]}.fits')), crop_img, prihdr, overwrite=True)
+            (os.path.join(output_path, f'{file_output_name}.fits')), 
+            crop_img, 
+            prihdr, 
+            overwrite=True)
         generate_txt(plate_data,data,output_path,file_output_name)
     working_path = os.path.join(get_workspace_path(), 'cache', 'working', img_name+"."+img_ext+".json")
     saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved', img_name+"."+img_ext+".json")
