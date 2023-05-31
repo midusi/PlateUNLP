@@ -1,7 +1,7 @@
 <script>
   import { metadataStore } from "../store/metadata";
   import {getContext} from "svelte";
-  export let name, value, index = null
+  export let name, value = "", index = null
 
   const setChangeFlag = getContext("setChangeFlag");
 
