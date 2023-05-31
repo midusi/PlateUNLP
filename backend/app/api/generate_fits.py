@@ -16,6 +16,17 @@ def api_generate_fits():
     plate_data = request.json["plate_data"]
     fields = request.json["fields"]
     
+    # Verificar que se esta recibiendo el campo MAIN-ID en todos los espectros
+    for metadata_dict in data_arr:
+        if(metadata_dict.get("MAIN-ID", None) == None or metadata_dict.get("MAIN-ID", "") == ""):
+            print("No se recibio correctamente el valor Main-ID en alguno de los espectros")
+            data = {
+                "status": False,
+                "status_code": 400,
+                "message": "Falta datos en la solicitud, revisar que Main-ID este correctamente completado en todos los espectros"
+            }
+            return json.jsonify(**data)
+    
     # Verificar que no solo se esten recibiendo caracteres en formato ASCII
     bad_format_list = {}
     for key, value in plate_data.items():
@@ -35,18 +46,18 @@ def api_generate_fits():
         return json.jsonify(**data)
 
         
-    # Verificar que no se repita el nombre de OBJECT en 2 espectros distintos
+    # Verificar que no se repita el nombre de MAIN-ID_SUFFIX en 2 espectros distintos
     objects = []
     for metadata_dict in data_arr:
         for object in objects:
-            if(object == metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"]):
-                print("Se recibio una combinacion de OBJECT_SUFFIX repetida, esto no esta permitido")
+            if(object == metadata_dict["MAIN-ID"]+"_"+metadata_dict["SUFFIX"]):
+                print("Se recibio una combinacion de MAIN-ID_SUFFIX repetida, esto no esta permitido")
                 data = {
                     "status": False,
                     "status_code": 400,
-                    "message": "Error: Cada combinacion OBJECT_SUFFIX solo puede aparecer una vez, revisar cuantos elementos tienen OBJECT="+metadata_dict["OBJECT"]+" y SUFFIX="+metadata_dict["SUFFIX"]}
+                    "message": "Error: Cada combinacion MAIN-ID_SUFFIX solo puede aparecer una vez, revisar cuantos elementos tienen MAIN-ID="+metadata_dict["MAIN-ID"]+" y SUFFIX="+metadata_dict["SUFFIX"]}
                 return json.jsonify(**data)
-        objects.append(metadata_dict["OBJECT"]+"_"+metadata_dict["SUFFIX"])
+        objects.append(metadata_dict["MAIN-ID"]+"_"+metadata_dict["SUFFIX"])
 
     # Obtencion de variables utiles
     image_path = os.path.join(path_dir, img_name)
@@ -72,15 +83,14 @@ def api_generate_fits():
         data.pop('color', None)
         data.pop('loaded', None)
         
-
         # The flag to -1 loads the image as is
-        rotated = False;
+        rotated = False
         img = cv2.imread(image_path, -1)
         original_height, original_width = img.shape
         if((original_width < original_height)):
             img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
             original_height, original_width = img.shape
-            rotated = True;
+            rotated = True
         
         #if (original_width > original_height):
             
@@ -101,7 +111,7 @@ def api_generate_fits():
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:,:]
-        file_output_name = f'{img_name}_{data["OBJECT"]}_{data["SUFFIX"]}'
+        file_output_name = f'{img_name}_{data["MAIN-ID"]}_{data["SUFFIX"]}'
         # saved image crop
         cv2.imwrite(os.path.join(output_path, f'{file_output_name}.png'),crop_img)
 
