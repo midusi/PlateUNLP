@@ -35,6 +35,7 @@
   let metadataSearched = []
   let names = []
   let validatedSpectrums = []
+  let validatedSpectrumsForMetadataSearch = []
   let plateValid = false;
   let dataLoaded = false
   let reset_filters_flag = false
@@ -97,6 +98,7 @@
       imageChanged = true
       spectrogramCanvas.deleteAllBbox();
       validatedSpectrums = []
+      validatedSpectrumsForMetadataSearch = []
       dataLoaded = false
       changeFlag = false
       imageName = selectedImage;
@@ -325,6 +327,12 @@
             invalidForm = true;
           }
         });
+       
+        // Si o si se tiene que tener el main ID, por lo que es obligatorio 
+        // relizar la busqueda de metadatos de cada espectro
+        if (spectro["MAIN-ID"] === "") {
+          invalidForm = true;
+        }
       });
 
       getRequiredMetadata($metadataStore.fields,true).forEach((metadata) => {
@@ -363,6 +371,16 @@
 
       if(/^Nuevo#/.test($metadataStore.spectraData[spectrumIndex]["OBJECT"]))
         invalidSpectrum = true
+
+      // Es necesario separar la condicion de habilitacion del boton de exportarFITS 
+      // de la del boton de BuscarMetadatos
+      validatedSpectrumsForMetadataSearch[spectrumIndex] = !invalidSpectrum
+
+      // Si o si se tiene que tener el main ID, por lo que es obligatorio 
+      // relizar la busqueda de metadatos de cada espectro
+      if ($metadataStore.spectraData[spectrumIndex]["MAIN-ID"] === "") {
+        invalidSpectrum = true;
+      }
 
       validatedSpectrums[spectrumIndex] = !invalidSpectrum
     
@@ -571,7 +589,7 @@
                     <RequiredForm
                       spectraData={item}
                       metadata={getPreFetchEspectreMetadata($metadataStore.fields)}
-                      invalidSpectrum ={!validatedSpectrums[bboxSelected-2]}
+                      invalidSpectrum ={!validatedSpectrumsForMetadataSearch[bboxSelected-2]}
                       confirmSearchMetadata = {confirmSearchMetadata}
                     />
                   </div>
