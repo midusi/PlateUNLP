@@ -45,6 +45,18 @@ def api_generate_fits():
         }
         return json.jsonify(**data)
 
+    # Verificar que no se incluyen en MAIN-ID y/o SUFFIX ciertos caracteres problematicos para el nombramiento de archivos0: '\ / : * ? " < > |'
+    bad_caracteres = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
+    for metadata_dict in data_arr:
+        for caracter in bad_caracteres:
+            if((caracter in metadata_dict["MAIN-ID"]) or (caracter in metadata_dict["SUFFIX"])):
+                print("No se permite en MAIN-ID y/o SUFFIX el uso de los caracteres: "+str(bad_caracteres))
+                data = {
+                    "status": False,
+                    "status_code": 400,
+                    "message": "No se permite en MAIN-ID y/o SUFFIX el uso de los caracteres: "+str(bad_caracteres)
+                }
+                return json.jsonify(**data)
         
     # Verificar que no se repita el nombre de MAIN-ID_SUFFIX en 2 espectros distintos
     objects = []
