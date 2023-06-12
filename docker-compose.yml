@@ -1,0 +1,7 @@
+version: '0.0.1'
+
+services:
+  backend:
+    build: ./docker/backend
+    ports:
+      - "5000:5000"
