@@ -1,7 +1,13 @@
 version: '0.0.1'
-
 services:
   backend:
-    build: ./docker/backend
+    build: 
+      context: ./docker/backend
+      dockerfile: Dockerfile
+    command: python manage.py run -h 0.0.0.0
+    volumes:
+      - ./backend/:/usr/src/app/
     ports:
-      - "5000:5000"
+      - 5000:5000
+    env_file:
+      - ./docker/backend/.env.dev

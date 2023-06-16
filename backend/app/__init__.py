@@ -4,22 +4,16 @@ from flask_cors import CORS
 
 from config.routes import set_routes
 
+# Initial configuration of the app
+app = Flask(__name__)
 
-def create_app(environment="development"):
+# Add Cors
+CORS(app)
 
-    # Initial configuration of the app
-    app = Flask(__name__)
+sm_list()
 
-    # Add Cors
-    CORS(app)
+# Folder where tif conversions to PNG are stored
+app.config['PNG_FOLDER'] = ".train"
 
-    sm_list()
-
-    # Folder where tif conversions to PNG are stored
-    app.config['PNG_FOLDER'] = ".train"
-
-    # Set the routes that the app possesses
-    set_routes(app)
-
-    # Return the APP instance configured
-    return app
+# Set the routes that the app possesses
+set_routes(app)
