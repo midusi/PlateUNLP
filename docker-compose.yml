@@ -1,6 +1,7 @@
 version: '0.0.1'
 services:
   backend:
+    container_name: backend
     build: 
       context: ./docker/backend
       dockerfile: Dockerfile
