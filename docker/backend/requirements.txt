@@ -10,6 +10,7 @@ Flask==2.3.2
 Flask-Cors
 Flask-WTF
 torch
+torchvision
 smallthon
 opencv-python
 scipy
