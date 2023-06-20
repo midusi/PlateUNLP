@@ -23,6 +23,12 @@ En caso de que lo que quiera sea actualizar los contenedores agregue al final el
 docker-compose --env-file=.env up --build
 ```
 
+### Acceso a la app
+
+Una vez levantado el entorno de produccion puede acceder al la aplicacion desde `localhost:5000`.
+
+Tambien puede acceder a la API expuesta por el backend desde `localhost:20500`
+
 ## Software recomendado
 
 Se debe tener instalado Node js y Python en el sistema con sus respectivos gestores de paquetes. Las versiones recomendadas son:

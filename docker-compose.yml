@@ -3,13 +3,25 @@ services:
   backend:
     container_name: backend
     build: 
-      context: ./docker/backend
+      context: ./backend
       dockerfile: Dockerfile
     command: python manage.py run -h 0.0.0.0
     volumes:
       - ./backend/:/usr/src/app/
       - ${BACKEND_DB_PATH}:/usr/src/app/db
     ports:
-      - 20500:5000
+      - 20500:20500
     env_file:
-      - ./docker/backend/.env.dev
+      - ./backend/.env.dev
+    
+  frontend:
+    container_name: frontend
+    image: node:16.17.1
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend/:/usr/src/app/
+    ports:
+      - 5000:5000
+    command: npm run dev
