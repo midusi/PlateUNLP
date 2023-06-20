@@ -8,7 +8,7 @@ services:
     command: python manage.py run -h 0.0.0.0
     volumes:
       - ./backend/:/usr/src/app/
-      - ./test_db/:/usr/src/app/db
+      - ${BACKEND_DB_PATH}:/usr/src/app/db
     ports:
       - 20500:5000
     env_file:

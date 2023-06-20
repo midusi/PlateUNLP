@@ -19,14 +19,22 @@ from datetime import datetime
 
 def api_get_metadata():
     
+    print("_________________")
+    print(f"UT = {request.json['UT']}")
+    print("_________________")
+    
     # Inicialización metadatos iniciales
     request_fields = ['OBJECT', 'OBSERVAT', 'DATE-OBS', 'UT', 'SUFFIX'] # "EXPTIME" y "PLATE-N" no usados
     metadata = {}
+    
+    print("OK 1")
     
     for key in request_fields:
         request_field = request.json[key]
         if (request_field != "MISSING"):
             metadata[key] = request_field
+    
+    print("OK 2")
             
     if(request.json["DATE-OBS"] != "MISSING"): 
         if (validate_date(request.json["DATE-OBS"], format="%d/%m/%Y")):
@@ -38,6 +46,8 @@ def api_get_metadata():
                 'metadata': {}
             }
             return jsonify(data), 400 
+
+    print("OK 3")
     
     if((request.json["UT"] != "MISSING") & (not validate_time(request.json["UT"]))):
         data = {
@@ -45,7 +55,6 @@ def api_get_metadata():
             'metadata': {}
         }
         return jsonify(data), 400   
-    
     try:
         Updater_mainId_ra2000_dec2000.update(metadata)
         Updater_SPTYPE.update(metadata)
@@ -69,6 +78,8 @@ def api_get_metadata():
         }
         return jsonify(data), 400
     
+    print("OK 4")
+    
     try:
         Updater_RA_DEC.update(metadata)
         Updater_RA1950_DEC1950.update(metadata)
@@ -81,12 +92,12 @@ def api_get_metadata():
         }
         #return jsonify(data), 400
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         data = {
-            'message': 'UT no cumple con el formato "hh:mm:ss".',
+            'message': f'A ocurrido una excepcion: {e}.',
             'metadata': {}
         }
-        return jsonify(data), 400   
+        return jsonify(data), 500   
 
     Updater_HA.update(metadata)
     Updater_AIRMASS.update(metadata)

@@ -18,10 +18,8 @@ Para levantar el conjunto de contenedores ejecutar:
 ```
 docker-compose --env-file=.env up
 ```
-En caso de que lo que quiera sea actualizar los contenedores agregue al final el tag `--build`, tal que asi:
-```
-docker-compose --env-file=.env up --build
-```
+En caso de que tambien quiera actualizar agregar el tag `--build`.
+
 
 ## Software recomendado
 
