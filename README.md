@@ -16,11 +16,11 @@ Para su creacion puede duplicar el archivo `.env.sample` que esta en la carpeta 
 
 Para levantar el conjunto de contenedores ejecutar:
 ```
-docker-compose --env-file=.env up
+docker compose --env-file=.env up
 ```
 En caso de que lo que quiera sea actualizar los contenedores agregue al final el tag `--build`, tal que asi:
 ```
-docker-compose --env-file=.env up --build
+docker compose --env-file=.env up --build
 ```
 
 ### Acceso a la app
@@ -103,3 +103,20 @@ npm run pm2-start
 Se dispone de los siguientes scripts: `pm2-start`, `pm2-stop`, `pm2-restart`,`pm2-reload` y `pm2-delete`.
 
 Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráfica del software.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

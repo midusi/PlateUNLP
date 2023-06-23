@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
 import apiWorkspace from '../api/workspace'
-import { spectrogramStore } from './spectrum'
+import { spectrogramStore } from './index'
 import {
   loadingAlert, errorAlert, closeAlert, showAlert,serverAlert
 } from '../helpers/Alert'

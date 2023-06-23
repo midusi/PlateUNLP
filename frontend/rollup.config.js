@@ -1,9 +1,15 @@
 import svelte from 'rollup-plugin-svelte';
+// const svelte = require('rollup-plugin-svelte');
 import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
+// const commonjs = require('@rollup/plugin-commonjs');
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+// const resolve = require('@rollup/plugin-node-resolve');
 import livereload from 'rollup-plugin-livereload';
+// const livereload = require('rollup-plugin-livereload');
 import { terser } from 'rollup-plugin-terser';
+// const { terser } = require('rollup-plugin-terser');
 import css from 'rollup-plugin-css-only';
+// const css = require('rollup-plugin-css-only');
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -28,7 +34,7 @@ function serve() {
 	};
 }
 
-export default {
+module.exports = {
 	input: 'src/main.js',
 	output: {
 		sourcemap: true,
@@ -52,7 +58,7 @@ export default {
 		// some cases you'll need additional configuration -
 		// consult the documentation for details:
 		// https://github.com/rollup/plugins/tree/master/packages/commonjs
-		resolve({
+		nodeResolve({
 			browser: true,
 			dedupe: ['svelte']
 		}),
@@ -73,4 +79,4 @@ export default {
 	watch: {
 		clearScreen: false
 	}
-};
+}
