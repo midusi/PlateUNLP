@@ -1,28 +1,49 @@
 version: '0.0.1'
 services:
-  # backend:
-  #   container_name: backend
-  #   build: 
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   command: python manage.py run -h 0.0.0.0
-  #   volumes:
-  #     - ./backend/:/usr/src/app/
-  #     - ${BACKEND_DB_PATH}:/usr/src/app/db
-  #   ports:
-  #     - 20500:20500
-  #   env_file:
-  #     - ./backend/.env.dev
+  backend:
+    container_name: backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py run -h 0.0.0.0
+    volumes:
+      - ./backend/:/usr/src/app/
+      - ${BACKEND_DB_PATH}:/usr/src/app/db
+    ports:
+      - 20500:20500
+    env_file:
+      - ./backend/.env.dev
+    networks:
+      - my-network
     
   frontend:
     container_name: frontend
     build: 
       context: ./frontend
       dockerfile: Dockerfile
-    #volumes:
-     # - ./frontend/:/usr/src/app/
-    ports:
-      - 5000:5000
-    expose:
-      - 5000
-    command: npm run dev -- --host 0.0.0.0
+    # volumes:
+    #   - ./frontend/:/usr/src/app/
+    # ports:
+    #   - 5000:5000
+    command: npm run dev
+    depends_on:
+      - backend
+    networks:
+      - my-network
+  
+networks:
+  my-network:
+    driver: bridge
+
+  # prod:
+  #   container_name: produccion
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.prod
+  #   #volumes:
+  #    # - ./frontend/:/usr/src/app/
+  #   ports:
+  #     - 5000:5000
+  #   expose:
+  #     - 5000
+  #   command: npm run pm2-start
