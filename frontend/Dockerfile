@@ -15,7 +15,8 @@ RUN npm install
 # copy project
 COPY . .
 
-#EXPOSE 5000
+EXPOSE 5000
+ENV HOST=0.0.0.0
 
 # run container
 # CMD [ "npm", "run", "dev" ]
