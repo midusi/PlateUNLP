@@ -18,6 +18,8 @@ RUN apt-get install -y libglib2.0-0
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app/requirements.txt
 RUN pip install -r requirements.txt
+RUN pip install --upgrade flask werkzeug
+RUN pip install --upgrade Flask-WTF
 
 # copy project
 COPY . /usr/src/app/
