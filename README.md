@@ -107,7 +107,7 @@ Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráf
 # Referencia
 
 Si quieres citar este repositorio por favor usa:
-'''
+```
 @article{example_article,
     title        = {Software inteligente para la digitalizaci{\'o}n de placas espectrosc{\'o}picas},
     author       = {Ronchetti, Franco and Quiroga, Facundo Manuel and Pereyra, Nehu{\'e}n and Miranda, Joaqu{\'\i}n and Ponte, Santiago and Aidelman, Yael Judith and Gamen, Roberto Claudio and Lanzarini, Laura Cristina},
@@ -118,7 +118,7 @@ Si quieres citar este repositorio por favor usa:
     number       = 1,
     pages        = {26--35},
 }
-'''
+```
 
 
 
