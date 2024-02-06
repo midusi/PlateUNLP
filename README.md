@@ -4,7 +4,7 @@
 
 ### Requerimientos
 
-- Tener instalado Docker
+- Docker
 
 ### Preparacion
 
@@ -32,14 +32,14 @@ Tambien puede acceder a la API expuesta por el backend desde `localhost:20500`
 ## Ejecucion sin docker
 
 ### Requerimientos
-
-- (Backend) Python (v3.8)
+#### Backend
+- Python (v3.8)
+#### Frontend
 - (Frontend) Node js (v12.22.7)
 - (Frontend) [Visual Studio BuildTools](https://visualstudio.microsoft.com/es/downloads/)
 
 ### Instalación de dependencias
 #### Backend
-
 Para instalar las dependencias del backend pocisionarse en la carpeta `/backend`, activar el entorno virtual en caso de que se emplee y ejecutar:
 
 ```bash
