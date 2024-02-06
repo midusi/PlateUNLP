@@ -40,7 +40,7 @@ Se debe tener instalado Node js y Python en el sistema con sus respectivos gesto
 
 ### Instalación de dependencias
 
-Para instalar las dependencias del backend es necesario posicionarse en la carpeta `/backend` y activar el entorno virtual con el siguiente comando en linux:
+Para instalar las dependencias del backend es necesario activar el entorno virtual en caso de que se emplee, con el siguiente comando en Linux:
 
 ```bash
 source env/bin/activate
@@ -52,7 +52,7 @@ En el caso de Windows:
 env\Scripts\activate.bat
 ```
 
-Por último se instalan las dependencias:
+E instalar las dependencias:
 
 ```bash
 pip install -r requirements.txt
