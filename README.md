@@ -39,25 +39,14 @@ Se debe tener instalado Node js y Python en el sistema con sus respectivos gesto
 - Python (v3.8) con pip 20.0.2.
 
 ### Instalación de dependencias
+## Backend
 
-Para instalar las dependencias del backend es necesario activar el entorno virtual en caso de que se emplee, con el siguiente comando en Linux:
-
-```bash
-source env/bin/activate
-```
-
-En el caso de Windows:
-
-```bash
-env\Scripts\activate.bat
-```
-
-E instalar las dependencias:
+Para instalar las dependencias del backend pocisionarse en la carpeta que le corresponde, activar el entorno virtual en caso de que se emplee y ejecutar:
 
 ```bash
 pip install -r requirements.txt
 ```
-
+## Frontend
 Para instalar las dependencias del frontend es necesario posicionarse en la carpeta `/frontend` y ejecutar:
 
 ```bash
