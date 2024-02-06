@@ -31,29 +31,26 @@ Tambien puede acceder a la API expuesta por el backend desde `localhost:20500`
 
 ## Ejecucion sin docker
 
-### Software recomendado
+### Requerimientos
 
-Se debe tener instalado Node js y Python en el sistema con sus respectivos gestores de paquetes. Las versiones recomendadas son:
-
-- Node js (v12.22.7) con npm 6.14.15.
-- Python (v3.8) con pip 20.0.2.
+- (Backend) Python (v3.8)
+- (Frontend) Node js (v12.22.7)
+- (Frontend) [Visual Studio BuildTools](https://visualstudio.microsoft.com/es/downloads/)
 
 ### Instalación de dependencias
-## Backend
+#### Backend
 
-Para instalar las dependencias del backend pocisionarse en la carpeta que le corresponde, activar el entorno virtual en caso de que se emplee y ejecutar:
+Para instalar las dependencias del backend pocisionarse en la carpeta `/backend`, activar el entorno virtual en caso de que se emplee y ejecutar:
 
 ```bash
 pip install -r requirements.txt
 ```
-## Frontend
+#### Frontend
 Para instalar las dependencias del frontend es necesario posicionarse en la carpeta `/frontend` y ejecutar:
 
 ```bash
 npm install
 ```
-
-Tambien instalar es necesario instalar las BuildTools de VS desde `https://visualstudio.microsoft.com/es/downloads/`
 
 ### Patchear la clase Upsample de PyTorch
 
