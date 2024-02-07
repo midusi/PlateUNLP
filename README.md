@@ -71,7 +71,7 @@ Crear un archivo `db.json` en la carpeta `backend/app/static/config`, y configur
 En la carpeta `/backend` una vez activado el entorno virtual, ejecutar:
 
 ```bash
-python3 run.py
+python run.py
 ```
 
 En la carpeta `/frontend`, ejecutar:
