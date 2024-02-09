@@ -33,7 +33,7 @@
         {#if list.length>0}
             <div><span>Seleccione para eliminar</span></div>
             {#each list as el}
-                <label><input class="mx-2" type="checkbox" bind:group={valuesCheck} value={el}/> {el}</label>
+                <label><input name="checkbox_generico" class="mx-2" type="checkbox" bind:group={valuesCheck} value={el}/> {el}</label>
             {/each}
             {#if valuesCheck.length > 0}
                 <button type="button" class="btn-sm btn btn-outline-danger" on:click={deleteValues}>
@@ -44,7 +44,7 @@
         <div class="row">
             <div class="col">
                 <span>Seleccionar valor por defecto</span>
-                <select bind:value={defaultValue} on:change={handleDefault(defaultValue,paramNameDef)} class="browser-default custom-select">
+                <select name="Default value selector" bind:value={defaultValue} on:change={handleDefault(defaultValue,paramNameDef)} class="browser-default custom-select">
                     {#each list as el}
                         <option value={el}> {el} </option>
                     {/each}
@@ -55,6 +55,7 @@
                 <span>Agregar valor</span>
                 <form on:submit|preventDefault={AddValue}>
                     <input
+                    name="input_generico"
                     class="form-control"
                     bind:value={newValue}
                 />

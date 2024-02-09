@@ -43,6 +43,7 @@
   {#if $metadataStore.fields[name].options === undefined}
     {#if $metadataStore.fields[name].remote && $metadataStore.spectraData[index] !== undefined}
       <input
+        name="input_generico"
         class="form-control"
         use:setType
         style={`background-color: ${$metadataStore.spectraData[index]["loaded"].includes($metadataStore.fields[name].label) ? "lavender" : "white"};`}
@@ -52,6 +53,7 @@
       />
     {:else}
       <input
+        name="input_generico"
         class="form-control"
         use:setType
         bind:value={value}
@@ -61,6 +63,7 @@
     {/if}
   {:else if $metadataStore.fields[name].label === "OBSERVAT"}
   <select
+      id="Observat selector"
       bind:value={value}
       class="browser-default custom-select"
       aria-label="Select Obsevat"
@@ -73,6 +76,7 @@
     </select>
   {:else}
     <input
+      name="input_generico"
       list={`${name}Options`}
       class="form-control"
       use:setType

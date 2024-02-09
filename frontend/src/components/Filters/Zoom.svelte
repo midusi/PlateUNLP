@@ -11,6 +11,8 @@
 <div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 40px; width: 300px;">
     <span>Zoom</span>
     <input
+        id="barra_de_control_de_zoom"
+        name="barra_de_control_de_zoom"
         type="range"
         min="0.1"
         max="1"

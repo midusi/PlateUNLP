@@ -12,6 +12,8 @@
 <div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 40px; width: 300px;">
     <span>Contraste</span>
     <input
+        id="barra_de_control_de_contraste"
+        name="barra_de_control_de_contraste"
         type="range"
         min="0"
         max="1"

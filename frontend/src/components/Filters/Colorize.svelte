@@ -38,10 +38,10 @@
 <div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 40px; width: 150px;">
     <span>Color</span>
     <div class="linea">
-        <button style="background:{original};" on:click={set_original}/>
-        <button style="background:{cian};" on:click={set_cian}/>
-        <button style="background:{yellow};" on:click={set_yellow}/>
-        <button style="background:{green};" on:click={set_green}/>
+        <button id="original_color_button" style="background:{original};" on:click={set_original}/>
+        <button id="cian_color_button" style="background:{cian};" on:click={set_cian}/>
+        <button id="yellow_color_button" style="background:{yellow};" on:click={set_yellow}/>
+        <button id="green_color_button" style="background:{green};" on:click={set_green}/>
     </div>
 </div>
 

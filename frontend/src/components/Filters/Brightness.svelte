@@ -12,6 +12,8 @@
 <div class="d-xl-flex flex-column justify-content-xl-start" style="margin-left: 40px; width: 300px;">
     <span>Brillo</span>
     <input
+        id="barra_de_control_de_brillo"
+        name="barra_de_control_de_brillo"
         type="range"
         min="0"
         max="1"
