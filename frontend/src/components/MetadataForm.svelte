@@ -1,6 +1,5 @@
 <script>
     import Field from "./Field.svelte";
-    import { metadataStore } from "../store/metadata";
     import {getImageTypDef, getObserverDef} from "../helpers/metadataUtilities" 
     export let metadata, spectraData, index;
     

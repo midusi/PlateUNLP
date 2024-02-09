@@ -470,4 +470,5 @@ dist
 
 /backend/app/static/cache
 /frontend/node_modules
+/test_db
 

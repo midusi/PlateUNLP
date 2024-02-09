@@ -272,19 +272,18 @@
     }
   }
 
-  function getRequiredMetadata(fields,global) {
-    if(global){
-      return Object.keys(fields).filter((label) => {
-        if (fields[label].required && fields[label].global) 
-          return label;
-      })
-    }
-    else{
-      return Object.keys(fields).filter((label) => {
-        if (fields[label].required && !fields[label].global) 
-          return label;
-      })
-    }
+  function getRequiredMetadata(fields, global) {
+    return Object.keys(fields).filter((label) => {
+      if (fields[label].required && fields[label].global == global) 
+        return label;
+    })
+  }
+
+  function getRequiredPreFetchEspectreMetadata(fields) {
+    return Object.keys(fields).filter((label) => {
+      if (fields[label].required && fields[label].pre_fetch && !fields[label].global) 
+        return label;
+    })
   }
 
   function getPreFetchEspectreMetadata(fields) {
@@ -302,19 +301,11 @@
   }
 
 
-  function getOptionalMetadata(fields,global){
-    if(global){
-      return Object.keys(fields).filter((label) => {
-        if (!fields[label].required && fields[label].global) 
-          return label;
-      })
-    }
-    else{
-      return Object.keys(fields).filter((label) => {
-        if (!fields[label].required && !fields[label].global && !fields[label].pre_fetch) 
-          return label;
-      })
-    }
+  function getRemoteSpectreMetadata(fields){
+    return Object.keys(fields).filter((label) => {
+      if (fields[label].remote && !fields[label].global) 
+        return label;
+    })
   }
 
   function validateForm() {
@@ -328,8 +319,8 @@
           }
         });
        
-        // Si o si se tiene que tener el main ID, por lo que es obligatorio 
-        // relizar la busqueda de metadatos de cada espectro
+        // Si o si se tiene que tener el main ID, si no se tiene entonces no se 
+        // puede permitir realizar la exportación de la placa
         if (spectro["MAIN-ID"] === "") {
           invalidForm = true;
         }
@@ -363,18 +354,31 @@
 
   function validateSpectrum(spectrumIndex){  
       let invalidSpectrum = false;
+      let invalidforMetadataSearch = false;
+
+      // Recorrer todos los metadotos oblicatorios no globales (que no son de la placa)
       getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
         if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
           invalidSpectrum = true;
         }
       });
 
-      if(/^Nuevo#/.test($metadataStore.spectraData[spectrumIndex]["OBJECT"]))
-        invalidSpectrum = true
+      // Recorrer todos los metadotos oblicatorios remotos (que son metadatos)
+      getRequiredPreFetchEspectreMetadata($metadataStore.fields).forEach((metadata) => {
+        if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
+          invalidforMetadataSearch = true;
+        }
+      });
 
-      // Es necesario separar la condicion de habilitacion del boton de exportarFITS 
-      // de la del boton de BuscarMetadatos
-      validatedSpectrumsForMetadataSearch[spectrumIndex] = !invalidSpectrum
+      if(/^Nuevo#/.test($metadataStore.spectraData[spectrumIndex]["OBJECT"]))
+      {
+        invalidSpectrum = true
+        invalidforMetadataSearch = true;
+      }
+
+      // Es suficiente con que los metadatos requeridos, !global (de cada espectro) y pre_fetch 
+      // sean validos para realizar la buqueda de metadatos
+      validatedSpectrumsForMetadataSearch[spectrumIndex] = !invalidforMetadataSearch
 
       // Si o si se tiene que tener el main ID, por lo que es obligatorio 
       // relizar la busqueda de metadatos de cada espectro
@@ -597,7 +601,7 @@
                     <div>
                       <MetadataForm
                         spectraData={item}
-                        metadata={getOptionalMetadata($metadataStore.fields,false)}
+                        metadata={getRemoteSpectreMetadata($metadataStore.fields)}
                         index={index}
                       />
                     </div>

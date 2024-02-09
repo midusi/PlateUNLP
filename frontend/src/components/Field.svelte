@@ -33,6 +33,7 @@
 <div class="mt-2">
   <span>
     {$metadataStore.fields[name].label}
+    <!-- Dibuja un asterisco rojo si el campo es obligatorio-->
     {#if $metadataStore.fields[name].required}
       <span style="color:red;">
         *

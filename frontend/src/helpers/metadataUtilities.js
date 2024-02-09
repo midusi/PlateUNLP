@@ -222,7 +222,7 @@ function getMetadataFields() {
       label: 'MAIN-ID',
       type: 'text',
       info: 'Simbad main ID object name',
-      required: false,
+      required: true,
       remote: true,
       global: false
     },
