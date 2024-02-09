@@ -35,7 +35,7 @@ Tambien puede acceder a la API expuesta por el backend desde `localhost:20500`
 #### Backend
 - Python (v3.8)
 #### Frontend
-- Node js (v12.22.7)
+- [Node js](https://nodejs.org/en/download) (v12.22.7)
 - [Visual Studio BuildTools](https://visualstudio.microsoft.com/es/downloads/)
 
 ### Instalación de dependencias
