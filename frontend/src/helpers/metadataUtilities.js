@@ -332,14 +332,15 @@ function getMetadataFields() {
       remote: true,
       global: false
     },
-    // End Remote Metadata
     exptime: {
       label: 'EXPTIME',
       type: 'text',
       info: 'Integration time in seconds',
       required: false,
+      remote: true,
       global: false
     },
+    // End Remote Metadata
     plateN: {
       label: 'PLATE-N',
       type: 'text',
