@@ -92,21 +92,6 @@ Se dispone de los siguientes scripts: `pm2-start`, `pm2-stop`, `pm2-restart`,`pm
 
 Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráfica del software.
 
-## Referencia
-
-Si quieres citar este repositorio por favor usa:
-```
-@article{example_article,
-    title        = {Software inteligente para la digitalizaci{\'o}n de placas espectrosc{\'o}picas},
-    author       = {Ronchetti, Franco and Quiroga, Facundo Manuel and Pereyra, Nehu{\'e}n and Miranda, Joaqu{\'\i}n and Ponte, Santiago and Aidelman, Yael Judith and Gamen, Roberto Claudio and Lanzarini, Laura Cristina},
-    year         = 2023,
-    month        = {March},
-    journal      = {Libro de actas - XXVIII Congreso Argentino de Ciencias de la Computación - CACIC 2022},
-    volume       = 327,
-    number       = 1,
-    pages        = {26--35},
-}
-```
 
 ## Links de interes
 - [proyecto de Recuperación del Trabajo Observacional Historico (ReTrOH)](https://retroh.fcaglp.unlp.edu.ar/)
