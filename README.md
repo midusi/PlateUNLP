@@ -1,4 +1,4 @@
-# Spectrogram
+# PlateUNLP
 
 ## Ejecucion en Docker
 
