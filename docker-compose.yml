@@ -21,8 +21,9 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
-    # volumes:
-    #   - ./frontend/:/usr/src/app/
+    volumes:
+      - ./frontend:/usr/src/app/
+      - /usr/src/app/node_modules
     ports:
       - 5000:5000
     command: npm run dev
