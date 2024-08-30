@@ -1,0 +1,1 @@
+Sabemos que las lamparas contienen *Fe*, sospechamos que tambien podrian contener otros materiales.
