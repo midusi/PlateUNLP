@@ -2,6 +2,7 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import InputCard from "./components/InputCard";
+import MaterialReferenceSpectrum from "./components/MaterialReferenceSpectrum";
 
 export default function App() {
   const [count, setCount] = useState(0);
@@ -9,6 +10,7 @@ export default function App() {
   return (
     <main className="max-w-4xl mx-auto">
       <InputCard/>
+      <MaterialReferenceSpectrum/>
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
