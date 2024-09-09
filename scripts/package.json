@@ -1,0 +1,11 @@
+{
+  "name": "@alineado/scripts",
+  "type": "module",
+  "scripts": {
+    "transform-db": "node transform-db.js",
+    "generate": "pnpm transform-db"
+  },
+  "dependencies": {
+    "csv": "^6.3.10"
+  }
+}
