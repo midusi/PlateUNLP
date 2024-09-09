@@ -1,0 +1,15 @@
+{
+  "name": "alineado",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "lint": "turbo check-types lint",
+    "build": "turbo build",
+    "postinstall": "pnpm run -C scripts generate"
+  },
+  "packageManager": "pnpm@9.6.0",
+  "devDependencies": {
+    "turbo": "^2.1.1"
+  }
+}
