@@ -2,12 +2,12 @@ import { useRef } from "react";
 import { 
   ComposedChart, Line, XAxis, YAxis, 
   CartesianGrid, Tooltip, Legend, Brush, 
-  ResponsiveContainer 
+  ResponsiveContainer, AreaChart, Area
 } from 'recharts';
 import fileData from '../../generated/spectrums.json';
 
 interface MaterialReferenceLampProps {
-  material: string; // Define el tipo de material como string
+  material: string;
 }
 
 interface BrushRange {
@@ -41,7 +41,6 @@ export default function MaterialReferenceLamp ({material}:MaterialReferenceLampP
   function handleBrushChange(newRange: BrushRange) {
     if (newRange.startIndex !== undefined && newRange.endIndex !== undefined) {
       rangeRef.current = [newRange.startIndex, newRange.endIndex]
-      console.log(rangeRef.current);
     } else {
       throw new Error("La variable newRange tiene valores sin definir. newRange="+newRange);
     }
@@ -52,31 +51,36 @@ export default function MaterialReferenceLamp ({material}:MaterialReferenceLampP
 
   /* </><div className="bg-yellow-50 px-8 py-4" style={{ width: '100%', height: 400 }}></div> */
   return (
-    <div className="a" style={{ width: '100%', height: 400 }}>
-      <ResponsiveContainer>
-        <ComposedChart
-          data={data}
-          margin={{ top: 20, right: 20, bottom: 20, left: 50 }}
+    <ResponsiveContainer height={500} width={'100%'}>
+      <ComposedChart
+        data={data}
+        margin={{ top: 80, right: 20, bottom: 20, left: 50 }}
+      >
+        <CartesianGrid />
+        <XAxis dataKey="x" domain={[xMin, xMax]} />
+        <YAxis dataKey="y" domain={[yMin, yMax]} />
+        <Tooltip content={<CustomTooltip />} offset={50}/>
+        <Legend />
+        <Area type="monotone" dataKey="y" dot={false} fill="#8884d8"/>
+        <Brush
+          dataKey="x"
+          startIndex={0}
+          endIndex={data.length - 1}
+          onChange={handleBrushChange}
+          height={60}
+          y={0}
         >
-          <CartesianGrid />
-          <XAxis dataKey="x" domain={[xMin, xMax]} />
-          <YAxis dataKey="y" domain={[yMin, yMax]} />
-          <Tooltip content={<CustomTooltip />} offset={50}/>
-          <Legend />
-          <Line type="monotone" dataKey="y" stroke="#ff7300" />
-          <Brush
-            dataKey="x"
-            startIndex={0}
-            endIndex={data.length - 1}
-            onChange={handleBrushChange}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
+          <AreaChart data={data}>
+            <YAxis hide domain={[yMin, yMax]} />
+            <Area type="monotone" dataKey="y" stroke="#8884d8" fill="#8884d8" />
+          </AreaChart>
+        </Brush>
+      </ComposedChart>
+    </ResponsiveContainer>
   );
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload}: any) {
   if (active && payload && payload.length) {
     const { x, material } = payload[0].payload;
     return (
