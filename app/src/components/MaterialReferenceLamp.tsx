@@ -57,11 +57,11 @@ export default function MaterialReferenceLamp ({material}:MaterialReferenceLampP
         margin={{ top: 80, right: 20, bottom: 20, left: 50 }}
       >
         <CartesianGrid />
-        <XAxis dataKey="x" domain={[xMin, xMax]} />
+        <XAxis dataKey="x" domain={[xMin, xMax]} tickFormatter={(x) => Math.round(x).toString()} />
         <YAxis dataKey="y" domain={[yMin, yMax]} />
         <Tooltip content={<CustomTooltip />} offset={50}/>
         <Legend />
-        <Area type="monotone" dataKey="y" dot={false} fill="#8884d8"/>
+        <Area type="monotone" dataKey="y" dot={false} stroke="#8884d8" fill="#8884d8"/>
         <Brush
           dataKey="x"
           startIndex={0}
