@@ -24,7 +24,7 @@ export default function InputCard(){
                                 text-white font-bold rounded border-none' 
                             onClick={() => console.log('Click')}
                             disabled={true}>
-                                AUTOMATED DETECTION
+                                AUTOMATED CALIBRATION
                         </button>
                     </div>
                 </div>
