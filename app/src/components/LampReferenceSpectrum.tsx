@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import fileData from '../../generated/spectrums.json';
 
-interface MaterialReferenceLampProps {
+interface LampReferenceSpectrumProps {
   material: string;
 }
 
@@ -15,7 +15,7 @@ interface BrushRange {
   endIndex?: number;
 }
 
-export default function MaterialReferenceLamp ({material}:MaterialReferenceLampProps) {
+export default function LampReferenceSpectrum ({material}:LampReferenceSpectrumProps) {
 
   function extractMaterialSpectralData(material:string) {
     const materialList = material.split('-')

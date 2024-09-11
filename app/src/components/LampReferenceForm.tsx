@@ -1,7 +1,7 @@
 import {useState} from "react"
 import FieldInput from "./FieldInput"
 import FieldSelect from "./FieldSelect"
-import MaterialReferenceLamp from "./MaterialReferenceLamp";
+import LampReferenceSpectrum from "./LampReferenceSpectrum";
 
 const options = ['He-Ne-Ar', 'Fe-Ne-Ar', 'Fe-Ne']
 
@@ -12,7 +12,7 @@ export default function InputCard(){
 
     return (
         <section className="my-8">
-            <h1 className="font-bold">Material Reference Lamp</h1>
+            <h1 className="font-bold">Lamp Reference Spectrum</h1>
             <div className="bg-yellow-50 px-8 py-4 mt-2 ">
 
                 <FieldSelect name='Material' value={material} options={options} onChange={setMaterial}/>
@@ -28,7 +28,7 @@ export default function InputCard(){
                         </button>
                     </div>
                 </div>
-                <MaterialReferenceLamp material={material}/>
+                <LampReferenceSpectrum material={material}/>
 
             </div>                
         </section>
