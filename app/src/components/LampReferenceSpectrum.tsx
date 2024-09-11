@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { 
-  ComposedChart, Line, XAxis, YAxis, 
+  ComposedChart, XAxis, YAxis, 
   CartesianGrid, Tooltip, Legend, Brush, 
   ResponsiveContainer, AreaChart, Area
 } from 'recharts';
