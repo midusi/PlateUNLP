@@ -1,12 +1,11 @@
 interface FieldProps {
     name: string;
     value: string;
+    options: string[]
     onChange: (value: string) => void
 }
 
-const options = ['He-Ne-Ar', 'Fe-Ne-Ar', 'Fe-Ne']
-
-export default function FieldSelect ({name, value, onChange}:FieldProps) {
+export default function FieldSelect ({name, value, options, onChange}:FieldProps) {
 
     return <div className="mx-2">
             <label> {name} </label>
