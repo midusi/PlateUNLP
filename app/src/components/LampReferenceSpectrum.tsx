@@ -71,6 +71,7 @@ export default function LampReferenceSpectrum ({material}:LampReferenceSpectrumP
           onChange={handleBrushChange}
           height={60}
           y={0}
+          tickFormatter={(x) => Math.round(x).toString()}
         >
           <AreaChart data={data}>
             <YAxis hide domain={[yMin, yMax]} />
