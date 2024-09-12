@@ -56,9 +56,11 @@ export default function LampReferenceSpectrum ({material}:LampReferenceSpectrumP
         data={data}
         margin={{ top: 80, right: 20, bottom: 20, left: 50 }}
       >
-        <CartesianGrid />
-        <XAxis dataKey="x" domain={[xMin, xMax]} tickFormatter={(x) => Math.round(x).toString()} />
-        <YAxis dataKey="y" domain={[yMin, yMax]} />
+        <CartesianGrid /> 
+        <XAxis dataKey="x" label={{ value: "Wavelength (Å)", position: 'bottom', offset: 0 }} 
+        domain={[xMin, xMax]} tickFormatter={(x) => Math.round(x).toString()} tickMargin={2}/>
+        <YAxis dataKey="y" label={{ value: 'Intensity', angle: -90, position: 'insideLeft' }} 
+        domain={[yMin, yMax]} />
         <Tooltip content={<CustomTooltip />} offset={50}/>
         <Legend />
         <Area type="monotone" dataKey="y" dot={false} stroke="#8884d8" fill="#8884d8"/>
