@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { 
   ComposedChart, XAxis, YAxis, 
   CartesianGrid, Tooltip, Legend, Brush, 
-  ResponsiveContainer, AreaChart, Area
+  ResponsiveContainer, AreaChart, Area, Bar, Line
 } from 'recharts';
 import fileData from '../../generated/spectrums.json';
 
@@ -58,13 +58,15 @@ export default function LampReferenceSpectrum ({material}:LampReferenceSpectrumP
       >
         <CartesianGrid /> 
         <XAxis dataKey="x" label={{ value: "Wavelength (Å)", position: 'bottom', offset: 0 }} 
-        domain={[xMin, xMax]} tickFormatter={(x) => Math.round(x).toString()} tickMargin={2}/>
+        domain={[xMin, xMax]} tickFormatter={(x) => Math.round(x).toString()} tickMargin={2}
+        type='number' allowDataOverflow={true}/>
         <YAxis dataKey="y" label={{ value: 'Intensity', angle: -90, position: 'insideLeft' }} 
         domain={[yMin, yMax]} />
         <Tooltip content={<CustomTooltip />} offset={50}/>
         <Legend />
         <Area type="monotone" dataKey="y" dot={false} stroke="#8884d8" fill="#8884d8"/>
         <Brush
+          data={data}
           dataKey="x"
           startIndex={0}
           endIndex={data.length - 1}
@@ -74,6 +76,8 @@ export default function LampReferenceSpectrum ({material}:LampReferenceSpectrumP
           tickFormatter={(x) => Math.round(x).toString()}
         >
           <AreaChart data={data}>
+            <XAxis hide dataKey="x" domain={[xMin, xMax]}
+            type='number' allowDataOverflow={true}/>
             <YAxis hide domain={[yMin, yMax]} />
             <Area type="monotone" dataKey="y" stroke="#8884d8" fill="#8884d8" />
           </AreaChart>
