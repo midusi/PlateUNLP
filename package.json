@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "lint": "turbo check-types lint",
     "build": "turbo build",
+    "start": "pnpm run -C app preview",
     "postinstall": "pnpm run -C scripts generate"
   },
   "packageManager": "pnpm@9.6.0",
