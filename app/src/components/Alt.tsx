@@ -1,4 +1,5 @@
 import Plot from "react-plotly.js";
+import { useRef, useMemo, useState } from "react";
 import fileData from '../../generated/spectrums.json';
 
 interface LampReferenceSpectrumProps {
@@ -17,7 +18,18 @@ export default function App({material}:LampReferenceSpectrumProps) {
     return data;
   }
 
-  const data = extractMaterialSpectralData(material);
+  const {data, xMin, xMax, yMin, yMax} = useMemo(() => {
+    const data = extractMaterialSpectralData(material)
+    return {
+      data,
+      xMin: Math.min(...data.map(d => d.x)),
+      xMax: Math.max(...data.map(d => d.x)),
+      yMin: Math.min(...data.map(d => d.y)),
+      yMax: Math.max(...data.map(d => d.y)),
+    }
+  }, [material])
+
+  const [range, setRange] = useState({start: 0, end: data.length - 1})
 
   // Separar los arrays de x e y
   const xValues = data.map((d:{x: number; y: number;}) => d.x);
@@ -36,9 +48,14 @@ export default function App({material}:LampReferenceSpectrumProps) {
       layout={{
         width: 800,
         height: 400,
-        title: "Lamp Reference Spectrum",
         xaxis: {
-          rangeslider: { visible: true }, // Mostrar un selector de rango debajo del gráfico
+          title: { text: 'Wavelength (Å)' }, // Etiqueta del eje X
+          rangeslider: {
+            visible: true
+          },
+        },
+        yaxis: {
+          title: { text: 'Intensity' },      // Etiqueta del eje Y
         },
         paper_bgcolor: "#fffbeb",   // Color de fondo total del gráfico
         plot_bgcolor: "#ffffff",    // Color de fondo donde se dibuja el gráfico

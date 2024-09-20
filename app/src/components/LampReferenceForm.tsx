@@ -2,7 +2,7 @@ import {useState} from "react"
 import FieldInput from "./FieldInput"
 import FieldSelect from "./FieldSelect"
 import LampReferenceSpectrum from "./LampReferenceSpectrum";
-import Alt from "./Alt";
+import Alt2 from "./Alt2";
 
 const options = ['He-Ne-Ar', 'Fe-Ne-Ar', 'Fe-Ne']
 
@@ -29,8 +29,7 @@ export default function InputCard(){
                         </button>
                     </div>
                 </div>
-                <LampReferenceSpectrum material={material}/>
-                <Alt material={material}/>
+                <Alt2 material={material}/>
 
             </div>                
         </section>
