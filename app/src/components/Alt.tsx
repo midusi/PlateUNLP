@@ -25,14 +25,14 @@ export default function App({material}:LampReferenceSpectrumProps) {
 
   return (
     <Plot
-    data={[{
-        x: xValues,
-        y: yValues,
-        type: "scatter",
-        mode: "lines",          // Mostrar solo líneas, sin marcadores "lines+markers"
-        fill: "tozeroy",        // Rellenar el área bajo la curva
-        marker: { color: "red" },
-      }]}
+      data={[{
+          x: xValues,
+          y: yValues,
+          type: "scatter",
+          mode: "lines",          // Mostrar solo líneas, sin marcadores "lines+markers"
+          fill: "tozeroy",        // Rellenar el área bajo la curva
+          marker: { color: "red" },
+        }]}
       layout={{
         width: "100%",
         height: 400,
@@ -40,6 +40,8 @@ export default function App({material}:LampReferenceSpectrumProps) {
         xaxis: {
           rangeslider: { visible: true }, // Mostrar un selector de rango debajo del gráfico
         },
+        paper_bgcolor: "#fffbeb",   // Color de fondo total del gráfico
+        plot_bgcolor: "#ffffff",    // Color de fondo donde se dibuja el gráfico
       }}
       useResizeHandler={true}    // Habilitar el redimensionamiento
       style={{ width: "100%" }}  // Hacer que el gráfico sea tan ancho como su contenedor
