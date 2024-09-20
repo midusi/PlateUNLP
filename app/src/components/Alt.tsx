@@ -34,7 +34,7 @@ export default function App({material}:LampReferenceSpectrumProps) {
           marker: { color: "red" },
         }]}
       layout={{
-        width: "100%",
+        width: 800,
         height: 400,
         title: "Lamp Reference Spectrum",
         xaxis: {
