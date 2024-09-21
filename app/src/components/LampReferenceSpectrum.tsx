@@ -1,10 +1,9 @@
-import { useRef, useMemo, useState } from "react";
+import { useMemo, memo, useState } from "react";
 import { 
-  ComposedChart, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Legend, Brush, 
-  ResponsiveContainer, AreaChart, Area, Bar, Line
+  ComposedChart, XAxis, YAxis, Tooltip, Brush, AreaChart, Area
 } from 'recharts';
 import fileData from '../../generated/spectrums.json';
+import 'rc-slider/assets/index.css';
 
 interface LampReferenceSpectrumProps {
   material: string;
@@ -13,6 +12,12 @@ interface LampReferenceSpectrumProps {
 interface BrushRange {
   startIndex?: number;
   endIndex?: number;
+}
+
+interface Data {
+  x: number;
+  y: number;
+  material:string;
 }
 
 function extractMaterialSpectralData(material:string) {
@@ -29,6 +34,146 @@ function extractMaterialSpectralData(material:string) {
   return data;
 }
 
+function fillDataWithLinearInterpolation(data:Data[]) {
+  const filledData = [];
+  const dist = 1// Distancia de rellenado
+
+  for (let i = 0; i < data.length - 1; i++) {
+    const currentPoint = data[i];
+    const nextPoint = data[i + 1];
+
+    // Añadir el punto actual al arreglo
+    filledData.push(currentPoint);
+
+    // Calcular la distancia entre puntos en x
+    const xDiff = nextPoint.x - currentPoint.x;
+
+    // Si la distancia es mayor que 1, rellenar puntos
+    if (xDiff > dist) {
+      for (let x = currentPoint.x + dist; x < nextPoint.x; x++) {
+        // Interpolación lineal para el valor de y
+        const y = currentPoint.y + (x - currentPoint.x) * (nextPoint.y - currentPoint.y) / xDiff;
+        
+        filledData.push({ x, y, material: "" });
+      }
+    }
+  }
+
+  // Añadir el último punto
+  filledData.push(data[data.length - 1]);
+
+  return filledData;
+}
+
+function binarySearch(arr:Data[], target:number, key:'x'|'y'){
+  let low = 0;
+  let high = arr.length - 1;
+  
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (arr[mid][key] < target) {
+      low = mid + 1;
+    } else if (arr[mid][key] > target) {
+      high = mid - 1;
+    } else {
+      return mid; // Si el valor exacto se encuentra
+    }
+  }
+  return low; // Si no se encuentra, devuelve el índice más cercano
+}
+
+interface LampReferenceBrushProps {
+  data: Data[],
+  setRange: React.Dispatch<React.SetStateAction<{ start: number; end: number }>>,
+  xMin: number,
+  xMax: number,
+  yMin: number,
+  yMax: number
+}
+
+function LampReferenceBrush ({data, setRange, 
+  xMin, xMax, yMin, yMax}:LampReferenceBrushProps) {
+
+  function handleRangeChange (newRange: BrushRange) {
+    if (newRange.startIndex !== undefined && newRange.endIndex !== undefined) {
+      // console.log(newRange)
+      setRange({
+        start: filledData[newRange.startIndex].x, 
+        end: filledData[newRange.endIndex].x
+      })
+    } else {
+      throw new Error("La variable newRange tiene valores sin definir. newRange="+newRange);
+    }
+  };
+  
+  const filledData = useMemo(() => {
+    return fillDataWithLinearInterpolation(data)
+  }, [data])
+
+  return <ComposedChart width={850} height={100} data={filledData}>
+      <XAxis hide dataKey="x"  /> {/* Ocultamos el eje X */}
+      <Brush
+        data={filledData}
+        dataKey="x"
+        onChange={handleRangeChange}
+        height={60}
+        y={0}
+        tickFormatter={(x) => Math.round(x).toString()}
+        gap={10}
+      >
+        <AreaChart data={data}>
+          <XAxis hide dataKey="x" domain={[xMin, xMax]}
+          type='number' allowDataOverflow={true}/>
+          <YAxis hide domain={[yMin, yMax]} />
+          <Tooltip/>
+          <Area type="monotone" dataKey="y" stroke="#8884d8" fill="#8884d8" />
+        </AreaChart>
+      </Brush>
+    </ComposedChart>
+}
+
+// Memorizar componente para evitar que se re-renderize a cada cambio de range
+const LampReferenceBrushMemo = memo(LampReferenceBrush);
+
+interface LampReferenceGraphProps {
+  data: Data[],
+  range: {start:number; end:number},
+  yMin: number,
+  yMax: number
+}
+
+function LampReferenceGraph ({data, range, yMin, yMax}:LampReferenceGraphProps) {
+  
+  const startIndex = binarySearch(data, range.start, 'x');
+  const endIndex = binarySearch(data, range.end, 'x');
+  const filteredData = data.slice(startIndex, endIndex + 1);
+
+  return <AreaChart height={500} width={850} data={filteredData}>
+    <defs>
+        <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+        </linearGradient>
+    </defs>
+    <XAxis dataKey="x" label={{ value: "Wavelength (Å)", position: 'bottom', offset: 0 }}
+        domain={[range.start, range.end]} 
+        tickFormatter={(x) => Math.round(x).toString()} tickMargin={2}
+        type='number' allowDataOverflow={true} />
+    <YAxis dataKey="y" label={{ value: 'Intensity', angle: -90, position: 'insideLeft' }}
+        domain={[yMin, yMax]} />
+    <Tooltip content={<CustomTooltip />} offset={50} />
+    <Area 
+      type="monotone" dataKey="y" dot={false} 
+      stroke="#8884d8" fill="#8884d8" isAnimationActive={false}
+    />
+  </AreaChart>
+}
+
+
 export default function LampReferenceSpectrum ({material}:LampReferenceSpectrumProps) {
   const {data, xMin, xMax, yMin, yMax} = useMemo(() => {
     const data = extractMaterialSpectralData(material)
@@ -41,57 +186,25 @@ export default function LampReferenceSpectrum ({material}:LampReferenceSpectrumP
     }
   }, [material])
 
-  const [range, setRange] = useState({start: 0, end: data.length - 1})
+  const [range, setRange] = useState({start: data[0].x, end: data[data.length - 1].x})
 
-  // const rangeRef = useRef([data[0].x, data[data.length - 1].x]);
-
-  // Filtrar los datos según el rango seleccionado
-  //const filteredData = data.filter(d => d.x >= dataRange[0] && d.x <= dataRange[1]);
-
-  /* </><div className="bg-yellow-50 px-8 py-4" style={{ width: '100%', height: 400 }}></div> */
   return (
-    <ResponsiveContainer height={500} width={'100%'}>
-      <ComposedChart
+    <>
+      <LampReferenceBrushMemo
         data={data}
-        margin={{ top: 80, right: 20, bottom: 20, left: 50 }}
-      >
-        <CartesianGrid /> 
-        <XAxis dataKey="x" label={{ value: "Wavelength (Å)", position: 'bottom', offset: 0 }} 
-        domain={[data[range.start].x, data[range.end].x]} tickFormatter={(x) => Math.round(x).toString()} tickMargin={2}
-        type='number' allowDataOverflow={true}/>
-        <YAxis dataKey="y" label={{ value: 'Intensity', angle: -90, position: 'insideLeft' }} 
-        domain={[yMin, yMax]} />
-        <Tooltip content={<CustomTooltip />} offset={50}/>
-        <Legend />
-        <Area type="monotone" dataKey="y" dot={false} stroke="#8884d8" fill="#8884d8"/>
-        <Brush
-          data={data}
-          dataKey="x"
-          startIndex={range.start}
-          endIndex={range.end}
-          onChange={(newRange) => {
-            if (newRange.startIndex !== undefined && newRange.endIndex !== undefined) {
-              // rangeRef.current = [newRange.startIndex, newRange.endIndex]
-              setRange({start: newRange.startIndex, end: newRange.endIndex})
-            } else {
-              throw new Error("La variable newRange tiene valores sin definir. newRange="+newRange);
-            }
-          }}
-          
-          type="number"
-          height={60}
-          y={0}
-          tickFormatter={(x) => Math.round(x).toString()}
-        >
-          <AreaChart data={data}>
-            <XAxis hide dataKey="x" domain={[xMin, xMax]}
-            type='number' allowDataOverflow={true}/>
-            <YAxis hide domain={[yMin, yMax]} />
-            <Area type="monotone" dataKey="y" stroke="#8884d8" fill="#8884d8" />
-          </AreaChart>
-        </Brush>
-      </ComposedChart>
-    </ResponsiveContainer>
+        setRange={setRange}
+        xMax={xMax}
+        xMin={xMin}
+        yMax={yMax}
+        yMin={yMin}
+      />
+      <LampReferenceGraph
+        data={data}
+        range={range}
+        yMin={yMin}
+        yMax={yMax}
+      />
+    </>
   );
 }
 
