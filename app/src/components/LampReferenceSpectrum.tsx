@@ -3,7 +3,6 @@ import {
   ComposedChart, XAxis, YAxis, Tooltip, Brush, AreaChart, Area
 } from 'recharts';
 import fileData from '../../generated/spectrums.json';
-import 'rc-slider/assets/index.css';
 
 interface LampReferenceSpectrumProps {
   material: string;
