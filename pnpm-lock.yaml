@@ -14,6 +14,9 @@ importers:
 
   app:
     dependencies:
+      fitsjs:
+        specifier: 0.6.6
+        version: 0.6.6
       plotly.js:
         specifier: ^2.12.1
         version: 2.35.2(mapbox-gl@1.13.3)(webpack@5.94.0)
@@ -1401,6 +1404,9 @@ packages:
   find-up@5.0.0:
     resolution: {integrity: sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng==}
     engines: {node: '>=10'}
+
+  fitsjs@0.6.6:
+    resolution: {integrity: sha512-SVZ99tLah3zPDgdPkvupmd73JmxUcgZ4HsdTk/T+KkZ1lhGmV+c+zhOncWqB91e0dtYHG+0PN/4iy3aUToXdOw==}
 
   flat-cache@3.2.0:
     resolution: {integrity: sha512-CYcENa+FtcUKLmhhqyctpclsq7QF38pKjZHsGNiSQF5r4FtoKDWabFDl3hzaEQMvT1LHEysw5twgLvpYYb4vbw==}
@@ -4123,6 +4129,8 @@ snapshots:
     dependencies:
       locate-path: 6.0.0
       path-exists: 4.0.0
+
+  fitsjs@0.6.6: {}
 
   flat-cache@3.2.0:
     dependencies:

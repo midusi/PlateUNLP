@@ -15,7 +15,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-plotly.js": "^2.5.0",
-    "recharts": "^2.1.0"
+    "recharts": "^2.1.0",
+    "fitsjs": "0.6.6"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",

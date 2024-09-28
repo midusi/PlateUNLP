@@ -1,23 +1,29 @@
 import { useState } from "react";
 
+interface FitsViewerProps {
+    content: { header: any; data: any };
+}
 
-export default function FitsViewer ({}) {
-    const [selectedFile, setSelectedFile] = useState<File|null>(null);
+export default function FitsViewer ({content}: FitsViewerProps) {
 
-    const handleFileChange = (event:React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            setSelectedFile(event.target.files[0]); // Obtener el archivo seleccionado
-        }
-    };
-
-    console.log(selectedFile)
+    console.log(content)
 
     return (
-        <>
-            {!selectedFile 
-                ? <input type="file" id="fileInput" onChange={handleFileChange} />
-                : <p>Archivo elegido: {selectedFile.name}</p> 
-            }
-        </>
+        <div>
+            <h3>Encabezado FITS:</h3>
+            <pre>{JSON.stringify(content.header, null, 2)}</pre>
+            <h3>Datos:</h3>
+            <pre>{content.data ? "Datos cargados" : "No hay datos disponibles"}</pre>
+        </div>
       );
 }
+
+// const formatContent = (content: string | ArrayBuffer | null) => {
+//     if (content === null) return "No hay contenido disponible";
+//     if (typeof content === "string") return content; // Si ya es string, retornarlo directamente
+//     if (content instanceof ArrayBuffer) {
+//         const uint8Array = new Uint8Array(content);
+//         return uint8Array.join(', '); // Convertir a string (puedes cambiar esto según tu necesidad)
+//     }
+//     return "Contenido no soportado"; // Mensaje para otros tipos
+// };
