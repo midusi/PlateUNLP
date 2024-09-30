@@ -26,7 +26,7 @@ const nist = parse(nistRaw, { from: 2 })
   )
   .filter(point => point.intensity > 0)
 
-const generated = new URL("../app/generated/", import.meta.url)
+const generated = new URL("../app/src/generated/", import.meta.url)
 fs.mkdirSync(generated, { recursive: true })
 
 // LIBS

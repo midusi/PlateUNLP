@@ -9,5 +9,5 @@ export default antfu({
   formatters: true,
   typescript: true,
   react: true,
-  ignores: ["/generated"],
+  ignores: ["generated/"],
 })
