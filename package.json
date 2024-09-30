@@ -9,8 +9,8 @@
     "start": "pnpm run -C app preview",
     "postinstall": "pnpm run -C scripts generate"
   },
-  "packageManager": "pnpm@9.6.0",
+  "packageManager": "pnpm@9.11.0",
   "devDependencies": {
-    "turbo": "^2.1.1"
+    "turbo": "^2.1.2"
   }
 }
