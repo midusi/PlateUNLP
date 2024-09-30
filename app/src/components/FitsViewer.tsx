@@ -1,21 +1,18 @@
-import { useState } from "react";
-
 interface FitsViewerProps {
-    content: { header: any; data: any };
+  content: { header: any, data: any }
 }
 
-export default function FitsViewer ({content}: FitsViewerProps) {
+export default function FitsViewer({ content }: FitsViewerProps) {
+  console.log(content)
 
-    console.log(content)
-
-    return (
-        <div>
-            <h3>Encabezado FITS:</h3>
-            <pre>{JSON.stringify(content.header, null, 2)}</pre>
-            <h3>Datos:</h3>
-            <pre>{content.data ? "Datos cargados" : "No hay datos disponibles"}</pre>
-        </div>
-      );
+  return (
+    <div>
+      <h3>Encabezado FITS:</h3>
+      <pre>{JSON.stringify(content.header, null, 2)}</pre>
+      <h3>Datos:</h3>
+      <pre>{content.data ? "Datos cargados" : "No hay datos disponibles"}</pre>
+    </div>
+  )
 }
 
 // const formatContent = (content: string | ArrayBuffer | null) => {
