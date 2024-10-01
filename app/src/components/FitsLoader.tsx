@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import FitsViewer from "./FitsViewer";
 
 export default function FitsLoader({}) {
@@ -6,15 +6,28 @@ export default function FitsLoader({}) {
   const [fileContent, setFileContent] = useState<any | null>(null);
 
   console.log(fileContent);
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     if (event.target.files) {
       const file = event.target.files[0];
       setLoading(true);
 
+      // Crear un FileReader para leer el archivo como ArrayBuffer
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        if (e.target?.result) {
+          const fileBuffer = e.target.result as ArrayBuffer;
 
-      // // Almacenar los resultados en el estado
-      // setFileContent({ header, dataunit });
-      // setLoading(false);
+          // Usar la función readFITS para extraer headers y datos
+          const { headers, data } = readFITS(fileBuffer);
+
+          // Almacenar los resultados en el estado
+          setFileContent({ headers, data });
+          setLoading(false);
+        }
+      };
+
+      // Leer el archivo como ArrayBuffer
+      reader.readAsArrayBuffer(file);
 
     }
   }
@@ -33,18 +46,46 @@ export default function FitsLoader({}) {
   );
 }
 
-// function parseFits(buffer: ArrayBuffer): FitsHeader {
-//     // Usar la biblioteca fitsjs para leer el encabezado
-//     const fitsData = readFITS(buffer);
-//     const header: FitsHeader = {};
+// Función para leer un archivo FITS crudo y extraer headers y datos
+function readFITS(fileBuffer: ArrayBuffer) {
+  const headerSize = 2880;  // Cada bloque de headers tiene 2880 bytes (36 líneas de 80 caracteres)
+  let headers: string[] = [];
+  let offset = 0;
 
-//     // Iterar sobre los encabezados y almacenar en el objeto
-//     for (const key in fitsData.header) {
-//         if (fitsData.header.hasOwnProperty(key)) {
-//             const value = fitsData.header[key];
-//             header[key.toUpperCase()] = value; // Clave en mayúsculas
-//         }
-//     }
+  // Leer headers
+  while (true) {
+      // Leer bloques de 80 bytes
+      const block = fileBuffer.slice(offset, offset + headerSize);
+      const header = new TextDecoder().decode(block); // Decodifica en texto
+      
+      // Dividir el bloque en líneas de 80 caracteres
+      const lines = header.match(/.{1,80}/g);
+      
+      // Agregar cada línea al array de headers
+      if (lines) {
+        headers = headers.concat(lines);
+      }
+      
+      // Verificar si encontramos la palabra "END", que indica el final de los headers
+      if (header.includes('END')) {
+        break;
+      }
+      
+      // Mover el offset para leer el siguiente bloque
+      offset += headerSize;
+  }
 
-//     return header;
-// };
+  // Imprimir headers
+  console.log("Headers:");
+  headers.forEach((line) => console.log(line.trim()));
+
+  // Ahora los datos empiezan después de los headers
+  const dataStart = offset + headerSize;
+  const data = fileBuffer.slice(dataStart);
+
+  // Retornar headers y datos
+  return {
+      headers,
+      data
+  };
+}
