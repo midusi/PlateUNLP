@@ -1,54 +1,54 @@
-import type { SpectrumPoint } from "@/lib/spectral-data"
-import { useGlobalStore } from "@/hooks/use-global-store"
-import { useMeasure } from "@/hooks/use-measure"
-import { getMaterialSpectralData } from "@/lib/spectral-data"
-import { AxisBottom, AxisLeft } from "@visx/axis"
-import { curveLinear } from "@visx/curve"
-import { GridColumns, GridRows } from "@visx/grid"
-import { Group } from "@visx/group"
-import { PatternLines } from "@visx/pattern"
-import { scaleLinear } from "@visx/scale"
-import { LinePath } from "@visx/shape"
-import * as d3 from "@visx/vendor/d3-array"
-import { useId, useMemo } from "react"
+import type { SpectrumPoint } from "@/lib/spectral-data";
+import { useGlobalStore } from "@/hooks/use-global-store";
+import { useMeasure } from "@/hooks/use-measure";
+import { getMaterialSpectralData } from "@/lib/spectral-data";
+import { AxisBottom, AxisLeft } from "@visx/axis";
+import { curveLinear } from "@visx/curve";
+import { GridColumns, GridRows } from "@visx/grid";
+import { Group } from "@visx/group";
+import { PatternLines } from "@visx/pattern";
+import { scaleLinear } from "@visx/scale";
+import { LinePath } from "@visx/shape";
+import * as d3 from "@visx/vendor/d3-array";
+import { useId, useMemo } from "react";
 
 // data accessors
-const getX = (p: SpectrumPoint) => p?.wavelength ?? 0
-const getY = (p: SpectrumPoint) => p?.intensity ?? 0
+const getX = (p: SpectrumPoint) => p?.wavelength ?? 0;
+const getY = (p: SpectrumPoint) => p?.intensity ?? 0;
 
-const height = 150
-const margin = { top: 40, right: 30, bottom: 50, left: 55 }
+const height = 150;
+const margin = { top: 40, right: 30, bottom: 50, left: 55 };
 
 export function ReferenceLampRange() {
-  const patternId = useId()
-  const material = useGlobalStore(s => s.material)
-  const [rangeMin, setRangeMin] = useGlobalStore(s => [
+  const patternId = useId();
+  const material = useGlobalStore((s) => s.material);
+  const [rangeMin, setRangeMin] = useGlobalStore((s) => [
     s.rangeMin,
     s.setRangeMin,
-  ])
-  const [rangeMax, setRangeMax] = useGlobalStore(s => [
+  ]);
+  const [rangeMax, setRangeMax] = useGlobalStore((s) => [
     s.rangeMax,
     s.setRangeMax,
-  ])
+  ]);
 
   const { data, xScale, yScale } = useMemo(() => {
-    const data = getMaterialSpectralData(material)
+    const data = getMaterialSpectralData(material);
     return {
       data,
       xScale: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
       yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
-    }
-  }, [material])
+    };
+  }, [material]);
 
   // bounds
-  const [measureRef, measured] = useMeasure<HTMLDivElement>()
-  const width = measured.width ?? 0
-  const xMax = Math.max(width - margin.left - margin.right, 0)
-  const yMax = Math.max(height - margin.top - margin.bottom, 0)
+  const [measureRef, measured] = useMeasure<HTMLDivElement>();
+  const width = measured.width ?? 0;
+  const xMax = Math.max(width - margin.left - margin.right, 0);
+  const yMax = Math.max(height - margin.top - margin.bottom, 0);
 
   // update scale output ranges
-  xScale.range([0, xMax])
-  yScale.range([yMax, 0])
+  xScale.range([0, xMax]);
+  yScale.range([yMax, 0]);
 
   return (
     <div ref={measureRef}>
@@ -69,12 +69,10 @@ export function ReferenceLampRange() {
           <LinePath<SpectrumPoint>
             curve={curveLinear}
             data={data}
-            x={p => xScale(getX(p)) ?? 0}
-            y={p => yScale(getY(p)) ?? 0}
-            strokeWidth={1}
-            strokeOpacity={1}
+            x={(p) => xScale(getX(p)) ?? 0}
+            y={(p) => yScale(getY(p)) ?? 0}
             shapeRendering="geometricPrecision"
-            className="stroke-primary"
+            className="stroke-primary stroke-1"
           />
           <AxisBottom
             scale={xScale}
@@ -88,9 +86,8 @@ export function ReferenceLampRange() {
             id={patternId}
             height={8}
             width={8}
-            strokeWidth={1}
             orientation={["diagonal"]}
-            className="stroke-neutral-300"
+            className="stroke-neutral-500/60 stroke-1"
           />
 
           <Group left={0}>
@@ -104,14 +101,14 @@ export function ReferenceLampRange() {
               left={xScale(rangeMin)}
               height={yMax}
               onMove={(dx) => {
-                const newMin
-                  = rangeMin + Math.sign(dx) * xScale.invert(Math.abs(dx))
+                const newMin =
+                  rangeMin + Math.sign(dx) * xScale.invert(Math.abs(dx));
                 if (
-                  newMin >= xScale.domain()[0]
-                  && xScale(rangeMax) - xScale(newMin) >= 20
+                  newMin >= xScale.domain()[0] &&
+                  xScale(rangeMax) - xScale(newMin) >= 20
                 ) {
                   // Update only if there are at least 20 pixels between the two thumbs.
-                  setRangeMin(newMin)
+                  setRangeMin(newMin);
                 }
               }}
             />
@@ -128,14 +125,14 @@ export function ReferenceLampRange() {
               left={0}
               height={yMax}
               onMove={(dx) => {
-                const newMax
-                  = rangeMax + Math.sign(dx) * xScale.invert(Math.abs(dx))
+                const newMax =
+                  rangeMax + Math.sign(dx) * xScale.invert(Math.abs(dx));
                 if (
-                  newMax <= xScale.domain()[1]
-                  && xScale(newMax) - xScale(rangeMin) >= 20
+                  newMax <= xScale.domain()[1] &&
+                  xScale(newMax) - xScale(rangeMin) >= 20
                 ) {
                   // Update only if there are at least 20 pixels between the two thumbs.
-                  setRangeMax(newMax)
+                  setRangeMax(newMax);
                 }
               }}
             />
@@ -143,7 +140,7 @@ export function ReferenceLampRange() {
         </Group>
       </svg>
     </div>
-  )
+  );
 }
 
 function ResizeHandler({
@@ -151,34 +148,34 @@ function ResizeHandler({
   left,
   onMove,
 }: {
-  height: number
-  left: number
-  onMove?: (dx: number) => void
+  height: number;
+  left: number;
+  onMove?: (dx: number) => void;
 }) {
-  const pathWidth = 8
-  const pathHeight = 15
+  const pathWidth = 8;
+  const pathHeight = 15;
 
   return (
     <Group
       left={left}
       onPointerDown={(event) => {
-        const target = event.target as HTMLElement
-        target.setPointerCapture(event.pointerId)
+        const target = event.target as HTMLElement;
+        target.setPointerCapture(event.pointerId);
         // Prevent browser focus behaviour because we focus a thumb manually when values change.
-        event.preventDefault()
+        event.preventDefault();
       }}
       onPointerMove={(event) => {
-        const target = event.target as HTMLElement
+        const target = event.target as HTMLElement;
         if (target.hasPointerCapture(event.pointerId)) {
-          const dx
-            = event.clientX - (target.getBoundingClientRect().x + pathWidth / 2)
-          onMove?.(dx)
+          const dx =
+            event.clientX - (target.getBoundingClientRect().x + pathWidth / 2);
+          onMove?.(dx);
         }
       }}
       onPointerUp={(event) => {
-        const target = event.target as HTMLElement
+        const target = event.target as HTMLElement;
         if (target.hasPointerCapture(event.pointerId)) {
-          target.releasePointerCapture(event.pointerId)
+          target.releasePointerCapture(event.pointerId);
         }
       }}
     >
@@ -196,5 +193,5 @@ function ResizeHandler({
         />
       </Group>
     </Group>
-  )
+  );
 }
