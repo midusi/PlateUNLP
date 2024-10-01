@@ -32,7 +32,6 @@
     "fitsjs": "0.6.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "recharts": "^2.12.7",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zustand": "5.0.0-rc.2"
