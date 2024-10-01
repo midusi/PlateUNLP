@@ -1,6 +1,5 @@
 import { useState } from "react";
 import FitsViewer from "./FitsViewer";
-import "fitsjs";
 
 export default function FitsLoader({}) {
   const [loading, setLoading] = useState(false);
@@ -12,27 +11,11 @@ export default function FitsLoader({}) {
       const file = event.target.files[0];
       setLoading(true);
 
-      // Inicializa el objeto FITS utilizando el archivo
-      try {
-        // Callback para manejar el archivo FITS una vez cargado
-        const callback = function () {
-          const hdu = this.getHDU(); // Obtiene la primera unidad de encabezado-datos
-          const header = hdu.header; // Obtiene el encabezado
-          const dataunit = hdu.data; // Obtiene la unidad de datos
 
-          // Procesar datos como desees
-          console.log("Header:", header);
-          console.log("Data:", dataunit);
+      // // Almacenar los resultados en el estado
+      // setFileContent({ header, dataunit });
+      // setLoading(false);
 
-          // Almacenar los resultados en el estado
-          setFileContent({ header, dataunit });
-          setLoading(false);
-        };
-
-        const fits = new astro.FITS.File(file, callback);
-      } catch (error) {
-        console.error(error);
-      }
     }
   }
 
