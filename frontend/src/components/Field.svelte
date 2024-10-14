@@ -11,7 +11,7 @@
 
   const regex = /^[ -~]*$/;
   $: {
-    let sanitizedValue = value.replace(/[^\x20-\x7E]/g, '');
+    let sanitizedValue = value?.replace(/[^\x20-\x7E]/g, '');
     if (regex.test(sanitizedValue)) {
       value = sanitizedValue;
     }
