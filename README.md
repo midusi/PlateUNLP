@@ -1,35 +1,40 @@
 # PlateUNLP
 
-## Ejecucion en Docker
+## Ejecución en Docker
 
 ### Requerimientos
 
 - Docker
 
-### Preparacion
+### Preparación
 
-Para la correcta ejecución de los contenedores debe tener preparado un archivo `.env` que asigne valores adecuados a las variables de entorno que requiere el arhivo `docker-compose.yml`.
+Para la correcta ejecución de los contenedores debe tener preparado un archivo `.env` que asigne valores adecuados a las variables de entorno que requiere el archivo `docker-compose.yml`.
 
-Para su creacion puede duplicar el archivo `.env.sample` que esta en la carpeta raiz del repositorio,cambiarle el nombre a `.env` y modificar las variables que declara segun las necesidades de su equipo.
+Para su creación puede duplicar el archivo `.env.sample` que esta en la carpeta raíz del repositorio,cambiarle el nombre a `.env` y modificar las variables que declara según las necesidades de su equipo.
 
-### Ejecucion
+### Ejecución
 
 Para levantar el conjunto de contenedores ejecutar:
 ```
-docker compose --env-file=.env up
+# Modo Desarrollo
+docker-compose --profile development --env-file=.env up
+
+# Modo Producción
+docker-compose --profile production --env-file=.env up
 ```
 En caso de que lo que quiera sea actualizar los contenedores agregue al final el tag `--build`, tal que asi:
 ```
-docker compose --env-file=.env up --build
+docker-compose --profile development --env-file=.env up --build
+docker-compose --profile production --env-file=.env up --build
 ```
 
 ### Acceso a la app
 
-Una vez levantado el entorno de produccion puede acceder al la aplicacion desde `localhost:5000`.
+Una vez levantado el entorno de producción puede acceder al la aplicación desde `localhost:5000`.
 
-Tambien puede acceder a la API expuesta por el backend desde `localhost:20500`
+También puede acceder a la API expuesta por el backend desde `localhost:20500`
 
-## Ejecucion sin docker
+## Ejecución sin docker
 
 ### Requerimientos
 #### Backend
@@ -40,7 +45,7 @@ Tambien puede acceder a la API expuesta por el backend desde `localhost:20500`
 
 ### Instalación de dependencias
 #### Backend
-Para instalar las dependencias del backend pocisionarse en la carpeta `/backend`, activar el entorno virtual en caso de que se emplee y ejecutar:
+Para instalar las dependencias del backend posesionarse en la carpeta `/backend`, activar el entorno virtual en caso de que se emplee y ejecutar:
 
 ```bash
 pip install -r requirements.txt
@@ -93,8 +98,9 @@ Se dispone de los siguientes scripts: `pm2-start`, `pm2-stop`, `pm2-restart`,`pm
 Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráfica del software.
 
 
-## Links de interes
-- [proyecto de Recuperación del Trabajo Observacional Historico (ReTrOH)](https://retroh.fcaglp.unlp.edu.ar/)
+## Links de interés
+- [proyecto de Recuperación del Trabajo Observacional Histórico (ReTrOH)](https://retroh.fcaglp.unlp.edu.ar/)
+
 
 
 

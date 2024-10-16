@@ -7,6 +7,7 @@ from app.helpers.DictPersistJSON import DictPersistJSON
 from app.helpers.generate_txt import generate_txt
 from app.api.config import get_workspace_path
 
+
 def api_generate_fits():
 
     img_name = request.json["img_name"]
@@ -15,18 +16,19 @@ def api_generate_fits():
     data_arr = request.json["data_arr"]
     plate_data = request.json["plate_data"]
     fields = request.json["fields"]
-    
+
     # Verificar que se esta recibiendo el campo MAIN-ID en todos los espectros
     for metadata_dict in data_arr:
-        if(metadata_dict.get("MAIN-ID", None) == None or metadata_dict.get("MAIN-ID", "") == ""):
-            print("No se recibio correctamente el valor Main-ID en alguno de los espectros")
+        if (metadata_dict.get("MAIN-ID", None) == None or metadata_dict.get("MAIN-ID", "") == ""):
+            print(
+                "No se recibio correctamente el valor Main-ID en alguno de los espectros")
             data = {
                 "status": False,
                 "status_code": 400,
                 "message": "Falta datos en la solicitud, revisar que Main-ID este correctamente completado en todos los espectros"
             }
             return json.jsonify(**data)
-    
+
     # Verificar que no solo se esten recibiendo caracteres en formato ASCII
     bad_format_list = {}
     for key, value in plate_data.items():
@@ -49,21 +51,23 @@ def api_generate_fits():
     bad_caracteres = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
     for metadata_dict in data_arr:
         for caracter in bad_caracteres:
-            if((caracter in metadata_dict["MAIN-ID"]) or (caracter in metadata_dict["SUFFIX"])):
-                print("No se permite en MAIN-ID y/o SUFFIX el uso de los caracteres: "+str(bad_caracteres))
+            if ((caracter in metadata_dict["MAIN-ID"]) or (caracter in metadata_dict["SUFFIX"])):
+                print(
+                    "No se permite en MAIN-ID y/o SUFFIX el uso de los caracteres: "+str(bad_caracteres))
                 data = {
                     "status": False,
                     "status_code": 400,
                     "message": "No se permite en MAIN-ID y/o SUFFIX el uso de los caracteres: "+str(bad_caracteres)
                 }
                 return json.jsonify(**data)
-        
+
     # Verificar que no se repita el nombre de MAIN-ID_SUFFIX en 2 espectros distintos
     objects = []
     for metadata_dict in data_arr:
         for object in objects:
-            if(object == metadata_dict["MAIN-ID"]+"_"+metadata_dict["SUFFIX"]):
-                print("Se recibio una combinacion de MAIN-ID_SUFFIX repetida, esto no esta permitido")
+            if (object == metadata_dict["MAIN-ID"]+"_"+metadata_dict["SUFFIX"]):
+                print(
+                    "Se recibio una combinacion de MAIN-ID_SUFFIX repetida, esto no esta permitido")
                 data = {
                     "status": False,
                     "status_code": 400,
@@ -80,7 +84,7 @@ def api_generate_fits():
     output_path = os.path.join(path_dir, "output")
     if not (os.path.exists(output_path)):
         os.mkdir(output_path)
-        
+
     # Borrado de archivos viejos de la placa en caso de que los haya
     files = os.listdir(output_path)
     print("---------------------------------")
@@ -88,44 +92,49 @@ def api_generate_fits():
         print(file)
         if (file.startswith(img_name+"_")):
             os.remove(os.path.join(output_path, file))
-    
+
     # cropped
-    for bbox,data in zip(bbox_arr,data_arr):
+    for bbox, data in zip(bbox_arr, data_arr):
         data.pop('id', None)
         data.pop('color', None)
         data.pop('loaded', None)
-        
+
         # The flag to -1 loads the image as is
         rotated = False
         img = cv2.imread(image_path, -1)
+
+        if len(img.shape) == 3:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
         original_height, original_width = img.shape
-        if((original_width < original_height)):
+        if ((original_width < original_height)):
             img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
             original_height, original_width = img.shape
             rotated = True
-        
-        #if (original_width > original_height):
-            
+
+        # if (original_width > original_height):
+
         x = int(bbox["x"])
         y = int(bbox["y"])
         w = int(bbox["w"])
         h = int(bbox["h"])
-        
-        if(y < 0 or y>original_height):
+
+        if (y < 0 or y > original_height):
             y = 0
-        if(y+h > original_height):
-            h = original_height - y 
-        if(x<0 or x > original_width):
+        if (y+h > original_height):
+            h = original_height - y
+        if (x < 0 or x > original_width):
             x = 0
-        if(x+w > original_width):
-            w = original_width - x 
+        if (x+w > original_width):
+            w = original_width - x
 
         # crop image
         crop_img = img[y:y+h, x:x+w]
-        crop_img = crop_img[:,:]
+        crop_img = crop_img[:, :]
         file_output_name = f'{img_name}_{data["MAIN-ID"]}_{data["SUFFIX"]}'
         # saved image crop
-        cv2.imwrite(os.path.join(output_path, f'{file_output_name}.png'),crop_img)
+        cv2.imwrite(os.path.join(
+            output_path, f'{file_output_name}.png'), crop_img)
 
         # generated fit
         prihdr = fits.Header()
@@ -137,23 +146,25 @@ def api_generate_fits():
                 prihdr[key] = (plate_data[key], comment)
             else:
                 prihdr[key] = (data[key], comment)
-            
-        prihdr["GAIN"] = ("","Gain, electrons per adu")
-        prihdr["NOISE"] = ("","Read noise")
 
-        if prihdr["EQUINOX"] != '':  
-          prihdr["EQUINOX"] = float(prihdr["EQUINOX"])
+        prihdr["GAIN"] = ("", "Gain, electrons per adu")
+        prihdr["NOISE"] = ("", "Read noise")
+
+        if prihdr["EQUINOX"] != '':
+            prihdr["EQUINOX"] = float(prihdr["EQUINOX"])
         else:
-          prihdr["EQUINOX"] = None
-          
+            prihdr["EQUINOX"] = None
+
         fits.writeto(
-            (os.path.join(output_path, f'{file_output_name}.fits')), 
-            crop_img, 
-            prihdr, 
+            (os.path.join(output_path, f'{file_output_name}.fits')),
+            crop_img,
+            prihdr,
             overwrite=True)
-        generate_txt(plate_data,data,output_path,file_output_name)
-    working_path = os.path.join(get_workspace_path(), 'cache', 'working', img_name+"."+img_ext+".json")
-    saved_path = os.path.join(get_workspace_path(), 'cache' ,'saved', img_name+"."+img_ext+".json")
+        generate_txt(plate_data, data, output_path, file_output_name)
+    working_path = os.path.join(get_workspace_path(
+    ), 'cache', 'working', img_name+"."+img_ext+".json")
+    saved_path = os.path.join(get_workspace_path(
+    ), 'cache', 'saved', img_name+"."+img_ext+".json")
     shutil.move(working_path, saved_path)
     # api response data
     data = {

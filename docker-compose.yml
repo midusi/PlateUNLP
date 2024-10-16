@@ -2,22 +2,46 @@ version: '0.0.1'
 services:
   backend:
     container_name: backend
+    profiles:
+      - production
     build: 
       context: ./backend
       dockerfile: Dockerfile
-    command: python manage.py run -h 0.0.0.0
+    command: python gateway.wsgi 
     volumes:
       - ./backend/:/usr/src/app/
-      - ${BACKEND_DB_PATH}:/usr/src/app/db
+      - ${WORKSPACE_PATH}:/usr/src/app/db
     ports:
       - 20500:20500
     env_file:
-      - ./backend/.env.dev
+      - ./backend/.env.prod
     networks:
       - my-network
     
   frontend:
     container_name: frontend
+    profiles:
+      - production
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/usr/src/app/
+      - /usr/src/app/node_modules
+    environment:
+       - NODE_ENV=production
+    ports:
+      - 5000:5000
+    command: npm run production
+    depends_on:
+      - backend
+    networks:
+      - my-network
+
+  frontend_dev:
+    profiles:
+      - development
+    container_name: frontend_dev
     build: 
       context: ./frontend
       dockerfile: Dockerfile
@@ -30,23 +54,28 @@ services:
       - 5000:5000
     command: npm run dev
     depends_on:
-      - backend
+      - backend_dev
+    networks:
+      - my-network
+
+  backend_dev:
+    container_name: backend_dev
+    profiles:
+      - development
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py run -h 0.0.0.0 
+    volumes:
+      - ./backend/:/usr/src/app/
+      - ${WORKSPACE_PATH}:/usr/src/app/db
+    ports:
+      - 20500:20500
+    env_file:
+      - ./backend/.env.dev
     networks:
       - my-network
   
 networks:
   my-network:
     driver: bridge
-
-  # prod:
-  #   container_name: produccion
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile.prod
-  #   #volumes:
-  #    # - ./frontend/:/usr/src/app/
-  #   ports:
-  #     - 5000:5000
-  #   expose:
-  #     - 5000
-  #   command: npm run pm2-start
