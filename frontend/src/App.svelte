@@ -39,6 +39,7 @@
   let plateValid = false;
   let dataLoaded = false
   let reset_filters_flag = false
+  let rotateImage = false
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
@@ -92,8 +93,15 @@
 
   setContext("setChangeFlag",setChangeFlag);
 
-  async function getImg(selectedImage) {
-    if (selectedImage != "" && selectedImage != imageName) {
+  const rotate = async () => {
+    rotateImage = !rotateImage
+    await getImg(imageName, rotateImage)
+    if(rotateImage)
+      spectrogramCanvas.setScale(0.2)
+  }
+
+  async function getImg(selectedImage, rotateImage = false) {
+    if (selectedImage != "") {
       uploadedImage = false
       imageChanged = true
       spectrogramCanvas.deleteAllBbox();
@@ -105,7 +113,7 @@
       initializeCanvas();
       let data;
       try{
-        data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage);
+        data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage, {rotateImage});
       }
       catch(err){
       }
@@ -539,7 +547,7 @@
         </div>
         <div id="witdh_ruler" class="col-lg-10 col-xl-10">
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <FilterZone spectrogramCanvas={spectrogramCanvas} bind:reset_filters_flag={reset_filters_flag}/>
+            <FilterZone spectrogramCanvas={spectrogramCanvas} rotate={rotate} bind:reset_filters_flag={reset_filters_flag}/>
             <canvas
               id="canvas-container"
               style="border-width: 1px;

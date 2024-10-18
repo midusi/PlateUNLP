@@ -11,12 +11,17 @@ def load():
 
     dir_path = request.values["dir_path"]
     img_name = request.values["img_name"]
+    rotate_image = request.values["rotate_image"]
+
     filename = os.path.join(dir_path, img_name)
     img_info = cv2.imread(filename, -1)
     img = cv2.imread(filename)
 
     original_dtype = img_info.dtype
     original_height, original_width, _ = img.shape
+
+    if rotate_image == 'true':
+        img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
 
     if not (img_name.split(sep='.')[-1] == 'png'):
         if ((original_width < original_height)):

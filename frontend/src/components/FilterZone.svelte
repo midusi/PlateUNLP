@@ -4,10 +4,10 @@
   import Contrast from "./Filters/Contrast.svelte";
   import Colorize from "./Filters/Colorize.svelte";
   // import Zoom from "./Filters/Zoom.svelte";
-  
   export let spectrogramCanvas
   export let reset_filters_flag
-  // export let scale
+  // export let scale = 0.1
+  export let rotate
   
   let brightness_input = 0
   let contrast_input = 0
@@ -79,12 +79,17 @@
     <NButton click={alter_enable_filters} style="float: right;">
       {enabled_filters_icon}
     </NButton>
+    <!--
+    <NButton click={rotate}  style="float: right;">
+      🔄
+    </NButton>
+    -->
   </h5>
   <div class="card-body">
     <div class="row">
-      <!-- <Zoom canvas={spectrogramCanvas} bind:scale={scale}/> -->
       <Brightness canvas={spectrogramCanvas} bind:brightness_input={brightness_input}/>
       <Contrast canvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
+      <!-- <Zoom canvas={spectrogramCanvas} bind:scale={scale}/> -->
       <Colorize canvas={spectrogramCanvas} bind:colorize_input={colorize_input}/>
     </div>
   </div>

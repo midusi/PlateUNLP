@@ -14,6 +14,12 @@ Para su creación puede duplicar el archivo `.env.sample` que esta en la carpeta
 
 ### Ejecución
 
+Configurar el directorio de trabajo:
+
+```
+export WORKSPACE_PATH=pah
+```
+
 Para levantar el conjunto de contenedores ejecutar:
 ```
 # Modo Desarrollo

@@ -2,10 +2,9 @@ import { writable } from 'svelte/store'
 import apiWorkspace from '../api/workspace'
 import { spectrogramStore } from './spectrum'
 import {
-  loadingAlert, errorAlert, closeAlert, showAlert,serverAlert
+  loadingAlert, errorAlert, closeAlert, showAlert, serverAlert
 } from '../helpers/Alert'
-import {serverUp} from './serverUp'
-
+import { serverUp } from './serverUp'
 
 function createStoreWorkspace() {
   const { subscribe, update } = writable({
@@ -21,9 +20,9 @@ function createStoreWorkspace() {
     subscribe,
     getPaths: async (dirPath) => {
       loadingAlert()
-      let response;
+      let response
       try {
-          response = await apiWorkspace.allPaths({
+        response = await apiWorkspace.allPaths({
           path_dir: dirPath
         })
         update((prev) => {
@@ -36,52 +35,45 @@ function createStoreWorkspace() {
           prev.state.error = error
           return prev
         })
-        if(await serverUp())
-          errorAlert({ message: error.response.data.message })
+        if (await serverUp()) errorAlert({ message: error.response.data.message })
       }
       update((prev) => {
         prev.state.loading = false
         return prev
       })
     },
-    setPath: (fileName,cantSpectra) => {
+    setPath: (fileName, cantSpectra) => {
       update((prev) => {
         prev.paths = prev.paths.map((file) => {
-          if(file.fileName === fileName)
-            file.number_of_spectra = cantSpectra
+          if (file.fileName === fileName) file.number_of_spectra = cantSpectra
           return file
         })
         return prev
       })
-    }
-    ,
-    getImg: async (spectrogramCanvas, dirPath, imgName) => {
-      loadingAlert("Cargando imagen...")
-      let data;
+    },
+    getImg: async (spectrogramCanvas, dirPath, imgName, params = { rotateImage: false }) => {
+      loadingAlert('Cargando imagen...')
+      let data
       try {
         const response = await apiWorkspace.getImg({
           dir_path: dirPath,
-          img_name: imgName
+          img_name: imgName,
+          rotate_image: params.rotateImage
         })
-        
-        data = response.data;
-        
+
+        data = response.data
+
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
 
-        if(data.info.bboxes){
-          //no predigo nada y cargo las bboxes
-          spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes,data.info.metadata);
+        if (data.info.bboxes)
+          // no predigo nada y cargo las bboxes
+          spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes, data.info.metadata)
+        else await spectrogramStore.getPredictions(
+          spectrogramCanvas,
+          dirPath,
+          imgName
+        )
 
-        }
-        else{
-          await spectrogramStore.getPredictions(
-            spectrogramCanvas,
-            dirPath,
-            imgName
-          )
-          
-        }
-        
         update((prev) => {
           prev.imageProperties = data.info
           return prev
@@ -92,10 +84,9 @@ function createStoreWorkspace() {
           prev.state.error = error
           return prev
         })
-        if(await serverUp())
-          errorAlert();
+        if (await serverUp()) errorAlert()
       }
-      
+
       update((prev) => {
         prev.state.loading = false
         return prev
@@ -114,19 +105,18 @@ function createStoreWorkspace() {
       }
     },
     loadConfig: async () => {
-      let response;
-      while(!response){
-        try {
-          response = await apiWorkspace.loadConfig()
-          if (response.data !== {}){
-            closeAlert()
-            showAlert({title:"Conexion establecida"})
-            return response.data.config
-          } 
-        } catch (error) {
-          closeAlert();
-          await serverAlert();
+      try {
+        const response = await apiWorkspace.loadConfig()
+        if (Object.keys(response.data).length !== 0) {
+          closeAlert()
+          showAlert({ title: 'Conexion establecida' })
+          return response.data.config
         }
+        return response
+      } catch (error) {
+        closeAlert()
+        await serverAlert()
+        return {}
       }
     }
   }

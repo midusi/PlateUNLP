@@ -26,6 +26,7 @@ module.exports = {
     'array-callback-return': ['off', { allowImplicit: true }],
     'no-param-reassign': [2, { props: false }],
     'import/prefer-default-export': 'off',
+    'nonblock-statement-body-position': 'off',
     'import/no-cycle': [
       'warn',
       {
