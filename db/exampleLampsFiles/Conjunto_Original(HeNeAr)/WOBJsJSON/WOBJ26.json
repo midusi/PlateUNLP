@@ -1,0 +1,2278 @@
+[
+    {
+        "pixel": "0",
+        "intensity": "3744.4219"
+    },
+    {
+        "pixel": "1",
+        "intensity": "3888.9348"
+    },
+    {
+        "pixel": "2",
+        "intensity": "3989.0266"
+    },
+    {
+        "pixel": "3",
+        "intensity": "4096.204"
+    },
+    {
+        "pixel": "4",
+        "intensity": "4099.887"
+    },
+    {
+        "pixel": "5",
+        "intensity": "3991.958"
+    },
+    {
+        "pixel": "6",
+        "intensity": "3724.222"
+    },
+    {
+        "pixel": "7",
+        "intensity": "3843.7256"
+    },
+    {
+        "pixel": "8",
+        "intensity": "3951.349"
+    },
+    {
+        "pixel": "9",
+        "intensity": "3976.9246"
+    },
+    {
+        "pixel": "10",
+        "intensity": "4043.1785"
+    },
+    {
+        "pixel": "11",
+        "intensity": "4057.365"
+    },
+    {
+        "pixel": "12",
+        "intensity": "4301.111"
+    },
+    {
+        "pixel": "13",
+        "intensity": "4410.6416"
+    },
+    {
+        "pixel": "14",
+        "intensity": "4497.6772"
+    },
+    {
+        "pixel": "15",
+        "intensity": "4503.656"
+    },
+    {
+        "pixel": "16",
+        "intensity": "4545.614"
+    },
+    {
+        "pixel": "17",
+        "intensity": "4547.1587"
+    },
+    {
+        "pixel": "18",
+        "intensity": "4385.817"
+    },
+    {
+        "pixel": "19",
+        "intensity": "4287.0464"
+    },
+    {
+        "pixel": "20",
+        "intensity": "4487.12"
+    },
+    {
+        "pixel": "21",
+        "intensity": "4594.1245"
+    },
+    {
+        "pixel": "22",
+        "intensity": "4689.4824"
+    },
+    {
+        "pixel": "23",
+        "intensity": "4890.985"
+    },
+    {
+        "pixel": "24",
+        "intensity": "4917.968"
+    },
+    {
+        "pixel": "25",
+        "intensity": "4893.063"
+    },
+    {
+        "pixel": "26",
+        "intensity": "4946.85"
+    },
+    {
+        "pixel": "27",
+        "intensity": "4910.13"
+    },
+    {
+        "pixel": "28",
+        "intensity": "4518.4507"
+    },
+    {
+        "pixel": "29",
+        "intensity": "4716.839"
+    },
+    {
+        "pixel": "30",
+        "intensity": "5014.3647"
+    },
+    {
+        "pixel": "31",
+        "intensity": "4792.8345"
+    },
+    {
+        "pixel": "32",
+        "intensity": "4904.1294"
+    },
+    {
+        "pixel": "33",
+        "intensity": "5186.228"
+    },
+    {
+        "pixel": "34",
+        "intensity": "5271.4873"
+    },
+    {
+        "pixel": "35",
+        "intensity": "5248.0176"
+    },
+    {
+        "pixel": "36",
+        "intensity": "5285.976"
+    },
+    {
+        "pixel": "37",
+        "intensity": "5410.5776"
+    },
+    {
+        "pixel": "38",
+        "intensity": "5526.8823"
+    },
+    {
+        "pixel": "39",
+        "intensity": "5514.5874"
+    },
+    {
+        "pixel": "40",
+        "intensity": "5447.5723"
+    },
+    {
+        "pixel": "41",
+        "intensity": "5271.2476"
+    },
+    {
+        "pixel": "42",
+        "intensity": "5233.6704"
+    },
+    {
+        "pixel": "43",
+        "intensity": "5546.3745"
+    },
+    {
+        "pixel": "44",
+        "intensity": "5524.9844"
+    },
+    {
+        "pixel": "45",
+        "intensity": "5564.3115"
+    },
+    {
+        "pixel": "46",
+        "intensity": "5473.232"
+    },
+    {
+        "pixel": "47",
+        "intensity": "5513.4976"
+    },
+    {
+        "pixel": "48",
+        "intensity": "5493.1133"
+    },
+    {
+        "pixel": "49",
+        "intensity": "5482.227"
+    },
+    {
+        "pixel": "50",
+        "intensity": "5517.376"
+    },
+    {
+        "pixel": "51",
+        "intensity": "5517.356"
+    },
+    {
+        "pixel": "52",
+        "intensity": "5469.7974"
+    },
+    {
+        "pixel": "53",
+        "intensity": "5416.696"
+    },
+    {
+        "pixel": "54",
+        "intensity": "5508.226"
+    },
+    {
+        "pixel": "55",
+        "intensity": "5482.2666"
+    },
+    {
+        "pixel": "56",
+        "intensity": "5462.4453"
+    },
+    {
+        "pixel": "57",
+        "intensity": "5490.8633"
+    },
+    {
+        "pixel": "58",
+        "intensity": "5562.8276"
+    },
+    {
+        "pixel": "59",
+        "intensity": "5684.3657"
+    },
+    {
+        "pixel": "60",
+        "intensity": "5736.4834"
+    },
+    {
+        "pixel": "61",
+        "intensity": "5677.7056"
+    },
+    {
+        "pixel": "62",
+        "intensity": "5708.913"
+    },
+    {
+        "pixel": "63",
+        "intensity": "5731.35"
+    },
+    {
+        "pixel": "64",
+        "intensity": "5736.719"
+    },
+    {
+        "pixel": "65",
+        "intensity": "5674.9644"
+    },
+    {
+        "pixel": "66",
+        "intensity": "5691.897"
+    },
+    {
+        "pixel": "67",
+        "intensity": "5727.458"
+    },
+    {
+        "pixel": "68",
+        "intensity": "5804.09"
+    },
+    {
+        "pixel": "69",
+        "intensity": "5785.821"
+    },
+    {
+        "pixel": "70",
+        "intensity": "5900.868"
+    },
+    {
+        "pixel": "71",
+        "intensity": "6024.146"
+    },
+    {
+        "pixel": "72",
+        "intensity": "6456.5303"
+    },
+    {
+        "pixel": "73",
+        "intensity": "6491.3003"
+    },
+    {
+        "pixel": "74",
+        "intensity": "6210.3125"
+    },
+    {
+        "pixel": "75",
+        "intensity": "6065.803"
+    },
+    {
+        "pixel": "76",
+        "intensity": "6028.968"
+    },
+    {
+        "pixel": "77",
+        "intensity": "5933.7754"
+    },
+    {
+        "pixel": "78",
+        "intensity": "5893.9883"
+    },
+    {
+        "pixel": "79",
+        "intensity": "5928.7773"
+    },
+    {
+        "pixel": "80",
+        "intensity": "5930.527"
+    },
+    {
+        "pixel": "81",
+        "intensity": "5876.1055"
+    },
+    {
+        "pixel": "82",
+        "intensity": "5783.62"
+    },
+    {
+        "pixel": "83",
+        "intensity": "6004.6704"
+    },
+    {
+        "pixel": "84",
+        "intensity": "6082.215"
+    },
+    {
+        "pixel": "85",
+        "intensity": "6167.8867"
+    },
+    {
+        "pixel": "86",
+        "intensity": "6443.3994"
+    },
+    {
+        "pixel": "87",
+        "intensity": "6679.2163"
+    },
+    {
+        "pixel": "88",
+        "intensity": "6692.2085"
+    },
+    {
+        "pixel": "89",
+        "intensity": "6768.2334"
+    },
+    {
+        "pixel": "90",
+        "intensity": "6772.805"
+    },
+    {
+        "pixel": "91",
+        "intensity": "6907.3076"
+    },
+    {
+        "pixel": "92",
+        "intensity": "6983.302"
+    },
+    {
+        "pixel": "93",
+        "intensity": "7120.997"
+    },
+    {
+        "pixel": "94",
+        "intensity": "7152.4053"
+    },
+    {
+        "pixel": "95",
+        "intensity": "7418.5723"
+    },
+    {
+        "pixel": "96",
+        "intensity": "7528.131"
+    },
+    {
+        "pixel": "97",
+        "intensity": "7525.4263"
+    },
+    {
+        "pixel": "98",
+        "intensity": "7488.328"
+    },
+    {
+        "pixel": "99",
+        "intensity": "7570.241"
+    },
+    {
+        "pixel": "100",
+        "intensity": "7682.072"
+    },
+    {
+        "pixel": "101",
+        "intensity": "7526.828"
+    },
+    {
+        "pixel": "102",
+        "intensity": "7600.5073"
+    },
+    {
+        "pixel": "103",
+        "intensity": "7707.7715"
+    },
+    {
+        "pixel": "104",
+        "intensity": "7748.1533"
+    },
+    {
+        "pixel": "105",
+        "intensity": "7963.824"
+    },
+    {
+        "pixel": "106",
+        "intensity": "8231.28"
+    },
+    {
+        "pixel": "107",
+        "intensity": "8190.8193"
+    },
+    {
+        "pixel": "108",
+        "intensity": "8060.444"
+    },
+    {
+        "pixel": "109",
+        "intensity": "8562.69"
+    },
+    {
+        "pixel": "110",
+        "intensity": "8906.961"
+    },
+    {
+        "pixel": "111",
+        "intensity": "8672.074"
+    },
+    {
+        "pixel": "112",
+        "intensity": "8057.3105"
+    },
+    {
+        "pixel": "113",
+        "intensity": "8127.988"
+    },
+    {
+        "pixel": "114",
+        "intensity": "9303.618"
+    },
+    {
+        "pixel": "115",
+        "intensity": "9798.68"
+    },
+    {
+        "pixel": "116",
+        "intensity": "8950.419"
+    },
+    {
+        "pixel": "117",
+        "intensity": "8270.263"
+    },
+    {
+        "pixel": "118",
+        "intensity": "7922.9966"
+    },
+    {
+        "pixel": "119",
+        "intensity": "8191.769"
+    },
+    {
+        "pixel": "120",
+        "intensity": "9312.47"
+    },
+    {
+        "pixel": "121",
+        "intensity": "10340.35"
+    },
+    {
+        "pixel": "122",
+        "intensity": "10411.124"
+    },
+    {
+        "pixel": "123",
+        "intensity": "10061.332"
+    },
+    {
+        "pixel": "124",
+        "intensity": "9426.615"
+    },
+    {
+        "pixel": "125",
+        "intensity": "8577.584"
+    },
+    {
+        "pixel": "126",
+        "intensity": "8056.4126"
+    },
+    {
+        "pixel": "127",
+        "intensity": "8734.025"
+    },
+    {
+        "pixel": "128",
+        "intensity": "10470.354"
+    },
+    {
+        "pixel": "129",
+        "intensity": "12180.235"
+    },
+    {
+        "pixel": "130",
+        "intensity": "13203.417"
+    },
+    {
+        "pixel": "131",
+        "intensity": "13370.228"
+    },
+    {
+        "pixel": "132",
+        "intensity": "13121.196"
+    },
+    {
+        "pixel": "133",
+        "intensity": "12516.254"
+    },
+    {
+        "pixel": "134",
+        "intensity": "11315.134"
+    },
+    {
+        "pixel": "135",
+        "intensity": "9861.143"
+    },
+    {
+        "pixel": "136",
+        "intensity": "8661.149"
+    },
+    {
+        "pixel": "137",
+        "intensity": "8419.746"
+    },
+    {
+        "pixel": "138",
+        "intensity": "9687.26"
+    },
+    {
+        "pixel": "139",
+        "intensity": "11725.136"
+    },
+    {
+        "pixel": "140",
+        "intensity": "13101.352"
+    },
+    {
+        "pixel": "141",
+        "intensity": "13717.726"
+    },
+    {
+        "pixel": "142",
+        "intensity": "13893.737"
+    },
+    {
+        "pixel": "143",
+        "intensity": "13402.579"
+    },
+    {
+        "pixel": "144",
+        "intensity": "13260.156"
+    },
+    {
+        "pixel": "145",
+        "intensity": "13230.084"
+    },
+    {
+        "pixel": "146",
+        "intensity": "12765.794"
+    },
+    {
+        "pixel": "147",
+        "intensity": "12007.988"
+    },
+    {
+        "pixel": "148",
+        "intensity": "10929.653"
+    },
+    {
+        "pixel": "149",
+        "intensity": "9607.114"
+    },
+    {
+        "pixel": "150",
+        "intensity": "8259.031"
+    },
+    {
+        "pixel": "151",
+        "intensity": "7754.2676"
+    },
+    {
+        "pixel": "152",
+        "intensity": "8606.3"
+    },
+    {
+        "pixel": "153",
+        "intensity": "10356.13"
+    },
+    {
+        "pixel": "154",
+        "intensity": "11982.706"
+    },
+    {
+        "pixel": "155",
+        "intensity": "13229.218"
+    },
+    {
+        "pixel": "156",
+        "intensity": "13921.638"
+    },
+    {
+        "pixel": "157",
+        "intensity": "14479.891"
+    },
+    {
+        "pixel": "158",
+        "intensity": "14671.087"
+    },
+    {
+        "pixel": "159",
+        "intensity": "14627.381"
+    },
+    {
+        "pixel": "160",
+        "intensity": "14686.442"
+    },
+    {
+        "pixel": "161",
+        "intensity": "14692.829"
+    },
+    {
+        "pixel": "162",
+        "intensity": "14674.688"
+    },
+    {
+        "pixel": "163",
+        "intensity": "14798.114"
+    },
+    {
+        "pixel": "164",
+        "intensity": "14922.084"
+    },
+    {
+        "pixel": "165",
+        "intensity": "14773.287"
+    },
+    {
+        "pixel": "166",
+        "intensity": "14360.272"
+    },
+    {
+        "pixel": "167",
+        "intensity": "13774.545"
+    },
+    {
+        "pixel": "168",
+        "intensity": "12821.363"
+    },
+    {
+        "pixel": "169",
+        "intensity": "11403.302"
+    },
+    {
+        "pixel": "170",
+        "intensity": "9740.548"
+    },
+    {
+        "pixel": "171",
+        "intensity": "8351.28"
+    },
+    {
+        "pixel": "172",
+        "intensity": "8256.986"
+    },
+    {
+        "pixel": "173",
+        "intensity": "9676.005"
+    },
+    {
+        "pixel": "174",
+        "intensity": "11387.203"
+    },
+    {
+        "pixel": "175",
+        "intensity": "12456.928"
+    },
+    {
+        "pixel": "176",
+        "intensity": "13152.465"
+    },
+    {
+        "pixel": "177",
+        "intensity": "13770.098"
+    },
+    {
+        "pixel": "178",
+        "intensity": "14336.984"
+    },
+    {
+        "pixel": "179",
+        "intensity": "14898.98"
+    },
+    {
+        "pixel": "180",
+        "intensity": "15039.101"
+    },
+    {
+        "pixel": "181",
+        "intensity": "14668.576"
+    },
+    {
+        "pixel": "182",
+        "intensity": "14663.161"
+    },
+    {
+        "pixel": "183",
+        "intensity": "14910.376"
+    },
+    {
+        "pixel": "184",
+        "intensity": "15006.175"
+    },
+    {
+        "pixel": "185",
+        "intensity": "14845.911"
+    },
+    {
+        "pixel": "186",
+        "intensity": "14412.843"
+    },
+    {
+        "pixel": "187",
+        "intensity": "13446.895"
+    },
+    {
+        "pixel": "188",
+        "intensity": "12353.211"
+    },
+    {
+        "pixel": "189",
+        "intensity": "12033.02"
+    },
+    {
+        "pixel": "190",
+        "intensity": "12855.122"
+    },
+    {
+        "pixel": "191",
+        "intensity": "13935.3"
+    },
+    {
+        "pixel": "192",
+        "intensity": "14439.239"
+    },
+    {
+        "pixel": "193",
+        "intensity": "14343.917"
+    },
+    {
+        "pixel": "194",
+        "intensity": "14176.346"
+    },
+    {
+        "pixel": "195",
+        "intensity": "14103.802"
+    },
+    {
+        "pixel": "196",
+        "intensity": "13936.522"
+    },
+    {
+        "pixel": "197",
+        "intensity": "13758.066"
+    },
+    {
+        "pixel": "198",
+        "intensity": "12911.841"
+    },
+    {
+        "pixel": "199",
+        "intensity": "12033.235"
+    },
+    {
+        "pixel": "200",
+        "intensity": "10744.301"
+    },
+    {
+        "pixel": "201",
+        "intensity": "8787.296"
+    },
+    {
+        "pixel": "202",
+        "intensity": "7072.7466"
+    },
+    {
+        "pixel": "203",
+        "intensity": "6987.8564"
+    },
+    {
+        "pixel": "204",
+        "intensity": "8453.433"
+    },
+    {
+        "pixel": "205",
+        "intensity": "10377.677"
+    },
+    {
+        "pixel": "206",
+        "intensity": "11656.998"
+    },
+    {
+        "pixel": "207",
+        "intensity": "12344.471"
+    },
+    {
+        "pixel": "208",
+        "intensity": "13041.052"
+    },
+    {
+        "pixel": "209",
+        "intensity": "13663.189"
+    },
+    {
+        "pixel": "210",
+        "intensity": "13941.423"
+    },
+    {
+        "pixel": "211",
+        "intensity": "14135.969"
+    },
+    {
+        "pixel": "212",
+        "intensity": "14225.25"
+    },
+    {
+        "pixel": "213",
+        "intensity": "14132.761"
+    },
+    {
+        "pixel": "214",
+        "intensity": "13994.621"
+    },
+    {
+        "pixel": "215",
+        "intensity": "13985.161"
+    },
+    {
+        "pixel": "216",
+        "intensity": "14019.69"
+    },
+    {
+        "pixel": "217",
+        "intensity": "13975.198"
+    },
+    {
+        "pixel": "218",
+        "intensity": "14001.313"
+    },
+    {
+        "pixel": "219",
+        "intensity": "14074.255"
+    },
+    {
+        "pixel": "220",
+        "intensity": "14186.141"
+    },
+    {
+        "pixel": "221",
+        "intensity": "14363.524"
+    },
+    {
+        "pixel": "222",
+        "intensity": "14149.334"
+    },
+    {
+        "pixel": "223",
+        "intensity": "13492.614"
+    },
+    {
+        "pixel": "224",
+        "intensity": "13135.442"
+    },
+    {
+        "pixel": "225",
+        "intensity": "13265.901"
+    },
+    {
+        "pixel": "226",
+        "intensity": "13590.57"
+    },
+    {
+        "pixel": "227",
+        "intensity": "13786.071"
+    },
+    {
+        "pixel": "228",
+        "intensity": "13960.283"
+    },
+    {
+        "pixel": "229",
+        "intensity": "14068.546"
+    },
+    {
+        "pixel": "230",
+        "intensity": "14153.596"
+    },
+    {
+        "pixel": "231",
+        "intensity": "13982.359"
+    },
+    {
+        "pixel": "232",
+        "intensity": "13718.619"
+    },
+    {
+        "pixel": "233",
+        "intensity": "13568.339"
+    },
+    {
+        "pixel": "234",
+        "intensity": "13375.148"
+    },
+    {
+        "pixel": "235",
+        "intensity": "13472.515"
+    },
+    {
+        "pixel": "236",
+        "intensity": "13733.614"
+    },
+    {
+        "pixel": "237",
+        "intensity": "14042.056"
+    },
+    {
+        "pixel": "238",
+        "intensity": "14038.906"
+    },
+    {
+        "pixel": "239",
+        "intensity": "13634.99"
+    },
+    {
+        "pixel": "240",
+        "intensity": "13270.036"
+    },
+    {
+        "pixel": "241",
+        "intensity": "13465.135"
+    },
+    {
+        "pixel": "242",
+        "intensity": "13490.708"
+    },
+    {
+        "pixel": "243",
+        "intensity": "13404.235"
+    },
+    {
+        "pixel": "244",
+        "intensity": "13276.54"
+    },
+    {
+        "pixel": "245",
+        "intensity": "13273.659"
+    },
+    {
+        "pixel": "246",
+        "intensity": "13327.424"
+    },
+    {
+        "pixel": "247",
+        "intensity": "12945.486"
+    },
+    {
+        "pixel": "248",
+        "intensity": "12075.334"
+    },
+    {
+        "pixel": "249",
+        "intensity": "11940.758"
+    },
+    {
+        "pixel": "250",
+        "intensity": "11006.163"
+    },
+    {
+        "pixel": "251",
+        "intensity": "9705.797"
+    },
+    {
+        "pixel": "252",
+        "intensity": "8233.161"
+    },
+    {
+        "pixel": "253",
+        "intensity": "7266.255"
+    },
+    {
+        "pixel": "254",
+        "intensity": "7808.581"
+    },
+    {
+        "pixel": "255",
+        "intensity": "9249.838"
+    },
+    {
+        "pixel": "256",
+        "intensity": "10480.861"
+    },
+    {
+        "pixel": "257",
+        "intensity": "11358.581"
+    },
+    {
+        "pixel": "258",
+        "intensity": "12028.6"
+    },
+    {
+        "pixel": "259",
+        "intensity": "12343.662"
+    },
+    {
+        "pixel": "260",
+        "intensity": "12493.131"
+    },
+    {
+        "pixel": "261",
+        "intensity": "12582.474"
+    },
+    {
+        "pixel": "262",
+        "intensity": "12446.352"
+    },
+    {
+        "pixel": "263",
+        "intensity": "12365.953"
+    },
+    {
+        "pixel": "264",
+        "intensity": "12364.407"
+    },
+    {
+        "pixel": "265",
+        "intensity": "12755.144"
+    },
+    {
+        "pixel": "266",
+        "intensity": "13058.449"
+    },
+    {
+        "pixel": "267",
+        "intensity": "13159.293"
+    },
+    {
+        "pixel": "268",
+        "intensity": "13026.1"
+    },
+    {
+        "pixel": "269",
+        "intensity": "12830.579"
+    },
+    {
+        "pixel": "270",
+        "intensity": "12730.166"
+    },
+    {
+        "pixel": "271",
+        "intensity": "12798.3545"
+    },
+    {
+        "pixel": "272",
+        "intensity": "13221.612"
+    },
+    {
+        "pixel": "273",
+        "intensity": "13247.485"
+    },
+    {
+        "pixel": "274",
+        "intensity": "13261.525"
+    },
+    {
+        "pixel": "275",
+        "intensity": "13133.885"
+    },
+    {
+        "pixel": "276",
+        "intensity": "12690.151"
+    },
+    {
+        "pixel": "277",
+        "intensity": "12569.135"
+    },
+    {
+        "pixel": "278",
+        "intensity": "12787.966"
+    },
+    {
+        "pixel": "279",
+        "intensity": "12414.58"
+    },
+    {
+        "pixel": "280",
+        "intensity": "12151.546"
+    },
+    {
+        "pixel": "281",
+        "intensity": "11835.675"
+    },
+    {
+        "pixel": "282",
+        "intensity": "11514.368"
+    },
+    {
+        "pixel": "283",
+        "intensity": "11626.724"
+    },
+    {
+        "pixel": "284",
+        "intensity": "12069.032"
+    },
+    {
+        "pixel": "285",
+        "intensity": "12378.197"
+    },
+    {
+        "pixel": "286",
+        "intensity": "12690.751"
+    },
+    {
+        "pixel": "287",
+        "intensity": "12819.192"
+    },
+    {
+        "pixel": "288",
+        "intensity": "12871.579"
+    },
+    {
+        "pixel": "289",
+        "intensity": "12880.88"
+    },
+    {
+        "pixel": "290",
+        "intensity": "12682.019"
+    },
+    {
+        "pixel": "291",
+        "intensity": "12514.307"
+    },
+    {
+        "pixel": "292",
+        "intensity": "12470.444"
+    },
+    {
+        "pixel": "293",
+        "intensity": "12529.8545"
+    },
+    {
+        "pixel": "294",
+        "intensity": "12676.652"
+    },
+    {
+        "pixel": "295",
+        "intensity": "12753.044"
+    },
+    {
+        "pixel": "296",
+        "intensity": "12765.395"
+    },
+    {
+        "pixel": "297",
+        "intensity": "12757.846"
+    },
+    {
+        "pixel": "298",
+        "intensity": "12725.125"
+    },
+    {
+        "pixel": "299",
+        "intensity": "12792.509"
+    },
+    {
+        "pixel": "300",
+        "intensity": "12521.655"
+    },
+    {
+        "pixel": "301",
+        "intensity": "12456.43"
+    },
+    {
+        "pixel": "302",
+        "intensity": "12427.429"
+    },
+    {
+        "pixel": "303",
+        "intensity": "12172.799"
+    },
+    {
+        "pixel": "304",
+        "intensity": "12156.09"
+    },
+    {
+        "pixel": "305",
+        "intensity": "12401.515"
+    },
+    {
+        "pixel": "306",
+        "intensity": "12436.139"
+    },
+    {
+        "pixel": "307",
+        "intensity": "12091.974"
+    },
+    {
+        "pixel": "308",
+        "intensity": "11988.395"
+    },
+    {
+        "pixel": "309",
+        "intensity": "12082.566"
+    },
+    {
+        "pixel": "310",
+        "intensity": "12094.375"
+    },
+    {
+        "pixel": "311",
+        "intensity": "12086.571"
+    },
+    {
+        "pixel": "312",
+        "intensity": "12129.49"
+    },
+    {
+        "pixel": "313",
+        "intensity": "12141.588"
+    },
+    {
+        "pixel": "314",
+        "intensity": "12137.434"
+    },
+    {
+        "pixel": "315",
+        "intensity": "12386.993"
+    },
+    {
+        "pixel": "316",
+        "intensity": "12610.533"
+    },
+    {
+        "pixel": "317",
+        "intensity": "12347.593"
+    },
+    {
+        "pixel": "318",
+        "intensity": "12025.596"
+    },
+    {
+        "pixel": "319",
+        "intensity": "11918.392"
+    },
+    {
+        "pixel": "320",
+        "intensity": "12158.688"
+    },
+    {
+        "pixel": "321",
+        "intensity": "12217.017"
+    },
+    {
+        "pixel": "322",
+        "intensity": "12268.703"
+    },
+    {
+        "pixel": "323",
+        "intensity": "11995.487"
+    },
+    {
+        "pixel": "324",
+        "intensity": "11878.279"
+    },
+    {
+        "pixel": "325",
+        "intensity": "11675.87"
+    },
+    {
+        "pixel": "326",
+        "intensity": "11714.407"
+    },
+    {
+        "pixel": "327",
+        "intensity": "11569.775"
+    },
+    {
+        "pixel": "328",
+        "intensity": "11452.822"
+    },
+    {
+        "pixel": "329",
+        "intensity": "11216.344"
+    },
+    {
+        "pixel": "330",
+        "intensity": "11103.641"
+    },
+    {
+        "pixel": "331",
+        "intensity": "11374.368"
+    },
+    {
+        "pixel": "332",
+        "intensity": "11551.567"
+    },
+    {
+        "pixel": "333",
+        "intensity": "11545.057"
+    },
+    {
+        "pixel": "334",
+        "intensity": "11264.797"
+    },
+    {
+        "pixel": "335",
+        "intensity": "11177.955"
+    },
+    {
+        "pixel": "336",
+        "intensity": "11447.687"
+    },
+    {
+        "pixel": "337",
+        "intensity": "11398.322"
+    },
+    {
+        "pixel": "338",
+        "intensity": "11106.5205"
+    },
+    {
+        "pixel": "339",
+        "intensity": "10875.2705"
+    },
+    {
+        "pixel": "340",
+        "intensity": "10572.79"
+    },
+    {
+        "pixel": "341",
+        "intensity": "10061.412"
+    },
+    {
+        "pixel": "342",
+        "intensity": "9308.002"
+    },
+    {
+        "pixel": "343",
+        "intensity": "8001.697"
+    },
+    {
+        "pixel": "344",
+        "intensity": "6566.251"
+    },
+    {
+        "pixel": "345",
+        "intensity": "6503.73"
+    },
+    {
+        "pixel": "346",
+        "intensity": "7804.202"
+    },
+    {
+        "pixel": "347",
+        "intensity": "8953.8125"
+    },
+    {
+        "pixel": "348",
+        "intensity": "9653.595"
+    },
+    {
+        "pixel": "349",
+        "intensity": "10047.734"
+    },
+    {
+        "pixel": "350",
+        "intensity": "10718.932"
+    },
+    {
+        "pixel": "351",
+        "intensity": "11220.45"
+    },
+    {
+        "pixel": "352",
+        "intensity": "11428.303"
+    },
+    {
+        "pixel": "353",
+        "intensity": "11618.635"
+    },
+    {
+        "pixel": "354",
+        "intensity": "11666.384"
+    },
+    {
+        "pixel": "355",
+        "intensity": "11480.604"
+    },
+    {
+        "pixel": "356",
+        "intensity": "11544.039"
+    },
+    {
+        "pixel": "357",
+        "intensity": "11722.491"
+    },
+    {
+        "pixel": "358",
+        "intensity": "11788.954"
+    },
+    {
+        "pixel": "359",
+        "intensity": "12004.349"
+    },
+    {
+        "pixel": "360",
+        "intensity": "11843.341"
+    },
+    {
+        "pixel": "361",
+        "intensity": "11158.996"
+    },
+    {
+        "pixel": "362",
+        "intensity": "10884.555"
+    },
+    {
+        "pixel": "363",
+        "intensity": "11329.884"
+    },
+    {
+        "pixel": "364",
+        "intensity": "11481.703"
+    },
+    {
+        "pixel": "365",
+        "intensity": "11229.24"
+    },
+    {
+        "pixel": "366",
+        "intensity": "11195.589"
+    },
+    {
+        "pixel": "367",
+        "intensity": "11377.362"
+    },
+    {
+        "pixel": "368",
+        "intensity": "11537.937"
+    },
+    {
+        "pixel": "369",
+        "intensity": "11649.223"
+    },
+    {
+        "pixel": "370",
+        "intensity": "11703.896"
+    },
+    {
+        "pixel": "371",
+        "intensity": "11618.836"
+    },
+    {
+        "pixel": "372",
+        "intensity": "11414.394"
+    },
+    {
+        "pixel": "373",
+        "intensity": "11053.908"
+    },
+    {
+        "pixel": "374",
+        "intensity": "10859.479"
+    },
+    {
+        "pixel": "375",
+        "intensity": "11230.6875"
+    },
+    {
+        "pixel": "376",
+        "intensity": "11646.551"
+    },
+    {
+        "pixel": "377",
+        "intensity": "11755.092"
+    },
+    {
+        "pixel": "378",
+        "intensity": "11762.724"
+    },
+    {
+        "pixel": "379",
+        "intensity": "11746.89"
+    },
+    {
+        "pixel": "380",
+        "intensity": "11681.472"
+    },
+    {
+        "pixel": "381",
+        "intensity": "11700.169"
+    },
+    {
+        "pixel": "382",
+        "intensity": "11677.891"
+    },
+    {
+        "pixel": "383",
+        "intensity": "11299.235"
+    },
+    {
+        "pixel": "384",
+        "intensity": "10968.473"
+    },
+    {
+        "pixel": "385",
+        "intensity": "11184.602"
+    },
+    {
+        "pixel": "386",
+        "intensity": "11301.469"
+    },
+    {
+        "pixel": "387",
+        "intensity": "11300.367"
+    },
+    {
+        "pixel": "388",
+        "intensity": "11391.928"
+    },
+    {
+        "pixel": "389",
+        "intensity": "11554.447"
+    },
+    {
+        "pixel": "390",
+        "intensity": "11723.43"
+    },
+    {
+        "pixel": "391",
+        "intensity": "11506.231"
+    },
+    {
+        "pixel": "392",
+        "intensity": "11325.528"
+    },
+    {
+        "pixel": "393",
+        "intensity": "11074.732"
+    },
+    {
+        "pixel": "394",
+        "intensity": "10719.589"
+    },
+    {
+        "pixel": "395",
+        "intensity": "10875.885"
+    },
+    {
+        "pixel": "396",
+        "intensity": "11309.581"
+    },
+    {
+        "pixel": "397",
+        "intensity": "11394.879"
+    },
+    {
+        "pixel": "398",
+        "intensity": "11103.844"
+    },
+    {
+        "pixel": "399",
+        "intensity": "11137.73"
+    },
+    {
+        "pixel": "400",
+        "intensity": "11400.833"
+    },
+    {
+        "pixel": "401",
+        "intensity": "11283.001"
+    },
+    {
+        "pixel": "402",
+        "intensity": "11120.311"
+    },
+    {
+        "pixel": "403",
+        "intensity": "11490.888"
+    },
+    {
+        "pixel": "404",
+        "intensity": "11678.181"
+    },
+    {
+        "pixel": "405",
+        "intensity": "11559.473"
+    },
+    {
+        "pixel": "406",
+        "intensity": "11339.474"
+    },
+    {
+        "pixel": "407",
+        "intensity": "11486.146"
+    },
+    {
+        "pixel": "408",
+        "intensity": "11507.799"
+    },
+    {
+        "pixel": "409",
+        "intensity": "11332.844"
+    },
+    {
+        "pixel": "410",
+        "intensity": "11537.775"
+    },
+    {
+        "pixel": "411",
+        "intensity": "11420.213"
+    },
+    {
+        "pixel": "412",
+        "intensity": "11241.626"
+    },
+    {
+        "pixel": "413",
+        "intensity": "11105.932"
+    },
+    {
+        "pixel": "414",
+        "intensity": "10816.892"
+    },
+    {
+        "pixel": "415",
+        "intensity": "11063.102"
+    },
+    {
+        "pixel": "416",
+        "intensity": "11339.1875"
+    },
+    {
+        "pixel": "417",
+        "intensity": "11226.494"
+    },
+    {
+        "pixel": "418",
+        "intensity": "11068.355"
+    },
+    {
+        "pixel": "419",
+        "intensity": "11085.06"
+    },
+    {
+        "pixel": "420",
+        "intensity": "11324.165"
+    },
+    {
+        "pixel": "421",
+        "intensity": "11323.994"
+    },
+    {
+        "pixel": "422",
+        "intensity": "11210.108"
+    },
+    {
+        "pixel": "423",
+        "intensity": "11152.219"
+    },
+    {
+        "pixel": "424",
+        "intensity": "10775.569"
+    },
+    {
+        "pixel": "425",
+        "intensity": "10512.256"
+    },
+    {
+        "pixel": "426",
+        "intensity": "10649.516"
+    },
+    {
+        "pixel": "427",
+        "intensity": "10346.173"
+    },
+    {
+        "pixel": "428",
+        "intensity": "10480.645"
+    },
+    {
+        "pixel": "429",
+        "intensity": "10862.689"
+    },
+    {
+        "pixel": "430",
+        "intensity": "10925.294"
+    },
+    {
+        "pixel": "431",
+        "intensity": "10963.54"
+    },
+    {
+        "pixel": "432",
+        "intensity": "11103.47"
+    },
+    {
+        "pixel": "433",
+        "intensity": "10988.259"
+    },
+    {
+        "pixel": "434",
+        "intensity": "10853.781"
+    },
+    {
+        "pixel": "435",
+        "intensity": "10938.589"
+    },
+    {
+        "pixel": "436",
+        "intensity": "10909.281"
+    },
+    {
+        "pixel": "437",
+        "intensity": "10561.065"
+    },
+    {
+        "pixel": "438",
+        "intensity": "10309.733"
+    },
+    {
+        "pixel": "439",
+        "intensity": "10430.779"
+    },
+    {
+        "pixel": "440",
+        "intensity": "10388.475"
+    },
+    {
+        "pixel": "441",
+        "intensity": "10605.884"
+    },
+    {
+        "pixel": "442",
+        "intensity": "10865.199"
+    },
+    {
+        "pixel": "443",
+        "intensity": "11021.018"
+    },
+    {
+        "pixel": "444",
+        "intensity": "11030.151"
+    },
+    {
+        "pixel": "445",
+        "intensity": "11046.69"
+    },
+    {
+        "pixel": "446",
+        "intensity": "11162.217"
+    },
+    {
+        "pixel": "447",
+        "intensity": "11173.909"
+    },
+    {
+        "pixel": "448",
+        "intensity": "11182.126"
+    },
+    {
+        "pixel": "449",
+        "intensity": "11103.243"
+    },
+    {
+        "pixel": "450",
+        "intensity": "10779.609"
+    },
+    {
+        "pixel": "451",
+        "intensity": "10371.136"
+    },
+    {
+        "pixel": "452",
+        "intensity": "10558.058"
+    },
+    {
+        "pixel": "453",
+        "intensity": "10981.023"
+    },
+    {
+        "pixel": "454",
+        "intensity": "10974.285"
+    },
+    {
+        "pixel": "455",
+        "intensity": "10646.783"
+    },
+    {
+        "pixel": "456",
+        "intensity": "10573.477"
+    },
+    {
+        "pixel": "457",
+        "intensity": "10498.589"
+    },
+    {
+        "pixel": "458",
+        "intensity": "10522.101"
+    },
+    {
+        "pixel": "459",
+        "intensity": "10742.752"
+    },
+    {
+        "pixel": "460",
+        "intensity": "10898.613"
+    },
+    {
+        "pixel": "461",
+        "intensity": "10960.826"
+    },
+    {
+        "pixel": "462",
+        "intensity": "10890.843"
+    },
+    {
+        "pixel": "463",
+        "intensity": "10890.029"
+    },
+    {
+        "pixel": "464",
+        "intensity": "10854.3"
+    },
+    {
+        "pixel": "465",
+        "intensity": "10754.244"
+    },
+    {
+        "pixel": "466",
+        "intensity": "10622.349"
+    },
+    {
+        "pixel": "467",
+        "intensity": "10683.506"
+    },
+    {
+        "pixel": "468",
+        "intensity": "10660.443"
+    },
+    {
+        "pixel": "469",
+        "intensity": "10528.542"
+    },
+    {
+        "pixel": "470",
+        "intensity": "10439.672"
+    },
+    {
+        "pixel": "471",
+        "intensity": "10513.349"
+    },
+    {
+        "pixel": "472",
+        "intensity": "10707.872"
+    },
+    {
+        "pixel": "473",
+        "intensity": "10765.898"
+    },
+    {
+        "pixel": "474",
+        "intensity": "10797.184"
+    },
+    {
+        "pixel": "475",
+        "intensity": "10837.993"
+    },
+    {
+        "pixel": "476",
+        "intensity": "10774.757"
+    },
+    {
+        "pixel": "477",
+        "intensity": "10773.375"
+    },
+    {
+        "pixel": "478",
+        "intensity": "10701.732"
+    },
+    {
+        "pixel": "479",
+        "intensity": "10631.983"
+    },
+    {
+        "pixel": "480",
+        "intensity": "10527.974"
+    },
+    {
+        "pixel": "481",
+        "intensity": "10521.898"
+    },
+    {
+        "pixel": "482",
+        "intensity": "10461.526"
+    },
+    {
+        "pixel": "483",
+        "intensity": "10450.568"
+    },
+    {
+        "pixel": "484",
+        "intensity": "10505.972"
+    },
+    {
+        "pixel": "485",
+        "intensity": "10435.952"
+    },
+    {
+        "pixel": "486",
+        "intensity": "10403.001"
+    },
+    {
+        "pixel": "487",
+        "intensity": "10379.633"
+    },
+    {
+        "pixel": "488",
+        "intensity": "10339.415"
+    },
+    {
+        "pixel": "489",
+        "intensity": "10322.149"
+    },
+    {
+        "pixel": "490",
+        "intensity": "10368.617"
+    },
+    {
+        "pixel": "491",
+        "intensity": "10348.526"
+    },
+    {
+        "pixel": "492",
+        "intensity": "10431.363"
+    },
+    {
+        "pixel": "493",
+        "intensity": "10404.075"
+    },
+    {
+        "pixel": "494",
+        "intensity": "10249.425"
+    },
+    {
+        "pixel": "495",
+        "intensity": "10272.095"
+    },
+    {
+        "pixel": "496",
+        "intensity": "10397.566"
+    },
+    {
+        "pixel": "497",
+        "intensity": "10414.316"
+    },
+    {
+        "pixel": "498",
+        "intensity": "10435.53"
+    },
+    {
+        "pixel": "499",
+        "intensity": "10408.373"
+    },
+    {
+        "pixel": "500",
+        "intensity": "10423.017"
+    },
+    {
+        "pixel": "501",
+        "intensity": "10426.257"
+    },
+    {
+        "pixel": "502",
+        "intensity": "10360.118"
+    },
+    {
+        "pixel": "503",
+        "intensity": "10306.289"
+    },
+    {
+        "pixel": "504",
+        "intensity": "10256.763"
+    },
+    {
+        "pixel": "505",
+        "intensity": "10231.83"
+    },
+    {
+        "pixel": "506",
+        "intensity": "10088.335"
+    },
+    {
+        "pixel": "507",
+        "intensity": "9962.506"
+    },
+    {
+        "pixel": "508",
+        "intensity": "10091.301"
+    },
+    {
+        "pixel": "509",
+        "intensity": "10225.473"
+    },
+    {
+        "pixel": "510",
+        "intensity": "10228.186"
+    },
+    {
+        "pixel": "511",
+        "intensity": "10349.421"
+    },
+    {
+        "pixel": "512",
+        "intensity": "10177.592"
+    },
+    {
+        "pixel": "513",
+        "intensity": "10074.388"
+    },
+    {
+        "pixel": "514",
+        "intensity": "10125.138"
+    },
+    {
+        "pixel": "515",
+        "intensity": "10271.364"
+    },
+    {
+        "pixel": "516",
+        "intensity": "10304.292"
+    },
+    {
+        "pixel": "517",
+        "intensity": "10290.632"
+    },
+    {
+        "pixel": "518",
+        "intensity": "10287.951"
+    },
+    {
+        "pixel": "519",
+        "intensity": "10236.169"
+    },
+    {
+        "pixel": "520",
+        "intensity": "10233.903"
+    },
+    {
+        "pixel": "521",
+        "intensity": "10198.169"
+    },
+    {
+        "pixel": "522",
+        "intensity": "10061.181"
+    },
+    {
+        "pixel": "523",
+        "intensity": "9940.109"
+    },
+    {
+        "pixel": "524",
+        "intensity": "9849.36"
+    },
+    {
+        "pixel": "525",
+        "intensity": "10033.944"
+    },
+    {
+        "pixel": "526",
+        "intensity": "10139.931"
+    },
+    {
+        "pixel": "527",
+        "intensity": "10167.3"
+    },
+    {
+        "pixel": "528",
+        "intensity": "10180.616"
+    },
+    {
+        "pixel": "529",
+        "intensity": "9967.302"
+    },
+    {
+        "pixel": "530",
+        "intensity": "9651.581"
+    },
+    {
+        "pixel": "531",
+        "intensity": "9861.691"
+    },
+    {
+        "pixel": "532",
+        "intensity": "10039.456"
+    },
+    {
+        "pixel": "533",
+        "intensity": "10046.313"
+    },
+    {
+        "pixel": "534",
+        "intensity": "9955.966"
+    },
+    {
+        "pixel": "535",
+        "intensity": "9938.761"
+    },
+    {
+        "pixel": "536",
+        "intensity": "9930.992"
+    },
+    {
+        "pixel": "537",
+        "intensity": "9848.074"
+    },
+    {
+        "pixel": "538",
+        "intensity": "9534.5625"
+    },
+    {
+        "pixel": "539",
+        "intensity": "9155.206"
+    },
+    {
+        "pixel": "540",
+        "intensity": "8861.453"
+    },
+    {
+        "pixel": "541",
+        "intensity": "8576.189"
+    },
+    {
+        "pixel": "542",
+        "intensity": "8026.594"
+    },
+    {
+        "pixel": "543",
+        "intensity": "7403.311"
+    },
+    {
+        "pixel": "544",
+        "intensity": "6440.4194"
+    },
+    {
+        "pixel": "545",
+        "intensity": "6553.07"
+    },
+    {
+        "pixel": "546",
+        "intensity": "7444.339"
+    },
+    {
+        "pixel": "547",
+        "intensity": "8108.9214"
+    },
+    {
+        "pixel": "548",
+        "intensity": "8486.222"
+    },
+    {
+        "pixel": "549",
+        "intensity": "8728.912"
+    },
+    {
+        "pixel": "550",
+        "intensity": "8996.393"
+    },
+    {
+        "pixel": "551",
+        "intensity": "9384.791"
+    },
+    {
+        "pixel": "552",
+        "intensity": "9631.36"
+    },
+    {
+        "pixel": "553",
+        "intensity": "9658.223"
+    },
+    {
+        "pixel": "554",
+        "intensity": "9886.806"
+    },
+    {
+        "pixel": "555",
+        "intensity": "9926.852"
+    },
+    {
+        "pixel": "556",
+        "intensity": "9942.397"
+    },
+    {
+        "pixel": "557",
+        "intensity": "10055.23"
+    },
+    {
+        "pixel": "558",
+        "intensity": "10148.138"
+    },
+    {
+        "pixel": "559",
+        "intensity": "10153.151"
+    },
+    {
+        "pixel": "560",
+        "intensity": "10175.184"
+    },
+    {
+        "pixel": "561",
+        "intensity": "10268.645"
+    },
+    {
+        "pixel": "562",
+        "intensity": "10263.575"
+    },
+    {
+        "pixel": "563",
+        "intensity": "10089.262"
+    },
+    {
+        "pixel": "564",
+        "intensity": "10071.235"
+    },
+    {
+        "pixel": "565",
+        "intensity": "10188.727"
+    },
+    {
+        "pixel": "566",
+        "intensity": "10084.874"
+    },
+    {
+        "pixel": "567",
+        "intensity": "9729.964"
+    },
+    {
+        "pixel": "568",
+        "intensity": "9327.3545"
+    }
+]
