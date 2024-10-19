@@ -1,42 +1,49 @@
-import { useMeasure } from "@/hooks/use-measure";
-import { Group } from "@visx/group";
-import { GridColumns, GridRows } from "@visx/grid";
-import { scaleLinear } from "@visx/scale";
-import * as d3 from "@visx/vendor/d3-array";
-import { LinePath } from "@visx/shape";
-import { curveLinear } from "@visx/curve";
-import { AxisBottom, AxisLeft } from "@visx/axis";
+import { useMeasure } from "@/hooks/use-measure"
+import { AxisBottom, AxisLeft } from "@visx/axis"
+import { curveLinear } from "@visx/curve"
+import { GridColumns, GridRows } from "@visx/grid"
+import { Group } from "@visx/group"
+import { scaleLinear } from "@visx/scale"
+import { LinePath } from "@visx/shape"
+import * as d3 from "@visx/vendor/d3-array"
+import { useMemo } from "react"
 
 interface Json1DPlotProps {
   data: [SpectrumPoint]
 }
 
 interface SpectrumPoint {
-  pixel: number,
+  pixel: number
   intensity: number
 }
 
 // data accessors
-const getX = (p: SpectrumPoint) => p?.pixel ?? 0;
-const getY = (p: SpectrumPoint) => p?.intensity ?? 0;
+const getX = (p: SpectrumPoint) => p?.pixel ?? 0
+const getY = (p: SpectrumPoint) => p?.intensity ?? 0
 
-const height = 300;
-const margin = { top: 40, right: 30, bottom: 50, left: 55 };
+const height = 300
+const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
 export default function Json1DPlot({ data }: Json1DPlotProps) {
-
   console.log(data)
 
-  const xScale = scaleLinear<number>({
-    domain: d3.extent(data, getX) as [number, number]
-  })
-  const yScale = scaleLinear<number>({ domain: [0, d3.max(data, getY)!] })
+  const { xScale, yScale } = useMemo(() => {
+    return {
+      data,
+      xScale: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
+      yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
+    }
+  }, [data])
 
   // bounds
-  const [measureRef, measured] = useMeasure<HTMLDivElement>();
-  const width = measured.width ?? 0;
-  const xMax = Math.max(width - margin.left - margin.right, 0);
-  const yMax = Math.max(height - margin.top - margin.bottom, 0);
+  const [measureRef, measured] = useMeasure<HTMLDivElement>()
+  const width = measured.width ?? 0
+  const xMax = Math.max(width - margin.left - margin.right, 0)
+  const yMax = Math.max(height - margin.top - margin.bottom, 0)
+
+  // update scale output ranges
+  xScale.range([0, xMax])
+  yScale.range([yMax, 0])
 
   return (
     <div ref={measureRef}>
@@ -57,8 +64,8 @@ export default function Json1DPlot({ data }: Json1DPlotProps) {
           <LinePath<SpectrumPoint>
             curve={curveLinear}
             data={data}
-            x={(p) => xScale(getX(p)) ?? 0}
-            y={(p) => yScale(getY(p)) ?? 0}
+            x={p => xScale(getX(p)) ?? 0}
+            y={p => yScale(getY(p)) ?? 0}
             shapeRendering="geometricPrecision"
             className="stroke-primary stroke-1"
           />
