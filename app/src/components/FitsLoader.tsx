@@ -1,5 +1,6 @@
 import { useState, ChangeEvent } from "react";
 import Json1DPlot from "./Json1DPlot";
+import { cn } from "@/lib/utils"
 
 const LoadingStates = {
   WAITING: 0,
@@ -48,6 +49,7 @@ export default function FitsLoader({ }) {
 
   return (
     <>
+      <h1 className={cn("text-2xl font-bold")}>Empirical Comparison Lamp</h1>
       {loadingState != LoadingStates.FINISHED
         && <input
           type="file"
