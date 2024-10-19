@@ -25,7 +25,6 @@ const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
 export default function Json1DPlot({ data }: Json1DPlotProps) {
-  console.log(data)
 
   const { xScale, yScale } = useMemo(() => {
     return {
