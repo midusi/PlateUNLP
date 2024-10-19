@@ -56,15 +56,18 @@ def extract_lamp_info(filepath:str, normalize:bool=False):
     
     return obs_x, obs_y, headers
 
-def jsonifyFits1D(path:str):
+def jsonifyFits1D(path_save:str):
     #folder_path = "C:\\Users\\santi\\OneDrive\\Documentos\\Doctorado\\Datos Crudos" #Home
-    folder_path = "/home/sponte/Documentos/Doctorado/AppAlineado/AppAlineado/db/exampleLampsFiles/Conjunto_Original(HeNeAr)/WCOMPs" #Lab
+    
+    #folder_path = "/home/sponte/Documentos/Doctorado/AppAlineado/AppAlineado/db/exampleLampsFiles/Conjunto_Original(HeNeAr)/WCOMPs" #Lab
+    folder_path = "C:\\Users\\santi\\OneDrive\\Documentos\\Doctorado\\AppAlineado\\AppAlineado\\db\\exampleLampsFiles\\Conjunto_Original(HeNeAr)\\WCOMPs" # home
     ff = FileFinder(folder_path=folder_path)
     start_array = ["WOBJ", "WCOMP"]
     filesW = ff.filename_in_folder(startwhith=start_array)
     filesW = filesW["WOBJ"] + filesW["WCOMP"]
 
-    folder_path = "/home/sponte/Documentos/Doctorado/AppAlineado/AppAlineado/db/exampleLampsFiles/Conjunto_Original(HeNeAr)/EFBTCOMPs" #Lab
+    #folder_path = "/home/sponte/Documentos/Doctorado/AppAlineado/AppAlineado/db/exampleLampsFiles/Conjunto_Original(HeNeAr)/EFBTCOMPs" #Lab
+    folder_path = "C:\\Users\\santi\\OneDrive\\Documentos\\Doctorado\\AppAlineado\\AppAlineado\\db\\exampleLampsFiles\\Conjunto_Original(HeNeAr)\\EFBTCOMPs" # home
     ff = FileFinder(folder_path=folder_path)
     start_array = ["EFBTOBJ", "EFBTCOMP"]
     filesEFBT = ff.filename_in_folder(startwhith=start_array)
@@ -72,13 +75,13 @@ def jsonifyFits1D(path:str):
 
     for file in filesW:
         name = file.split('/')[-1].split('.')[0]
-        print(name)
         emp_x, emp_y, emp_head = extract_lamp_info(file, normalize=False)
 
-        for_json = [{"pix":str(it[0]), "wav":str(it[1])} for it in zip(emp_x, emp_y)]
+        for_json = [{"pixel":str(it[0]), "intensity":str(it[1])} for it in zip(emp_x, emp_y)]
 
-        with open(os.path.join(path,f"{name}.json"), "w") as archivo_json:
+        with open(os.path.join(path_save,f"{name}.json"), "w") as archivo_json:
             json.dump(for_json, archivo_json, indent=4)
 
-path_save = '/home/sponte/Documentos/Doctorado/AppAlineado/AppAlineado/db/exampleLampsFiles/Conjunto_Original(HeNeAr)/WCOMPs_JSON'
-jsonifyFits1D(path=path_save)
+# path_save = '/home/sponte/Documentos/Doctorado/AppAlineado/AppAlineado/db/exampleLampsFiles/Conjunto_Original(HeNeAr)/WCOMPsJSON' #Lab
+path_save = 'C:\\Users\\santi\\OneDrive\\Documentos\\Doctorado\\AppAlineado\\AppAlineado\\db\\exampleLampsFiles\\Conjunto_Original(HeNeAr)\\WCOMPsJSON' #Home
+jsonifyFits1D(path_save=path_save)
