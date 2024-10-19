@@ -2,6 +2,7 @@ import { ReferenceLampForm } from "@/components/ReferenceLampForm";
 import { ReferenceLampRange } from "@/components/ReferenceLampRange";
 import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum";
 import FitsLoader from "./components/FitsLoader";
+import { cn } from "@/lib/utils"
 
 export default function App() {
   return (
@@ -18,6 +19,9 @@ export default function App() {
         <section className="space-y-0 my-8">
           <ReferenceLampRange />
           <ReferenceLampSpectrum />
+          <h1 className={cn("text-2xl font-bold")}>Empirical Comparison Lamp</h1>
+          <FitsLoader />
+          <h1 className={cn("text-2xl font-bold")}>Empirical Spectrum</h1>
           <FitsLoader />
         </section>
       </main>
