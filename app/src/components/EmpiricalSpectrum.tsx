@@ -8,24 +8,19 @@ import { LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
 
-interface Json1DPlotProps {
-  data: [SpectrumPoint]
-}
-
-interface SpectrumPoint {
+export interface EmpiricalSpectrumPoint {
   pixel: number
   intensity: number
 }
 
 // data accessors
-const getX = (p: SpectrumPoint) => p?.pixel ?? 0
-const getY = (p: SpectrumPoint) => p?.intensity ?? 0
+const getX = (p: EmpiricalSpectrumPoint) => p?.pixel ?? 0
+const getY = (p: EmpiricalSpectrumPoint) => p?.intensity ?? 0
 
 const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
-export default function Json1DPlot({ data }: Json1DPlotProps) {
-
+export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoint[], color: string }) {
   const { xScale, yScale } = useMemo(() => {
     return {
       data,
@@ -60,18 +55,19 @@ export default function Json1DPlot({ data }: Json1DPlotProps) {
             height={yMax}
             className="stroke-neutral-100"
           />
-          <LinePath<SpectrumPoint>
+          <LinePath<EmpiricalSpectrumPoint>
             curve={curveLinear}
             data={data}
             x={p => xScale(getX(p)) ?? 0}
             y={p => yScale(getY(p)) ?? 0}
             shapeRendering="geometricPrecision"
-            className="stroke-primary stroke-1"
+            className="stroke-1"
+            style={{ stroke: color }}
           />
           <AxisBottom
             scale={xScale}
             top={yMax}
-            label="Wavelength (Å)"
+            label="Pixel"
             numTicks={Math.floor(xMax / 80)}
           />
           <AxisLeft scale={yScale} label="Intensity" />

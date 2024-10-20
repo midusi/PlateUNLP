@@ -1,49 +1,46 @@
+import type { EmpiricalSpectrumPoint } from "./EmpiricalSpectrum"
 import { parseFITS } from "fits2js"
 import { type ChangeEvent, useState } from "react"
-import Json1DPlot from "./Json1DPlot"
+import { EmpiricalSpectrum } from "./EmpiricalSpectrum"
 
-const LoadingStates = {
-  WAITING: 0,
-  INPROCCES: 1,
-  FINISHED: 2,
-  ERROR: 3,
-}
+type LoadingState = "waiting" | "processing" | "finished" | "error"
 
-export default function FitsLoader() {
-  const [loadingState, setLoadingState] = useState(LoadingStates.WAITING)
-  const [fileContent, setFileContent] = useState<any | null>(null)
+export function FitsLoader({ plotColor }: { plotColor: string }) {
+  const [loadingState, setLoadingState] = useState<LoadingState>("waiting")
+  const [loadedData, setLoadedData] = useState<EmpiricalSpectrumPoint[] | null>(null)
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     if (event.target.files) {
       const file = event.target.files[0]
-      setLoadingState(LoadingStates.INPROCCES)
+      setLoadingState("processing")
       const reader = new FileReader()
       reader.readAsArrayBuffer(file)
       reader.onload = () => {
         if (reader.result) {
           try {
             const fits = parseFITS(reader.result as ArrayBuffer, 1)
-            const json = fits.data.map((value, i) => ({ pixel: i, intensity: value }))
-            setFileContent(json)
-            setLoadingState(LoadingStates.FINISHED)
+            const json = fits.data.map(
+              (value, i): EmpiricalSpectrumPoint => ({ pixel: i, intensity: value }),
+            )
+            setLoadedData(json)
+            setLoadingState("finished")
           }
           catch (error) {
             console.error("Error al parsear el JSON:", error)
-            setLoadingState(LoadingStates.ERROR)
+            setLoadingState("error")
           }
         }
       }
       reader.onerror = () => {
         console.error("Error al leer el archivo")
-        setLoadingState(LoadingStates.ERROR)
+        setLoadingState("error")
       }
     }
   }
 
   return (
     <>
-      {loadingState !== LoadingStates.FINISHED
-      && (
+      {loadingState !== "finished" && (
         <input
           type="file"
           id="fileInput"
@@ -51,10 +48,8 @@ export default function FitsLoader() {
           accept=".fit,.fits"
         />
       )}
-      {loadingState === LoadingStates.INPROCCES
-      && <p>Cargando contenido...</p>}
-      {fileContent
-      && <Json1DPlot data={fileContent} />}
+      {loadingState === "processing" && <p>Cargando contenido...</p>}
+      {loadedData && <EmpiricalSpectrum data={loadedData} color={plotColor} />}
     </>
   )
 }
