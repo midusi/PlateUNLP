@@ -1,64 +1,60 @@
-import { useState, ChangeEvent } from "react";
-import Json1DPlot from "./Json1DPlot";
+import { parseFITS } from "fits2js"
+import { type ChangeEvent, useState } from "react"
+import Json1DPlot from "./Json1DPlot"
 
 const LoadingStates = {
   WAITING: 0,
   INPROCCES: 1,
   FINISHED: 2,
   ERROR: 3,
-};
-
-interface JsonData {
-  pixel: string,
-  intensity: string
 }
 
-export default function FitsLoader({ }) {
-  const [loadingState, setLoadingState] = useState(LoadingStates.WAITING);
-  const [fileContent, setFileContent] = useState<any | null>(null);
+export default function FitsLoader() {
+  const [loadingState, setLoadingState] = useState(LoadingStates.WAITING)
+  const [fileContent, setFileContent] = useState<any | null>(null)
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     if (event.target.files) {
-      const file = event.target.files[0];
-      setLoadingState(LoadingStates.INPROCCES);
-      const reader = new FileReader();
-      reader.readAsText(file);
+      const file = event.target.files[0]
+      setLoadingState(LoadingStates.INPROCCES)
+      const reader = new FileReader()
+      reader.readAsArrayBuffer(file)
       reader.onload = () => {
         if (reader.result) {
           try {
-            const jsonContent = JSON.parse(reader.result as string);
-            const interpretedContent = jsonContent.map((item: JsonData) => ({
-              pixel: parseInt(item.pixel, 10),
-              intensity: parseFloat(item.intensity)
-            }));
-            setFileContent(interpretedContent);
-            setLoadingState(LoadingStates.FINISHED);
-          } catch (error) {
-            console.error("Error al parsear el JSON:", error);
-            setLoadingState(LoadingStates.ERROR);
+            const fits = parseFITS(reader.result as ArrayBuffer, 1)
+            const json = fits.data.map((value, i) => ({ pixel: i, intensity: value }))
+            setFileContent(json)
+            setLoadingState(LoadingStates.FINISHED)
+          }
+          catch (error) {
+            console.error("Error al parsear el JSON:", error)
+            setLoadingState(LoadingStates.ERROR)
           }
         }
-      };
+      }
       reader.onerror = () => {
-        console.error("Error al leer el archivo");
-        setLoadingState(LoadingStates.ERROR);
-      };
+        console.error("Error al leer el archivo")
+        setLoadingState(LoadingStates.ERROR)
+      }
     }
   }
 
   return (
     <>
-      {loadingState != LoadingStates.FINISHED
-        && <input
+      {loadingState !== LoadingStates.FINISHED
+      && (
+        <input
           type="file"
           id="fileInput"
           onChange={handleFileChange}
-          accept=".json"
-        />}
-      {loadingState == LoadingStates.INPROCCES
-        && <p>Cargando contenido...</p>}
+          accept=".fit,.fits"
+        />
+      )}
+      {loadingState === LoadingStates.INPROCCES
+      && <p>Cargando contenido...</p>}
       {fileContent
-        && <Json1DPlot data={fileContent} />}
+      && <Json1DPlot data={fileContent} />}
     </>
-  );
+  )
 }
