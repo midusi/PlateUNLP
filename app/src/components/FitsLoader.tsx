@@ -18,10 +18,19 @@ export function FitsLoader({ plotColor }: { plotColor: string }) {
       reader.onload = () => {
         if (reader.result) {
           try {
-            const fits = parseFITS(reader.result as ArrayBuffer, 1)
-            const json = fits.data.map(
-              (value, i): EmpiricalSpectrumPoint => ({ pixel: i, intensity: value }),
-            )
+            let json: EmpiricalSpectrumPoint[]
+            if (file.name.startsWith("WCOMP")) {
+              const fits = parseFITS(reader.result as ArrayBuffer, 1)
+              json = fits.data.map(
+                (value, i): EmpiricalSpectrumPoint => ({ pixel: i, intensity: value }),
+              )
+            }
+            else { // WOBJ y otros nombres
+              const fits = parseFITS(reader.result as ArrayBuffer, 3)
+              json = fits.data[0][0].map( // Hay 4 indices en [x][0], en este caso elegimos x=0
+                (value, i): EmpiricalSpectrumPoint => ({ pixel: i, intensity: value }),
+              )
+            }
             setLoadedData(json)
             setLoadingState("finished")
           }
