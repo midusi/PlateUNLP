@@ -1,5 +1,5 @@
 import type { EmpiricalSpectrumPoint } from "./EmpiricalSpectrum"
-import { parseFITS } from "fits2js"
+import { FITS } from "fits2js"
 import { type ChangeEvent, useState } from "react"
 import { EmpiricalSpectrum } from "./EmpiricalSpectrum"
 
@@ -18,19 +18,14 @@ export function FitsLoader({ plotColor }: { plotColor: string }) {
       reader.onload = () => {
         if (reader.result) {
           try {
-            let json: EmpiricalSpectrumPoint[]
-            if (file.name.startsWith("WCOMP")) {
-              const fits = parseFITS(reader.result as ArrayBuffer, 1)
-              json = fits.data.map(
-                (value, i): EmpiricalSpectrumPoint => ({ pixel: i, intensity: value }),
-              )
-            }
-            else { // WOBJ y otros nombres
-              const fits = parseFITS(reader.result as ArrayBuffer, 3)
-              json = fits.data[0][0].map( // Hay 4 indices en [x][0], en este caso elegimos x=0
-                (value, i): EmpiricalSpectrumPoint => ({ pixel: i, intensity: value }),
-              )
-            }
+            const fits = FITS.fromBuffer(reader.result as ArrayBuffer, null)
+            // This code takes the first row of the data and maps it to a JSON object
+            // with the pixel and intensity values. It does it like this because there
+            // are some FITS files that have more than one row of data, but taking the
+            // first row is enough for now.
+            const json = Array.from(fits.getData().take(fits.NAXISn[0])).map(
+              ({ coordinates, value }): EmpiricalSpectrumPoint => ({ pixel: coordinates[0], intensity: value }),
+            )
             setLoadedData(json)
             setLoadingState("finished")
           }
