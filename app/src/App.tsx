@@ -18,10 +18,14 @@ export default function App() {
         <section className="space-y-0 my-8">
           <ReferenceLampRange />
           <ReferenceLampSpectrum />
-          <h1 className="text-2xl font-bold">Empirical Comparison Lamp</h1>
-          <FitsLoader plotColor="#0ea5e9" />
-          <h1 className="text-2xl font-bold">Empirical Spectrum</h1>
-          <FitsLoader plotColor="#16a34a" />
+          <div>
+            <h1 className="text-2xl font-bold">Empirical Comparison Lamp</h1>
+            <FitsLoader plotColor="#0ea5e9" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Empirical Spectrum</h1>
+            <FitsLoader plotColor="#16a34a" />
+          </div>
         </section>
       </main>
 
