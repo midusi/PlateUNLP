@@ -23,15 +23,20 @@ export WORKSPACE_PATH=pah
 Para levantar el conjunto de contenedores ejecutar:
 ```
 # Modo Desarrollo
-docker-compose --profile development --env-file=.env up
+export WORKSPACE_PATH='ruta de trabajo'
+docker-compose --profile development
 
 # Modo Producción
-docker-compose --profile production --env-file=.env up
+export WORKSPACE_PATH='ruta de trabajo'
+docker-compose --profile production
 ```
 En caso de que lo que quiera sea actualizar los contenedores agregue al final el tag `--build`, tal que asi:
 ```
-docker-compose --profile development --env-file=.env up --build
-docker-compose --profile production --env-file=.env up --build
+export WORKSPACE_PATH='ruta de trabajo'
+docker-compose --profile development --build
+
+export WORKSPACE_PATH='ruta de trabajo'
+docker-compose --profile production --build
 ```
 
 ### Acceso a la app
