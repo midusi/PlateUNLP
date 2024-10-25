@@ -24,11 +24,11 @@ Para levantar el conjunto de contenedores ejecutar:
 ```
 # Modo Desarrollo
 export WORKSPACE_PATH='ruta de trabajo'
-docker-compose --profile development
+docker-compose --profile development up
 
 # Modo Producción
 export WORKSPACE_PATH='ruta de trabajo'
-docker-compose --profile production
+docker-compose --profile production up
 ```
 En caso de que lo que quiera sea actualizar los contenedores agregue al final el tag `--build`, tal que asi:
 ```
