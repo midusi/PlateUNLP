@@ -4,7 +4,7 @@ import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
 import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
-import { LinePath } from "@visx/shape"
+import { Circle, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
 
@@ -39,9 +39,18 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   xScale.range([0, xMax])
   yScale.range([yMax, 0])
 
+  // Point logic
+  const highlightPoint = { pixel: 100, intensity: 50 } // valores de ejemplo
+
   return (
     <div ref={measureRef}>
       <svg width={width} height={height}>
+        <Circle
+          cx={xScale(getX(highlightPoint)) ?? 0}
+          cy={yScale(getY(highlightPoint)) ?? 0}
+          r={4}
+          fill="red"
+        />
         <Group top={margin.top} left={margin.left}>
           <GridColumns
             scale={xScale}
