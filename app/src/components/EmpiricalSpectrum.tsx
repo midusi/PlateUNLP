@@ -44,10 +44,16 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   function onClick(event: React.MouseEvent<SVGSVGElement>) {
     // Obtener la posición del clic relativo al SVG
     const svgRect = event.currentTarget.getBoundingClientRect()
-    const xClick = event.clientX - svgRect.left - margin.left
-    const yClick = event.clientY - svgRect.top - margin.top
+    const xClick = event.clientX - svgRect.left
+    const yClick = event.clientY - svgRect.top
+    //let yClick = data[xClick].intensity
+    //const yClick = 1 - svgRect.top + margin.bottom//
 
     // Actualizar la posición del clic en el estado
+    console.log('event.clientY', event.clientY)
+    console.log('svgRect.top', svgRect.top)
+    const y = xScale.invert(xClick - margin.left)
+    console.log("x", y)
     setClickPosition({ x: xClick, y: yClick })
   }
 
