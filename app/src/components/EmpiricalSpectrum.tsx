@@ -6,7 +6,7 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Circle, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 export interface EmpiricalSpectrumPoint {
   pixel: number
@@ -40,14 +40,23 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   yScale.range([yMax, 0])
 
   // Point logic
-  const highlightPoint = { pixel: 100, intensity: 50 } // valores de ejemplo
+  const [clickPosition, setClickPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 })
+  function onClick(event: React.MouseEvent<SVGSVGElement>) {
+    // Obtener la posición del clic relativo al SVG
+    const svgRect = event.currentTarget.getBoundingClientRect()
+    const xClick = event.clientX - svgRect.left - margin.left
+    const yClick = event.clientY - svgRect.top - margin.top
+
+    // Actualizar la posición del clic en el estado
+    setClickPosition({ x: xClick, y: yClick })
+  }
 
   return (
     <div ref={measureRef}>
-      <svg width={width} height={height}>
+      <svg width={width} height={height} onClick={onClick}>
         <Circle
-          cx={xScale(getX(highlightPoint)) ?? 0}
-          cy={yScale(getY(highlightPoint)) ?? 0}
+          cx={clickPosition.x}
+          cy={clickPosition.y}
           r={4}
           fill="red"
         />
