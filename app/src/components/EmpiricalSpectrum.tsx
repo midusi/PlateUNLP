@@ -42,26 +42,24 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   // Point logic
   const [clickPosition, setClickPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 })
   function onClick(event: React.MouseEvent<SVGSVGElement>) {
-    // Obtener la posición del clic relativo al SVG
     const svgRect = event.currentTarget.getBoundingClientRect()
-    const xClick = event.clientX - svgRect.left
-    const yClick = event.clientY - svgRect.top
-    //let yClick = data[xClick].intensity
-    //const yClick = 1 - svgRect.top + margin.bottom//
 
-    // Actualizar la posición del clic en el estado
-    console.log('event.clientY', event.clientY)
-    console.log('svgRect.top', svgRect.top)
-    const y = xScale.invert(xClick - margin.left)
-    console.log("x", y)
-    setClickPosition({ x: xClick, y: yClick })
+    // clic X relativo al SVG
+    const xClick = event.clientX - svgRect.left - margin.left
+
+    const xVal = xScale.invert(xClick)
+    const yMatch = data[Math.round(xVal) - 1]
+    if (yMatch) {
+      const yVal = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(yMatch.intensity))
+      setClickPosition({ x: xClick, y: yVal })
+    }
   }
 
   return (
     <div ref={measureRef}>
       <svg width={width} height={height} onClick={onClick}>
         <Circle
-          cx={clickPosition.x}
+          cx={clickPosition.x + margin.left}
           cy={clickPosition.y}
           r={4}
           fill="red"
