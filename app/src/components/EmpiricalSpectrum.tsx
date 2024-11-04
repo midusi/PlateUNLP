@@ -40,13 +40,10 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   yScale.range([yMax, 0])
 
   // Point logic
-  const [clickPosition, setClickPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 })
+  const [clickPosition, setClickPosition] = useState<{ x: number, y: number } | null>(null)
   function onClick(event: React.MouseEvent<SVGSVGElement>) {
     const svgRect = event.currentTarget.getBoundingClientRect()
-
-    // clic X relativo al SVG
     const xClick = event.clientX - svgRect.left - margin.left
-
     const xVal = xScale.invert(xClick)
     const yMatch = data[Math.round(xVal) - 1]
     if (yMatch) {
@@ -58,12 +55,15 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   return (
     <div ref={measureRef}>
       <svg width={width} height={height} onClick={onClick}>
-        <Circle
-          cx={clickPosition.x + margin.left}
-          cy={clickPosition.y}
-          r={4}
-          fill="red"
-        />
+        {clickPosition
+          && (
+            <Circle
+              cx={clickPosition.x + margin.left}
+              cy={clickPosition.y}
+              r={4}
+              fill="red"
+            />
+          )}
         <Group top={margin.top} left={margin.left}>
           <GridColumns
             scale={xScale}
