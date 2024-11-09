@@ -1,3 +1,5 @@
+import type { JSX } from "react/jsx-runtime"
+import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
@@ -6,7 +8,7 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Circle, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
-import { useMemo, useState } from "react"
+import { JSXElementConstructor, ReactElement, ReactNode, useMemo, useState } from "react"
 
 export interface EmpiricalSpectrumPoint {
   pixel: number
@@ -40,30 +42,39 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   yScale.range([yMax, 0])
 
   // Point logic
-  const [clickPosition, setClickPosition] = useState<{ x: number, y: number } | null>(null)
-  function onClick(event: React.MouseEvent<SVGSVGElement>) {
-    const svgRect = event.currentTarget.getBoundingClientRect()
-    const xClick = event.clientX - svgRect.left - margin.left
-    const xVal = xScale.invert(xClick)
+  const [lampPoints, setLampPoints] = useGlobalStore(s => [
+    s.lampPoints,
+    s.setLampPoints,
+  ])
+
+  const spotsInGraph: JSX.Element[] = []
+  for (const [index, point] of lampPoints.entries()) {
+    const xVal = xScale.invert(point)
     const yMatch = data[Math.round(xVal) - 1]
     if (yMatch) {
       const yVal = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(yMatch.intensity))
-      setClickPosition({ x: xClick, y: yVal })
+      spotsInGraph.push(
+        <Circle
+          key={`circle-${index}`}
+          cx={point + margin.left}
+          cy={yVal}
+          r={4}
+          fill="red"
+        />,
+      )
     }
+  }
+
+  function onClick(event: React.MouseEvent<SVGSVGElement>) {
+    const svgRect = event.currentTarget.getBoundingClientRect()
+    const xClick = event.clientX - svgRect.left - margin.left
+    setLampPoints([...lampPoints, xClick])
   }
 
   return (
     <div ref={measureRef}>
       <svg width={width} height={height} onClick={onClick}>
-        {clickPosition
-          && (
-            <Circle
-              cx={clickPosition.x + margin.left}
-              cy={clickPosition.y}
-              r={4}
-              fill="red"
-            />
-          )}
+        {spotsInGraph}
         <Group top={margin.top} left={margin.left}>
           <GridColumns
             scale={xScale}
