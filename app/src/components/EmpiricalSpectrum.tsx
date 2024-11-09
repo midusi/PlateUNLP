@@ -8,7 +8,7 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Circle, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
-import { JSXElementConstructor, ReactElement, ReactNode, useMemo, useState } from "react"
+import { useMemo } from "react"
 
 export interface EmpiricalSpectrumPoint {
   pixel: number
