@@ -81,8 +81,6 @@ export function ReferenceLampSpectrum() {
     const svgRect = event.currentTarget.getBoundingClientRect()
     const xClick = event.clientX - svgRect.left - margin.left
     const xVal = xScale.invert(xClick)
-    console.log(xClick, xVal)
-    // console.log(xClick, xVal, filteredData[0], filteredData[filteredData.length - 1])
     setMaterialPoints([...materialPoints, xVal])
   }
 
