@@ -49,26 +49,28 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
 
   const spotsInGraph: JSX.Element[] = []
   for (const [index, point] of lampPoints.entries()) {
-    const xVal = xScale.invert(point)
-    const yMatch = data[Math.round(xVal) - 1]
-    if (yMatch) {
-      const yVal = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(yMatch.intensity))
-      spotsInGraph.push(
-        <Circle
-          key={`circle-${index}`}
-          cx={point + margin.left}
-          cy={yVal}
-          r={4}
-          fill="red"
-        />,
-      )
-    }
+    const xClick = xScale(point.x)
+    const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
+    spotsInGraph.push(
+      <Circle
+        key={`circle-${index}`}
+        cx={xClick + margin.left}
+        cy={yPix}
+        r={4}
+        fill="red"
+      />,
+    )
   }
 
   function onClick(event: React.MouseEvent<SVGSVGElement>) {
     const svgRect = event.currentTarget.getBoundingClientRect()
     const xClick = event.clientX - svgRect.left - margin.left
-    setLampPoints([...lampPoints, xClick])
+    const xVal = xScale.invert(xClick)
+    const yMatch = data[Math.round(xVal) - 1]
+    if (yMatch) {
+      const yVal = yMatch.intensity
+      setLampPoints([...lampPoints, { x: xVal, y: yVal }])
+    }
   }
 
   return (

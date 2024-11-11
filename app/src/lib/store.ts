@@ -1,18 +1,20 @@
 import { LAMP_MATERIALS, type LampMaterial } from "@/lib/spectral-data"
 import { create } from "zustand"
 
+interface Point { x: number, y: number }
+
 export interface GlobalStore {
   material: LampMaterial
   rangeMin: number
   rangeMax: number
-  lampPoints: number[]
+  lampPoints: Point[]
   materialPoints: number[]
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
   setRangeMax: (value: number) => void
   setRange: (min: number, max: number) => void
-  setLampPoints: (arr: number[]) => void
+  setLampPoints: (arr: Point[]) => void
   setMaterialPoints: (arr: number[]) => void
 }
 
@@ -39,6 +41,6 @@ export const globalStore = create<GlobalStore>()(set => ({
   setRangeMin: value => set({ rangeMin: Math.round(value) }),
   setRangeMax: value => set({ rangeMax: Math.round(value) }),
   setRange: (min, max) => set({ rangeMin: Math.round(min), rangeMax: Math.round(max) }),
-  setLampPoints: (arr: number[]) => { set({ lampPoints: arr }) },
+  setLampPoints: (arr: Point[]) => { set({ lampPoints: arr }) },
   setMaterialPoints: (arr: number[]) => { set({ materialPoints: arr }) },
 }))
