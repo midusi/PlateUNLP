@@ -6,11 +6,14 @@ export interface GlobalStore {
   rangeMin: number
   rangeMax: number
   lampPoints: number[]
+  materialPoints: number[]
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
   setRangeMax: (value: number) => void
   setRange: (min: number, max: number) => void
+  setLampPoints: (arr: number[]) => void
+  setMaterialPoints: (arr: number[]) => void
 }
 
 export const globalStore = create<GlobalStore>()(set => ({
@@ -22,6 +25,8 @@ export const globalStore = create<GlobalStore>()(set => ({
   rangeMax: 20000,
   /** The points marked in the lamp espectrum. */
   lampPoints: [],
+  /** The points marked in the material lamp espectrum. */
+  materialPoints: [],
 
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {
@@ -34,5 +39,6 @@ export const globalStore = create<GlobalStore>()(set => ({
   setRangeMin: value => set({ rangeMin: Math.round(value) }),
   setRangeMax: value => set({ rangeMax: Math.round(value) }),
   setRange: (min, max) => set({ rangeMin: Math.round(min), rangeMax: Math.round(max) }),
-  setLampPoints: (value: number[]) => { set({ lampPoints: value }) },
+  setLampPoints: (arr: number[]) => { set({ lampPoints: arr }) },
+  setMaterialPoints: (arr: number[]) => { set({ materialPoints: arr }) },
 }))
