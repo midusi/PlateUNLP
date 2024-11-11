@@ -8,14 +8,14 @@ export interface GlobalStore {
   rangeMin: number
   rangeMax: number
   lampPoints: Point[]
-  materialPoints: number[]
+  materialPoints: Point[]
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
   setRangeMax: (value: number) => void
   setRange: (min: number, max: number) => void
   setLampPoints: (arr: Point[]) => void
-  setMaterialPoints: (arr: number[]) => void
+  setMaterialPoints: (arr: Point[]) => void
 }
 
 export const globalStore = create<GlobalStore>()(set => ({
@@ -42,5 +42,5 @@ export const globalStore = create<GlobalStore>()(set => ({
   setRangeMax: value => set({ rangeMax: Math.round(value) }),
   setRange: (min, max) => set({ rangeMin: Math.round(min), rangeMax: Math.round(max) }),
   setLampPoints: (arr: Point[]) => { set({ lampPoints: arr }) },
-  setMaterialPoints: (arr: number[]) => { set({ materialPoints: arr }) },
+  setMaterialPoints: (arr: Point[]) => { set({ materialPoints: arr }) },
 }))

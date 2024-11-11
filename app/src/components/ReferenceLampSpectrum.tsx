@@ -56,32 +56,37 @@ export function ReferenceLampSpectrum() {
 
   // Spots logic
   const spotsInGraph: JSX.Element[] = []
-  for (const [index, xVal] of materialPoints.entries()) {
-    if ((filteredData[0].wavelength <= xVal)
-      && (xVal <= filteredData[filteredData.length - 1].wavelength)) {
-      const yMatch = data.reduce((prev, curr) => {
-        return (Math.abs(curr.wavelength - xVal) < Math.abs(prev.wavelength - xVal) ? curr : prev)
-      })
-      if (yMatch) {
-        const yVal = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(yMatch.intensity))
-        const xClick = xScale(yMatch.wavelength) // remplaze xVal por yMatch.wavelength
-        spotsInGraph.push(
-          <Circle
-            key={`circle-${index}`}
-            cx={xClick + margin.left}
-            cy={yVal}
-            r={4}
-            fill="red"
-          />,
-        )
-      }
+  for (const [index, point] of materialPoints.entries()) {
+    if ((filteredData[0].wavelength <= point.x)
+      && (point.x <= filteredData[filteredData.length - 1].wavelength)) {
+      const xClick = xScale(point.x)
+      const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
+      spotsInGraph.push(
+        <Circle
+          key={`circle-${index}`}
+          cx={xClick + margin.left}
+          cy={yPix}
+          r={4}
+          fill="red"
+        />,
+      )
     }
   }
   function onClick(event: React.MouseEvent<SVGSVGElement>) {
     const svgRect = event.currentTarget.getBoundingClientRect()
     const xClick = event.clientX - svgRect.left - margin.left
     const xVal = xScale.invert(xClick)
-    setMaterialPoints([...materialPoints, xVal])
+    if ((filteredData[0].wavelength <= xVal)
+      && (xVal <= filteredData[filteredData.length - 1].wavelength)) {
+      const yMatch = data.reduce((prev, curr) => {
+        return (Math.abs(curr.wavelength - xVal) < Math.abs(prev.wavelength - xVal) ? curr : prev)
+      })
+      if (yMatch) {
+        const yVal = yMatch.intensity
+        const xVal = yMatch.wavelength // Redefino xVal a la posicion mas cercana
+        setMaterialPoints([...materialPoints, { x: xVal, y: yVal }])
+      }
+    }
   }
 
   return (
