@@ -2,6 +2,7 @@ import { ReferenceLampForm } from "@/components/ReferenceLampForm"
 import { ReferenceLampRange } from "@/components/ReferenceLampRange"
 import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
 import { FitsLoader } from "./components/FitsLoader"
+import { ContinueButton } from "./ContinueButton"
 
 export default function App() {
   return (
@@ -27,6 +28,8 @@ export default function App() {
             <FitsLoader plotColor="#16a34a" />
           </div>
         </section>
+
+        <ContinueButton />
       </main>
 
       <footer className="mt-40 mb-20 text-xs italic text-center text-muted-foreground">
