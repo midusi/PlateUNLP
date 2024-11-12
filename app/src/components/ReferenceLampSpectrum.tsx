@@ -7,7 +7,7 @@ import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
 import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
-import { Circle, LinePath } from "@visx/shape"
+import { Circle, Line, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
 
@@ -60,14 +60,17 @@ export function ReferenceLampSpectrum() {
     if ((filteredData[0].wavelength <= point.x)
       && (point.x <= filteredData[filteredData.length - 1].wavelength)) {
       const xClick = xScale(point.x)
-      const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
+      // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
       spotsInGraph.push(
-        <Circle
-          key={`circle-${index}`}
-          cx={xClick + margin.left}
-          cy={yPix}
-          r={4}
-          fill="red"
+        <Line
+          key={`line-${index}`}
+          x1={xClick + margin.left}
+          y1={0 + margin.top} // Valor inicial en el eje y
+          x2={xClick + margin.left}
+          y2={height - margin.bottom} // Altura del gráfico
+          stroke="red"
+          strokeWidth={2}
+          strokeDasharray="4 4" // Define el patrón de punteado
         />,
       )
     }
