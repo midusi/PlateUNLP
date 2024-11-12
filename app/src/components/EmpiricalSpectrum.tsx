@@ -42,9 +42,10 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   yScale.range([yMax, 0])
 
   // Point logic
-  const [lampPoints, setLampPoints] = useGlobalStore(s => [
+  const [lampPoints, setLampPoints, linesPalette] = useGlobalStore(s => [
     s.lampPoints,
     s.setLampPoints,
+    s.linesPalette,
   ])
 
   const spotsInGraph: JSX.Element[] = []
@@ -55,12 +56,12 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
       <Line
         key={`line-${index}`}
         x1={xClick + margin.left}
-        y1={0 + margin.top} // Valor inicial en el eje y
+        y1={0 + margin.top}
         x2={xClick + margin.left}
-        y2={height - margin.bottom} // Altura del gráfico
-        stroke="red"
+        y2={height - margin.bottom}
+        stroke={linesPalette[index % linesPalette.length]}
         strokeWidth={2}
-        strokeDasharray="4 4" // Define el patrón de punteado
+        strokeDasharray="4 4"
       />,
     )
   }

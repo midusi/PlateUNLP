@@ -19,12 +19,13 @@ const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
 export function ReferenceLampSpectrum() {
-  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints] = useGlobalStore(s => [
+  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette] = useGlobalStore(s => [
     s.material,
     s.rangeMin,
     s.rangeMax,
     s.materialPoints,
     s.setMaterialPoints,
+    s.linesPalette,
   ])
 
   const data = useMemo(() => getMaterialSpectralData(material), [material])
@@ -68,7 +69,7 @@ export function ReferenceLampSpectrum() {
           y1={0 + margin.top} // Valor inicial en el eje y
           x2={xClick + margin.left}
           y2={height - margin.bottom} // Altura del gráfico
-          stroke="red"
+          stroke={linesPalette[index % linesPalette.length]}
           strokeWidth={2}
           strokeDasharray="4 4" // Define el patrón de punteado
         />,
