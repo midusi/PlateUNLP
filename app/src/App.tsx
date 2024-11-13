@@ -1,8 +1,8 @@
 import { ReferenceLampForm } from "@/components/ReferenceLampForm"
 import { ReferenceLampRange } from "@/components/ReferenceLampRange"
 import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
+import { ContinueButton } from "./components/ContinueButton"
 import { FitsLoader } from "./components/FitsLoader"
-import { ContinueButton } from "./ContinueButton"
 
 export default function App() {
   return (

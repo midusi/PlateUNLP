@@ -1,5 +1,5 @@
-import { Button } from "./components/ui/button"
-import { useGlobalStore } from "./hooks/use-global-store"
+import { useGlobalStore } from "../hooks/use-global-store"
+import { Button } from "./ui/button"
 
 export function ContinueButton() {
     const [lampPoints, materialPoints] = useGlobalStore(s => [

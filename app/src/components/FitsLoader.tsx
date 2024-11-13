@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input"
 import { FITS } from "fits2js"
 import { type ChangeEvent, useMemo, useState } from "react"
 import { EmpiricalSpectrum } from "./EmpiricalSpectrum"
+import { Previewer } from "./Previewer"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
@@ -61,26 +62,31 @@ export function FitsLoader({ plotColor }: { plotColor: string }) {
         />
         {loadingState === "finished"
           ? (
-              <p className="ml-4">
-                {
-                  [
-                    fits?.getHeader("DATE-OBS")?.trim(),
-                    fits?.getHeader("TELESCOP")?.trim(),
-                    fits?.getHeader("INSTRUME")?.trim(),
-                    fits?.getHeader("OBSERVER")?.trim(),
-                    fits?.getHeader("OBJECT")?.trim(),
-                    fits?.getHeader("EQUINOX"),
-                    fits?.getHeader("EPOCH"),
-                  ].filter(Boolean).join(" /// ")
-                }
-              </p>
-            )
+            <p className="ml-4">
+              {
+                [
+                  fits?.getHeader("DATE-OBS")?.trim(),
+                  fits?.getHeader("TELESCOP")?.trim(),
+                  fits?.getHeader("INSTRUME")?.trim(),
+                  fits?.getHeader("OBSERVER")?.trim(),
+                  fits?.getHeader("OBJECT")?.trim(),
+                  fits?.getHeader("EQUINOX"),
+                  fits?.getHeader("EPOCH"),
+                ].filter(Boolean).join(" /// ")
+              }
+            </p>
+          )
           : loadingState === "error"
             ? <p className="text-red-500">Error al cargar el archivo</p>
             : null}
       </div>
       {loadingState === "processing" && <p>Cargando contenido...</p>}
-      {loadedData && <EmpiricalSpectrum data={loadedData} color={plotColor} />}
+      {loadedData && (
+        <>
+          <EmpiricalSpectrum data={loadedData} color={plotColor} />
+          <Previewer data={loadedData} color={plotColor} />
+        </>
+      )}
     </div>
   )
 }
