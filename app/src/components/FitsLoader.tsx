@@ -7,7 +7,7 @@ import { Previewer } from "./Previewer"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
-export function FitsLoader({ plotColor }: { plotColor: string }) {
+export function FitsLoader({ plotColor, interactable = true, preview = true }: { plotColor: string, interactable: boolean, preview: boolean }) {
   const [loadingState, setLoadingState] = useState<LoadingState>("waiting")
   const [fits, setFits] = useState<FITS | null>(null)
 
@@ -83,8 +83,8 @@ export function FitsLoader({ plotColor }: { plotColor: string }) {
       {loadingState === "processing" && <p>Cargando contenido...</p>}
       {loadedData && (
         <>
-          <EmpiricalSpectrum data={loadedData} color={plotColor} />
-          <Previewer data={loadedData} color={plotColor} />
+          {interactable && <EmpiricalSpectrum data={loadedData} color={plotColor} />}
+          {preview && <Previewer data={loadedData} color={plotColor} />}
         </>
       )}
     </div>

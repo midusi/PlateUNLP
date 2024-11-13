@@ -21,11 +21,11 @@ export default function App() {
           <ReferenceLampSpectrum />
           <div>
             <h1 className="text-2xl font-bold">Empirical Comparison Lamp</h1>
-            <FitsLoader plotColor="#0ea5e9" />
+            <FitsLoader plotColor="#0ea5e9" interactable preview />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Empirical Spectrum</h1>
-            <FitsLoader plotColor="#16a34a" />
+            <FitsLoader plotColor="#16a34a" interactable={false} preview />
           </div>
         </section>
 
