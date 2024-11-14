@@ -7,7 +7,7 @@ import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
 import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
-import { Circle, Line, LinePath } from "@visx/shape"
+import { Line, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
 
