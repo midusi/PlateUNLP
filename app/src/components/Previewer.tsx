@@ -1,6 +1,7 @@
 import type { JSX } from "react/jsx-runtime"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
+import { linearRegression } from "@/lib/utils"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -109,24 +110,4 @@ export function Previewer({ data, color }: { data: EmpiricalSpectrumPoint[], col
             </svg>
         </div>
     )
-}
-
-function linearRegression(x: number[], y: number[]) {
-    if (x.length !== y.length) {
-        throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
-    }
-    const n = x.length
-    const sumX = x.reduce((acc, cur) => acc + cur, 0)
-    const sumY = y.reduce((acc, cur) => acc + cur, 0)
-    const sumMul = x.map((val, i) => val * y[i]).reduce((acc, cur) => acc + cur, 0)
-    const sumXCuad = x.map(val => val ** 2).reduce((acc, cur) => acc + cur, 0)
-    const promX = sumX / n
-    const promY = sumY / n
-
-    const m = (n * sumMul - sumX * sumY) / (n * sumXCuad - sumX ** 2)
-    const b = promY - m * promX
-
-    return function (value: number): number {
-        return m * value + b
-    }
 }
