@@ -10,6 +10,7 @@ export interface GlobalStore {
   lampPoints: Point[]
   materialPoints: Point[]
   linesPalette: string[]
+  materialsPalette: string[]
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
@@ -31,7 +32,25 @@ export const globalStore = create<GlobalStore>()(set => ({
   /** The points marked in the material lamp espectrum. */
   materialPoints: [],
   /** The color palette for the lines marked for the user. */
-  linesPalette: ["#FF6B6B", "#4ECDC4", "#FFD93D", "#1A535C", "#FF9F1C", "#2A9D8F", "#E76F51"], // Pastel vibrante
+  linesPalette: [
+    "#FF6B6B",
+    "#4ECDC4",
+    "#FFD93D",
+    "#1A535C",
+    "#FF9F1C",
+    "#2A9D8F",
+    "#E76F51",
+  ], // Pastel vibrante
+
+  materialsPalette: [
+    "#ff7f0e", // Naranja
+    "#d62728", // Rojo
+    "#17becf", // Cian
+    "#9467bd", // Púrpura
+    "#8c564b", // Marrón
+    "#e377c2", // Rosa
+    "#7f7f7f", // Gris
+  ],
 
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {

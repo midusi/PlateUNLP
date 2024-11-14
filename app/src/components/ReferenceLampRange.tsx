@@ -30,15 +30,7 @@ export function ReferenceLampRange() {
     s.rangeMax,
     s.setRangeMax,
   ])
-  const materialsColors = [
-    "#d62728", // Rojo
-    "#9467bd", // Púrpura
-    "#8c564b", // Marrón
-    "#e377c2", // Rosa
-    "#ff7f0e", // Naranja
-    "#7f7f7f", // Gris
-    "#17becf", // Cian
-  ]
+  const materialsPalette = useGlobalStore(s => s.materialsPalette)
 
   const { data, xScale, yScale } = useMemo(() => {
     const data = getMaterialSpectralData(material)
@@ -96,7 +88,7 @@ export function ReferenceLampRange() {
                 y={p => yScale(getY(p)) ?? 0}
                 shapeRendering="geometricPrecision"
                 className="stroke-1"
-                stroke={materialsColors[index % materialsColors.length]}
+                stroke={materialsPalette[index % materialsPalette.length]}
               />
             ))
           }
