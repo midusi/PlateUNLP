@@ -27,21 +27,17 @@ export function ReferenceLampSpectrum() {
     s.setMaterialPoints,
     s.linesPalette,
   ])
+  const materialsColors = [
+    "#d62728", // Rojo
+    "#9467bd", // Púrpura
+    "#8c564b", // Marrón
+    "#e377c2", // Rosa
+    "#ff7f0e", // Naranja
+    "#7f7f7f", // Gris
+    "#17becf", // Cian
+  ]
 
-  const [datas, materials, data] = useMemo(() => {
-    const materials = material.split("-")
-    const data = getMaterialSpectralData((material))
-    /* Mucha de esta logica se podria mover dentro de 'getMaterialSpectralData' */
-    const arr: SpectrumPoint[][] = []
-    for (const m of materials) {
-      const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
-      const d = data.filter(d => nameList.includes(d.material))
-      datas.push(d)
-    }
-    return [arr, materials, data]
-  }, [material])
-
-  console.log(materials, datas)
+  const data = useMemo(() => getMaterialSpectralData(material), [material])
 
   const { filteredData, xScale, yScale } = useMemo(() => {
     let min = 0
@@ -58,6 +54,17 @@ export function ReferenceLampSpectrum() {
       yScale: scaleLinear<number>({ domain: [0, d3.max(filteredData, getY)!] }),
     }
   }, [data, rangeMin, rangeMax])
+
+  const [filteredDatas, materials] = useMemo(() => {
+    const materials = material.split("-")
+    const filteredDatas: SpectrumPoint[][] = []
+    for (const m of materials) {
+      const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
+      const d = filteredData.filter(d => nameList.includes(d.material))
+      filteredDatas.push(d)
+    }
+    return [filteredDatas, materials]
+  }, [filteredData, material])
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
@@ -124,14 +131,20 @@ export function ReferenceLampSpectrum() {
             height={yMax}
             className="stroke-neutral-100"
           />
-          <LinePath<SpectrumPoint>
-            curve={curveLinear}
-            data={filteredData}
-            x={p => xScale(getX(p)) ?? 0}
-            y={p => yScale(getY(p)) ?? 0}
-            shapeRendering="geometricPrecision"
-            className="stroke-primary stroke-1"
-          />
+          {
+            filteredDatas.map((fd, index) => (
+              <LinePath<SpectrumPoint>
+                key={`material_line-${materials[index]}`}
+                curve={curveLinear}
+                data={fd}
+                x={p => xScale(getX(p)) ?? 0}
+                y={p => yScale(getY(p)) ?? 0}
+                shapeRendering="geometricPrecision"
+                className="stroke-1"
+                stroke={materialsColors[index % materialsColors.length]}
+              />
+            ))
+          }
           <AxisBottom
             scale={xScale}
             top={yMax}
@@ -139,6 +152,21 @@ export function ReferenceLampSpectrum() {
             numTicks={Math.floor(xMax / 80)}
           />
           <AxisLeft scale={yScale} label="Intensity" />
+        </Group>
+
+        <Group top={margin.top} left={width - margin.right - 100}>
+          {materials.map((m: string, index: number) => (
+            <Group top={index * 20} key={`legend-item-${m}`}>
+              <rect
+                width={15}
+                height={15}
+                fill={materialsColors[index % materialsColors.length]}
+              />
+              <text x={20} y={12} fontSize={12} fill="black">
+                {m}
+              </text>
+            </Group>
+          ))}
         </Group>
       </svg>
     </div>
