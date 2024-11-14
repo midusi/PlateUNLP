@@ -28,7 +28,21 @@ export function ReferenceLampSpectrum() {
     s.linesPalette,
   ])
 
-  const data = useMemo(() => getMaterialSpectralData(material), [material])
+  const [datas, materials, data] = useMemo(() => {
+    const materials = material.split("-")
+    const data = getMaterialSpectralData((material))
+    /* Mucha de esta logica se podria mover dentro de 'getMaterialSpectralData' */
+    const arr: SpectrumPoint[][] = []
+    for (const m of materials) {
+      const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
+      const d = data.filter(d => nameList.includes(d.material))
+      datas.push(d)
+    }
+    return [arr, materials, data]
+  }, [material])
+
+  console.log(materials, datas)
+
   const { filteredData, xScale, yScale } = useMemo(() => {
     let min = 0
     while (getX(data[min]) < rangeMin) min++
