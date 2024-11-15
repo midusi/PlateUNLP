@@ -19,13 +19,14 @@ const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
 export function ReferenceLampSpectrum() {
-  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette] = useGlobalStore(s => [
+  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette, lampPoints] = useGlobalStore(s => [
     s.material,
     s.rangeMin,
     s.rangeMax,
     s.materialPoints,
     s.setMaterialPoints,
     s.linesPalette,
+    s.lampPoints,
   ])
   const materialsPalette = useGlobalStore(s => s.materialsPalette)
 
@@ -99,9 +100,15 @@ export function ReferenceLampSpectrum() {
         return (Math.abs(curr.wavelength - xVal) < Math.abs(prev.wavelength - xVal) ? curr : prev)
       })
       if (yMatch) {
+        const newMaterialPoints = [...materialPoints]
+        console.log(materialPoints, lampPoints)
+        // Si no hay punto homologo borramos el punto de su ultima posicion antes de graficar
+        if (materialPoints.length > lampPoints.length) {
+          newMaterialPoints.pop()
+        }
         const yVal = yMatch.intensity
         const xVal = yMatch.wavelength // Redefino xVal a la posicion mas cercana
-        setMaterialPoints([...materialPoints, { x: xVal, y: yVal }])
+        setMaterialPoints([...newMaterialPoints, { x: xVal, y: yVal }])
       }
     }
   }

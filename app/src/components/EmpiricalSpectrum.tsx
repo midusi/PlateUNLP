@@ -73,16 +73,13 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
     const xVal = xScale.invert(xClick)
     const yMatch = data[Math.round(xVal) - 1]
     if (yMatch) {
-
-      // //--------------------------------------------
-      // // 1ro determinar si no hay un punto homologo
-      // if (materialPoints.length > lampPoints.length) {
-      //   // 2do Si no lo hay entonces borramos el ultimo
-      //   const lampPoints = lampPoints.slice(0, -1);
-      // }
-      // // 3ro En ambos casos se grafica el nuevo.
+      const newLampPoints = [...lampPoints]
+      // Si no hay punto homologo borramos el punto de su ultima posicion antes de graficar
+      if (lampPoints.length > materialPoints.length) {
+        newLampPoints.pop()
+      }
       const yVal = yMatch.intensity
-      setLampPoints([...lampPoints, { x: xVal, y: yVal }])
+      setLampPoints([...newLampPoints, { x: xVal, y: yVal }])
     }
   }
 
