@@ -1,7 +1,7 @@
 import type { EmpiricalSpectrumPoint } from "./EmpiricalSpectrum"
 import { Input } from "@/components/ui/input"
 import { FITS } from "fits2js"
-import { type ChangeEvent, useMemo, useState } from "react"
+import { type ChangeEvent, useEffect, useMemo, useState } from "react"
 import { EmpiricalSpectrum } from "./EmpiricalSpectrum"
 import { Previewer } from "./Previewer"
 
@@ -9,7 +9,7 @@ type LoadingState = "waiting" | "processing" | "finished" | "error"
 
 interface FitsLoaderProps {
   plotColor: string
-  setData: React.Dispatch<React.SetStateAction<EmpiricalSpectrumPoint[] | null>> | null
+  setData: React.Dispatch<React.SetStateAction<EmpiricalSpectrumPoint[] | null>>
   interactable: boolean
   preview: boolean
 }
@@ -30,12 +30,14 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
     const loadedData = Array.from(fits.getData().take(fits.NAXISn[0])).map(
       ({ coordinates, value }) => ({ pixel: coordinates[0], intensity: value }),
     )
-
     return loadedData
   }, [fits])
-  if (setData) {
-    setData(loadedData)
-  }
+
+  useEffect(() => {
+    if (loadedData) {
+      setData(loadedData)
+    }
+  }, [loadedData, setData])
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {

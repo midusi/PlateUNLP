@@ -30,7 +30,7 @@ export default function App() {
             <h1 className="text-2xl font-bold">Empirical Comparison Lamp</h1>
             <FitsLoader
               plotColor="#0ea5e9"
-              setData={null}
+              setData={() => { }}
               interactable
               preview
             />
