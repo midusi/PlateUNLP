@@ -47,10 +47,10 @@ export function Previewer({ data, color }: { data: EmpiricalSpectrumPoint[], col
         matches.map(val => val.material.x),
     )
 
-    const regressionedData: Point[] = data.map((val, i) => {
+    const regressionedData: Point[] = data.map((val) => {
         return {
             x: excecuteRegression(val.pixel),
-            y: data[i].intensity,
+            y: val.intensity,
         }
     })
 
