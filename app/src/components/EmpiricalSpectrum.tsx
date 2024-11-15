@@ -42,10 +42,11 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   yScale.range([yMax, 0])
 
   // Point logic
-  const [lampPoints, setLampPoints, linesPalette] = useGlobalStore(s => [
+  const [lampPoints, setLampPoints, linesPalette, materialPoints] = useGlobalStore(s => [
     s.lampPoints,
     s.setLampPoints,
     s.linesPalette,
+    s.materialPoints,
   ])
 
   const spotsInGraph: JSX.Element[] = []
@@ -72,6 +73,14 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
     const xVal = xScale.invert(xClick)
     const yMatch = data[Math.round(xVal) - 1]
     if (yMatch) {
+
+      // //--------------------------------------------
+      // // 1ro determinar si no hay un punto homologo
+      // if (materialPoints.length > lampPoints.length) {
+      //   // 2do Si no lo hay entonces borramos el ultimo
+      //   const lampPoints = lampPoints.slice(0, -1);
+      // }
+      // // 3ro En ambos casos se grafica el nuevo.
       const yVal = yMatch.intensity
       setLampPoints([...lampPoints, { x: xVal, y: yVal }])
     }
