@@ -7,7 +7,14 @@ import { Previewer } from "./Previewer"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
-export function FitsLoader({ plotColor, interactable = true, preview = true }: { plotColor: string, interactable: boolean, preview: boolean }) {
+interface FitsLoaderProps {
+  plotColor: string
+  setData: React.Dispatch<React.SetStateAction<EmpiricalSpectrumPoint[] | null>> | null
+  interactable: boolean
+  preview: boolean
+}
+
+export function FitsLoader({ plotColor, setData, interactable = true, preview = true }: FitsLoaderProps) {
   const [loadingState, setLoadingState] = useState<LoadingState>("waiting")
   const [fits, setFits] = useState<FITS | null>(null)
 
@@ -20,10 +27,15 @@ export function FitsLoader({ plotColor, interactable = true, preview = true }: {
     // with the pixel and intensity values. It does it like this because there
     // are some FITS files that have more than one row of data, but taking the
     // first row is enough for now.
-    return Array.from(fits.getData().take(fits.NAXISn[0])).map(
+    const loadedData = Array.from(fits.getData().take(fits.NAXISn[0])).map(
       ({ coordinates, value }) => ({ pixel: coordinates[0], intensity: value }),
     )
+
+    return loadedData
   }, [fits])
+  if (setData) {
+    setData(loadedData)
+  }
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {

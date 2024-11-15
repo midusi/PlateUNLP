@@ -1,7 +1,22 @@
+import { linearRegression } from "@/lib/utils"
 import { useGlobalStore } from "../hooks/use-global-store"
 import { Button } from "./ui/button"
 
-export function ContinueButton() {
+export interface Point {
+    x: number
+    y: number
+}
+
+interface EmpiricalSpectrumPoint {
+    pixel: number
+    intensity: number
+}
+
+interface ContinueButtonProps {
+    data: EmpiricalSpectrumPoint[] | null
+}
+
+export function ContinueButton({ data }: ContinueButtonProps) {
     const [lampPoints, materialPoints] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
@@ -16,9 +31,21 @@ export function ContinueButton() {
         matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
     }
 
+    const excecuteRegression = linearRegression(
+        matches.map(val => val.lamp.x),
+        matches.map(val => val.material.x),
+    )
+
     function onClick() {
-        const data = { matches }
-        const json = JSON.stringify(data, null, 2)
+        if (!data) {
+            throw new Error("No estan cargados los datos del espectro de ciencia")
+        }
+
+        const regressionedData: Point[] = data.map(({ pixel, intensity }) => ({
+            x: excecuteRegression(pixel),
+            y: intensity,
+        }))
+        const json = JSON.stringify({ regressionedData }, null, 2)
         const blob = new Blob([json], { type: "application/json" })
         const url = URL.createObjectURL(blob)
 
