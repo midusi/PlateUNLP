@@ -100,15 +100,24 @@ export function ReferenceLampSpectrum() {
         return (Math.abs(curr.wavelength - xVal) < Math.abs(prev.wavelength - xVal) ? curr : prev)
       })
       if (yMatch) {
+        const newVal = {
+          x: yMatch.wavelength, // Redefino xVal a la posicion mas cercana
+          y: yMatch.intensity,
+        }
+        // Si el punto cliquieado esta ocupado se borra la linea que lo ocupa
+        if (materialPoints.some(p => p.x === newVal.x && p.y === newVal.y)) {
+          setMaterialPoints(materialPoints.filter(
+            point => !(point.x === newVal.x && point.y === newVal.y),
+          ))
+          return
+        }
+
         const newMaterialPoints = [...materialPoints]
-        console.log(materialPoints, lampPoints)
         // Si no hay punto homologo borramos el punto de su ultima posicion antes de graficar
         if (materialPoints.length > lampPoints.length) {
           newMaterialPoints.pop()
         }
-        const yVal = yMatch.intensity
-        const xVal = yMatch.wavelength // Redefino xVal a la posicion mas cercana
-        setMaterialPoints([...newMaterialPoints, { x: xVal, y: yVal }])
+        setMaterialPoints([...newMaterialPoints, newVal])
       }
     }
   }
