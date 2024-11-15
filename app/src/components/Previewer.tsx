@@ -1,4 +1,3 @@
-import type { JSX } from "react/jsx-runtime"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
 import { linearRegression } from "@/lib/utils"
@@ -7,7 +6,7 @@ import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
 import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
-import { Circle, Line, LinePath } from "@visx/shape"
+import { LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
 
