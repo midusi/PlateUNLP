@@ -77,16 +77,28 @@ export function ReferenceLampSpectrum() {
       const xClick = xScale(point.x)
       // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
       spotsInGraph.push(
-        <Line
-          key={`line-${index}`}
-          x1={xClick + margin.left}
-          y1={0 + margin.top} // Valor inicial en el eje y
-          x2={xClick + margin.left}
-          y2={height - margin.bottom} // Altura del gráfico
-          stroke={linesPalette[index % linesPalette.length]}
-          strokeWidth={2}
-          strokeDasharray="4 4" // Define el patrón de punteado
-        />,
+        <>
+          <Line
+            key={`line-${index}`}
+            x1={xClick + margin.left}
+            y1={0 + margin.top} // Valor inicial en el eje y
+            x2={xClick + margin.left}
+            y2={height - margin.bottom} // Altura del gráfico
+            stroke={linesPalette[index % linesPalette.length]}
+            strokeWidth={2}
+            strokeDasharray="4 4" // Define el patrón de punteado
+          />
+          <text
+            x={xClick + margin.left + 5} // Ajusta el desplazamiento horizontal del texto
+            y={margin.top + 10} // Ajusta el desplazamiento vertical del texto
+            fill={linesPalette[index % linesPalette.length]} // Usa el mismo color de la línea
+            fontSize="12" // Tamaño de fuente
+            fontFamily="Arial, sans-serif" // Familia de fuente
+          >
+            #
+            {`${index}`}
+          </text>
+        </>,
       )
     }
   }
