@@ -6,6 +6,20 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function linearRegression(x: number[], y: number[]) {
+  /**
+   * x e y contienen una serie de valores que se corresponden
+   * cada uno con el de la misma posición en el otro arreglo.
+   * Esta función busca una recta que dado un valor de x
+   * devuelva el un valor de y, o lo más cercano que se pueda
+   * al minimizar el error que pueda haber entre todos los
+   * pares de números.
+   * La función devuelta, dado cualquier x, devuelve un y que
+   * aproxima el valor ideal que debería corresponderle.
+   * Dentro de las limitaciones de lo que se puede hacer con
+   * una aproximación lineal a una correspondencia de
+   * complejidad desconocida.
+   */
+
   if (x.length !== y.length) {
     throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
   }
@@ -25,7 +39,7 @@ export function linearRegression(x: number[], y: number[]) {
   }
 }
 
-export function linearRegression(x: number[], y: number[]) {
+export function legendreAlgoritm(x: number[], y: number[]) {
   if (x.length !== y.length) {
     throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
   }
