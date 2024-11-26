@@ -24,3 +24,13 @@ export function linearRegression(x: number[], y: number[]) {
     return m * value + b
   }
 }
+
+export function linearRegression(x: number[], y: number[]) {
+  if (x.length !== y.length) {
+    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
+  }
+
+  return function (value: number): number {
+    return value
+  }
+}
