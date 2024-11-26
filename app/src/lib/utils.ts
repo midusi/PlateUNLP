@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx"
+import { inv, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -44,7 +45,44 @@ export function legendreAlgoritm(x: number[], y: number[]) {
     throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
   }
 
+  if (x.length === 0 || x.length === 1) {
+    return function (_value: number): number {
+      return 0
+    }
+  }
+
+  const degree = 8
+
+  // Generar la matriz de Legendre
+  function legendreBasis(x: number, k: number): number {
+    if (k === 0)
+      return 1
+    if (k === 1)
+      return x
+    return ((2 * k - 1) * x * legendreBasis(x, k - 1) - (k - 1) * legendreBasis(x, k - 2)) / k
+  }
+
+  const P = x.map(xi =>
+    Array.from({ length: degree + 1 }, (_, k) => legendreBasis(xi, k)),
+  )
+
+  // Matriz de diseño
+  const X = matrix(P)
+
+  // Transpuesta de X
+  const XT = transpose(X)
+
+  // Calcular coeficientes: (XT * X)^-1 * XT * y
+  const Y = matrix(y)
+  const coefficients = multiply(
+    multiply(inv(multiply(XT, X)), XT),
+    Y,
+  )
+
   return function (value: number): number {
-    return value
+    return (coefficients.toArray() as number[]).reduce(
+      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasis(value, k)
+      , 0,
+    )
   }
 }

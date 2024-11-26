@@ -4,7 +4,7 @@ import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
 import { useState } from "react"
 import { ContinueButton } from "./components/ContinueButton"
 import { FitsLoader } from "./components/FitsLoader"
-import { linearRegression } from "./lib/utils"
+import { legendreAlgoritm, linearRegression } from "./lib/utils"
 
 interface EmpiricalSpectrumPoint {
   pixel: number
@@ -23,7 +23,7 @@ const radioOptions: InferenceOption[] = [
   },
   {
     name: "Legendre (8 coefficients)",
-    function: linearRegression, // Cambiar por legendreRegression
+    function: legendreAlgoritm, // Cambiar por legendreRegression
   },
 ]
 
