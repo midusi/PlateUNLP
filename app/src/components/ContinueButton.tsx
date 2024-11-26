@@ -1,4 +1,3 @@
-import { linearRegression } from "@/lib/utils"
 import { useGlobalStore } from "../hooks/use-global-store"
 import { Button } from "./ui/button"
 
@@ -14,9 +13,10 @@ interface EmpiricalSpectrumPoint {
 
 interface ContinueButtonProps {
     data: EmpiricalSpectrumPoint[] | null
+    inferenceFunction: (x: number[], y: number[]) => ((value: number) => number)
 }
 
-export function ContinueButton({ data }: ContinueButtonProps) {
+export function ContinueButton({ data, inferenceFunction }: ContinueButtonProps) {
     const [lampPoints, materialPoints] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
@@ -31,7 +31,7 @@ export function ContinueButton({ data }: ContinueButtonProps) {
         matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
     }
 
-    const excecuteRegression = linearRegression(
+    const excecuteInference = inferenceFunction(
         matches.map(val => val.lamp.x),
         matches.map(val => val.material.x),
     )
@@ -42,7 +42,7 @@ export function ContinueButton({ data }: ContinueButtonProps) {
         }
 
         const regressionedData: Point[] = data.map(({ pixel, intensity }) => ({
-            x: excecuteRegression(pixel),
+            x: excecuteInference(pixel),
             y: intensity,
         }))
         const json = JSON.stringify({ regressionedData }, null, 2)
