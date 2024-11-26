@@ -1,6 +1,5 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
-import { linearRegression } from "@/lib/utils"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -20,6 +19,12 @@ export interface Point {
     y: number
 }
 
+interface PreviewerProps {
+    data: EmpiricalSpectrumPoint[]
+    color: string
+    inferenceFunction: (x: number[], y: number[]) => ((value: number) => number)
+}
+
 // data accessors
 const getX = (p: Point) => p?.x ?? 0
 const getY = (p: Point) => p?.y ?? 0
@@ -27,7 +32,7 @@ const getY = (p: Point) => p?.y ?? 0
 const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
-export function Previewer({ data, color }: { data: EmpiricalSpectrumPoint[], color: string }) {
+export function Previewer({ data, color, inferenceFunction }: PreviewerProps) {
     const [lampPoints, materialPoints] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
@@ -42,7 +47,7 @@ export function Previewer({ data, color }: { data: EmpiricalSpectrumPoint[], col
         matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
     }
 
-    const excecuteRegression = linearRegression(
+    const excecuteRegression = inferenceFunction(
         matches.map(val => val.lamp.x),
         matches.map(val => val.material.x),
     )

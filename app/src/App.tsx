@@ -52,6 +52,7 @@ export default function App() {
               setData={() => { }}
               interactable
               preview
+              inferenceFunction={exportedFunction.function}
             />
           </div>
           <div>
@@ -61,6 +62,7 @@ export default function App() {
               setData={setScienceSpectrumData}
               interactable={false}
               preview
+              inferenceFunction={exportedFunction.function}
             />
           </div>
         </section>

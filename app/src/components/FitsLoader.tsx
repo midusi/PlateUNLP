@@ -12,9 +12,10 @@ interface FitsLoaderProps {
   setData: React.Dispatch<React.SetStateAction<EmpiricalSpectrumPoint[] | null>>
   interactable: boolean
   preview: boolean
+  inferenceFunction: (x: number[], y: number[]) => ((value: number) => number)
 }
 
-export function FitsLoader({ plotColor, setData, interactable = true, preview = true }: FitsLoaderProps) {
+export function FitsLoader({ plotColor, setData, interactable = true, preview = true, inferenceFunction }: FitsLoaderProps) {
   const [loadingState, setLoadingState] = useState<LoadingState>("waiting")
   const [fits, setFits] = useState<FITS | null>(null)
 
@@ -98,7 +99,7 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
       {loadedData && (
         <>
           {interactable && <EmpiricalSpectrum data={loadedData} color={plotColor} />}
-          {preview && <Previewer data={loadedData} color={plotColor} />}
+          {preview && <Previewer data={loadedData} color={plotColor} inferenceFunction={inferenceFunction} />}
         </>
       )}
     </div>
