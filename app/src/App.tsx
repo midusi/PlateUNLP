@@ -1,7 +1,7 @@
 import { ReferenceLampForm } from "@/components/ReferenceLampForm"
 import { ReferenceLampRange } from "@/components/ReferenceLampRange"
 import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { ContinueButton } from "./components/ContinueButton"
 import { FitsLoader } from "./components/FitsLoader"
 import { linearRegression } from "./lib/utils"
