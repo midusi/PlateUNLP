@@ -75,17 +75,23 @@ export function InferenceBoxGraph({ inferenceFunction }: InferenceBoxGraphProps)
     yScale.range([yMax, 0])
 
     const spotsInGraph = matches.map((match, index) => {
+        const xPos = xScale(match.x)
+        let yPos = yScale(match.y)
+        if (!yPos) {
+            yPos = 0
+        }
+
         return (
-            <g key={`InferenceBoxGraphGroup-${match}`}>
+            <g key={`InferenceBoxGraphGroup-${match.x}-${match.y}`}>
                 <Circle
-                    cx={xScale(match.x)}
-                    cy={yScale(match.y)}
+                    cx={xPos}
+                    cy={yPos}
                     stroke="grey"
                     r={3}
                 />
                 <text
-                    x={xScale(match.x) + 5} // Ajusta el desplazamiento horizontal del texto
-                    y={yScale(match.y) - 5} // Ajusta el desplazamiento vertical del texto
+                    x={xPos + 5} // Ajusta el desplazamiento horizontal del texto
+                    y={yPos - 5} // Ajusta el desplazamiento vertical del texto
                     fontSize="12"
                     fontFamily="Arial, sans-serif"
                     fill="black" // Asegúrate de establecer un color de relleno
