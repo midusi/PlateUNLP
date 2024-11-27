@@ -4,6 +4,7 @@ import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
 import { useState } from "react"
 import { ContinueButton } from "./components/ContinueButton"
 import { FitsLoader } from "./components/FitsLoader"
+import { InferenceBoxGraph } from "./components/InferenceBoxGraph"
 import { legendreAlgoritm, linearRegression } from "./lib/utils"
 
 interface EmpiricalSpectrumPoint {
@@ -64,6 +65,10 @@ export default function App() {
               preview
               inferenceFunction={exportedFunction.function}
             />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Inference function fit</h1>
+            <InferenceBoxGraph inferenceFunction={exportedFunction.function} />
           </div>
         </section>
 
