@@ -74,20 +74,34 @@ export function InferenceBoxGraph({ inferenceFunction }: InferenceBoxGraphProps)
     xScale.range([0, xMax])
     yScale.range([yMax, 0])
 
+    const spotsInGraph = matches.map((match, index) => {
+        return (
+            <g key={`InferenceBoxGraphGroup-${match}`}>
+                <Circle
+                    cx={xScale(match.x)}
+                    cy={yScale(match.y)}
+                    stroke="grey"
+                    r={3}
+                />
+                <text
+                    x={xScale(match.x) + 5} // Ajusta el desplazamiento horizontal del texto
+                    y={yScale(match.y) - 5} // Ajusta el desplazamiento vertical del texto
+                    fontSize="12"
+                    fontFamily="Arial, sans-serif"
+                    fill="black" // Asegúrate de establecer un color de relleno
+                >
+                    #
+                    {index}
+                </text>
+            </g>
+        )
+    })
+
     return (
         <svg width={width} height={height}>
-            {matches.map((match, index) => {
-                return (
-                    <Circle
-                        key={`InferenceBoxGraphDot-${index}`}
-                        cx={xScale(match.x) + margin.left}
-                        cy={yScale(match.y) + margin.top} // Valor inicial en el eje y
-                        stroke="grey"
-                        r={3}
-                    />
-                )
-            })}
+
             <Group top={margin.top} left={margin.left}>
+                {spotsInGraph}
                 <GridColumns
                     scale={xScale}
                     width={xMax}
@@ -112,10 +126,10 @@ export function InferenceBoxGraph({ inferenceFunction }: InferenceBoxGraphProps)
                 <AxisBottom
                     scale={xScale}
                     top={yMax}
-                    label="Wavelength (Å)"
+                    label="Pixel"
                     numTicks={Math.floor(xMax / 80)}
                 />
-                <AxisLeft scale={yScale} label="Intensity" />
+                <AxisLeft scale={yScale} label="Wavelength (Å)" />
             </Group>
         </svg>
     )
