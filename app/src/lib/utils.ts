@@ -6,6 +6,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function generateRange(min: number, max: number, count: number): number[] {
+  return Array.from({ length: count }, (_, i) => min + (i * (max - min)) / (count - 1))
+}
+
 export function linearRegression(x: number[], y: number[]) {
   /**
    * x e y contienen una serie de valores que se corresponden
@@ -50,6 +54,9 @@ export function legendreAlgoritm(x: number[], y: number[]) {
       return 0
     }
   }
+
+  x.sort((a, b) => a - b)
+  y.sort((a, b) => a - b)
 
   const degree = 8
 

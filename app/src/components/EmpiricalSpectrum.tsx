@@ -54,16 +54,16 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
     const xClick = xScale(point.x)
     // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
     spotsInGraph.push(
-      <Line
-        key={`empiricalLine-${index}`}
-        x1={xClick + margin.left}
-        y1={0 + margin.top}
-        x2={xClick + margin.left}
-        y2={height - margin.bottom}
-        stroke={linesPalette[index % linesPalette.length]}
-        strokeWidth={2}
-        strokeDasharray="4 4"
-      >
+      <g key={`EmpiricalLine-${index}`}>
+        <Line
+          x1={xClick + margin.left}
+          y1={0 + margin.top}
+          x2={xClick + margin.left}
+          y2={height - margin.bottom}
+          stroke={linesPalette[index % linesPalette.length]}
+          strokeWidth={2}
+          strokeDasharray="4 4"
+        />
         <text
           x={xClick + margin.left + 5} // Ajusta el desplazamiento horizontal del texto
           y={margin.top + 10} // Ajusta el desplazamiento vertical del texto
@@ -74,7 +74,7 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
           #
           {`${index}`}
         </text>
-      </Line>,
+      </g>,
     )
   }
 
