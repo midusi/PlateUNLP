@@ -61,9 +61,8 @@ export function InferenceBoxGraph() {
 
     const { xScale, yScale } = useMemo(() => {
         return {
-            functionValues,
-            xScale: scaleLinear<number>({ domain: [functionValues[0].x, d3.max(functionValues, getX)!] }),
-            yScale: scaleLinear<number>({ domain: [functionValues[0].y, d3.max(functionValues, getY)!] }),
+            xScale: scaleLinear<number>({ domain: [d3.min(functionValues, getX)!, d3.max(functionValues, getX)!] }),
+            yScale: scaleLinear<number>({ domain: [d3.min(functionValues, getY)!, d3.max(functionValues, getY)!] }),
         }
     }, [functionValues])
 
