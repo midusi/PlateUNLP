@@ -40,13 +40,13 @@ export function InferenceForm() {
     for (let i = 0; i < smallArr.length; i++) {
         matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
     }
+    const inferenceFunction = selectedOption.function(
+        matches.map(val => val.lamp.x),
+        matches.map(val => val.material.x),
+    )
+    setPixelToWavelengthFunction(inferenceFunction)
 
     function onChangeRadio(option: InferenceOption) {
-        const inferenceFunction = option.function(
-            matches.map(val => val.lamp.x),
-            matches.map(val => val.material.x),
-        )
-        setPixelToWavelengthFunction(inferenceFunction)
         setSelectedOption(option)
     }
 

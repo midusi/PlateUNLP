@@ -60,11 +60,16 @@ export function InferenceBoxGraph() {
     }, [matches, pixelToWavelengthFunction])
 
     const { xScale, yScale } = useMemo(() => {
+        const xMin = Math.min(d3.min(matches, getX)!, d3.min(functionValues, getX)!)
+        const xMax = Math.max(d3.max(matches, getX)!, d3.max(functionValues, getX)!)
+        const yMin = Math.min(d3.min(matches, getY)!, d3.min(functionValues, getY)!)
+        const yMax = Math.max(d3.max(matches, getY)!, d3.max(functionValues, getY)!)
+
         return {
-            xScale: scaleLinear<number>({ domain: [d3.min(functionValues, getX)!, d3.max(functionValues, getX)!] }),
-            yScale: scaleLinear<number>({ domain: [d3.min(functionValues, getY)!, d3.max(functionValues, getY)!] }),
+            xScale: scaleLinear<number>({ domain: [xMin, xMax] }),
+            yScale: scaleLinear<number>({ domain: [yMin, yMax] }),
         }
-    }, [functionValues])
+    }, [functionValues, matches])
 
     // bounds
     const xMax = Math.max(width - margin.left - margin.right, 0)
@@ -75,11 +80,11 @@ export function InferenceBoxGraph() {
     yScale.range([yMax, 0])
 
     const spotsInGraph = matches.map((match, index) => {
-        const xPos = xScale(match.x)
-        let yPos = yScale(match.y)
-        if (!yPos) {
-            yPos = 0
-        }
+        const xPos = xScale(getX(match))
+        const yPos = yScale(getY(match))
+
+        if (!xPos || !yPos)
+            return <g key={`InferenceBoxGraphGroup-${match.x}-${match.y}`}></g>
 
         return (
             <g key={`InferenceBoxGraphGroup-${match.x}-${match.y}`}>
