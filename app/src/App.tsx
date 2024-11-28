@@ -34,7 +34,6 @@ export default function App() {
               setData={() => { }}
               interactable
               preview
-              inferenceFunction={exportedFunction.function}
             />
           </div>
           <div>
@@ -44,7 +43,6 @@ export default function App() {
               setData={setScienceSpectrumData}
               interactable={false}
               preview
-              inferenceFunction={exportedFunction.function}
             />
           </div>
           <div>
@@ -53,7 +51,7 @@ export default function App() {
           </div>
         </section>
 
-        <ContinueButton data={scienceSpectrumData} inferenceFunction={exportedFunction.function} />
+        <ContinueButton data={scienceSpectrumData} />
       </main>
 
       <footer className="mt-40 mb-20 text-xs italic text-center text-muted-foreground">
