@@ -4,34 +4,15 @@ import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
 import { useState } from "react"
 import { ContinueButton } from "./components/ContinueButton"
 import { FitsLoader } from "./components/FitsLoader"
-import { InferenceBoxGraph } from "./components/InferenceBoxGraph"
-import { legendreAlgoritm, linearRegression } from "./lib/utils"
+import { InferenceForm } from "./components/InferenceForm"
 
 interface EmpiricalSpectrumPoint {
   pixel: number
   intensity: number
 }
 
-interface InferenceOption {
-  name: string
-  function: (x: number[], y: number[]) => ((value: number) => number)
-}
-
-const radioOptions: InferenceOption[] = [
-  {
-    name: "Linear regresion",
-    function: linearRegression,
-  },
-  {
-    name: "Legendre (8 coefficients)",
-    function: legendreAlgoritm, // Cambiar por legendreRegression
-  },
-]
-
 export default function App() {
   const [scienceSpectrumData, setScienceSpectrumData] = useState<EmpiricalSpectrumPoint[] | null>(null)
-  const [exportedFunction, setExportedFunction] = useState(radioOptions[0])
-
   return (
     <div className="max-w-6xl px-8 mx-auto">
       <header>
@@ -68,29 +49,10 @@ export default function App() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Inference function fit</h1>
-            <InferenceBoxGraph inferenceFunction={exportedFunction.function} />
+            <InferenceForm />
           </div>
         </section>
 
-        {/* Refactorizar: De aca hasta despues del objeto ContinueButton. */}
-        <p>
-          Wavelength inference method:
-          {radioOptions.map((option: InferenceOption) => (
-            <label key={option.name} style={{ display: "block", marginBottom: "8px" }}>
-              <input
-                type="radio"
-                name="inferenceMethod"
-                value={option.name}
-                checked={exportedFunction.name === option.name}
-                onChange={() => {
-                  setExportedFunction(option)
-                }}
-              />
-              {option.name}
-
-            </label>
-          ))}
-        </p>
         <ContinueButton data={scienceSpectrumData} inferenceFunction={exportedFunction.function} />
       </main>
 

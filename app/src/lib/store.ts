@@ -11,6 +11,7 @@ export interface GlobalStore {
   materialPoints: Point[]
   linesPalette: string[]
   materialsPalette: string[]
+  pixelToWavelengthFunction: ((value: number) => number) | null
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
@@ -18,6 +19,7 @@ export interface GlobalStore {
   setRange: (min: number, max: number) => void
   setLampPoints: (arr: Point[]) => void
   setMaterialPoints: (arr: Point[]) => void
+  setPixelToWavelengthFunction: (arr: (value: number) => number) => void
 }
 
 export const globalStore = create<GlobalStore>()(set => ({
@@ -52,6 +54,8 @@ export const globalStore = create<GlobalStore>()(set => ({
     "#7f7f7f", // Gris
   ],
 
+  pixelToWavelengthFunction: null,
+
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {
       set({ material: value })
@@ -65,4 +69,5 @@ export const globalStore = create<GlobalStore>()(set => ({
   setRange: (min, max) => set({ rangeMin: Math.round(min), rangeMax: Math.round(max) }),
   setLampPoints: (arr: Point[]) => { set({ lampPoints: arr }) },
   setMaterialPoints: (arr: Point[]) => { set({ materialPoints: arr }) },
+  setPixelToWavelengthFunction: (value) => { set({ pixelToWavelengthFunction: value }) },
 }))
