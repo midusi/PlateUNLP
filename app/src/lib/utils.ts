@@ -1,3 +1,4 @@
+import { zip } from "@visx/vendor/d3-array"
 import { type ClassValue, clsx } from "clsx"
 import { inv, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
@@ -41,6 +42,33 @@ export function linearRegression(x: number[], y: number[]) {
 
   return function (value: number): number {
     return m * value + b
+  }
+}
+
+export function piecewiseLinearRegression(x: number[], y: number[]) {
+  /**
+  * x e y contienen una serie de valores que se corresponden
+  * cada uno con el de la misma posición en el otro arreglo.
+  * Esta función busca una recta entre cada par de puntos de
+  * x e y. Con el conjunto de funciones definidas genera una
+  * función por partes con la que dado cualquier píxel esta
+  * responde que longitud de onda le corresponde.
+  * Para los valores más allá del rango x especificado se
+  * usa la función obtenida de la regresión lineal entre el
+  * primer y último punto.
+   */
+  if (x.length !== y.length) {
+    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
+  }
+
+  for (let i = 0; i < x.length; i++) {
+
+  }
+
+
+
+  return function (value: number): number {
+    return 0
   }
 }
 
