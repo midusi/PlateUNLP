@@ -52,6 +52,7 @@ export function InferenceForm() {
             matches.map(val => val.material.x),
         )
         setPixelToWavelengthFunction(inferenceFunction)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matches, selectedOption]) // Dependencias relevantes
 
     function onChangeRadio(option: InferenceOption) {
