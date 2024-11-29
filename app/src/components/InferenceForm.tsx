@@ -1,5 +1,5 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { legendreAlgoritm, linearRegression } from "@/lib/utils"
+import { legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
 
@@ -22,6 +22,10 @@ const radioOptions: InferenceOption[] = [
     {
         name: "Linear regresion",
         function: linearRegression,
+    },
+    {
+        name: "Piece wise linear regression",
+        function: piecewiseLinearRegression, // Cambiar por legendreRegression
     },
     {
         name: "Legendre (8 coefficients)",
