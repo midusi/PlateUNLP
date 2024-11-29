@@ -52,7 +52,7 @@ export function InferenceForm() {
             matches.map(val => val.material.x),
         )
         setPixelToWavelengthFunction(inferenceFunction)
-    }, [matches, selectedOption, setPixelToWavelengthFunction]) // Dependencias relevantes
+    }, [matches, selectedOption]) // Dependencias relevantes
 
     function onChangeRadio(option: InferenceOption) {
         setSelectedOption(option)
