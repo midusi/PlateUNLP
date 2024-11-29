@@ -20,10 +20,6 @@ export interface Point {
     y: number
 }
 
-interface InferenceBoxGraphProps {
-    inferenceFunction: (x: number[], y: number[]) => ((value: number) => number)
-}
-
 // data accessors
 const getX = (p: Point) => p?.x ?? 0
 const getY = (p: Point) => p?.y ?? 0
@@ -32,39 +28,48 @@ const height = 400
 const width = 400
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
-export function InferenceBoxGraph({ inferenceFunction }: InferenceBoxGraphProps) {
-    const [lampPoints, materialPoints] = useGlobalStore(s => [
+export function InferenceBoxGraph() {
+    const [lampPoints, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
+        s.pixelToWavelengthFunction,
     ])
 
-    const matches: Point[] = []
-    const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
-    for (let i = 0; i < smallArr.length; i++) {
-        matches.push({ x: lampPoints[i].x, y: materialPoints[i].x })
-    }
-
-    const excecuteRegression = inferenceFunction(
-        matches.map(val => val.x),
-        matches.map(val => val.y),
-    )
-
-    const minV = Math.min(...matches.map(val => val.x), ...matches.map(val => val.x))
-    const maxV = Math.max(...matches.map(val => val.x), ...matches.map(val => val.x))
-    const functionValues: Point[] = generateRange(minV - 50, maxV + 50, 100).map((value) => {
-        return {
-            x: value,
-            y: excecuteRegression(value),
+    const matches: Point[] = useMemo((): Point[] => {
+        const matches: Point[] = []
+        const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
+        for (let i = 0; i < smallArr.length; i++) {
+            matches.push({ x: lampPoints[i].x, y: materialPoints[i].x })
         }
-    })
+        return matches
+    }, [lampPoints, materialPoints])
+
+    const functionValues: Point[] = useMemo((): Point[] => {
+        let functionValues: Point[] = []
+        if (pixelToWavelengthFunction) {
+            const minV = Math.min(...matches.map(val => val.x), ...matches.map(val => val.x))
+            const maxV = Math.max(...matches.map(val => val.x), ...matches.map(val => val.x))
+            functionValues = generateRange(minV - 50, maxV + 50, 100).map((value) => {
+                return {
+                    x: value,
+                    y: pixelToWavelengthFunction(value),
+                }
+            })
+        }
+        return functionValues
+    }, [matches, pixelToWavelengthFunction])
 
     const { xScale, yScale } = useMemo(() => {
+        const xMin = Math.min(d3.min(matches, getX)!, d3.min(functionValues, getX)!)
+        const xMax = Math.max(d3.max(matches, getX)!, d3.max(functionValues, getX)!)
+        const yMin = Math.min(d3.min(matches, getY)!, d3.min(functionValues, getY)!)
+        const yMax = Math.max(d3.max(matches, getY)!, d3.max(functionValues, getY)!)
+
         return {
-            functionValues,
-            xScale: scaleLinear<number>({ domain: [functionValues[0].x, d3.max(functionValues, getX)!] }),
-            yScale: scaleLinear<number>({ domain: [functionValues[0].y, d3.max(functionValues, getY)!] }),
+            xScale: scaleLinear<number>({ domain: [xMin, xMax] }),
+            yScale: scaleLinear<number>({ domain: [yMin, yMax] }),
         }
-    }, [functionValues])
+    }, [functionValues, matches])
 
     // bounds
     const xMax = Math.max(width - margin.left - margin.right, 0)
@@ -75,11 +80,11 @@ export function InferenceBoxGraph({ inferenceFunction }: InferenceBoxGraphProps)
     yScale.range([yMax, 0])
 
     const spotsInGraph = matches.map((match, index) => {
-        const xPos = xScale(match.x)
-        let yPos = yScale(match.y)
-        if (!yPos) {
-            yPos = 0
-        }
+        const xPos = xScale(getX(match))
+        const yPos = yScale(getY(match))
+
+        if (!xPos || !yPos)
+            return <g key={`InferenceBoxGraphGroup-${match.x}-${match.y}`}></g>
 
         return (
             <g key={`InferenceBoxGraphGroup-${match.x}-${match.y}`}>

@@ -22,7 +22,6 @@ export interface Point {
 interface PreviewerProps {
     data: EmpiricalSpectrumPoint[]
     color: string
-    inferenceFunction: (x: number[], y: number[]) => ((value: number) => number)
 }
 
 // data accessors
@@ -32,10 +31,11 @@ const getY = (p: Point) => p?.y ?? 0
 const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
-export function Previewer({ data, color, inferenceFunction }: PreviewerProps) {
-    const [lampPoints, materialPoints] = useGlobalStore(s => [
+export function Previewer({ data, color }: PreviewerProps) {
+    const [lampPoints, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
+        s.pixelToWavelengthFunction,
     ])
 
     const matches: {
@@ -47,22 +47,23 @@ export function Previewer({ data, color, inferenceFunction }: PreviewerProps) {
         matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
     }
 
-    const excecuteRegression = inferenceFunction(
-        matches.map(val => val.lamp.x),
-        matches.map(val => val.material.x),
-    )
-
-    const regressionedData: Point[] = data.map((val) => {
-        return {
-            x: excecuteRegression(val.pixel),
-            y: val.intensity,
+    const regressionedData: Point[] = useMemo(() => {
+        let regressionedData: Point[] = []
+        if (pixelToWavelengthFunction) {
+            regressionedData = data.map((val) => {
+                return {
+                    x: pixelToWavelengthFunction(val.pixel),
+                    y: val.intensity,
+                }
+            })
         }
-    })
+        return regressionedData
+    }, [data, pixelToWavelengthFunction])
 
     const { xScale, yScale } = useMemo(() => {
         return {
             regressionedData,
-            xScale: scaleLinear<number>({ domain: [regressionedData[0].x, d3.max(regressionedData, getX)!] }),
+            xScale: scaleLinear<number>({ domain: [d3.min(regressionedData, getX)!, d3.max(regressionedData, getX)!] }),
             yScale: scaleLinear<number>({ domain: [0, d3.max(regressionedData, getY)!] }),
         }
     }, [regressionedData])

@@ -13,36 +13,33 @@ interface EmpiricalSpectrumPoint {
 
 interface ContinueButtonProps {
     data: EmpiricalSpectrumPoint[] | null
-    inferenceFunction: (x: number[], y: number[]) => ((value: number) => number)
 }
 
-export function ContinueButton({ data, inferenceFunction }: ContinueButtonProps) {
-    const [lampPoints, materialPoints] = useGlobalStore(s => [
+export function ContinueButton({ data }: ContinueButtonProps) {
+    const [lampPoints, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
+        s.pixelToWavelengthFunction,
     ])
 
     const matches: {
-        lamp: { x: number, y: number }
-        material: { x: number, y: number }
+        lamp: Point
+        material: Point
     }[] = []
     const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
     for (let i = 0; i < smallArr.length; i++) {
         matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
     }
 
-    const excecuteInference = inferenceFunction(
-        matches.map(val => val.lamp.x),
-        matches.map(val => val.material.x),
-    )
-
     function onClick() {
         if (!data) {
             throw new Error("No estan cargados los datos del espectro de ciencia")
         }
-
-        const regressionedData: Point[] = data.map(({ pixel, intensity }) => ({
-            x: excecuteInference(pixel),
+        if (!pixelToWavelengthFunction) {
+            throw new Error("No está definida la funcion para convertir pixel a longitud de onda")
+        }
+        const regressionedData = data.map(({ pixel, intensity }) => ({
+            x: pixelToWavelengthFunction(pixel),
             y: intensity,
         }))
         const json = JSON.stringify({ regressionedData }, null, 2)
