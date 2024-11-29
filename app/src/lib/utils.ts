@@ -1,4 +1,3 @@
-import { zip } from "@visx/vendor/d3-array"
 import { type ClassValue, clsx } from "clsx"
 import { inv, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
@@ -9,6 +8,14 @@ export function cn(...inputs: ClassValue[]) {
 
 export function generateRange(min: number, max: number, count: number): number[] {
   return Array.from({ length: count }, (_, i) => min + (i * (max - min)) / (count - 1))
+}
+
+function sortArraysByFirst(x: number[], y: number[]) {
+  const combined = x.map((value: number, index: number) => ({ x: value, y: y[index] }))
+  combined.sort((a, b) => a.x - b.x)
+  const sortedX = combined.map(item => item.x)
+  const sortedY = combined.map(item => item.y)
+  return { sortedX, sortedY }
 }
 
 export function linearRegression(x: number[], y: number[]) {
@@ -47,28 +54,46 @@ export function linearRegression(x: number[], y: number[]) {
 
 export function piecewiseLinearRegression(x: number[], y: number[]) {
   /**
-  * x e y contienen una serie de valores que se corresponden
-  * cada uno con el de la misma posición en el otro arreglo.
-  * Esta función busca una recta entre cada par de puntos de
-  * x e y. Con el conjunto de funciones definidas genera una
-  * función por partes con la que dado cualquier píxel esta
-  * responde que longitud de onda le corresponde.
-  * Para los valores más allá del rango x especificado se
-  * usa la función obtenida de la regresión lineal entre el
-  * primer y último punto.
+   * x e y contienen una serie de valores que se corresponden
+   * cada uno con el de la misma posición en el otro arreglo.
+   * Esta función busca una recta entre cada par de puntos de
+   * x e y. Con el conjunto de funciones definidas genera una
+   * función por partes con la que dado cualquier píxel esta
+   * responde que longitud de onda le corresponde.
+   * Para los valores más allá del rango x especificado se
+   * usa la función obtenida de la regresión lineal entre el
+   * primer y último punto.
    */
   if (x.length !== y.length) {
     throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
   }
 
+  const { sortedX, sortedY } = sortArraysByFirst(x, y)
+
+  const functions: ((value: number) => number)[] = []
   for (let i = 0; i < x.length; i++) {
-
+    functions.push(
+      linearRegression(
+        [sortedX[i], sortedX[i + 1]],
+        [sortedY[i], sortedY[i + 1]],
+      ),
+    )
   }
+  const functionOuOfRange: (value: number) => number = linearRegression(
+    [sortedX[0], sortedX[sortedX.length - 1]],
+    [sortedY[0], sortedY[sortedY.length - 1]],
+  )
 
-
-
-  return function (value: number): number {
-    return 0
+  return function piecewiseFunction(value: number): number {
+    if (value < sortedX[0] || value >= sortedX[sortedX.length - 1]) {
+      return functionOuOfRange(value)
+    }
+    for (let i = sortedX.length; i > 0; i++) {
+      if (sortedX[i] <= value) {
+        return functions[i](value)
+      }
+    }
+    throw new Error("El valor recibido no está contemplado por el dominio de la función")
   }
 }
 
