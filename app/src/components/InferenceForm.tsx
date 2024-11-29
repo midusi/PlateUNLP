@@ -1,6 +1,6 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { legendreAlgoritm, linearRegression } from "@/lib/utils"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
 
 interface InferenceOption {
@@ -11,6 +11,11 @@ interface InferenceOption {
 export interface Point {
     x: number
     y: number
+}
+
+interface Match {
+    lamp: Point
+    material: Point
 }
 
 const radioOptions: InferenceOption[] = [
@@ -32,19 +37,22 @@ export function InferenceForm() {
         s.materialPoints,
     ])
 
-    const matches: {
-        lamp: Point
-        material: Point
-    }[] = []
-    const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
-    for (let i = 0; i < smallArr.length; i++) {
-        matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
-    }
-    const inferenceFunction = selectedOption.function(
-        matches.map(val => val.lamp.x),
-        matches.map(val => val.material.x),
-    )
-    setPixelToWavelengthFunction(inferenceFunction)
+    const matches: Match[] = useMemo((): Match[] => {
+        const matches: Match[] = []
+        const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
+        for (let i = 0; i < smallArr.length; i++) {
+            matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
+        }
+        return matches
+    }, [lampPoints, materialPoints])
+
+    useEffect(() => {
+        const inferenceFunction = selectedOption.function(
+            matches.map(val => val.lamp.x),
+            matches.map(val => val.material.x),
+        )
+        setPixelToWavelengthFunction(inferenceFunction)
+    }, [matches, selectedOption, setPixelToWavelengthFunction]) // Dependencias relevantes
 
     function onChangeRadio(option: InferenceOption) {
         setSelectedOption(option)
