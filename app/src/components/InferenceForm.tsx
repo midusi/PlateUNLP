@@ -1,5 +1,5 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { legendreAlgoritm, linearRegression } from "@/lib/utils"
+import { legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
 
@@ -22,6 +22,10 @@ const radioOptions: InferenceOption[] = [
     {
         name: "Linear regresion",
         function: linearRegression,
+    },
+    {
+        name: "Piece wise linear regression",
+        function: piecewiseLinearRegression, // Cambiar por legendreRegression
     },
     {
         name: "Legendre (8 coefficients)",
@@ -51,8 +55,10 @@ export function InferenceForm() {
             matches.map(val => val.lamp.x),
             matches.map(val => val.material.x),
         )
+
         setPixelToWavelengthFunction(inferenceFunction)
-    }, [matches, selectedOption, setPixelToWavelengthFunction]) // Dependencias relevantes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [matches, selectedOption]) // Dependencias relevantes
 
     function onChangeRadio(option: InferenceOption) {
         setSelectedOption(option)
@@ -75,7 +81,7 @@ export function InferenceForm() {
                     </label>
                 ))}
             </p>
-            <InferenceBoxGraph />
+            {matches.length >= 2 && <InferenceBoxGraph />}
         </>
     )
 }
