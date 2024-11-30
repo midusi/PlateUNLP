@@ -55,6 +55,7 @@ export function InferenceForm() {
             matches.map(val => val.lamp.x),
             matches.map(val => val.material.x),
         )
+
         setPixelToWavelengthFunction(inferenceFunction)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matches, selectedOption]) // Dependencias relevantes
@@ -80,7 +81,7 @@ export function InferenceForm() {
                     </label>
                 ))}
             </p>
-            <InferenceBoxGraph />
+            {matches.length >= 2 && <InferenceBoxGraph />}
         </>
     )
 }
