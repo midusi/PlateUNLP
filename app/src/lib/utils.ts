@@ -1,5 +1,5 @@
 import { type ClassValue, clsx } from "clsx"
-import { inv, matrix, multiply, transpose } from "mathjs"
+import { inv, matrix, multiply, number, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -18,11 +18,15 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
   return [sortedX, sortedY]
 }
 
-export class ErrorCode {
-  constructor(public code: number, public description: string) { }
+class CustomError extends Error {
+  code: number
+  constructor(code: number, message: string) {
+    super(message)
+    this.code = code
+  }
 }
 
-export function linearRegression(x: number[], y: number[]): ((value: number) => number) | ErrorCode {
+export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
   /**
    * x e y contienen una serie de valores que se corresponden
    * cada uno con el de la misma posición en el otro arreglo.
@@ -38,11 +42,11 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
    */
 
   if (x.length !== y.length) {
-    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño.")
+    throw new CustomError(1001, "Los arreglos de números recibidos deben tener el mismo tamaño.")
   }
 
   if (x.length <= 1) {
-    return new ErrorCode(1, "1: Insufficient matches, at least 2 are required for inference with linear regression.")
+    throw new CustomError(1002, "Insufficient matches, at least 2 are required for inference with linear regression.")
   }
 
   const n = x.length
@@ -61,7 +65,7 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
   }
 }
 
-export function piecewiseLinearRegression(x: number[], y: number[]): ((value: number) => number) | ErrorCode {
+export function piecewiseLinearRegression(x: number[], y: number[]): ((value: number) => number) {
   /**
    * x e y contienen una serie de valores que se corresponden
    * cada uno con el de la misma posición en el otro arreglo.
@@ -74,11 +78,11 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
    * primer y último punto.
    */
   if (x.length !== y.length) {
-    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño.")
+    throw new CustomError(1001, "Los arreglos de números recibidos deben tener el mismo tamaño.")
   }
 
   if (x.length <= 1) {
-    return new ErrorCode(1, "1: Insufficient matches, at least 2 are required for inference with linear regression.")
+    throw new CustomError(1002, "Insufficient matches, at least 2 are required for inference with linear regression.")
   }
 
   const [sortedX, sortedY] = sortArraysByFirst(x, y)
@@ -89,19 +93,12 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
       [sortedX[i], sortedX[i + 1]],
       [sortedY[i], sortedY[i + 1]],
     )
-    if (segmentFunction instanceof ErrorCode) {
-      throw new TypeError(`No se pudo obtener la funcion de regresion lineal entre los pixeles ${sortedX[i]} y ${sortedX[i + 1]}.`)
-    }
     functionsArr.push(segmentFunction)
   }
   const functionOuOfRange = linearRegression(
     [sortedX[0], sortedX[sortedX.length - 1]],
     [sortedY[0], sortedY[sortedY.length - 1]],
   )
-
-  if (functionOuOfRange instanceof ErrorCode) {
-    throw new TypeError(`No se pudo obtener la funcion de regresion lineal entre los pixeles ${sortedX[0]} y ${sortedX[sortedX.length - 1]}.`)
-  }
 
   return function piecewiseFunction(value: number): number {
     if (value < sortedX[0] || value >= sortedX[sortedX.length - 1]) {
@@ -117,13 +114,13 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
   }
 }
 
-export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) | ErrorCode {
+export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) {
   if (x.length !== y.length) {
-    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
+    throw new CustomError(1001, "Los arreglos de números recibidos deben tener el mismo tamaño.")
   }
 
   if (x.length <= 1) {
-    return new ErrorCode(1, "1: Insufficient matches, at least 2 are required for inference with linear regression.")
+    throw new CustomError(1002, "Insufficient matches, at least 2 are required for inference with linear regression.")
   }
 
   x.sort((a, b) => a - b)
