@@ -1,5 +1,5 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
+import { CustomError, ErrorCodes, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
 
@@ -35,6 +35,7 @@ const radioOptions: InferenceOption[] = [
 
 export function InferenceForm() {
     const [selectedOption, setSelectedOption] = useState<InferenceOption>(radioOptions[0])
+    const [showInference, setShowInference] = useState(false)
     const [setPixelToWavelengthFunction, lampPoints, materialPoints] = useGlobalStore(s => [
         s.setPixelToWavelengthFunction,
         s.lampPoints,
@@ -51,12 +52,22 @@ export function InferenceForm() {
     }, [lampPoints, materialPoints])
 
     useEffect(() => {
-        const inferenceFunction = selectedOption.function(
-            matches.map(val => val.lamp.x),
-            matches.map(val => val.material.x),
-        )
-
-        setPixelToWavelengthFunction(inferenceFunction)
+        try {
+            const inferenceFunction = selectedOption.function(
+                matches.map(val => val.lamp.x),
+                matches.map(val => val.material.x),
+            )
+            setPixelToWavelengthFunction(inferenceFunction)
+            setShowInference(true)
+        }
+        catch (error) {
+            if (error instanceof CustomError && error.code === ErrorCodes.INSUFFICIENT_MATCHES) {
+                setShowInference(false)
+            }
+            else {
+                throw error
+            }
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matches, selectedOption]) // Dependencias relevantes
 
@@ -81,7 +92,7 @@ export function InferenceForm() {
                     </label>
                 ))}
             </p>
-            {matches.length >= 2 && <InferenceBoxGraph />}
+            {showInference && <InferenceBoxGraph />}
         </>
     )
 }

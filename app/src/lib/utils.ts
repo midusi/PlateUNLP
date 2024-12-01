@@ -18,7 +18,12 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
   return [sortedX, sortedY]
 }
 
-class CustomError extends Error {
+export const ErrorCodes = {
+  DIFFERENT_PROMP_SIZE: 1001,
+  INSUFFICIENT_MATCHES: 1002,
+}
+
+export class CustomError extends Error {
   code: number
   constructor(code: number, message: string) {
     super(message)
@@ -42,11 +47,17 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
    */
 
   if (x.length !== y.length) {
-    throw new CustomError(1001, "Los arreglos de números recibidos deben tener el mismo tamaño.")
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
   }
 
   if (x.length <= 1) {
-    throw new CustomError(1002, "Insufficient matches, at least 2 are required for inference with linear regression.")
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with linear regression.",
+    )
   }
 
   const n = x.length
@@ -78,11 +89,17 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
    * primer y último punto.
    */
   if (x.length !== y.length) {
-    throw new CustomError(1001, "Los arreglos de números recibidos deben tener el mismo tamaño.")
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
   }
 
   if (x.length <= 1) {
-    throw new CustomError(1002, "Insufficient matches, at least 2 are required for inference with linear regression.")
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with linear regression.",
+    )
   }
 
   const [sortedX, sortedY] = sortArraysByFirst(x, y)
@@ -116,11 +133,17 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
 
 export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) {
   if (x.length !== y.length) {
-    throw new CustomError(1001, "Los arreglos de números recibidos deben tener el mismo tamaño.")
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
   }
 
   if (x.length <= 1) {
-    throw new CustomError(1002, "Insufficient matches, at least 2 are required for inference with linear regression.")
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with linear regression.",
+    )
   }
 
   x.sort((a, b) => a - b)
