@@ -28,7 +28,7 @@ const height = 400
 const width = 400
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
-export function InferenceBoxGraph() {
+function InferenceBoxComponents() {
     const [lampPoints, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
@@ -109,39 +109,44 @@ export function InferenceBoxGraph() {
     })
 
     return (
-        <svg width={width} height={height}>
+        <Group top={margin.top} left={margin.left}>
+            {spotsInGraph}
+            <GridColumns
+                scale={xScale}
+                width={xMax}
+                height={yMax}
+                className="stroke-neutral-100"
+            />
+            <GridRows
+                scale={yScale}
+                width={xMax}
+                height={yMax}
+                className="stroke-neutral-100"
+            />
+            <LinePath<Point>
+                curve={curveLinear}
+                data={functionValues}
+                x={p => xScale(getX(p)) ?? 0}
+                y={p => yScale(getY(p)) ?? 0}
+                shapeRendering="geometricPrecision"
+                className="stroke-1"
+                style={{ stroke: "green" }}
+            />
+            <AxisBottom
+                scale={xScale}
+                top={yMax}
+                label="Pixel"
+                numTicks={Math.floor(xMax / 80)}
+            />
+            <AxisLeft scale={yScale} label="Wavelength (Å)" />
+        </Group>
+    )
+}
 
-            <Group top={margin.top} left={margin.left}>
-                {spotsInGraph}
-                <GridColumns
-                    scale={xScale}
-                    width={xMax}
-                    height={yMax}
-                    className="stroke-neutral-100"
-                />
-                <GridRows
-                    scale={yScale}
-                    width={xMax}
-                    height={yMax}
-                    className="stroke-neutral-100"
-                />
-                <LinePath<Point>
-                    curve={curveLinear}
-                    data={functionValues}
-                    x={p => xScale(getX(p)) ?? 0}
-                    y={p => yScale(getY(p)) ?? 0}
-                    shapeRendering="geometricPrecision"
-                    className="stroke-1"
-                    style={{ stroke: "green" }}
-                />
-                <AxisBottom
-                    scale={xScale}
-                    top={yMax}
-                    label="Pixel"
-                    numTicks={Math.floor(xMax / 80)}
-                />
-                <AxisLeft scale={yScale} label="Wavelength (Å)" />
-            </Group>
+export function InferenceBoxGraph() {
+    return (
+        <svg width={width} height={height}>
+            <InferenceBoxComponents />
         </svg>
     )
 }
