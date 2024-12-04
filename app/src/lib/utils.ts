@@ -98,7 +98,7 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
   if (x.length <= 1) {
     throw new CustomError(
       ErrorCodes.INSUFFICIENT_MATCHES,
-      "Insufficient matches, at least 2 are required for inference with linear regression.",
+      "Insufficient matches, at least 2 are required for inference with piece wise linear regression.",
     )
   }
 
@@ -142,7 +142,7 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
   if (x.length <= 1) {
     throw new CustomError(
       ErrorCodes.INSUFFICIENT_MATCHES,
-      "Insufficient matches, at least 2 are required for inference with linear regression.",
+      "Insufficient matches, at least 2 are required for inference with legendre algoritm.",
     )
   }
 
