@@ -1,5 +1,5 @@
 import { type ClassValue, clsx } from "clsx"
-import { inv, matrix, multiply, number, transpose } from "mathjs"
+import { inv, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
