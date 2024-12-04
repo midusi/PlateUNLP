@@ -1,5 +1,5 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { generateRange } from "@/lib/utils"
+import { CustomError, generateRange } from "@/lib/utils"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -27,12 +27,17 @@ const getY = (p: Point) => p?.y ?? 0
 const height = 400
 const width = 400
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
+const xMax = Math.max(width - margin.left - margin.right, 0)
+const yMax = Math.max(height - margin.top - margin.bottom, 0)
 
-function InferenceBoxComponents() {
-    const [lampPoints, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
+interface InferenceBoxComponentsProps {
+    pixelToWavelengthFunction: (value: number) => number
+}
+
+function InferenceBoxComponents({ pixelToWavelengthFunction }: InferenceBoxComponentsProps) {
+    const [lampPoints, materialPoints] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
-        s.pixelToWavelengthFunction,
     ])
 
     const matches: Point[] = useMemo((): Point[] => {
@@ -46,16 +51,14 @@ function InferenceBoxComponents() {
 
     const functionValues: Point[] = useMemo((): Point[] => {
         let functionValues: Point[] = []
-        if (pixelToWavelengthFunction) {
-            const minV = Math.min(...matches.map(val => val.x), ...matches.map(val => val.x))
-            const maxV = Math.max(...matches.map(val => val.x), ...matches.map(val => val.x))
-            functionValues = generateRange(minV - 50, maxV + 50, 100).map((value) => {
-                return {
-                    x: value,
-                    y: pixelToWavelengthFunction(value),
-                }
-            })
-        }
+        const minV = Math.min(...matches.map(val => val.x), ...matches.map(val => val.x))
+        const maxV = Math.max(...matches.map(val => val.x), ...matches.map(val => val.x))
+        functionValues = generateRange(minV - 50, maxV + 50, 100).map((value) => {
+            return {
+                x: value,
+                y: pixelToWavelengthFunction(value),
+            }
+        })
         return functionValues
     }, [matches, pixelToWavelengthFunction])
 
@@ -70,10 +73,6 @@ function InferenceBoxComponents() {
             yScale: scaleLinear<number>({ domain: [yMin, yMax] }),
         }
     }, [functionValues, matches])
-
-    // bounds
-    const xMax = Math.max(width - margin.left - margin.right, 0)
-    const yMax = Math.max(height - margin.top - margin.bottom, 0)
 
     // update scale output ranges
     xScale.range([0, xMax])
@@ -143,10 +142,102 @@ function InferenceBoxComponents() {
     )
 }
 
+interface GraphInErrorCaseProps {
+    message: string
+}
+
+function GraphInErrorCase({ message }: GraphInErrorCaseProps) {
+    // Función para dividir el texto en líneas
+    function wrapText(text: string, maxWidth: number): string[] {
+        const words = text.split(" ")
+        const lines: string[] = []
+        let currentLine = ""
+
+        words.forEach((word) => {
+            const testLine = currentLine ? `${currentLine} ${word}` : word
+            if (testLine.length * 8 > maxWidth) { // Aproximación: cada carácter ocupa ~8px
+                lines.push(currentLine)
+                currentLine = word
+            }
+            else {
+                currentLine = testLine
+            }
+        })
+
+        if (currentLine)
+            lines.push(currentLine)
+        return lines
+    };
+
+    const lines = wrapText(message, width - 50)
+    const indexedLines = lines.map((line, index) => ({ line, index }))
+    const textHeight = 15
+    const boxPadding = 15
+    const boxWidth = width - 100
+    const boxHeight = lines.length * textHeight + boxPadding * 2
+    return (
+        <>
+            <Group top={margin.top} left={margin.left}>
+                <AxisBottom
+                    top={yMax}
+                    scale={scaleLinear<number>({ domain: [0, xMax] }).range([0, xMax])}
+                    label="Pixel"
+                    numTicks={Math.floor(xMax / 80)}
+                />
+                <AxisLeft
+                    scale={scaleLinear<number>({ domain: [0, yMax] }).range([yMax, 0])}
+                    label="Wavelength (Å)"
+                />
+            </Group>
+            <g>
+                <rect
+                    x={(width - boxWidth) / 2}
+                    y={((height - boxHeight + textHeight + boxPadding) / 2)}
+                    width={boxWidth}
+                    height={boxHeight}
+                    fill="lightyellow"
+                    stroke="red"
+                    rx={10} // Bordes redondeados
+                />
+                <text
+                    x={width / 2}
+                    y={height / 2}
+                    textAnchor="middle" // Centra el texto horizontalmente
+                    dominantBaseline="middle" // Centra el texto verticalmente
+                    fontSize="16"
+                    fill="red"
+                >
+                    {indexedLines.map((line, index) => (
+                        <tspan
+                            key={line.index}
+                            x={width / 2} // Mantén el texto centrado horizontalmente
+                            dy={index === 0 ? "0" : "1.2em"} // Espaciado vertical entre líneas
+                        >
+                            {line.line}
+                        </tspan>
+                    ))}
+                </text>
+            </g>
+        </>
+    )
+}
+
 export function InferenceBoxGraph() {
+    const [pixelToWavelengthFunction] = useGlobalStore(s => [
+        s.pixelToWavelengthFunction,
+    ])
+
+    let content
+    if (pixelToWavelengthFunction instanceof CustomError) {
+        content = <GraphInErrorCase message={pixelToWavelengthFunction.message} />
+    }
+    else {
+        content = <InferenceBoxComponents pixelToWavelengthFunction={pixelToWavelengthFunction} />
+    }
+
     return (
         <svg width={width} height={height}>
-            <InferenceBoxComponents />
+            {content}
         </svg>
     )
 }
