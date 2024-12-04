@@ -35,7 +35,6 @@ const radioOptions: InferenceOption[] = [
 
 export function InferenceForm() {
     const [selectedOption, setSelectedOption] = useState<InferenceOption>(radioOptions[0])
-    const [showInference, setShowInference] = useState(false)
     const [setPixelToWavelengthFunction, lampPoints, materialPoints] = useGlobalStore(s => [
         s.setPixelToWavelengthFunction,
         s.lampPoints,
@@ -58,11 +57,10 @@ export function InferenceForm() {
                 matches.map(val => val.material.x),
             )
             setPixelToWavelengthFunction(inferenceFunction)
-            setShowInference(true)
         }
         catch (error) {
-            if (error instanceof CustomError && error.code === ErrorCodes.INSUFFICIENT_MATCHES) {
-                setShowInference(false)
+            if (error instanceof CustomError) {
+                setPixelToWavelengthFunction(error)
             }
             else {
                 throw error
@@ -92,7 +90,7 @@ export function InferenceForm() {
                     </label>
                 ))}
             </p>
-            {showInference && <InferenceBoxGraph />}
+            <InferenceBoxGraph />
         </>
     )
 }
