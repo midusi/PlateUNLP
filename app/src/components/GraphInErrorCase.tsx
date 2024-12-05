@@ -13,12 +13,14 @@ export function GraphInErrorCase({ message, dimensions, margin }: GraphInErrorCa
     const xMax = Math.max(width - margin.left - margin.right, 0)
     const yMax = Math.max(height - margin.top - margin.bottom, 0)
 
-    const lines = wrapText(message, width - 50)
-    const indexedLines = lines.map((line, index) => ({ line, index }))
-    const textHeight = 15
     const boxPadding = 15
-    const boxWidth = width - 100
-    const boxHeight = lines.length * textHeight + boxPadding * 2
+    const boxWidth = width * 0.6
+
+    const lines = wrapText(message, boxWidth - boxPadding)
+    const indexedLines = lines.map((line, index) => ({ line, index }))
+
+    const textHeight = 15
+    const boxHeight = (lines.length + 1) * textHeight + boxPadding * 2
     return (
         <>
             <Group top={margin.top} left={margin.left}>
@@ -36,7 +38,7 @@ export function GraphInErrorCase({ message, dimensions, margin }: GraphInErrorCa
             <g>
                 <rect
                     x={(width - boxWidth) / 2}
-                    y={((height - boxHeight + textHeight + boxPadding) / 2)}
+                    y={((height - boxHeight) / 2)}
                     width={boxWidth}
                     height={boxHeight}
                     fill="lightyellow"
@@ -44,8 +46,8 @@ export function GraphInErrorCase({ message, dimensions, margin }: GraphInErrorCa
                     rx={10} // Bordes redondeados
                 />
                 <text
-                    x={width / 2}
-                    y={height / 2}
+                    x={((width - boxWidth) / 2) + boxPadding * 2}
+                    y={((height - boxHeight) / 2) + boxPadding * 2}
                     textAnchor="middle" // Centra el texto horizontalmente
                     dominantBaseline="middle" // Centra el texto verticalmente
                     fontSize="16"
