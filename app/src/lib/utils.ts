@@ -18,7 +18,20 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
   return [sortedX, sortedY]
 }
 
-export function linearRegression(x: number[], y: number[]): (value: number) => number {
+export const ErrorCodes = {
+  DIFFERENT_PROMP_SIZE: 1001,
+  INSUFFICIENT_MATCHES: 1002,
+}
+
+export class CustomError extends Error {
+  code: number
+  constructor(code: number, message: string) {
+    super(message)
+    this.code = code
+  }
+}
+
+export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
   /**
    * x e y contienen una serie de valores que se corresponden
    * cada uno con el de la misma posición en el otro arreglo.
@@ -34,8 +47,19 @@ export function linearRegression(x: number[], y: number[]): (value: number) => n
    */
 
   if (x.length !== y.length) {
-    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
   }
+
+  if (x.length <= 1) {
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with linear regression.",
+    )
+  }
+
   const n = x.length
   const sumX = x.reduce((acc, cur) => acc + cur, 0)
   const sumY = y.reduce((acc, cur) => acc + cur, 0)
@@ -52,7 +76,7 @@ export function linearRegression(x: number[], y: number[]): (value: number) => n
   }
 }
 
-export function piecewiseLinearRegression(x: number[], y: number[]): (value: number) => number {
+export function piecewiseLinearRegression(x: number[], y: number[]): ((value: number) => number) {
   /**
    * x e y contienen una serie de valores que se corresponden
    * cada uno con el de la misma posición en el otro arreglo.
@@ -65,21 +89,30 @@ export function piecewiseLinearRegression(x: number[], y: number[]): (value: num
    * primer y último punto.
    */
   if (x.length !== y.length) {
-    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
+  }
+
+  if (x.length <= 1) {
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with piece wise linear regression.",
+    )
   }
 
   const [sortedX, sortedY] = sortArraysByFirst(x, y)
 
   const functionsArr: ((value: number) => number)[] = []
   for (let i = 0; i < x.length; i++) {
-    functionsArr.push(
-      linearRegression(
-        [sortedX[i], sortedX[i + 1]],
-        [sortedY[i], sortedY[i + 1]],
-      ),
+    const segmentFunction = linearRegression(
+      [sortedX[i], sortedX[i + 1]],
+      [sortedY[i], sortedY[i + 1]],
     )
+    functionsArr.push(segmentFunction)
   }
-  const functionOuOfRange: (value: number) => number = linearRegression(
+  const functionOuOfRange = linearRegression(
     [sortedX[0], sortedX[sortedX.length - 1]],
     [sortedY[0], sortedY[sortedY.length - 1]],
   )
@@ -94,20 +127,23 @@ export function piecewiseLinearRegression(x: number[], y: number[]): (value: num
       }
     }
 
-    return 0
     throw new Error(`El valor ${value} no está contemplado por el dominio de la función`)
   }
 }
 
-export function legendreAlgoritm(x: number[], y: number[]): (value: number) => number {
+export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) {
   if (x.length !== y.length) {
-    throw new Error("Los arreglos de números recibidos deben tener el mismo tamaño")
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
   }
 
-  if (x.length === 0 || x.length === 1) {
-    return function (_value: number): number {
-      return 0
-    }
+  if (x.length <= 1) {
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with legendre algoritm.",
+    )
   }
 
   x.sort((a, b) => a - b)

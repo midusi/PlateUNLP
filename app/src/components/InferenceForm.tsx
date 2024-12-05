@@ -1,5 +1,5 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
+import { CustomError, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
 
@@ -51,12 +51,21 @@ export function InferenceForm() {
     }, [lampPoints, materialPoints])
 
     useEffect(() => {
-        const inferenceFunction = selectedOption.function(
-            matches.map(val => val.lamp.x),
-            matches.map(val => val.material.x),
-        )
-
-        setPixelToWavelengthFunction(inferenceFunction)
+        try {
+            const inferenceFunction = selectedOption.function(
+                matches.map(val => val.lamp.x),
+                matches.map(val => val.material.x),
+            )
+            setPixelToWavelengthFunction(inferenceFunction)
+        }
+        catch (error) {
+            if (error instanceof CustomError) {
+                setPixelToWavelengthFunction(error)
+            }
+            else {
+                throw error
+            }
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matches, selectedOption]) // Dependencias relevantes
 
@@ -81,7 +90,7 @@ export function InferenceForm() {
                     </label>
                 ))}
             </p>
-            {matches.length >= 2 && <InferenceBoxGraph />}
+            <InferenceBoxGraph />
         </>
     )
 }

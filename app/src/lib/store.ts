@@ -1,5 +1,6 @@
 import { LAMP_MATERIALS, type LampMaterial } from "@/lib/spectral-data"
 import { create } from "zustand"
+import { CustomError, ErrorCodes } from "./utils"
 
 interface Point { x: number, y: number }
 
@@ -11,7 +12,7 @@ export interface GlobalStore {
   materialPoints: Point[]
   linesPalette: string[]
   materialsPalette: string[]
-  pixelToWavelengthFunction: ((value: number) => number) | null
+  pixelToWavelengthFunction: ((value: number) => number) | CustomError
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
@@ -19,7 +20,7 @@ export interface GlobalStore {
   setRange: (min: number, max: number) => void
   setLampPoints: (arr: Point[]) => void
   setMaterialPoints: (arr: Point[]) => void
-  setPixelToWavelengthFunction: (arr: (value: number) => number) => void
+  setPixelToWavelengthFunction: (arr: ((value: number) => number) | CustomError) => void
 }
 
 export const globalStore = create<GlobalStore>()(set => ({
@@ -54,7 +55,10 @@ export const globalStore = create<GlobalStore>()(set => ({
     "#7f7f7f", // Gris
   ],
 
-  pixelToWavelengthFunction: null,
+  pixelToWavelengthFunction: new CustomError(
+    ErrorCodes.INSUFFICIENT_MATCHES,
+    "Insufficient matches, at least 2 are required for inference with linear regression.",
+  ),
 
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {

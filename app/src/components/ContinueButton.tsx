@@ -1,3 +1,4 @@
+import { CustomError } from "@/lib/utils"
 import { useGlobalStore } from "../hooks/use-global-store"
 import { Button } from "./ui/button"
 
@@ -35,8 +36,8 @@ export function ContinueButton({ data }: ContinueButtonProps) {
         if (!data) {
             throw new Error("No estan cargados los datos del espectro de ciencia")
         }
-        if (!pixelToWavelengthFunction) {
-            throw new Error("No está definida la funcion para convertir pixel a longitud de onda")
+        if (pixelToWavelengthFunction instanceof CustomError) {
+            throw pixelToWavelengthFunction
         }
         const regressionedData = data.map(({ pixel, intensity }) => ({
             x: pixelToWavelengthFunction(pixel),
@@ -56,7 +57,7 @@ export function ContinueButton({ data }: ContinueButtonProps) {
     return (
         <div className="flex justify-center">
             <Button
-                disabled={matches.length < 1}
+                disabled={pixelToWavelengthFunction instanceof CustomError}
                 onClick={onClick}
             >
                 Continue
