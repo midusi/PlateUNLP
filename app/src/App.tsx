@@ -5,7 +5,7 @@ import { useState } from "react"
 import { ContinueButton } from "./components/ContinueButton"
 import { FitsLoader } from "./components/FitsLoader"
 import { InferenceForm } from "./components/InferenceForm"
-import { MultiStepBar } from "./components/MultiStepBar"
+import { NavigationProgressBar } from "./components/NavigationProgressBar"
 
 interface EmpiricalSpectrumPoint {
   pixel: number
@@ -23,7 +23,7 @@ export default function App() {
       </header>
 
       <main>
-        <MultiStepBar />
+        <NavigationProgressBar />
 
         <ReferenceLampForm />
 
