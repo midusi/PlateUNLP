@@ -1,9 +1,16 @@
 <script>
-  import { Tabs, TabList, TabButton, TabPanel, Tab, PlateTab } from "./components/Tab/tabs";
+  import {
+    Tabs,
+    TabList,
+    TabButton,
+    TabPanel,
+    Tab,
+    PlateTab,
+  } from "./components/Tab/tabs";
   import SpectrogramCanvas from "./models/SpectrogramCanvas";
   import { spectrogramStore, workspaceStore, metadataStore } from "./store";
   import { onMount } from "svelte";
-  import { slide,fly } from 'svelte/transition';
+  import { slide, fly } from "svelte/transition";
   import {
     RequiredForm,
     NButton,
@@ -15,13 +22,19 @@
     ExportButton,
     PlateForm,
     FilterZone,
-    MetadataForm
+    MetadataForm,
   } from "./components";
-  import { confirmAlert,showAlert,deleteAlert,errorAlert, loadingAlert } from "./helpers/Alert";
-  import {setContext} from "svelte";
+  import {
+    confirmAlert,
+    showAlert,
+    deleteAlert,
+    errorAlert,
+    loadingAlert,
+  } from "./helpers/Alert";
+  import { setContext } from "svelte";
 
   let imageChanged = true;
-  let imageSaved = false
+  let imageSaved = false;
   let cantSpectra = 0;
   let spectrogramCanvas;
   let uploadedImage = false;
@@ -32,105 +45,141 @@
   let bboxSelected = 1;
   let invalidForm = true;
   let changeFlag = false;
-  let metadataSearched = []
-  let names = []
-  let validatedSpectrums = []
-  let validatedSpectrumsForMetadataSearch = []
+  let metadataSearched = [];
+  let names = [];
+  let validatedSpectrums = [];
+  let validatedSpectrumsForMetadataSearch = [];
   let plateValid = false;
-  let dataLoaded = false
-  let reset_filters_flag = false
-  let rotateImage = false
+  let dataLoaded = false;
+  let reset_filters_flag = false;
+  let rotateImage = false;
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
     $metadataStore.formActions.selectForIndex(bboxSelected - 1);
 
-  async function checkChangeFlag(){
-    if(changeFlag){
+  async function checkChangeFlag() {
+    if (changeFlag) {
       AutoSaveData();
       imageSaved = true;
       changeFlag = false;
     }
   }
 
-  const checkChangeFlagInterval = setInterval(checkChangeFlag,5000); 
+  const checkChangeFlagInterval = setInterval(checkChangeFlag, 5000);
+
+  async function generateHash(input) {
+    const encoder = new TextEncoder(); // Codifica el texto como bytes
+    const data = encoder.encode(input); // Convierte el string a un Uint8Array
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data); // Genera el hash
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // Convierte el buffer a un array
+    const hashHex = hashArray
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join(""); // Convierte a hexadecimal
+    return hashHex;
+  }
 
   onMount(async () => {
+    let message = "";
+
+    async function authenticate() {
+      const password = prompt("Ingresa la contraseña:");
+      if (
+        (await generateHash(password)) ===
+        "f1cebed3a0dc153324ab26036934a467d1eeb3276076d8c566dca9ce79f04ec1"
+      ) {
+        message = "Autenticación exitosa";
+        alert("Bienvenido al sistema.");
+      } else {
+        alert("Contraseña incorrecta.");
+        location.reload();
+      }
+    }
+
+    authenticate();
     const events = {
       "selection:created": handleCreatedUpdate,
       "selection:updated": handleCreatedUpdate,
       "object:added": handlerAdded,
       "object:removed": handlerRemoved,
-      "object:modified": handlerModified
+      "object:modified": handlerModified,
     };
     loadConfig();
     metadataStore.initFields();
-    let witdh_ruler =  document.getElementById("witdh_ruler").clientWidth
+    let witdh_ruler = document.getElementById("witdh_ruler").clientWidth;
     spectrogramCanvas = new SpectrogramCanvas(events, witdh_ruler);
     canvas = spectrogramCanvas.getCanvas();
     checkChangeFlag();
   });
 
-  function loadNames(){
-    for (let i = 0; i < cantSpectra; i++) 
-        names[i] = $metadataStore.spectraData[i]["OBJECT"]
+  function loadNames() {
+    for (let i = 0; i < cantSpectra; i++)
+      names[i] = $metadataStore.spectraData[i]["OBJECT"];
   }
 
-  function updateName(){
-    if(bboxSelected > 1 && cantSpectra > 0 && names[bboxSelected-2] !== $metadataStore.spectraData[bboxSelected-2]["OBJECT"]){
-      names[bboxSelected-2] = $metadataStore.spectraData[bboxSelected-2]["OBJECT"]
-      spectrogramCanvas.updateLabel(bboxSelected-2,names[bboxSelected-2])
+  function updateName() {
+    if (
+      bboxSelected > 1 &&
+      cantSpectra > 0 &&
+      names[bboxSelected - 2] !==
+        $metadataStore.spectraData[bboxSelected - 2]["OBJECT"]
+    ) {
+      names[bboxSelected - 2] =
+        $metadataStore.spectraData[bboxSelected - 2]["OBJECT"];
+      spectrogramCanvas.updateLabel(bboxSelected - 2, names[bboxSelected - 2]);
     }
   }
 
-  export function setChangeFlag(){
-      validateSelectedSpectrum();
-      validateForm();
-      updateName();
-      changeFlag = true;
-      imageSaved = false;
+  export function setChangeFlag() {
+    validateSelectedSpectrum();
+    validateForm();
+    updateName();
+    changeFlag = true;
+    imageSaved = false;
   }
 
-  setContext("setChangeFlag",setChangeFlag);
+  setContext("setChangeFlag", setChangeFlag);
 
   const rotate = async () => {
-    rotateImage = !rotateImage
-    await getImg(imageName, rotateImage)
-    if(rotateImage)
-      spectrogramCanvas.setScale(0.2)
-  }
+    rotateImage = !rotateImage;
+    await getImg(imageName, rotateImage);
+    if (rotateImage) spectrogramCanvas.setScale(0.2);
+  };
 
   async function getImg(selectedImage, rotateImage = false) {
     if (selectedImage != "") {
-      uploadedImage = false
-      imageChanged = true
+      uploadedImage = false;
+      imageChanged = true;
       spectrogramCanvas.deleteAllBbox();
-      validatedSpectrums = []
-      validatedSpectrumsForMetadataSearch = []
-      dataLoaded = false
-      changeFlag = false
+      validatedSpectrums = [];
+      validatedSpectrumsForMetadataSearch = [];
+      dataLoaded = false;
+      changeFlag = false;
       imageName = selectedImage;
       initializeCanvas();
       let data;
-      try{
-        data = await workspaceStore.getImg(spectrogramCanvas, pathDir, selectedImage, {rotateImage});
-      }
-      catch(err){
-      }
-      reset_filters_flag = true
+      try {
+        data = await workspaceStore.getImg(
+          spectrogramCanvas,
+          pathDir,
+          selectedImage,
+          { rotateImage }
+        );
+      } catch (err) {}
+      reset_filters_flag = true;
 
-      if(data.metadata){
-        imageSaved = true
-        let spectraData = data.metadata.map((val,i) => {
-          val["id"] = $metadataStore.spectraData[i]["id"]
-          val["color"] = $metadataStore.spectraData[i]["color"]
+      if (data.metadata) {
+        imageSaved = true;
+        let spectraData = data.metadata.map((val, i) => {
+          val["id"] = $metadataStore.spectraData[i]["id"];
+          val["color"] = $metadataStore.spectraData[i]["color"];
           return val;
         });
         metadataStore.setSpectraData(spectraData);
         metadataStore.setPlateData(data.plateData);
-        for(let i = 0; i < spectraData.length ; i++){
-          if(spectraData[i]["OBJECT"] === ""){
-            $metadataStore.spectraData[i]["OBJECT"] = `Nuevo#${i+1}`
+        for (let i = 0; i < spectraData.length; i++) {
+          if (spectraData[i]["OBJECT"] === "") {
+            $metadataStore.spectraData[i]["OBJECT"] = `Nuevo#${i + 1}`;
           }
         }
         checkMetadataSearched();
@@ -138,33 +187,32 @@
         validateAllSpectrum();
         loadNames();
         changeFlag = false;
-        
       } else {
         setChangeFlag();
-        bboxSelected = 1
+        bboxSelected = 1;
       }
       imageChanged = false;
       uploadedImage = true;
     }
   }
 
-  async function confirmSearchMetadata(){
-    if(metadataSearched[bboxSelected-2]){
+  async function confirmSearchMetadata() {
+    if (metadataSearched[bboxSelected - 2]) {
       deleteAlert({
-      title :'¿Seguro que quieres buscar metadatos?',
-      text :  'Se perderan los datos anteriores',
-      confirmButtonText : 'Buscar',
-      denyButtonText : 'Cancelar',
-      succesFunc: async () => {
-        await setRemoteMetadata();
-      }})             
-    }
-    else{
+        title: "¿Seguro que quieres buscar metadatos?",
+        text: "Se perderan los datos anteriores",
+        confirmButtonText: "Buscar",
+        denyButtonText: "Cancelar",
+        succesFunc: async () => {
+          await setRemoteMetadata();
+        },
+      });
+    } else {
       await setRemoteMetadata();
-      metadataSearched[bboxSelected-2] = true;
+      metadataSearched[bboxSelected - 2] = true;
     }
   }
-  
+
   async function setRemoteMetadata() {
     const data = {
       OBJECT: $metadataStore.spectraData[bboxSelected - 2]["OBJECT"],
@@ -173,12 +221,14 @@
       UT: $metadataStore.spectraData[bboxSelected - 2]["UT"],
       SUFFIX: $metadataStore.spectraData[bboxSelected - 2]["SUFFIX"],
     };
-    const setted = await metadataStore.setRemoteMetadata(data, bboxSelected - 2);
-    if(setted){
+    const setted = await metadataStore.setRemoteMetadata(
+      data,
+      bboxSelected - 2
+    );
+    if (setted) {
       setChangeFlag();
     }
     return setted;
-    
   }
 
   function initializeCanvas() {
@@ -188,32 +238,32 @@
   }
 
   function addBox() {
-    spectrogramCanvas.addBbox(cantSpectra+1);
+    spectrogramCanvas.addBbox(cantSpectra + 1);
     setChangeFlag();
   }
 
- function AutoSaveData(){
+  function AutoSaveData() {
     spectrogramStore.autoSaveValues(
-        spectrogramCanvas.getBboxes(),
-        $metadataStore.spectraData,
-        $metadataStore.plateData,
-        pathDir,
-        imageName
+      spectrogramCanvas.getBboxes(),
+      $metadataStore.spectraData,
+      $metadataStore.plateData,
+      pathDir,
+      imageName
     );
-    workspaceStore.setPath(imageName,cantSpectra)
+    workspaceStore.setPath(imageName, cantSpectra);
   }
 
-  function checkMetadataSearched(){
-    $metadataStore.spectraData.forEach((spectro,i) => {
-        getSearchedMetadata($metadataStore.fields,false).every((metadata) => {
-          if (spectro[metadata] !== "") {
-            metadataSearched[i] = true;
-            return false;
-          }
+  function checkMetadataSearched() {
+    $metadataStore.spectraData.forEach((spectro, i) => {
+      getSearchedMetadata($metadataStore.fields, false).every((metadata) => {
+        if (spectro[metadata] !== "") {
+          metadataSearched[i] = true;
+          return false;
+        }
 
-          return true;
-        });
+        return true;
       });
+    });
   }
 
   async function generateFits() {
@@ -231,89 +281,87 @@
           imageName,
           $metadataStore.fields
         );
-        if(response["status"]){ 
-          imageName = ""
+        if (response["status"]) {
+          imageName = "";
           metadataStore.initFields();
           uploadedImage = false;
           initializeCanvas();
           await workspaceStore.getPaths(pathDir);
-          showAlert()
-        }
-        else if(response["message"]){
+          showAlert();
+        } else if (response["message"]) {
           errorAlert({
-            message: response["message"]
+            message: response["message"],
           });
-          errorAlert(message=response["message"])
+          errorAlert((message = response["message"]));
         } else {
-          errorAlert()
+          errorAlert();
         }
       },
     });
-    
   }
 
   async function getPaths() {
-    if(pathDir){
+    if (pathDir) {
       await workspaceStore.getPaths(pathDir);
     }
   }
 
-  function updateDefaults(){
+  function updateDefaults() {}
 
-  }
-
-  function getMetadata(fields,global) {
+  function getMetadata(fields, global) {
     let data;
-    if(global){
-      data = Object.keys(fields)
-      .filter((label) => {
-          if (fields[label].global) return label;
-      })
+    if (global) {
+      data = Object.keys(fields).filter((label) => {
+        if (fields[label].global) return label;
+      });
       return data;
-    }
-    else{
-    data = Object.keys(fields)
-      .filter((label) => {
-          if (!fields[label].global) return label;
-      })
+    } else {
+      data = Object.keys(fields).filter((label) => {
+        if (!fields[label].global) return label;
+      });
       return data;
     }
   }
 
   function getRequiredMetadata(fields, global) {
     return Object.keys(fields).filter((label) => {
-      if (fields[label].required && fields[label].global == global) 
+      if (fields[label].required && fields[label].global == global)
         return label;
-    })
+    });
   }
 
   function getRequiredPreFetchEspectreMetadata(fields) {
     return Object.keys(fields).filter((label) => {
-      if (fields[label].required && fields[label].pre_fetch && !fields[label].global) 
+      if (
+        fields[label].required &&
+        fields[label].pre_fetch &&
+        !fields[label].global
+      )
         return label;
-    })
+    });
   }
 
   function getPreFetchEspectreMetadata(fields) {
     return Object.keys(fields).filter((label) => {
-      if (fields[label].pre_fetch && !fields[label].global) 
-        return label;
-    })
+      if (fields[label].pre_fetch && !fields[label].global) return label;
+    });
   }
 
-  function getSearchedMetadata(fields,global){
-      return Object.keys(fields).filter((label) => {
-        if (!fields[label].required && !fields[label].global && fields[label].default === undefined)
-          return label;  
-      })
-  }
-
-
-  function getRemoteSpectreMetadata(fields){
+  function getSearchedMetadata(fields, global) {
     return Object.keys(fields).filter((label) => {
-      if (fields[label].remote && !fields[label].global) 
+      if (
+        !fields[label].required &&
+        !fields[label].global &&
+        fields[label].default === undefined
+      )
         return label;
-    })
+    });
+  }
+
+  function getRemoteSpectreMetadata(fields) {
+    return Object.keys(fields).filter((label) => {
+      if (fields[label].remote && !fields[label].global) return label;
+    });
   }
 
   function validateForm() {
@@ -321,84 +369,84 @@
     plateValid = true;
     if (cantSpectra > 0) {
       $metadataStore.spectraData.forEach((spectro) => {
-        getRequiredMetadata($metadataStore.fields,false).forEach((metadata) => {
-          if (spectro[metadata] === "") {
-            invalidForm = true;
+        getRequiredMetadata($metadataStore.fields, false).forEach(
+          (metadata) => {
+            if (spectro[metadata] === "") {
+              invalidForm = true;
+            }
           }
-        });
-       
-        // Si o si se tiene que tener el main ID, si no se tiene entonces no se 
+        );
+
+        // Si o si se tiene que tener el main ID, si no se tiene entonces no se
         // puede permitir realizar la exportación de la placa
         if (spectro["MAIN-ID"] === "") {
           invalidForm = true;
         }
       });
 
-      getRequiredMetadata($metadataStore.fields,true).forEach((metadata) => {
+      getRequiredMetadata($metadataStore.fields, true).forEach((metadata) => {
         if (!$metadataStore.plateData[metadata]) {
           invalidForm = true;
           plateValid = false;
         }
       });
-    }
-    else{
-      invalidForm = true
-    }
-  }
-
-  function validateAllSpectrum(){
-    if(cantSpectra > 0){
-      for (let i = 0; i < cantSpectra; i++) 
-        validateSpectrum(i)
-    }
-      
-  }
-
-  function validateSelectedSpectrum(){
-    if (cantSpectra > 0 && bboxSelected > 1 ){
-      validateSpectrum(bboxSelected-2)
+    } else {
+      invalidForm = true;
     }
   }
 
-  function validateSpectrum(spectrumIndex){  
-      let invalidSpectrum = false;
-      let invalidforMetadataSearch = false;
+  function validateAllSpectrum() {
+    if (cantSpectra > 0) {
+      for (let i = 0; i < cantSpectra; i++) validateSpectrum(i);
+    }
+  }
 
-      // Recorrer todos los metadotos oblicatorios no globales (que no son de la placa)
-      getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
-        if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
-          invalidSpectrum = true;
-        }
-      });
+  function validateSelectedSpectrum() {
+    if (cantSpectra > 0 && bboxSelected > 1) {
+      validateSpectrum(bboxSelected - 2);
+    }
+  }
 
-      // Recorrer todos los metadotos oblicatorios remotos (que son metadatos)
-      getRequiredPreFetchEspectreMetadata($metadataStore.fields).forEach((metadata) => {
+  function validateSpectrum(spectrumIndex) {
+    let invalidSpectrum = false;
+    let invalidforMetadataSearch = false;
+
+    // Recorrer todos los metadotos oblicatorios no globales (que no son de la placa)
+    getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
+      if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
+        invalidSpectrum = true;
+      }
+    });
+
+    // Recorrer todos los metadotos oblicatorios remotos (que son metadatos)
+    getRequiredPreFetchEspectreMetadata($metadataStore.fields).forEach(
+      (metadata) => {
         if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
           invalidforMetadataSearch = true;
         }
-      });
-
-      if(/^Nuevo#/.test($metadataStore.spectraData[spectrumIndex]["OBJECT"]))
-      {
-        invalidSpectrum = true
-        invalidforMetadataSearch = true;
       }
+    );
 
-      // Es suficiente con que los metadatos requeridos, !global (de cada espectro) y pre_fetch 
-      // sean validos para realizar la buqueda de metadatos
-      validatedSpectrumsForMetadataSearch[spectrumIndex] = !invalidforMetadataSearch
+    if (/^Nuevo#/.test($metadataStore.spectraData[spectrumIndex]["OBJECT"])) {
+      invalidSpectrum = true;
+      invalidforMetadataSearch = true;
+    }
 
-      // Si o si se tiene que tener el main ID, por lo que es obligatorio 
-      // relizar la busqueda de metadatos de cada espectro
-      if ($metadataStore.spectraData[spectrumIndex]["MAIN-ID"] === "") {
-        invalidSpectrum = true;
-      }
+    // Es suficiente con que los metadatos requeridos, !global (de cada espectro) y pre_fetch
+    // sean validos para realizar la buqueda de metadatos
+    validatedSpectrumsForMetadataSearch[spectrumIndex] =
+      !invalidforMetadataSearch;
 
-      validatedSpectrums[spectrumIndex] = !invalidSpectrum
-    
+    // Si o si se tiene que tener el main ID, por lo que es obligatorio
+    // relizar la busqueda de metadatos de cada espectro
+    if ($metadataStore.spectraData[spectrumIndex]["MAIN-ID"] === "") {
+      invalidSpectrum = true;
+    }
+
+    validatedSpectrums[spectrumIndex] = !invalidSpectrum;
   }
 
-  function handlerModified(){
+  function handlerModified() {
     setChangeFlag();
   }
 
@@ -412,31 +460,32 @@
   }
 
   function handlerAdded(obj) {
-    validatedSpectrums.push(false)
+    validatedSpectrums.push(false);
     cantSpectra++;
     const fields = {};
 
-    if(cantSpectra === 1 && !dataLoaded){
+    if (cantSpectra === 1 && !dataLoaded) {
       const globalFields = {};
       Object.keys($metadataStore.fields).map((field) => {
-      if($metadataStore.fields[field].global){
-        if ($metadataStore.fields[field].options === undefined)
-          globalFields[field] = "";
-        else globalFields[field] = $metadataStore.fields[field].options[0];}
-    });
+        if ($metadataStore.fields[field].global) {
+          if ($metadataStore.fields[field].options === undefined)
+            globalFields[field] = "";
+          else globalFields[field] = $metadataStore.fields[field].options[0];
+        }
+      });
       metadataStore.setPlateData(globalFields);
       dataLoaded = true;
     }
-    
+
     Object.keys($metadataStore.fields).map((field) => {
-      if(!$metadataStore.fields[field].global)
+      if (!$metadataStore.fields[field].global)
         if ($metadataStore.fields[field].options === undefined)
           fields[field] = "";
         else fields[field] = $metadataStore.fields[field].options[0];
     });
 
-    if(!fields["OBJECT"]){ 
-      fields["OBJECT"] = `Nuevo#${cantSpectra}`
+    if (!fields["OBJECT"]) {
+      fields["OBJECT"] = `Nuevo#${cantSpectra}`;
     }
 
     metadataStore.setSpectraData([
@@ -449,17 +498,16 @@
       },
     ]);
     metadataSearched.push(false);
-    names.push(fields["OBJECT"])
+    names.push(fields["OBJECT"]);
   }
 
-
   function handlerRemoved(obj) {
-    let index = bboxSelected - 2
-    validatedSpectrums.splice(index,1)
+    let index = bboxSelected - 2;
+    validatedSpectrums.splice(index, 1);
     let namesAux = names;
-    namesAux.splice(index,1);
-    names = namesAux
-    metadataSearched.splice(index,1)
+    namesAux.splice(index, 1);
+    names = namesAux;
+    metadataSearched.splice(index, 1);
     cantSpectra--;
     if (cantSpectra > 0) {
       metadataStore.setSpectraData(
@@ -472,29 +520,28 @@
       canvas.renderAll();
     } else {
       metadataStore.setSpectraData([]);
-      bboxSelected = 1
+      bboxSelected = 1;
     }
     changeFlag = true;
     imageSaved = false;
-    if(!imageChanged){
+    if (!imageChanged) {
       validateForm();
       validateSelectedSpectrum();
     }
   }
 
   function setBbox(event) {
-    let index = event.detail.index
-    if(index === 0){
-      canvas.discardActiveObject()
-      bboxSelected = 1
+    let index = event.detail.index;
+    if (index === 0) {
+      canvas.discardActiveObject();
+      bboxSelected = 1;
       canvas.renderAll();
-    }
-    else{
-      if (index !== bboxSelected - 1){
+    } else {
+      if (index !== bboxSelected - 1) {
         const item = canvas.item(index - 1);
         if (item != undefined) {
           canvas.setActiveObject(item);
-          bboxSelected = index + 1
+          bboxSelected = index + 1;
           validateSelectedSpectrum();
           canvas.renderAll();
         }
@@ -535,11 +582,15 @@
     <div class="card-body">
       <div class="row">
         <div class="col-lg-2 col-xl-2">
-          <FileList paths={$workspaceStore.paths} getImg={getImg} getPaths={getPaths} pathDir={pathDir
-          }/>
+          <FileList
+            paths={$workspaceStore.paths}
+            {getImg}
+            {getPaths}
+            {pathDir}
+          />
           {#if uploadedImage}
             <div style="display:inline">
-              <div in:slide="{{duration:1000}}">
+              <div in:slide={{ duration: 1000 }}>
                 <ImageInfoCard state={imageSaved} />
               </div>
             </div>
@@ -547,83 +598,104 @@
         </div>
         <div id="witdh_ruler" class="col-lg-10 col-xl-10">
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <FilterZone spectrogramCanvas={spectrogramCanvas} rotate={rotate} bind:reset_filters_flag={reset_filters_flag}/>
+            <FilterZone {spectrogramCanvas} {rotate} bind:reset_filters_flag />
             <canvas
               id="canvas-container"
               style="border-width: 1px;
                     border-style: solid;
                     border-color: black;"
-            />  
+            />
           </div>
           {#if uploadedImage}
-            <div in:slide="{{duration:1000}}" out:slide="{{duration:700}}">
-            <Tabs on:selectTab={setBbox}>
-              <TabList>
-                <div class="row">
-                  <div class="col-10 my-2">
-                    <Tab>
-                      <PlateTab bind:validated={plateValid}/>
-                    </Tab>
-                    {#if $metadataStore.spectraData.length > 0}
-                      <span style="background-color: darkgray;font-size: 20px; color: darkgray"> .</span>
-                      <span style="font-size: 16px; color: black">  Espectros : </span>
+            <div in:slide={{ duration: 1000 }} out:slide={{ duration: 700 }}>
+              <Tabs on:selectTab={setBbox}>
+                <TabList>
+                  <div class="row">
+                    <div class="col-10 my-2">
+                      <Tab>
+                        <PlateTab bind:validated={plateValid} />
+                      </Tab>
+                      {#if $metadataStore.spectraData.length > 0}
+                        <span
+                          style="background-color: darkgray;font-size: 20px; color: darkgray"
+                        >
+                          .</span
+                        >
+                        <span style="font-size: 16px; color: black">
+                          Espectros :
+                        </span>
 
-                      {#each $metadataStore.spectraData as item, index}
-                        <Tab>
-                          <TabButton
-                            color ={item.color}
-                            index={index}
-                            bind:names ={names}
-                            bind:validated={validatedSpectrums[index]}
-                          />
-                        </Tab>
-                      {/each}
-                    {/if}
-                    <NButton style={"margin-left:5px;margin-bottom:2px;"} click={addBox}>+</NButton>
-                  </div> 
-                  <div class="col-2 py-3">
-                    <ExportButton plateValid = {plateValid} spectrums={$metadataStore.spectraData} validatedSpectrums={validatedSpectrums} title={"faltanDatos"} click={generateFits} disabled={invalidForm}/>
-                  </div>  
-                </div>
-              </TabList>
-              
-              <TabPanel>
-                <div class="controls">
-                  <PlateForm
-                    plateData={$metadataStore.plateData}
-                    metadata={getMetadata($metadataStore.fields,true)}
-                  />
-                </div>
-              </TabPanel>
-              {#each $metadataStore.spectraData as item,index}
-                <TabPanel>
-                  <div class="controls">
-                    <RequiredForm
-                      spectraData={item}
-                      metadata={getPreFetchEspectreMetadata($metadataStore.fields)}
-                      invalidSpectrum ={!validatedSpectrumsForMetadataSearch[bboxSelected-2]}
-                      confirmSearchMetadata = {confirmSearchMetadata}
-                    />
-                  </div>
-                  {#if metadataSearched[bboxSelected-2]}
-                    <div>
-                      <MetadataForm
-                        spectraData={item}
-                        metadata={getRemoteSpectreMetadata($metadataStore.fields)}
-                        index={index}
+                        {#each $metadataStore.spectraData as item, index}
+                          <Tab>
+                            <TabButton
+                              color={item.color}
+                              {index}
+                              bind:names
+                              bind:validated={validatedSpectrums[index]}
+                            />
+                          </Tab>
+                        {/each}
+                      {/if}
+                      <NButton
+                        style={"margin-left:5px;margin-bottom:2px;"}
+                        click={addBox}>+</NButton
+                      >
+                    </div>
+                    <div class="col-2 py-3">
+                      <ExportButton
+                        {plateValid}
+                        spectrums={$metadataStore.spectraData}
+                        {validatedSpectrums}
+                        title={"faltanDatos"}
+                        click={generateFits}
+                        disabled={invalidForm}
                       />
                     </div>
-                  {/if}
+                  </div>
+                </TabList>
+
+                <TabPanel>
+                  <div class="controls">
+                    <PlateForm
+                      plateData={$metadataStore.plateData}
+                      metadata={getMetadata($metadataStore.fields, true)}
+                    />
+                  </div>
                 </TabPanel>
-              {/each}
-        
-            </Tabs>
-            <div class="row mt-4 ml-1 mb-4">
-              <div class="controls  mr-2"> 
-                <SetParams/>
+                {#each $metadataStore.spectraData as item, index}
+                  <TabPanel>
+                    <div class="controls">
+                      <RequiredForm
+                        spectraData={item}
+                        metadata={getPreFetchEspectreMetadata(
+                          $metadataStore.fields
+                        )}
+                        invalidSpectrum={!validatedSpectrumsForMetadataSearch[
+                          bboxSelected - 2
+                        ]}
+                        {confirmSearchMetadata}
+                      />
+                    </div>
+                    {#if metadataSearched[bboxSelected - 2]}
+                      <div>
+                        <MetadataForm
+                          spectraData={item}
+                          metadata={getRemoteSpectreMetadata(
+                            $metadataStore.fields
+                          )}
+                          {index}
+                        />
+                      </div>
+                    {/if}
+                  </TabPanel>
+                {/each}
+              </Tabs>
+              <div class="row mt-4 ml-1 mb-4">
+                <div class="controls mr-2">
+                  <SetParams />
+                </div>
               </div>
             </div>
-          </div>
           {/if}
         </div>
       </div>
