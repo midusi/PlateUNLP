@@ -8,33 +8,55 @@ interface ProgressBarProps {
     max: number
 }
 
-function ProgressBar({ label, value, max, }: ProgressBarProps) {
+function ProgressBar({ label, value, max }: ProgressBarProps) {
     return (
         <div className="progress-bar" aria-labelledby="progress-bar-label">
-            <span id="progress-bar-label">{label}: {value}%</span>
+            <span id="progress-bar-label">
+                {label}
+                :
+                {" "}
+                {value}
+                %
+            </span>
             <div className="progress-bar-completed" style={{ width: `${(value / max) * 100}%` }}>
             </div>
         </div>
     )
 }
 
-export function NavigationProgressBar() {
-    const min = 0
-    const max = 100
+interface stepData {
+    name: string
+    content: JSX.Element
+}
 
-    const [progress, setProgress] = useState(10)
+export function NavigationProgressBar() {
+    const steptsArr: stepData[] = [
+        { name: "Begin", content: <>BEGIN</> },
+        { name: "Digitization", content: <>1</> },
+        { name: "Spectrum segmentation", content: <>2</> },
+        { name: "Feature extraction", content: <>3</> },
+        { name: "Calibration", content: <>4</> },
+        { name: "Completed", content: <>FIN</> },
+    ]
+
+    const min = 0
+    const max = steptsArr.length - 1
+
+    const [progress, setProgress] = useState(1)
 
     function simulateProgress(value: number) {
         const sum = progress + value
         if (sum >= min && sum <= max)
             setProgress(sum)
     }
+
     return (
         <>
-            <ProgressBar label="Loading..." value={progress} max={max} />
+            <ProgressBar label={steptsArr[progress].name} value={progress} max={max} />
+            {steptsArr[progress].content}
             <div className="flex justify-between mt-4">
-                <Button onClick={() => simulateProgress(-10)}>Decrease Progress</Button>
-                <Button onClick={() => simulateProgress(10)}>Increase Progress</Button>
+                <Button onClick={() => simulateProgress(-1)}>Prev</Button>
+                <Button onClick={() => simulateProgress(1)}>Next</Button>
             </div>
         </>
     )
