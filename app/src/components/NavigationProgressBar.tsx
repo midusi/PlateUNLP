@@ -3,13 +3,15 @@ import { Button } from "./ui/button"
 import "./css/ProgressBar.css"
 
 interface ProgressBarProps {
+    label: string
     value: number
     max: number
 }
 
-function ProgressBar({ value, max }: ProgressBarProps) {
+function ProgressBar({ label, value, max, }: ProgressBarProps) {
     return (
         <div className="progress-bar" aria-labelledby="progress-bar-label">
+            <span id="progress-bar-label">{label}: {value}%</span>
             <div className="progress-bar-completed" style={{ width: `${(value / max) * 100}%` }}>
             </div>
         </div>
@@ -29,7 +31,7 @@ export function NavigationProgressBar() {
     }
     return (
         <>
-            <ProgressBar value={progress} max={max} />
+            <ProgressBar label="Loading..." value={progress} max={max} />
             <div className="flex justify-between mt-4">
                 <Button onClick={() => simulateProgress(-10)}>Decrease Progress</Button>
                 <Button onClick={() => simulateProgress(10)}>Increase Progress</Button>
