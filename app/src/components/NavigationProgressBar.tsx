@@ -45,8 +45,14 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                     {stepsArr.map((step, index) => (
                         <div
                             key={step.name}
-                            className={`flex items-center justify-center w-6 h-6 rounded-full ${index <= progress ? "bg-blue-500 text-white" : "bg-gray-300 text-black"
-                                }`}
+                            onClick={() => setProgress(index)}
+                            className={
+                                `flex items-center justify-center w-6 h-6 rounded-full 
+                                ${index <= progress
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-300 text-black"
+                                }`
+                            }
                         >
                             {index}
                         </div>
