@@ -1,19 +1,8 @@
-import { ReferenceLampForm } from "@/components/ReferenceLampForm"
-import { ReferenceLampRange } from "@/components/ReferenceLampRange"
-import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
-import { useState } from "react"
-import { ContinueButton } from "./components/ContinueButton"
-import { FitsLoader } from "./components/FitsLoader"
-import { InferenceForm } from "./components/InferenceForm"
+import type { stepData } from "./components/NavigationProgressBar"
 import { NavigationProgressBar } from "./components/NavigationProgressBar"
-
-interface EmpiricalSpectrumPoint {
-  pixel: number
-  intensity: number
-}
+import { StepCalibration } from "./components/StepCalibration"
 
 export default function App() {
-  const [scienceSpectrumData, setScienceSpectrumData] = useState<EmpiricalSpectrumPoint[] | null>(null)
   return (
     <div className="max-w-6xl px-8 mx-auto">
       <header>
@@ -23,38 +12,16 @@ export default function App() {
       </header>
 
       <main>
-        <NavigationProgressBar />
+        <NavigationProgressBar stepsArr={[
+          { name: "Begin", content: <>BEGIN</> },
+          { name: "Digitization", content: <>1</> },
+          { name: "Spectrum segmentation", content: <>2</> },
+          { name: "Feature extraction", content: <>3</> },
+          { name: "Calibration", content: <StepCalibration /> },
+          { name: "Completed", content: <>FIN</> },
+        ]}
+        />
 
-        <ReferenceLampForm />
-
-        <section className="space-y-0 my-8">
-          <ReferenceLampRange />
-          <ReferenceLampSpectrum />
-          <div>
-            <h1 className="text-2xl font-bold">Empirical Comparison Lamp</h1>
-            <FitsLoader
-              plotColor="#0ea5e9"
-              setData={() => { }}
-              interactable
-              preview
-            />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Empirical Spectrum</h1>
-            <FitsLoader
-              plotColor="#16a34a"
-              setData={setScienceSpectrumData}
-              interactable={false}
-              preview
-            />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Inference function fit</h1>
-            <InferenceForm />
-          </div>
-        </section>
-
-        <ContinueButton data={scienceSpectrumData} />
       </main>
 
       <footer className="mt-40 mb-20 text-xs italic text-center text-muted-foreground">

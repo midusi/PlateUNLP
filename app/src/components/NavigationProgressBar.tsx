@@ -15,21 +15,16 @@ function ProgressBar({ value, max }: ProgressBarProps) {
     )
 }
 
-interface stepData {
+export interface stepData {
     name: string
     content: JSX.Element
 }
 
-export function NavigationProgressBar() {
-    const stepsArr: stepData[] = [
-        { name: "Begin", content: <>BEGIN</> },
-        { name: "Digitization", content: <>1</> },
-        { name: "Spectrum segmentation", content: <>2</> },
-        { name: "Feature extraction", content: <>3</> },
-        { name: "Calibration", content: <>4</> },
-        { name: "Completed", content: <>FIN</> },
-    ]
+interface NavigationProgressBarProps {
+    stepsArr: stepData[]
+}
 
+export function NavigationProgressBar({ stepsArr }: NavigationProgressBarProps) {
     const [progress, setProgress] = useState(1)
 
     const min = 0
