@@ -3,18 +3,13 @@ import { Button } from "./ui/button"
 import "./css/ProgressBar.css"
 
 interface ProgressBarProps {
-    label: string
     value: number
     max: number
 }
 
-function ProgressBar({ label, value, max }: ProgressBarProps) {
-    const label_formated = `${label} (${value}/${max})`
+function ProgressBar({ value, max }: ProgressBarProps) {
     return (
         <div className="progress-bar" aria-labelledby="progress-bar-label">
-            <span id="progress-bar-label" className="block mb-2 text-center">
-                {label_formated}
-            </span>
             <div className="progress-bar-completed rounded-full" style={{ width: `${(value / max) * 100}%` }} />
         </div>
     )
@@ -35,10 +30,10 @@ export function NavigationProgressBar() {
         { name: "Completed", content: <>FIN</> },
     ]
 
+    const [progress, setProgress] = useState(1)
+
     const min = 0
     const max = stepsArr.length - 1
-
-    const [progress, setProgress] = useState(1)
 
     function simulateProgress(value: number) {
         const sum = progress + value
@@ -48,7 +43,7 @@ export function NavigationProgressBar() {
 
     return (
         <div className="w-full space-y-4">
-            <ProgressBar label={stepsArr[progress].name} value={progress} max={max} />
+            <ProgressBar value={progress} max={max} />
             <div className="relative w-full">
                 <div className="absolute top-[-12px] left-0 w-full flex justify-between">
                     {stepsArr.map((step, index) => (
@@ -62,7 +57,11 @@ export function NavigationProgressBar() {
                     ))}
                 </div>
             </div>
-            <div className="pt-14 pb-10 text-center">
+
+            <h1 className="pt-14 pb-10 text-center mt-12 mb-16 text-4xl font-bold tracking-tight lg:text-5xl">
+                {stepsArr[progress].name}
+            </h1>
+            <div className="pt-14 pb-10">
                 {stepsArr[progress].content}
             </div>
 
