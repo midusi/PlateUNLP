@@ -22,10 +22,11 @@ export interface stepData {
 
 interface NavigationProgressBarProps {
     stepsArr: stepData[]
+    initialStep: number
 }
 
-export function NavigationProgressBar({ stepsArr }: NavigationProgressBarProps) {
-    const [progress, setProgress] = useState(1)
+export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgressBarProps) {
+    const [progress, setProgress] = useState(initialStep)
 
     const min = 0
     const max = stepsArr.length - 1

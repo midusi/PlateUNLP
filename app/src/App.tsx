@@ -12,14 +12,16 @@ export default function App() {
       </header>
 
       <main>
-        <NavigationProgressBar stepsArr={[
-          { name: "Begin", content: <>BEGIN</> },
-          { name: "Digitization", content: <>1</> },
-          { name: "Spectrum segmentation", content: <>2</> },
-          { name: "Feature extraction", content: <>3</> },
-          { name: "Calibration", content: <StepCalibration /> },
-          { name: "Completed", content: <>FIN</> },
-        ]}
+        <NavigationProgressBar
+          initialStep={4}
+          stepsArr={[
+            { name: "Begin", content: <>BEGIN</> },
+            { name: "Digitization", content: <>1</> },
+            { name: "Spectrum segmentation", content: <>2</> },
+            { name: "Feature extraction", content: <>3</> },
+            { name: "Calibration", content: <StepCalibration /> },
+            { name: "Completed", content: <>FIN</> },
+          ]}
         />
 
       </main>
