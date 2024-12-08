@@ -1,6 +1,8 @@
+import type { NumberValue } from "@visx/vendor/d3-scale"
 import type { JSX } from "react/jsx-runtime"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
+import { CustomError } from "@/lib/utils"
 import { AxisBottom, AxisLeft, AxisTop } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -22,14 +24,22 @@ const getY = (p: EmpiricalSpectrumPoint) => p?.intensity ?? 0
 const height = 300
 const margin = { top: 40, right: 30, bottom: 100, left: 55 }
 
-export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoint[], color: string }) {
-  const { xScalePixel, yScale } = useMemo(() => {
-    return {
-      data,
-      xScalePixel: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
-      yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
-    }
-  }, [data])
+interface EmpiricalSpectrumProps {
+  data: EmpiricalSpectrumPoint[]
+  color: string
+  interactable: boolean
+}
+
+export function EmpiricalSpectrum({ data, color, interactable = true }: EmpiricalSpectrumProps) {
+  const [lampPoints, setLampPoints, linesPalette, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
+    s.lampPoints,
+    s.setLampPoints,
+    s.linesPalette,
+    s.materialPoints,
+    s.pixelToWavelengthFunction,
+  ])
+
+  const isPixelToWavelengthValid = !(pixelToWavelengthFunction instanceof CustomError)
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
@@ -37,45 +47,49 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
   const xMax = Math.max(width - margin.left - margin.right, 0)
   const yMax = Math.max(height - margin.top - margin.bottom, 0)
 
+  const { xScalePixel, xScaleWavelength, yScale } = useMemo(() => {
+    return {
+      data,
+      xScalePixel: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
+      xScaleWavelength: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
+      yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
+    }
+  }, [data])
+
   // update scale output ranges
   xScalePixel.range([0, xMax])
+  xScaleWavelength.range([0, xMax])
   yScale.range([yMax, 0])
 
-  // Point logic
-  const [lampPoints, setLampPoints, linesPalette, materialPoints] = useGlobalStore(s => [
-    s.lampPoints,
-    s.setLampPoints,
-    s.linesPalette,
-    s.materialPoints,
-  ])
-
   const spotsInGraph: JSX.Element[] = []
-  for (const [index, point] of lampPoints.entries()) {
-    const xClick = xScalePixel(point.x)
-    // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
-    spotsInGraph.push(
-      <g key={`EmpiricalLine-${index}`}>
-        <Line
-          x1={xClick + margin.left}
-          y1={0 + margin.top}
-          x2={xClick + margin.left}
-          y2={height - margin.bottom}
-          stroke={linesPalette[index % linesPalette.length]}
-          strokeWidth={2}
-          strokeDasharray="4 4"
-        />
-        <text
-          x={xClick + margin.left + 5} // Ajusta el desplazamiento horizontal del texto
-          y={margin.top + 10} // Ajusta el desplazamiento vertical del texto
-          fill={linesPalette[index % linesPalette.length]} // Usa el mismo color de la línea
-          fontSize="12" // Tamaño de fuente
-          fontFamily="Arial, sans-serif" // Familia de fuente
-        >
-          #
-          {`${index}`}
-        </text>
-      </g>,
-    )
+  if (interactable) {
+    for (const [index, point] of lampPoints.entries()) {
+      const xClick = xScalePixel(point.x)
+      // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
+      spotsInGraph.push(
+        <g key={`EmpiricalLine-${index}`}>
+          <Line
+            x1={xClick + margin.left}
+            y1={0 + margin.top}
+            x2={xClick + margin.left}
+            y2={height - margin.bottom}
+            stroke={linesPalette[index % linesPalette.length]}
+            strokeWidth={2}
+            strokeDasharray="4 4"
+          />
+          <text
+            x={xClick + margin.left + 5}
+            y={margin.top + 20}
+            fill={linesPalette[index % linesPalette.length]}
+            fontSize="12"
+            fontFamily="Arial, sans-serif"
+          >
+            #
+            {`${index}`}
+          </text>
+        </g>,
+      )
+    }
   }
 
   function onClick(event: React.MouseEvent<SVGSVGElement>) {
@@ -107,8 +121,8 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
 
   return (
     <div ref={measureRef}>
-      <svg width={width} height={height} onClick={onClick}>
-        {spotsInGraph}
+      <svg width={width} height={height} onClick={interactable ? onClick : undefined}>
+        {interactable && spotsInGraph}
         <Group top={margin.top} left={margin.left}>
           <GridColumns
             scale={xScalePixel}
@@ -136,12 +150,42 @@ export function EmpiricalSpectrum({ data, color }: { data: EmpiricalSpectrumPoin
             label="Pixel"
             numTicks={Math.floor(xMax / 80)}
           />
-          <AxisBottom
-            scale={xScalePixel}
-            top={yMax}
-            label="Wavelength (Å)"
-            numTicks={Math.floor(xMax / 80)}
-          />
+          {isPixelToWavelengthValid
+            ? (
+              <AxisBottom
+                scale={xScaleWavelength}
+                top={yMax}
+                label="Wavelength (Å)"
+                numTicks={Math.floor(xMax / 80)}
+                tickFormat={(value: NumberValue) => {
+                  const numericValue = Number(value)
+                  return Number.isNaN(numericValue)
+                    ? "-"
+                    : pixelToWavelengthFunction(numericValue).toFixed(2)
+                }}
+              />
+            )
+            : (
+              <>
+                <AxisBottom
+                  scale={xScaleWavelength}
+                  top={yMax}
+                  label="Wavelength (Å)"
+                  numTicks={Math.floor(xMax / 80)}
+                  tickFormat={(_value: NumberValue) => "-"}
+                />
+                <text
+                  x={width / 2}
+                  y={yMax + 20}
+                  fill="red"
+                  fontSize="12"
+                  fontFamily="Arial, sans-serif"
+                  textAnchor="middle"
+                >
+                  {`${pixelToWavelengthFunction.message}`}
+                </text>
+              </>
+            )}
           <AxisLeft scale={yScale} label="Intensity" />
         </Group>
       </svg>
