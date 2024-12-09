@@ -28,9 +28,10 @@ interface EmpiricalSpectrumProps {
   data: EmpiricalSpectrumPoint[]
   color: string
   interactable: boolean
+  preview: boolean
 }
 
-export function EmpiricalSpectrum({ data, color, interactable = true }: EmpiricalSpectrumProps) {
+export function EmpiricalSpectrum({ data, color, interactable = true, preview = true }: EmpiricalSpectrumProps) {
   const [lampPoints, setLampPoints, linesPalette, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
     s.lampPoints,
     s.setLampPoints,
@@ -150,42 +151,39 @@ export function EmpiricalSpectrum({ data, color, interactable = true }: Empirica
             label="Pixel"
             numTicks={Math.floor(xMax / 80)}
           />
-          {isPixelToWavelengthValid
-            ? (
+          {preview && (
+            <>
               <AxisBottom
                 scale={xScaleWavelength}
                 top={yMax}
                 label="Wavelength (Å)"
                 numTicks={Math.floor(xMax / 80)}
-                tickFormat={(value: NumberValue) => {
-                  const numericValue = Number(value)
-                  return Number.isNaN(numericValue)
-                    ? "-"
-                    : pixelToWavelengthFunction(numericValue).toFixed(2)
-                }}
+                tickFormat={
+                  isPixelToWavelengthValid
+                    ? (value: NumberValue) => {
+                      const numericValue = Number(value)
+                      return Number.isNaN(numericValue)
+                        ? "-"
+                        : pixelToWavelengthFunction(numericValue).toFixed(2)
+                    }
+                    : (_value: NumberValue) => "-"
+                }
               />
-            )
-            : (
-              <>
-                <AxisBottom
-                  scale={xScaleWavelength}
-                  top={yMax}
-                  label="Wavelength (Å)"
-                  numTicks={Math.floor(xMax / 80)}
-                  tickFormat={(_value: NumberValue) => "-"}
-                />
-                <text
-                  x={width / 2}
-                  y={yMax + 20}
-                  fill="red"
-                  fontSize="12"
-                  fontFamily="Arial, sans-serif"
-                  textAnchor="middle"
-                >
-                  {`${pixelToWavelengthFunction.message}`}
-                </text>
-              </>
-            )}
+              {!isPixelToWavelengthValid
+                && (
+                  <text
+                    x={width / 2}
+                    y={yMax + 20}
+                    fill="red"
+                    fontSize="12"
+                    fontFamily="Arial, sans-serif"
+                    textAnchor="middle"
+                  >
+                    {`${pixelToWavelengthFunction.message}`}
+                  </text>
+                )}
+            </>
+          )}
           <AxisLeft scale={yScale} label="Intensity" />
         </Group>
       </svg>
