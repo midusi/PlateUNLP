@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input"
 import { FITS } from "fits2js"
 import { type ChangeEvent, useEffect, useMemo, useState } from "react"
 import { EmpiricalSpectrum } from "./EmpiricalSpectrum"
-import { Previewer } from "./Previewer"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
@@ -95,12 +94,15 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
             : null}
       </div>
       {loadingState === "processing" && <p>Cargando contenido...</p>}
-      {loadedData && (
-        <>
-          {interactable && <EmpiricalSpectrum data={loadedData} color={plotColor} />}
-          {preview && <Previewer data={loadedData} color={plotColor} />}
-        </>
-      )}
+      {loadedData
+        && (
+          <EmpiricalSpectrum
+            data={loadedData}
+            color={plotColor}
+            interactable={interactable}
+            preview={preview}
+          />
+        )}
     </div>
   )
 }
