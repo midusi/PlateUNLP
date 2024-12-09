@@ -1,3 +1,4 @@
+import { GraphInErrorCase } from "@/components/GraphInErrorCase"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
 import { CustomError } from "@/lib/utils"
@@ -9,7 +10,6 @@ import { scaleLinear } from "@visx/scale"
 import { LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
-import { GraphInErrorCase } from "./GraphInErrorCase"
 
 export interface EmpiricalSpectrumPoint {
     pixel: number
