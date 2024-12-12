@@ -1,3 +1,4 @@
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
 import { useState } from "react"
 import { Button } from "./ui/button"
 import "./css/ProgressBar.css"
@@ -39,6 +40,14 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
 
     return (
         <div className="w-full space-y-4">
+            <div className="flex justify-between mt-4">
+                <Button onClick={() => simulateProgress(-1)} disabled={progress === min}>
+                    <ChevronLeftIcon className="h-5 w-5" />
+                </Button>
+                <Button onClick={() => simulateProgress(1)} disabled={progress === max}>
+                    <ChevronRightIcon className="h-5 w-5" />
+                </Button>
+            </div>
             <ProgressBar value={progress} max={max} />
             <div className="relative w-full">
                 <div className="absolute top-[-12px] left-0 w-full flex justify-between">
@@ -68,8 +77,12 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
             </div>
 
             <div className="flex justify-between mt-4">
-                <Button onClick={() => simulateProgress(-1)} disabled={progress === min}>Prev</Button>
-                <Button onClick={() => simulateProgress(1)} disabled={progress === max}>Next</Button>
+                <Button onClick={() => simulateProgress(-1)} disabled={progress === min}>
+                    <ChevronLeftIcon className="h-5 w-5" />
+                </Button>
+                <Button onClick={() => simulateProgress(1)} disabled={progress === max}>
+                    <ChevronRightIcon className="h-5 w-5" />
+                </Button>
             </div>
         </div>
     )
