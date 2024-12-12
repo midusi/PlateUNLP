@@ -18,25 +18,23 @@ export function StepCalibration() {
                     <InferenceForm />
                 </div>
 
-                <div className="w-3/4 bg-white p-4">
-                    <section className="space-y-0 my-8">
-                        <ReferenceLampRange />
-                        <ReferenceLampSpectrum />
-                        <h1 className="text-2xl font-bold">Empirical Comparison Lamp</h1>
-                        <FitsLoader
-                            plotColor="#0ea5e9"
-                            setData={() => { }}
-                            interactable
-                            preview
-                        />
-                        <h1 className="text-2xl font-bold">Empirical Spectrum</h1>
-                        <FitsLoader
-                            plotColor="#16a34a"
-                            setData={setScienceSpectrumData}
-                            interactable={false}
-                            preview
-                        />
-                    </section>
+                <div className="w-3/4 bg-gray-100 p-4">
+                    <ReferenceLampRange />
+                    <ReferenceLampSpectrum />
+                    <h1 className="text-2xl font-bold">Empirical Comparison Lamp</h1>
+                    <FitsLoader
+                        plotColor="#0ea5e9"
+                        setData={() => { }}
+                        interactable
+                        preview
+                    />
+                    <h1 className="text-2xl font-bold">Empirical Spectrum</h1>
+                    <FitsLoader
+                        plotColor="#16a34a"
+                        setData={setScienceSpectrumData}
+                        interactable={false}
+                        preview
+                    />
                 </div>
             </div>
 
