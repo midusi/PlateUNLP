@@ -4,14 +4,14 @@ import { StepCalibration } from "./components/StepCalibration"
 
 export default function App() {
   return (
-    <div className="w-full px-8 mx-auto">
-      <header>
-        <h1 className="text-center mt-12 mb-16 text-4xl font-bold tracking-tight lg:text-5xl">
+    <div className="w-full mx-auto">
+      <header className="mb-12 bg-[#2D3748]">
+        <h1 className="text-left text-2xl text-white font-bold tracking-tight p-4">
           🌌 PlateUNLP
         </h1>
       </header>
 
-      <main>
+      <main className="px-8">
         <NavigationProgressBar
           initialStep={4}
           stepsArr={[
@@ -23,7 +23,6 @@ export default function App() {
             { name: "Completed", content: <>FIN</> },
           ]}
         />
-
       </main>
 
       <footer className="mt-40 mb-20 text-xs italic text-center text-muted-foreground">
