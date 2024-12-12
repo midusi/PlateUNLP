@@ -29,11 +29,14 @@ export function ReferenceLampForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-x-6 grid-cols-5">
+        <div className="mb-4">
           <MaterialInput />
+        </div>
+        <div className="grid gap-x-6 grid-cols-2 mb-4">
           <MinInput />
           <MaxInput />
-
+        </div>
+        <div className="flex justify-center">
           <Button className="leading-tight self-end" size="lg">
             Automated
             <br />
