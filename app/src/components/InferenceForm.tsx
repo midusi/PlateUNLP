@@ -2,6 +2,7 @@ import { useGlobalStore } from "@/hooks/use-global-store"
 import { CustomError, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 interface InferenceOption {
     name: string
@@ -74,23 +75,31 @@ export function InferenceForm() {
     }
 
     return (
-        <>
-            <p>
-                {radioOptions.map((option: InferenceOption) => (
-                    <label key={option.name} style={{ display: "block", marginBottom: "8px" }}>
-                        <input
-                            type="radio"
-                            name="inferenceMethod"
-                            value={option.name}
-                            checked={selectedOption.name === option.name}
-                            onChange={() => onChangeRadio(option)}
-                        />
-                        {option.name}
+        <Card className="m-2">
+            <CardHeader>
+                <CardTitle>Inference function fit</CardTitle>
+                <CardDescription>
+                    Fill in the details of the function for wavelength inference.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <p>
+                    {radioOptions.map((option: InferenceOption) => (
+                        <label key={option.name} style={{ display: "block", marginBottom: "8px" }}>
+                            <input
+                                type="radio"
+                                name="inferenceMethod"
+                                value={option.name}
+                                checked={selectedOption.name === option.name}
+                                onChange={() => onChangeRadio(option)}
+                            />
+                            {option.name}
 
-                    </label>
-                ))}
-            </p>
-            <InferenceBoxGraph />
-        </>
+                        </label>
+                    ))}
+                </p>
+                <InferenceBoxGraph />
+            </CardContent>
+        </Card>
     )
 }

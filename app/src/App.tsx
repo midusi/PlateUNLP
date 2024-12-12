@@ -4,7 +4,7 @@ import { StepCalibration } from "./components/StepCalibration"
 
 export default function App() {
   return (
-    <div className="max-w-6xl px-8 mx-auto">
+    <div className="w-full px-8 mx-auto">
       <header>
         <h1 className="text-center mt-12 mb-16 text-4xl font-bold tracking-tight lg:text-5xl">
           🌌 PlateUNLP

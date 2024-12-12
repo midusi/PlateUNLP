@@ -1,27 +1,27 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useGlobalStore } from "@/hooks/use-global-store";
-import { LAMP_MATERIALS } from "@/lib/spectral-data";
-import { useId } from "react";
+} from "@/components/ui/select"
+import { useGlobalStore } from "@/hooks/use-global-store"
+import { LAMP_MATERIALS } from "@/lib/spectral-data"
+import { useId } from "react"
 
 export function ReferenceLampForm() {
   return (
-    <Card>
+    <Card className="m-2">
       <CardHeader>
         <CardTitle>Input Details</CardTitle>
         <CardDescription>
@@ -29,11 +29,14 @@ export function ReferenceLampForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-x-6 grid-cols-5">
+        <div className="mb-4">
           <MaterialInput />
+        </div>
+        <div className="grid gap-x-6 grid-cols-2 mb-4">
           <MinInput />
           <MaxInput />
-
+        </div>
+        <div className="flex justify-center">
           <Button className="leading-tight self-end" size="lg">
             Automated
             <br />
@@ -42,15 +45,15 @@ export function ReferenceLampForm() {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 function MaterialInput() {
-  const inputId = useId();
-  const [material, setMaterial] = useGlobalStore((s) => [
+  const inputId = useId()
+  const [material, setMaterial] = useGlobalStore(s => [
     s.material,
     s.setMaterial,
-  ]);
+  ])
 
   return (
     <div className="flex flex-col gap-2 col-span-2">
@@ -60,7 +63,7 @@ function MaterialInput() {
           <SelectValue placeholder="Select material" />
         </SelectTrigger>
         <SelectContent>
-          {LAMP_MATERIALS.map((m) => (
+          {LAMP_MATERIALS.map(m => (
             <SelectItem key={m} value={m}>
               {m}
             </SelectItem>
@@ -68,12 +71,12 @@ function MaterialInput() {
         </SelectContent>
       </Select>
     </div>
-  );
+  )
 }
 
 function MinInput() {
-  const inputId = useId();
-  const rangeMin = useGlobalStore((s) => s.rangeMin);
+  const inputId = useId()
+  const rangeMin = useGlobalStore(s => s.rangeMin)
 
   return (
     <div className="flex flex-col gap-2">
@@ -86,12 +89,12 @@ function MinInput() {
         disabled
       />
     </div>
-  );
+  )
 }
 
 function MaxInput() {
-  const inputId = useId();
-  const rangeMax = useGlobalStore((s) => s.rangeMax);
+  const inputId = useId()
+  const rangeMax = useGlobalStore(s => s.rangeMax)
 
   return (
     <div className="flex flex-col gap-2">
@@ -104,5 +107,5 @@ function MaxInput() {
         disabled
       />
     </div>
-  );
+  )
 }
