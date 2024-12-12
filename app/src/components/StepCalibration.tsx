@@ -13,13 +13,12 @@ export function StepCalibration() {
     return (
         <>
             <div className="flex w-full">
-                <div className="w-1/4 bg-gray-200 p-4">
+                <div className="w-1/4 bg-gray-200 p-4 rounded-md">
                     <ReferenceLampForm />
-                    <h1 className="text-2xl font-bold">Inference function fit</h1>
                     <InferenceForm />
                 </div>
 
-                <div className="w-3/4 bg-white-100 p-4">
+                <div className="w-3/4 bg-white p-4">
                     <section className="space-y-0 my-8">
                         <ReferenceLampRange />
                         <ReferenceLampSpectrum />
