@@ -1,4 +1,3 @@
-import type { stepData } from "./components/NavigationProgressBar"
 import { NavigationProgressBar } from "./components/NavigationProgressBar"
 import { StepCalibration } from "./components/StepCalibration"
 
