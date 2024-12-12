@@ -39,6 +39,10 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
 
     return (
         <div className="w-full space-y-4">
+            <div className="flex justify-between mt-4">
+                <Button onClick={() => simulateProgress(-1)} disabled={progress === min}>Prev</Button>
+                <Button onClick={() => simulateProgress(1)} disabled={progress === max}>Next</Button>
+            </div>
             <ProgressBar value={progress} max={max} />
             <div className="relative w-full">
                 <div className="absolute top-[-12px] left-0 w-full flex justify-between">
