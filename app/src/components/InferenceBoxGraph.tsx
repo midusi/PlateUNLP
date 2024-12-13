@@ -163,8 +163,14 @@ export function InferenceBoxGraph() {
     }
 
     return (
-        <svg width={width} height={height}>
-            {content}
-        </svg>
+        <div className="w-full">
+            <svg
+                className="w-full h-auto"
+                viewBox={`0 0 ${width} ${height}`}
+                preserveAspectRatio="xMidYMid meet"
+            >
+                {content}
+            </svg>
+        </div>
     )
 }
