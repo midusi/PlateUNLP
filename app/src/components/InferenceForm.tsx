@@ -1,6 +1,7 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { CustomError, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
+import { ErrorScatterGraph } from "./ErrorScatterGraph"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
@@ -99,6 +100,7 @@ export function InferenceForm() {
                     ))}
                 </p>
                 <InferenceBoxGraph />
+                <ErrorScatterGraph />
             </CardContent>
         </Card>
     )

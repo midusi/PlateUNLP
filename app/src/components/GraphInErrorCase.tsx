@@ -6,9 +6,10 @@ interface GraphInErrorCaseProps {
     message: string
     dimensions: { width: number, height: number }
     margin: { top: number, right: number, bottom: number, left: number }
+    labels: { x: string, y: string }
 }
 
-export function GraphInErrorCase({ message, dimensions, margin }: GraphInErrorCaseProps) {
+export function GraphInErrorCase({ message, dimensions, margin, labels }: GraphInErrorCaseProps) {
     const { width, height } = dimensions
     const xMax = Math.max(width - margin.left - margin.right, 0)
     const yMax = Math.max(height - margin.top - margin.bottom, 0)
@@ -27,12 +28,12 @@ export function GraphInErrorCase({ message, dimensions, margin }: GraphInErrorCa
                 <AxisBottom
                     top={yMax}
                     scale={scaleLinear<number>({ domain: [0, xMax] }).range([0, xMax])}
-                    label="Pixel"
+                    label={labels.x}
                     numTicks={Math.floor(xMax / 80)}
                 />
                 <AxisLeft
                     scale={scaleLinear<number>({ domain: [0, yMax] }).range([yMax, 0])}
-                    label="Wavelength (Å)"
+                    label={labels.y}
                 />
             </Group>
             <g>

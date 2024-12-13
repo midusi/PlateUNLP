@@ -11,31 +11,25 @@ import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
 import { GraphInErrorCase } from "./GraphInErrorCase"
 
-export interface EmpiricalSpectrumPoint {
-    pixel: number
-    intensity: number
-}
+const height = 200
+const width = 400
+const margin = { top: 40, right: 30, bottom: 50, left: 55 }
+const xMax = Math.max(width - margin.left - margin.right, 0)
+const yMax = Math.max(height - margin.top - margin.bottom, 0)
 
 export interface Point {
     x: number
     y: number
 }
 
-// data accessors
 const getX = (p: Point) => p?.x ?? 0
 const getY = (p: Point) => p?.y ?? 0
 
-const height = 400
-const width = 400
-const margin = { top: 40, right: 30, bottom: 50, left: 55 }
-const xMax = Math.max(width - margin.left - margin.right, 0)
-const yMax = Math.max(height - margin.top - margin.bottom, 0)
-
-interface InferenceBoxComponentsProps {
+interface ErrorScatterComponentsProps {
     pixelToWavelengthFunction: (value: number) => number
 }
 
-function InferenceBoxComponents({ pixelToWavelengthFunction }: InferenceBoxComponentsProps) {
+function ErrorScatterComponents({ pixelToWavelengthFunction }: ErrorScatterComponentsProps) {
     const [lampPoints, materialPoints] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
@@ -50,44 +44,42 @@ function InferenceBoxComponents({ pixelToWavelengthFunction }: InferenceBoxCompo
         return matches
     }, [lampPoints, materialPoints])
 
-    const functionValues: Point[] = useMemo((): Point[] => {
-        let functionValues: Point[] = []
-        const minV = Math.min(...matches.map(val => val.x), ...matches.map(val => val.x))
-        const maxV = Math.max(...matches.map(val => val.x), ...matches.map(val => val.x))
-        functionValues = generateRange(minV - 50, maxV + 50, 100).map((value) => {
-            return {
-                x: value,
-                y: pixelToWavelengthFunction(value),
-            }
+    const dispersionErrors: Point[] = useMemo((): Point[] => {
+        const dispersionErrors: Point[] = matches.map((match) => {
+            const dispersionError = match.y - pixelToWavelengthFunction(match.x)
+            return { x: match.y, y: dispersionError }
         })
-        return functionValues
+        return dispersionErrors
     }, [matches, pixelToWavelengthFunction])
 
     const { xScale, yScale } = useMemo(() => {
-        const xMin = Math.min(d3.min(matches, getX)!, d3.min(functionValues, getX)!)
-        const xMax = Math.max(d3.max(matches, getX)!, d3.max(functionValues, getX)!)
-        const yMin = Math.min(d3.min(matches, getY)!, d3.min(functionValues, getY)!)
-        const yMax = Math.max(d3.max(matches, getY)!, d3.max(functionValues, getY)!)
+        const xMin = d3.min(dispersionErrors, getX)!
+        const xMax = d3.max(dispersionErrors, getX)!
+        const yMin = d3.min(dispersionErrors, getY)!
+        const yMax = d3.max(dispersionErrors, getY)!
+        const yLim = Math.ceil(Math.max(Math.abs(yMin), Math.max(yMax)))
+        const marginX = 30
+        const marginY = 0.2 * yLim
 
         return {
-            xScale: scaleLinear<number>({ domain: [xMin, xMax] }),
-            yScale: scaleLinear<number>({ domain: [yMin, yMax] }),
+            xScale: scaleLinear<number>({ domain: [xMin - marginX, xMax + marginX] }),
+            yScale: scaleLinear<number>({ domain: [-yLim - marginY, yLim + marginY] }),
         }
-    }, [functionValues, matches])
+    }, [dispersionErrors])
 
     // update scale output ranges
     xScale.range([0, xMax])
     yScale.range([yMax, 0])
 
-    const spotsInGraph = matches.map((match, index) => {
+    const spotsInGraph = dispersionErrors.map((match, index) => {
         const xPos = xScale(getX(match))
         const yPos = yScale(getY(match))
 
         if (!xPos || !yPos)
-            return <g key={`InferenceBoxGraphGroup-${match.x}-${match.y}`}></g>
+            return <g key={`ErrorScatterGraphGroup-${match.x}-${match.y}`}></g>
 
         return (
-            <g key={`InferenceBoxGraphGroup-${match.x}-${match.y}`}>
+            <g key={`ErrorScatterGraphGroup-${match.x}-${match.y}`}>
                 <Circle
                     cx={xPos}
                     cy={yPos}
@@ -125,25 +117,25 @@ function InferenceBoxComponents({ pixelToWavelengthFunction }: InferenceBoxCompo
             />
             <LinePath<Point>
                 curve={curveLinear}
-                data={functionValues}
+                data={[{ x: d3.min(dispersionErrors, getX)! - 30, y: 0 }, { x: d3.max(dispersionErrors, getX)! + 30, y: 0 }]}
                 x={p => xScale(getX(p)) ?? 0}
                 y={p => yScale(getY(p)) ?? 0}
                 shapeRendering="geometricPrecision"
                 className="stroke-1"
-                style={{ stroke: "green" }}
+                style={{ stroke: "grey", strokeDasharray: "4 4" }}
             />
             <AxisBottom
                 scale={xScale}
                 top={yMax}
-                label="Pixel"
-                numTicks={Math.floor(xMax / 80)}
+                label="Wavelength (Å)"
+                numTicks={Math.floor(xMax / 40)}
             />
-            <AxisLeft scale={yScale} label="Wavelength (Å)" />
+            <AxisLeft scale={yScale} label="Dispersion error" numTicks={5} />
         </Group>
     )
 }
 
-export function InferenceBoxGraph() {
+export function ErrorScatterGraph() {
     const [pixelToWavelengthFunction] = useGlobalStore(s => [
         s.pixelToWavelengthFunction,
     ])
@@ -155,12 +147,12 @@ export function InferenceBoxGraph() {
                 message={pixelToWavelengthFunction.message}
                 dimensions={{ height, width }}
                 margin={margin}
-                labels={{ x: "Pixel", y: "Wavelength (Å)" }}
+                labels={{ x: "Wavelength (Å)", y: "Dispersion error" }}
             />
         )
     }
     else {
-        content = <InferenceBoxComponents pixelToWavelengthFunction={pixelToWavelengthFunction} />
+        content = <ErrorScatterComponents pixelToWavelengthFunction={pixelToWavelengthFunction} />
     }
 
     return (
