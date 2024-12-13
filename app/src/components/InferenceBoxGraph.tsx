@@ -155,6 +155,7 @@ export function InferenceBoxGraph() {
                 message={pixelToWavelengthFunction.message}
                 dimensions={{ height, width }}
                 margin={margin}
+                labels={{ x: "Pixel", y: "Wavelength (Å)" }}
             />
         )
     }
