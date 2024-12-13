@@ -11,6 +11,10 @@ import * as d3 from "@visx/vendor/d3-array"
 import { useMemo } from "react"
 import { GraphInErrorCase } from "./GraphInErrorCase"
 
+const height = 200
+const width = 400
+const margin = { top: 40, right: 30, bottom: 50, left: 55 }
+
 export function ErrorScatterGraph() {
     const [pixelToWavelengthFunction] = useGlobalStore(s => [
         s.pixelToWavelengthFunction,
@@ -18,15 +22,28 @@ export function ErrorScatterGraph() {
 
     let content
     if (pixelToWavelengthFunction instanceof CustomError) {
-        content = <></>
+        content = (
+            <GraphInErrorCase
+                message={pixelToWavelengthFunction.message}
+                dimensions={{ height, width }}
+                margin={margin}
+                labels={{ x: "Wavelength (Å)", y: "Dispersion error" }}
+            />
+        )
     }
     else {
         content = <></>
     }
 
     return (
-        <svg >
-            {content}
-        </svg>
+        <div className="w-full">
+            <svg
+                className="w-full h-auto"
+                viewBox={`0 0 ${width} ${height}`}
+                preserveAspectRatio="xMidYMid meet"
+            >
+                {content}
+            </svg>
+        </div>
     )
 }
