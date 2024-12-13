@@ -3,6 +3,7 @@ import { CustomError, legendreAlgoritm, linearRegression, piecewiseLinearRegress
 import { useEffect, useMemo, useState } from "react"
 import { InferenceBoxGraph } from "./InferenceBoxGraph"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { ErrorScatterGraph } from "./ErrorScatterGraph"
 
 interface InferenceOption {
     name: string
@@ -99,6 +100,7 @@ export function InferenceForm() {
                     ))}
                 </p>
                 <InferenceBoxGraph />
+                <ErrorScatterGraph />
             </CardContent>
         </Card>
     )
