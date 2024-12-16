@@ -4,8 +4,8 @@ import { MdCloudUpload, MdDelete } from "react-icons/md"
 import "@/components/css/Uploader.css"
 
 export function Uploader() {
-    const [file, setFile] = useState(null)
-    const [fileName, setFileName] = useState("No selected file")
+    const [file, setFile] = useState<string | null>(null)
+    const [fileName, setFileName] = useState<string>("No selected file")
 
     return (
         <div>
@@ -16,7 +16,7 @@ export function Uploader() {
                     className="input-field"
                     hidden
                     onChange={({ target: { files } }) => {
-                        files[0] && setFileName(files[0].name)
+                        files && files[0] && setFileName(files[0].name)
                         if (files) {
                             setFile(URL.createObjectURL(files[0]))
                         }
