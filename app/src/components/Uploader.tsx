@@ -10,20 +10,50 @@ interface UploaderProps {
 export function Uploader({ accept = "image/*" }: UploaderProps) {
     const [file, setFile] = useState<string | null>(null)
     const [fileName, setFileName] = useState<string>("No selected file")
+    const [isDragging, setIsDragging] = useState<boolean>(false)
+
+    function handleFileUpload(file: File): void {
+        setFileName(file.name)
+        setFile(URL.createObjectURL(file))
+    };
+
+    function handleDrop(event: React.DragEvent<HTMLFormElement>): void {
+        event.preventDefault()
+        setIsDragging(false)
+
+        const files = event.dataTransfer.files
+        if (files && files[0]) {
+            handleFileUpload(files[0])
+        }
+    }
 
     return (
         <div>
-            <form onClick={() => (document.querySelector(".input-field") as HTMLElement).click()}>
+            <form
+                className={`uploader-form ${isDragging ? "dragging" : ""}`}
+                onClick={() => (document.querySelector(".input-field") as HTMLElement).click()}
+                onDragOver={(event) => {
+                    if (!file) {
+                        event.preventDefault()
+                        setIsDragging(true)
+                    }
+                }}
+                onDragEnter={(event) => {
+                    if (!file) {
+                        event.preventDefault()
+                        setIsDragging(true)
+                    }
+                }}
+                onDragLeave={() => { !file && setIsDragging(false) }}
+                onDrop={handleDrop}
+            >
                 <input
                     type="file"
                     accept={accept}
                     className="input-field"
                     hidden
                     onChange={({ target: { files } }) => {
-                        files && files[0] && setFileName(files[0].name)
-                        if (files) {
-                            setFile(URL.createObjectURL(files[0]))
-                        }
+                        files && files[0] && handleFileUpload(files[0])
                     }}
                 />
                 {file
@@ -31,7 +61,7 @@ export function Uploader({ accept = "image/*" }: UploaderProps) {
                     : (
                         <>
                             <MdCloudUpload color="#1475cf" size={100} />
-                            <p>Browse files to upload</p>
+                            <p>{isDragging ? "Drop your file here" : "Browse files to upload or drag them here"}</p>
                         </>
                     )}
             </form>

@@ -10,6 +10,11 @@ form {
     border-radius: 5px;
 }
 
+.uploader-form.dragging {
+    background-color: rgba(20, 117, 207, 0.1);
+    border-color: #0d6efd;
+}
+
 .uploaded-row{
     margin: 10px 0;
     display: flex;
