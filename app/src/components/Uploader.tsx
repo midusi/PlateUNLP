@@ -3,7 +3,11 @@ import { AiFillFileImage } from "react-icons/ai"
 import { MdCloudUpload, MdDelete } from "react-icons/md"
 import "@/components/css/Uploader.css"
 
-export function Uploader() {
+interface UploaderProps {
+    accept: string
+}
+
+export function Uploader({ accept = "image/*" }: UploaderProps) {
     const [file, setFile] = useState<string | null>(null)
     const [fileName, setFileName] = useState<string>("No selected file")
 
@@ -12,7 +16,7 @@ export function Uploader() {
             <form onClick={() => (document.querySelector(".input-field") as HTMLElement).click()}>
                 <input
                     type="file"
-                    accept="image/*"
+                    accept={accept}
                     className="input-field"
                     hidden
                     onChange={({ target: { files } }) => {

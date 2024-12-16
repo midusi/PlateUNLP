@@ -68,7 +68,7 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
   return (
     <div className="my-2">
       <div className="flex items-center">
-        <Uploader />
+        <Uploader accept="image/*" />
         <Input
           type="file"
           onChange={handleFileChange}
