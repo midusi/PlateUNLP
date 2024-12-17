@@ -68,13 +68,8 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
   return (
     <div className="my-2">
       <div className="flex items-center">
-        <Uploader accept="image/*" />
-        <Input
-          type="file"
-          onChange={handleFileChange}
-          accept=".fit,.fits"
-          className="w-min"
-        />
+        {!loadedData
+          && <Uploader accept=".fit,.fits" onChange={handleFileChange} />}
         {loadingState === "finished"
           ? (
             <p className="ml-4">
