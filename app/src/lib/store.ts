@@ -36,14 +36,8 @@ export const globalStore = create<GlobalStore>()(set => ({
   materialPoints: [],
   /** The color palette for the lines marked for the user. */
   linesPalette: [
-    "#FF6B6B",
-    "#4ECDC4",
-    "#FFD93D",
-    "#1A535C",
-    "#FF9F1C",
-    "#2A9D8F",
-    "#E76F51",
-  ], // Pastel vibrante
+    "#000000",
+  ],
 
   materialsPalette: [
     "#ff7f0e", // Naranja
