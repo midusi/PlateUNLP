@@ -66,10 +66,11 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
   }
 
   return (
-    <div className="my-2">
-      <div className="flex items-center">
-        {!loadedData
-          && <Uploader accept=".fit,.fits" onChange={handleFileChange} showInfoDeleteRow={false} />}
+    <div className="flex flex-col flex-1 h-full my-2">
+      <div className="flex-1 flex h-full">
+        {!loadedData && (
+          <Uploader accept=".fit,.fits" onChange={handleFileChange} showInfoDeleteRow={false} />
+        )}
         {loadingState === "finished"
           ? (
             <p className="ml-4">
