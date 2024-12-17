@@ -1,3 +1,4 @@
+import type { ChangeEvent } from "react"
 import { useState } from "react"
 import { AiFillFileImage } from "react-icons/ai"
 import { MdCloudUpload, MdDelete } from "react-icons/md"
@@ -5,9 +6,10 @@ import "@/components/css/Uploader.css"
 
 interface UploaderProps {
     accept: string
+    onChange: (event: ChangeEvent<HTMLInputElement>) => void
 }
 
-export function Uploader({ accept = "image/*" }: UploaderProps) {
+export function Uploader({ accept = "image/*", onChange }: UploaderProps) {
     const [file, setFile] = useState<string | null>(null)
     const [fileName, setFileName] = useState<string>("No selected file")
     const [isDragging, setIsDragging] = useState<boolean>(false)
@@ -24,11 +26,15 @@ export function Uploader({ accept = "image/*" }: UploaderProps) {
         const files = event.dataTransfer.files
         if (files && files[0]) {
             handleFileUpload(files[0])
+            const fakeEvent = {
+                target: { files } as unknown as HTMLInputElement,
+            } as React.ChangeEvent<HTMLInputElement> // Simular un ChangeEvent<HTMLInputElement>
+            onChange(fakeEvent)
         }
     }
 
     return (
-        <div>
+        <div className="uploader-container">
             <form
                 className={`uploader-form ${isDragging ? "dragging" : ""}`}
                 onClick={() => (document.querySelector(".input-field") as HTMLElement).click()}
@@ -52,8 +58,12 @@ export function Uploader({ accept = "image/*" }: UploaderProps) {
                     accept={accept}
                     className="input-field"
                     hidden
-                    onChange={({ target: { files } }) => {
-                        files && files[0] && handleFileUpload(files[0])
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                        const { files } = event.target
+                        if (files && files[0]) {
+                            onChange(event)
+                            handleFileUpload(files[0])
+                        }
                     }}
                 />
                 {file
