@@ -28,12 +28,14 @@ export function StepCalibration() {
                         </div>
                         <div className="flex-1">
                             <CardTitle>Empirical Comparison Lamp</CardTitle>
-                            <FitsLoader
-                                plotColor="#0ea5e9"
-                                setData={() => { }}
-                                interactable
-                                preview
-                            />
+                            <div className="flex-1 h-full">
+                                <FitsLoader
+                                    plotColor="#0ea5e9"
+                                    setData={() => { }}
+                                    interactable
+                                    preview
+                                />
+                            </div>
                         </div>
 
                         <div className="flex-1">
