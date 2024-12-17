@@ -1,11 +1,18 @@
+.uploader-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 form {
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     border: 2px dashed #1475cf;
     height: 300px;
-    width: 500px;
     cursor: pointer;
     border-radius: 5px;
 }
