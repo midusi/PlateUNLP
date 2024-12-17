@@ -7,9 +7,10 @@ import "@/components/css/Uploader.css"
 interface UploaderProps {
     accept: string
     onChange: (event: ChangeEvent<HTMLInputElement>) => void
+    showInfoDeleteRow: boolean
 }
 
-export function Uploader({ accept = "image/*", onChange }: UploaderProps) {
+export function Uploader({ accept = "image/*", onChange, showInfoDeleteRow = true }: UploaderProps) {
     const [file, setFile] = useState<string | null>(null)
     const [fileName, setFileName] = useState<string>("No selected file")
     const [isDragging, setIsDragging] = useState<boolean>(false)
@@ -75,17 +76,19 @@ export function Uploader({ accept = "image/*", onChange }: UploaderProps) {
                         </>
                     )}
             </form>
-            <section className="uploaded-row">
-                <AiFillFileImage color="#1475cf" />
-                <span className="uploaded-content">
-                    {fileName}
-                    <MdDelete onClick={() => {
-                        setFileName("No selected file")
-                        setFile(null)
-                    }}
-                    />
-                </span>
-            </section>
+            {showInfoDeleteRow && (
+                <section className="uploaded-row">
+                    <AiFillFileImage color="#1475cf" />
+                    <span className="uploaded-content">
+                        {fileName}
+                        <MdDelete onClick={() => {
+                            setFileName("No selected file")
+                            setFile(null)
+                        }}
+                        />
+                    </span>
+                </section>
+            )}
         </div>
     )
 }
