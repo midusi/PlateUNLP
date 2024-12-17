@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input"
 import { FITS } from "fits2js"
 import { type ChangeEvent, useEffect, useMemo, useState } from "react"
 import { EmpiricalSpectrum } from "./EmpiricalSpectrum"
+import { Uploader } from "./Uploader"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
@@ -67,12 +68,8 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
   return (
     <div className="my-2">
       <div className="flex items-center">
-        <Input
-          type="file"
-          onChange={handleFileChange}
-          accept=".fit,.fits"
-          className="w-min"
-        />
+        {!loadedData
+          && <Uploader accept=".fit,.fits" onChange={handleFileChange} />}
         {loadingState === "finished"
           ? (
             <p className="ml-4">
