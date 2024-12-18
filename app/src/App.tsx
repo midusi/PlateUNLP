@@ -1,7 +1,18 @@
 import { NavigationProgressBar } from "./components/NavigationProgressBar"
 import { StepCalibration } from "./components/StepCalibration"
+import { useGlobalStore } from "./hooks/use-global-store"
 
 export default function App() {
+  const [completedStages, setCompletedStages] = useGlobalStore(s => [
+    s.completedStages,
+    s.setCompletedStages,
+  ])
+
+  function onComplete(stageNumber: number) {
+    if (stageNumber === completedStages + 1)
+      setCompletedStages(stageNumber)
+  }
+
   return (
     <div className="w-full mx-auto">
       <header className="mb-12 bg-[#2D3748]">
@@ -18,7 +29,7 @@ export default function App() {
             { name: "Digitization", content: <>1</> },
             { name: "Spectrum segmentation", content: <>2</> },
             { name: "Feature extraction", content: <>3</> },
-            { name: "Calibration", content: <StepCalibration /> },
+            { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(4)} /> },
             { name: "Completed", content: <>FIN</> },
           ]}
         />

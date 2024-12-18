@@ -1,3 +1,4 @@
+import { useGlobalStore } from "@/hooks/use-global-store"
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
 import { useState } from "react"
 import { Button } from "./ui/button"
@@ -28,6 +29,9 @@ interface NavigationProgressBarProps {
 
 export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgressBarProps) {
     const [progress, setProgress] = useState(initialStep)
+    const [completedStages] = useGlobalStore(s => [
+        s.completedStages,
+    ])
 
     const min = 0
     const max = stepsArr.length - 1
@@ -38,13 +42,25 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
             setProgress(sum)
     }
 
+    function disabledPrev(): boolean {
+        return (progress === min)
+    }
+
+    function disabledNext(): boolean {
+        return (progress === max || progress > completedStages)
+    }
+
+    function disabledItem(index: number): boolean {
+        return index > (completedStages + 1)
+    }
+
     return (
         <div className="w-full space-y-4">
             <div className="flex justify-between mt-4">
-                <Button onClick={() => simulateProgress(-1)} disabled={progress === min}>
+                <Button onClick={() => simulateProgress(-1)} disabled={disabledPrev()}>
                     <ChevronLeftIcon className="h-5 w-5" />
                 </Button>
-                <Button onClick={() => simulateProgress(1)} disabled={progress === max}>
+                <Button onClick={() => simulateProgress(1)} disabled={disabledNext()}>
                     <ChevronRightIcon className="h-5 w-5" />
                 </Button>
             </div>
@@ -54,13 +70,19 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                     {stepsArr.map((step, index) => (
                         <div
                             key={step.name}
-                            onClick={() => setProgress(index)}
+                            onClick={() => {
+                                if (!disabledItem(index)) {
+                                    setProgress(index)
+                                }
+                            }}
+                            aria-disabled={disabledItem(index)}
                             className={
                                 `flex items-center justify-center w-6 h-6 rounded-full 
                                 ${index <= progress
                                     ? "bg-blue-500 text-white"
                                     : "bg-gray-300 text-black"
-                                }`
+                                }
+                                ${disabledItem(index) ? "cursor-not-allowed opacity-50" : ""}`
                             }
                         >
                             {index}
@@ -69,18 +91,18 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                 </div>
             </div>
 
-            <h1 className="pt-14 pb-10 text-center mt-12 mb-16 text-4xl font-bold tracking-tight lg:text-5xl">
+            <h1 className="pt-8 text-center text-4xl font-bold tracking-tight lg:text-5xl">
                 {stepsArr[progress].name}
             </h1>
-            <div className="pt-14 pb-10">
+            <div className="pb-6">
                 {stepsArr[progress].content}
             </div>
 
-            <div className="flex justify-between mt-4">
-                <Button onClick={() => simulateProgress(-1)} disabled={progress === min}>
+            <div className="flex justify-between">
+                <Button onClick={() => simulateProgress(-1)} disabled={disabledPrev()}>
                     <ChevronLeftIcon className="h-5 w-5" />
                 </Button>
-                <Button onClick={() => simulateProgress(1)} disabled={progress === max}>
+                <Button onClick={() => simulateProgress(1)} disabled={disabledNext()}>
                     <ChevronRightIcon className="h-5 w-5" />
                 </Button>
             </div>

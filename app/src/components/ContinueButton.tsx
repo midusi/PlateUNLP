@@ -13,10 +13,14 @@ interface EmpiricalSpectrumPoint {
 }
 
 interface ContinueButtonProps {
+    className: string
     data: EmpiricalSpectrumPoint[] | null
+    inSuccessfulCase: () => void
 }
 
-export function ContinueButton({ data }: ContinueButtonProps) {
+function defaultBehavior() { }
+
+export function ContinueButton({ className, data, inSuccessfulCase = defaultBehavior }: ContinueButtonProps) {
     const [lampPoints, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
@@ -52,15 +56,17 @@ export function ContinueButton({ data }: ContinueButtonProps) {
         link.download = "calibratedLamp.json"
         link.click()
         URL.revokeObjectURL(url) // Libera el objeto URL después de la descarga
+
+        inSuccessfulCase()
     }
 
     return (
-        <div className="flex justify-center">
+        <div className={className}>
             <Button
                 disabled={pixelToWavelengthFunction instanceof CustomError}
                 onClick={onClick}
             >
-                Continue
+                Export
             </Button>
         </div>
     )
