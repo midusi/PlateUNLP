@@ -69,14 +69,14 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                 </div>
             </div>
 
-            <h1 className="pt-14 pb-10 text-center mt-12 mb-16 text-4xl font-bold tracking-tight lg:text-5xl">
+            <h1 className="pt-8 text-center text-4xl font-bold tracking-tight lg:text-5xl">
                 {stepsArr[progress].name}
             </h1>
-            <div className="pt-14 pb-10">
+            <div className="pb-6">
                 {stepsArr[progress].content}
             </div>
 
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between">
                 <Button onClick={() => simulateProgress(-1)} disabled={progress === min}>
                     <ChevronLeftIcon className="h-5 w-5" />
                 </Button>
