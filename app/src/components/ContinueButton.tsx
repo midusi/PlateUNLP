@@ -61,7 +61,7 @@ export function ContinueButton({ className, data }: ContinueButtonProps) {
                 disabled={pixelToWavelengthFunction instanceof CustomError}
                 onClick={onClick}
             >
-                Continue
+                Export
             </Button>
         </div>
     )
