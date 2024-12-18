@@ -8,7 +8,11 @@ import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
 import { useState } from "react"
 import { CardTitle } from "./ui/card"
 
-export function StepCalibration() {
+interface StageProps {
+    onComplete: () => void
+}
+
+export function StepCalibration({ onComplete }: StageProps) {
     const [scienceSpectrumData, setScienceSpectrumData] = useState<EmpiricalSpectrumPoint[] | null>(null)
 
     return (
