@@ -52,7 +52,7 @@ export function StepCalibration() {
                 </div>
             </div>
 
-            <ContinueButton data={scienceSpectrumData} />
+            <ContinueButton className="flex justify-center pt-4" data={scienceSpectrumData} />
         </>
     )
 }

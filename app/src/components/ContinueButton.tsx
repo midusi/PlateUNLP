@@ -13,10 +13,11 @@ interface EmpiricalSpectrumPoint {
 }
 
 interface ContinueButtonProps {
+    className: string
     data: EmpiricalSpectrumPoint[] | null
 }
 
-export function ContinueButton({ data }: ContinueButtonProps) {
+export function ContinueButton({ className, data }: ContinueButtonProps) {
     const [lampPoints, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
         s.lampPoints,
         s.materialPoints,
@@ -55,7 +56,7 @@ export function ContinueButton({ data }: ContinueButtonProps) {
     }
 
     return (
-        <div className="flex justify-center">
+        <div className={className}>
             <Button
                 disabled={pixelToWavelengthFunction instanceof CustomError}
                 onClick={onClick}
