@@ -72,5 +72,5 @@ export const globalStore = create<GlobalStore>()(set => ({
   setLampPoints: (arr: Point[]) => { set({ lampPoints: arr }) },
   setMaterialPoints: (arr: Point[]) => { set({ materialPoints: arr }) },
   setPixelToWavelengthFunction: (value) => { set({ pixelToWavelengthFunction: value }) },
-  setCompletedStages: (value: number) => set({ completedStages: value }),
+  setCompletedStages: (value: number) => { set({ completedStages: value }) },
 }))
