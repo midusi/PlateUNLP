@@ -56,7 +56,11 @@ export function StepCalibration({ onComplete }: StageProps) {
                 </div>
             </div>
 
-            <ContinueButton className="flex justify-center pt-4" data={scienceSpectrumData} />
+            <ContinueButton
+                className="flex justify-center pt-4"
+                data={scienceSpectrumData}
+                inSuccessfulCase={onComplete}
+            />
         </>
     )
 }
