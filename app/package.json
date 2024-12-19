@@ -35,6 +35,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "5.4.0",
+    "resizable-panes-react": "6.0.26",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zustand": "^5.0.1"
