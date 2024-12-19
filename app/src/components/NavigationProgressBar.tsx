@@ -56,15 +56,25 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
 
     return (
         <div className="w-full space-y-4">
-            <div className="flex justify-between mt-4">
-                <Button onClick={() => simulateProgress(-1)} disabled={disabledPrev()}>
+            <div className="flex items-center w-full mt-4">
+                <Button
+                    className="flex-shrink-0"
+                    onClick={() => simulateProgress(-1)}
+                    disabled={disabledPrev()}
+                >
                     <ChevronLeftIcon className="h-5 w-5" />
                 </Button>
-                <Button onClick={() => simulateProgress(1)} disabled={disabledNext()}>
+                <div className="flex-grow mx-2">
+                    <ProgressBar value={progress} max={max} />
+                </div>
+                <Button
+                    className="flex-shrink-0"
+                    onClick={() => simulateProgress(1)}
+                    disabled={disabledNext()}
+                >
                     <ChevronRightIcon className="h-5 w-5" />
                 </Button>
             </div>
-            <ProgressBar value={progress} max={max} />
             <div className="relative w-full">
                 <div className="absolute top-[-12px] left-0 w-full flex justify-between">
                     {stepsArr.map((step, index) => (
