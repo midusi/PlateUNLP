@@ -6,6 +6,7 @@ import { ReferenceLampForm } from "@/components/ReferenceLampForm"
 import { ReferenceLampRange } from "@/components/ReferenceLampRange"
 import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
 import { useState } from "react"
+import { Pane, ResizablePanes } from "resizable-panes-react"
 import { CardTitle } from "./ui/card"
 
 interface StageProps {
@@ -17,13 +18,17 @@ export function StepCalibration({ onComplete }: StageProps) {
 
     return (
         <>
-            <div className="flex w-full">
-                <div className="w-1/4 bg-gray-200 p-4 rounded-md">
+            <ResizablePanes
+                vertical
+                uniqueId="uniqueId"
+                resizerSize={5}
+                resizerClass="w-full bg-gradient-to-t from-sky-300 to-sky-200 border-2 border-gray-300 rounded-md flex justify-center items-center"
+            >
+                <Pane id="P0" size={30} minSize={20} className="bg-gray-200 p-4">
                     <ReferenceLampForm />
                     <InferenceForm />
-                </div>
-
-                <div className="w-3/4 bg-gray-100 p-4">
+                </Pane>
+                <Pane id="P1" size={70} minSize={20} className="bg-gray-100 p-4">
                     <CardTitle>Teorical Comparison Lamp</CardTitle>
                     <ReferenceLampRange />
                     <div className="flex flex-col h-screen">
@@ -53,9 +58,8 @@ export function StepCalibration({ onComplete }: StageProps) {
                         </div>
                     </div>
 
-                </div>
-            </div>
-
+                </Pane>
+            </ResizablePanes>
             <ContinueButton
                 className="flex justify-center pt-4"
                 data={scienceSpectrumData}
