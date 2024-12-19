@@ -1,5 +1,4 @@
 import type { EmpiricalSpectrumPoint } from "./EmpiricalSpectrum"
-import { Input } from "@/components/ui/input"
 import { FITS } from "fits2js"
 import { type ChangeEvent, useEffect, useMemo, useState } from "react"
 import { EmpiricalSpectrum } from "./EmpiricalSpectrum"

@@ -1,5 +1,5 @@
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { CustomError, generateRange } from "@/lib/utils"
+import { CustomError } from "@/lib/utils"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
