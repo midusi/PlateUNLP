@@ -3,10 +3,10 @@ import { ContinueButton } from "@/components/ContinueButton"
 import { FitsLoader } from "@/components/FitsLoader"
 import { InferenceForm } from "@/components/InferenceForm"
 import { ReferenceLampForm } from "@/components/ReferenceLampForm"
-import { ReferenceLampRange } from "@/components/ReferenceLampRange"
 import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
 import { useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
+import { ReferenceLampRangeUI } from "./ReferenceLampRangeUI"
 import { CardTitle } from "./ui/card"
 
 interface StageProps {
@@ -30,7 +30,7 @@ export function StepCalibration({ onComplete }: StageProps) {
                 </Pane>
                 <Pane id="P1" size={70} minSize={20} className="bg-gray-100 p-4">
                     <CardTitle>Teorical Comparison Lamp</CardTitle>
-                    <ReferenceLampRange />
+                    <ReferenceLampRangeUI />
                     <div className="flex flex-col h-screen">
                         <div className="flex-1">
                             <ReferenceLampSpectrum />

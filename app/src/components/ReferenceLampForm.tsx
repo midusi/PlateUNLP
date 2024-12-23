@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -31,10 +30,6 @@ export function ReferenceLampForm() {
       <CardContent>
         <div className="mb-4">
           <MaterialInput />
-        </div>
-        <div className="grid gap-x-6 grid-cols-2 mb-4">
-          <MinInput />
-          <MaxInput />
         </div>
         <div className="flex justify-center">
           <Button className="leading-tight self-end" size="lg">
@@ -70,42 +65,6 @@ function MaterialInput() {
           ))}
         </SelectContent>
       </Select>
-    </div>
-  )
-}
-
-function MinInput() {
-  const inputId = useId()
-  const rangeMin = useGlobalStore(s => s.rangeMin)
-
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={inputId}>Min. wavelength</Label>
-      <Input
-        id={inputId}
-        type="text"
-        value={`${rangeMin} Å`}
-        className="tabular-nums disabled:opacity-100 disabled:cursor-default"
-        disabled
-      />
-    </div>
-  )
-}
-
-function MaxInput() {
-  const inputId = useId()
-  const rangeMax = useGlobalStore(s => s.rangeMax)
-
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={inputId}>Max. wavelength</Label>
-      <Input
-        id={inputId}
-        type="text"
-        value={`${rangeMax} Å`}
-        className="tabular-nums disabled:opacity-100 disabled:cursor-default"
-        disabled
-      />
     </div>
   )
 }

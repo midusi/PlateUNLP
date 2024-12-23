@@ -17,7 +17,7 @@ const getX = (p: SpectrumPoint) => p?.wavelength ?? 0
 const getY = (p: SpectrumPoint) => p?.intensity ?? 0
 
 const height = 150
-const margin = { top: 40, right: 30, bottom: 50, left: 55 }
+const margin = { top: 20, right: 30, bottom: 40, left: 50 }
 
 export function ReferenceLampRange() {
   const patternId = useId()
