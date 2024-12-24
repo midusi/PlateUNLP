@@ -20,36 +20,58 @@ export function ReferenceLampRangeUI() {
 
 function MinInput() {
     const inputId = useId()
-    const rangeMin = useGlobalStore(s => s.rangeMin)
+    const [rangeMin, setRangeMin, rangeMax] = useGlobalStore(s => [
+        s.rangeMin,
+        s.setRangeMin,
+        s.rangeMax,
+    ])
 
     return (
         <div className="flex flex-col gap-2">
             <Label htmlFor={inputId}>Min. wavelength</Label>
-            <Input
-                id={inputId}
-                type="text"
-                value={`${rangeMin} Å`}
-                className="tabular-nums disabled:opacity-100 disabled:cursor-default"
-                disabled
-            />
+            <div className="flex items-center gap-1">
+                <Input
+                    id={inputId}
+                    type="number"
+                    value={rangeMin}
+                    onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value < rangeMax)
+                            setRangeMin(value)
+                    }}
+                    className="tabular-nums disabled:cursor-default"
+                />
+                <span className="text-gray-500">Å</span>
+            </div>
         </div>
     )
 }
 
 function MaxInput() {
     const inputId = useId()
-    const rangeMax = useGlobalStore(s => s.rangeMax)
+    const [rangeMax, setRangeMax, rangeMin] = useGlobalStore(s => [
+        s.rangeMax,
+        s.setRangeMax,
+        s.rangeMin,
+    ])
 
     return (
         <div className="flex flex-col gap-2">
             <Label htmlFor={inputId}>Max. wavelength</Label>
-            <Input
-                id={inputId}
-                type="text"
-                value={`${rangeMax} Å`}
-                className="tabular-nums disabled:opacity-100 disabled:cursor-default"
-                disabled
-            />
+            <div className="flex items-center gap-1">
+                <Input
+                    id={inputId}
+                    type="number"
+                    value={rangeMax}
+                    className="tabular-nums disabled:opacity-100 disabled:cursor-default"
+                    onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value > rangeMin)
+                            setRangeMax(value)
+                    }}
+                />
+                <span className="text-gray-500">Å</span>
+            </div>
         </div>
     )
 }

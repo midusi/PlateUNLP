@@ -22,14 +22,6 @@ const margin = { top: 20, right: 30, bottom: 40, left: 50 }
 export function ReferenceLampRange() {
   const patternId = useId()
   const material = useGlobalStore(s => s.material)
-  const [rangeMin, setRangeMin] = useGlobalStore(s => [
-    s.rangeMin,
-    s.setRangeMin,
-  ])
-  const [rangeMax, setRangeMax] = useGlobalStore(s => [
-    s.rangeMax,
-    s.setRangeMax,
-  ])
   const materialsPalette = useGlobalStore(s => s.materialsPalette)
 
   const { data, xScale, yScale } = useMemo(() => {
@@ -40,6 +32,29 @@ export function ReferenceLampRange() {
       yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
     }
   }, [material])
+
+  const [rangeMin, setRangeMin] = useGlobalStore((s) => {
+    const dataMin = d3.min(data, getX)!
+    let min = s.rangeMin
+    if (s.rangeMin < dataMin) {
+      min = dataMin
+    }
+    return [
+      min,
+      s.setRangeMin,
+    ]
+  })
+  const [rangeMax, setRangeMax] = useGlobalStore((s) => {
+    const dataMax = d3.max(data, getX)!
+    let max = s.rangeMax
+    if (s.rangeMax > dataMax) {
+      max = dataMax
+    }
+    return [
+      max,
+      s.setRangeMax,
+    ]
+  })
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
