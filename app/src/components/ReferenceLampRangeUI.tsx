@@ -20,9 +20,10 @@ export function ReferenceLampRangeUI() {
 
 function MinInput() {
     const inputId = useId()
-    const [rangeMin, setRangeMin] = useGlobalStore(s => [
+    const [rangeMin, setRangeMin, rangeMax] = useGlobalStore(s => [
         s.rangeMin,
         s.setRangeMin,
+        s.rangeMax,
     ])
 
     return (
@@ -33,7 +34,11 @@ function MinInput() {
                     id={inputId}
                     type="number"
                     value={rangeMin}
-                    onChange={e => setRangeMin(Number(e.target.value))}
+                    onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value < rangeMax)
+                            setRangeMin(value)
+                    }}
                     className="tabular-nums disabled:cursor-default"
                 />
                 <span className="text-gray-500">Å</span>
@@ -44,9 +49,10 @@ function MinInput() {
 
 function MaxInput() {
     const inputId = useId()
-    const [rangeMax, setRangeMax] = useGlobalStore(s => [
+    const [rangeMax, setRangeMax, rangeMin] = useGlobalStore(s => [
         s.rangeMax,
         s.setRangeMax,
+        s.rangeMin,
     ])
 
     return (
@@ -58,7 +64,11 @@ function MaxInput() {
                     type="number"
                     value={rangeMax}
                     className="tabular-nums disabled:opacity-100 disabled:cursor-default"
-                    onChange={e => setRangeMax(Number(e.target.value))}
+                    onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value > rangeMin)
+                            setRangeMax(value)
+                    }}
                 />
                 <span className="text-gray-500">Å</span>
             </div>
