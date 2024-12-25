@@ -104,10 +104,7 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                 </Button>
             </div>
 
-            <h1 className="pt-8 text-center text-4xl font-bold tracking-tight lg:text-5xl">
-                {stepsArr[progress].name}
-            </h1>
-            <div className="pb-6">
+            <div className="pt-8 pb-6">
                 {stepsArr[progress].content}
             </div>
 
