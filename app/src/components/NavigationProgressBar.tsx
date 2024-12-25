@@ -86,7 +86,7 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                                         ? "bg-blue-500 text-white"
                                         : "bg-gray-300 text-black"
                                     }
-                                ${disabledItem(index) ? "cursor-not-allowed opacity-50" : ""}`
+                                ${disabledItem(index) ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`
                                 }
                                 style={{
                                     position: "relative",
