@@ -77,20 +77,23 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                                 }}
                                 aria-disabled={disabledItem(index)}
                                 className={
-                                    `flex items-center justify-center w-8 h-8 rounded-lg
-
+                                    `flex items-center justify-center p-2 rounded-lg 
+                                ${progress === index
+                                        ? "border border-black"
+                                        : "border border-gray-300"
+                                    }
                                 ${index <= progress
                                         ? "bg-blue-500 text-white"
                                         : "bg-gray-300 text-black"
                                     }
-                                ${disabledItem(index) ? "cursor-not-allowed opacity-50" : ""}`
+                                ${disabledItem(index) ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`
                                 }
                                 style={{
                                     position: "relative",
                                     top: "-50%",
                                 }}
                             >
-                                {index}
+                                {step.name}
                             </div>
                         ))}
                     </div>
@@ -104,10 +107,7 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                 </Button>
             </div>
 
-            <h1 className="pt-8 text-center text-4xl font-bold tracking-tight lg:text-5xl">
-                {stepsArr[progress].name}
-            </h1>
-            <div className="pb-6">
+            <div className="pt-8 pb-6">
                 {stepsArr[progress].content}
             </div>
 
