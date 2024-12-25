@@ -77,8 +77,11 @@ export function NavigationProgressBar({ stepsArr, initialStep }: NavigationProgr
                                 }}
                                 aria-disabled={disabledItem(index)}
                                 className={
-                                    `flex items-center justify-center p-2 rounded-lg
-
+                                    `flex items-center justify-center p-2 rounded-lg 
+                                ${progress === index
+                                        ? "border border-black"
+                                        : "border border-gray-300"
+                                    }
                                 ${index <= progress
                                         ? "bg-blue-500 text-white"
                                         : "bg-gray-300 text-black"
