@@ -19,7 +19,7 @@ const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
 export function ReferenceLampSpectrum() {
-  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette, lampPoints] = useGlobalStore(s => [
+  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette, lampPoints, oneTeoricalSpectrum] = useGlobalStore(s => [
     s.material,
     s.rangeMin,
     s.rangeMax,
@@ -27,6 +27,7 @@ export function ReferenceLampSpectrum() {
     s.setMaterialPoints,
     s.linesPalette,
     s.lampPoints,
+    s.oneTeoricalSpectrum,
   ])
   const materialsPalette = useGlobalStore(s => s.materialsPalette)
 
@@ -49,11 +50,10 @@ export function ReferenceLampSpectrum() {
   }, [data, rangeMin, rangeMax])
 
   // Material division
-  const oneSpectrum = true
   const [filteredDatas, materials] = useMemo(() => {
     let materials = material.split("-")
     let filteredDatas: SpectrumPoint[][]
-    if (oneSpectrum) {
+    if (oneTeoricalSpectrum) {
       materials = [`${material}`]
       filteredDatas = [filteredData]
     }
@@ -67,7 +67,7 @@ export function ReferenceLampSpectrum() {
       }
     }
     return [filteredDatas, materials]
-  }, [filteredData, material, oneSpectrum])
+  }, [filteredData, material, oneTeoricalSpectrum])
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
