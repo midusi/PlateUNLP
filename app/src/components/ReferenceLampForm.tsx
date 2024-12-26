@@ -65,6 +65,19 @@ function MaterialInput() {
           ))}
         </SelectContent>
       </Select>
+      <div>
+        <input
+          type="checkbox"
+          id="checkbox-display-materials-in-a-single-spectrum"
+          className="mr-2 cursor-pointer"
+        />
+        <label
+          htmlFor="checkbox-display-materials-in-a-single-spectrum"
+          className="cursor-pointer"
+        >
+          Display materials in a single spectrum
+        </label>
+      </div>
     </div>
   )
 }
