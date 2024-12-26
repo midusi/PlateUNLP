@@ -48,16 +48,26 @@ export function ReferenceLampSpectrum() {
     }
   }, [data, rangeMin, rangeMax])
 
+  // Material division
+  const oneSpectrum = true
   const [filteredDatas, materials] = useMemo(() => {
-    const materials = material.split("-")
-    const filteredDatas: SpectrumPoint[][] = []
-    for (const m of materials) {
-      const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
-      const d = filteredData.filter(d => nameList.includes(d.material))
-      filteredDatas.push(d)
+    let materials = material.split("-")
+    let filteredDatas: SpectrumPoint[][]
+    if (oneSpectrum) {
+      materials = [`${material}`]
+      filteredDatas = [filteredData]
+    }
+    else {
+      materials = material.split("-")
+      filteredDatas = []
+      for (const m of materials) {
+        const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
+        const d = filteredData.filter(d => nameList.includes(d.material))
+        filteredDatas.push(d)
+      }
     }
     return [filteredDatas, materials]
-  }, [filteredData, material])
+  }, [filteredData, material, oneSpectrum])
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
