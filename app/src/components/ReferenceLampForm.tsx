@@ -45,9 +45,11 @@ export function ReferenceLampForm() {
 
 function MaterialInput() {
   const inputId = useId()
-  const [material, setMaterial] = useGlobalStore(s => [
+  const [material, setMaterial, oneTeoricalSpectrum, setOneTeoricalSpectrum] = useGlobalStore(s => [
     s.material,
     s.setMaterial,
+    s.oneTeoricalSpectrum,
+    s.setOneTeoricalSpectrum,
   ])
 
   return (
@@ -65,6 +67,21 @@ function MaterialInput() {
           ))}
         </SelectContent>
       </Select>
+      <div>
+        <input
+          type="checkbox"
+          id="checkbox-display-materials-in-a-single-spectrum"
+          className="mr-2 cursor-pointer"
+          checked={oneTeoricalSpectrum}
+          onChange={e => setOneTeoricalSpectrum(e.target.checked)}
+        />
+        <label
+          htmlFor="checkbox-display-materials-in-a-single-spectrum"
+          className="cursor-pointer"
+        >
+          Display materials in a single spectrum
+        </label>
+      </div>
     </div>
   )
 }

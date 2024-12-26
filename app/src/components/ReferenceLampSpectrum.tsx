@@ -19,7 +19,7 @@ const height = 300
 const margin = { top: 40, right: 30, bottom: 50, left: 55 }
 
 export function ReferenceLampSpectrum() {
-  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette, lampPoints] = useGlobalStore(s => [
+  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette, lampPoints, oneTeoricalSpectrum] = useGlobalStore(s => [
     s.material,
     s.rangeMin,
     s.rangeMax,
@@ -27,6 +27,7 @@ export function ReferenceLampSpectrum() {
     s.setMaterialPoints,
     s.linesPalette,
     s.lampPoints,
+    s.oneTeoricalSpectrum,
   ])
   const materialsPalette = useGlobalStore(s => s.materialsPalette)
 
@@ -48,16 +49,25 @@ export function ReferenceLampSpectrum() {
     }
   }, [data, rangeMin, rangeMax])
 
+  // Material division
   const [filteredDatas, materials] = useMemo(() => {
-    const materials = material.split("-")
-    const filteredDatas: SpectrumPoint[][] = []
-    for (const m of materials) {
-      const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
-      const d = filteredData.filter(d => nameList.includes(d.material))
-      filteredDatas.push(d)
+    let materials = material.split("-")
+    let filteredDatas: SpectrumPoint[][]
+    if (oneTeoricalSpectrum) {
+      materials = [`${material}`]
+      filteredDatas = [filteredData]
+    }
+    else {
+      materials = material.split("-")
+      filteredDatas = []
+      for (const m of materials) {
+        const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
+        const d = filteredData.filter(d => nameList.includes(d.material))
+        filteredDatas.push(d)
+      }
     }
     return [filteredDatas, materials]
-  }, [filteredData, material])
+  }, [filteredData, material, oneTeoricalSpectrum])
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()

@@ -14,6 +14,7 @@ export interface GlobalStore {
   materialsPalette: string[]
   pixelToWavelengthFunction: ((value: number) => number) | CustomError
   completedStages: number
+  oneTeoricalSpectrum: boolean
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
@@ -23,6 +24,7 @@ export interface GlobalStore {
   setMaterialPoints: (arr: Point[]) => void
   setPixelToWavelengthFunction: (arr: ((value: number) => number) | CustomError) => void
   setCompletedStages: (value: number) => void
+  setOneTeoricalSpectrum: (value: boolean) => void
 }
 
 export const globalStore = create<GlobalStore>()(set => ({
@@ -50,6 +52,7 @@ export const globalStore = create<GlobalStore>()(set => ({
     "#e377c2", // Rosa
     "#7f7f7f", // Gris
   ],
+  oneTeoricalSpectrum: true,
 
   pixelToWavelengthFunction: new CustomError(
     ErrorCodes.INSUFFICIENT_MATCHES,
@@ -73,4 +76,5 @@ export const globalStore = create<GlobalStore>()(set => ({
   setMaterialPoints: (arr: Point[]) => { set({ materialPoints: arr }) },
   setPixelToWavelengthFunction: (value) => { set({ pixelToWavelengthFunction: value }) },
   setCompletedStages: (value: number) => { set({ completedStages: value }) },
+  setOneTeoricalSpectrum: value => set({ oneTeoricalSpectrum: value }),
 }))
