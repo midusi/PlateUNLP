@@ -146,10 +146,7 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  x.sort((a, b) => a - b)
-  y.sort((a, b) => a - b)
-
-  const degree = 8
+  const degree = 3
 
   // Generar la matriz de Legendre
   function legendreBasis(x: number, k: number): number {
