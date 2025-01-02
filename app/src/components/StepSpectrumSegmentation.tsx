@@ -12,7 +12,6 @@ export function StepSpectrumSegmentation() {
         if (event.target.files) {
             const file = event.target.files[0]
             if (!["image/png", "image/jpeg"].includes(file.type)) {
-                alert("Por favor, sube una imagen válida (PNG o JPG)")
                 setLoadingState("error")
                 return
             }
@@ -26,13 +25,13 @@ export function StepSpectrumSegmentation() {
                         setLoadingState("finished")
                     }
                     catch (error) {
-                        console.error("Error al procesar la imagen:", error)
+                        console.error("Error processing image:", error)
                         setLoadingState("error")
                     }
                 }
             }
             reader.onerror = () => {
-                console.error("Error al leer el archivo")
+                console.error("Error reading file")
                 setLoadingState("error")
             }
         }
@@ -44,11 +43,11 @@ export function StepSpectrumSegmentation() {
             {loadingState === "processing" && <p>Cargando contenido...</p>}
             {loadingState === "finished" && file && (
                 <div>
-                    <p>Imagen cargada:</p>
-                    <img src={file} alt="Imagen subida" style={{ maxWidth: "100%", maxHeight: "300px" }} />
+                    <p>Image uploaded:</p>
+                    <img src={file} alt="Image uploaded" style={{ maxWidth: "100%", maxHeight: "300px" }} />
                 </div>
             )}
-            {loadingState === "error" && <p>Error al cargar la imagen. Por favor, inténtalo de nuevo.</p>}
+            {loadingState === "error" && <p>Error loading image. Please try again.</p>}
 
         </>
     )
