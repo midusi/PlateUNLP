@@ -1,5 +1,6 @@
 import { NavigationProgressBar } from "./components/NavigationProgressBar"
 import { StepCalibration } from "./components/StepCalibration"
+import { StepSpectrumSegmentation } from "./components/StepSpectrumSegmentation"
 import { useGlobalStore } from "./hooks/use-global-store"
 
 export default function App() {
@@ -27,7 +28,7 @@ export default function App() {
           stepsArr={[
             { name: "Begin", content: <>BEGIN</> },
             { name: "Digitization", content: <>1</> },
-            { name: "Spectrum segmentation", content: <>2</> },
+            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation /> },
             { name: "Feature extraction", content: <>3</> },
             { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(4)} /> },
             { name: "Completed", content: <>FIN</> },
