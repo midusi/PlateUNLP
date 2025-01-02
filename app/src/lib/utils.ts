@@ -156,16 +156,13 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  function scaleToRange(x: number[]): (value: number) => number {
+  // Escalar los puntos al dominio [-1, 1]
+  function obtainNormalizator(x: number[]): (value: number) => number {
     const min = Math.min(...x) // Valor mínimo en x
     const max = Math.max(...x) // Valor máximo en x
-
-    // Aplicar la fórmula de normalización
     return (value: number) => ((2 * (value - min)) / (max - min) - 1)
   }
-
-  // Escalar los puntos al dominio [-1, 1]
-  const normalizator = scaleToRange(x)
+  const normalizator = obtainNormalizator(x)
   const x_scaled = x.map(normalizator)
 
   function legendreBasisIterative(x: number, k: number): number {
