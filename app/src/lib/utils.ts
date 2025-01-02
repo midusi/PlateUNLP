@@ -131,6 +131,11 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
   }
 }
 
+function linspace(start: number, stop: number, num: number) {
+  const step = (stop - start) / (num - 1)
+  return Array.from({ length: num }, (_, i) => start + i * step)
+}
+
 export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) {
   if (x.length !== y.length) {
     throw new CustomError(
@@ -146,19 +151,33 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  const degree = 3
+  // Escalar los puntos al dominio [-1, 1]
+  const n = x.length
+  const x_scaled = linspace(-1, 1, n)
 
-  // Generar la matriz de Legendre
-  function legendreBasis(x: number, k: number): number {
+  const degree = 8
+
+  function legendreBasisIterative(x: number, k: number): number {
     if (k === 0)
-      return 1
+      return 1 // P0(x) = 1
     if (k === 1)
-      return x
-    return ((2 * k - 1) * x * legendreBasis(x, k - 1) - (k - 1) * legendreBasis(x, k - 2)) / k
+      return x // P1(x) = x
+
+    let Pk_2 = 1 // P0(x)
+    let Pk_1 = x // P1(x)
+    let Pk = 0
+
+    for (let i = 2; i <= k; i++) {
+      Pk = ((2 * i - 1) * x * Pk_1 - (i - 1) * Pk_2) / i
+      Pk_2 = Pk_1
+      Pk_1 = Pk
+    }
+
+    return Pk
   }
 
-  const P = x.map(xi =>
-    Array.from({ length: degree + 1 }, (_, k) => legendreBasis(xi, k)),
+  const P = x_scaled.map(xi =>
+    Array.from({ length: degree + 1 }, (_, k) => legendreBasisIterative(xi, k)),
   )
 
   // Matriz de diseño
@@ -170,13 +189,13 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
   // Calcular coeficientes: (XT * X)^-1 * XT * y
   const Y = matrix(y)
   const coefficients = multiply(
-    multiply(inv(multiply(XT, X)), XT),
-    Y,
+    inv(multiply(XT, X)),
+    multiply(XT, Y),
   )
 
   return function (value: number): number {
     return (coefficients.toArray() as number[]).reduce(
-      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasis(value, k)
+      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasisIterative(value, k)
       , 0,
     )
   }
