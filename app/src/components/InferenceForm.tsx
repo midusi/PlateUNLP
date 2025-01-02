@@ -45,6 +45,7 @@ const radioOptions: InferenceOption[] = [
 
 export function InferenceForm() {
     const [selectedOption, setSelectedOption] = useState<InferenceOption>(radioOptions[0])
+    const [degree, setDegree] = useState<number>(3)
     const [setPixelToWavelengthFunction, lampPoints, materialPoints] = useGlobalStore(s => [
         s.setPixelToWavelengthFunction,
         s.lampPoints,
@@ -65,7 +66,7 @@ export function InferenceForm() {
             const inferenceFunction = selectedOption.function(
                 matches.map(val => val.lamp.x),
                 matches.map(val => val.material.x),
-                selectedOption.needDegree ? 3 : undefined,
+                selectedOption.needDegree ? degree : undefined,
             )
             setPixelToWavelengthFunction(inferenceFunction)
         }
@@ -78,10 +79,20 @@ export function InferenceForm() {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matches, selectedOption]) // Dependencias relevantes
+    }, [matches, selectedOption, degree]) // Dependencias relevantes
 
     function onChangeRadio(option: InferenceOption) {
         setSelectedOption(option)
+    }
+
+    function onChangeDegree(event: React.ChangeEvent<HTMLInputElement>) {
+        const value = event.target.value
+        if (/^\d{1,2}$/.test(value)) {
+            const numericValue = Number.parseInt(value, 10)
+            if (numericValue > 0) {
+                setDegree(numericValue)
+            }
+        }
     }
 
     return (
@@ -104,7 +115,16 @@ export function InferenceForm() {
                                 onChange={() => onChangeRadio(option)}
                             />
                             {option.name}
-
+                            {option.needDegree && (
+                                <input
+                                    type="number"
+                                    id="degreeInput"
+                                    style={{ width: "3em", textAlign: "center" }}
+                                    maxLength={2}
+                                    value={degree}
+                                    onChange={onChangeDegree}
+                                />
+                            )}
                         </label>
                     ))}
                 </p>
