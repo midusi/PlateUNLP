@@ -45,7 +45,7 @@ const radioOptions: InferenceOption[] = [
 
 export function InferenceForm() {
     const [selectedOption, setSelectedOption] = useState<InferenceOption>(radioOptions[0])
-    const [degree, setDegree] = useState<number | text>(3)
+    const [degree, setDegree] = useState<number | string>(3)
     const [setPixelToWavelengthFunction, lampPoints, materialPoints] = useGlobalStore(s => [
         s.setPixelToWavelengthFunction,
         s.lampPoints,
@@ -66,7 +66,7 @@ export function InferenceForm() {
             const inferenceFunction = selectedOption.function(
                 matches.map(val => val.lamp.x),
                 matches.map(val => val.material.x),
-                selectedOption.needDegree ? degree : undefined,
+                selectedOption.needDegree ? Number(degree) : undefined,
             )
             setPixelToWavelengthFunction(inferenceFunction)
         }
@@ -79,7 +79,7 @@ export function InferenceForm() {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matches, selectedOption, degree]) // Dependencias relevantes
+    }, [matches, selectedOption, degree])
 
     function onChangeRadio(option: InferenceOption) {
         setSelectedOption(option)
