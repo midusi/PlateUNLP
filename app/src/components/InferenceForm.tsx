@@ -45,7 +45,7 @@ const radioOptions: InferenceOption[] = [
 
 export function InferenceForm() {
     const [selectedOption, setSelectedOption] = useState<InferenceOption>(radioOptions[0])
-    const [degree, setDegree] = useState<number>(3)
+    const [degree, setDegree] = useState<number | text>(3)
     const [setPixelToWavelengthFunction, lampPoints, materialPoints] = useGlobalStore(s => [
         s.setPixelToWavelengthFunction,
         s.lampPoints,
@@ -87,7 +87,10 @@ export function InferenceForm() {
 
     function onChangeDegree(event: React.ChangeEvent<HTMLInputElement>) {
         const value = event.target.value
-        if (/^\d{1,2}$/.test(value)) {
+        if (value === "") {
+            setDegree(value)
+        }
+        else if (/^\d{1,2}$/.test(value)) {
             const numericValue = Number.parseInt(value, 10)
             if (numericValue > 0) {
                 setDegree(numericValue)
@@ -119,10 +122,19 @@ export function InferenceForm() {
                                 <input
                                     type="number"
                                     id="degreeInput"
-                                    style={{ width: "3em", textAlign: "center" }}
+                                    className="ml-4 border"
+                                    style={{
+                                        width: "3em",
+                                        textAlign: "center",
+                                        appearance: "auto",
+                                        backgroundColor: "#e0f7fa",
+                                    }}
                                     maxLength={2}
                                     value={degree}
                                     onChange={onChangeDegree}
+                                    min={1}
+                                    max={99}
+                                    step={1}
                                 />
                             )}
                         </label>
