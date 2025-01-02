@@ -6,8 +6,10 @@ import { InferenceBoxGraph } from "./InferenceBoxGraph"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 interface InferenceOption {
+    id: number
     name: string
-    function: (x: number[], y: number[]) => ((value: number) => number)
+    function: ((x: number[], y: number[], degree?: number) => ((value: number) => number))
+    needDegree: boolean
 }
 
 export interface Point {
@@ -22,16 +24,22 @@ interface Match {
 
 const radioOptions: InferenceOption[] = [
     {
+        id: 0,
         name: "Linear regresion",
         function: linearRegression,
+        needDegree: false,
     },
     {
+        id: 1,
         name: "Piece wise linear regression",
-        function: piecewiseLinearRegression, // Cambiar por legendreRegression
+        function: piecewiseLinearRegression,
+        needDegree: false,
     },
     {
-        name: "Legendre (8 coefficients)",
-        function: legendreAlgoritm, // Cambiar por legendreRegression
+        id: 2,
+        name: "Legendre",
+        function: legendreAlgoritm,
+        needDegree: true,
     },
 ]
 
@@ -57,6 +65,7 @@ export function InferenceForm() {
             const inferenceFunction = selectedOption.function(
                 matches.map(val => val.lamp.x),
                 matches.map(val => val.material.x),
+                selectedOption.needDegree ? 3 : undefined,
             )
             setPixelToWavelengthFunction(inferenceFunction)
         }

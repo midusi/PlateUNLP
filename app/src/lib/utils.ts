@@ -22,6 +22,7 @@ export const ErrorCodes = {
   DIFFERENT_PROMP_SIZE: 1001,
   INSUFFICIENT_MATCHES: 1002,
   LESS_DATA_THAN_DEGREE: 1003,
+  DEGREE_UNDEFINED: 1004,
 }
 
 export class CustomError extends Error {
@@ -132,7 +133,7 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
   }
 }
 
-export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) {
+export function legendreAlgoritm(x: number[], y: number[], degree: number = -1): ((value: number) => number) {
   if (x.length !== y.length) {
     throw new CustomError(
       ErrorCodes.DIFFERENT_PROMP_SIZE,
@@ -147,7 +148,13 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  const degree = 3
+  if (!degree) {
+    throw new CustomError(
+      ErrorCodes.DEGREE_UNDEFINED,
+      `A valid degree value (greater than 0) must be specified.`,
+    )
+  }
+
   const n = x.length
   if (degree >= n) {
     throw new CustomError(
