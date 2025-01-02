@@ -24,7 +24,7 @@ export default function App() {
 
       <main className="px-8">
         <NavigationProgressBar
-          initialStep={4}
+          initialStep={2}
           stepsArr={[
             { name: "Begin", content: <>BEGIN</> },
             { name: "Digitization", content: <>1</> },
