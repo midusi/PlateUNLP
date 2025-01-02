@@ -6,8 +6,10 @@ import { InferenceBoxGraph } from "./InferenceBoxGraph"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 interface InferenceOption {
+    id: number
     name: string
-    function: (x: number[], y: number[]) => ((value: number) => number)
+    function: ((x: number[], y: number[], degree?: number) => ((value: number) => number))
+    needDegree: boolean
 }
 
 export interface Point {
@@ -22,21 +24,28 @@ interface Match {
 
 const radioOptions: InferenceOption[] = [
     {
+        id: 0,
         name: "Linear regresion",
         function: linearRegression,
+        needDegree: false,
     },
     {
+        id: 1,
         name: "Piece wise linear regression",
-        function: piecewiseLinearRegression, // Cambiar por legendreRegression
+        function: piecewiseLinearRegression,
+        needDegree: false,
     },
     {
-        name: "Legendre (8 coefficients)",
-        function: legendreAlgoritm, // Cambiar por legendreRegression
+        id: 2,
+        name: "Legendre",
+        function: legendreAlgoritm,
+        needDegree: true,
     },
 ]
 
 export function InferenceForm() {
     const [selectedOption, setSelectedOption] = useState<InferenceOption>(radioOptions[0])
+    const [degree, setDegree] = useState<number | text>(3)
     const [setPixelToWavelengthFunction, lampPoints, materialPoints] = useGlobalStore(s => [
         s.setPixelToWavelengthFunction,
         s.lampPoints,
@@ -57,6 +66,7 @@ export function InferenceForm() {
             const inferenceFunction = selectedOption.function(
                 matches.map(val => val.lamp.x),
                 matches.map(val => val.material.x),
+                selectedOption.needDegree ? degree : undefined,
             )
             setPixelToWavelengthFunction(inferenceFunction)
         }
@@ -69,10 +79,23 @@ export function InferenceForm() {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matches, selectedOption]) // Dependencias relevantes
+    }, [matches, selectedOption, degree]) // Dependencias relevantes
 
     function onChangeRadio(option: InferenceOption) {
         setSelectedOption(option)
+    }
+
+    function onChangeDegree(event: React.ChangeEvent<HTMLInputElement>) {
+        const value = event.target.value
+        if (value === "") {
+            setDegree(value)
+        }
+        else if (/^\d{1,2}$/.test(value)) {
+            const numericValue = Number.parseInt(value, 10)
+            if (numericValue > 0) {
+                setDegree(numericValue)
+            }
+        }
     }
 
     return (
@@ -95,7 +118,25 @@ export function InferenceForm() {
                                 onChange={() => onChangeRadio(option)}
                             />
                             {option.name}
-
+                            {option.needDegree && (
+                                <input
+                                    type="number"
+                                    id="degreeInput"
+                                    className="ml-4 border"
+                                    style={{
+                                        width: "3em",
+                                        textAlign: "center",
+                                        appearance: "auto",
+                                        backgroundColor: "#e0f7fa",
+                                    }}
+                                    maxLength={2}
+                                    value={degree}
+                                    onChange={onChangeDegree}
+                                    min={1}
+                                    max={99}
+                                    step={1}
+                                />
+                            )}
                         </label>
                     ))}
                 </p>

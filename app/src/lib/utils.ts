@@ -21,6 +21,8 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
 export const ErrorCodes = {
   DIFFERENT_PROMP_SIZE: 1001,
   INSUFFICIENT_MATCHES: 1002,
+  LESS_DATA_THAN_DEGREE: 1003,
+  DEGREE_UNDEFINED: 1004,
 }
 
 export class CustomError extends Error {
@@ -131,7 +133,7 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
   }
 }
 
-export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) {
+export function legendreAlgoritm(x: number[], y: number[], degree: number = -1): ((value: number) => number) {
   if (x.length !== y.length) {
     throw new CustomError(
       ErrorCodes.DIFFERENT_PROMP_SIZE,
@@ -146,22 +148,51 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  x.sort((a, b) => a - b)
-  y.sort((a, b) => a - b)
-
-  const degree = 8
-
-  // Generar la matriz de Legendre
-  function legendreBasis(x: number, k: number): number {
-    if (k === 0)
-      return 1
-    if (k === 1)
-      return x
-    return ((2 * k - 1) * x * legendreBasis(x, k - 1) - (k - 1) * legendreBasis(x, k - 2)) / k
+  if (!degree) {
+    throw new CustomError(
+      ErrorCodes.DEGREE_UNDEFINED,
+      `A valid degree value (greater than 0) must be specified.`,
+    )
   }
 
-  const P = x.map(xi =>
-    Array.from({ length: degree + 1 }, (_, k) => legendreBasis(xi, k)),
+  const n = x.length
+  if (degree >= n) {
+    throw new CustomError(
+      ErrorCodes.LESS_DATA_THAN_DEGREE,
+      `To approximate with a Legendre algorithm of degree ${degree}, at least ${degree + 1} data pairs are required.`,
+    )
+  }
+
+  // Escalar los puntos al dominio [-1, 1]
+  function obtainNormalizator(x: number[]): (value: number) => number {
+    const min = Math.min(...x) // Valor mínimo en x
+    const max = Math.max(...x) // Valor máximo en x
+    return (value: number) => ((2 * (value - min)) / (max - min) - 1)
+  }
+  const normalizator = obtainNormalizator(x)
+  const x_scaled = x.map(normalizator)
+
+  function legendreBasisIterative(x: number, k: number): number {
+    if (k === 0)
+      return 1 // P0(x) = 1
+    if (k === 1)
+      return x // P1(x) = x
+
+    let Pk_2 = 1 // P0(x)
+    let Pk_1 = x // P1(x)
+    let Pk = 0
+
+    for (let i = 2; i <= k; i++) {
+      Pk = ((2 * i - 1) * x * Pk_1 - (i - 1) * Pk_2) / i
+      Pk_2 = Pk_1
+      Pk_1 = Pk
+    }
+
+    return Pk
+  }
+
+  const P = x_scaled.map(xi =>
+    Array.from({ length: degree + 1 }, (_, k) => legendreBasisIterative(xi, k)),
   )
 
   // Matriz de diseño
@@ -173,13 +204,14 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
   // Calcular coeficientes: (XT * X)^-1 * XT * y
   const Y = matrix(y)
   const coefficients = multiply(
-    multiply(inv(multiply(XT, X)), XT),
-    Y,
+    inv(multiply(XT, X)),
+    multiply(XT, Y),
   )
 
   return function (value: number): number {
+    const val = normalizator(value)
     return (coefficients.toArray() as number[]).reduce(
-      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasis(value, k)
+      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasisIterative(val, k)
       , 0,
     )
   }
