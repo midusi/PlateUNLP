@@ -21,6 +21,7 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
 export const ErrorCodes = {
   DIFFERENT_PROMP_SIZE: 1001,
   INSUFFICIENT_MATCHES: 1002,
+  LESS_DATA_THAN_DEGREE: 1003,
 }
 
 export class CustomError extends Error {
@@ -151,11 +152,17 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  // Escalar los puntos al dominio [-1, 1]
+  const degree = 4
   const n = x.length
-  const x_scaled = linspace(-1, 1, n)
+  if (degree >= n) {
+    throw new CustomError(
+      ErrorCodes.LESS_DATA_THAN_DEGREE,
+      `To approximate with a Legendre algorithm of degree ${degree}, at least ${degree + 1} data pairs are required.`,
+    )
+  }
 
-  const degree = 8
+  // Escalar los puntos al dominio [-1, 1]
+  const x_scaled = linspace(-1, 1, n)
 
   function legendreBasisIterative(x: number, k: number): number {
     if (k === 0)
