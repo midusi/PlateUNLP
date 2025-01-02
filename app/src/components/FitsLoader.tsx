@@ -52,13 +52,13 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
             setLoadingState("finished")
           }
           catch (error) {
-            console.error("Error al parsear el JSON:", error)
+            console.error("Error parsing JSON:", error)
             setLoadingState("error")
           }
         }
       }
       reader.onerror = () => {
-        console.error("Error al leer el archivo")
+        console.error("Error reading file")
         setLoadingState("error")
       }
     }
@@ -87,10 +87,10 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
             </p>
           )
           : loadingState === "error"
-            ? <p className="text-red-500">Error al cargar el archivo</p>
+            ? <p className="text-red-500">Error loading file</p>
             : null}
       </div>
-      {loadingState === "processing" && <p>Cargando contenido...</p>}
+      {loadingState === "processing" && <p>Loading content...</p>}
       {loadedData
         && (
           <EmpiricalSpectrum
