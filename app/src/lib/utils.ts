@@ -132,11 +132,6 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
   }
 }
 
-function linspace(start: number, stop: number, num: number) {
-  const step = (stop - start) / (num - 1)
-  return Array.from({ length: num }, (_, i) => start + i * step)
-}
-
 export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => number) {
   if (x.length !== y.length) {
     throw new CustomError(
@@ -152,7 +147,7 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  const degree = 4
+  const degree = 3
   const n = x.length
   if (degree >= n) {
     throw new CustomError(
@@ -161,8 +156,17 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
     )
   }
 
+  function scaleToRange(x: number[]): (value: number) => number {
+    const min = Math.min(...x) // Valor mínimo en x
+    const max = Math.max(...x) // Valor máximo en x
+
+    // Aplicar la fórmula de normalización
+    return (value: number) => ((2 * (value - min)) / (max - min) - 1)
+  }
+
   // Escalar los puntos al dominio [-1, 1]
-  const x_scaled = linspace(-1, 1, n)
+  const normalizator = scaleToRange(x)
+  const x_scaled = x.map(normalizator)
 
   function legendreBasisIterative(x: number, k: number): number {
     if (k === 0)
@@ -201,8 +205,9 @@ export function legendreAlgoritm(x: number[], y: number[]): ((value: number) => 
   )
 
   return function (value: number): number {
+    const val = normalizator(value)
     return (coefficients.toArray() as number[]).reduce(
-      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasisIterative(value, k)
+      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasisIterative(val, k)
       , 0,
     )
   }
