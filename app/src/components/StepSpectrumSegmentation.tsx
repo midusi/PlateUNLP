@@ -1,11 +1,13 @@
+import type { StepProps } from "@/interfaces/StepProps"
 import type { ChangeEvent } from "react"
 import { useState } from "react"
 import { BBImageEditor } from "./BBImageEditor"
+import { Button } from "./ui/button"
 import { Uploader } from "./Uploader"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
-export function StepSpectrumSegmentation() {
+export function StepSpectrumSegmentation({ onComplete }: StepProps) {
     const [loadingState, setLoadingState] = useState<LoadingState>("waiting")
     const [file, setFile] = useState<string | null>(null)
 
@@ -32,6 +34,12 @@ export function StepSpectrumSegmentation() {
             )}
             {loadingState === "error" && <p>Error loading image. Please try again.</p>}
 
+            <Button
+                disabled
+                onClick={onComplete}
+            >
+                Save
+            </Button>
         </div>
     )
 }

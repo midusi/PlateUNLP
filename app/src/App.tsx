@@ -28,7 +28,7 @@ export default function App() {
           stepsArr={[
             { name: "Begin", content: <>BEGIN</> },
             { name: "Digitization", content: <>1</> },
-            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation /> },
+            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation onComplete={() => onComplete(2)} /> },
             { name: "Feature extraction", content: <>3</> },
             { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(4)} /> },
             { name: "Completed", content: <>FIN</> },
