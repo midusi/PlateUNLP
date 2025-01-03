@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 import { Button } from "./ui/button"
 
@@ -6,7 +7,17 @@ interface BBImageEditorProps {
     src: string
 }
 
+interface BoundingBox {
+    id: number
+    x: number
+    y: number
+    width: number
+    height: number
+}
+
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
+    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+
     return (
         <ResizablePanes
             vertical
