@@ -10,45 +10,27 @@ export function StepSpectrumSegmentation() {
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
+            setLoadingState("processing")
             const file = event.target.files[0]
             if (!["image/png", "image/jpeg"].includes(file.type)) {
                 setLoadingState("error")
                 return
             }
-            setLoadingState("processing")
-            const reader = new FileReader()
-            reader.readAsArrayBuffer(file)
-            reader.onload = () => {
-                if (reader.result) {
-                    try {
-                        setFile(reader.result as string) // Guardar la URL de la imagen
-                        setLoadingState("finished")
-                    }
-                    catch (error) {
-                        console.error("Error processing image:", error)
-                        setLoadingState("error")
-                    }
-                }
-            }
-            reader.onerror = () => {
-                console.error("Error reading file")
-                setLoadingState("error")
-            }
+            setFile(URL.createObjectURL(file))
+            setLoadingState("finished")
         }
     }
 
     return (
-        <>
-            <Uploader accept=".png,.jpg" onChange={handleFileChange} showInfoDeleteRow={false} />
+        <div className="w-full bg-gray-200 p-6">
+            {loadingState === "waiting"
+                && <Uploader accept=".png,.jpg" onChange={handleFileChange} showInfoDeleteRow={false} />}
             {loadingState === "processing" && <p>Cargando contenido...</p>}
             {loadingState === "finished" && file && (
-                <div>
-                    <p>Image uploaded:</p>
-                    <img src={file} alt="Image uploaded" style={{ maxWidth: "100%", maxHeight: "300px" }} />
-                </div>
+                <img className="w-full" src={file}></img>
             )}
             {loadingState === "error" && <p>Error loading image. Please try again.</p>}
 
-        </>
+        </div>
     )
 }
