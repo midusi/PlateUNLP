@@ -1,5 +1,6 @@
 import type { ChangeEvent } from "react"
 import { useState } from "react"
+import { BBImageEditor } from "./BBImageEditor"
 import { Uploader } from "./Uploader"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
@@ -27,7 +28,7 @@ export function StepSpectrumSegmentation() {
                 && <Uploader accept=".png,.jpg" onChange={handleFileChange} showInfoDeleteRow={false} />}
             {loadingState === "processing" && <p>Cargando contenido...</p>}
             {loadingState === "finished" && file && (
-                <img className="w-full" src={file}></img>
+                <BBImageEditor className="w-full" src={file} />
             )}
             {loadingState === "error" && <p>Error loading image. Please try again.</p>}
 
