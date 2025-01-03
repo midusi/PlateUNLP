@@ -1,3 +1,4 @@
+import type { StepProps } from "@/interfaces/StepProps"
 import type { EmpiricalSpectrumPoint } from "./EmpiricalSpectrum"
 import { ContinueButton } from "@/components/ContinueButton"
 import { FitsLoader } from "@/components/FitsLoader"
@@ -9,11 +10,7 @@ import { Pane, ResizablePanes } from "resizable-panes-react"
 import { ReferenceLampRangeUI } from "./ReferenceLampRangeUI"
 import { CardTitle } from "./ui/card"
 
-interface StageProps {
-    onComplete: () => void
-}
-
-export function StepCalibration({ onComplete }: StageProps) {
+export function StepCalibration({ onComplete }: StepProps) {
     const [scienceSpectrumData, setScienceSpectrumData] = useState<EmpiricalSpectrumPoint[] | null>(null)
 
     return (
