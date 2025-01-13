@@ -17,7 +17,8 @@ interface BoundingBox {
 
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
-    const [nextId, setNextId] = useState(1)
+    const [selectedBB, setSelectedBB] = useState<number | null>(null)
+    const [nextId, setNextId] = useState<number>(1)
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
@@ -29,10 +30,16 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
         }
         setBoundingBoxes([...boundingBoxes, newBox])
         setNextId(nextId + 1)
+        if (!selectedBB) {
+            setSelectedBB(newBox.id)
+        }
     };
 
-    function removeBoundingBox(id: number) {
-        setBoundingBoxes(boundingBoxes.filter(box => box.id !== id))
+    function removeBoundingBox(id: number | null) {
+        if (selectedBB) {
+            setBoundingBoxes(boundingBoxes.filter(box => box.id !== id))
+            boundingBoxes[0] ? setSelectedBB(boundingBoxes[0]!.id) : setSelectedBB(null)
+        }
     };
 
     return (
@@ -55,11 +62,14 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                                 top: `${box.y}px`,
                                 width: `${box.width}px`,
                                 height: `${box.height}px`,
-                                border: "2px solid red",
+                                border: `2px solid 
+                                    ${selectedBB === box.id
+                                        ? "orange"
+                                        : "red"}`,
                                 cursor: "pointer",
                                 boxSizing: "border-box",
                             }}
-                            onClick={() => removeBoundingBox(box.id)}
+                            onClick={() => setSelectedBB(box.id)}
                         />
                     ))}
                 </div>
@@ -73,7 +83,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 </Button>
                 <Button
                     className="w-32"
-                    onClick={() => { }}
+                    onClick={() => { selectedBB && removeBoundingBox(selectedBB) }}
                 >
                     -BB
                 </Button>
