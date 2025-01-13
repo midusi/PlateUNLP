@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 import { Button } from "./ui/button"
 
@@ -19,6 +19,24 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [nextId, setNextId] = useState<number>(1)
+
+    const imageRef = useRef<HTMLImageElement>(null)
+    const [scale, setScale] = useState({ x: 1, y: 1 })
+
+    useEffect(() => {
+        function updateScale() {
+            const image = imageRef.current
+            if (image) {
+                setScale({
+                    x: image.offsetWidth / image.naturalWidth,
+                    y: image.offsetHeight / image.naturalHeight,
+                })
+            }
+        }
+        updateScale()
+        window.addEventListener("resize", updateScale)
+        return () => window.removeEventListener("resize", updateScale)
+    }, [])
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
@@ -51,17 +69,17 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
         >
             <Pane id="P0" size={80} minSize={20} className="bg-black">
                 <div className="relative">
-                    <img className={className} src={src} alt="Bounding Box Editor" />
+                    <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
                     {/* Dibujar las Bounding Boxes */}
                     {boundingBoxes.map(box => (
                         <div
                             key={box.id}
                             style={{
                                 position: "absolute",
-                                left: `${box.x}px`,
-                                top: `${box.y}px`,
-                                width: `${box.width}px`,
-                                height: `${box.height}px`,
+                                left: `${box.x * scale.x}px`,
+                                top: `${box.y * scale.y}px`,
+                                width: `${box.width * scale.x}px`,
+                                height: `${box.height * scale.y}px`,
                                 border: `2px solid 
                                     ${selectedBB === box.id
                                         ? "orange"
