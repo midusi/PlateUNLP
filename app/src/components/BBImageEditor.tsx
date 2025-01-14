@@ -67,8 +67,8 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     }
 
     useEffect(() => {
+        const image = imageRef.current
         function updateScale() {
-            const image = imageRef.current
             if (image) {
                 setScale({
                     x: image.offsetWidth / image.naturalWidth,
@@ -77,8 +77,17 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
             }
         }
         updateScale()
-        window.addEventListener("resize", updateScale)
-        return () => window.removeEventListener("resize", updateScale)
+        // ResizeObserver para monitorear cambios en el tamaño del contenedor de la imagen.
+        const observer = new ResizeObserver(() => updateScale())
+        if (image) {
+            observer.observe(image)
+        }
+        return () => {
+            if (image) {
+                observer.unobserve(image)
+            }
+            observer.disconnect()
+        }
     }, [])
 
     function addBoundingBox() {
