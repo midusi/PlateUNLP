@@ -50,7 +50,11 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 setBoundingBoxes(prev =>
                     prev.map(box =>
                         box.id === draggingBB
-                            ? { ...box, x: mouseX - dragOffset.x, y: mouseY - dragOffset.y }
+                            ? {
+                                ...box,
+                                x: Math.max(0, Math.min(mouseX - dragOffset.x, image.naturalWidth - box.width)),
+                                y: Math.max(0, Math.min(mouseY - dragOffset.y, image.naturalHeight - box.height)),
+                            }
                             : box,
                     ),
                 )
