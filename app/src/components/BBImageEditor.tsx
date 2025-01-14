@@ -23,6 +23,45 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const imageRef = useRef<HTMLImageElement>(null)
     const [scale, setScale] = useState({ x: 1, y: 1 })
 
+    // Arrastre de Bounding Boxes
+    const [draggingBB, setDraggingBB] = useState<number | null>(null)
+    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+
+    function startDragging(event: React.MouseEvent, box: BoundingBox) {
+        const image = imageRef.current
+        if (image) {
+            const rect = image.getBoundingClientRect()
+            const offsetX = event.clientX - rect.left - box.x * scale.x
+            const offsetY = event.clientY - rect.top - box.y * scale.y
+
+            setDraggingBB(box.id)
+            setDragOffset({ x: offsetX / scale.x, y: offsetY / scale.y })
+        }
+    }
+
+    function handleDragging(event: React.MouseEvent) {
+        if (draggingBB !== null) {
+            const image = imageRef.current
+            if (image) {
+                const rect = image.getBoundingClientRect()
+                const mouseX = (event.clientX - rect.left) / scale.x
+                const mouseY = (event.clientY - rect.top) / scale.y
+
+                setBoundingBoxes(prev =>
+                    prev.map(box =>
+                        box.id === draggingBB
+                            ? { ...box, x: mouseX - dragOffset.x, y: mouseY - dragOffset.y }
+                            : box,
+                    ),
+                )
+            }
+        }
+    }
+
+    function stopDragging() {
+        setDraggingBB(null)
+    }
+
     useEffect(() => {
         function updateScale() {
             const image = imageRef.current
@@ -87,6 +126,10 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                                 cursor: "pointer",
                                 boxSizing: "border-box",
                             }}
+                            onMouseDown={event => startDragging(event, box)}
+                            onMouseMove={handleDragging}
+                            onMouseUp={stopDragging}
+                            onMouseLeave={stopDragging}
                             onClick={() => setSelectedBB(box.id)}
                         />
                     ))}
