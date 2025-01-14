@@ -99,6 +99,45 @@ function useBoundingBoxesDrag(
     return { draggingBB, startDragging, handleDragging, stopDragging }
 }
 
+interface BoundingBoxElementProps {
+    box: BoundingBox
+    scale: { x: number, y: number }
+    selected: boolean
+    dragged: boolean
+    onClick: () => void
+    onDragStart: (event: React.MouseEvent) => void
+    onDrag: (event: React.MouseEvent) => void
+    onDragEnd: () => void
+}
+
+function BoundingBoxElement({ box, scale, selected, dragged, onClick, onDragStart, onDrag, onDragEnd }: BoundingBoxElementProps) {
+    const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight } = box
+    const { x: scaleX, y: scaleY } = scale
+
+    return (
+        <div
+            key={boxId}
+            style={{
+                position: "absolute",
+                left: `${boxX * scaleX}px`,
+                top: `${boxY * scaleY}px`,
+                width: `${boxWidth * scaleX}px`,
+                height: `${boxHeight * scaleY}px`,
+                border: `2px solid ${selected
+                    ? "orange"
+                    : "red"}`,
+                cursor: dragged ? "grabbing" : "grab",
+                boxSizing: "border-box",
+            }}
+            onMouseDown={onDragStart}
+            onMouseMove={onDrag}
+            onMouseUp={onDragEnd}
+            onMouseLeave={onDragEnd}
+            onClick={onClick}
+        />
+    )
+}
+
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
@@ -144,26 +183,16 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                     <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
                     {/* Dibujar las Bounding Boxes */}
                     {boundingBoxes.map(box => (
-                        <div
+                        <BoundingBoxElement
                             key={box.id}
-                            style={{
-                                position: "absolute",
-                                left: `${box.x * scale.x}px`,
-                                top: `${box.y * scale.y}px`,
-                                width: `${box.width * scale.x}px`,
-                                height: `${box.height * scale.y}px`,
-                                border: `2px solid 
-                                    ${selectedBB === box.id
-                                        ? "orange"
-                                        : "red"}`,
-                                cursor: draggingBB === box.id ? "grabbing" : "grab",
-                                boxSizing: "border-box",
-                            }}
-                            onMouseDown={event => startDragging(event, box)}
-                            onMouseMove={handleDragging}
-                            onMouseUp={stopDragging}
-                            onMouseLeave={stopDragging}
+                            box={box}
+                            scale={scale}
+                            selected={selectedBB === box.id}
+                            dragged={draggingBB === box.id}
                             onClick={() => setSelectedBB(box.id)}
+                            onDragStart={event => startDragging(event, box)}
+                            onDrag={handleDragging}
+                            onDragEnd={stopDragging}
                         />
                     ))}
                 </div>
