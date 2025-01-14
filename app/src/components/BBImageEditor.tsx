@@ -127,7 +127,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                                     ${selectedBB === box.id
                                         ? "orange"
                                         : "red"}`,
-                                cursor: "pointer",
+                                cursor: draggingBB === box.id ? "grabbing" : "grab",
                                 boxSizing: "border-box",
                             }}
                             onMouseDown={event => startDragging(event, box)}
