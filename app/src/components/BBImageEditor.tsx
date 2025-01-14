@@ -15,13 +15,47 @@ interface BoundingBox {
     height: number
 }
 
+function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
+    const [scale, setScale] = useState({ x: 1, y: 1 })
+
+    useEffect(() => {
+        const image = imageRef.current
+
+        function updateScale() {
+            if (image) {
+                setScale({
+                    x: image.offsetWidth / image.naturalWidth,
+                    y: image.offsetHeight / image.naturalHeight,
+                })
+            }
+        }
+
+        updateScale()
+
+        // ResizeObserver para monitorear cambios en el tamaño del contenedor de la imagen.
+        const observer = new ResizeObserver(() => updateScale())
+        if (image) {
+            observer.observe(image)
+        }
+
+        return () => {
+            if (image) {
+                observer.unobserve(image)
+            }
+            observer.disconnect()
+        }
+    }, [imageRef])
+
+    return scale
+}
+
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [nextId, setNextId] = useState<number>(1)
 
     const imageRef = useRef<HTMLImageElement>(null)
-    const [scale, setScale] = useState({ x: 1, y: 1 })
+    const scale = useImageScale(imageRef)
 
     // Arrastre de Bounding Boxes
     const [draggingBB, setDraggingBB] = useState<number | null>(null)
@@ -65,30 +99,6 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     function stopDragging() {
         setDraggingBB(null)
     }
-
-    useEffect(() => {
-        const image = imageRef.current
-        function updateScale() {
-            if (image) {
-                setScale({
-                    x: image.offsetWidth / image.naturalWidth,
-                    y: image.offsetHeight / image.naturalHeight,
-                })
-            }
-        }
-        updateScale()
-        // ResizeObserver para monitorear cambios en el tamaño del contenedor de la imagen.
-        const observer = new ResizeObserver(() => updateScale())
-        if (image) {
-            observer.observe(image)
-        }
-        return () => {
-            if (image) {
-                observer.unobserve(image)
-            }
-            observer.disconnect()
-        }
-    }, [])
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
