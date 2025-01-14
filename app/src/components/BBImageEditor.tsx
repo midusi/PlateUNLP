@@ -49,15 +49,11 @@ function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
     return scale
 }
 
-export function BBImageEditor({ className, src }: BBImageEditorProps) {
-    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
-    const [selectedBB, setSelectedBB] = useState<number | null>(null)
-    const [nextId, setNextId] = useState<number>(1)
-
-    const imageRef = useRef<HTMLImageElement>(null)
-    const scale = useImageScale(imageRef)
-
-    // Arrastre de Bounding Boxes
+function useBoundingBoxesDrag(
+    imageRef: React.RefObject<HTMLImageElement>,
+    scale: { x: number, y: number },
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
+) {
     const [draggingBB, setDraggingBB] = useState<number | null>(null)
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
@@ -99,6 +95,20 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     function stopDragging() {
         setDraggingBB(null)
     }
+
+    return { draggingBB, startDragging, handleDragging, stopDragging }
+}
+
+export function BBImageEditor({ className, src }: BBImageEditorProps) {
+    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+    const [selectedBB, setSelectedBB] = useState<number | null>(null)
+    const [nextId, setNextId] = useState<number>(1)
+
+    const imageRef = useRef<HTMLImageElement>(null)
+    const scale = useImageScale(imageRef)
+
+    // Arrastre de Bounding Boxes
+    const { draggingBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
