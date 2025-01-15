@@ -54,7 +54,7 @@ function useBoundingBoxesDrag(
     scale: { x: number, y: number },
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
 ) {
-    const [draggingBB, setDraggingBB] = useState<number | null>(null)
+    const [draggedBB, setDraggedBB] = useState<number | null>(null)
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
     function startDragging(event: React.MouseEvent, box: BoundingBox) {
@@ -64,13 +64,13 @@ function useBoundingBoxesDrag(
             const offsetX = event.clientX - rect.left - box.x * scale.x
             const offsetY = event.clientY - rect.top - box.y * scale.y
 
-            setDraggingBB(box.id)
+            setDraggedBB(box.id)
             setDragOffset({ x: offsetX / scale.x, y: offsetY / scale.y })
         }
     }
 
     function handleDragging(event: React.MouseEvent) {
-        if (draggingBB !== null) {
+        if (draggedBB !== null) {
             const image = imageRef.current
             if (image) {
                 const rect = image.getBoundingClientRect()
@@ -79,7 +79,7 @@ function useBoundingBoxesDrag(
 
                 setBoundingBoxes(prev =>
                     prev.map(box =>
-                        box.id === draggingBB
+                        box.id === draggedBB
                             ? {
                                 ...box,
                                 x: Math.max(0, Math.min(mouseX - dragOffset.x, image.naturalWidth - box.width)),
@@ -93,10 +93,10 @@ function useBoundingBoxesDrag(
     }
 
     function stopDragging() {
-        setDraggingBB(null)
+        setDraggedBB(null)
     }
 
-    return { draggingBB, startDragging, handleDragging, stopDragging }
+    return { draggedBB, startDragging, handleDragging, stopDragging }
 }
 
 interface BoundingBoxElementProps {
@@ -147,7 +147,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const scale = useImageScale(imageRef)
 
     // Arrastre de Bounding Boxes
-    const { draggingBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
+    const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
