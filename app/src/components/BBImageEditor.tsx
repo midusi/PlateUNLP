@@ -188,7 +188,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                             box={box}
                             scale={scale}
                             selected={selectedBB === box.id}
-                            dragged={draggingBB === box.id}
+                            dragged={draggedBB === box.id}
                             onClick={() => setSelectedBB(box.id)}
                             onDragStart={event => startDragging(event, box)}
                             onDrag={handleDragging}
