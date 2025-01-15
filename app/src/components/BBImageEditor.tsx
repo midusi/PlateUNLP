@@ -99,6 +99,79 @@ function useBoundingBoxesDrag(
     return { draggedBB, startDragging, handleDragging, stopDragging }
 }
 
+function useBoundingBoxesResizing(
+    imageRef: React.RefObject<HTMLImageElement>,
+    scale: { x: number, y: number },
+    selectedBB: number | null,
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
+) {
+    const [resizingBB, setResizingBB] = useState<number | null>(null)
+    const [resizeDirection, setResizeDirection] = useState<string | null>(null)
+
+    function handleResizeStart(event: React.MouseEvent, direction: string) {
+        if (selectedBB !== null) {
+            setResizingBB(selectedBB)
+            setResizeDirection(direction)
+        }
+        event.stopPropagation() // Evita que active la lógica de arrastre
+    };
+
+    function handleResizing(event: React.MouseEvent) {
+        if (resizingBB !== null && resizeDirection) {
+            const image = imageRef.current
+            if (image) {
+                const rect = image.getBoundingClientRect()
+                const mouseX = (event.clientX - rect.left) / scale.x
+                const mouseY = (event.clientY - rect.top) / scale.y
+
+                setBoundingBoxes(prev =>
+                    prev.map((box) => {
+                        if (box.id === resizingBB) {
+                            let newWidth = box.width
+                            let newHeight = box.height
+                            let newX = box.x
+                            let newY = box.y
+
+                            if (resizeDirection.includes("e")) {
+                                newWidth = Math.max(10, mouseX - box.x)
+                            }
+                            if (resizeDirection.includes("s")) {
+                                newHeight = Math.max(10, mouseY - box.y)
+                            }
+                            if (resizeDirection.includes("w")) {
+                                const deltaX = box.x - mouseX
+                                newWidth = Math.max(10, box.width + deltaX)
+                                newX = box.x - deltaX
+                            }
+                            if (resizeDirection.includes("n")) {
+                                const deltaY = box.y - mouseY
+                                newHeight = Math.max(10, box.height + deltaY)
+                                newY = box.y - deltaY
+                            }
+
+                            return {
+                                ...box,
+                                x: Math.max(0, newX),
+                                y: Math.max(0, newY),
+                                width: Math.min(image.naturalWidth - newX, newWidth),
+                                height: Math.min(image.naturalHeight - newY, newHeight),
+                            }
+                        }
+                        return box
+                    }),
+                )
+            }
+        }
+    };
+
+    function stopResizing() {
+        setResizingBB(null)
+        setResizeDirection(null)
+    }
+
+    return { handleResizeStart, handleResizing, stopResizing }
+}
+
 interface BoundingBoxElementProps {
     box: BoundingBox
     scale: { x: number, y: number }
@@ -185,69 +258,12 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     // Arrastre de Bounding Boxes
     const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
 
-    const [resizingBB, setResizingBB] = useState<number | null>(null)
-    const [resizeDirection, setResizeDirection] = useState<string | null>(null)
-
-    function handleResizeStart(event: React.MouseEvent, direction: string) {
-        if (selectedBB !== null) {
-            setResizingBB(selectedBB)
-            setResizeDirection(direction)
-        }
-        event.stopPropagation() // Evita que active la lógica de arrastre
-    };
-
-    function handleResizing(event: React.MouseEvent) {
-        if (resizingBB !== null && resizeDirection) {
-            const image = imageRef.current
-            if (image) {
-                const rect = image.getBoundingClientRect()
-                const mouseX = (event.clientX - rect.left) / scale.x
-                const mouseY = (event.clientY - rect.top) / scale.y
-
-                setBoundingBoxes(prev =>
-                    prev.map((box) => {
-                        if (box.id === resizingBB) {
-                            let newWidth = box.width
-                            let newHeight = box.height
-                            let newX = box.x
-                            let newY = box.y
-
-                            if (resizeDirection.includes("e")) {
-                                newWidth = Math.max(10, mouseX - box.x)
-                            }
-                            if (resizeDirection.includes("s")) {
-                                newHeight = Math.max(10, mouseY - box.y)
-                            }
-                            if (resizeDirection.includes("w")) {
-                                const deltaX = box.x - mouseX
-                                newWidth = Math.max(10, box.width + deltaX)
-                                newX = box.x - deltaX
-                            }
-                            if (resizeDirection.includes("n")) {
-                                const deltaY = box.y - mouseY
-                                newHeight = Math.max(10, box.height + deltaY)
-                                newY = box.y - deltaY
-                            }
-
-                            return {
-                                ...box,
-                                x: Math.max(0, newX),
-                                y: Math.max(0, newY),
-                                width: Math.min(image.naturalWidth - newX, newWidth),
-                                height: Math.min(image.naturalHeight - newY, newHeight),
-                            }
-                        }
-                        return box
-                    }),
-                )
-            }
-        }
-    };
+    // Redimenzionado de Bounding Boxes
+    const { handleResizeStart, handleResizing, stopResizing } = useBoundingBoxesResizing(imageRef, scale, selectedBB, setBoundingBoxes)
 
     const handleMouseUp = () => {
         stopDragging()
-        setResizingBB(null)
-        setResizeDirection(null)
+        stopResizing()
     }
 
     function addBoundingBox() {
