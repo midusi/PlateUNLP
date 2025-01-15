@@ -108,11 +108,33 @@ interface BoundingBoxElementProps {
     onDragStart: (event: React.MouseEvent) => void
     onDrag: (event: React.MouseEvent) => void
     onDragEnd: () => void
+    onResizeStart: (event: React.MouseEvent, direction: string) => void
 }
 
-function BoundingBoxElement({ box, scale, selected, dragged, onClick, onDragStart, onDrag, onDragEnd }: BoundingBoxElementProps) {
+function BoundingBoxElement({
+    box,
+    scale,
+    selected,
+    dragged,
+    onClick,
+    onDragStart,
+    onDrag,
+    onDragEnd,
+    onResizeStart,
+}: BoundingBoxElementProps) {
     const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight } = box
     const { x: scaleX, y: scaleY } = scale
+
+    const resizeHandles = [
+        { direction: "nw", style: { left: -5, top: -5, cursor: "nwse-resize" } },
+        { direction: "n", style: { left: "50%", top: -5, transform: "translateX(-50%)", cursor: "ns-resize" } },
+        { direction: "ne", style: { right: -5, top: -5, cursor: "nesw-resize" } },
+        { direction: "e", style: { right: -5, top: "50%", transform: "translateY(-50%)", cursor: "ew-resize" } },
+        { direction: "se", style: { right: -5, bottom: -5, cursor: "nwse-resize" } },
+        { direction: "s", style: { left: "50%", bottom: -5, transform: "translateX(-50%)", cursor: "ns-resize" } },
+        { direction: "sw", style: { left: -5, bottom: -5, cursor: "nesw-resize" } },
+        { direction: "w", style: { left: -5, top: "50%", transform: "translateY(-50%)", cursor: "ew-resize" } },
+    ]
 
     return (
         <div
@@ -134,7 +156,21 @@ function BoundingBoxElement({ box, scale, selected, dragged, onClick, onDragStar
             onMouseUp={onDragEnd}
             onMouseLeave={onDragEnd}
             onClick={onClick}
-        />
+        >
+            {selected && resizeHandles.map(handle => (
+                <div
+                    key={handle.direction}
+                    onMouseDown={event => onResizeStart(event, handle.direction)}
+                    style={{
+                        position: "absolute",
+                        width: 10,
+                        height: 10,
+                        background: "rgba(0, 0, 0, 0.5)",
+                        ...handle.style,
+                    }}
+                />
+            ))}
+        </div>
     )
 }
 
@@ -148,6 +184,71 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
 
     // Arrastre de Bounding Boxes
     const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
+
+    const [resizingBB, setResizingBB] = useState<number | null>(null)
+    const [resizeDirection, setResizeDirection] = useState<string | null>(null)
+
+    function handleResizeStart(event: React.MouseEvent, direction: string) {
+        if (selectedBB !== null) {
+            setResizingBB(selectedBB)
+            setResizeDirection(direction)
+        }
+        event.stopPropagation() // Evita que active la lógica de arrastre
+    };
+
+    function handleResizing(event: React.MouseEvent) {
+        if (resizingBB !== null && resizeDirection) {
+            const image = imageRef.current
+            if (image) {
+                const rect = image.getBoundingClientRect()
+                const mouseX = (event.clientX - rect.left) / scale.x
+                const mouseY = (event.clientY - rect.top) / scale.y
+
+                setBoundingBoxes(prev =>
+                    prev.map((box) => {
+                        if (box.id === resizingBB) {
+                            let newWidth = box.width
+                            let newHeight = box.height
+                            let newX = box.x
+                            let newY = box.y
+
+                            if (resizeDirection.includes("e")) {
+                                newWidth = Math.max(10, mouseX - box.x)
+                            }
+                            if (resizeDirection.includes("s")) {
+                                newHeight = Math.max(10, mouseY - box.y)
+                            }
+                            if (resizeDirection.includes("w")) {
+                                const deltaX = box.x - mouseX
+                                newWidth = Math.max(10, box.width + deltaX)
+                                newX = box.x - deltaX
+                            }
+                            if (resizeDirection.includes("n")) {
+                                const deltaY = box.y - mouseY
+                                newHeight = Math.max(10, box.height + deltaY)
+                                newY = box.y - deltaY
+                            }
+
+                            return {
+                                ...box,
+                                x: Math.max(0, newX),
+                                y: Math.max(0, newY),
+                                width: Math.min(image.naturalWidth - newX, newWidth),
+                                height: Math.min(image.naturalHeight - newY, newHeight),
+                            }
+                        }
+                        return box
+                    }),
+                )
+            }
+        }
+    };
+
+    const handleMouseUp = () => {
+        stopDragging()
+        setResizingBB(null)
+        setResizeDirection(null)
+    }
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
@@ -179,7 +280,15 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
             resizerClass="w-full bg-gradient-to-t from-sky-300 to-sky-200 border-2 border-gray-300 rounded-md flex justify-center items-center"
         >
             <Pane id="P0" size={80} minSize={20} className="bg-black">
-                <div className="relative">
+                <div
+                    className="relative"
+                    onMouseMove={(event) => {
+                        handleDragging(event)
+                        handleResizing(event)
+                    }}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                >
                     <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
                     {/* Dibujar las Bounding Boxes */}
                     {boundingBoxes.map(box => (
@@ -193,6 +302,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                             onDragStart={event => startDragging(event, box)}
                             onDrag={handleDragging}
                             onDragEnd={stopDragging}
+                            onResizeStart={handleResizeStart}
                         />
                     ))}
                 </div>
