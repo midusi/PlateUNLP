@@ -247,24 +247,12 @@ function BoundingBoxElement({
     )
 }
 
-export function BBImageEditor({ className, src }: BBImageEditorProps) {
+function useBoundingBoxesAddRemove(
+    selectedBB: number | null,
+    setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>,
+) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
-    const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [nextId, setNextId] = useState<number>(1)
-
-    const imageRef = useRef<HTMLImageElement>(null)
-    const scale = useImageScale(imageRef)
-
-    // Arrastre de Bounding Boxes
-    const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
-
-    // Redimenzionado de Bounding Boxes
-    const { handleResizeStart, handleResizing, stopResizing } = useBoundingBoxesResizing(imageRef, scale, selectedBB, setBoundingBoxes)
-
-    const handleMouseUp = () => {
-        stopDragging()
-        stopResizing()
-    }
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
@@ -288,6 +276,28 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
             newBBArr[0] ? setSelectedBB(newBBArr[0]!.id) : setSelectedBB(null)
         }
     };
+
+    return { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox }
+}
+
+export function BBImageEditor({ className, src }: BBImageEditorProps) {
+    const [selectedBB, setSelectedBB] = useState<number | null>(null)
+    const imageRef = useRef<HTMLImageElement>(null)
+    const scale = useImageScale(imageRef)
+
+    // Agregado y borrado de bounding box
+    const { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(selectedBB, setSelectedBB)
+
+    // Arrastre de Bounding Boxes
+    const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
+
+    // Redimenzionado de Bounding Boxes
+    const { handleResizeStart, handleResizing, stopResizing } = useBoundingBoxesResizing(imageRef, scale, selectedBB, setBoundingBoxes)
+
+    const handleMouseUp = () => {
+        stopDragging()
+        stopResizing()
+    }
 
     return (
         <ResizablePanes
