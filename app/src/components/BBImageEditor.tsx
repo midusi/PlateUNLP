@@ -283,8 +283,9 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
 
     function removeBoundingBox(id: number | null) {
         if (selectedBB) {
-            setBoundingBoxes(boundingBoxes.filter(box => box.id !== id))
-            boundingBoxes[0] ? setSelectedBB(boundingBoxes[0]!.id) : setSelectedBB(null)
+            const newBBArr = boundingBoxes.filter(box => box.id !== id)
+            setBoundingBoxes(newBBArr)
+            newBBArr[0] ? setSelectedBB(newBBArr[0]!.id) : setSelectedBB(null)
         }
     };
 
