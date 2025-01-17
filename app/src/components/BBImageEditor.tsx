@@ -335,18 +335,21 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 </div>
             </Pane>
             <Pane id="P1" size={20} minSize={10} className="bg-gray-100 flex flex-col items-center space-y-2 p-2">
-                <Button
-                    className="w-32"
-                    onClick={addBoundingBox}
-                >
-                    +BB
-                </Button>
-                <Button
-                    className="w-32"
-                    onClick={() => { selectedBB && removeBoundingBox(selectedBB) }}
-                >
-                    -BB
-                </Button>
+                <h3 className="text-lg font-semibold text-gray-700">Bounding Box Controls</h3>
+                <div className="flex w-full mx-4 space-x-2">
+                    <Button
+                        className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
+                        onClick={addBoundingBox}
+                    >
+                        ➕
+                    </Button>
+                    <Button
+                        className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
+                        onClick={() => { selectedBB && removeBoundingBox(selectedBB) }}
+                    >
+                        ➖
+                    </Button>
+                </div>
                 <select
                     className="w-full p-2 mx-4 overflow-y-auto h-[20vh] border border-grey-600"
                     name="bounding_boxes_list"
