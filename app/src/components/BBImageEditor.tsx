@@ -348,7 +348,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                     -BB
                 </Button>
                 <select
-                    className="w-full ml-8 mr-8 overflow-y-auto h-[20vh]"
+                    className="w-full p-2 mx-4 overflow-y-auto h-[20vh] border border-grey-600"
                     name="bounding_boxes_list"
                     id="bounding_boxes_list"
                     multiple
