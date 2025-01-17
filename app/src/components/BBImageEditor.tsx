@@ -349,7 +349,11 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 </Button>
                 <select name="bounding_boxes_list" id="bounding_boxes_list" multiple>
                     {boundingBoxes.map(box => (
-                        <option key={`BB_list_item_${box.id}`}>
+                        <option
+                            key={`BB_list_item_${box.id}`}
+                            selected={selectedBB === box.id}
+                            onClick={() => setSelectedBB(box.id)}
+                        >
                             {box.id}
                         </option>
                     ))}
