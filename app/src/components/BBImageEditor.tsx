@@ -347,6 +347,13 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 >
                     -BB
                 </Button>
+                <select name="bounding_boxes_list" id="bounding_boxes_list" multiple>
+                    {boundingBoxes.map(box => (
+                        <option key={`BB_list_item_${box.id}`}>
+                            {box.id}
+                        </option>
+                    ))}
+                </select>
             </Pane>
         </ResizablePanes>
     )
