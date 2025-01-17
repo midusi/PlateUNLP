@@ -25,7 +25,7 @@ export function StepSpectrumSegmentation({ onComplete }: StepProps) {
     }
 
     return (
-        <div className="w-full bg-gray-200 p-6">
+        <div className="w-full p-6">
             {loadingState === "waiting"
                 && <Uploader accept=".png,.jpg" onChange={handleFileChange} showInfoDeleteRow={false} />}
             {loadingState === "processing" && <p>Cargando contenido...</p>}
