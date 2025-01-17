@@ -344,40 +344,42 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 id="P1"
                 size={3}
                 minSize={1}
-                className="bg-gray-100 flex flex-col items-center space-y-2 p-4 overflow-hidden"
+                className="w-full bg-gray-100 flex flex-col items-center space-y-2"
             >
-                <h3 className="text-lg font-semibold text-gray-700">Bounding Box Controls</h3>
-                <div className="flex w-full px-2 space-x-2">
-                    <Button
-                        className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
-                        onClick={addBoundingBox}
+                <div className="w-full p-4 flex flex-col items-center space-y-1">
+                    <h3 className="text-lg font-semibold text-gray-700">Bounding Box Controls</h3>
+                    <div className="flex w-full space-x-2">
+                        <Button
+                            className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
+                            onClick={addBoundingBox}
+                        >
+                            ➕
+                        </Button>
+                        <Button
+                            className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
+                            onClick={() => { selectedBB && removeBoundingBox(selectedBB) }}
+                        >
+                            ➖
+                        </Button>
+                    </div>
+                    <select
+                        className="w-full p-2 overflow-y-auto h-[20vh] border border-grey-600"
+                        name="bounding_boxes_list"
+                        id="bounding_boxes_list"
+                        multiple
+                        value={selectedBB !== null ? [selectedBB.toString()] : []}
+                        onChange={(e) => {
+                            const selectedId = Number.parseInt(e.target.value, 10)
+                            setSelectedBB(selectedId)
+                        }}
                     >
-                        ➕
-                    </Button>
-                    <Button
-                        className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
-                        onClick={() => { selectedBB && removeBoundingBox(selectedBB) }}
-                    >
-                        ➖
-                    </Button>
+                        {boundingBoxes.map(box => (
+                            <option key={box.id}>
+                                {box.id}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-                <select
-                    className="w-full  overflow-y-auto h-[20vh] border border-grey-600"
-                    name="bounding_boxes_list"
-                    id="bounding_boxes_list"
-                    multiple
-                    value={selectedBB !== null ? [selectedBB.toString()] : []}
-                    onChange={(e) => {
-                        const selectedId = Number.parseInt(e.target.value, 10)
-                        setSelectedBB(selectedId)
-                    }}
-                >
-                    {boundingBoxes.map(box => (
-                        <option key={box.id}>
-                            {box.id}
-                        </option>
-                    ))}
-                </select>
             </Pane>
         </ResizablePanes>
     )
