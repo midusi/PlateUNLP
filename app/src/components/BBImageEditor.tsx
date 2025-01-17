@@ -347,7 +347,12 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 >
                     -BB
                 </Button>
-                <select name="bounding_boxes_list" id="bounding_boxes_list" multiple>
+                <select
+                    className="w-full ml-8 mr-8 overflow-y-auto h-[20vh]"
+                    name="bounding_boxes_list"
+                    id="bounding_boxes_list"
+                    multiple
+                >
                     {boundingBoxes.map(box => (
                         <option
                             key={`BB_list_item_${box.id}`}
