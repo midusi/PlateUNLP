@@ -369,11 +369,11 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
 interface BoxListProps {
     boundingBoxes: BoundingBox[]
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+    selected: number | null
+    setSelected: React.Dispatch<React.SetStateAction<number | null>>
 }
 
-function BoxList({ boundingBoxes, setBoundingBoxes }: BoxListProps) {
-    const [selected, setSelected] = useState<number | null>(null)
-
+function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected }: BoxListProps) {
     function handleSelect(id: number) {
         if (selected === id) {
             setSelected(null)
@@ -480,7 +480,12 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                             ➖
                         </Button>
                     </div>
-                    <BoxList boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} />
+                    <BoxList
+                        boundingBoxes={boundingBoxes}
+                        setBoundingBoxes={setBoundingBoxes}
+                        selected={selectedBB}
+                        setSelected={setSelectedBB}
+                    />
                     {/* <select
                         className="w-full p-2 overflow-y-auto h-[20vh] border border-grey-600"
                         name="bounding_boxes_list"
