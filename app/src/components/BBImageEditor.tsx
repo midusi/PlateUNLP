@@ -17,14 +17,6 @@ const spectrumColors: Record<Spectrum, string> = {
     [Spectrum.Science]: "green",
 }
 const getColorForSpectrum = (spectrum: Spectrum): string => spectrumColors[spectrum]
-function getSpectrumFromColor(color: string): Spectrum | null {
-    for (const spectrum in spectrumColors) {
-        if (spectrumColors[spectrum as Spectrum] === color) {
-            return spectrum as Spectrum
-        }
-    }
-    return null
-}
 
 interface BoundingBox {
     id: number
