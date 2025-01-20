@@ -1,3 +1,4 @@
+import { Select } from "@radix-ui/react-select"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 import { Button } from "./ui/button"
@@ -295,20 +296,36 @@ function useBoundingBoxesAddRemove(
 interface ItemOfBoxListProps {
     box: BoundingBox
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+    isSelected: boolean
+    onSelect: (id: number) => void
 }
 
-function ItemOfBoxList({ box, setBoundingBoxes }: ItemOfBoxListProps) {
+function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBoxListProps) {
     const { id, content } = box
     const [value, setValue] = useState<Spectrum>(content)
+
+    function handleInteractableClick(e: React.MouseEvent) {
+        e.stopPropagation()
+        if (!isSelected) {
+            onSelect(id)
+        }
+    };
+
     return (
         <div
             key={id}
-            className="w-full flex justify-between items-center p-2 border-b border-gray-300"
+            className={`w-full flex justify-between items-center p-2   
+                ${isSelected ? "bg-blue-100" : "bg-white"} 
+                ${isSelected ? "border border-black" : "border-b border-gray-300"}`}
+            onClick={() => onSelect(id)}
         >
             <input
                 readOnly
-                className="px-2 border-l border-b border-t border-gray-100 flex-grow min-w-6"
+                className={`px-2 border-l border-b border-t flex-grow min-w-6
+                    ${isSelected ? "bg-blue-100" : "bg-white"} 
+                    ${isSelected ? "border-gray-300" : "border-gray-100"}`}
                 value={id}
+                onClick={handleInteractableClick}
             />
             <div className="flex items-center ml-2 space-x-2">
                 <select
@@ -324,7 +341,9 @@ function ItemOfBoxList({ box, setBoundingBoxes }: ItemOfBoxListProps) {
                             setValue(newSpectrum)
                         }
                     }}
-                    className="ml-2 border border-gray-400 rounded"
+                    className={`ml-2 border border-gray-400 rounded
+                        ${isSelected ? "bg-blue-100" : "bg-white"}`}
+                    onClick={handleInteractableClick}
                 >
                     {Object.values(Spectrum).map(spectrum => (
                         <option key={spectrum} value={spectrum}>
@@ -353,10 +372,27 @@ interface BoxListProps {
 }
 
 function BoxList({ boundingBoxes, setBoundingBoxes }: BoxListProps) {
+    const [selected, setSelected] = useState<number | null>(null)
+
+    function handleSelect(id: number) {
+        if (selected === id) {
+            setSelected(null)
+        }
+        else {
+            setSelected(id)
+        }
+    }
+
     return (
         <div className="w-full bg-white border border-gray-200">
             {boundingBoxes.map(box => (
-                <ItemOfBoxList key={box.id} box={box} setBoundingBoxes={setBoundingBoxes} />
+                <ItemOfBoxList
+                    key={box.id}
+                    box={box}
+                    setBoundingBoxes={setBoundingBoxes}
+                    isSelected={box.id === selected}
+                    onSelect={handleSelect}
+                />
             ))}
         </div>
     )
