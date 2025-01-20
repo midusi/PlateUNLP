@@ -1,4 +1,3 @@
-import { Select } from "@radix-ui/react-select"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 import { Button } from "./ui/button"
@@ -486,45 +485,6 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                         selected={selectedBB}
                         setSelected={setSelectedBB}
                     />
-                    {/* <select
-                        className="w-full p-2 overflow-y-auto h-[20vh] border border-grey-600"
-                        name="bounding_boxes_list"
-                        id="bounding_boxes_list"
-                        multiple
-                        value={selectedBB !== null ? [selectedBB.toString()] : []}
-                        onChange={(e) => {
-                            const selectedId = Number.parseInt(e.target.value, 10)
-                            setSelectedBB(selectedId)
-                        }}
-                    >
-                        {boundingBoxes.map(box => (
-                            <option key={box.id}>
-                                {box.id}
-                                <select
-                                    value={getColorForSpectrum(box.content)}
-                                    onChange={(e) => {
-                                        const newColor = e.target.value
-                                        let newContent: Spectrum
-                                        if (newColor === "red") {
-                                            newContent = Spectrum.Lamp
-                                        }
-                                        else {
-                                            newContent = Spectrum.Science
-                                        }
-                                        setBoundingBoxes(prevBoxes =>
-                                            prevBoxes.map(b =>
-                                                b.id === box.id ? { ...b, content: newContent } : b,
-                                            ),
-                                        )
-                                    }}
-                                    className="ml-2 border border-gray-400 rounded"
-                                >
-                                    <option value="red">Red</option>
-                                    <option value="green">Green</option>
-                                </select>
-                            </option>
-                        ))}
-                    </select> */}
                 </div>
             </Pane>
         </ResizablePanes>
