@@ -13,8 +13,8 @@ enum Spectrum {
 }
 
 const spectrumColors: Record<Spectrum, string> = {
-    [Spectrum.Lamp]: "Red",
-    [Spectrum.Science]: "Green",
+    [Spectrum.Lamp]: "red",
+    [Spectrum.Science]: "green",
 }
 const getColorForSpectrum = (spectrum: Spectrum): string => spectrumColors[spectrum]
 function getSpectrumFromColor(color: string): Spectrum | null {
@@ -314,27 +314,39 @@ function ItemOfBoxList({ box, setBoundingBoxes }: ItemOfBoxListProps) {
             className="flex justify-between items-center p-2 border-b border-gray-300"
         >
             <input readOnly className="px-2 border-l border-b border-t border-gray-100" value={id} />
-            <select
-                value={value}
-                onChange={(e) => {
-                    const newSpectrum = e.target.value as Spectrum
-                    if (content !== newSpectrum) {
-                        setBoundingBoxes(prevBoxes =>
-                            prevBoxes.map(b =>
-                                b.id === box.id ? { ...b, content: newSpectrum } : b,
-                            ),
-                        )
-                        setValue(newSpectrum)
-                    }
-                }}
-                className="ml-2 border border-gray-400 rounded"
-            >
-                {Object.values(Spectrum).map(spectrum => (
-                    <option key={spectrum} value={spectrum}>
-                        {getColorForSpectrum(spectrum)}
-                    </option>
-                ))}
-            </select>
+            <div className="flex justify-between items-center">
+                <select
+                    value={value}
+                    onChange={(e) => {
+                        const newSpectrum = e.target.value as Spectrum
+                        if (content !== newSpectrum) {
+                            setBoundingBoxes(prevBoxes =>
+                                prevBoxes.map(b =>
+                                    b.id === box.id ? { ...b, content: newSpectrum } : b,
+                                ),
+                            )
+                            setValue(newSpectrum)
+                        }
+                    }}
+                    className="ml-2 border border-gray-400 rounded"
+                >
+                    {Object.values(Spectrum).map(spectrum => (
+                        <option key={spectrum} value={spectrum}>
+                            {
+                                spectrum
+                            }
+                        </option>
+                    ))}
+                </select>
+                <span
+                    className="ml-1 inline-block w-3 rounded-none"
+                    style={{
+                        backgroundColor: getColorForSpectrum(content),
+                        aspectRatio: "0.5",
+                    }}
+
+                />
+            </div>
         </div>
     )
 }
