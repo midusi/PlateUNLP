@@ -201,7 +201,7 @@ function BoundingBoxElement({
     onDragEnd,
     onResizeStart,
 }: BoundingBoxElementProps) {
-    const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight } = box
+    const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight, content: boxContent } = box
     const { x: scaleX, y: scaleY } = scale
 
     const resizeHandles = [
@@ -224,9 +224,10 @@ function BoundingBoxElement({
                 top: `${boxY * scaleY}px`,
                 width: `${boxWidth * scaleX}px`,
                 height: `${boxHeight * scaleY}px`,
-                border: `2px solid ${selected
-                    ? "orange"
-                    : "red"}`,
+                border: `${selected ? "4px" : "2px"
+                    } solid ${boxContent === Spectrum.Lamp
+                        ? "red"
+                        : "green"}`,
                 cursor: dragged ? "grabbing" : "grab",
                 boxSizing: "border-box",
             }}
