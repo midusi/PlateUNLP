@@ -7,12 +7,18 @@ interface BBImageEditorProps {
     src: string
 }
 
+enum Spectrum {
+    Lamp = "lamp spectrum",
+    Science = "science spectrum",
+}
+
 interface BoundingBox {
     id: number
     x: number
     y: number
     width: number
     height: number
+    content: Spectrum
 }
 
 function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
