@@ -311,10 +311,14 @@ function ItemOfBoxList({ box, setBoundingBoxes }: ItemOfBoxListProps) {
     return (
         <div
             key={id}
-            className="flex justify-between items-center p-2 border-b border-gray-300"
+            className="w-full flex justify-between items-center p-2 border-b border-gray-300"
         >
-            <input readOnly className="px-2 border-l border-b border-t border-gray-100" value={id} />
-            <div className="flex justify-between items-center">
+            <input
+                readOnly
+                className="px-2 border-l border-b border-t border-gray-100 flex-grow min-w-6"
+                value={id}
+            />
+            <div className="flex items-center ml-2 space-x-2">
                 <select
                     value={value}
                     onChange={(e) => {
