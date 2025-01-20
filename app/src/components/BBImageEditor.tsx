@@ -329,8 +329,11 @@ function ItemOfBoxList({ box, setBoundingBoxes }: ItemOfBoxListProps) {
                 }}
                 className="ml-2 border border-gray-400 rounded"
             >
-                <option value={Spectrum.Lamp as Spectrum}>{getColorForSpectrum(Spectrum.Lamp)}</option>
-                <option value={Spectrum.Science as Spectrum}>{getColorForSpectrum(Spectrum.Science)}</option>
+                {Object.values(Spectrum).map(spectrum => (
+                    <option key={spectrum} value={spectrum}>
+                        {getColorForSpectrum(spectrum)}
+                    </option>
+                ))}
             </select>
         </div>
     )
