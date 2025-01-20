@@ -267,6 +267,7 @@ function useBoundingBoxesAddRemove(
             y: 50,
             width: 100,
             height: 100,
+            content: Spectrum.Lamp,
         }
         setBoundingBoxes([...boundingBoxes, newBox])
         setNextId(nextId + 1)
