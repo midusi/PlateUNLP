@@ -7,12 +7,24 @@ interface BBImageEditorProps {
     src: string
 }
 
+enum Spectrum {
+    Lamp = "Lamp spectrum",
+    Science = "Science spectrum",
+}
+
+const spectrumColors: Record<Spectrum, string> = {
+    [Spectrum.Lamp]: "red",
+    [Spectrum.Science]: "green",
+}
+const getColorForSpectrum = (spectrum: Spectrum): string => spectrumColors[spectrum]
+
 interface BoundingBox {
     id: number
     x: number
     y: number
     width: number
     height: number
+    content: Spectrum
 }
 
 function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
@@ -195,7 +207,7 @@ function BoundingBoxElement({
     onDragEnd,
     onResizeStart,
 }: BoundingBoxElementProps) {
-    const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight } = box
+    const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight, content: boxContent } = box
     const { x: scaleX, y: scaleY } = scale
 
     const resizeHandles = [
@@ -218,9 +230,8 @@ function BoundingBoxElement({
                 top: `${boxY * scaleY}px`,
                 width: `${boxWidth * scaleX}px`,
                 height: `${boxHeight * scaleY}px`,
-                border: `2px solid ${selected
-                    ? "orange"
-                    : "red"}`,
+                border: `${selected ? "4px" : "2px"
+                    } solid ${getColorForSpectrum(boxContent)}`,
                 cursor: dragged ? "grabbing" : "grab",
                 boxSizing: "border-box",
             }}
@@ -261,6 +272,7 @@ function useBoundingBoxesAddRemove(
             y: 50,
             width: 100,
             height: 100,
+            content: Spectrum.Lamp,
         }
         setBoundingBoxes([...boundingBoxes, newBox])
         setNextId(nextId + 1)
@@ -278,6 +290,111 @@ function useBoundingBoxesAddRemove(
     };
 
     return { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox }
+}
+
+interface ItemOfBoxListProps {
+    box: BoundingBox
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+    isSelected: boolean
+    onSelect: (id: number) => void
+}
+
+function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBoxListProps) {
+    const { id, content } = box
+    const [value, setValue] = useState<Spectrum>(content)
+
+    function handleInteractableClick(e: React.MouseEvent) {
+        e.stopPropagation()
+        if (!isSelected) {
+            onSelect(id)
+        }
+    };
+
+    return (
+        <div
+            key={id}
+            className={`w-full flex justify-between items-center p-2   
+                ${isSelected ? "bg-blue-100" : "bg-white"} 
+                ${isSelected ? "border border-black" : "border-b border-gray-300"}`}
+            onClick={() => onSelect(id)}
+        >
+            <input
+                readOnly
+                className={`px-2 border-l border-b border-t flex-grow min-w-6
+                    ${isSelected ? "bg-blue-100" : "bg-white"} 
+                    ${isSelected ? "border-gray-300" : "border-gray-100"}`}
+                value={id}
+                onClick={handleInteractableClick}
+            />
+            <div className="flex items-center ml-2 space-x-2">
+                <select
+                    value={value}
+                    onChange={(e) => {
+                        const newSpectrum = e.target.value as Spectrum
+                        if (content !== newSpectrum) {
+                            setBoundingBoxes(prevBoxes =>
+                                prevBoxes.map(b =>
+                                    b.id === box.id ? { ...b, content: newSpectrum } : b,
+                                ),
+                            )
+                            setValue(newSpectrum)
+                        }
+                    }}
+                    className={`ml-2 border border-gray-400 rounded
+                        ${isSelected ? "bg-blue-100" : "bg-white"}`}
+                    onClick={handleInteractableClick}
+                >
+                    {Object.values(Spectrum).map(spectrum => (
+                        <option key={spectrum} value={spectrum}>
+                            {
+                                spectrum
+                            }
+                        </option>
+                    ))}
+                </select>
+                <span
+                    className="ml-1 inline-block w-3 rounded-none"
+                    style={{
+                        backgroundColor: getColorForSpectrum(content),
+                        aspectRatio: "0.5",
+                    }}
+
+                />
+            </div>
+        </div>
+    )
+}
+
+interface BoxListProps {
+    boundingBoxes: BoundingBox[]
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+    selected: number | null
+    setSelected: React.Dispatch<React.SetStateAction<number | null>>
+}
+
+function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected }: BoxListProps) {
+    function handleSelect(id: number) {
+        if (selected === id) {
+            setSelected(null)
+        }
+        else {
+            setSelected(id)
+        }
+    }
+
+    return (
+        <div className="w-full bg-white border border-gray-200">
+            {boundingBoxes.map(box => (
+                <ItemOfBoxList
+                    key={box.id}
+                    box={box}
+                    setBoundingBoxes={setBoundingBoxes}
+                    isSelected={box.id === selected}
+                    onSelect={handleSelect}
+                />
+            ))}
+        </div>
+    )
 }
 
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
@@ -362,23 +479,12 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                             ➖
                         </Button>
                     </div>
-                    <select
-                        className="w-full p-2 overflow-y-auto h-[20vh] border border-grey-600"
-                        name="bounding_boxes_list"
-                        id="bounding_boxes_list"
-                        multiple
-                        value={selectedBB !== null ? [selectedBB.toString()] : []}
-                        onChange={(e) => {
-                            const selectedId = Number.parseInt(e.target.value, 10)
-                            setSelectedBB(selectedId)
-                        }}
-                    >
-                        {boundingBoxes.map(box => (
-                            <option key={box.id}>
-                                {box.id}
-                            </option>
-                        ))}
-                    </select>
+                    <BoxList
+                        boundingBoxes={boundingBoxes}
+                        setBoundingBoxes={setBoundingBoxes}
+                        selected={selectedBB}
+                        setSelected={setSelectedBB}
+                    />
                 </div>
             </Pane>
         </ResizablePanes>
