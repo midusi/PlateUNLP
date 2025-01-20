@@ -8,8 +8,22 @@ interface BBImageEditorProps {
 }
 
 enum Spectrum {
-    Lamp = "lamp spectrum",
-    Science = "science spectrum",
+    Lamp = "Lamp spectrum",
+    Science = "Science spectrum",
+}
+
+const spectrumColors: Record<Spectrum, string> = {
+    [Spectrum.Lamp]: "Red",
+    [Spectrum.Science]: "Green",
+}
+const getColorForSpectrum = (spectrum: Spectrum): string => spectrumColors[spectrum]
+function getSpectrumFromColor(color: string): Spectrum | null {
+    for (const spectrum in spectrumColors) {
+        if (spectrumColors[spectrum as Spectrum] === color) {
+            return spectrum as Spectrum
+        }
+    }
+    return null
 }
 
 interface BoundingBox {
@@ -225,9 +239,7 @@ function BoundingBoxElement({
                 width: `${boxWidth * scaleX}px`,
                 height: `${boxHeight * scaleY}px`,
                 border: `${selected ? "4px" : "2px"
-                    } solid ${boxContent === Spectrum.Lamp
-                        ? "red"
-                        : "green"}`,
+                    } solid ${getColorForSpectrum(boxContent)}`,
                 cursor: dragged ? "grabbing" : "grab",
                 boxSizing: "border-box",
             }}
@@ -286,6 +298,57 @@ function useBoundingBoxesAddRemove(
     };
 
     return { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox }
+}
+
+interface ItemOfBoxListProps {
+    box: BoundingBox
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+}
+
+function ItemOfBoxList({ box, setBoundingBoxes }: ItemOfBoxListProps) {
+    const { id, content } = box
+    const [value, setValue] = useState<Spectrum>(content)
+    return (
+        <div
+            key={id}
+            className="flex justify-between items-center p-2 border-b border-gray-300"
+        >
+            <input readOnly className="px-2 border-l border-b border-t border-gray-100" value={id} />
+            <select
+                value={value}
+                onChange={(e) => {
+                    const newSpectrum = e.target.value as Spectrum
+                    if (content !== newSpectrum) {
+                        setBoundingBoxes(prevBoxes =>
+                            prevBoxes.map(b =>
+                                b.id === box.id ? { ...b, content: newSpectrum } : b,
+                            ),
+                        )
+                        setValue(newSpectrum)
+                    }
+                }}
+                className="ml-2 border border-gray-400 rounded"
+            >
+                <option value={Spectrum.Lamp as Spectrum}>{getColorForSpectrum(Spectrum.Lamp)}</option>
+                <option value={Spectrum.Science as Spectrum}>{getColorForSpectrum(Spectrum.Science)}</option>
+            </select>
+        </div>
+    )
+}
+
+interface BoxListProps {
+    boundingBoxes: BoundingBox[]
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+}
+
+function BoxList({ boundingBoxes, setBoundingBoxes }: BoxListProps) {
+    return (
+        <div className="w-full bg-white border border-gray-200">
+            {boundingBoxes.map(box => (
+                <ItemOfBoxList key={box.id} box={box} setBoundingBoxes={setBoundingBoxes} />
+            ))}
+        </div>
+    )
 }
 
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
@@ -370,7 +433,8 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                             ➖
                         </Button>
                     </div>
-                    <select
+                    <BoxList boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} />
+                    {/* <select
                         className="w-full p-2 overflow-y-auto h-[20vh] border border-grey-600"
                         name="bounding_boxes_list"
                         id="bounding_boxes_list"
@@ -384,9 +448,31 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                         {boundingBoxes.map(box => (
                             <option key={box.id}>
                                 {box.id}
+                                <select
+                                    value={getColorForSpectrum(box.content)}
+                                    onChange={(e) => {
+                                        const newColor = e.target.value
+                                        let newContent: Spectrum
+                                        if (newColor === "red") {
+                                            newContent = Spectrum.Lamp
+                                        }
+                                        else {
+                                            newContent = Spectrum.Science
+                                        }
+                                        setBoundingBoxes(prevBoxes =>
+                                            prevBoxes.map(b =>
+                                                b.id === box.id ? { ...b, content: newContent } : b,
+                                            ),
+                                        )
+                                    }}
+                                    className="ml-2 border border-gray-400 rounded"
+                                >
+                                    <option value="red">Red</option>
+                                    <option value="green">Green</option>
+                                </select>
                             </option>
                         ))}
-                    </select>
+                    </select> */}
                 </div>
             </Pane>
         </ResizablePanes>
