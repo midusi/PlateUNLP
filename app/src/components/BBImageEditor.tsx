@@ -294,6 +294,27 @@ function useBoundingBoxesAddRemove(
     return { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox }
 }
 
+interface InputWhitTempProps {
+    value: string
+    setValue: React.Dispatch<React.SetStateAction<string>>
+    className: string
+    onClick: (e: React.MouseEvent) => void
+}
+
+function InputWhitTemp({ value, setValue, className, onClick }: InputWhitTempProps) {
+    const [temp, setTemp] = useState<string>(value)
+
+    return (
+        <input
+            readOnly
+            className={className}
+            value={temp}
+            onChange={e => setTemp(e.target.value)}
+            onClick={onClick}
+        />
+    )
+}
+
 interface ItemOfBoxListProps {
     box: BoundingBox
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
@@ -303,7 +324,8 @@ interface ItemOfBoxListProps {
 
 function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBoxListProps) {
     const { id, name, content } = box
-    const [value, setValue] = useState<Spectrum>(content)
+    const [spectrumContent, setSpectrumContent] = useState<Spectrum>(content)
+    const [spectrumName, setSpectrumName] = useState<string>(name)
 
     function handleInteractableClick(e: React.MouseEvent) {
         e.stopPropagation()
@@ -325,18 +347,18 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
                     #
                     {id}
                 </span>
-                <input
-                    readOnly
+                <InputWhitTemp
+                    value={spectrumName}
+                    setValue={setSpectrumName}
                     className={`px-2 border-l border-b border-t flex-grow min-w-6
                     ${isSelected ? "bg-blue-100" : "bg-white"} 
                     ${isSelected ? "border-gray-300" : "border-gray-100"}`}
-                    value={name}
                     onClick={handleInteractableClick}
                 />
             </div>
             <div className="flex items-center ml-2 space-x-2">
                 <select
-                    value={value}
+                    value={spectrumContent}
                     onChange={(e) => {
                         const newSpectrum = e.target.value as Spectrum
                         if (content !== newSpectrum) {
@@ -345,7 +367,7 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
                                     b.id === box.id ? { ...b, content: newSpectrum } : b,
                                 ),
                             )
-                            setValue(newSpectrum)
+                            setSpectrumContent(newSpectrum)
                         }
                     }}
                     className={`ml-2 border border-gray-400 rounded
