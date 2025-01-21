@@ -302,7 +302,7 @@ interface ItemOfBoxListProps {
 }
 
 function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBoxListProps) {
-    const { id, content } = box
+    const { id, name, content } = box
     const [value, setValue] = useState<Spectrum>(content)
 
     function handleInteractableClick(e: React.MouseEvent) {
@@ -320,14 +320,20 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
                 ${isSelected ? "border border-black" : "border-b border-gray-300"}`}
             onClick={() => onSelect(id)}
         >
-            <input
-                readOnly
-                className={`px-2 border-l border-b border-t flex-grow min-w-6
+            <div className="flex items-center flex-grow min-w-8">
+                <span className="mr-1 w-5">
+                    #
+                    {id}
+                </span>
+                <input
+                    readOnly
+                    className={`px-2 border-l border-b border-t flex-grow min-w-6
                     ${isSelected ? "bg-blue-100" : "bg-white"} 
                     ${isSelected ? "border-gray-300" : "border-gray-100"}`}
-                value={id}
-                onClick={handleInteractableClick}
-            />
+                    value={name}
+                    onClick={handleInteractableClick}
+                />
+            </div>
             <div className="flex items-center ml-2 space-x-2">
                 <select
                     value={value}
