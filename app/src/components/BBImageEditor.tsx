@@ -331,7 +331,6 @@ interface ItemOfBoxListProps {
 function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBoxListProps) {
     const { id, name, content } = box
     const [spectrumContent, setSpectrumContent] = useState<Spectrum>(content)
-    const [spectrumName, setSpectrumName] = useState<string>(name)
 
     function handleInteractableClick(e: React.MouseEvent) {
         e.stopPropagation()
@@ -354,7 +353,7 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
                     {id}
                 </span>
                 <InputWhitTemp
-                    value={spectrumName}
+                    value={name}
                     onEnter={(value: string) => {
                         if (name !== value) {
                             setBoundingBoxes(prevBoxes =>
