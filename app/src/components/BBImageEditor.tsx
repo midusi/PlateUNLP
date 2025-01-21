@@ -20,6 +20,7 @@ const getColorForSpectrum = (spectrum: Spectrum): string => spectrumColors[spect
 
 interface BoundingBox {
     id: number
+    name: string
     x: number
     y: number
     width: number
@@ -268,6 +269,7 @@ function useBoundingBoxesAddRemove(
     function addBoundingBox() {
         const newBox: BoundingBox = {
             id: nextId,
+            name: "Spectrum",
             x: 50,
             y: 50,
             width: 100,
