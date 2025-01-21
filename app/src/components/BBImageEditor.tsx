@@ -296,20 +296,26 @@ function useBoundingBoxesAddRemove(
 
 interface InputWhitTempProps {
     value: string
-    setValue: React.Dispatch<React.SetStateAction<string>>
+    onEnter: (value: string) => void
     className: string
     onClick: (e: React.MouseEvent) => void
 }
 
-function InputWhitTemp({ value, setValue, className, onClick }: InputWhitTempProps) {
+function InputWhitTemp({ value, onEnter, className, onClick }: InputWhitTempProps) {
     const [temp, setTemp] = useState<string>(value)
+
+    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === "Enter") {
+            onEnter(temp)
+        }
+    };
 
     return (
         <input
-            readOnly
             className={className}
             value={temp}
             onChange={e => setTemp(e.target.value)}
+            onKeyDown={handleKeyDown}
             onClick={onClick}
         />
     )
@@ -349,7 +355,15 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
                 </span>
                 <InputWhitTemp
                     value={spectrumName}
-                    setValue={setSpectrumName}
+                    onEnter={(value: string) => {
+                        if (name !== value) {
+                            setBoundingBoxes(prevBoxes =>
+                                prevBoxes.map(b =>
+                                    b.id === box.id ? { ...b, name: value } : b,
+                                ),
+                            )
+                        }
+                    }}
                     className={`px-2 border-l border-b border-t flex-grow min-w-6
                     ${isSelected ? "bg-blue-100" : "bg-white"} 
                     ${isSelected ? "border-gray-300" : "border-gray-100"}`}
