@@ -280,19 +280,21 @@ function useBoundingBoxesAddRemove(
 ) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
     const [nextId, setNextId] = useState<number>(1)
+    const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
             id: nextId,
             name: "Spectrum",
-            x: 50,
-            y: 50,
+            x: nextPos.x,
+            y: nextPos.y,
             width: 200,
             height: 100,
             content: Spectrum.Lamp,
         }
         setBoundingBoxes([...boundingBoxes, newBox])
         setNextId(nextId + 1)
+        setNextPos({ x: nextPos.x + 10, y: nextPos.y + 10 })
         if (!selectedBB) {
             setSelectedBB(newBox.id)
         }
