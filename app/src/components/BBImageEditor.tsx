@@ -287,7 +287,7 @@ function useBoundingBoxesAddRemove(
             name: "Spectrum",
             x: 50,
             y: 50,
-            width: 100,
+            width: 200,
             height: 100,
             content: Spectrum.Lamp,
         }
