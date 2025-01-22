@@ -232,10 +232,11 @@ function BoundingBoxElement({
                 top: `${boxY * scaleY}px`,
                 width: `${boxWidth * scaleX}px`,
                 height: `${boxHeight * scaleY}px`,
-                border: `${selected ? "4px" : "2px"
+                border: `${selected ? "3px" : "2px"
                     } solid ${getColorForSpectrum(boxContent)}`,
                 cursor: dragged ? "grabbing" : "grab",
                 boxSizing: "border-box",
+                zIndex: selected ? 1000 : 1,
             }}
             onMouseDown={onDragStart}
             onMouseMove={onDrag}
