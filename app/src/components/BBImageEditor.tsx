@@ -255,7 +255,7 @@ function BoundingBoxElement({
                     borderRadius: "2px",
                 }}
             >
-                {boxName}
+                {`#${boxId} ${boxName}`}
             </div>
             {selected && resizeHandles.map(handle => (
                 <div
