@@ -208,6 +208,7 @@ function BoundingBoxElement({
     onDragEnd,
     onResizeStart,
 }: BoundingBoxElementProps) {
+    const [isHovered, setIsHovered] = useState<boolean>(false)
     const { id: boxId, x: boxX, y: boxY, width:
         boxWidth, height: boxHeight, content: boxContent, name: boxName } = box
     const { x: scaleX, y: scaleY } = scale
@@ -254,7 +255,12 @@ function BoundingBoxElement({
                     padding: "2px 4px",
                     fontSize: "10px",
                     borderRadius: "2px",
+                    opacity: "1",
+                    transition: "opacity 0.1s ease",
+                    ...(isHovered && { opacity: "0" }), // Cambiar visibilidad al hacer hover
                 }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
             >
                 {`#${boxId} ${boxName}`}
             </div>
