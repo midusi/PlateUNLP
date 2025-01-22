@@ -208,7 +208,9 @@ function BoundingBoxElement({
     onDragEnd,
     onResizeStart,
 }: BoundingBoxElementProps) {
-    const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight, content: boxContent } = box
+    const [isHovered, setIsHovered] = useState<boolean>(false)
+    const { id: boxId, x: boxX, y: boxY, width:
+        boxWidth, height: boxHeight, content: boxContent, name: boxName } = box
     const { x: scaleX, y: scaleY } = scale
 
     const resizeHandles = [
@@ -231,10 +233,11 @@ function BoundingBoxElement({
                 top: `${boxY * scaleY}px`,
                 width: `${boxWidth * scaleX}px`,
                 height: `${boxHeight * scaleY}px`,
-                border: `${selected ? "4px" : "2px"
+                border: `${selected ? "3px" : "2px"
                     } solid ${getColorForSpectrum(boxContent)}`,
                 cursor: dragged ? "grabbing" : "grab",
                 boxSizing: "border-box",
+                zIndex: selected ? 1000 : 1,
             }}
             onMouseDown={onDragStart}
             onMouseMove={onDrag}
@@ -242,6 +245,25 @@ function BoundingBoxElement({
             onMouseLeave={onDragEnd}
             onClick={onClick}
         >
+            <div
+                style={{
+                    position: "absolute",
+                    top: "0",
+                    left: "0",
+                    backgroundColor: "rgba(0, 0, 0, 0.7)",
+                    color: "white",
+                    padding: "2px 4px",
+                    fontSize: "10px",
+                    borderRadius: "2px",
+                    opacity: "1",
+                    transition: "opacity 0.1s ease",
+                    ...(isHovered && { opacity: "0" }), // Cambiar visibilidad al hacer hover
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                {`#${boxId} ${boxName}`}
+            </div>
             {selected && resizeHandles.map(handle => (
                 <div
                     key={handle.direction}
@@ -265,19 +287,21 @@ function useBoundingBoxesAddRemove(
 ) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
     const [nextId, setNextId] = useState<number>(1)
+    const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
             id: nextId,
             name: "Spectrum",
-            x: 50,
-            y: 50,
-            width: 100,
+            x: nextPos.x,
+            y: nextPos.y,
+            width: 200,
             height: 100,
             content: Spectrum.Lamp,
         }
         setBoundingBoxes([...boundingBoxes, newBox])
         setNextId(nextId + 1)
+        setNextPos({ x: nextPos.x + 10, y: nextPos.y + 10 })
         if (!selectedBB) {
             setSelectedBB(newBox.id)
         }
