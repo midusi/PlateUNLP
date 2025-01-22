@@ -208,7 +208,8 @@ function BoundingBoxElement({
     onDragEnd,
     onResizeStart,
 }: BoundingBoxElementProps) {
-    const { id: boxId, x: boxX, y: boxY, width: boxWidth, height: boxHeight, content: boxContent } = box
+    const { id: boxId, x: boxX, y: boxY, width:
+        boxWidth, height: boxHeight, content: boxContent, name: boxName } = box
     const { x: scaleX, y: scaleY } = scale
 
     const resizeHandles = [
@@ -242,6 +243,20 @@ function BoundingBoxElement({
             onMouseLeave={onDragEnd}
             onClick={onClick}
         >
+            <div
+                style={{
+                    position: "absolute",
+                    top: "0",
+                    left: "0",
+                    backgroundColor: "rgba(0, 0, 0, 0.7)",
+                    color: "white",
+                    padding: "2px 4px",
+                    fontSize: "10px",
+                    borderRadius: "2px",
+                }}
+            >
+                {boxName}
+            </div>
             {selected && resizeHandles.map(handle => (
                 <div
                     key={handle.direction}
