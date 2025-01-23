@@ -468,7 +468,8 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [zoomLevel, setZoomLevel] = useState<number>(1)
     const imageRef = useRef<HTMLImageElement>(null)
-    const scale = useImageScale(imageRef) * zoomLevel
+    const imageScale = useImageScale(imageRef)
+    const scale = { x: imageScale.x * zoomLevel, y: imageScale.y * zoomLevel }
 
     // Agregado y borrado de bounding box
     const { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(selectedBB, setSelectedBB)
@@ -512,6 +513,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                     }}
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
+                    onWheel={handleZoom}
                 >
                     <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
                     {/* Dibujar las Bounding Boxes */}
