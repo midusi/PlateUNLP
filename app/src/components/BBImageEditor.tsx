@@ -466,8 +466,9 @@ function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected }: Box
 
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
+    const [zoomLevel, setZoomLevel] = useState<number>(1)
     const imageRef = useRef<HTMLImageElement>(null)
-    const scale = useImageScale(imageRef)
+    const scale = useImageScale(imageRef) * zoomLevel
 
     // Agregado y borrado de bounding box
     const { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(selectedBB, setSelectedBB)
