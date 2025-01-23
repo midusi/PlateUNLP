@@ -484,6 +484,12 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
         stopResizing()
     }
 
+    function handleZoom(event: React.WheelEvent) {
+        event.preventDefault()
+        const delta = -event.deltaY / 500 // Ajustar la sensibilidad del zoom
+        setZoomLevel(prev => Math.min(Math.max(prev + delta, 0.5), 3)) // Limitar entre 0.5x y 3x
+    };
+
     return (
         <ResizablePanes
             vertical
