@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 import { Button } from "./ui/button"
@@ -474,10 +475,8 @@ interface ImageBBDisplayProps {
 }
 
 function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBoxes, setBoundingBoxes }: ImageBBDisplayProps) {
-    const [zoomLevel, setZoomLevel] = useState<number>(1)
     const imageRef = useRef<HTMLImageElement>(null)
     const imageScale = useImageScale(imageRef)
-    const containerRef = useRef<HTMLDivElement>(null)
 
     // Arrastre de Bounding Boxes
     const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, imageScale, setBoundingBoxes)
@@ -490,6 +489,55 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
         stopResizing()
     }
 
+    return (
+        <div
+            className="relative overflow-hidden"
+            onMouseMove={(event) => {
+                handleDragging(event)
+                handleResizing(event)
+            }}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+        >
+
+            <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
+            {/* Dibujar las Bounding Boxes */}
+            {boundingBoxes.map(box => (
+                <BoundingBoxElement
+                    key={box.id}
+                    box={box}
+                    scale={imageScale}
+                    selected={selectedBB === box.id}
+                    dragged={draggedBB === box.id}
+                    onClick={() => setSelectedBB(box.id)}
+                    onDragStart={event => startDragging(event, box)}
+                    onDrag={handleDragging}
+                    onDragEnd={stopDragging}
+                    onResizeStart={handleResizeStart}
+                />
+            ))}
+        </div>
+    )
+}
+
+interface ZoomComponentProps {
+    children: ReactNode
+    minZoom?: number
+    maxZoom?: number
+    sensitivity?: number
+    className?: string
+}
+
+function ZoomComponent({
+    children,
+    minZoom = 0.5,
+    maxZoom = 3,
+    sensitivity = 500,
+    className,
+}: ZoomComponentProps) {
+    const [zoomLevel, setZoomLevel] = useState<number>(1)
+    const containerRef = useRef<HTMLDivElement>(null)
+
     useEffect(() => {
         const container = containerRef.current
 
@@ -497,8 +545,8 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
         function handleZoom(event: WheelEvent) {
             if (event.ctrlKey || event.metaKey) { // Permitir zoom solo con Ctrl/Meta
                 event.preventDefault()
-                const delta = -event.deltaY / 500 // Sensibilidad de zoom
-                setZoomLevel(prev => Math.min(Math.max(prev + delta, 0.5), 3)) // Limitar entre 0.5x y 3x
+                const delta = -event.deltaY / sensitivity
+                setZoomLevel(prev => Math.min(Math.max(prev + delta, minZoom), 3))
             }
         }
 
@@ -511,44 +559,19 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
                 container.removeEventListener("wheel", handleZoom)
             }
         }
-    }, [])
+    }, [minZoom, maxZoom, sensitivity])
 
     return (
         <div
-            className="relative overflow-hidden"
+            id="zoom-manager"
             ref={containerRef}
-            onMouseMove={(event) => {
-                handleDragging(event)
-                handleResizing(event)
+            className={`relative overflow-hidden ${className ?? ""}`}
+            style={{
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: "center",
             }}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
         >
-            <div
-                id="zoom-manager"
-                style={{
-                    transform: `scale(${zoomLevel})`,
-                    transformOrigin: "center",
-                }}
-            >
-
-                <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
-                {/* Dibujar las Bounding Boxes */}
-                {boundingBoxes.map(box => (
-                    <BoundingBoxElement
-                        key={box.id}
-                        box={box}
-                        scale={imageScale}
-                        selected={selectedBB === box.id}
-                        dragged={draggedBB === box.id}
-                        onClick={() => setSelectedBB(box.id)}
-                        onDragStart={event => startDragging(event, box)}
-                        onDrag={handleDragging}
-                        onDragEnd={stopDragging}
-                        onResizeStart={handleResizeStart}
-                    />
-                ))}
-            </div>
+            {children}
         </div>
     )
 }
@@ -573,14 +596,16 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 minSize={2}
                 className="bg-black"
             >
-                <ImageBBDisplay
-                    className={className}
-                    src={src}
-                    selectedBB={selectedBB}
-                    setSelectedBB={setSelectedBB}
-                    boundingBoxes={boundingBoxes}
-                    setBoundingBoxes={setBoundingBoxes}
-                />
+                <ZoomComponent>
+                    <ImageBBDisplay
+                        className={className}
+                        src={src}
+                        selectedBB={selectedBB}
+                        setSelectedBB={setSelectedBB}
+                        boundingBoxes={boundingBoxes}
+                        setBoundingBoxes={setBoundingBoxes}
+                    />
+                </ZoomComponent>
             </Pane>
             <Pane
                 id="P1"
