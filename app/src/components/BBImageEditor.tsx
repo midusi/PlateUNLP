@@ -477,52 +477,78 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
     const [zoomLevel, setZoomLevel] = useState<number>(1)
     const imageRef = useRef<HTMLImageElement>(null)
     const imageScale = useImageScale(imageRef)
-    const scale = { x: imageScale.x * zoomLevel, y: imageScale.y * zoomLevel }
+    const containerRef = useRef<HTMLDivElement>(null)
 
     // Arrastre de Bounding Boxes
-    const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
+    const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, imageScale, setBoundingBoxes)
 
     // Redimenzionado de Bounding Boxes
-    const { handleResizeStart, handleResizing, stopResizing } = useBoundingBoxesResizing(imageRef, scale, selectedBB, setBoundingBoxes)
+    const { handleResizeStart, handleResizing, stopResizing } = useBoundingBoxesResizing(imageRef, imageScale, selectedBB, setBoundingBoxes)
 
     const handleMouseUp = () => {
         stopDragging()
         stopResizing()
     }
 
-    function handleZoom(event: React.WheelEvent) {
-        event.preventDefault()
-        const delta = -event.deltaY / 500 // Ajustar la sensibilidad del zoom
-        setZoomLevel(prev => Math.min(Math.max(prev + delta, 0.5), 3)) // Limitar entre 0.5x y 3x
-    };
+    useEffect(() => {
+        const container = containerRef.current
+
+        // Manejador personalizado para el zoom
+        function handleZoom(event: WheelEvent) {
+            if (event.ctrlKey || event.metaKey) { // Permitir zoom solo con Ctrl/Meta
+                event.preventDefault()
+                const delta = -event.deltaY / 500 // Sensibilidad de zoom
+                setZoomLevel(prev => Math.min(Math.max(prev + delta, 0.5), 3)) // Limitar entre 0.5x y 3x
+            }
+        }
+
+        if (container) {
+            container.addEventListener("wheel", handleZoom, { passive: false })
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener("wheel", handleZoom)
+            }
+        }
+    }, [])
 
     return (
         <div
-            className="relative"
+            className="relative overflow-hidden"
+            ref={containerRef}
             onMouseMove={(event) => {
                 handleDragging(event)
                 handleResizing(event)
             }}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            onWheel={handleZoom}
         >
-            <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
-            {/* Dibujar las Bounding Boxes */}
-            {boundingBoxes.map(box => (
-                <BoundingBoxElement
-                    key={box.id}
-                    box={box}
-                    scale={scale}
-                    selected={selectedBB === box.id}
-                    dragged={draggedBB === box.id}
-                    onClick={() => setSelectedBB(box.id)}
-                    onDragStart={event => startDragging(event, box)}
-                    onDrag={handleDragging}
-                    onDragEnd={stopDragging}
-                    onResizeStart={handleResizeStart}
-                />
-            ))}
+            <div
+                id="zoom-manager"
+                style={{
+                    transform: `scale(${zoomLevel})`,
+                    transformOrigin: "center",
+                }}
+            >
+
+                <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
+                {/* Dibujar las Bounding Boxes */}
+                {boundingBoxes.map(box => (
+                    <BoundingBoxElement
+                        key={box.id}
+                        box={box}
+                        scale={imageScale}
+                        selected={selectedBB === box.id}
+                        dragged={draggedBB === box.id}
+                        onClick={() => setSelectedBB(box.id)}
+                        onDragStart={event => startDragging(event, box)}
+                        onDrag={handleDragging}
+                        onDragEnd={stopDragging}
+                        onResizeStart={handleResizeStart}
+                    />
+                ))}
+            </div>
         </div>
     )
 }
