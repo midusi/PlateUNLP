@@ -464,15 +464,20 @@ function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected }: Box
     )
 }
 
-export function BBImageEditor({ className, src }: BBImageEditorProps) {
-    const [selectedBB, setSelectedBB] = useState<number | null>(null)
+interface ImageBBDisplayProps {
+    className: string
+    src: string
+    selectedBB: number | null
+    setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>
+    boundingBoxes: BoundingBox[]
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+}
+
+function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBoxes, setBoundingBoxes }: ImageBBDisplayProps) {
     const [zoomLevel, setZoomLevel] = useState<number>(1)
     const imageRef = useRef<HTMLImageElement>(null)
     const imageScale = useImageScale(imageRef)
     const scale = { x: imageScale.x * zoomLevel, y: imageScale.y * zoomLevel }
-
-    // Agregado y borrado de bounding box
-    const { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(selectedBB, setSelectedBB)
 
     // Arrastre de Bounding Boxes
     const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, scale, setBoundingBoxes)
@@ -492,6 +497,43 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     };
 
     return (
+        <div
+            className="relative"
+            onMouseMove={(event) => {
+                handleDragging(event)
+                handleResizing(event)
+            }}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleZoom}
+        >
+            <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
+            {/* Dibujar las Bounding Boxes */}
+            {boundingBoxes.map(box => (
+                <BoundingBoxElement
+                    key={box.id}
+                    box={box}
+                    scale={scale}
+                    selected={selectedBB === box.id}
+                    dragged={draggedBB === box.id}
+                    onClick={() => setSelectedBB(box.id)}
+                    onDragStart={event => startDragging(event, box)}
+                    onDrag={handleDragging}
+                    onDragEnd={stopDragging}
+                    onResizeStart={handleResizeStart}
+                />
+            ))}
+        </div>
+    )
+}
+
+export function BBImageEditor({ className, src }: BBImageEditorProps) {
+    const [selectedBB, setSelectedBB] = useState<number | null>(null)
+
+    // Agregado y borrado de bounding box
+    const { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(selectedBB, setSelectedBB)
+
+    return (
         <ResizablePanes
             vertical
             uniqueId="uniqueId"
@@ -505,33 +547,14 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 minSize={2}
                 className="bg-black"
             >
-                <div
-                    className="relative"
-                    onMouseMove={(event) => {
-                        handleDragging(event)
-                        handleResizing(event)
-                    }}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                    onWheel={handleZoom}
-                >
-                    <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
-                    {/* Dibujar las Bounding Boxes */}
-                    {boundingBoxes.map(box => (
-                        <BoundingBoxElement
-                            key={box.id}
-                            box={box}
-                            scale={scale}
-                            selected={selectedBB === box.id}
-                            dragged={draggedBB === box.id}
-                            onClick={() => setSelectedBB(box.id)}
-                            onDragStart={event => startDragging(event, box)}
-                            onDrag={handleDragging}
-                            onDragEnd={stopDragging}
-                            onResizeStart={handleResizeStart}
-                        />
-                    ))}
-                </div>
+                <ImageBBDisplay
+                    className={className}
+                    src={src}
+                    selectedBB={selectedBB}
+                    setSelectedBB={setSelectedBB}
+                    boundingBoxes={boundingBoxes}
+                    setBoundingBoxes={setBoundingBoxes}
+                />
             </Pane>
             <Pane
                 id="P1"
