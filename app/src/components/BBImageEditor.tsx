@@ -537,6 +537,7 @@ function ZoomComponent({
 }: ZoomComponentProps) {
     const [zoomLevel, setZoomLevel] = useState<number>(1)
     const containerRef = useRef<HTMLDivElement>(null)
+    const [transformOrigin, setTransformOrigin] = useState<string>("center")
 
     useEffect(() => {
         const container = containerRef.current
@@ -545,8 +546,20 @@ function ZoomComponent({
         function handleZoom(event: WheelEvent) {
             if (event.ctrlKey || event.metaKey) { // Permitir zoom solo con Ctrl/Meta
                 event.preventDefault()
+
+                if (container) {
+                    // Calcula la posición relativa del mouse dentro del contenedor
+                    const rect = container.getBoundingClientRect()
+                    const offsetX = ((event.clientX - rect.left) / rect.width) * 100
+                    const offsetY = ((event.clientY - rect.top) / rect.height) * 100
+
+                    // Actualiza el origen del zoom en porcentaje
+                    setTransformOrigin(`${offsetX}% ${offsetY}%`)
+                }
+
+                // Ajusta el nivel de zoom
                 const delta = -event.deltaY / sensitivity
-                setZoomLevel(prev => Math.min(Math.max(prev + delta, minZoom), 3))
+                setZoomLevel(prev => Math.min(Math.max(prev + delta, minZoom), maxZoom))
             }
         }
 
@@ -568,7 +581,7 @@ function ZoomComponent({
             className={`relative overflow-hidden ${className ?? ""}`}
             style={{
                 transform: `scale(${zoomLevel})`,
-                transformOrigin: "center",
+                transformOrigin,
             }}
         >
             {children}
