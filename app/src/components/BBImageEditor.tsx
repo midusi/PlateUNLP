@@ -530,7 +530,7 @@ interface ZoomComponentProps {
 
 function ZoomComponent({
     children,
-    minZoom = 0.5,
+    minZoom = 1,
     maxZoom = 3,
     sensitivity = 500,
     className,
