@@ -525,6 +525,13 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
 
 interface ZoomComponentProps {
     children: ReactNode
+    setZoomInfo: React.Dispatch<React.SetStateAction<{
+        scale: number
+        origin: {
+            x: number
+            y: number
+        }
+    }>>
     minZoom?: number
     maxZoom?: number
     sensitivity?: number
@@ -536,6 +543,7 @@ function ZoomComponent({
     minZoom = 1,
     maxZoom = 3,
     sensitivity = 500,
+    setZoomInfo,
     className,
 }: ZoomComponentProps) {
     const [zoomLevel, setZoomLevel] = useState<number>(1)
@@ -545,11 +553,14 @@ function ZoomComponent({
     useEffect(() => {
         const container = containerRef.current
 
+        setZoomInfo({ scale: zoomLevel, origin: { x: 0, y: 0 } })
+
         // Manejador personalizado para el zoom
         function handleZoom(event: WheelEvent) {
             if (event.ctrlKey || event.metaKey) { // Permitir zoom solo con Ctrl/Meta
                 event.preventDefault()
 
+                let newOrigin: { x: number, y: number } = { x: 0, y: 0 }
                 if (container) {
                     // Calcula la posición relativa del mouse dentro del contenedor
                     const rect = container.getBoundingClientRect()
@@ -558,11 +569,14 @@ function ZoomComponent({
 
                     // Actualiza el origen del zoom en porcentaje
                     setTransformOrigin(`${offsetX}% ${offsetY}%`)
+                    newOrigin = { x: offsetX, y: offsetY }
                 }
 
                 // Ajusta el nivel de zoom
                 const delta = -event.deltaY / sensitivity
-                setZoomLevel(prev => Math.min(Math.max(prev + delta, minZoom), maxZoom))
+                const newZoomLevel = Math.min(Math.max(zoomLevel + delta, minZoom), maxZoom)
+                setZoomLevel(newZoomLevel)
+                setZoomInfo({ scale: newZoomLevel, origin: newOrigin })
             }
         }
 
@@ -575,7 +589,7 @@ function ZoomComponent({
                 container.removeEventListener("wheel", handleZoom)
             }
         }
-    }, [minZoom, maxZoom, sensitivity])
+    }, [minZoom, maxZoom, sensitivity, zoomLevel, setZoomInfo])
 
     return (
         <div
