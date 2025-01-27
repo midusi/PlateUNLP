@@ -65,7 +65,8 @@ function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
 
 function useBoundingBoxesDrag(
     imageRef: React.RefObject<HTMLImageElement>,
-    scale: { x: number, y: number },
+    imageScale: { x: number, y: number },
+    zoomInfo: { scale: number, origin: { x: number, y: number } },
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
 ) {
     const [draggedBB, setDraggedBB] = useState<number | null>(null)
@@ -75,11 +76,12 @@ function useBoundingBoxesDrag(
         const image = imageRef.current
         if (image) {
             const rect = image.getBoundingClientRect()
-            const offsetX = event.clientX - rect.left - box.x * scale.x
-            const offsetY = event.clientY - rect.top - box.y * scale.y
+
+            const offsetX = (event.clientX - rect.left - (box.x - zoomInfo.origin.x) * imageScale.x * zoomInfo.scale) / (imageScale.x * zoomInfo.scale)
+            const offsetY = (event.clientY - rect.top - (box.y - zoomInfo.origin.y) * imageScale.y * zoomInfo.scale) / (imageScale.y * zoomInfo.scale)
 
             setDraggedBB(box.id)
-            setDragOffset({ x: offsetX / scale.x, y: offsetY / scale.y })
+            setDragOffset({ x: offsetX, y: offsetY })
         }
     }
 
@@ -88,8 +90,9 @@ function useBoundingBoxesDrag(
             const image = imageRef.current
             if (image) {
                 const rect = image.getBoundingClientRect()
-                const mouseX = (event.clientX - rect.left) / scale.x
-                const mouseY = (event.clientY - rect.top) / scale.y
+
+                const mouseX = ((event.clientX - rect.left) / (imageScale.x * zoomInfo.scale)) + zoomInfo.origin.x
+                const mouseY = ((event.clientY - rect.top) / (imageScale.y * zoomInfo.scale)) + zoomInfo.origin.y
 
                 setBoundingBoxes(prev =>
                     prev.map(box =>
