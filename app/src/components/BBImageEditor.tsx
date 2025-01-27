@@ -475,14 +475,15 @@ interface ImageBBDisplayProps {
     setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>
     boundingBoxes: BoundingBox[]
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+    zoomInfo: { scale: number, origin: { x: number, y: number } }
 }
 
-function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBoxes, setBoundingBoxes }: ImageBBDisplayProps) {
+function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBoxes, setBoundingBoxes, zoomInfo }: ImageBBDisplayProps) {
     const imageRef = useRef<HTMLImageElement>(null)
     const imageScale = useImageScale(imageRef)
 
     // Arrastre de Bounding Boxes
-    const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, imageScale, setBoundingBoxes)
+    const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, imageScale, zoomInfo, setBoundingBoxes)
 
     // Redimenzionado de Bounding Boxes
     const { handleResizeStart, handleResizing, stopResizing } = useBoundingBoxesResizing(imageRef, imageScale, selectedBB, setBoundingBoxes)
@@ -608,6 +609,13 @@ function ZoomComponent({
 
 export function BBImageEditor({ className, src }: BBImageEditorProps) {
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
+    const [zoomInfo, setZoomInfo] = useState<{
+        scale: number
+        origin: { x: number, y: number }
+    }>({
+        scale: 1,
+        origin: { x: 0, y: 0 },
+    })
 
     // Agregado y borrado de bounding box
     const { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(selectedBB, setSelectedBB)
@@ -626,7 +634,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                 minSize={2}
                 className="bg-black"
             >
-                <ZoomComponent>
+                <ZoomComponent setZoomInfo={setZoomInfo}>
                     <ImageBBDisplay
                         className={className}
                         src={src}
@@ -634,6 +642,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
                         setSelectedBB={setSelectedBB}
                         boundingBoxes={boundingBoxes}
                         setBoundingBoxes={setBoundingBoxes}
+                        zoomInfo={zoomInfo}
                     />
                 </ZoomComponent>
             </Pane>
