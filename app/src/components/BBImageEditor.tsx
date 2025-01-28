@@ -5,11 +5,6 @@ import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 import { Button } from "./ui/button"
 
-interface BBImageEditorProps {
-    className: string
-    src: string
-}
-
 const spectrumColors: Record<Spectrum, string> = {
     [Spectrum.Lamp]: "red",
     [Spectrum.Science]: "green",
@@ -273,10 +268,11 @@ function BoundingBoxElement({
 }
 
 function useBoundingBoxesAddRemove(
+    boundingBoxes: BoundingBox[],
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
     selectedBB: number | null,
     setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>,
 ) {
-    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
     const [nextId, setNextId] = useState<number>(1)
     const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
 
@@ -306,7 +302,7 @@ function useBoundingBoxesAddRemove(
         }
     };
 
-    return { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox }
+    return { addBoundingBox, removeBoundingBox }
 }
 
 interface InputWhitTempProps {
@@ -594,7 +590,14 @@ function ZoomComponent({
     )
 }
 
-export function BBImageEditor({ className, src }: BBImageEditorProps) {
+interface BBImageEditorProps {
+    className: string
+    src: string
+    boundingBoxes: BoundingBox[]
+    setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+}
+
+export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes }: BBImageEditorProps) {
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [zoomInfo, setZoomInfo] = useState<{
         scale: number
@@ -605,7 +608,7 @@ export function BBImageEditor({ className, src }: BBImageEditorProps) {
     })
 
     // Agregado y borrado de bounding box
-    const { boundingBoxes, setBoundingBoxes, addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(selectedBB, setSelectedBB)
+    const { addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(boundingBoxes, setBoundingBoxes, selectedBB, setSelectedBB)
 
     return (
         <ResizablePanes

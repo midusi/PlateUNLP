@@ -1,3 +1,4 @@
+import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepProps } from "@/interfaces/StepProps"
 import type { ChangeEvent } from "react"
 import { useState } from "react"
@@ -42,9 +43,11 @@ interface SegmentationUIProps {
 }
 
 function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
+    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+
     return (
         <>
-            <BBImageEditor className="w-full" src={file} />
+            <BBImageEditor className="w-full" src={file} boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} />
             <div className="flex justify-center pt-4">
                 <Button
                     onClick={() => {
