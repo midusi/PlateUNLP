@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Spectrum } from "@/enums/Spectrum"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 import { Button } from "./ui/button"
@@ -6,11 +7,6 @@ import { Button } from "./ui/button"
 interface BBImageEditorProps {
     className: string
     src: string
-}
-
-enum Spectrum {
-    Lamp = "Lamp spectrum",
-    Science = "Science spectrum",
 }
 
 const spectrumColors: Record<Spectrum, string> = {
