@@ -28,12 +28,23 @@ export function StepSpectrumSegmentation({ onComplete }: StepProps) {
         <div className="w-full p-6">
             {loadingState === "waiting"
                 && <Uploader accept=".png,.jpg" onChange={handleFileChange} showInfoDeleteRow={false} />}
-            {loadingState === "processing" && <p>Cargando contenido...</p>}
-            {loadingState === "finished" && file && (
-                <BBImageEditor className="w-full" src={file} />
-            )}
             {loadingState === "error" && <p>Error loading image. Please try again.</p>}
+            {loadingState === "processing" && <p>Cargando contenido...</p>}
+            {loadingState === "finished" && file
+                && <SegmentationUI file={file} onComplete={onComplete} />}
+        </div>
+    )
+}
 
+interface SegmentationUIProps {
+    file: string
+    onComplete: () => void
+}
+
+function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
+    return (
+        <>
+            <BBImageEditor className="w-full" src={file} />
             <div className="flex justify-center pt-4">
                 <Button
                     onClick={() => {
@@ -44,7 +55,6 @@ export function StepSpectrumSegmentation({ onComplete }: StepProps) {
                     Save
                 </Button>
             </div>
-
-        </div>
+        </>
     )
 }
