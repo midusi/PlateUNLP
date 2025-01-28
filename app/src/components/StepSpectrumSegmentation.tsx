@@ -34,12 +34,17 @@ export function StepSpectrumSegmentation({ onComplete }: StepProps) {
             )}
             {loadingState === "error" && <p>Error loading image. Please try again.</p>}
 
-            <Button
-                disabled
-                onClick={onComplete}
-            >
-                Save
-            </Button>
+            <div className="flex justify-center pt-4">
+                <Button
+                    onClick={() => {
+                        onComplete()
+                    }}
+                    disabled={file === null}
+                >
+                    Save
+                </Button>
+            </div>
+
         </div>
     )
 }
