@@ -1,3 +1,4 @@
+import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
 import { Spectrum } from "@/enums/Spectrum"
 import { useEffect, useRef, useState } from "react"
@@ -14,16 +15,6 @@ const spectrumColors: Record<Spectrum, string> = {
     [Spectrum.Science]: "green",
 }
 const getColorForSpectrum = (spectrum: Spectrum): string => spectrumColors[spectrum]
-
-interface BoundingBox {
-    id: number
-    name: string
-    x: number
-    y: number
-    width: number
-    height: number
-    content: Spectrum
-}
 
 function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
     const [scale, setScale] = useState({ x: 1, y: 1 })
