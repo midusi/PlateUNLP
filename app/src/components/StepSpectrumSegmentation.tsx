@@ -62,7 +62,7 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
         const scaleY = naturalHeight / height
 
         // Crear un canvas para cada bounding box y generar las descargas
-        boundingBoxes.forEach((box, index) => {
+        boundingBoxes.forEach((box) => {
             const canvas = document.createElement("canvas")
             const ctx = canvas.getContext("2d")
 
