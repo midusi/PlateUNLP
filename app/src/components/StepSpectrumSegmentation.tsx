@@ -45,15 +45,60 @@ interface SegmentationUIProps {
 function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
 
+    async function handleDownload() {
+        if (!file || boundingBoxes.length === 0)
+            return
+
+        const image = new Image()
+        image.src = file
+
+        // Esperar a que la imagen se cargue completamente
+        await new Promise((resolve) => {
+            image.onload = resolve
+        })
+
+        // Crear un canvas para cada bounding box y generar las descargas
+        boundingBoxes.forEach((box, index) => {
+            const canvas = document.createElement("canvas")
+            const ctx = canvas.getContext("2d")
+
+            if (ctx) {
+                // Ajustar el tamaño del canvas al tamaño de la bounding box
+                canvas.width = box.width
+                canvas.height = box.height
+
+                // Dibujar la porción de la imagen en el canvas
+                ctx.drawImage(
+                    image,
+                    box.x, // Coordenada x de la bounding box
+                    box.y, // Coordenada y de la bounding box
+                    box.width, // Ancho de la bounding box
+                    box.height, // Altura de la bounding box
+                    0,
+                    0,
+                    box.width,
+                    box.height,
+                )
+
+                // Convertir el canvas a una URL de descarga
+                const link = document.createElement("a")
+                link.download = `cropped-image-${index + 1}.png`
+                link.href = canvas.toDataURL("image/png")
+                link.click()
+            }
+        })
+    }
+
     return (
         <>
             <BBImageEditor className="w-full" src={file} boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} />
             <div className="flex justify-center pt-4">
                 <Button
                     onClick={() => {
+                        handleDownload()
                         onComplete()
                     }}
-                    disabled={file === null}
+                    disabled={file === null || boundingBoxes.length === 0}
                 >
                     Save
                 </Button>
