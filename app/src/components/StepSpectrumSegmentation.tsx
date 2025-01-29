@@ -57,27 +57,34 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
             image.onload = resolve
         })
 
+        const { naturalWidth, naturalHeight, width, height } = image
+        const scaleX = naturalWidth / width
+        const scaleY = naturalHeight / height
+
         // Crear un canvas para cada bounding box y generar las descargas
         boundingBoxes.forEach((box, index) => {
             const canvas = document.createElement("canvas")
             const ctx = canvas.getContext("2d")
 
             if (ctx) {
-                // Ajustar el tamaño del canvas al tamaño de la bounding box
-                canvas.width = box.width
-                canvas.height = box.height
+                const realX = box.x * scaleX
+                const realY = box.y * scaleY
+                const realWidth = box.width * scaleX
+                const realHeight = box.height * scaleY
 
-                // Dibujar la porción de la imagen en el canvas
+                canvas.width = realWidth
+                canvas.height = realHeight
+
                 ctx.drawImage(
                     image,
-                    box.x, // Coordenada x de la bounding box
-                    box.y, // Coordenada y de la bounding box
-                    box.width, // Ancho de la bounding box
-                    box.height, // Altura de la bounding box
+                    realX, // Coordenada X en la imagen real
+                    realY, // Coordenada Y en la imagen real
+                    realWidth, // Ancho real de la bounding box
+                    realHeight, // Alto real de la bounding box
                     0,
                     0,
-                    box.width,
-                    box.height,
+                    realWidth,
+                    realHeight,
                 )
 
                 // Convertir el canvas a una URL de descarga
