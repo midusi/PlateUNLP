@@ -89,7 +89,7 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
 
                 // Convertir el canvas a una URL de descarga
                 const link = document.createElement("a")
-                link.download = `cropped-image-${index + 1}.png`
+                link.download = `#${box.id}-${box.name}.png`
                 link.href = canvas.toDataURL("image/png")
                 link.click()
             }
