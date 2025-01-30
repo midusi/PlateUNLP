@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react"
 import { useState } from "react"
 import { AiFillFileImage } from "react-icons/ai"
 import { MdCloudUpload, MdDelete } from "react-icons/md"
-import "@/components/css/Uploader.css"
+import "@/css/Uploader.css"
 
 interface UploaderProps {
     accept: string

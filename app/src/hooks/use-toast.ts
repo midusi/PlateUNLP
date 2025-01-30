@@ -1,7 +1,7 @@
 import type {
   ToastActionElement,
   ToastProps,
-} from "@/components/ui/toast"
+} from "@/atoms/toast"
 import React from "react"
 
 const TOAST_LIMIT = 1
@@ -103,9 +103,9 @@ export function reducer(state: State, action: Action): State {
         toasts: state.toasts.map(t =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t,
         ),
       }

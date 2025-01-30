@@ -1,8 +1,8 @@
-import type { EmpiricalSpectrumPoint } from "./EmpiricalSpectrum"
+import type { EmpiricalSpectrumPoint } from "@/molecules/EmpiricalSpectrum"
+import { EmpiricalSpectrum } from "@/molecules/EmpiricalSpectrum"
 import { FITS } from "fits2js"
 import { type ChangeEvent, useEffect, useMemo, useState } from "react"
-import { EmpiricalSpectrum } from "./EmpiricalSpectrum"
-import { Uploader } from "./Uploader"
+import { Uploader } from "../molecules/Uploader"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 

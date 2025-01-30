@@ -1,6 +1,6 @@
 import { CustomError } from "@/lib/utils"
+import { Button } from "../atoms/button"
 import { useGlobalStore } from "../hooks/use-global-store"
-import { Button } from "./ui/button"
 
 export interface Point {
     x: number

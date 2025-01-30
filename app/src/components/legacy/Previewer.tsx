@@ -1,4 +1,4 @@
-import { GraphInErrorCase } from "@/components/GraphInErrorCase"
+import { GraphInErrorCase } from "@/molecules/GraphInErrorCase"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
 import { CustomError } from "@/lib/utils"
