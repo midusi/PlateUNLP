@@ -1,7 +1,7 @@
-import { GraphInErrorCase } from "@/molecules/GraphInErrorCase"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
 import { CustomError } from "@/lib/utils"
+import { GraphInErrorCase } from "@/molecules/GraphInErrorCase"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
