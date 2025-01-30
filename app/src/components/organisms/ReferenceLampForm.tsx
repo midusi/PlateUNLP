@@ -1,19 +1,19 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/atoms/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+} from "@/components/atoms/card"
+import { Label } from "@/components/atoms/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/atoms/select"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { LAMP_MATERIALS } from "@/lib/spectral-data"
 import { useId } from "react"

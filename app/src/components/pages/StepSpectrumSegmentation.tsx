@@ -1,10 +1,10 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepProps } from "@/interfaces/StepProps"
 import type { ChangeEvent } from "react"
+import { Button } from "@/components/atoms/button"
+import { Uploader } from "@/components/molecules/Uploader"
+import { BBImageEditor } from "@/components/organisms/BBImageEditor"
 import { useState } from "react"
-import { BBImageEditor } from "./BBImageEditor"
-import { Button } from "./ui/button"
-import { Uploader } from "./Uploader"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 

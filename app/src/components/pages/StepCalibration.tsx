@@ -1,14 +1,14 @@
+import type { EmpiricalSpectrumPoint } from "@/components/molecules/EmpiricalSpectrum"
 import type { StepProps } from "@/interfaces/StepProps"
-import type { EmpiricalSpectrumPoint } from "./EmpiricalSpectrum"
-import { ContinueButton } from "@/components/ContinueButton"
-import { FitsLoader } from "@/components/FitsLoader"
-import { InferenceForm } from "@/components/InferenceForm"
-import { ReferenceLampForm } from "@/components/ReferenceLampForm"
-import { ReferenceLampSpectrum } from "@/components/ReferenceLampSpectrum"
+import { CardTitle } from "@/components/atoms/card"
+import { ContinueButton } from "@/components/molecules/ContinueButton"
+import { ReferenceLampRangeUI } from "@/components/molecules/ReferenceLampRangeUI"
+import { ReferenceLampSpectrum } from "@/components/molecules/ReferenceLampSpectrum"
+import { FitsLoader } from "@/components/organisms/FitsLoader"
+import { InferenceForm } from "@/components/organisms/InferenceForm"
+import { ReferenceLampForm } from "@/components/organisms/ReferenceLampForm"
 import { useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
-import { ReferenceLampRangeUI } from "./ReferenceLampRangeUI"
-import { CardTitle } from "./ui/card"
 
 export function StepCalibration({ onComplete }: StepProps) {
     const [scienceSpectrumData, setScienceSpectrumData] = useState<EmpiricalSpectrumPoint[] | null>(null)

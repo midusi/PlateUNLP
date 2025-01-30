@@ -46,6 +46,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 60 9.1% 97.8%;
@@ -73,10 +74,12 @@
     --chart-5: 340 75% 55%;
   }
 }
+
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -86,7 +89,8 @@
   :root {
     font-feature-settings:
       "liga" 1,
-      "calt" 1; /* fix for Chrome */
+      "calt" 1;
+    /* fix for Chrome */
     font-optical-sizing: auto;
   }
 }

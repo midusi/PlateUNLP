@@ -1,8 +1,8 @@
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/atoms/input"
+import { Label } from "@/components/atoms/label"
+import { ReferenceLampRange } from "@/components/molecules/ReferenceLampRange"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useId } from "react"
-import { ReferenceLampRange } from "./ReferenceLampRange"
 
 export function ReferenceLampRangeUI() {
     return (

@@ -1,9 +1,9 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/atoms/card"
+import { ErrorScatterGraph } from "@/components/molecules/ErrorScatterGraph"
+import { InferenceBoxGraph } from "@/components/molecules/InferenceBoxGraph"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { CustomError, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
-import { ErrorScatterGraph } from "./ErrorScatterGraph"
-import { InferenceBoxGraph } from "./InferenceBoxGraph"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 
 interface InferenceOption {
     id: number
