@@ -1,6 +1,6 @@
+import { Button } from "@/components/atoms/button"
+import { useGlobalStore } from "@/hooks/use-global-store"
 import { CustomError } from "@/lib/utils"
-import { Button } from "../atoms/button"
-import { useGlobalStore } from "../hooks/use-global-store"
 
 export interface Point {
     x: number

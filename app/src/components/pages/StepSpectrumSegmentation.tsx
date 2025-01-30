@@ -1,8 +1,8 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepProps } from "@/interfaces/StepProps"
 import type { ChangeEvent } from "react"
+import { Button } from "@/components/atoms/button"
 import { useState } from "react"
-import { Button } from "../atoms/button"
 import { Uploader } from "../molecules/Uploader"
 import { BBImageEditor } from "../organisms/BBImageEditor"
 

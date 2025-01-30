@@ -1,7 +1,7 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/atoms/card"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { CustomError, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../atoms/card"
 import { ErrorScatterGraph } from "../molecules/ErrorScatterGraph"
 import { InferenceBoxGraph } from "../molecules/InferenceBoxGraph"
 

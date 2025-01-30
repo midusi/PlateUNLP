@@ -1,7 +1,7 @@
+import { Button } from "@/components/atoms/button"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
 import { useState } from "react"
-import { Button } from "../atoms/button"
 import "@/css/ProgressBar.css"
 
 interface ProgressBarProps {

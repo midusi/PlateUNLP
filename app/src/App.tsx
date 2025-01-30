@@ -1,7 +1,7 @@
+import { NavigationProgressBar } from "@/components/organisms/NavigationProgressBar"
+import { StepCalibration } from "@/components/pages/StepCalibration"
+import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
 import { useGlobalStore } from "./hooks/use-global-store"
-import { NavigationProgressBar } from "./organisms/NavigationProgressBar"
-import { StepCalibration } from "./pages/StepCalibration"
-import { StepSpectrumSegmentation } from "./pages/StepSpectrumSegmentation"
 
 export default function App() {
   const [completedStages, setCompletedStages] = useGlobalStore(s => [

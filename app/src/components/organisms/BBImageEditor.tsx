@@ -1,9 +1,9 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
+import { Button } from "@/components/atoms/button"
 import { Spectrum } from "@/enums/Spectrum"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
-import { Button } from "../atoms/button"
 
 const spectrumColors: Record<Spectrum, string> = {
     [Spectrum.Lamp]: "red",

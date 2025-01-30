@@ -1,7 +1,7 @@
 import type {
   ToastActionElement,
   ToastProps,
-} from "@/atoms/toast"
+} from "@/components/atoms/toast"
 import React from "react"
 
 const TOAST_LIMIT = 1

@@ -1,5 +1,5 @@
-import { Input } from "@/atoms/input"
-import { Label } from "@/atoms/label"
+import { Input } from "@/components/atoms/input"
+import { Label } from "@/components/atoms/label"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useId } from "react"
 import { ReferenceLampRange } from "./ReferenceLampRange"
