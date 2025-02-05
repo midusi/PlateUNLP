@@ -124,12 +124,12 @@ function prepare_input(img_src: string) {
     image.src = img_src
 
     const canvas = document.createElement("canvas")
-    canvas.width = 1080
-    canvas.height = 1080
+    canvas.width = 1088
+    canvas.height = 1088
     const context = canvas.getContext("2d")!
-    context.drawImage(image, 0, 0, 1080, 1080)
+    context.drawImage(image, 0, 0, 1088, 1088)
 
-    const data = context.getImageData(0, 0, 1080, 1080).data
+    const data = context.getImageData(0, 0, 1088, 1088).data
     const red: number[] = []
     const green: number[] = []
     const blue: number[] = []
@@ -142,18 +142,17 @@ function prepare_input(img_src: string) {
 }
 
 async function runInference(img_src: string) {
-    const model_name = "/models/mnist-8.onnx"
-    const session = await ort.InferenceSession.create(model_name, {
-        executionProviders: ["cpu"], // Forzar el uso del backend CPU
-    })
-    // if (!session) {
-    //     return
-    // }
+    const model_path = "/models/spectrum_part_segmentator.onnx"
+    const session = await ort.InferenceSession.create(model_path)
 
-    // const input = prepare_input(img_src)
+    if (!session) {
+        return
+    }
 
-    // const feeds = { images: new ort.Tensor("float32", input, [1, 3, 1080, 1080]) }
+    const input = prepare_input(img_src)
 
-    // const output = await session.run(feeds)
-    // console.log("Resultado de la inferencia:", output)
+    const feeds = { images: new ort.Tensor("float32", input, [1, 3, 1088, 1088]) }
+
+    const output = await session.run(feeds)
+    console.log("Resultado de la inferencia:", output)
 }
