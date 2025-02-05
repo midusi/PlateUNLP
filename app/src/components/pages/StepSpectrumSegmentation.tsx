@@ -4,7 +4,8 @@ import type { ChangeEvent } from "react"
 import { Button } from "@/components/atoms/button"
 import { Uploader } from "@/components/molecules/Uploader"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
-import { useState } from "react"
+import * as ort from "onnxruntime-web"
+import { useEffect, useState } from "react"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
@@ -44,6 +45,10 @@ interface SegmentationUIProps {
 
 function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+
+    useEffect(() => {
+        runInference(file)
+    })
 
     async function handleDownload() {
         if (!file || boundingBoxes.length === 0)
@@ -112,4 +117,43 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
             </div>
         </>
     )
+}
+
+function prepare_input(img_src: string) {
+    const image = new Image()
+    image.src = img_src
+
+    const canvas = document.createElement("canvas")
+    canvas.width = 1080
+    canvas.height = 1080
+    const context = canvas.getContext("2d")!
+    context.drawImage(image, 0, 0, 1080, 1080)
+
+    const data = context.getImageData(0, 0, 1080, 1080).data
+    const red: number[] = []
+    const green: number[] = []
+    const blue: number[] = []
+    for (let index = 0; index < data.length; index += 4) {
+        red.push(data[index] / 255)
+        green.push(data[index + 1] / 255)
+        blue.push(data[index + 2] / 255)
+    }
+    return new Float32Array([...red, ...green, ...blue])
+}
+
+async function runInference(img_src: string) {
+    const model_name = "/models/mnist-8.onnx"
+    const session = await ort.InferenceSession.create(model_name, {
+        executionProviders: ["cpu"], // Forzar el uso del backend CPU
+    })
+    // if (!session) {
+    //     return
+    // }
+
+    // const input = prepare_input(img_src)
+
+    // const feeds = { images: new ort.Tensor("float32", input, [1, 3, 1080, 1080]) }
+
+    // const output = await session.run(feeds)
+    // console.log("Resultado de la inferencia:", output)
 }
