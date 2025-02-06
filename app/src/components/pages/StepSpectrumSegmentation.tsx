@@ -131,7 +131,8 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
 async function determineBBs(img_src: string) {
     const SIZE_M = 1088
     const CLASSES = [Spectrum.Lamp, Spectrum.Science]
-    const THRESHOLD = 0.8
+    const CONFIDENCE_THRESHOLD = 0.75
+    const IOU_THRESHOLD = 0.7
 
     async function loadModel() {
         const model_path = "/models/spectrum_part_segmentator.onnx"
@@ -185,7 +186,7 @@ async function determineBBs(img_src: string) {
                 .map(row => [row, DATA[COLS * (row + 4) + column]])
                 .reduce((accum, item) => item[1] > accum[1] ? item : accum, [0, 0])
 
-            if (prob < THRESHOLD) {
+            if (prob < CONFIDENCE_THRESHOLD) {
                 continue
             }
 
@@ -222,7 +223,7 @@ async function determineBBs(img_src: string) {
         const result = []
         while (boundingBoxes.length > 0) {
             result.push(boundingBoxes[0])
-            boundingBoxes = boundingBoxes.filter(bb => iou(boundingBoxes[0], bb) < 0.70)
+            boundingBoxes = boundingBoxes.filter(bb => iou(boundingBoxes[0], bb) < IOU_THRESHOLD)
         }
         return result
     }
