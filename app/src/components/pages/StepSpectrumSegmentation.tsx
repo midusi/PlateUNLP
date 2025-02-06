@@ -141,18 +141,45 @@ function prepare_input(img_src: string) {
     return new Float32Array([...red, ...green, ...blue])
 }
 
-async function runInference(img_src: string) {
+async function loadModel() {
     const model_path = "/models/spectrum_part_segmentator.onnx"
     const session = await ort.InferenceSession.create(model_path)
+    return session
+}
 
-    if (!session) {
-        return
-    }
-
-    const input = prepare_input(img_src)
-
+async function runInference(session: ort.InferenceSession, input: Float32Array<ArrayBuffer>) {
     const feeds = { images: new ort.Tensor("float32", input, [1, 3, 1088, 1088]) }
 
-    const output = await session.run(feeds)
-    console.log("Resultado de la inferencia:", output)
+    const outputs = await session.run(feeds)
+    console.log("Resultado de la inferencia:", outputs.output0.data)
+}
+
+async function determineBB(img_src: string) {
+    const yolo_classes = ["lamp spectrum", "science spectrum"]
+
+    const session: ort.InferenceSession = await loadModel()
+    const input: Float32Array<ArrayBuffer> = prepare_input(img_src)
+    const output: ort.InferenceSession.OnnxValueMapType = runInference(session, input)
+}
+
+function iou(box1, box2) {
+    return intersection(box1, box2) / union(box1, box2)
+}
+
+function union(box1, box2) {
+    const [box1_x1, box1_y1, box1_x2, box1_y2] = box1
+    const [box2_x1, box2_y1, box2_x2, box2_y2] = box2
+    const box1_area = (box1_x2 - box1_x1) * (box1_y2 - box1_y1)
+    const box2_area = (box2_x2 - box2_x1) * (box2_y2 - box2_y1)
+    return box1_area + box2_area - intersection(box1, box2)
+}
+
+function intersection(box1, box2) {
+    const [box1_x1, box1_y1, box1_x2, box1_y2] = box1
+    const [box2_x1, box2_y1, box2_x2, box2_y2] = box2
+    const x1 = Math.max(box1_x1, box2_x1)
+    const y1 = Math.max(box1_y1, box2_y1)
+    const x2 = Math.min(box1_x2, box2_x2)
+    const y2 = Math.min(box1_y2, box2_y2)
+    return (x2 - x1) * (y2 - y1)
 }
