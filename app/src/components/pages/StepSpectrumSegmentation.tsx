@@ -47,8 +47,9 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
 
     useEffect(() => {
-        runInference(file)
-    })
+        // Predecir Bounding Boxes
+        determineBB(file)
+    }, [])
 
     async function handleDownload() {
         if (!file || boundingBoxes.length === 0)
@@ -138,7 +139,10 @@ function prepare_input(img_src: string) {
         green.push(data[index + 1] / 255)
         blue.push(data[index + 2] / 255)
     }
-    return new Float32Array([...red, ...green, ...blue])
+    return {
+        input: new Float32Array([...red, ...green, ...blue]),
+        image,
+    }
 }
 
 async function loadModel() {
@@ -149,17 +153,41 @@ async function loadModel() {
 
 async function runInference(session: ort.InferenceSession, input: Float32Array<ArrayBuffer>) {
     const feeds = { images: new ort.Tensor("float32", input, [1, 3, 1088, 1088]) }
-
     const outputs = await session.run(feeds)
-    console.log("Resultado de la inferencia:", outputs.output0.data)
+    return outputs
 }
 
 async function determineBB(img_src: string) {
     const yolo_classes = ["lamp spectrum", "science spectrum"]
 
     const session: ort.InferenceSession = await loadModel()
-    const input: Float32Array<ArrayBuffer> = prepare_input(img_src)
-    const output: ort.InferenceSession.OnnxValueMapType = runInference(session, input)
+    const { input, image } = prepare_input(img_src)
+    const outputs: ort.InferenceSession.OnnxValueMapType = await runInference(session, input)
+    const processed = processOutputs(outputs, image)
+    // console.log("Resultado de la inferencia:", outputs)
+}
+
+function processOutputs(outputs: ort.InferenceSession.OnnxValueMapType, image: HTMLImageElement) {
+    const { naturalWidth: NATURALWIDTH, naturalHeight: NATURALHEIGHT } = image
+    console.log("Hola: ", NATURALHEIGHT, NATURALWIDTH)
+
+    // console.log("salida", outputs.output0.data)
+    const DATA = outputs.output0.data
+    const COLS = outputs.output0.dims[2]
+    const ROWS = outputs.output0.dims[1]
+    let column, row
+    for (column = 0; column < COLS; column++) {
+        const xc = DATA[8400 * 0 + column]
+        const yc = DATA[8400 * 1 + column]
+        const w = DATA[8400 * 2 + column]
+        const h = DATA[8400 * 3 + column]
+
+        // const x1 = (xc - w / 2) / 640 * img_width
+        // const y1 = (yc - h / 2) / 640 * img_height
+        // const x2 = (xc + w / 2) / 640 * img_width
+        // const y2 = (yc + h / 2) / 640 * img_height
+    }
+    return outputs
 }
 
 function iou(box1, box2) {
