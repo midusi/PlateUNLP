@@ -192,11 +192,17 @@ async function determineBBs(img_src: string) {
             const label = CLASSES[class_id]
             const xc: number = DATA[COLS * 0 + column]
             const yc: number = DATA[COLS * 1 + column]
-            const w: number = DATA[COLS * 2 + column] / SIZE_M * NATURALWIDTH
-            const h: number = DATA[COLS * 3 + column] / SIZE_M * NATURALWIDTH
+            let w: number = DATA[COLS * 2 + column]
+            let h: number = DATA[COLS * 3 + column]
 
-            const x1 = (xc - w / 2) / SIZE_M * NATURALWIDTH
-            const y1 = (yc - h / 2) / SIZE_M * NATURALHEIGHT
+            let x1 = (xc - w / 2)
+            let y1 = (yc - h / 2)
+
+            // Escalado
+            x1 = x1 * (NATURALWIDTH / SIZE_M)
+            y1 = y1 * (NATURALHEIGHT / SIZE_M)
+            w = w * (NATURALWIDTH / SIZE_M)
+            h = h * (NATURALHEIGHT / SIZE_M)
 
             const boundingBox: BoundingBox = {
                 id: id++,
@@ -216,9 +222,8 @@ async function determineBBs(img_src: string) {
         const result = []
         while (boundingBoxes.length > 0) {
             result.push(boundingBoxes[0])
-            boundingBoxes = boundingBoxes.filter(bb => iou(boundingBoxes[0], bb) < 0.7)
+            boundingBoxes = boundingBoxes.filter(bb => iou(boundingBoxes[0], bb) < 0.70)
         }
-
         return result
     }
 
