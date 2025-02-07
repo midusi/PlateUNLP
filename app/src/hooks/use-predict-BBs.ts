@@ -1,6 +1,6 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { Spectrum } from "@/enums/Spectrum"
-import { CustomError, ErrorCodes } from "@/lib/utils"
+import { CustomError, ErrorCodes, iou } from "@/lib/utils"
 import * as ort from "onnxruntime-web"
 import { useMemo, useState } from "react"
 
@@ -120,38 +120,4 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     }
 
     return determineBBs
-}
-
-function iou(box1: BoundingBox, box2: BoundingBox) {
-    return intersection(box1, box2) / union(box1, box2)
-}
-
-function union(box1: BoundingBox, box2: BoundingBox) {
-    const { x: box1_x1, y: box1_y1, width: box1_width, height: box1_height } = box1
-    const box1_x2 = box1_x1 + box1_width
-    const box1_y2 = box1_y1 + box1_height
-
-    const { x: box2_x1, y: box2_y1, width: box2_width, height: box2_height } = box2
-    const box2_x2 = box2_x1 + box2_width
-    const box2_y2 = box2_y1 + box2_height
-
-    const box1_area = (box1_x2 - box1_x1) * (box1_y2 - box1_y1)
-    const box2_area = (box2_x2 - box2_x1) * (box2_y2 - box2_y1)
-    return box1_area + box2_area - intersection(box1, box2)
-}
-
-function intersection(box1: BoundingBox, box2: BoundingBox) {
-    const { x: box1_x1, y: box1_y1, width: box1_width, height: box1_height } = box1
-    const box1_x2 = box1_x1 + box1_width
-    const box1_y2 = box1_y1 + box1_height
-
-    const { x: box2_x1, y: box2_y1, width: box2_width, height: box2_height } = box2
-    const box2_x2 = box2_x1 + box2_width
-    const box2_y2 = box2_y1 + box2_height
-
-    const x1 = Math.max(box1_x1, box2_x1)
-    const y1 = Math.max(box1_y1, box2_y1)
-    const x2 = Math.min(box1_x2, box2_x2)
-    const y2 = Math.min(box1_y2, box2_y2)
-    return (x2 - x1) * (y2 - y1)
 }
