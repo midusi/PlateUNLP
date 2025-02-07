@@ -20,7 +20,6 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
 }
 
 export const ErrorCodes = {
-  WAITING_MODEL: 301,
   DIFFERENT_PROMP_SIZE: 501,
   INSUFFICIENT_MATCHES: 502,
   LESS_DATA_THAN_DEGREE: 503,
@@ -251,4 +250,9 @@ export function iou(box1: BoundingBox, box2: BoundingBox) {
   }
 
   return intersection(box1, box2) / union(box1, box2)
+}
+
+export function getNextId(boundingBoxes: BoundingBox[]) {
+  const maxId = boundingBoxes.reduce((max, box) => Math.max(max, box.id), 0)
+  return maxId + 1
 }
