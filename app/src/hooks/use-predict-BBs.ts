@@ -1,8 +1,8 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { Spectrum } from "@/enums/Spectrum"
-import { CustomError, ErrorCodes, iou } from "@/lib/utils"
+import { iou } from "@/lib/utils"
 import * as ort from "onnxruntime-web"
-import { useMemo, useState } from "react"
+import { useMemo, useRef } from "react"
 
 export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     const SIZE_M = 1088
@@ -11,13 +11,15 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     const IOU_THRESHOLD = 0.7
     const modelPath = "/models/spectrum_part_segmentator.onnx"
 
-    const [MODEL, setModel] = useState<ort.InferenceSession | null>(null)
+    const modelRef = useRef<Promise<ort.InferenceSession> | null>(null)
 
     useMemo(() => {
-        ort.InferenceSession.create(modelPath)
-            .then(setModel)
-            .catch(error => console.error("Error cargando el modelo ONNX:", error))
-    }, [modelPath])
+        modelRef.current = ort.InferenceSession.create(modelPath)
+        // .then((m) => {
+        //     console.log("Modelo cargado")
+        //     return m
+        // })
+    }, [])
 
     function prepare_input(img_src: string) {
         const image = new Image()
@@ -108,12 +110,8 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     }
 
     async function determineBBs(img_src: string): Promise<BoundingBox[]> {
-        if (!MODEL) {
-            throw new CustomError(ErrorCodes.WAITING_MODEL, "El modelo aún no está cargado.")
-        }
-
         const { input, image } = prepare_input(img_src)
-        const session: ort.InferenceSession = MODEL
+        const session: ort.InferenceSession = await modelRef.current!
         const outputs: ort.InferenceSession.OnnxValueMapType = await runInference(session, input)
         const processed_output: BoundingBox[] = processOutputs(outputs, image)
         return processed_output
