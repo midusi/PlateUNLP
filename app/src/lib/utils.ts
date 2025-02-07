@@ -19,10 +19,11 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
 }
 
 export const ErrorCodes = {
-  DIFFERENT_PROMP_SIZE: 1001,
-  INSUFFICIENT_MATCHES: 1002,
-  LESS_DATA_THAN_DEGREE: 1003,
-  DEGREE_UNDEFINED: 1004,
+  WAITING_MODEL: 301,
+  DIFFERENT_PROMP_SIZE: 501,
+  INSUFFICIENT_MATCHES: 502,
+  LESS_DATA_THAN_DEGREE: 503,
+  DEGREE_UNDEFINED: 504,
 }
 
 export class CustomError extends Error {
