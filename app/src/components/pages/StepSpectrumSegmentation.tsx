@@ -5,7 +5,7 @@ import { Button } from "@/components/atoms/button"
 import { Uploader } from "@/components/molecules/Uploader"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
-import { CustomError, ErrorCodes } from "@/lib/utils"
+import { getNextId } from "@/lib/utils"
 import { useState } from "react"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
@@ -49,20 +49,13 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
     const determineBB: (img_src: string) => Promise<BoundingBox[]> = usePredictBBs()
 
     async function handleAutodetect() {
-        try {
-            const bbAutodetected = await determineBB(file)
-            setBoundingBoxes(bbAutodetected)
+        const bbAutodetectedPromise = determineBB(file)
+        const newBBs: BoundingBox[] = [...boundingBoxes]
+        for (const bb of await bbAutodetectedPromise) {
+            const newBB = { ...bb, id: getNextId(newBBs) }
+            newBBs.push(newBB)
         }
-        catch (error) {
-            if (error instanceof CustomError && error.code === ErrorCodes.WAITING_MODEL) {
-                console.warn("Waiting model, retry in 1 second...")
-                await new Promise(resolve => setTimeout(resolve, 1000))
-                await handleAutodetect() // Reintenta la detección
-            }
-            else {
-                throw error
-            }
-        }
+        setBoundingBoxes(newBBs)
     }
 
     async function handleDownload() {

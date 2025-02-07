@@ -2,6 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
 import { Button } from "@/components/atoms/button"
 import { Spectrum } from "@/enums/Spectrum"
+import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 
@@ -273,12 +274,11 @@ function useBoundingBoxesAddRemove(
     selectedBB: number | null,
     setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>,
 ) {
-    const [nextId, setNextId] = useState<number>(1)
     const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
-            id: nextId,
+            id: getNextId(boundingBoxes),
             name: "Spectrum",
             x: nextPos.x,
             y: nextPos.y,
@@ -288,7 +288,6 @@ function useBoundingBoxesAddRemove(
             prob: 1,
         }
         setBoundingBoxes([...boundingBoxes, newBox])
-        setNextId(nextId + 1)
         setNextPos({ x: nextPos.x + 10, y: nextPos.y + 10 })
         if (!selectedBB) {
             setSelectedBB(newBox.id)
