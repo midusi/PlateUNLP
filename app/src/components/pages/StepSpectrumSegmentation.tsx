@@ -4,6 +4,8 @@ import type { ChangeEvent } from "react"
 import { Button } from "@/components/atoms/button"
 import { Uploader } from "@/components/molecules/Uploader"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
+import { usePredictBBs } from "@/hooks/use-predict-BBs"
+import { getNextId } from "@/lib/utils"
 import { useState } from "react"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
@@ -44,6 +46,17 @@ interface SegmentationUIProps {
 
 function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+    const determineBB: (img_src: string) => Promise<BoundingBox[]> = usePredictBBs()
+
+    async function handleAutodetect() {
+        const bbAutodetectedPromise = determineBB(file)
+        const newBBs: BoundingBox[] = [...boundingBoxes]
+        for (const bb of await bbAutodetectedPromise) {
+            const newBB = { ...bb, id: getNextId(newBBs) }
+            newBBs.push(newBB)
+        }
+        setBoundingBoxes(newBBs)
+    }
 
     async function handleDownload() {
         if (!file || boundingBoxes.length === 0)
@@ -98,6 +111,13 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
 
     return (
         <>
+            <Button
+                onClick={() => {
+                    handleAutodetect()
+                }}
+            >
+                Autodetect
+            </Button>
             <BBImageEditor className="w-full" src={file} boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} />
             <div className="flex justify-center pt-4">
                 <Button

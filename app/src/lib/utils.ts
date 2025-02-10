@@ -1,3 +1,4 @@
+import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { type ClassValue, clsx } from "clsx"
 import { inv, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
@@ -19,10 +20,10 @@ function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]]
 }
 
 export const ErrorCodes = {
-  DIFFERENT_PROMP_SIZE: 1001,
-  INSUFFICIENT_MATCHES: 1002,
-  LESS_DATA_THAN_DEGREE: 1003,
-  DEGREE_UNDEFINED: 1004,
+  DIFFERENT_PROMP_SIZE: 501,
+  INSUFFICIENT_MATCHES: 502,
+  LESS_DATA_THAN_DEGREE: 503,
+  DEGREE_UNDEFINED: 504,
 }
 
 export class CustomError extends Error {
@@ -215,4 +216,43 @@ export function legendreAlgoritm(x: number[], y: number[], degree: number = -1):
       , 0,
     )
   }
+}
+
+export function iou(box1: BoundingBox, box2: BoundingBox) {
+  function union(box1: BoundingBox, box2: BoundingBox) {
+    const { x: box1_x1, y: box1_y1, width: box1_width, height: box1_height } = box1
+    const box1_x2 = box1_x1 + box1_width
+    const box1_y2 = box1_y1 + box1_height
+
+    const { x: box2_x1, y: box2_y1, width: box2_width, height: box2_height } = box2
+    const box2_x2 = box2_x1 + box2_width
+    const box2_y2 = box2_y1 + box2_height
+
+    const box1_area = (box1_x2 - box1_x1) * (box1_y2 - box1_y1)
+    const box2_area = (box2_x2 - box2_x1) * (box2_y2 - box2_y1)
+    return box1_area + box2_area - intersection(box1, box2)
+  }
+
+  function intersection(box1: BoundingBox, box2: BoundingBox) {
+    const { x: box1_x1, y: box1_y1, width: box1_width, height: box1_height } = box1
+    const box1_x2 = box1_x1 + box1_width
+    const box1_y2 = box1_y1 + box1_height
+
+    const { x: box2_x1, y: box2_y1, width: box2_width, height: box2_height } = box2
+    const box2_x2 = box2_x1 + box2_width
+    const box2_y2 = box2_y1 + box2_height
+
+    const x1 = Math.max(box1_x1, box2_x1)
+    const y1 = Math.max(box1_y1, box2_y1)
+    const x2 = Math.min(box1_x2, box2_x2)
+    const y2 = Math.min(box1_y2, box2_y2)
+    return (x2 - x1) * (y2 - y1)
+  }
+
+  return intersection(box1, box2) / union(box1, box2)
+}
+
+export function getNextId(boundingBoxes: BoundingBox[]) {
+  const maxId = boundingBoxes.reduce((max, box) => Math.max(max, box.id), 0)
+  return maxId + 1
 }

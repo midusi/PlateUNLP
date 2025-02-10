@@ -7,5 +7,6 @@ export interface BoundingBox {
     y: number
     width: number
     height: number
-    content: Spectrum
+    class_name: Spectrum
+    prob: number
 }

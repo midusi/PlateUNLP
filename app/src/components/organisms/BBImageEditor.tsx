@@ -2,6 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
 import { Button } from "@/components/atoms/button"
 import { Spectrum } from "@/enums/Spectrum"
+import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 
@@ -196,7 +197,7 @@ function BoundingBoxElement({
 }: BoundingBoxElementProps) {
     const [isHovered, setIsHovered] = useState<boolean>(false)
     const { id: boxId, x: boxX, y: boxY, width:
-        boxWidth, height: boxHeight, content: boxContent, name: boxName } = box
+        boxWidth, height: boxHeight, class_name: boxClass, name: boxName } = box
     const { x: scaleX, y: scaleY } = scale
 
     const resizeHandles = [
@@ -220,7 +221,7 @@ function BoundingBoxElement({
                 width: `${boxWidth * scaleX}px`,
                 height: `${boxHeight * scaleY}px`,
                 border: `${selected ? "3px" : "2px"
-                    } solid ${getColorForSpectrum(boxContent)}`,
+                    } solid ${getColorForSpectrum(boxClass)}`,
                 cursor: dragged ? "grabbing" : "grab",
                 boxSizing: "border-box",
                 zIndex: selected ? 1000 : 1,
@@ -273,21 +274,20 @@ function useBoundingBoxesAddRemove(
     selectedBB: number | null,
     setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>,
 ) {
-    const [nextId, setNextId] = useState<number>(1)
     const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
 
     function addBoundingBox() {
         const newBox: BoundingBox = {
-            id: nextId,
+            id: getNextId(boundingBoxes),
             name: "Spectrum",
             x: nextPos.x,
             y: nextPos.y,
             width: 200,
             height: 100,
-            content: Spectrum.Lamp,
+            class_name: Spectrum.Lamp,
+            prob: 1,
         }
         setBoundingBoxes([...boundingBoxes, newBox])
-        setNextId(nextId + 1)
         setNextPos({ x: nextPos.x + 10, y: nextPos.y + 10 })
         if (!selectedBB) {
             setSelectedBB(newBox.id)
@@ -340,8 +340,8 @@ interface ItemOfBoxListProps {
 }
 
 function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBoxListProps) {
-    const { id, name, content } = box
-    const [spectrumContent, setSpectrumContent] = useState<Spectrum>(content)
+    const { id, name, class_name } = box
+    const [spectrumContent, setSpectrumContent] = useState<Spectrum>(class_name)
 
     function handleInteractableClick(e: React.MouseEvent) {
         e.stopPropagation()
@@ -385,10 +385,10 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
                     value={spectrumContent}
                     onChange={(e) => {
                         const newSpectrum = e.target.value as Spectrum
-                        if (content !== newSpectrum) {
+                        if (class_name !== newSpectrum) {
                             setBoundingBoxes(prevBoxes =>
                                 prevBoxes.map(b =>
-                                    b.id === box.id ? { ...b, content: newSpectrum } : b,
+                                    b.id === box.id ? { ...b, class_name: newSpectrum } : b,
                                 ),
                             )
                             setSpectrumContent(newSpectrum)
@@ -409,7 +409,7 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
                 <span
                     className="ml-1 inline-block w-3 rounded-none"
                     style={{
-                        backgroundColor: getColorForSpectrum(content),
+                        backgroundColor: getColorForSpectrum(class_name),
                         aspectRatio: "0.5",
                     }}
 
