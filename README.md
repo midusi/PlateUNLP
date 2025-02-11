@@ -45,7 +45,6 @@ pnpm start
 ```
 
 ---
----
 
 # Para desarrolladores
 
