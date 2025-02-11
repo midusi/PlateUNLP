@@ -1,6 +1,8 @@
 import { NavigationProgressBar } from "@/components/organisms/NavigationProgressBar"
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
+import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
+import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
 import { useGlobalStore } from "./hooks/use-global-store"
 
 export default function App() {
@@ -24,13 +26,14 @@ export default function App() {
 
       <main className="px-8">
         <NavigationProgressBar
-          initialStep={2}
+          initialStep={1}
           stepsArr={[
             { name: "Begin", content: <>BEGIN</> },
-            { name: "Digitization", content: <>1</> },
-            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation onComplete={() => onComplete(2)} /> },
-            { name: "Feature extraction", content: <>3</> },
-            { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(4)} /> },
+            { name: "Plate segmentation", content: <StepPlateSegmentation onComplete={() => onComplete(1)} /> },
+            { name: "Metadata retrieval", content: <StepMetadataRetrieval onComplete={() => onComplete(2)} /> },
+            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation onComplete={() => onComplete(3)} /> },
+            { name: "Feature extraction", content: <>4</> },
+            { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(5)} /> },
             { name: "Completed", content: <>FIN</> },
           ]}
         />
