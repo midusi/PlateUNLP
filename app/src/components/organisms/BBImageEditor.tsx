@@ -245,25 +245,28 @@ function BoundingBoxElement({
                     opacity: "1",
                     transition: "opacity 0.1s ease",
                     ...(isHovered && { opacity: "0" }), // Cambiar visibilidad al hacer hover
+                    userSelect: "none",
                 }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
                 {`#${boxId} ${boxName}`}
             </div>
-            {selected && resizeHandles.map(handle => (
-                <div
-                    key={handle.direction}
-                    onMouseDown={event => onResizeStart(event, handle.direction)}
-                    style={{
-                        position: "absolute",
-                        width: 10,
-                        height: 10,
-                        background: "rgba(0, 0, 0, 0.5)",
-                        ...handle.style,
-                    }}
-                />
-            ))}
+            {
+                selected && resizeHandles.map(handle => (
+                    <div
+                        key={handle.direction}
+                        onMouseDown={event => onResizeStart(event, handle.direction)}
+                        style={{
+                            position: "absolute",
+                            width: 10,
+                            height: 10,
+                            background: "rgba(0, 0, 0, 0.5)",
+                            ...handle.style,
+                        }}
+                    />
+                ))
+            }
         </div>
     )
 }
@@ -487,7 +490,14 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
             onMouseLeave={handleMouseUp}
         >
 
-            <img className={className} ref={imageRef} src={src} alt="Bounding Box Editor" />
+            <img
+                className={className}
+                ref={imageRef}
+                src={src}
+                alt="Bounding Box Editor"
+                style={{ userSelect: "none" }}
+                draggable={false}
+            />
             {/* Dibujar las Bounding Boxes */}
             {boundingBoxes.map(box => (
                 <BoundingBoxElement
