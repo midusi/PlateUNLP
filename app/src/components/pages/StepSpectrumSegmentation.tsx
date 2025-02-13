@@ -115,6 +115,7 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
                 onClick={() => {
                     handleAutodetect()
                 }}
+                className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
             >
                 Autodetect
             </Button>
