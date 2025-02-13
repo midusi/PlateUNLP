@@ -18,10 +18,9 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
 
     const modelRef = useRef<Promise<ort.InferenceSession> | null>(null)
 
-    const [lastResponse, setLastResponse] = useState<Response | null>({
+    const [lastResponse, setLastResponse] = useState<Response>({
         input: "",
         output: [],
-
     })
 
     useMemo(() => {
@@ -122,10 +121,17 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     }
 
     async function determineBBs(img_src: string): Promise<BoundingBox[]> {
+        if (lastResponse.input === img_src) {
+            return lastResponse.output
+        }
         const { input, image } = prepare_input(img_src)
         const session: ort.InferenceSession = await modelRef.current!
         const outputs: ort.InferenceSession.OnnxValueMapType = await runInference(session, input)
         const processed_output: BoundingBox[] = processOutputs(outputs, image)
+        setLastResponse({
+            input: img_src,
+            output: processed_output,
+        })
         return processed_output
     }
 
