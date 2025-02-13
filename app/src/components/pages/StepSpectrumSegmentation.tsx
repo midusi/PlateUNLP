@@ -4,8 +4,6 @@ import type { ChangeEvent } from "react"
 import { Button } from "@/components/atoms/button"
 import { Uploader } from "@/components/molecules/Uploader"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
-import { usePredictBBs } from "@/hooks/use-predict-BBs"
-import { getNextId } from "@/lib/utils"
 import { useState } from "react"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
