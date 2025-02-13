@@ -46,17 +46,6 @@ interface SegmentationUIProps {
 
 function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
-    const determineBB: (img_src: string) => Promise<BoundingBox[]> = usePredictBBs()
-
-    async function handleAutodetect() {
-        const bbAutodetectedPromise = determineBB(file)
-        const newBBs: BoundingBox[] = [...boundingBoxes]
-        for (const bb of await bbAutodetectedPromise) {
-            const newBB = { ...bb, id: getNextId(newBBs) }
-            newBBs.push(newBB)
-        }
-        setBoundingBoxes(newBBs)
-    }
 
     async function handleDownload() {
         if (!file || boundingBoxes.length === 0)
@@ -117,7 +106,6 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
                 boundingBoxes={boundingBoxes}
                 setBoundingBoxes={setBoundingBoxes}
                 enableAutodetect
-                handleAutodetect={handleAutodetect}
             />
             <div className="flex justify-center pt-4">
                 <Button

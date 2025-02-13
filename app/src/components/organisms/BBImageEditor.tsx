@@ -2,6 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
 import { Button } from "@/components/atoms/button"
 import { Spectrum } from "@/enums/Spectrum"
+import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
@@ -606,10 +607,9 @@ interface BBImageEditorProps {
     boundingBoxes: BoundingBox[]
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
     enableAutodetect: boolean
-    handleAutodetect: () => Promise<void>
 }
 
-export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes, enableAutodetect, handleAutodetect }: BBImageEditorProps) {
+export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes, enableAutodetect }: BBImageEditorProps) {
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [zoomInfo, setZoomInfo] = useState<{
         scale: number
@@ -618,6 +618,16 @@ export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes,
         scale: 1,
         origin: { x: 0, y: 0 },
     })
+    const determineBB: (img_src: string) => Promise<BoundingBox[]> = usePredictBBs()
+    async function handleAutodetect() {
+        const bbAutodetectedPromise = determineBB(src)
+        const newBBs: BoundingBox[] = [...boundingBoxes]
+        for (const bb of await bbAutodetectedPromise) {
+            const newBB = { ...bb, id: getNextId(newBBs) }
+            newBBs.push(newBB)
+        }
+        setBoundingBoxes(newBBs)
+    }
 
     // Agregado y borrado de bounding box
     const { addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(boundingBoxes, setBoundingBoxes, selectedBB, setSelectedBB)
