@@ -605,9 +605,11 @@ interface BBImageEditorProps {
     src: string
     boundingBoxes: BoundingBox[]
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+    enableAutodetect: boolean
+    handleAutodetect: () => Promise<void>
 }
 
-export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes }: BBImageEditorProps) {
+export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes, enableAutodetect, handleAutodetect }: BBImageEditorProps) {
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [zoomInfo, setZoomInfo] = useState<{
         scale: number
@@ -654,6 +656,16 @@ export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes 
             >
                 <div className="w-full p-4 flex flex-col items-center space-y-1">
                     <h3 className="text-lg font-semibold text-gray-700">Bounding Box Controls</h3>
+                    {enableAutodetect && (
+                        <Button
+                            onClick={() => {
+                                handleAutodetect()
+                            }}
+                            className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
+                        >
+                            Autodetect
+                        </Button>
+                    )}
                     <div className="flex w-full space-x-2">
                         <Button
                             className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"

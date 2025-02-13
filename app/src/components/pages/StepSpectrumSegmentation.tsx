@@ -111,15 +111,14 @@ function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
 
     return (
         <>
-            <Button
-                onClick={() => {
-                    handleAutodetect()
-                }}
-                className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
-            >
-                Autodetect
-            </Button>
-            <BBImageEditor className="w-full" src={file} boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} />
+            <BBImageEditor
+                className="w-full"
+                src={file}
+                boundingBoxes={boundingBoxes}
+                setBoundingBoxes={setBoundingBoxes}
+                enableAutodetect
+                handleAutodetect={handleAutodetect}
+            />
             <div className="flex justify-center pt-4">
                 <Button
                     onClick={() => {
