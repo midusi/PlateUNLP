@@ -20,11 +20,12 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
 
     const [lastResponse, setLastResponse] = useState<Response | null>({
         input: "",
-        output: []
+        output: [],
 
     })
 
     useMemo(() => {
+        ort.env.wasm.wasmPaths = "/models/"
         modelRef.current = ort.InferenceSession.create(modelPath)
         // .then((m) => {
         //     console.log("Modelo cargado")
