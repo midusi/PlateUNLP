@@ -2,7 +2,12 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { Spectrum } from "@/enums/Spectrum"
 import { iou } from "@/lib/utils"
 import * as ort from "onnxruntime-web"
-import { useMemo, useRef } from "react"
+import { useMemo, useRef, useState } from "react"
+
+interface Response {
+    input: string
+    output: BoundingBox[]
+}
 
 export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     const SIZE_M = 1088
@@ -12,6 +17,12 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     const modelPath = "/models/spectrum_part_segmentator.onnx"
 
     const modelRef = useRef<Promise<ort.InferenceSession> | null>(null)
+
+    const [lastResponse, setLastResponse] = useState<Response | null>({
+        input: "",
+        output: []
+
+    })
 
     useMemo(() => {
         modelRef.current = ort.InferenceSession.create(modelPath)
