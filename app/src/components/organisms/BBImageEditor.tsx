@@ -644,7 +644,7 @@ export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes,
                 id="P0"
                 size={7}
                 minSize={2}
-                className="bg-black"
+                className="bg-blue-50 min-h-[35vh] flex flex-col justify-center"
             >
                 <ZoomComponent setZoomInfo={setZoomInfo}>
                     <ImageBBDisplay
