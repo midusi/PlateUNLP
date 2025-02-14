@@ -97,6 +97,10 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
             w = w * (NATURALWIDTH / SIZE_M)
             h = h * (NATURALHEIGHT / SIZE_M)
 
+            // Modificacion para que el ancho valla hasta los extremos
+            x1 = 0
+            w = NATURALWIDTH
+
             const boundingBox: BoundingBox = {
                 id: id++,
                 name: label,
