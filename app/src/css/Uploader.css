@@ -6,7 +6,7 @@
     padding-bottom: 4rem;
 }
 
-form {
+.uploader-form {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -23,7 +23,7 @@ form {
     border-color: #0d6efd;
 }
 
-.uploaded-row{
+.uploaded-row {
     margin: 10px 0;
     display: flex;
     justify-content: space-between;
