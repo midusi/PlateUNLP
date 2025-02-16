@@ -1,10 +1,17 @@
 import type { StepProps } from "@/interfaces/StepProps"
 import { Button } from "../atoms/button"
+import { useState } from "react"
+import { LoadFile } from "../molecules/LoadFile"
+import { SegmentationUI } from "../organisms/SegmentationUI"
 
 export function StepPlateSegmentation({ onComplete }: StepProps) {
+    const [file, setFile] = useState<string | null>(null)
     return (
         <>
-            1
+            <div className="w-full p-6">
+                {!file && <LoadFile onSelect={(fileValue: string) => setFile(fileValue)} />}
+                {file && <SegmentationUI file={file} onComplete={onComplete} />}
+            </div>
             <Button
                 onClick={() => { onComplete() }}
                 disabled
