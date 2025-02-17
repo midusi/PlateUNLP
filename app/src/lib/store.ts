@@ -59,7 +59,7 @@ export const globalStore = create<GlobalStore>()(set => ({
     "Insufficient matches, at least 2 are required for inference with linear regression.",
   ),
 
-  completedStages: 3,
+  completedStages: 4,
 
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {

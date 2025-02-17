@@ -2,6 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
 import { Button } from "@/components/atoms/button"
 import { Spectrum } from "@/enums/Spectrum"
+import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
@@ -605,9 +606,10 @@ interface BBImageEditorProps {
     src: string
     boundingBoxes: BoundingBox[]
     setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+    enableAutodetect: boolean
 }
 
-export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes }: BBImageEditorProps) {
+export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes, enableAutodetect }: BBImageEditorProps) {
     const [selectedBB, setSelectedBB] = useState<number | null>(null)
     const [zoomInfo, setZoomInfo] = useState<{
         scale: number
@@ -616,6 +618,16 @@ export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes 
         scale: 1,
         origin: { x: 0, y: 0 },
     })
+    const determineBB: (img_src: string) => Promise<BoundingBox[]> = usePredictBBs()
+    async function handleAutodetect() {
+        const bbAutodetectedPromise = determineBB(src)
+        const newBBs: BoundingBox[] = [...boundingBoxes]
+        for (const bb of await bbAutodetectedPromise) {
+            const newBB = { ...bb, id: getNextId(newBBs) }
+            newBBs.push(newBB)
+        }
+        setBoundingBoxes(newBBs)
+    }
 
     // Agregado y borrado de bounding box
     const { addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(boundingBoxes, setBoundingBoxes, selectedBB, setSelectedBB)
@@ -632,7 +644,7 @@ export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes 
                 id="P0"
                 size={7}
                 minSize={2}
-                className="bg-black"
+                className="bg-blue-50 min-h-[35vh] flex flex-col justify-center"
             >
                 <ZoomComponent setZoomInfo={setZoomInfo}>
                     <ImageBBDisplay
@@ -654,6 +666,16 @@ export function BBImageEditor({ className, src, boundingBoxes, setBoundingBoxes 
             >
                 <div className="w-full p-4 flex flex-col items-center space-y-1">
                     <h3 className="text-lg font-semibold text-gray-700">Bounding Box Controls</h3>
+                    {enableAutodetect && (
+                        <Button
+                            onClick={() => {
+                                handleAutodetect()
+                            }}
+                            className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
+                        >
+                            Autodetect
+                        </Button>
+                    )}
                     <div className="flex w-full space-x-2">
                         <Button
                             className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
