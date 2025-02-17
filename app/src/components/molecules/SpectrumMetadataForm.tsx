@@ -1,16 +1,17 @@
+import type { z } from "zod"
+import { spectrumMetadataFormSchema } from "@/lib/spectrumMetadataFormSchema"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Label } from "@radix-ui/react-label"
-import { Input } from "../atoms/input"
-import { z } from 'zod'
 import { forwardRef, useImperativeHandle } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { DatePicker } from "../atoms/DatePicker"
+import { DatePicker } from "../atoms/datePicker"
+import { Input } from "../atoms/input"
 import { TimePicker } from "../atoms/timePicker"
 
 export interface SpectrumMetadata {
     OBJECT: string // required
     DATE_OBS: Date // required
-    TIME_OBS: number //time/timestamp
+    TIME_OBS: number // time/timestamp
     MAIN_ID: string // required
     UT: number // float required
     ST: number // float
@@ -30,42 +31,20 @@ export interface SpectrumMetadata {
     EQUINOX: number // float
 }
 
-export const spectrumMetadataFormSchema = z.object({
-    OBJECT: z.string().nonempty(),
-    DATE_OBS: z.date(),
-    TIME_OBS: z.number().optional(),
-    MAIN_ID: z.string().nonempty(),
-    UT: z.number(),
-    ST: z.union([z.undefined(), z.number()]),
-    HA: z.union([z.undefined(), z.number()]),
-    RA: z.union([z.undefined(), z.number()]),
-    DEC: z.union([z.undefined(), z.number()]),
-    GAIN: z.union([z.undefined(), z.number()]),
-    RA2000: z.union([z.undefined(), z.number()]),
-    DEC2000: z.union([z.undefined(), z.number()]),
-    RA1950: z.union([z.undefined(), z.number()]),
-    DEC1950: z.union([z.undefined(), z.number()]),
-    EXPTIME: z.number().optional(),
-    DETECTOR: z.string().optional(),
-    IMAGETYP: z.string().optional(),
-    SPTYPE: z.string().optional(),
-    JD: z.union([z.undefined(), z.number()]),
-    EQUINOX: z.union([z.undefined(), z.number()])
-})
 type FormData = z.infer<typeof spectrumMetadataFormSchema>
 
-export const SpectrumMetadataForm = forwardRef((props, ref) => {
+export const SpectrumMetadataForm = forwardRef((_props, ref) => {
     const {
         register,
         watch,
         trigger,
         reset,
         control,
-        formState: { errors, isValid }
+        formState: { errors, isValid },
     } = useForm<FormData>({
         resolver: zodResolver(spectrumMetadataFormSchema), // Conectar Zod con React Hook Form
         mode: "onChange",
-    });
+    })
 
     useImperativeHandle(ref, () => ({
         setValues: (spectrumMetadata: SpectrumMetadata) => {
@@ -75,10 +54,10 @@ export const SpectrumMetadataForm = forwardRef((props, ref) => {
             return watch()
         },
         validate: () => {
-            trigger();
+            trigger()
             return isValid
-        }
-    }));
+        },
+    }))
 
     return (
         <>
@@ -108,7 +87,7 @@ export const SpectrumMetadataForm = forwardRef((props, ref) => {
                             render={({ field: { value, onChange } }) => (
                                 <TimePicker
                                     date={value ? new Date(value * 1000) : undefined}
-                                    setDate={(date) => onChange(date ? date.getTime() / 1000 : 0)}
+                                    setDate={date => onChange(date ? date.getTime() / 1000 : 0)}
                                 />
                             )}
                         />
@@ -127,7 +106,7 @@ export const SpectrumMetadataForm = forwardRef((props, ref) => {
                             render={({ field: { value, onChange } }) => (
                                 <TimePicker
                                     date={value ? new Date(value * 1000) : undefined}
-                                    setDate={(date) => onChange(date ? date.getTime() / 1000 : 0)}
+                                    setDate={date => onChange(date ? date.getTime() / 1000 : 0)}
                                 />
                             )}
                         />
@@ -135,23 +114,35 @@ export const SpectrumMetadataForm = forwardRef((props, ref) => {
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>ST</Label>
-                        <Input {...register("ST", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="Local mean sidereal time" className="border p-2 rounded" />
+                        <Input
+                            {...register("ST", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="Local mean sidereal time"
+                            className="border p-2 rounded"
+                        />
                         {errors.ST && <p className="text-red-500">{errors.ST.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>HA</Label>
-                        <Input {...register("HA", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="Hour angle" className="border p-2 rounded" />
+                        <Input
+                            {...register("HA", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="Hour angle"
+                            className="border p-2 rounded"
+                        />
                         {errors.HA && <p className="text-red-500">{errors.HA.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>RA</Label>
-                        <Input  {...register("RA", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="Right ascension" className="border p-2 rounded" />
+                        <Input
+                            {...register("RA", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="Right ascension"
+                            className="border p-2 rounded"
+                        />
                         {errors.RA && <p className="text-red-500">{errors.RA.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -160,46 +151,65 @@ export const SpectrumMetadataForm = forwardRef((props, ref) => {
                             placeholder="Declination"
                             className="border p-2 rounded"
                             {...register("DEC", {
-                                setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
                             })}
                         />
                         {errors.DEC && <p className="text-red-500">{errors.DEC.message}</p>}
                     </div>
 
-
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>GAIN</Label>
-                        <Input {...register("GAIN", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="GAIN" className="border p-2 rounded" />
+                        <Input
+                            {...register("GAIN", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="GAIN"
+                            className="border p-2 rounded"
+                        />
                         {errors.GAIN && <p className="text-red-500">{errors.GAIN.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>RA2000</Label>
-                        <Input {...register("RA2000", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="Right ascension J2000" className="border p-2 rounded" />
+                        <Input
+                            {...register("RA2000", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="Right ascension J2000"
+                            className="border p-2 rounded"
+                        />
                         {errors.RA2000 && <p className="text-red-500">{errors.RA2000.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>DEC2000</Label>
-                        <Input {...register("DEC2000", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="Declination J2000" className="border p-2 rounded" />
+                        <Input
+                            {...register("DEC2000", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="Declination J2000"
+                            className="border p-2 rounded"
+                        />
                         {errors.DEC2000 && <p className="text-red-500">{errors.DEC2000.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>RA1950</Label>
-                        <Input {...register("RA1950", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="RA2000 precessed ep.1950 eq.1950" className="border p-2 rounded" />
+                        <Input
+                            {...register("RA1950", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="RA2000 precessed ep.1950 eq.1950"
+                            className="border p-2 rounded"
+                        />
                         {errors.RA1950 && <p className="text-red-500">{errors.RA1950.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>DEC1950</Label>
-                        <Input {...register("DEC1950", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="DEC2000 precessed to ep.1950 eq.1950" className="border p-2 rounded" />
+                        <Input
+                            {...register("DEC1950", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="DEC2000 precessed to ep.1950 eq.1950"
+                            className="border p-2 rounded"
+                        />
                         {errors.DEC1950 && <p className="text-red-500">{errors.DEC1950.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -210,7 +220,7 @@ export const SpectrumMetadataForm = forwardRef((props, ref) => {
                             render={({ field: { value, onChange } }) => (
                                 <TimePicker
                                     date={value ? new Date(value * 1000) : undefined}
-                                    setDate={(date) => onChange(date ? date.getTime() / 1000 : 0)}
+                                    setDate={date => onChange(date ? date.getTime() / 1000 : 0)}
                                 />
                             )}
                         />
@@ -233,16 +243,24 @@ export const SpectrumMetadataForm = forwardRef((props, ref) => {
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>JD</Label>
-                        <Input {...register("JD", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="Geocentric Julian day (Greenwich)" className="border p-2 rounded" />
+                        <Input
+                            {...register("JD", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="Geocentric Julian day (Greenwich)"
+                            className="border p-2 rounded"
+                        />
                         {errors.JD && <p className="text-red-500">{errors.JD.message}</p>}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>EQUINOX</Label>
-                        <Input {...register("EQUINOX", {
-                            setValueAs: (value) => (value === "" ? undefined : isNaN(value) ? NaN : Number(value)),
-                        })} placeholder="EQUINOX of ra y dec" className="border p-2 rounded" />
+                        <Input
+                            {...register("EQUINOX", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="EQUINOX of ra y dec"
+                            className="border p-2 rounded"
+                        />
                         {errors.EQUINOX && <p className="text-red-500">{errors.EQUINOX.message}</p>}
                     </div>
                 </div>
