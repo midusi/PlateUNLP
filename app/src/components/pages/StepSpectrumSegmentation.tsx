@@ -10,7 +10,7 @@ export function StepSpectrumSegmentation({ onComplete }: StepProps) {
     return (
         <div className="w-full p-6">
             {!file && <LoadFile onSelect={(fileValue: string) => setFile(fileValue)} />}
-            {file && <SegmentationUI file={file} onComplete={onComplete} />}
+            {file && <SegmentationUI file={file} onComplete={onComplete} enableAutodetect />}
         </div>
     )
 }

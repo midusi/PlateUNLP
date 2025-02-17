@@ -1,28 +1,16 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
-import { usePredictBBs } from "@/hooks/use-predict-BBs"
-import { getNextId } from "@/lib/utils"
 import { useState } from "react"
 
 interface SegmentationUIProps {
     file: string
     onComplete: () => void
+    enableAutodetect: boolean
 }
 
-export function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
+export function SegmentationUI({ file, onComplete, enableAutodetect }: SegmentationUIProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
-    const determineBB: (img_src: string) => Promise<BoundingBox[]> = usePredictBBs()
-
-    async function handleAutodetect() {
-        const bbAutodetectedPromise = determineBB(file)
-        const newBBs: BoundingBox[] = [...boundingBoxes]
-        for (const bb of await bbAutodetectedPromise) {
-            const newBB = { ...bb, id: getNextId(newBBs) }
-            newBBs.push(newBB)
-        }
-        setBoundingBoxes(newBBs)
-    }
 
     async function handleDownload() {
         if (!file || boundingBoxes.length === 0)
@@ -77,14 +65,13 @@ export function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
 
     return (
         <>
-            <Button
-                onClick={() => {
-                    handleAutodetect()
-                }}
-            >
-                Autodetect
-            </Button>
-            <BBImageEditor className="w-full" src={file} boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} enableAutodetect />
+            <BBImageEditor
+                className="w-full"
+                src={file}
+                boundingBoxes={boundingBoxes}
+                setBoundingBoxes={setBoundingBoxes}
+                enableAutodetect={enableAutodetect}
+            />
             <div className="flex justify-center pt-4">
                 <Button
                     onClick={() => {
