@@ -43,15 +43,3 @@ Ejecutar:
 ```bash
 pnpm start
 ```
-
----
-
-# Para desarrolladores
-
-Algunas consideraciones especiales que se deben tener en cuenta durante el trabajo de desarrollo.
-
-## Inferencia de modelos funcional solo en Producción.
-
-Las funcionalidades relacionadas al reconocimiento de objetos en imágenes se ejecutan en su totalidad en el Frontend. Gracias a esto no se requiere de ningún tipo de Backend.
-
-Si va a trabajar con las funcionalidades de detección de objetos tenga en cuenta que ⚠ Estas funcionalidades no funcionan en Desarrollo, 🔧 asegurarse de levantar Producción si pretende testearlas.
