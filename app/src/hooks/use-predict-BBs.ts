@@ -2,7 +2,12 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { Spectrum } from "@/enums/Spectrum"
 import { iou } from "@/lib/utils"
 import * as ort from "onnxruntime-web"
-import { useMemo, useRef } from "react"
+import { useMemo, useRef, useState } from "react"
+
+interface Response {
+    input: string
+    output: BoundingBox[]
+}
 
 export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     const SIZE_M = 1088
@@ -13,7 +18,13 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
 
     const modelRef = useRef<Promise<ort.InferenceSession> | null>(null)
 
+    const [lastResponse, setLastResponse] = useState<Response>({
+        input: "",
+        output: [],
+    })
+
     useMemo(() => {
+        ort.env.wasm.wasmPaths = "/models/"
         modelRef.current = ort.InferenceSession.create(modelPath)
         // .then((m) => {
         //     console.log("Modelo cargado")
@@ -86,6 +97,10 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
             w = w * (NATURALWIDTH / SIZE_M)
             h = h * (NATURALHEIGHT / SIZE_M)
 
+            // Modificacion para que el ancho valla hasta los extremos
+            x1 = 0
+            w = NATURALWIDTH
+
             const boundingBox: BoundingBox = {
                 id: id++,
                 name: label,
@@ -110,10 +125,17 @@ export function usePredictBBs(): (img_src: string) => Promise<BoundingBox[]> {
     }
 
     async function determineBBs(img_src: string): Promise<BoundingBox[]> {
+        if (lastResponse.input === img_src) {
+            return lastResponse.output
+        }
         const { input, image } = prepare_input(img_src)
         const session: ort.InferenceSession = await modelRef.current!
         const outputs: ort.InferenceSession.OnnxValueMapType = await runInference(session, input)
         const processed_output: BoundingBox[] = processOutputs(outputs, image)
+        setLastResponse({
+            input: img_src,
+            output: processed_output,
+        })
         return processed_output
     }
 
