@@ -1,37 +1,40 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-import { Period, display12HourValue, setDateByType } from "./timePickerUtils";
+import type { Period } from "./timePickerUtils"
+import * as React from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
+import { display12HourValue, setDateByType } from "./timePickerUtils"
 
 export interface PeriodSelectorProps {
-    period: Period;
-    setPeriod: (m: Period) => void;
-    date: Date | undefined;
-    setDate: (date: Date | undefined) => void;
-    onRightFocus?: () => void;
-    onLeftFocus?: () => void;
+    period: Period
+    setPeriod: (m: Period) => void
+    date: Date | undefined
+    setDate: (date: Date | undefined) => void
+    onRightFocus?: () => void
+    onLeftFocus?: () => void
 }
 
 export const TimePeriodSelect = React.forwardRef<HTMLButtonElement, PeriodSelectorProps>(({ period, setPeriod, date, setDate, onLeftFocus, onRightFocus }, ref) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-        if (e.key === "ArrowRight") onRightFocus?.();
-        if (e.key === "ArrowLeft") onLeftFocus?.();
-    };
+        if (e.key === "ArrowRight")
+            onRightFocus?.()
+        if (e.key === "ArrowLeft")
+            onLeftFocus?.()
+    }
 
     const handleValueChange = (value: Period) => {
-        setPeriod(value);
+        setPeriod(value)
 
         /**
          * trigger an update whenever the user switches between AM and PM;
          * otherwise user must manually change the hour each time
          */
         if (date) {
-            const tempDate = new Date(date);
-            const hours = display12HourValue(date.getHours());
-            setDate(setDateByType(tempDate, hours.toString(), "12hours", period === "AM" ? "PM" : "AM"));
+            const tempDate = new Date(date)
+            const hours = display12HourValue(date.getHours())
+            setDate(setDateByType(tempDate, hours.toString(), "12hours", period === "AM" ? "PM" : "AM"))
         }
-    };
+    }
 
     return (
         <div className="flex h-10 items-center">
@@ -45,7 +48,7 @@ export const TimePeriodSelect = React.forwardRef<HTMLButtonElement, PeriodSelect
                 </SelectContent>
             </Select>
         </div>
-    );
-});
+    )
+})
 
-TimePeriodSelect.displayName = "TimePeriodSelect";
+TimePeriodSelect.displayName = "TimePeriodSelect"

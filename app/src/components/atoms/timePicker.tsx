@@ -1,21 +1,21 @@
-import * as React from "react";
-import { Label } from "./label";
-import { TimePickerInput } from "./timePickerInput";
-import { TimePeriodSelect } from "./periodSelect";
-import { Period } from "./timePickerUtils";
+import type { Period } from "./timePickerUtils"
+import * as React from "react"
+import { Label } from "./label"
+import { TimePeriodSelect } from "./periodSelect"
+import { TimePickerInput } from "./timePickerInput"
 
 interface TimePickerProps {
-    date: Date | undefined;
-    setDate: (date: Date | undefined) => void;
+    date: Date | undefined
+    setDate: (date: Date | undefined) => void
 }
 
 export function TimePicker({ date, setDate }: TimePickerProps) {
-    const [period, setPeriod] = React.useState<Period>("PM");
+    const [period, setPeriod] = React.useState<Period>("PM")
 
-    const minuteRef = React.useRef<HTMLInputElement>(null);
-    const hourRef = React.useRef<HTMLInputElement>(null);
-    const secondRef = React.useRef<HTMLInputElement>(null);
-    const periodRef = React.useRef<HTMLButtonElement>(null);
+    const minuteRef = React.useRef<HTMLInputElement>(null)
+    const hourRef = React.useRef<HTMLInputElement>(null)
+    const secondRef = React.useRef<HTMLInputElement>(null)
+    const periodRef = React.useRef<HTMLButtonElement>(null)
 
     return (
         <div className="flex items-end gap-2">
@@ -27,7 +27,7 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     picker="12hours"
                     period={period}
                     date={date}
-                    setDate={setDate ? (date) => setDate(date) : () => { }}
+                    setDate={setDate ? date => setDate(date) : () => { }}
                     ref={hourRef}
                     onRightFocus={() => minuteRef.current?.focus()}
                 />
@@ -40,7 +40,7 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     picker="minutes"
                     id="minutes12"
                     date={date}
-                    setDate={setDate ? (date) => setDate(date) : () => { }}
+                    setDate={setDate ? date => setDate(date) : () => { }}
                     ref={minuteRef}
                     onLeftFocus={() => hourRef.current?.focus()}
                     onRightFocus={() => secondRef.current?.focus()}
@@ -54,7 +54,7 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     picker="seconds"
                     id="seconds12"
                     date={date}
-                    setDate={setDate ? (date) => setDate(date) : () => { }}
+                    setDate={setDate ? date => setDate(date) : () => { }}
                     ref={secondRef}
                     onLeftFocus={() => minuteRef.current?.focus()}
                     onRightFocus={() => periodRef.current?.focus()}
@@ -68,11 +68,11 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     period={period}
                     setPeriod={setPeriod}
                     date={date}
-                    setDate={setDate ? (date) => setDate(date) : () => { }}
+                    setDate={setDate ? date => setDate(date) : () => { }}
                     ref={periodRef}
                     onLeftFocus={() => secondRef.current?.focus()}
                 />
             </div>
         </div>
-    );
+    )
 }
