@@ -10,7 +10,7 @@ interface SegmentationUIProps {
     onComplete: () => void
 }
 
-export const SegmentationUI = ({ file, onComplete }: SegmentationUIProps) => {
+export function SegmentationUI({ file, onComplete }: SegmentationUIProps) {
     const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
     const determineBB: (img_src: string) => Promise<BoundingBox[]> = usePredictBBs()
 
@@ -84,7 +84,7 @@ export const SegmentationUI = ({ file, onComplete }: SegmentationUIProps) => {
             >
                 Autodetect
             </Button>
-            <BBImageEditor className="w-full" src={file} boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} />
+            <BBImageEditor className="w-full" src={file} boundingBoxes={boundingBoxes} setBoundingBoxes={setBoundingBoxes} enableAutodetect />
             <div className="flex justify-center pt-4">
                 <Button
                     onClick={() => {

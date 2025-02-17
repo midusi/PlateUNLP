@@ -1,6 +1,6 @@
 import type { StepProps } from "@/interfaces/StepProps"
-import { Button } from "../atoms/button"
 import { useState } from "react"
+import { Button } from "../atoms/button"
 import { LoadFile } from "../molecules/LoadFile"
 import { SegmentationUI } from "../organisms/SegmentationUI"
 

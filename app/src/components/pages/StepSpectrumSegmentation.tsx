@@ -1,11 +1,8 @@
-
 import type { StepProps } from "@/interfaces/StepProps"
 
 import { useState } from "react"
-import { SegmentationUI } from "../organisms/SegmentationUI"
 import { LoadFile } from "../molecules/LoadFile"
-
-
+import { SegmentationUI } from "../organisms/SegmentationUI"
 
 export function StepSpectrumSegmentation({ onComplete }: StepProps) {
     const [file, setFile] = useState<string | null>(null)
@@ -17,4 +14,3 @@ export function StepSpectrumSegmentation({ onComplete }: StepProps) {
         </div>
     )
 }
-
