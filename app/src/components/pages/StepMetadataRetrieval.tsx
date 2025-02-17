@@ -1,10 +1,11 @@
 import type { StepProps } from "@/interfaces/StepProps"
+import type { SpectrumMetadata } from "../molecules/SpectrumMetadataForm"
+import { useRef } from "react"
 import { Button } from "../atoms/button"
-import { useRef } from "react";
-import { SpectrumMetadata, SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm";
+import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
 
 export function StepMetadataRetrieval({ onComplete }: StepProps) {
-    const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void; getValues: () => SpectrumMetadata; validate: () => void }>(null)
+    const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, getValues: () => SpectrumMetadata, validate: () => void }>(null)
     return (
         <>
             <SpectrumMetadataForm ref={spectrumMetadataFormRef} />
@@ -16,7 +17,7 @@ export function StepMetadataRetrieval({ onComplete }: StepProps) {
                     Get
                 </Button>
                 <Button
-                    onClick={() => console.log("formulario correcto: " + spectrumMetadataFormRef.current?.validate())}
+                    onClick={() => console.log(`formulario correcto: ${spectrumMetadataFormRef.current?.validate()}`)}
                     className="bg-blue-500 text-white p-2 rounded"
                 >
                     Validate
@@ -42,7 +43,7 @@ export function StepMetadataRetrieval({ onComplete }: StepProps) {
                         IMAGETYP: "",
                         SPTYPE: "",
                         JD: 0,
-                        EQUINOX: 0
+                        EQUINOX: 0,
                     })}
                     className=" bg-blue-500 text-white p-2 rounded"
                 >
