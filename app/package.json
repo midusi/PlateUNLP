@@ -1,15 +1,15 @@
 {
-  "name": "@alineado/app",
+  "name": "@plateunlp/app",
   "type": "module",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start --host",
     "check-types": "tsc --noEmit",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "preview": "vite preview --host 0.0.0.0"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -22,6 +22,8 @@
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.4",
+    "@trpc/client": "11.0.0-rc.795",
+    "@trpc/server": "11.0.0-rc.795",
     "@visx/axis": "^3.12.0",
     "@visx/curve": "^3.12.0",
     "@visx/grid": "^3.12.0",
@@ -44,12 +46,14 @@
     "resizable-panes-react": "6.0.26",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "vinxi": "^0.5.3",
     "zod": "^3.24.2",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.12.1",
     "@eslint-react/eslint-plugin": "^1.22.1",
+    "@plateunlp/server": "workspace:^",
     "@tailwindcss/postcss": "^4.0.6",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
@@ -64,8 +68,9 @@
     "postcss": "^8.4.49",
     "shadcn": "^2.1.8",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.6.3",
+    "typescript": "~5.7.3",
     "vite": "6.1.0",
-    "vite-plugin-static-copy": "^2.2.0"
+    "vite-plugin-static-copy": "^2.2.0",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
