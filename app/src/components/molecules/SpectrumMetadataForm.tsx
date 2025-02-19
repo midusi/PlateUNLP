@@ -62,7 +62,7 @@ export const SpectrumMetadataForm = forwardRef((_props, ref) => {
     return (
         <>
             <form>
-                <div className="flex flex-wrap justify-around gap-y-4">
+                <div className="flex flex-wrap content-normal gap-4">
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label>OBJECT</Label>
                         <Input {...register("OBJECT")} placeholder="Name of the object observed" className="border p-2 rounded" />
