@@ -26,7 +26,8 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
     // with the pixel and intensity values. It does it like this because there
     // are some FITS files that have more than one row of data, but taking the
     // first row is enough for now.
-    const loadedData = Array.from(fits.getData().take(fits.NAXISn[0])).map(
+
+    const loadedData = Array.from(fits.data.getData().take(fits.data.NAXISn[0])).map(
       ({ coordinates, value }) => ({ pixel: coordinates[0], intensity: value }),
     )
     return loadedData
@@ -72,34 +73,34 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
         )}
         {loadingState === "finished"
           ? (
-            <p className="ml-4">
-              {
-                [
-                  fits?.getHeader("DATE-OBS")?.trim(),
-                  fits?.getHeader("TELESCOP")?.trim(),
-                  fits?.getHeader("INSTRUME")?.trim(),
-                  fits?.getHeader("OBSERVER")?.trim(),
-                  fits?.getHeader("OBJECT")?.trim(),
-                  fits?.getHeader("EQUINOX"),
-                  fits?.getHeader("EPOCH"),
-                ].filter(Boolean).join(" /// ")
-              }
-            </p>
-          )
+              <p className="ml-4">
+                {
+                  [
+                    fits?.header.getValue("DATE-OBS")?.trim(),
+                    fits?.header.getValue("TELESCOP")?.trim(),
+                    fits?.header.getValue("INSTRUME")?.trim(),
+                    fits?.header.getValue("OBSERVER")?.trim(),
+                    fits?.header.getValue("OBJECT")?.trim(),
+                    fits?.header.getValue("EQUINOX"),
+                    fits?.header.getValue("EPOCH"),
+                  ].filter(Boolean).join(" /// ")
+                }
+              </p>
+            )
           : loadingState === "error"
             ? <p className="text-red-500">Error loading file</p>
             : null}
       </div>
       {loadingState === "processing" && <p>Loading content...</p>}
       {loadedData
-        && (
-          <EmpiricalSpectrum
-            data={loadedData}
-            color={plotColor}
-            interactable={interactable}
-            preview={preview}
-          />
-        )}
+      && (
+        <EmpiricalSpectrum
+          data={loadedData}
+          color={plotColor}
+          interactable={interactable}
+          preview={preview}
+        />
+      )}
     </div>
   )
 }
