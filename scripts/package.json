@@ -1,5 +1,5 @@
 {
-  "name": "@alineado/scripts",
+  "name": "@plateunlp/scripts",
   "type": "module",
   "scripts": {
     "transform-db": "node transform-db.js",
