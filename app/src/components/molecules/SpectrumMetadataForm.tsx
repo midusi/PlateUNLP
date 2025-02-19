@@ -50,13 +50,16 @@ export const SpectrumMetadataForm = forwardRef((_props, ref) => {
         setValues: (spectrumMetadata: SpectrumMetadata) => {
             reset(spectrumMetadata)
         },
+        resetValues: () => {
+            reset()
+        },
         getValues: () => {
             return watch()
         },
         validate: () => {
             trigger()
             return isValid
-        },
+        }
     }))
 
     return (
