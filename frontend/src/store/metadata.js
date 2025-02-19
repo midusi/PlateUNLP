@@ -1,8 +1,10 @@
 import { writable } from 'svelte/store'
-import { loadingAlert, remoteErrorAlert, showAlert, errorAlert } from '../helpers/Alert'
+import {
+  loadingAlert, remoteErrorAlert, showAlert, errorAlert
+} from '../helpers/Alert'
 import apiSpectrum from '../api/spectrum'
 import { getMetadataFields } from '../helpers/metadataUtilities'
-import {serverUp} from './serverUp'
+import { serverUp } from './serverUp'
 
 function createStoreMetadata() {
   const { subscribe, update, set } = writable({
@@ -32,8 +34,7 @@ function createStoreMetadata() {
     },
 
     setRemoteFields: (fields) => {
-
-       update((prev) => {
+      update((prev) => {
         Object.keys(fields).map((field) => {
           prev.fields[field] = fields[field]
         })
@@ -47,28 +48,26 @@ function createStoreMetadata() {
       try {
         update((prev) => {
           Object.keys(prev.spectraData[index]).map((field) => {
-            console.log(field)
-            if((field != "OBJECT") & (field != "DATE-OBS") & (field != "UT"))
-              prev.spectraData[index][field] = ""
+            if ((field != 'OBJECT') & (field != 'DATE-OBS') & (field != 'UT'))
+              prev.spectraData[index][field] = ''
           })
           return prev
         })
         const response = await apiSpectrum.getMetadata(metadataSend)
         const { data } = response
         update((prev) => {
-          prev.spectraData[index]["loaded"] = []
+          prev.spectraData[index].loaded = []
           Object.keys(data.metadata).map((field) => {
             prev.spectraData[index][field] = data.metadata[field]
-            prev.spectraData[index]["loaded"].push(field)
+            prev.spectraData[index].loaded.push(field)
           })
           return prev
         })
-        showAlert({ title: 'Metadatos Cargados exitosamente'})
+        showAlert({ title: 'Metadatos Cargados exitosamente' })
         return true
       } catch (error) {
-        if(await serverUp()){
-          return await remoteErrorAlert({ message: error.response.data.message})
-        }
+        if (await serverUp())
+          return await remoteErrorAlert({ message: error.response.data.message })
       }
       return false
     },
@@ -92,7 +91,6 @@ function createStoreMetadata() {
         prev.plateData = data
         return prev
       })
-
     },
 
     addOptionObservat: (key, data) => {
@@ -111,20 +109,20 @@ function createStoreMetadata() {
 
     updateDefaults: () => {
       update((prev) => {
-        let fields = getMetadataFields();
-        let newFields =  {}
+        const fields = getMetadataFields()
+        const newFields = {}
         Object.keys(fields).map((field) => {
           newFields[fields[field].label] = fields[field]
         })
-        let oldFields = prev.fields;
+        const oldFields = prev.fields
         Object.keys(prev.fields).map((field) => {
-          if(oldFields[field].default != undefined){
+          if (oldFields[field].default !== undefined) {
             oldFields[field].options = newFields[field].options
             oldFields[field].default = newFields[field].default
           }
+        })
+        return prev
       })
-       return prev
-    })
     }
   }
 }

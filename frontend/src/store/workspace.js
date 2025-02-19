@@ -64,7 +64,7 @@ function createStoreWorkspace() {
         data = response.data
 
         spectrogramCanvas.loadImage(`data:image/png;base64,${data.image}`, data.info.width, data.info.heigth)
-
+        // && data.info.bboxes.length !== 0 [PREDICCIONES]
         if (data.info.bboxes)
           // no predigo nada y cargo las bboxes
           spectrogramCanvas.loadBboxYoloFormatJson(data.info.bboxes, data.info.metadata)

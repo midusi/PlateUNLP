@@ -80,8 +80,9 @@
   }
 
   onMount(async () => {
+    
+    /*
     let message = "";
-
     async function authenticate() {
       const password = prompt("Ingresa la contraseña:");
       if (
@@ -95,8 +96,8 @@
         location.reload();
       }
     }
-
     authenticate();
+    */
     const events = {
       "selection:created": handleCreatedUpdate,
       "selection:updated": handleCreatedUpdate,
@@ -410,7 +411,6 @@
   function validateSpectrum(spectrumIndex) {
     let invalidSpectrum = false;
     let invalidforMetadataSearch = false;
-
     // Recorrer todos los metadotos oblicatorios no globales (que no son de la placa)
     getRequiredMetadata($metadataStore.fields, false).forEach((metadata) => {
       if ($metadataStore.spectraData[spectrumIndex][metadata] === "") {
