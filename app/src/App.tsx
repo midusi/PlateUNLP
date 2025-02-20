@@ -1,4 +1,5 @@
 import { NavigationProgressBar } from "@/components/organisms/NavigationProgressBar"
+import { NewNavigationProgressBar } from "@/components/organisms/NewNavigationProgressBar"
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
@@ -25,6 +26,7 @@ export default function App() {
       </header>
 
       <main className="px-8">
+        <NewNavigationProgressBar general={[]} perSpectrum={[]}/>
         <NavigationProgressBar
           initialStep={1}
           stepsArr={[
