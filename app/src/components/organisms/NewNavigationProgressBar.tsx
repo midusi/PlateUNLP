@@ -19,7 +19,15 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
     />
 }
 
-interface ProgressBarLineProps {
+interface NavigationlineWithBoxProps {
+
+}
+
+function NavigationlineWithBox({}:NavigationlineWithBoxProps){
+    return <></>
+}
+
+interface NavigationLineProps {
     steps: JSX.Element[];
     actualStep: number;
     setActualStep: React.Dispatch<React.SetStateAction<number>>;
@@ -28,9 +36,9 @@ interface ProgressBarLineProps {
 function ProgressBarLine({ steps, actualStep, setActualStep }: ProgressBarLineProps) {
     return (
         <div className="flex items-center justify-between w-full">
-            {steps.map((_, index) => (
+            {steps.map((_: JSX.Element, index:number) => (
                 <div key={index} className="flex items-center w-full last:w-auto">
-                    <span
+                    return <span
                         className={clsx('rounded-full',
                             index < actualStep ? 'bg-blue-500' : 'bg-gray-500',
                             index == actualStep ? 'w-5 h-5' : 'w-4 h-4',
