@@ -1,5 +1,7 @@
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
 import { useState } from "react"
+import { Button } from "../atoms/button"
 
 interface NewNavigationProgressBarProps {
     general: JSX.Element[]
@@ -20,25 +22,81 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
         <div>Step 6</div>,
     ]
 
+    const leftButton = (
+        <Button
+            className={clsx(
+                "flex-shrink-0",
+                "text-orange-500 bg-white shadow-none",
+                "hover:text-black hover:bg-gray-200 transition active:bg-gray-400",
+            )}
+        // onClick={() => simulateProgress(1)}
+        // disabled={disabledNext()}
+        >
+            <ChevronLeftIcon className="h-5 w-5" />
+        </Button>
+    )
+
+    const rigthButton = (
+        <Button
+            className={clsx(
+                "flex-shrink-0",
+                "text-orange-500 bg-white shadow-none",
+                "hover:text-black hover:bg-gray-200 transition active:bg-gray-400",
+            )}
+        // onClick={() => simulateProgress(1)}
+        // disabled={disabledNext()}
+        >
+            <ChevronRightIcon className="h-5 w-5" />
+        </Button>
+    )
+
     return (
-        <NavigationLine
-            generalSteps={generalSteps}
-            specificSteps={specificSteps}
-            actualStep={actual}
-            setActualStep={setActual}
-        />
+        <>
+            <div className="flex w-full">
+                <div className="w-[5%] flex items-center justify-center">
+                    {leftButton}
+                </div>
+                <div className="w-[90%] flex items-center justify-center m-4">
+                    <NavigationLine
+                        generalSteps={generalSteps}
+                        specificSteps={specificSteps}
+                        actualStep={actual}
+                        setActualStep={setActual}
+                    />
+                </div>
+                <div className="w-[5%] flex items-center justify-center">
+                    {rigthButton}
+                </div>
+            </div>
+            <div className="flex items-center justify-center">
+                {
+                    [...generalSteps, bridgeStep, ...specificSteps][actual]
+                }
+            </div>
+            <div className="flex w-full">
+                <div className="w-[5%] flex items-center justify-center">
+                    {leftButton}
+                </div>
+                <div className="w-[90%] flex items-center justify-center m-4" />
+                <div className="w-[5%] flex items-center justify-center">
+                    {rigthButton}
+                </div>
+            </div>
+
+        </>
     )
 }
 
 interface NavigationLineProps {
     generalSteps: JSX.Element[]
+    bridgeStep: JSX.Element
     specificSteps: JSX.Element[]
     actualStep: number
     setActualStep: React.Dispatch<React.SetStateAction<number>>
 }
 
-function NavigationLine({ generalSteps, specificSteps, actualStep, setActualStep }: NavigationLineProps) {
-    const steps = [...generalSteps, ...specificSteps]
+function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, setActualStep }: NavigationLineProps) {
+    const steps = [...generalSteps, bridgeStep, ...specificSteps]
     const slicePoint: number = generalSteps.length
 
     const components = steps.map((_, index) => (
@@ -71,12 +129,12 @@ function NavigationLine({ generalSteps, specificSteps, actualStep, setActualStep
             </div>
             <div
                 className={clsx(
-                    "absolute bg-gray-50 border rounded-lg  border-dashed",
+                    "absolute bg-gray-50 border rounded-lg  border-dashed border-gray-200",
                     "-z-10 py-4",
                 )}
                 style={{
-                    left: `${Math.round(100 * slicePoint / steps.length) + 3}%`,
-                    right: `-2%`,
+                    left: `${Math.round(100 * slicePoint / steps.length) + 8}%`,
+                    right: `-1%`,
                 }}
             >
                 <span className={clsx(
