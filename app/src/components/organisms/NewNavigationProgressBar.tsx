@@ -21,6 +21,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
         <div>Step 5</div>,
         <div>Step 6</div>,
     ]
+    const steps = [...generalSteps, bridgeStep, ...specificSteps]
 
     const leftButton = (
         <Button
@@ -28,9 +29,10 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 "flex-shrink-0",
                 "text-orange-500 bg-white shadow-none",
                 "hover:text-black hover:bg-gray-200 transition active:bg-gray-400",
+                "disabled:text-white",
             )}
-        // onClick={() => simulateProgress(1)}
-        // disabled={disabledNext()}
+            onClick={() => setActual(actual - 1)}
+            disabled={actual === 0}
         >
             <ChevronLeftIcon className="h-5 w-5" />
         </Button>
@@ -42,9 +44,10 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 "flex-shrink-0",
                 "text-orange-500 bg-white shadow-none",
                 "hover:text-black hover:bg-gray-200 transition active:bg-gray-400",
+                "disabled:text-white",
             )}
-        // onClick={() => simulateProgress(1)}
-        // disabled={disabledNext()}
+            onClick={() => setActual(actual + 1)}
+            disabled={actual === steps.length}
         >
             <ChevronRightIcon className="h-5 w-5" />
         </Button>
@@ -70,7 +73,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
             </div>
             <div className="flex items-center justify-center">
                 {
-                    [...generalSteps, bridgeStep, ...specificSteps][actual]
+                    steps[actual]
                 }
             </div>
             <div className="flex w-full">
