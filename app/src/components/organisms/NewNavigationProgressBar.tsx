@@ -64,6 +64,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 <div className="w-[90%] flex items-center justify-center m-4">
                     <NavigationLine
                         generalSteps={generalSteps}
+                        bridgeStep={bridgeStep}
                         specificSteps={specificSteps}
                         actualStep={actual}
                         setActualStep={setActual}
