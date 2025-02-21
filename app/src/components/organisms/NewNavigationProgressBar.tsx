@@ -1,6 +1,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
 import { useState } from "react"
+import { object } from "zod"
 import { Button } from "../atoms/button"
 
 interface NewNavigationProgressBarProps {
@@ -10,6 +11,7 @@ interface NewNavigationProgressBarProps {
 
 export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useState(0)
+    const [specificObject, setSpecificObject] = useState<string | null>(null)
     const generalSteps: JSX.Element[] = [
         <div>Step 1</div>,
         <div>Step 2</div>,
@@ -47,7 +49,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 "disabled:text-white",
             )}
             onClick={() => setActual(actual + 1)}
-            disabled={actual === steps.length}
+            disabled={((specificObject === null) && (actual === general.length + 2)) || (actual === steps.length)}
         >
             <ChevronRightIcon className="h-5 w-5" />
         </Button>
@@ -65,6 +67,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                         specificSteps={specificSteps}
                         actualStep={actual}
                         setActualStep={setActual}
+                        specificObject={specificObject}
                     />
                 </div>
                 <div className="w-[5%] flex items-center justify-center">
@@ -96,9 +99,10 @@ interface NavigationLineProps {
     specificSteps: JSX.Element[]
     actualStep: number
     setActualStep: React.Dispatch<React.SetStateAction<number>>
+    specificObject: string | null
 }
 
-function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, setActualStep }: NavigationLineProps) {
+function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, setActualStep, specificObject }: NavigationLineProps) {
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
     const slicePoint: number = generalSteps.length + 1
 
@@ -109,9 +113,13 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                     "rounded-full",
                     index < actualStep ? "bg-blue-500" : "bg-gray-500",
                     index === actualStep ? "w-5 h-5" : "w-4 h-4",
-                    "cursor-pointer active:scale-90 active:bg-blue-700",
+                    ((specificObject !== null) || (index < slicePoint))
+                    && "cursor-pointer active:scale-90 active:bg-blue-700",
                 )}
-                onClick={_ => setActualStep(index)}
+                onClick={(_) => {
+                    ((specificObject !== null) || (index < slicePoint))
+                        && setActualStep(index)
+                }}
             />
             {index < steps.length - 1 && (
                 <div className={clsx(
@@ -132,8 +140,9 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
             </div>
             <div
                 className={clsx(
-                    "absolute bg-gray-50 border rounded-lg  border-dashed border-gray-200",
-                    "-z-10 py-4",
+                    "absolute bg-gray-50 border rounded-lg  border-dashed",
+                    "pb-4 pt-4",
+                    specificObject ? "-z-10 border-yellow-300" : "-z-1 border-red-500",
                 )}
                 style={{
                     left: `${Math.round(100 * slicePoint / steps.length) + 8}%`,
@@ -143,6 +152,7 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                 <span className={clsx(
                     "absolute top-0 left-10 -translate-x-1/2 -translate-y-4",
                     "text-xs font-semibold ",
+                    specificObject ? "text-black" : "text-gray-200",
                 )}
                 >
                     Spectrum Nº_
