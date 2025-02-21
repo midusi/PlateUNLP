@@ -1,8 +1,8 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
 import { useState } from "react"
-import { object } from "zod"
 import { Button } from "../atoms/button"
+import { StepSpectrumSelection } from "../pages/StepSpectrumSelection"
 
 interface NewNavigationProgressBarProps {
     general: JSX.Element[]
@@ -13,15 +13,15 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
     const [actual, setActual] = useState(0)
     const [specificObject, setSpecificObject] = useState<string | null>(null)
     const generalSteps: JSX.Element[] = [
-        <div>Step 1</div>,
-        <div>Step 2</div>,
+        <div key="1">Step 1</div>,
+        <div key="2">Step 2</div>,
 
     ]
-    const bridgeStep = <div>Step 3</div>
+    const bridgeStep = <StepSpectrumSelection setSpecificObject={setSpecificObject} />
     const specificSteps: JSX.Element[] = [
-        <div>Step 4</div>,
-        <div>Step 5</div>,
-        <div>Step 6</div>,
+        <div key="4">Step 4</div>,
+        <div key="5">Step 5</div>,
+        <div key="6">Step 6</div>,
     ]
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
 
@@ -49,7 +49,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 "disabled:text-white",
             )}
             onClick={() => setActual(actual + 1)}
-            disabled={((specificObject === null) && (actual === general.length + 2)) || (actual === steps.length)}
+            disabled={((specificObject === null) && (actual === generalSteps.length)) || (actual === steps.length)}
         >
             <ChevronRightIcon className="h-5 w-5" />
         </Button>
