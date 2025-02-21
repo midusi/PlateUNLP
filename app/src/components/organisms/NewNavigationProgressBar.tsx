@@ -1,4 +1,3 @@
-import { group } from "node:console"
 import clsx from "clsx"
 import { useState } from "react"
 
@@ -64,10 +63,10 @@ function NavigationLine({ steps, actualStep, setActualStep }: NavigationLineProp
                 ))}
             </div>
             <div
-                className="absolute bg-gray-100 border rounded-lg -z-10 px-4 py-4"
+                className="absolute bg-gray-50 border rounded-lg  border-dashed -z-10 px-4 py-4"
                 style={{
-                    left: `${Math.round(100 * slicePoint / steps.length)}%`,
-                    right: 0,
+                    left: `${Math.round(100 * slicePoint / steps.length) + 3}%`,
+                    right: `-2%`,
                 }}
             />
         </div>
