@@ -97,7 +97,7 @@ interface NavigationLineProps {
 
 function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, setActualStep }: NavigationLineProps) {
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
-    const slicePoint: number = generalSteps.length
+    const slicePoint: number = generalSteps.length + 1
 
     const components = steps.map((_, index) => (
         <div key={index} className="flex items-center w-full last:w-auto">
