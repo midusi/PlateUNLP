@@ -58,17 +58,28 @@ function NavigationLine({ steps, actualStep, setActualStep }: NavigationLineProp
     return (
         <div className="relative flex items-center flex-1">
             <div className="flex items-center justify-between w-full">
-                {steps.map((step: JSX.Element, index: number) => (
+                {steps.map((_, index: number) => (
                     components[index]
                 ))}
             </div>
             <div
-                className="absolute bg-gray-50 border rounded-lg  border-dashed -z-10 px-4 py-4"
+                className={clsx(
+                    "absolute bg-gray-50 border rounded-lg  border-dashed",
+                    "-z-10 py-4",
+                )}
                 style={{
                     left: `${Math.round(100 * slicePoint / steps.length) + 3}%`,
                     right: `-2%`,
                 }}
-            />
+            >
+                <span className={clsx(
+                    "absolute top-0 left-10 -translate-x-1/2 -translate-y-4",
+                    "text-xs font-semibold ",
+                )}
+                >
+                    Spectrum Nº_
+                </span>
+            </div>
         </div>
     )
 }
