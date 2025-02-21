@@ -8,10 +8,13 @@ interface NewNavigationProgressBarProps {
 
 export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useState(0)
-    const steps: JSX.Element[] = [
+    const generalSteps: JSX.Element[] = [
         <div>Step 1</div>,
         <div>Step 2</div>,
-        <div>Step 3</div>,
+
+    ]
+    const bridgeStep = <div>Step 3</div>
+    const specificSteps: JSX.Element[] = [
         <div>Step 4</div>,
         <div>Step 5</div>,
         <div>Step 6</div>,
@@ -19,7 +22,8 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
 
     return (
         <NavigationLine
-            steps={steps}
+            generalSteps={generalSteps}
+            specificSteps={specificSteps}
             actualStep={actual}
             setActualStep={setActual}
         />
@@ -27,12 +31,16 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
 }
 
 interface NavigationLineProps {
-    steps: JSX.Element[]
+    generalSteps: JSX.Element[]
+    specificSteps: JSX.Element[]
     actualStep: number
     setActualStep: React.Dispatch<React.SetStateAction<number>>
 }
 
-function NavigationLine({ steps, actualStep, setActualStep }: NavigationLineProps) {
+function NavigationLine({ generalSteps, specificSteps, actualStep, setActualStep }: NavigationLineProps) {
+    const steps = [...generalSteps, ...specificSteps]
+    const slicePoint: number = generalSteps.length
+
     const components = steps.map((_, index) => (
         <div key={index} className="flex items-center w-full last:w-auto">
             <span
@@ -54,7 +62,6 @@ function NavigationLine({ steps, actualStep, setActualStep }: NavigationLineProp
         </div>
     ))
 
-    const slicePoint: number = 2
     return (
         <div className="relative flex items-center flex-1">
             <div className="flex items-center justify-between w-full">
