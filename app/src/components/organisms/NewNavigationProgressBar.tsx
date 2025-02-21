@@ -143,7 +143,7 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                 className={clsx(
                     "absolute bg-gray-50 border rounded-lg  border-dashed",
                     "pb-4 pt-4",
-                    specificObject ? "-z-10 border-yellow-300" : "-z-1 border-red-500",
+                    specificObject ? "-z-10 border-yellow-300" : "-z-1 border-red-500 bg-opacity-90",
                 )}
                 style={{
                     left: `${Math.round(100 * slicePoint / steps.length) + 8}%`,
