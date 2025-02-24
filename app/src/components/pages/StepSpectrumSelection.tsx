@@ -6,9 +6,9 @@ interface StepSpectrumSelectionProps {
 
 export function StepSpectrumSelection({ setSpecificObject }: StepSpectrumSelectionProps) {
     const spectrums = [
-        { id: "Pla0#Spec1", image: null, complete: 3 },
-        { id: "Pla0#Spec2", image: null, complete: 0 },
-        { id: "Pla0#Spec3", image: null, complete: 0 },
+        { id: "Pla0#Spec1", image: "spectrumExample.png", complete: 3 },
+        { id: "Pla0#Spec2", image: "spectrumExample.png", complete: 0 },
+        { id: "Pla0#Spec3", image: "spectrumExample.png", complete: 0 },
     ]
     const totalSteps = 5
     return (
@@ -27,7 +27,9 @@ export function StepSpectrumSelection({ setSpecificObject }: StepSpectrumSelecti
                         {spectrums.map((spectrum, _) => (
                             <tr key={spectrum.id} className="hover:bg-gray-50">
                                 <td className="border px-4 py-2">{spectrum.id}</td>
-                                <td className="border px-4 py-2">{spectrum.image}</td>
+                                <td className="border px-4 py-2">
+                                    <img src={`/images/${spectrum.image}`} alt="Spectrum" className="w-full h-auto" />
+                                </td>
                                 <td className="border px-4 py-2">
                                     {`${spectrum.complete}/${totalSteps}`}
                                 </td>
