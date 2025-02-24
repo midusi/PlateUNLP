@@ -4,6 +4,7 @@ import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegment
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
 import { useGlobalStore } from "./hooks/use-global-store"
+import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 
 export default function App() {
   const [completedStages, setCompletedStages] = useGlobalStore(s => [
@@ -30,10 +31,11 @@ export default function App() {
           stepsArr={[
             { name: "Begin", content: <>BEGIN</> },
             { name: "Plate segmentation", content: <StepPlateSegmentation onComplete={() => onComplete(1)} /> },
-            { name: "Metadata retrieval", content: <StepMetadataRetrieval onComplete={() => onComplete(2)} /> },
-            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation onComplete={() => onComplete(3)} /> },
-            { name: "Feature extraction", content: <>4</> },
-            { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(5)} /> },
+            { name: "Plate metadata", content: <StepPlateMetadata onComplete={() => onComplete(2)} /> },
+            { name: "Metadata retrieval", content: <StepMetadataRetrieval onComplete={() => onComplete(3)} /> },
+            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation onComplete={() => onComplete(4)} /> },
+            { name: "Feature extraction", content: <>5</> },
+            { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(6)} /> },
             { name: "Completed", content: <>FIN</> },
           ]}
         />
