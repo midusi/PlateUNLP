@@ -151,12 +151,12 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                 }}
             >
                 <span className={clsx(
-                    "absolute top-0 left-10 -translate-x-1/2 -translate-y-4",
+                    "absolute top-0 left-1 text-left -translate-y-4",
                     "text-xs font-semibold ",
                     specificObject ? "text-black" : "text-gray-200",
                 )}
                 >
-                    Spectrum Nº_
+                    {specificObject}
                 </span>
             </div>
         </div>
