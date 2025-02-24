@@ -13,23 +13,30 @@ interface NewNavigationProgressBarProps {
 export interface StepData {
     id: string
     content: JSX.Element
+    complete: boolean
+    enable: boolean
 }
 
 export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useState(0)
     const [specificObject, setSpecificObject] = useState<string | null>(null)
     const generalSteps: StepData[] = [
-        { id: "Begin", content: <div key="1">Step 1</div> },
-        { id: "Plate Metadata", content: <div key="2">Step 2</div> },
-        { id: "Plate Segmentation", content: <div key="3">Step 3</div> },
+        { id: "Begin", content: <div key="1">Step 1</div>, complete: true, enable: true },
+        { id: "Plate Metadata", content: <div key="2">Step 2</div>, complete: true, enable: true },
+        { id: "Plate Segmentation", content: <div key="3">Step 3</div>, complete: true, enable: true },
     ]
-    const bridgeStep = { id: "Spectrum Selection", content: <StepSpectrumSelection setSpecificObject={setSpecificObject} /> }
+    const bridgeStep = {
+        id: "Spectrum Selection",
+        content: <StepSpectrumSelection setSpecificObject={setSpecificObject} />,
+        complete: false,
+        enable: true,
+    }
     const specificSteps: StepData[] = [
-        { id: "Spectrum Segmentation", content: <div key="5">Step 5</div> },
-        { id: "Spectrum Metadata", content: <div key="6">Step 6</div> },
-        { id: "Feature Extraction", content: <div key="7">Step 7</div> },
-        { id: "Calibration", content: <div key="8">Step 8</div> },
-        { id: "Complete", content: <div key="9">Step 9</div> },
+        { id: "Spectrum Segmentation", content: <div key="5">Step 5</div>, complete: false, enable: false },
+        { id: "Spectrum Metadata", content: <div key="6">Step 6</div>, complete: false, enable: false },
+        { id: "Feature Extraction", content: <div key="7">Step 7</div>, complete: false, enable: false },
+        { id: "Calibration", content: <div key="8">Step 8</div>, complete: false, enable: false },
+        { id: "Complete", content: <div key="9">Step 9</div>, complete: false, enable: false },
     ]
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
 
@@ -118,17 +125,32 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
             <span
                 className={clsx(
                     "rounded-full",
-                    index < actualStep ? "bg-blue-500" : "bg-gray-500",
+                    index <= actualStep ? "bg-blue-500" : "bg-gray-500",
                     index === actualStep ? "w-5 h-5" : "w-4 h-4",
                     ((specificObject !== null) || (index < slicePoint))
                     && "cursor-pointer active:scale-90 active:bg-blue-700",
+                    "relative flex items-center justify-center",
                 )}
                 onClick={(_) => {
                     ((specificObject !== null) || (index < slicePoint))
                         && setActualStep(index)
                 }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
-            />
+            >
+                {step.enable && (
+                    <span
+                        className={clsx(
+                            "rounded-full",
+                            step.complete
+                                ? "bg-green-400 active:bg-green-700"
+                                : "bg-yellow-400 active:bg-yellow-500",
+                            index === actualStep ? "w-3 h-3" : "w-2 h-2",
+                            ((specificObject !== null) || (index < slicePoint))
+                            && "cursor-pointer active:scale-90",
+                        )}
+                    />
+                )}
+            </span>
             <Tooltip
                 id={`step-${step.id}-2tooltip`}
                 place="top"
