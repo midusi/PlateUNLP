@@ -1,4 +1,5 @@
-import { ArrowDownTrayIcon, ArrowRightIcon } from "@heroicons/react/24/outline"
+import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/24/outline"
+import clsx from "clsx"
 import { Button } from "../atoms/button"
 
 interface StepSpectrumSelectionProps {
@@ -27,46 +28,62 @@ export function StepSpectrumSelection({ setSpecificObject }: StepSpectrumSelecti
                         </tr>
                     </thead>
                     <tbody>
-                        {spectrums.map((spectrum, _) => (
-                            <tr key={spectrum.id} className="hover:bg-gray-50">
-                                <td className="border px-4 py-2">{spectrum.id}</td>
-                                <td className="border px-4 py-2">
-                                    <img src={`/images/${spectrum.image}`} alt="Spectrum" className="w-full h-auto" />
-                                </td>
-                                <td className="border px-6 py-2">
-                                    {`${spectrum.complete}/${totalSteps}`}
-                                </td>
-                                <td className="border px-4 py-2">
-                                    {spectrum.complete / totalSteps === 1
-                                        ? (
-                                            <div className="text-green-300">
-                                                Complete
-                                            </div>
-                                        )
-                                        : (
-                                            <div className="text-orange-300">
-                                                Pending
-                                            </div>
-                                        )}
-                                </td>
-                                <td className="border-none px-4 py-2 text-center">
-                                    <Button
-                                        className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                                        onClick={() => { }}
-                                    >
-                                        <ArrowDownTrayIcon className="w-5 h-5" />
-                                    </Button>
-                                </td>
-                                <td className="border-none px-4 py-2 text-center">
-                                    <Button
-                                        className="p-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
-                                        onClick={() => setSpecificObject(spectrum.id)}
-                                    >
-                                        <ArrowRightIcon className="w-5 h-5" />
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
+                        {spectrums.map((spectrum, _) => {
+                            const complete: boolean = spectrum.complete / totalSteps === 1
+                            return (
+                                <tr key={spectrum.id} className="hover:bg-gray-50">
+                                    <td className="border px-4 py-2">{spectrum.id}</td>
+                                    <td className="border px-4 py-2">
+                                        <img src={`/images/${spectrum.image}`} alt="Spectrum" className="w-full h-auto" />
+                                    </td>
+                                    <td className="border px-6 py-2">
+                                        {`${spectrum.complete}/${totalSteps}`}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {complete
+                                            ? (
+                                                <div className="text-green-300">
+                                                    Complete
+                                                </div>
+                                            )
+                                            : (
+                                                <div className="text-orange-300">
+                                                    Pending
+                                                </div>
+                                            )}
+                                    </td>
+                                    <td className="border-none px-4 py-2 text-center">
+                                        <Button
+                                            className={clsx(
+                                                "p-2",
+                                                "bg-blue-500 text-white rounded hover:bg-blue-600 transition",
+                                            )}
+                                            onClick={() => { }}
+                                            disabled={!complete}
+                                        >
+                                            <ArrowDownTrayIcon className="w-5 h-5" />
+                                        </Button>
+                                    </td>
+                                    <td className="border-none px-4 py-2 text-center">
+                                        <Button
+                                            className={clsx(
+                                                "p-2 rounded ",
+                                                !complete
+                                                    ? "bg-orange-500 hover:bg-orange-400"
+                                                    : "bg-green-500 hover:bg-green-400",
+                                                "text-white  transition",
+                                            )}
+                                            onClick={() => setSpecificObject(spectrum.id)}
+                                        >
+                                            {complete
+                                                ? <PencilIcon className="w-5 h-5" />
+                                                : <ArrowRightIcon className="w-5 h-5" />}
+                                        </Button>
+                                    </td>
+                                </tr>
+                            )
+                        },
+                        )}
                     </tbody>
                 </table>
                 <Button
