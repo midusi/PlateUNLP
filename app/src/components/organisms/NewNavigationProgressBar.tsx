@@ -1,6 +1,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
 import { useState } from "react"
+import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
 import { StepSpectrumSelection } from "../pages/StepSpectrumSelection"
 
@@ -9,19 +10,26 @@ interface NewNavigationProgressBarProps {
     perSpectrum: JSX.Element[]
 }
 
+export interface StepData {
+    id: string
+    content: JSX.Element
+}
+
 export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useState(0)
     const [specificObject, setSpecificObject] = useState<string | null>(null)
-    const generalSteps: JSX.Element[] = [
-        <div key="1">Step 1</div>,
-        <div key="2">Step 2</div>,
-
+    const generalSteps: StepData[] = [
+        { id: "Begin", content: <div key="1">Step 1</div> },
+        { id: "Plate Metadata", content: <div key="2">Step 2</div> },
+        { id: "Plate Segmentation", content: <div key="3">Step 3</div> },
     ]
-    const bridgeStep = <StepSpectrumSelection setSpecificObject={setSpecificObject} />
-    const specificSteps: JSX.Element[] = [
-        <div key="4">Step 4</div>,
-        <div key="5">Step 5</div>,
-        <div key="6">Step 6</div>,
+    const bridgeStep = { id: "Spectrum Selection", content: <StepSpectrumSelection setSpecificObject={setSpecificObject} /> }
+    const specificSteps: StepData[] = [
+        { id: "Spectrum Segmentation", content: <div key="5">Step 5</div> },
+        { id: "Spectrum Metadata", content: <div key="6">Step 6</div> },
+        { id: "Feature Extraction", content: <div key="7">Step 7</div> },
+        { id: "Calibration", content: <div key="8">Step 8</div> },
+        { id: "Complete", content: <div key="9">Step 9</div> },
     ]
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
 
@@ -76,9 +84,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 </div>
             </div>
             <div className="flex items-center justify-center">
-                {
-                    steps[actual]
-                }
+                {steps[actual].content}
             </div>
             <div className="flex w-full">
                 <div className="w-[5%] flex items-center justify-center">
@@ -95,9 +101,9 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
 }
 
 interface NavigationLineProps {
-    generalSteps: JSX.Element[]
-    bridgeStep: JSX.Element
-    specificSteps: JSX.Element[]
+    generalSteps: StepData[]
+    bridgeStep: StepData
+    specificSteps: StepData[]
     actualStep: number
     setActualStep: React.Dispatch<React.SetStateAction<number>>
     specificObject: string | null
@@ -107,8 +113,8 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
     const slicePoint: number = generalSteps.length + 1
 
-    const components = steps.map((_, index) => (
-        <div key={index} className="flex items-center w-full last:w-auto">
+    const components = steps.map((step, index) => (
+        <div key={step.id} className="flex items-center w-full last:w-auto">
             <span
                 className={clsx(
                     "rounded-full",
@@ -121,6 +127,13 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                     ((specificObject !== null) || (index < slicePoint))
                         && setActualStep(index)
                 }}
+                data-tooltip-id={`step-${step.id}-2tooltip`}
+            />
+            <Tooltip
+                id={`step-${step.id}-2tooltip`}
+                place="top"
+                delayShow={300}
+                content={step.id}
             />
             {index < steps.length - 1 && (
                 <div className={clsx(
@@ -146,7 +159,7 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                     specificObject ? "-z-10 border-yellow-300" : "-z-1 border-red-500 bg-opacity-90",
                 )}
                 style={{
-                    left: `${Math.round(100 * slicePoint / steps.length) + 8}%`,
+                    left: `${Math.round(100 * slicePoint / steps.length)}%`,
                     right: `-1%`,
                 }}
             >
