@@ -49,6 +49,16 @@ export default function App() {
     },
   ]
 
+  const stateOfGenerals: {
+    complete: boolean
+    enable: boolean
+  }[] = {}
+
+  const stateOfSpecifics: {
+    complete: boolean
+    enable: boolean
+  }[][] = {}
+
   return (
     <div className="w-full mx-auto">
       <header className="mb-12 bg-[#2D3748]">
