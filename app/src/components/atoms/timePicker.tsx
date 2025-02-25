@@ -18,10 +18,10 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
     const periodRef = React.useRef<HTMLButtonElement>(null)
 
     return (
-        <div className="flex items-end gap-2">
-            <div className="grid gap-1 text-center">
+        <div className="flex gap-2">
+            <div className="flex">
                 <Label htmlFor="hours" className="text-xs">
-                    Hours
+                    H
                 </Label>
                 <TimePickerInput
                     picker="12hours"
@@ -32,9 +32,9 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     onRightFocus={() => minuteRef.current?.focus()}
                 />
             </div>
-            <div className="grid gap-1 text-center">
+            <div className="flex">
                 <Label htmlFor="minutes" className="text-xs">
-                    Minutes
+                    M
                 </Label>
                 <TimePickerInput
                     picker="minutes"
@@ -46,9 +46,9 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     onRightFocus={() => secondRef.current?.focus()}
                 />
             </div>
-            <div className="grid gap-1 text-center">
+            <div className="flex">
                 <Label htmlFor="seconds" className="text-xs">
-                    Seconds
+                    S
                 </Label>
                 <TimePickerInput
                     picker="seconds"
@@ -60,10 +60,7 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     onRightFocus={() => periodRef.current?.focus()}
                 />
             </div>
-            <div className="grid gap-1 text-center">
-                <Label htmlFor="period" className="text-xs">
-                    Period
-                </Label>
+            <div className="flex">
                 <TimePeriodSelect
                     period={period}
                     setPeriod={setPeriod}
