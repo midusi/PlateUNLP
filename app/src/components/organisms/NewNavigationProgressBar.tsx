@@ -158,11 +158,18 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                 content={step.id}
             />
             {index < steps.length - 1 && (
-                <div className={clsx(
-                    "h-1 flex-1",
-                    index < actualStep ? "bg-blue-500" : "bg-gray-500",
-                )}
-                />
+                <div className="relative flex-1 h-1">
+                    <div className="absolute inset-0 h-full bg-gray-500" />
+                    <div
+                        className={clsx(
+                            "absolute inset-0 h-full",
+                            "transition-all duration-500",
+                            "bg-blue-500"
+                        )}
+                        style={{ width: index < actualStep ? "100%" : "0%" }}
+                    />
+                </div>
+
             )}
         </div>
     ))
