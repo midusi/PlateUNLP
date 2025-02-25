@@ -6,8 +6,8 @@ import { Button } from "../atoms/button"
 import { StepSpectrumSelection } from "../pages/StepSpectrumSelection"
 
 interface NewNavigationProgressBarProps {
-    general: JSX.Element[]
-    perSpectrum: JSX.Element[]
+    general: StepData[]
+    perSpectrum: StepData[]
 }
 
 export interface StepData {
@@ -20,25 +20,14 @@ export interface StepData {
 export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useState(0)
     const [specificObject, setSpecificObject] = useState<string | null>(null)
-    const generalSteps: StepData[] = [
-        { id: "Begin", content: <div key="1">Step 1</div>, complete: true, enable: true },
-        { id: "Plate Metadata", content: <div key="2">Step 2</div>, complete: true, enable: true },
-        { id: "Plate Segmentation", content: <div key="3">Step 3</div>, complete: true, enable: true },
-    ]
-    const bridgeStep = {
+
+    const bridgeStep: StepData = {
         id: "Spectrum Selection",
         content: <StepSpectrumSelection setSpecificObject={setSpecificObject} />,
         complete: false,
         enable: true,
     }
-    const specificSteps: StepData[] = [
-        { id: "Spectrum Segmentation", content: <div key="5">Step 5</div>, complete: false, enable: false },
-        { id: "Spectrum Metadata", content: <div key="6">Step 6</div>, complete: false, enable: false },
-        { id: "Feature Extraction", content: <div key="7">Step 7</div>, complete: false, enable: false },
-        { id: "Calibration", content: <div key="8">Step 8</div>, complete: false, enable: false },
-        { id: "Complete", content: <div key="9">Step 9</div>, complete: false, enable: false },
-    ]
-    const steps = [...generalSteps, bridgeStep, ...specificSteps]
+    const steps = [...general, bridgeStep, ...perSpectrum]
 
     const leftButton = (
         <Button
@@ -64,7 +53,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 "disabled:text-white",
             )}
             onClick={() => setActual(actual + 1)}
-            disabled={((specificObject === null) && (actual === generalSteps.length)) || (actual === steps.length)}
+            disabled={((specificObject === null) && (actual === general.length)) || (actual === steps.length)}
         >
             <ChevronRightIcon className="h-5 w-5" />
         </Button>
@@ -78,9 +67,9 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                 </div>
                 <div className="w-[90%] flex items-center justify-center m-4">
                     <NavigationLine
-                        generalSteps={generalSteps}
+                        generalSteps={general}
                         bridgeStep={bridgeStep}
-                        specificSteps={specificSteps}
+                        specificSteps={perSpectrum}
                         actualStep={actual}
                         setActualStep={setActual}
                         specificObject={specificObject}
@@ -140,11 +129,12 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                 {step.enable && (
                     <span
                         className={clsx(
-                            "rounded-full",
+                            "absolute top-0 right-0 translate-x-1/4 -translate-y-1/4",
+                            "rounded-full border border-black",
                             step.complete
                                 ? "bg-green-400 active:bg-green-700"
                                 : "bg-yellow-400 active:bg-yellow-500",
-                            index === actualStep ? "w-3 h-3" : "w-2 h-2",
+                            index === actualStep ? "w-2.5 h-2.5" : "w-2 h-2",
                             ((specificObject !== null) || (index < slicePoint))
                             && "cursor-pointer active:scale-90",
                         )}

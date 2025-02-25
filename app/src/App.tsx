@@ -1,5 +1,5 @@
 import { NavigationProgressBar } from "@/components/organisms/NavigationProgressBar"
-import { NewNavigationProgressBar } from "@/components/organisms/NewNavigationProgressBar"
+import { NewNavigationProgressBar, StepData } from "@/components/organisms/NewNavigationProgressBar"
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
@@ -17,6 +17,38 @@ export default function App() {
       setCompletedStages(stageNumber)
   }
 
+  // Steps info form
+  const generalSteps: StepData[] = [
+    { id: "Plate Metadata", content: <div key="1">Step 1</div>, complete: true, enable: true },
+    {
+      id: "Plate Segmentation",
+      content: <StepPlateSegmentation onComplete={() => { }} />,
+      complete: true,
+      enable: true
+    },
+  ]
+  const specificSteps: StepData[] = [
+    {
+      id: "Spectrum Segmentation",
+      content: <StepSpectrumSegmentation onComplete={() => { }} />,
+      complete: false,
+      enable: false
+    },
+    {
+      id: "Spectrum Metadata",
+      content: <StepMetadataRetrieval onComplete={() => { }} />,
+      complete: false,
+      enable: false
+    },
+    { id: "Feature Extraction", content: <div key="7">Step 7</div>, complete: false, enable: false },
+    {
+      id: "Calibration",
+      content: <StepCalibration onComplete={() => { }} />,
+      complete: false,
+      enable: false
+    },
+  ]
+
   return (
     <div className="w-full mx-auto">
       <header className="mb-12 bg-[#2D3748]">
@@ -26,7 +58,7 @@ export default function App() {
       </header>
 
       <main className="px-8">
-        <NewNavigationProgressBar general={[]} perSpectrum={[]}/>
+        <NewNavigationProgressBar general={generalSteps} perSpectrum={specificSteps} />
         <NavigationProgressBar
           initialStep={1}
           stepsArr={[
