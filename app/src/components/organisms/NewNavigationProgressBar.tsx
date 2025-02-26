@@ -1,3 +1,4 @@
+import type { ProcessInfoForm } from "@/interfaces/ProcessInfoForm"
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
 import { useState } from "react"
@@ -8,6 +9,7 @@ import { StepSpectrumSelection } from "../pages/StepSpectrumSelection"
 interface NewNavigationProgressBarProps {
     general: StepData[]
     perSpectrum: StepData[]
+    processInfo: ProcessInfoForm
 }
 
 export interface StepData {
@@ -16,7 +18,7 @@ export interface StepData {
     state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
 }
 
-export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigationProgressBarProps) {
+export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useState(0)
     const [specificObject, setSpecificObject] = useState<string | null>(null)
 
@@ -71,6 +73,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
                         actualStep={actual}
                         setActualStep={setActual}
                         specificObject={specificObject}
+                        processInfo={processInfo}
                     />
                 </div>
                 <div className="w-[5%] flex items-center justify-center">
@@ -101,9 +104,18 @@ interface NavigationLineProps {
     actualStep: number
     setActualStep: React.Dispatch<React.SetStateAction<number>>
     specificObject: string | null
+    processInfo: ProcessInfoForm
 }
 
-function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, setActualStep, specificObject }: NavigationLineProps) {
+function NavigationLine({
+    generalSteps,
+    bridgeStep,
+    specificSteps,
+    actualStep,
+    setActualStep,
+    specificObject,
+    processInfo,
+}: NavigationLineProps) {
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
     const slicePoint: number = generalSteps.length + 1
 
@@ -114,30 +126,38 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                     "rounded-full",
                     index <= actualStep ? "bg-blue-500" : "bg-gray-500",
                     index === actualStep ? "w-5 h-5" : "w-4 h-4",
-                    ((specificObject !== null) || (index < slicePoint))
+                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
                     && "cursor-pointer active:scale-90 active:bg-blue-700",
                     "relative flex items-center justify-center",
                 )}
                 onClick={(_) => {
-                    ((specificObject !== null) || (index < slicePoint))
+                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
                         && setActualStep(index)
                 }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
-                {step.state !== "NOT_REACHED" && (
-                    <span
-                        className={clsx(
-                            "absolute top-0 right-0 translate-x-1/4 -translate-y-1/4",
-                            "rounded-full border border-black",
-                            step.state === "COMPLETE"
-                                ? "bg-green-400 active:bg-green-700"
-                                : "bg-yellow-400 active:bg-yellow-500",
-                            index === actualStep ? "w-2.5 h-2.5" : "w-2 h-2",
-                            ((specificObject !== null) || (index < slicePoint))
-                            && "cursor-pointer active:scale-90",
-                        )}
-                    />
-                )}
+                {
+                    (
+                        (index < slicePoint
+                            && processInfo.general[index].state !== "NOT_REACHED") // es general
+                        || (index >= slicePoint
+                            && processInfo.perSpectrum !== null
+                            && processInfo.perSpectrum[index - slicePoint][0].state !== "NOT_REACHED")) // es un paso especifico
+                    && (
+                        <span
+                            className={clsx(
+                                "absolute top-0 right-0 translate-x-1/4 -translate-y-1/4",
+                                "rounded-full border border-black",
+                                step.state === "COMPLETE"
+                                    ? "bg-green-400 active:bg-green-700"
+                                    : "bg-yellow-400 active:bg-yellow-500",
+                                index === actualStep ? "w-2.5 h-2.5" : "w-2 h-2",
+                                ((processInfo.perSpectrum !== null) || (index < slicePoint))
+                                && "cursor-pointer active:scale-90",
+                            )}
+                        />
+                    )
+                }
             </span>
             <Tooltip
                 id={`step-${step.id}-2tooltip`}

@@ -1,8 +1,10 @@
 import type { StepData } from "@/components/organisms/NewNavigationProgressBar"
+import type { ProcessInfoForm } from "./interfaces/ProcessInfoForm"
 import { NavigationProgressBar } from "@/components/organisms/NavigationProgressBar"
 import { NewNavigationProgressBar } from "@/components/organisms/NewNavigationProgressBar"
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
+import { useState } from "react"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
 import { useGlobalStore } from "./hooks/use-global-store"
@@ -54,15 +56,13 @@ export default function App() {
     },
   ]
 
-  const stateOfGenerals: {
-    complete: boolean
-    enable: boolean
-  }[] = {}
-
-  const stateOfSpecifics: {
-    complete: boolean
-    enable: boolean
-  }[][] = {}
+  const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
+    general: [
+      { state: "NECESSARY_CHANGES" },
+      ...generalSteps.map(_ => ({ state: "NOT_REACHED" as const })),
+    ],
+    perSpectrum: null,
+  })
 
   return (
     <div className="w-full mx-auto">
@@ -73,7 +73,11 @@ export default function App() {
       </header>
 
       <main className="px-8">
-        <NewNavigationProgressBar general={generalSteps} perSpectrum={specificSteps} />
+        <NewNavigationProgressBar
+          general={generalSteps}
+          perSpectrum={specificSteps}
+          processInfo={processInfo}
+        />
         <NavigationProgressBar
           initialStep={1}
           stepsArr={[
