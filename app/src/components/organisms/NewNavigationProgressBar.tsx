@@ -136,28 +136,18 @@ function NavigationLine({
                 }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
-                {
-                    (
-                        (index < slicePoint
-                            && processInfo.general[index].state !== "NOT_REACHED") // es general
-                        || (index >= slicePoint
-                            && processInfo.perSpectrum !== null
-                            && processInfo.perSpectrum[index - slicePoint][0].state !== "NOT_REACHED")) // es un paso especifico
-                    && (
-                        <span
-                            className={clsx(
-                                "absolute top-0 right-0 translate-x-1/4 -translate-y-1/4",
-                                "rounded-full border border-black",
-                                step.state === "COMPLETE"
-                                    ? "bg-green-400 active:bg-green-700"
-                                    : "bg-yellow-400 active:bg-yellow-500",
-                                index === actualStep ? "w-2.5 h-2.5" : "w-2 h-2",
-                                ((processInfo.perSpectrum !== null) || (index < slicePoint))
-                                && "cursor-pointer active:scale-90",
-                            )}
-                        />
-                    )
-                }
+                <StatePoint
+                    index={index}
+                    actualStep={actualStep}
+                    state={
+                        index < slicePoint
+                            ? processInfo.general[index].state
+                            : (processInfo.perSpectrum[index - slicePoint].states
+                                ? processInfo.perSpectrum[index - slicePoint].states![0]
+                                : "NOT_REACHED"
+                            )
+                    }
+                />
             </span>
             <Tooltip
                 id={`step-${step.id}-2tooltip`}
@@ -210,5 +200,29 @@ function NavigationLine({
                 </span>
             </div>
         </div>
+    )
+}
+
+interface StatePointProps {
+    index: number
+    actualStep: number
+    state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
+}
+
+function StatePoint({ index, actualStep, state }: StatePointProps) {
+    if (state === "NOT_REACHED")
+        return null
+    return (
+        <span
+            className={clsx(
+                "absolute top-0 right-0 translate-x-1/4 -translate-y-1/4",
+                "rounded-full border border-black",
+                state === "COMPLETE"
+                    ? "bg-green-400 active:bg-green-700"
+                    : "bg-yellow-400 active:bg-yellow-500",
+                index === actualStep ? "w-2.5 h-2.5" : "w-2 h-2",
+                "cursor-pointer active:scale-90",
+            )}
+        />
     )
 }
