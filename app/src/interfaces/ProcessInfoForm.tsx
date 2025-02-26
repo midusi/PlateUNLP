@@ -1,8 +1,13 @@
 export interface ProcessInfoForm {
-    general: {
-        state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
-    }[] // Indexado por numero de etapa
-    perSpectrum: null | {
-        state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
-    }[][] // Indexado por numero de etapa y numero de espectro
+    general: StepGeneralInfoForm[]
+    perSpectrum: StepSpecificInfoForm[]
+}
+
+export interface StepGeneralInfoForm {
+    state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
+}
+
+export interface StepSpecificInfoForm {
+    states: null // Todavia no se dividio la cantidad de espectros
+    | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
 }

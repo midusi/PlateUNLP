@@ -61,7 +61,7 @@ export default function App() {
       { state: "NECESSARY_CHANGES" },
       ...generalSteps.map(_ => ({ state: "NOT_REACHED" as const })),
     ],
-    perSpectrum: null,
+    perSpectrum: specificSteps.map(_ => ({ states: null })),
   })
 
   return (
