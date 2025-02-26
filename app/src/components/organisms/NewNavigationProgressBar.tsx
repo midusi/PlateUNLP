@@ -13,8 +13,7 @@ interface NewNavigationProgressBarProps {
 export interface StepData {
     id: string
     content: JSX.Element
-    complete: boolean
-    enable: boolean
+    state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
 }
 
 export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigationProgressBarProps) {
@@ -24,8 +23,7 @@ export function NewNavigationProgressBar({ general, perSpectrum }: NewNavigation
     const bridgeStep: StepData = {
         id: "Spectrum Selection",
         content: <StepSpectrumSelection setSpecificObject={setSpecificObject} />,
-        complete: false,
-        enable: true,
+        state: "NECESSARY_CHANGES",
     }
     const steps = [...general, bridgeStep, ...perSpectrum]
 
@@ -126,12 +124,12 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                 }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
-                {step.enable && (
+                {step.state !== "NOT_REACHED" && (
                     <span
                         className={clsx(
                             "absolute top-0 right-0 translate-x-1/4 -translate-y-1/4",
                             "rounded-full border border-black",
-                            step.complete
+                            step.state === "COMPLETE"
                                 ? "bg-green-400 active:bg-green-700"
                                 : "bg-yellow-400 active:bg-yellow-500",
                             index === actualStep ? "w-2.5 h-2.5" : "w-2 h-2",
@@ -154,7 +152,7 @@ function NavigationLine({ generalSteps, bridgeStep, specificSteps, actualStep, s
                         className={clsx(
                             "absolute inset-0 h-full",
                             "transition-all duration-500",
-                            "bg-blue-500"
+                            "bg-blue-500",
                         )}
                         style={{ width: index < actualStep ? "100%" : "0%" }}
                     />
