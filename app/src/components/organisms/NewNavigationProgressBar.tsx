@@ -1,7 +1,7 @@
 import type { ProcessInfoForm } from "@/interfaces/ProcessInfoForm"
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
-import { useState } from "react"
+import { SetStateAction, useState } from "react"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
 import { StepSpectrumSelection } from "../pages/StepSpectrumSelection"
@@ -121,39 +121,13 @@ function NavigationLine({
 
     const components = steps.map((step, index) => (
         <div key={step.id} className="flex items-center w-full last:w-auto">
-            <span
-                className={clsx(
-                    "rounded-full",
-                    index <= actualStep ? "bg-blue-500" : "bg-gray-500",
-                    index === actualStep ? "w-5 h-5" : "w-4 h-4",
-                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
-                    && "cursor-pointer active:scale-90 active:bg-blue-700",
-                    "relative flex items-center justify-center",
-                )}
-                onClick={(_) => {
-                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
-                        && setActualStep(index)
-                }}
-                data-tooltip-id={`step-${step.id}-2tooltip`}
-            >
-                <StatePoint
-                    index={index}
-                    actualStep={actualStep}
-                    state={
-                        index < slicePoint
-                            ? processInfo.general[index].state
-                            : (processInfo.perSpectrum[index - slicePoint].states
-                                ? processInfo.perSpectrum[index - slicePoint].states![0]
-                                : "NOT_REACHED"
-                            )
-                    }
-                />
-            </span>
-            <Tooltip
-                id={`step-${step.id}-2tooltip`}
-                place="top"
-                delayShow={300}
-                content={step.id}
+            <StepPoint
+                index={index}
+                step={step}
+                actualStepIndex={actualStep}
+                slicePoint={slicePoint}
+                processInfo={processInfo}
+                setActualStep={setActualStep}
             />
             {index < steps.length - 1 && (
                 <div className="relative flex-1 h-1">
@@ -201,6 +175,58 @@ function NavigationLine({
             </div>
         </div>
     )
+}
+
+
+interface StepPointProps {
+    index: number
+    step: StepData
+    actualStepIndex: number
+    slicePoint: number
+    processInfo: ProcessInfoForm
+    setActualStep: (value: SetStateAction<number>) => void
+}
+
+function StepPoint({ index, step, actualStepIndex, slicePoint, processInfo, setActualStep }: StepPointProps) {
+    return (
+        <>
+            <span
+                className={clsx(
+                    "rounded-full",
+                    index <= actualStepIndex ? "bg-blue-500" : "bg-gray-500",
+                    index === actualStepIndex ? "w-5 h-5" : "w-4 h-4",
+                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
+                    && "cursor-pointer active:scale-90 active:bg-blue-700",
+                    "relative flex items-center justify-center",
+                )}
+                onClick={(_) => {
+                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
+                        && setActualStep(index)
+                }}
+                data-tooltip-id={`step-${step.id}-2tooltip`}
+            >
+                <StatePoint
+                    index={index}
+                    actualStep={actualStepIndex}
+                    state={
+                        index < slicePoint
+                            ? processInfo.general[index].state
+                            : (processInfo.perSpectrum[index - slicePoint].states
+                                ? processInfo.perSpectrum[index - slicePoint].states![0]
+                                : "NOT_REACHED"
+                            )
+                    }
+                />
+            </span>
+            <Tooltip
+                id={`step-${step.id}-2tooltip`}
+                place="top"
+                delayShow={300}
+                content={step.id}
+            />
+        </>
+    )
+
 }
 
 interface StatePointProps {
