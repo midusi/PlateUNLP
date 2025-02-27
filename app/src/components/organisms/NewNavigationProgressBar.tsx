@@ -137,38 +137,27 @@ function NavigationLine({
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
     const slicePoint: number = processInfo.general.length
 
-    const components = steps.map((step, index) => (
-        <div key={step.id} className="flex items-center w-full last:w-auto">
-            <StepPoint
-                index={index}
-                step={step}
-                actualStepIndex={actualStep}
-                processInfo={processInfo}
-                setActualStep={setActualStep}
-            />
-            {index < steps.length - 1 && (
-                <div className="relative flex-1 h-1">
-                    <div className="absolute inset-0 h-full bg-gray-500" />
-                    <div
-                        className={clsx(
-                            "absolute inset-0 h-full",
-                            "transition-all duration-500",
-                            "bg-blue-500",
-                        )}
-                        style={{ width: index < actualStep ? "100%" : "0%" }}
-                    />
-                </div>
-
-            )}
-        </div>
-    ))
-
     return (
-        <div className="relative flex items-center flex-1">
+        <div className="relative flex items-center flex-1 w-full">
+            {/* Barra de progreso */}
+            <div className="absolute left-0 right-0 h-1 bg-gray-500" />
+            <div
+                className="absolute left-0 h-1 bg-blue-500 transition-all duration-500"
+                style={{ width: `${(actualStep / (steps.length - 1)) * 100}%` }}
+            />
+            {/* Puntos */}
             <div className="flex items-center justify-between w-full">
-                {steps.map((_, index: number) => (
-                    components[index]
-                ))}
+                {steps.map((step, index) => (
+                    <StepPoint
+                        key={step.id}
+                        index={index}
+                        step={step}
+                        actualStepIndex={actualStep}
+                        processInfo={processInfo}
+                        setActualStep={setActualStep}
+                    />
+                ),
+                )}
             </div>
             <div
                 className={clsx(
