@@ -1,7 +1,8 @@
 import type { ProcessInfoForm } from "@/interfaces/ProcessInfoForm"
+import type { SetStateAction } from "react"
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
-import { SetStateAction, useState } from "react"
+import { useState } from "react"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
 import { StepSpectrumSelection } from "../pages/StepSpectrumSelection"
@@ -177,7 +178,6 @@ function NavigationLine({
     )
 }
 
-
 interface StepPointProps {
     index: number
     step: StepData
@@ -188,34 +188,35 @@ interface StepPointProps {
 }
 
 function StepPoint({ index, step, actualStepIndex, slicePoint, processInfo, setActualStep }: StepPointProps) {
+    const state = index < slicePoint
+        ? processInfo.general[index].state
+        : (processInfo.perSpectrum[index - slicePoint].states
+            ? processInfo.perSpectrum[index - slicePoint].states![0]
+            : "NOT_REACHED"
+        )
+
+    const clickAvailable: boolean = state !== "NOT_REACHED"
+    const size: string = index === actualStepIndex ? "w-5 h-5" : "w-4 h-4"
+    const color: string = index <= actualStepIndex ? "bg-blue-500" : "bg-gray-500"
     return (
         <>
             <span
                 className={clsx(
                     "rounded-full",
-                    index <= actualStepIndex ? "bg-blue-500" : "bg-gray-500",
-                    index === actualStepIndex ? "w-5 h-5" : "w-4 h-4",
-                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
-                    && "cursor-pointer active:scale-90 active:bg-blue-700",
+                    color,
+                    size,
+                    clickAvailable && "cursor-pointer active:scale-90 active:bg-blue-700",
                     "relative flex items-center justify-center",
                 )}
-                onClick={(_) => {
-                    ((processInfo.perSpectrum !== null) || (index < slicePoint))
-                        && setActualStep(index)
-                }}
+                onClick={clickAvailable
+                    ? (_) => { setActualStep(index) }
+                    : () => { }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
                 <StatePoint
                     index={index}
                     actualStep={actualStepIndex}
-                    state={
-                        index < slicePoint
-                            ? processInfo.general[index].state
-                            : (processInfo.perSpectrum[index - slicePoint].states
-                                ? processInfo.perSpectrum[index - slicePoint].states![0]
-                                : "NOT_REACHED"
-                            )
-                    }
+                    state={state}
                 />
             </span>
             <Tooltip
@@ -226,7 +227,6 @@ function StepPoint({ index, step, actualStepIndex, slicePoint, processInfo, setA
             />
         </>
     )
-
 }
 
 interface StatePointProps {
