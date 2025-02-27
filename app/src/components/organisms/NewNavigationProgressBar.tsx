@@ -19,6 +19,23 @@ export interface StepData {
     state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
 }
 
+function getStepState(index: number, processInfo: ProcessInfoForm):
+    "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE" {
+    // Comprobar existencia de paso destino
+    const total = processInfo.general.length + processInfo.perSpectrum.length
+    if (index < 0 || index >= total) {
+        return "NOT_REACHED"
+    }
+
+    const slicePoint = processInfo.general.length
+    return index < slicePoint
+        ? processInfo.general[index].state
+        : (processInfo.perSpectrum[index - slicePoint].states
+            ? processInfo.perSpectrum[index - slicePoint].states![0]
+            : "NOT_REACHED"
+        )
+}
+
 export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useState(0)
     const [specificObject, setSpecificObject] = useState<string | null>(null)
@@ -38,8 +55,8 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: 
                 "hover:text-black hover:bg-gray-200 transition active:bg-gray-400",
                 "disabled:text-white",
             )}
-            onClick={() => setActual(actual - 1)}
-            disabled={actual === 0}
+            onClick={() => { setActual(actual - 1) }}
+            disabled={getStepState(actual - 1, processInfo) === "NOT_REACHED"}
         >
             <ChevronLeftIcon className="h-5 w-5" />
         </Button>
@@ -54,7 +71,7 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: 
                 "disabled:text-white",
             )}
             onClick={() => setActual(actual + 1)}
-            disabled={((specificObject === null) && (actual === general.length)) || (actual === steps.length)}
+            disabled={getStepState(actual + 1, processInfo) === "NOT_REACHED"}
         >
             <ChevronRightIcon className="h-5 w-5" />
         </Button>
@@ -118,7 +135,7 @@ function NavigationLine({
     processInfo,
 }: NavigationLineProps) {
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
-    const slicePoint: number = generalSteps.length + 1
+    const slicePoint: number = processInfo.general.length
 
     const components = steps.map((step, index) => (
         <div key={step.id} className="flex items-center w-full last:w-auto">
@@ -126,7 +143,6 @@ function NavigationLine({
                 index={index}
                 step={step}
                 actualStepIndex={actualStep}
-                slicePoint={slicePoint}
                 processInfo={processInfo}
                 setActualStep={setActualStep}
             />
@@ -182,19 +198,12 @@ interface StepPointProps {
     index: number
     step: StepData
     actualStepIndex: number
-    slicePoint: number
     processInfo: ProcessInfoForm
     setActualStep: (value: SetStateAction<number>) => void
 }
 
-function StepPoint({ index, step, actualStepIndex, slicePoint, processInfo, setActualStep }: StepPointProps) {
-    const state = index < slicePoint
-        ? processInfo.general[index].state
-        : (processInfo.perSpectrum[index - slicePoint].states
-            ? processInfo.perSpectrum[index - slicePoint].states![0]
-            : "NOT_REACHED"
-        )
-
+function StepPoint({ index, step, actualStepIndex, processInfo, setActualStep }: StepPointProps) {
+    const state = getStepState(index, processInfo)
     const clickAvailable: boolean = state !== "NOT_REACHED"
     const size: string = index === actualStepIndex ? "w-5 h-5" : "w-4 h-4"
     const color: string = index <= actualStepIndex ? "bg-blue-500" : "bg-gray-500"
