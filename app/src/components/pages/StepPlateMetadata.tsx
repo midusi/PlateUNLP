@@ -1,10 +1,14 @@
 import type { StepProps } from "@/interfaces/StepProps"
 import type { PlateMetadata } from "../molecules/PlateMetadataForm"
+import { useGlobalStore } from "@/hooks/use-global-store"
 import { useRef } from "react"
 import { Button } from "../atoms/button"
 import { PlateMetadataForm } from "../molecules/PlateMetadataForm"
 
 export function StepPlateMetadata({ index, setProcessInfo }: StepProps) {
+    const [setActualStep] = useGlobalStore(s => [
+        s.setActualStep,
+    ])
     function onComplete() {
         /// Marca el paso actual como completado y el que le sigue como
         /// que necesita actualizaciones
@@ -19,6 +23,7 @@ export function StepPlateMetadata({ index, setProcessInfo }: StepProps) {
                         : step.state),
             })),
         }))
+        setActualStep(index + 1)
     }
 
     const plateMetadataFormRef = useRef<{ setValues: (spectrumMetadata: PlateMetadata) => void, resetValues: () => void, getValues: () => PlateMetadata, validate: () => void }>(null)

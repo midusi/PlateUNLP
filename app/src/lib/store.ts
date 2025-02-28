@@ -14,6 +14,7 @@ export interface GlobalStore {
   materialsPalette: string[]
   pixelToWavelengthFunction: ((value: number) => number) | CustomError
   oneTeoricalSpectrum: boolean
+  actualStep: number // etapa actual en la barra de navegación
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
@@ -23,6 +24,7 @@ export interface GlobalStore {
   setMaterialPoints: (arr: Point[]) => void
   setPixelToWavelengthFunction: (arr: ((value: number) => number) | CustomError) => void
   setOneTeoricalSpectrum: (value: boolean) => void
+  setActualStep: (value: number) => void
 }
 
 export const globalStore = create<GlobalStore>()(set => ({
@@ -57,6 +59,8 @@ export const globalStore = create<GlobalStore>()(set => ({
     "Insufficient matches, at least 2 are required for inference with linear regression.",
   ),
 
+  actualStep: 0,
+
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {
       set({ material: value })
@@ -72,4 +76,5 @@ export const globalStore = create<GlobalStore>()(set => ({
   setMaterialPoints: (arr: Point[]) => { set({ materialPoints: arr }) },
   setPixelToWavelengthFunction: (value) => { set({ pixelToWavelengthFunction: value }) },
   setOneTeoricalSpectrum: value => set({ oneTeoricalSpectrum: value }),
+  setActualStep: value => set({ actualStep: value }),
 }))
