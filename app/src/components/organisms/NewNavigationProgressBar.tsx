@@ -41,8 +41,7 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: 
 
     const bridgeStep: StepData = {
         id: "Spectrum Selection",
-        content: <StepSpectrumSelection setSpecificObject={setSpecificObject} />,
-        state: "NECESSARY_CHANGES",
+        content: <StepSpectrumSelection setSpecificObject={setSpecificObject} />,,
     }
     const steps = [...general, bridgeStep, ...perSpectrum]
 
