@@ -1,6 +1,5 @@
 import type { StepData } from "@/components/organisms/NewNavigationProgressBar"
 import type { ProcessInfoForm } from "./interfaces/ProcessInfoForm"
-import { NavigationProgressBar } from "@/components/organisms/NavigationProgressBar"
 import { NewNavigationProgressBar } from "@/components/organisms/NewNavigationProgressBar"
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
@@ -9,14 +8,8 @@ import { StepFeatureExtraction } from "./components/pages/StepFeatureExtraction"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
 import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
-import { useGlobalStore } from "./hooks/use-global-store"
 
 export default function App() {
-  const [completedStages, setCompletedStages] = useGlobalStore(s => [
-    s.completedStages,
-    s.setCompletedStages,
-  ])
-
   const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
     general: [
       { state: "NECESSARY_CHANGES" },
@@ -91,10 +84,6 @@ export default function App() {
         )),
       }))
       processInfo.perSpectrum[0].states = processInfo.perSpectrum[0].states!.map(() => "NECESSARY_CHANGES")
-    }
-
-    if (stageNumber === completedStages + 1) {
-      setCompletedStages(stageNumber)
     }
   }
 
