@@ -16,7 +16,6 @@ interface NewNavigationProgressBarProps {
 export interface StepData {
     id: string
     content: JSX.Element
-    state: "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE"
 }
 
 function getStepState(index: number, processInfo: ProcessInfoForm):

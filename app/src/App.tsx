@@ -5,6 +5,7 @@ import { NewNavigationProgressBar } from "@/components/organisms/NewNavigationPr
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
 import { useState } from "react"
+import { StepFeatureExtraction } from "./components/pages/StepFeatureExtraction"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
 import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
@@ -16,49 +17,43 @@ export default function App() {
     s.setCompletedStages,
   ])
 
+  const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
+    general: [
+      { state: "NECESSARY_CHANGES" },
+      ...Array.from({ length: 2 }, () => ({ state: "NOT_REACHED" as const })),
+    ],
+    perSpectrum: Array.from({ length: 4 }, () => ({ states: null })),
+  })
+
   // Steps info form
   const generalSteps: StepData[] = [
     {
       id: "Plate Metadata",
-      content: <div key="1">Step 1</div>,
-      state: "COMPLETE",
+      content: <StepPlateMetadata index={0} processInfo={processInfo} />,
     },
     {
       id: "Plate Segmentation",
-      content: <StepPlateSegmentation onComplete={() => { }} />,
-      state: "COMPLETE",
+      content: <StepPlateSegmentation index={1} processInfo={processInfo} />,
     },
   ]
   const specificSteps: StepData[] = [
     {
       id: "Spectrum Segmentation",
-      content: <StepSpectrumSegmentation onComplete={() => { }} />,
-      state: "NOT_REACHED",
+      content: <StepSpectrumSegmentation index={3} processInfo={processInfo} />,
     },
     {
       id: "Spectrum Metadata",
-      content: <StepMetadataRetrieval onComplete={() => { }} />,
-      state: "NOT_REACHED",
+      content: <StepMetadataRetrieval index={4} processInfo={processInfo} />,
     },
     {
       id: "Feature Extraction",
-      content: <div key="7">Step 7</div>,
-      state: "NOT_REACHED",
+      content: <StepFeatureExtraction index={6} processInfo={processInfo} />,
     },
     {
       id: "Calibration",
-      content: <StepCalibration onComplete={() => { }} />,
-      state: "NOT_REACHED",
+      content: <StepCalibration index={6} processInfo={processInfo} />,
     },
   ]
-
-  const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
-    general: [
-      { state: "NECESSARY_CHANGES" },
-      ...generalSteps.map(_ => ({ state: "NOT_REACHED" as const })),
-    ],
-    perSpectrum: specificSteps.map(_ => ({ states: null })),
-  })
 
   function onComplete(stageNumber: number) {
     if (stageNumber < processInfo.general.length - 1) {
@@ -116,18 +111,6 @@ export default function App() {
           general={generalSteps}
           perSpectrum={specificSteps}
           processInfo={processInfo}
-        />
-        <NavigationProgressBar
-          initialStep={1}
-          stepsArr={[
-            { name: "Plate metadata", content: <StepPlateMetadata onComplete={() => onComplete(0)} /> },
-            { name: "Plate segmentation", content: <StepPlateSegmentation onComplete={() => onComplete(1)} /> },
-            { name: "Metadata retrieval", content: <StepMetadataRetrieval onComplete={() => onComplete(3)} /> },
-            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation onComplete={() => onComplete(4)} /> },
-            { name: "Feature extraction", content: <>5</> },
-            { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(6)} /> },
-            { name: "Completed", content: <>FIN</> },
-          ]}
         />
       </main>
 
