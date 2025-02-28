@@ -1,3 +1,6 @@
+import type { ProcessInfoForm } from "./ProcessInfoForm"
+
 export interface StepProps {
-    onComplete: () => void
+    processInfo: ProcessInfoForm
+    index: number
 }
