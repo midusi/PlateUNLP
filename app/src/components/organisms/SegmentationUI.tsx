@@ -1,4 +1,5 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
+import type { Dispatch, SetStateAction } from "react"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
 import { useState } from "react"
@@ -7,11 +8,18 @@ interface SegmentationUIProps {
     file: string
     onComplete: () => void
     enableAutodetect: boolean
+    boundingBoxes: BoundingBox[]
+    setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+
 }
 
-export function SegmentationUI({ file, onComplete, enableAutodetect }: SegmentationUIProps) {
-    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
-
+export function SegmentationUI({
+    file,
+    onComplete,
+    enableAutodetect,
+    boundingBoxes,
+    setBoundingBoxes,
+}: SegmentationUIProps) {
     async function handleDownload() {
         if (!file || boundingBoxes.length === 0)
             return
