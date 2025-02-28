@@ -22,29 +22,29 @@ export default function App() {
   const generalSteps: StepData[] = [
     {
       id: "Plate Metadata",
-      content: <StepPlateMetadata index={0} processInfo={processInfo} />,
+      content: <StepPlateMetadata index={0} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
       id: "Plate Segmentation",
-      content: <StepPlateSegmentation index={1} processInfo={processInfo} />,
+      content: <StepPlateSegmentation index={1} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
   ]
   const specificSteps: StepData[] = [
     {
       id: "Spectrum Segmentation",
-      content: <StepSpectrumSegmentation index={3} processInfo={processInfo} />,
+      content: <StepSpectrumSegmentation index={3} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
       id: "Spectrum Metadata",
-      content: <StepMetadataRetrieval index={4} processInfo={processInfo} />,
+      content: <StepMetadataRetrieval index={4} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
       id: "Feature Extraction",
-      content: <StepFeatureExtraction index={6} processInfo={processInfo} />,
+      content: <StepFeatureExtraction index={6} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
       id: "Calibration",
-      content: <StepCalibration index={6} processInfo={processInfo} />,
+      content: <StepCalibration index={6} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
   ]
 
