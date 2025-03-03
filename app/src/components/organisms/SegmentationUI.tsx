@@ -2,7 +2,6 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Dispatch, SetStateAction } from "react"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
-import { useState } from "react"
 
 interface SegmentationUIProps {
     file: string
