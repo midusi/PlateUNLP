@@ -1,4 +1,5 @@
 import type { ProcessInfoForm } from "@/interfaces/ProcessInfoForm"
+import type { Dispatch, SetStateAction } from "react"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
@@ -11,6 +12,7 @@ interface NewNavigationProgressBarProps {
     general: StepData[]
     perSpectrum: StepData[]
     processInfo: ProcessInfoForm
+    setProcessInfo: Dispatch<SetStateAction<ProcessInfoForm>>
 }
 
 export interface StepData {
@@ -35,7 +37,7 @@ function getStepState(index: number, processInfo: ProcessInfoForm):
         )
 }
 
-export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: NewNavigationProgressBarProps) {
+export function NewNavigationProgressBar({ general, perSpectrum, processInfo, setProcessInfo }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useGlobalStore(s => [
         s.actualStep,
         s.setActualStep,
@@ -44,7 +46,7 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: 
 
     const bridgeStep: StepData = {
         id: "Spectrum Selection",
-        content: <StepSpectrumSelection setSpecificObject={setSpecificObject} />,
+        content: <StepSpectrumSelection setSpecificObject={setSpecificObject} processInfo={processInfo} />,
     }
     const steps = [...general, bridgeStep, ...perSpectrum]
 
