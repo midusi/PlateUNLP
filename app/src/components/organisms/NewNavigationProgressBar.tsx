@@ -223,7 +223,7 @@ function StepPoint({ index, step, actualStepIndex, processInfo, setActualStep }:
                     : () => { }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
-                {processInfo.selectedSpectrum !== null
+                {(index < processInfo.general.length || processInfo.selectedSpectrum !== null)
                     && (
                         <StatePoint
                             index={index}
