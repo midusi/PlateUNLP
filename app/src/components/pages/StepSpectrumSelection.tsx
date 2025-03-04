@@ -1,38 +1,18 @@
-import type { ProcessInfoForm, SpectrumData, StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
+import type { ProcessInfoForm, SpectrumData } from "@/interfaces/ProcessInfoForm"
+import type { Dispatch, SetStateAction } from "react"
 import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/24/outline"
 import clsx from "clsx"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
 
-function totalStepsCompleted(spectrumId: number, steps: StepSpecificInfoForm[]): number {
-    let stepsCompleted = 0
-    // Recorrer etapas por las que tiene que pasar un espectro
-    for (let stepId = 0; stepId < steps.length; stepId++) {
-        // Revisa valor del espectro en etapa i y suma si esta completado
-        if (steps[stepId].states![spectrumId] === "COMPLETE") {
-            stepsCompleted += 1
-        }
-    }
-    return stepsCompleted
-}
-
 interface StepSpectrumSelectionProps {
     processInfo: ProcessInfoForm
-    setSpecificObject: (value: SpectrumData | null) => void
+    setSpecificObject: Dispatch<SetStateAction<number | null>>
 }
 
 export function StepSpectrumSelection({ processInfo, setSpecificObject }: StepSpectrumSelectionProps) {
     const stepsNum = processInfo.perSpectrum.length
-    const spectrumsNum = processInfo.perSpectrum[0].states!.length
-    const spectrums: SpectrumData[] = Array.from(
-        { length: spectrumsNum },
-        (_, index) => ({
-            id: index,
-            name: `Plate${index}#Spectrum1`,
-            image: "spectrumExample.png",
-            complete: totalStepsCompleted(index, processInfo.perSpectrum),
-        }),
-    )
+    const spectrums: SpectrumData[] = processInfo.spectrums
 
     return (
         <>
@@ -49,13 +29,13 @@ export function StepSpectrumSelection({ processInfo, setSpecificObject }: StepSp
                         </tr>
                     </thead>
                     <tbody>
-                        {spectrums.map((spectrum, _) => {
+                        {spectrums.map((spectrum, index) => {
                             const complete: boolean = spectrum.complete / stepsNum === 1
                             return (
                                 <tr key={spectrum.id} className="hover:bg-gray-50">
                                     <td className="border px-4 py-2">{spectrum.name}</td>
                                     <td className="border px-4 py-2">
-                                        <img src={`/images/${spectrum.image}`} alt="Spectrum" className="w-full h-auto" />
+                                        <img src={spectrum.image} alt={spectrum.name} className="w-full h-auto" />
                                     </td>
                                     <td className="border px-6 py-2">
                                         {`${spectrum.complete}/${stepsNum}`}
@@ -104,7 +84,7 @@ export function StepSpectrumSelection({ processInfo, setSpecificObject }: StepSp
                                                 "text-white  transition",
                                             )}
                                             data-tooltip-id={complete ? "edit-tooltip" : "complete-tooltip"}
-                                            onClick={() => setSpecificObject(spectrum)}
+                                            onClick={() => setSpecificObject(index)}
                                         >
                                             {complete
                                                 ? <PencilIcon className="w-5 h-5" />

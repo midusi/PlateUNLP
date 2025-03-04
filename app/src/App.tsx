@@ -16,7 +16,7 @@ export default function App() {
       ...Array.from({ length: 2 }, () => ({ state: "NOT_REACHED" as const })),
     ],
     perSpectrum: Array.from({ length: 4 }, () => ({ states: null })),
-    selectedSpectrum: null,
+    spectrums: [],
   })
 
   // Steps info form

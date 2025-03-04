@@ -1,7 +1,7 @@
 export interface ProcessInfoForm {
-    general: StepGeneralInfoForm[]
-    perSpectrum: StepSpecificInfoForm[]
-    selectedSpectrum: null | SpectrumData
+    general: StepGeneralInfoForm[] // Info etapas que realizar por cada placa
+    perSpectrum: StepSpecificInfoForm[] // Info etapas que realizar por cada espectro
+    spectrums: SpectrumData[] // Informacion sobre el estado de cada espectro
 }
 
 export interface StepGeneralInfoForm {

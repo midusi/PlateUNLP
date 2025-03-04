@@ -50,6 +50,7 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
                         enableAutodetect={false}
                         boundingBoxes={boundingBoxes}
                         setBoundingBoxes={setBoundingBoxes}
+                        setProcessInfo={setProcessInfo}
                     />
                 )}
             </div>

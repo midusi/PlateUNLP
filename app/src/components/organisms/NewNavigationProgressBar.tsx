@@ -1,5 +1,4 @@
-import type { ProcessInfoForm, SpectrumData } from "@/interfaces/ProcessInfoForm"
-import type { Dispatch, SetStateAction } from "react"
+import type { ProcessInfoForm } from "@/interfaces/ProcessInfoForm"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
@@ -12,7 +11,6 @@ interface NewNavigationProgressBarProps {
     general: StepData[]
     perSpectrum: StepData[]
     processInfo: ProcessInfoForm
-    setProcessInfo: Dispatch<SetStateAction<ProcessInfoForm>>
 }
 
 export interface StepData {
@@ -37,22 +35,16 @@ function getStepState(index: number, processInfo: ProcessInfoForm):
         )
 }
 
-export function NewNavigationProgressBar({ general, perSpectrum, processInfo, setProcessInfo }: NewNavigationProgressBarProps) {
+export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: NewNavigationProgressBarProps) {
     const [actual, setActual] = useGlobalStore(s => [
         s.actualStep,
         s.setActualStep,
     ])
-    const specificObject: SpectrumData | null = processInfo.selectedSpectrum
-    function setSpecificObject(value: SpectrumData | null): void {
-        setProcessInfo(prev => ({
-            ...prev,
-            selectedSpectrum: value,
-        }))
-    }
+    const [selectedSpectrum, setSelectedSpectrum] = useState<number | null>(null)
 
     const bridgeStep: StepData = {
         id: "Spectrum Selection",
-        content: <StepSpectrumSelection setSpecificObject={setSpecificObject} processInfo={processInfo} />,
+        content: <StepSpectrumSelection setSpecificObject={setSelectedSpectrum} processInfo={processInfo} />,
     }
     const steps = [...general, bridgeStep, ...perSpectrum]
 
@@ -99,7 +91,7 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo, se
                         specificSteps={perSpectrum}
                         actualStep={actual}
                         setActualStep={setActual}
-                        specificObject={specificObject}
+                        spectrumSelected={selectedSpectrum}
                         processInfo={processInfo}
                     />
                 </div>
@@ -130,7 +122,7 @@ interface NavigationLineProps {
     specificSteps: StepData[]
     actualStep: number
     setActualStep: (value: number) => void
-    specificObject: SpectrumData | null
+    spectrumSelected: number | null
     processInfo: ProcessInfoForm
 }
 
@@ -140,7 +132,7 @@ function NavigationLine({
     specificSteps,
     actualStep,
     setActualStep,
-    specificObject,
+    spectrumSelected,
     processInfo,
 }: NavigationLineProps) {
     const steps = [...generalSteps, bridgeStep, ...specificSteps]
@@ -162,6 +154,7 @@ function NavigationLine({
                         index={index}
                         step={step}
                         actualStepIndex={actualStep}
+                        spectrumSelected={spectrumSelected}
                         processInfo={processInfo}
                         setActualStep={setActualStep}
                     />
@@ -172,21 +165,21 @@ function NavigationLine({
                 className={clsx(
                     "absolute bg-gray-50 border rounded-lg  border-dashed",
                     "pb-4 pt-4",
-                    specificObject ? "-z-10 border-yellow-300" : "-z-1 border-red-500 bg-opacity-90",
+                    spectrumSelected !== null ? "-z-10 border-yellow-300" : "-z-1 border-red-500 bg-opacity-90",
                 )}
                 style={{
                     left: `${Math.round(100 * slicePoint / steps.length)}%`,
                     right: `-1%`,
                 }}
             >
-                {specificObject && (
+                {spectrumSelected !== null && (
                     <span className={clsx(
                         "absolute top-0 left-1 text-left -translate-y-4",
                         "text-xs font-semibold ",
                         "text-black",
                     )}
                     >
-                        {specificObject.name}
+                        {processInfo.spectrums[spectrumSelected].name}
                     </span>
                 )}
 
@@ -199,11 +192,12 @@ interface StepPointProps {
     index: number
     step: StepData
     actualStepIndex: number
+    spectrumSelected: number | null
     processInfo: ProcessInfoForm
     setActualStep: (value: number) => void
 }
 
-function StepPoint({ index, step, actualStepIndex, processInfo, setActualStep }: StepPointProps) {
+function StepPoint({ index, step, actualStepIndex, spectrumSelected, processInfo, setActualStep }: StepPointProps) {
     const state = getStepState(index, processInfo)
     const clickAvailable: boolean = state !== "NOT_REACHED"
     const size: string = index === actualStepIndex ? "w-5 h-5" : "w-4 h-4"
@@ -223,7 +217,7 @@ function StepPoint({ index, step, actualStepIndex, processInfo, setActualStep }:
                     : () => { }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
-                {(index < processInfo.general.length || processInfo.selectedSpectrum !== null)
+                {(index < processInfo.general.length || spectrumSelected !== null)
                     && (
                         <StatePoint
                             index={index}
