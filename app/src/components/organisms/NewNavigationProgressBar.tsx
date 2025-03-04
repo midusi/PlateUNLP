@@ -42,7 +42,13 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo, se
         s.actualStep,
         s.setActualStep,
     ])
-    const [specificObject, setSpecificObject] = useState<SpectrumData | null>(null)
+    const specificObject: SpectrumData | null = processInfo.selectedSpectrum
+    function setSpecificObject(value: SpectrumData | null): void {
+        setProcessInfo(prev => ({
+            ...prev,
+            selectedSpectrum: value,
+        }))
+    }
 
     const bridgeStep: StepData = {
         id: "Spectrum Selection",
@@ -124,7 +130,7 @@ interface NavigationLineProps {
     specificSteps: StepData[]
     actualStep: number
     setActualStep: (value: number) => void
-    specificObject: string | null
+    specificObject: SpectrumData | null
     processInfo: ProcessInfoForm
 }
 
@@ -173,14 +179,17 @@ function NavigationLine({
                     right: `-1%`,
                 }}
             >
-                <span className={clsx(
-                    "absolute top-0 left-1 text-left -translate-y-4",
-                    "text-xs font-semibold ",
-                    specificObject ? "text-black" : "text-gray-200",
+                {specificObject && (
+                    <span className={clsx(
+                        "absolute top-0 left-1 text-left -translate-y-4",
+                        "text-xs font-semibold ",
+                        "text-black",
+                    )}
+                    >
+                        {specificObject.name}
+                    </span>
                 )}
-                >
-                    {specificObject}
-                </span>
+
             </div>
         </div>
     )
@@ -214,11 +223,14 @@ function StepPoint({ index, step, actualStepIndex, processInfo, setActualStep }:
                     : () => { }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
-                <StatePoint
-                    index={index}
-                    actualStep={actualStepIndex}
-                    state={state}
-                />
+                {processInfo.selectedSpectrum !== null
+                    && (
+                        <StatePoint
+                            index={index}
+                            actualStep={actualStepIndex}
+                            state={state}
+                        />
+                    )}
             </span>
             <Tooltip
                 id={`step-${step.id}-2tooltip`}

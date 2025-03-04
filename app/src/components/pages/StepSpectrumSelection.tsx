@@ -18,7 +18,7 @@ function totalStepsCompleted(spectrumId: number, steps: StepSpecificInfoForm[]):
 
 interface StepSpectrumSelectionProps {
     processInfo: ProcessInfoForm
-    setSpecificObject: React.Dispatch<React.SetStateAction<string | null>>
+    setSpecificObject: (value: SpectrumData | null) => void
 }
 
 export function StepSpectrumSelection({ processInfo, setSpecificObject }: StepSpectrumSelectionProps) {
@@ -104,7 +104,7 @@ export function StepSpectrumSelection({ processInfo, setSpecificObject }: StepSp
                                                 "text-white  transition",
                                             )}
                                             data-tooltip-id={complete ? "edit-tooltip" : "complete-tooltip"}
-                                            onClick={() => setSpecificObject(spectrum.name)}
+                                            onClick={() => setSpecificObject(spectrum)}
                                         >
                                             {complete
                                                 ? <PencilIcon className="w-5 h-5" />

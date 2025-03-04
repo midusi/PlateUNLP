@@ -1,7 +1,7 @@
 export interface ProcessInfoForm {
     general: StepGeneralInfoForm[]
     perSpectrum: StepSpecificInfoForm[]
-    selectedSpectrum: null | number
+    selectedSpectrum: null | SpectrumData
 }
 
 export interface StepGeneralInfoForm {
