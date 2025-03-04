@@ -62,7 +62,6 @@ export default function App() {
           general={generalSteps}
           perSpectrum={specificSteps}
           processInfo={processInfo}
-          setProcessInfo={setProcessInfo}
         />
       </main>
 
