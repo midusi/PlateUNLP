@@ -49,45 +49,6 @@ export default function App() {
     },
   ]
 
-  function onComplete(stageNumber: number) {
-    if (stageNumber < processInfo.general.length - 1) {
-      setProcessInfo(prev => ({
-        ...prev,
-        general: prev.general.map((spectrum, i) => (
-          i === stageNumber
-            ? {
-              ...spectrum,
-              state: "COMPLETE",
-            }
-            : (i === stageNumber + 1
-              ? {
-                ...spectrum,
-                state: "NECESSARY_CHANGES",
-              }
-              : { ...spectrum }
-            )
-        ),
-        ),
-      }))
-      processInfo.general[stageNumber].state = "COMPLETE"
-      processInfo.general[stageNumber + 1].state = "NECESSARY_CHANGES"
-    }
-    else if (stageNumber === processInfo.general.length) {
-      setProcessInfo(prev => ({
-        ...prev,
-        perSpectrum: prev.perSpectrum.map((spectrum, i) => (
-          i === 0
-            ? {
-              ...spectrum,
-              states: spectrum.states!.map(_ => "NECESSARY_CHANGES"),
-            }
-            : spectrum
-        )),
-      }))
-      processInfo.perSpectrum[0].states = processInfo.perSpectrum[0].states!.map(() => "NECESSARY_CHANGES")
-    }
-  }
-
   return (
     <div className="w-full mx-auto">
       <header className="mb-12 bg-[#2D3748]">
