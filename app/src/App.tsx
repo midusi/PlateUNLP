@@ -8,6 +8,7 @@ import { StepFeatureExtraction } from "./components/pages/StepFeatureExtraction"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
 import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
+import { StepSpectrumSelection } from "./components/pages/StepSpectrumSelection"
 
 export default function App() {
   const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
@@ -30,6 +31,10 @@ export default function App() {
       content: <StepPlateSegmentation index={1} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
   ]
+  const bridgeStep: StepData = {
+    id: "Spectrum Selection",
+    content: <StepSpectrumSelection index={2} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+  }
   const specificSteps: StepData[] = [
     {
       id: "Spectrum Segmentation",
@@ -60,6 +65,7 @@ export default function App() {
       <main className="px-8">
         <NewNavigationProgressBar
           general={generalSteps}
+          bridgeStep={bridgeStep}
           perSpectrum={specificSteps}
           processInfo={processInfo}
         />

@@ -8,6 +8,7 @@ import { StepSpectrumSelection } from "../pages/StepSpectrumSelection"
 
 interface NewNavigationProgressBarProps {
   general: StepData[]
+  bridgeStep: StepData
   perSpectrum: StepData[]
   processInfo: ProcessInfoForm
 }
@@ -34,18 +35,13 @@ function getStepState(index: number, processInfo: ProcessInfoForm, selectedSpect
       )
 }
 
-export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: NewNavigationProgressBarProps) {
-  const [actual, setActual, selectedSpectrum, setSelectedSpectrum] = useGlobalStore(s => [
+export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, processInfo }: NewNavigationProgressBarProps) {
+  const [actual, setActual, selectedSpectrum] = useGlobalStore(s => [
     s.actualStep,
     s.setActualStep,
     s.selectedSpectrum,
-    s.setSelectedSpectrum,
   ])
 
-  const bridgeStep: StepData = {
-    id: "Spectrum Selection",
-    content: <StepSpectrumSelection setSpecificObject={setSelectedSpectrum} processInfo={processInfo} />,
-  }
   const steps = [...general, bridgeStep, ...perSpectrum]
 
   const leftButton = (

@@ -1,17 +1,17 @@
 import type { ProcessInfoForm, SpectrumData } from "@/interfaces/ProcessInfoForm"
+import type { StepProps } from "@/interfaces/StepProps"
+import { useGlobalStore } from "@/hooks/use-global-store"
 import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/24/outline"
 import clsx from "clsx"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
 
-interface StepSpectrumSelectionProps {
-  processInfo: ProcessInfoForm
-  setSpecificObject: (value: number | null) => void
-}
-
-export function StepSpectrumSelection({ processInfo, setSpecificObject }: StepSpectrumSelectionProps) {
+export function StepSpectrumSelection({ processInfo }: StepProps) {
   const stepsNum = processInfo.perSpectrum.length
   const spectrums: SpectrumData[] = processInfo.spectrums
+  const [setSpecificObject] = useGlobalStore(s => [
+    s.setSelectedSpectrum,
+  ])
 
   return (
     <>
