@@ -1,4 +1,4 @@
-import type { ProcessInfoForm, SpectrumData } from "@/interfaces/ProcessInfoForm"
+import type { SpectrumData } from "@/interfaces/ProcessInfoForm"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/24/outline"
@@ -6,11 +6,12 @@ import clsx from "clsx"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
 
-export function StepSpectrumSelection({ processInfo }: StepProps) {
+export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepProps) {
   const stepsNum = processInfo.perSpectrum.length
   const spectrums: SpectrumData[] = processInfo.spectrums
-  const [setSpecificObject] = useGlobalStore(s => [
+  const [setSpecificObject, setActualStep] = useGlobalStore(s => [
     s.setSelectedSpectrum,
+    s.setActualStep,
   ])
 
   return (
@@ -83,7 +84,10 @@ export function StepSpectrumSelection({ processInfo }: StepProps) {
                         "text-white  transition",
                       )}
                       data-tooltip-id={complete ? "edit-tooltip" : "complete-tooltip"}
-                      onClick={() => setSpecificObject(index)}
+                      onClick={() => {
+                        setSpecificObject(index)
+                        setActualStep(stepIndex + 1)
+                      }}
                     >
                       {complete
                         ? <PencilIcon className="w-5 h-5" />
