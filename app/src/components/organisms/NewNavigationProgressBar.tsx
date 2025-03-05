@@ -17,7 +17,7 @@ export interface StepData {
   content: JSX.Element
 }
 
-function getStepState(index: number, processInfo: ProcessInfoForm):
+function getStepState(index: number, processInfo: ProcessInfoForm, selectedSpectrum: number | null):
     "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE" {
   // Comprobar existencia de paso destino
   const total = processInfo.general.length + processInfo.perSpectrum.length
@@ -28,7 +28,7 @@ function getStepState(index: number, processInfo: ProcessInfoForm):
   const slicePoint = processInfo.general.length
   return index < slicePoint
     ? processInfo.general[index].state
-    : (processInfo.perSpectrum[index - slicePoint].states
+    : ((processInfo.perSpectrum[index - slicePoint].states && selectedSpectrum !== null)
         ? processInfo.perSpectrum[index - slicePoint].states![0]
         : "NOT_REACHED"
       )
@@ -57,7 +57,7 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: 
         "disabled:text-white",
       )}
       onClick={() => { setActual(actual - 1) }}
-      disabled={getStepState(actual - 1, processInfo) === "NOT_REACHED"}
+      disabled={getStepState(actual - 1, processInfo, selectedSpectrum) === "NOT_REACHED"}
     >
       <ChevronLeftIcon className="h-5 w-5" />
     </Button>
@@ -72,7 +72,7 @@ export function NewNavigationProgressBar({ general, perSpectrum, processInfo }: 
         "disabled:text-white",
       )}
       onClick={() => setActual(actual + 1)}
-      disabled={getStepState(actual + 1, processInfo) === "NOT_REACHED"}
+      disabled={getStepState(actual + 1, processInfo, selectedSpectrum) === "NOT_REACHED"}
     >
       <ChevronRightIcon className="h-5 w-5" />
     </Button>
@@ -198,7 +198,7 @@ interface StepPointProps {
 }
 
 function StepPoint({ index, step, actualStepIndex, spectrumSelected, processInfo, setActualStep }: StepPointProps) {
-  const state = getStepState(index, processInfo)
+  const state = getStepState(index, processInfo, spectrumSelected)
   const clickAvailable: boolean = state !== "NOT_REACHED"
   const size: string = index === actualStepIndex ? "w-5 h-5" : "w-4 h-4"
   const color: string = index <= actualStepIndex ? "bg-blue-500" : "bg-gray-500"
