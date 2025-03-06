@@ -152,6 +152,7 @@ function NavigationLine({
                         spectrumSelected={spectrumSelected}
                         processInfo={processInfo}
                         setActualStep={setActualStep}
+                        showStepName
                     />
                 ),
                 )}
@@ -190,28 +191,44 @@ interface StepPointProps {
     spectrumSelected: number | null
     processInfo: ProcessInfoForm
     setActualStep: (value: number) => void
+    showStepName: boolean
 }
 
-function StepPoint({ index, step, actualStepIndex, spectrumSelected, processInfo, setActualStep }: StepPointProps) {
+function StepPoint({
+    index,
+    step,
+    actualStepIndex,
+    spectrumSelected,
+    processInfo,
+    setActualStep,
+    showStepName = false
+}: StepPointProps) {
     const state = getStepState(index, processInfo, spectrumSelected)
     const clickAvailable: boolean = state !== "NOT_REACHED"
-    const size: string = index === actualStepIndex ? "w-5 h-5" : "w-4 h-4"
-    const color: string = index <= actualStepIndex ? "bg-blue-500" : "bg-gray-500"
+    const size: string = index === actualStepIndex
+        ? "w-5 h-5"
+        : "w-4 h-4"
+    const color: string = index <= actualStepIndex ? "bg-blue-500" : "bg-gray-400"
     return (
         <>
             <span
                 className={clsx(
                     "rounded-full",
                     color,
-                    size,
+                    !showStepName ? size : "px-1",
+                    showStepName && "select-none text-center font-medium text-gray-900",
+                    showStepName && index === actualStepIndex && "font-bold",
+                    index === actualStepIndex && "ring-2 ring-blue-300",
                     clickAvailable && "cursor-pointer active:scale-90 active:bg-blue-700",
                     "relative flex items-center justify-center",
+
                 )}
                 onClick={clickAvailable
                     ? (_) => { setActualStep(index) }
                     : () => { }}
                 data-tooltip-id={`step-${step.id}-2tooltip`}
             >
+                {showStepName && step.id}
                 {(index < processInfo.general.length || spectrumSelected !== null)
                     && (
                         <StatePoint
@@ -221,12 +238,12 @@ function StepPoint({ index, step, actualStepIndex, spectrumSelected, processInfo
                         />
                     )}
             </span>
-            <Tooltip
+            {!showStepName && <Tooltip
                 id={`step-${step.id}-2tooltip`}
                 place="top"
                 delayShow={300}
                 content={step.id}
-            />
+            />}
         </>
     )
 }
