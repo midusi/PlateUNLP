@@ -20,7 +20,6 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
         id: index,
         name: `Plate${index}#Spectrum`,
         image,
-        complete: totalStepsCompleted(index, prev.perSpectrum),
       })),
     }))
   }
@@ -35,8 +34,8 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
         state: index === i
           ? "COMPLETE"
           : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
+            ? "NECESSARY_CHANGES"
+            : step.state),
       })),
       perSpectrum: prev.perSpectrum.map((step, i) => (
         {
@@ -72,14 +71,4 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
   )
 }
 
-function totalStepsCompleted(spectrumId: number, steps: StepSpecificInfoForm[]): number {
-  let stepsCompleted = 0
-  // Recorrer etapas por las que tiene que pasar un espectro
-  for (let stepId = 0; stepId < steps.length; stepId++) {
-    // Revisa valor del espectro en etapa i y suma si esta completado
-    if (steps[stepId].states![spectrumId] === "COMPLETE") {
-      stepsCompleted += 1
-    }
-  }
-  return stepsCompleted
-}
+

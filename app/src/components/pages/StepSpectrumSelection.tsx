@@ -5,6 +5,7 @@ import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/
 import clsx from "clsx"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
+import { totalStepsCompleted } from "@/lib/utils"
 
 export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepProps) {
   const stepsNum = processInfo.perSpectrum.length
@@ -30,7 +31,8 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
           </thead>
           <tbody>
             {spectrums.map((spectrum, index) => {
-              const complete: boolean = spectrum.complete / stepsNum === 1
+              const completedSteps = totalStepsCompleted(index, processInfo.perSpectrum)
+              const complete: boolean = completedSteps / stepsNum === 1
               return (
                 <tr key={spectrum.id} className="hover:bg-gray-50">
                   <td className="border px-4 py-2">{spectrum.name}</td>
@@ -38,7 +40,7 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                     <img src={spectrum.image} alt={spectrum.name} className="w-full h-auto" />
                   </td>
                   <td className="border px-6 py-2">
-                    {`${spectrum.complete}/${stepsNum}`}
+                    {`${completedSteps}/${stepsNum}`}
                   </td>
                   <td className="border px-4 py-2">
                     {complete
