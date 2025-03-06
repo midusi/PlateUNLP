@@ -47,9 +47,9 @@ export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, pro
         <Button
             className={clsx(
                 "flex-shrink-0",
-                "text-orange-500 bg-white shadow-none",
-                "hover:text-black hover:bg-gray-200 transition active:bg-gray-400",
-                "disabled:text-white",
+                "bg-orange-400 text-white shadow-none",
+                "hover:text-black hover:bg-orange-600 transition active:bg-gray-400",
+                "disabled:bg-white",
             )}
             onClick={() => { setActual(actual - 1) }}
             disabled={getStepState(actual - 1, processInfo, selectedSpectrum) === "NOT_REACHED"}
@@ -62,9 +62,9 @@ export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, pro
         <Button
             className={clsx(
                 "flex-shrink-0",
-                "text-orange-500 bg-white shadow-none",
-                "hover:text-black hover:bg-gray-200 transition active:bg-gray-400",
-                "disabled:text-white",
+                "bg-orange-400 text-white shadow-none",
+                "hover:text-black hover:bg-orange-600 transition active:bg-gray-400",
+                "disabled:bg-white",
             )}
             onClick={() => setActual(actual + 1)}
             disabled={getStepState(actual + 1, processInfo, selectedSpectrum) === "NOT_REACHED"}
@@ -94,7 +94,7 @@ export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, pro
                     {rigthButton}
                 </div>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center mt-8 mb-8">
                 {steps[actual].content}
             </div>
             <div className="flex w-full">
