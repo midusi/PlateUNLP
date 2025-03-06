@@ -6,13 +6,30 @@ import { useState } from "react"
 import { LoadFile } from "../molecules/LoadFile"
 import { SegmentationUI } from "../organisms/SegmentationUI"
 
-export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
+export function StepSpectrumSegmentation({ index, setProcessInfo }: StepProps) {
   const [file, setFile] = useState<string | null>(null)
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
   ])
+
+  function saveCroppedImages(croppedImages: string[]) {
+    setProcessInfo(prev => ({
+      ...prev,
+      spectrums: prev.spectrums.map((spectrum, index) => (
+        index === selectedSpectrum
+          ? {
+              ...spectrum,
+              images: {
+                lamps: croppedImages,
+                scienceSpectrum: croppedImages[0],
+              }, // FALTA: DISTINGUIR ENTRE LAMPARA Y ESPECTRO DE CIENCIA, AHORA SOLO LO ASIGNO AL AZAR.
+            }
+          : spectrum
+      )),
+    }))
+  }
 
   function onComplete() {
     /// AGREGAR GUARDADO DE RECORTES DE IMAGENES
@@ -57,7 +74,7 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
           enableAutodetect
           boundingBoxes={boundingBoxes}
           setBoundingBoxes={setBoundingBoxes}
-          setProcessInfo={setProcessInfo}
+          saveCroppedImages={saveCroppedImages} // no pasar funcion de estado sino funcion de guardado personalizada
         />
       )}
     </div>

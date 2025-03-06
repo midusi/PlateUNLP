@@ -1,5 +1,4 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { ProcessInfoForm, StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 import type { Dispatch, SetStateAction } from "react"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
@@ -10,7 +9,7 @@ interface SegmentationUIProps {
   enableAutodetect: boolean
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
-  setProcessInfo: Dispatch<SetStateAction<ProcessInfoForm>>
+  saveCroppedImages: (croppedImages: string[]) => void
 }
 
 export function SegmentationUI({
@@ -19,7 +18,7 @@ export function SegmentationUI({
   enableAutodetect,
   boundingBoxes,
   setBoundingBoxes,
-  setProcessInfo,
+  saveCroppedImages,
 }: SegmentationUIProps) {
   async function saveImages() {
     if (!file || boundingBoxes.length === 0)
@@ -43,16 +42,7 @@ export function SegmentationUI({
       croppedImages.push(trimImageToBase64(image, box, { x: scaleX, y: scaleY }))
     })
 
-    setProcessInfo(prev => ({
-      ...prev,
-      spectrums: croppedImages.map((image, index) => ({
-        id: index,
-        name: `Plate${index}#Spectrum`,
-        image,
-        complete: totalStepsCompleted(index, prev.perSpectrum),
-
-      })),
-    }))
+    saveCroppedImages(croppedImages)
   }
 
   return (
@@ -108,16 +98,4 @@ function trimImageToBase64(
   )
 
   return canvas.toDataURL("image/png")
-}
-
-function totalStepsCompleted(spectrumId: number, steps: StepSpecificInfoForm[]): number {
-  let stepsCompleted = 0
-  // Recorrer etapas por las que tiene que pasar un espectro
-  for (let stepId = 0; stepId < steps.length; stepId++) {
-    // Revisa valor del espectro en etapa i y suma si esta completado
-    if (steps[stepId].states![spectrumId] === "COMPLETE") {
-      stepsCompleted += 1
-    }
-  }
-  return stepsCompleted
 }
