@@ -29,7 +29,7 @@ function getStepState(index: number, processInfo: ProcessInfoForm, selectedSpect
     return index < slicePoint
         ? processInfo.general[index].state
         : ((processInfo.perSpectrum[index - slicePoint].states && selectedSpectrum !== null)
-            ? processInfo.perSpectrum[index - slicePoint].states![0]
+            ? processInfo.perSpectrum[index - slicePoint].states![selectedSpectrum]
             : "NOT_REACHED"
         )
 }

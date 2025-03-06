@@ -43,15 +43,15 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                   <td className="border px-4 py-2">
                     {complete
                       ? (
-                          <div className="text-green-400">
-                            Complete
-                          </div>
-                        )
+                        <div className="text-green-400">
+                          Complete
+                        </div>
+                      )
                       : (
-                          <div className="text-orange-400">
-                            Pending
-                          </div>
-                        )}
+                        <div className="text-orange-400">
+                          Pending
+                        </div>
+                      )}
                   </td>
                   <td className="border-none px-4 py-2 text-center">
                     <Button
