@@ -110,7 +110,7 @@ importers:
         version: 5.5.0(react@19.0.0)
       react-tooltip:
         specifier: ^5.28.0
-        version: 5.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 5.28.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       resizable-panes-react:
         specifier: 6.0.26
         version: 6.0.26(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -10057,12 +10057,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.0.10
 
-  react-tooltip@5.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-tooltip@5.28.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
       '@floating-ui/dom': 1.6.12
       classnames: 2.5.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
 
   react@19.0.0: {}
 
