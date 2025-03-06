@@ -1,18 +1,15 @@
-import type { StepProps } from "@/interfaces/StepProps"
-import type { SpectrumMetadata } from "../molecules/SpectrumMetadataForm"
-import { useRef } from "react"
-import { Button } from "../atoms/button"
-import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import type { StepProps } from "@/interfaces/StepProps"
+import { Button } from "../atoms/button"
 
-export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: StepProps) {
+export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
     const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
         s.setActualStep,
         s.selectedSpectrum
     ])
 
     function onComplete() {
-        /// AGREGAR GUARDADO DE METADATOS
+        /// AGREGAR GUARDADO DE DATOS EXTRAIDOS
 
         /// Marca el paso actual como completado y el que le sigue como
         /// que necesita actualizaciones
@@ -42,27 +39,17 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
                     )
             )),
         }))
+
         setActualStep(index + 1)
     }
 
-    const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, resetValues: () => void, getValues: () => SpectrumMetadata, validate: () => void }>(null)
     return (
         <>
-            <SpectrumMetadataForm ref={spectrumMetadataFormRef} />
-            <div className="flex justify-evenly mt-6">
-                <Button
-                    onClick={() => spectrumMetadataFormRef.current?.resetValues()}
-                    className=" bg-blue-500 w-1/4"
-                >
-                    Reset fields
-                </Button>
-
-                <Button className="w-1/4"
-                    onClick={() => { if (spectrumMetadataFormRef.current?.validate()) onComplete() }}
-                >
-                    Save
-                </Button>
-            </div>
+            <h1> FEATURE EXTRACTION </h1>
+            <hr></hr>
+            <Button onClick={() => onComplete()}>
+                Save
+            </Button>
         </>
     )
 }

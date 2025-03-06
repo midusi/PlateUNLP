@@ -108,6 +108,9 @@ importers:
       react-icons:
         specifier: 5.5.0
         version: 5.5.0(react@19.0.0)
+      react-tooltip:
+        specifier: ^5.28.0
+        version: 5.28.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       resizable-panes-react:
         specifier: 6.0.26
         version: 6.0.26(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -4542,6 +4545,12 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  react-tooltip@5.28.0:
+    resolution: {integrity: sha512-R5cO3JPPXk6FRbBHMO0rI9nkUG/JKfalBSQfZedZYzmqaZQgq7GLzF8vcCWx6IhUCKg0yPqJhXIzmIO5ff15xg==}
+    peerDependencies:
+      react: '>=16.14.0'
+      react-dom: '>=16.14.0'
 
   react@19.0.0:
     resolution: {integrity: sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==}
@@ -10047,6 +10056,13 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.0.10
+
+  react-tooltip@5.28.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      '@floating-ui/dom': 1.6.12
+      classnames: 2.5.1
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
 
   react@19.0.0: {}
 

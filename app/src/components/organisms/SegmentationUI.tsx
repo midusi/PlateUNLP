@@ -1,88 +1,101 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
+import type { Dispatch, SetStateAction } from "react"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
-import { useState } from "react"
 
 interface SegmentationUIProps {
-    file: string
-    onComplete: () => void
-    enableAutodetect: boolean
+  file: string
+  onComplete: () => void
+  enableAutodetect: boolean
+  boundingBoxes: BoundingBox[]
+  setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+  saveCroppedImages: (croppedImages: string[]) => void
 }
 
-export function SegmentationUI({ file, onComplete, enableAutodetect }: SegmentationUIProps) {
-    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+export function SegmentationUI({
+  file,
+  onComplete,
+  enableAutodetect,
+  boundingBoxes,
+  setBoundingBoxes,
+  saveCroppedImages,
+}: SegmentationUIProps) {
+  async function saveImages() {
+    if (!file || boundingBoxes.length === 0)
+      return
 
-    async function handleDownload() {
-        if (!file || boundingBoxes.length === 0)
-            return
+    const croppedImages: string[] = []
 
-        const image = new Image()
-        image.src = file
+    // Cargar imagen
+    const image = new Image()
+    image.src = file
+    await new Promise((resolve) => {
+      image.onload = resolve
+    })
 
-        // Esperar a que la imagen se cargue completamente
-        await new Promise((resolve) => {
-            image.onload = resolve
-        })
+    // Informacion de escala
+    const { naturalWidth, naturalHeight, width, height } = image
+    const scaleX = naturalWidth / width
+    const scaleY = naturalHeight / height
 
-        const { naturalWidth, naturalHeight, width, height } = image
-        const scaleX = naturalWidth / width
-        const scaleY = naturalHeight / height
+    boundingBoxes.forEach((box) => {
+      croppedImages.push(trimImageToBase64(image, box, { x: scaleX, y: scaleY }))
+    })
 
-        // Crear un canvas para cada bounding box y generar las descargas
-        boundingBoxes.forEach((box) => {
-            const canvas = document.createElement("canvas")
-            const ctx = canvas.getContext("2d")
+    saveCroppedImages(croppedImages)
+  }
 
-            if (ctx) {
-                const realX = box.x * scaleX
-                const realY = box.y * scaleY
-                const realWidth = box.width * scaleX
-                const realHeight = box.height * scaleY
+  return (
+    <>
+      <BBImageEditor
+        className="w-full"
+        src={file}
+        boundingBoxes={boundingBoxes}
+        setBoundingBoxes={setBoundingBoxes}
+        enableAutodetect={enableAutodetect}
+      />
+      <div className="flex justify-center pt-4">
+        <Button
+          onClick={() => {
+            saveImages()
+            onComplete()
+          }}
+          disabled={file === null || boundingBoxes.length === 0}
+        >
+          Save
+        </Button>
+      </div>
+    </>
+  )
+}
 
-                canvas.width = realWidth
-                canvas.height = realHeight
+function trimImageToBase64(
+  image: HTMLImageElement,
+  box: BoundingBox,
+  scale: { x: number, y: number },
+): string {
+  const canvas = document.createElement("canvas")
+  const ctx = canvas.getContext("2d")
 
-                ctx.drawImage(
-                    image,
-                    realX, // Coordenada X en la imagen real
-                    realY, // Coordenada Y en la imagen real
-                    realWidth, // Ancho real de la bounding box
-                    realHeight, // Alto real de la bounding box
-                    0,
-                    0,
-                    realWidth,
-                    realHeight,
-                )
+  const realX = box.x * scale.x
+  const realY = box.y * scale.y
+  const realWidth = box.width * scale.x
+  const realHeight = box.height * scale.y
 
-                // Convertir el canvas a una URL de descarga
-                const link = document.createElement("a")
-                link.download = `#${box.id}-${box.name}.png`
-                link.href = canvas.toDataURL("image/png")
-                link.click()
-            }
-        })
-    }
+  canvas.width = realWidth
+  canvas.height = realHeight
 
-    return (
-        <>
-            <BBImageEditor
-                className="w-full"
-                src={file}
-                boundingBoxes={boundingBoxes}
-                setBoundingBoxes={setBoundingBoxes}
-                enableAutodetect={enableAutodetect}
-            />
-            <div className="flex justify-center pt-4">
-                <Button
-                    onClick={() => {
-                        handleDownload()
-                        onComplete()
-                    }}
-                    disabled={file === null || boundingBoxes.length === 0}
-                >
-                    Save
-                </Button>
-            </div>
-        </>
-    )
+  ctx!.drawImage(
+    image,
+    realX, // Coordenada X en la imagen real
+    realY, // Coordenada Y en la imagen real
+    realWidth, // Ancho real de la bounding box
+    realHeight, // Alto real de la bounding box
+    0,
+    0,
+    realWidth,
+    realHeight,
+  )
+
+  return canvas.toDataURL("image/png")
 }

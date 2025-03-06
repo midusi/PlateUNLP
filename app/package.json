@@ -43,6 +43,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-icons": "5.5.0",
+    "react-tooltip": "^5.28.0",
     "resizable-panes-react": "6.0.26",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",

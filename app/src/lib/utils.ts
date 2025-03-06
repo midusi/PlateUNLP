@@ -1,4 +1,5 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
+import { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 import { type ClassValue, clsx } from "clsx"
 import { inv, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
@@ -255,4 +256,16 @@ export function iou(box1: BoundingBox, box2: BoundingBox) {
 export function getNextId(boundingBoxes: BoundingBox[]) {
   const maxId = boundingBoxes.reduce((max, box) => Math.max(max, box.id), 0)
   return maxId + 1
+}
+
+export function totalStepsCompleted(spectrumId: number, steps: StepSpecificInfoForm[]): number {
+  let stepsCompleted = 0
+  // Recorrer etapas por las que tiene que pasar un espectro
+  for (let stepId = 0; stepId < steps.length; stepId++) {
+    // Revisa valor del espectro en etapa i y suma si esta completado
+    if (steps[stepId].states![spectrumId] === "COMPLETE") {
+      stepsCompleted += 1
+    }
+  }
+  return stepsCompleted
 }

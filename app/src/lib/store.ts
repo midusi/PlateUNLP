@@ -13,8 +13,9 @@ export interface GlobalStore {
   linesPalette: string[]
   materialsPalette: string[]
   pixelToWavelengthFunction: ((value: number) => number) | CustomError
-  completedStages: number
   oneTeoricalSpectrum: boolean
+  actualStep: number // etapa actual en la barra de navegación
+  selectedSpectrum: number | null
 
   setMaterial: (material: LampMaterial) => void
   setRangeMin: (value: number) => void
@@ -23,8 +24,9 @@ export interface GlobalStore {
   setLampPoints: (arr: Point[]) => void
   setMaterialPoints: (arr: Point[]) => void
   setPixelToWavelengthFunction: (arr: ((value: number) => number) | CustomError) => void
-  setCompletedStages: (value: number) => void
   setOneTeoricalSpectrum: (value: boolean) => void
+  setActualStep: (value: number) => void
+  setSelectedSpectrum: (value: number | null) => void
 }
 
 export const globalStore = create<GlobalStore>()(set => ({
@@ -59,7 +61,9 @@ export const globalStore = create<GlobalStore>()(set => ({
     "Insufficient matches, at least 2 are required for inference with linear regression.",
   ),
 
-  completedStages: 4,
+  actualStep: 0,
+
+  selectedSpectrum: null,
 
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {
@@ -72,9 +76,10 @@ export const globalStore = create<GlobalStore>()(set => ({
   setRangeMin: value => set({ rangeMin: Math.round(value) }),
   setRangeMax: value => set({ rangeMax: Math.round(value) }),
   setRange: (min, max) => set({ rangeMin: Math.round(min), rangeMax: Math.round(max) }),
-  setLampPoints: (arr: Point[]) => { set({ lampPoints: arr }) },
-  setMaterialPoints: (arr: Point[]) => { set({ materialPoints: arr }) },
+  setLampPoints: (arr) => { set({ lampPoints: arr }) },
+  setMaterialPoints: (arr) => { set({ materialPoints: arr }) },
   setPixelToWavelengthFunction: (value) => { set({ pixelToWavelengthFunction: value }) },
-  setCompletedStages: (value: number) => { set({ completedStages: value }) },
   setOneTeoricalSpectrum: value => set({ oneTeoricalSpectrum: value }),
+  setActualStep: value => set({ actualStep: value }),
+  setSelectedSpectrum: value => set({ selectedSpectrum: value }),
 }))

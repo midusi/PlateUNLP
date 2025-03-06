@@ -1,21 +1,58 @@
-import { NavigationProgressBar } from "@/components/organisms/NavigationProgressBar"
+import type { StepData } from "@/components/organisms/NewNavigationProgressBar"
+import type { ProcessInfoForm } from "./interfaces/ProcessInfoForm"
+import { NewNavigationProgressBar } from "@/components/organisms/NewNavigationProgressBar"
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
+import { useState } from "react"
+import { StepFeatureExtraction } from "./components/pages/StepFeatureExtraction"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
-import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
-import { useGlobalStore } from "./hooks/use-global-store"
 import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
+import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
+import { StepSpectrumSelection } from "./components/pages/StepSpectrumSelection"
 
 export default function App() {
-  const [completedStages, setCompletedStages] = useGlobalStore(s => [
-    s.completedStages,
-    s.setCompletedStages,
-  ])
+  const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
+    general: [
+      { state: "NECESSARY_CHANGES" },
+      ...Array.from({ length: 2 }, () => ({ state: "NOT_REACHED" as const })),
+    ],
+    perSpectrum: Array.from({ length: 4 }, () => ({ states: null })),
+    spectrums: [],
+  })
 
-  function onComplete(stageNumber: number) {
-    if (stageNumber === completedStages + 1)
-      setCompletedStages(stageNumber)
+  // Steps info form
+  const generalSteps: StepData[] = [
+    {
+      id: "Plate Metadata",
+      content: <StepPlateMetadata index={0} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+    },
+    {
+      id: "Plate Segmentation",
+      content: <StepPlateSegmentation index={1} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+    },
+  ]
+  const bridgeStep: StepData = {
+    id: "Spectrum Selection",
+    content: <StepSpectrumSelection index={2} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
   }
+  const specificSteps: StepData[] = [
+    {
+      id: "Spectrum Segmentation",
+      content: <StepSpectrumSegmentation index={3} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+    },
+    {
+      id: "Spectrum Metadata",
+      content: <StepMetadataRetrieval index={4} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+    },
+    {
+      id: "Feature Extraction",
+      content: <StepFeatureExtraction index={5} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+    },
+    {
+      id: "Calibration",
+      content: <StepCalibration index={6} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+    },
+  ]
 
   return (
     <div className="w-full mx-auto">
@@ -26,18 +63,11 @@ export default function App() {
       </header>
 
       <main className="px-8">
-        <NavigationProgressBar
-          initialStep={1}
-          stepsArr={[
-            { name: "Begin", content: <>BEGIN</> },
-            { name: "Plate metadata", content: <StepPlateMetadata onComplete={() => onComplete(1)} /> },
-            { name: "Plate segmentation", content: <StepPlateSegmentation onComplete={() => onComplete(1)} /> },
-            { name: "Metadata retrieval", content: <StepMetadataRetrieval onComplete={() => onComplete(3)} /> },
-            { name: "Spectrum segmentation", content: <StepSpectrumSegmentation onComplete={() => onComplete(4)} /> },
-            { name: "Feature extraction", content: <>5</> },
-            { name: "Calibration", content: <StepCalibration onComplete={() => onComplete(6)} /> },
-            { name: "Completed", content: <>FIN</> },
-          ]}
+        <NewNavigationProgressBar
+          general={generalSteps}
+          bridgeStep={bridgeStep}
+          perSpectrum={specificSteps}
+          processInfo={processInfo}
         />
       </main>
 

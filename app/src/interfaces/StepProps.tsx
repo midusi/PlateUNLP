@@ -1,3 +1,8 @@
+import type { Dispatch, SetStateAction } from "react"
+import type { ProcessInfoForm } from "./ProcessInfoForm"
+
 export interface StepProps {
-    onComplete: () => void
+    processInfo: ProcessInfoForm
+    setProcessInfo: Dispatch<SetStateAction<ProcessInfoForm>>
+    index: number
 }
