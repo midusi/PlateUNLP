@@ -46,7 +46,7 @@ export default function App() {
     },
     {
       id: "Feature Extraction",
-      content: <StepFeatureExtraction index={6} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+      content: <StepFeatureExtraction index={5} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
       id: "Calibration",
