@@ -43,3 +43,12 @@ Ejecutar:
 ```bash
 pnpm start
 ```
+
+## Docker
+
+Se cuenta con un `Dockerfile` que permite crear una imagen del proyecto. Por ejemplo, ejecutando estos comandos se tiene una instancia de _PlateUNLP_:
+
+```bash
+docker build . -t plateunlp:latest
+docker run --rm -it plateunlp:latest
+```
