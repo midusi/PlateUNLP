@@ -1,16 +1,16 @@
 {
-  "name": "alineado",
+  "name": "plateunlp",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "turbo dev",
     "lint": "turbo check-types lint",
     "build": "turbo build",
-    "start": "pnpm run -C app preview",
+    "start": "pnpm run -C app start",
     "postinstall": "pnpm run -C scripts generate"
   },
-  "packageManager": "pnpm@9.11.0",
+  "packageManager": "pnpm@10.5.2",
   "devDependencies": {
-    "turbo": "^2.3.3"
+    "turbo": "^2.4.4"
   }
 }

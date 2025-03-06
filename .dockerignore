@@ -1,0 +1,8 @@
+.git
+.gitignore
+
+**/node_modules
+**/.turbo
+**/dist
+**/.output
+**/.vinxi
