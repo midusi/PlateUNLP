@@ -37,7 +37,6 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
     const generalTotal = processInfo.general.length
-    console.log(selectedSpectrum, index)
     setProcessInfo(prev => ({
       ...prev,
       perSpectrum: prev.perSpectrum.map((step, i) => (
