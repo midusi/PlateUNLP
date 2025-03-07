@@ -1,5 +1,4 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useState } from "react"
@@ -38,8 +37,8 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
         state: index === i
           ? "COMPLETE"
           : (index + 1 === i
-            ? "NECESSARY_CHANGES"
-            : step.state),
+              ? "NECESSARY_CHANGES"
+              : step.state),
       })),
       perSpectrum: prev.perSpectrum.map((step, i) => (
         {
@@ -74,5 +73,3 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
     </>
   )
 }
-
-
