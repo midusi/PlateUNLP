@@ -10,7 +10,7 @@ export interface StepGeneralInfoForm {
 
 export interface StepSpecificInfoForm {
   states: null // Todavia no se dividio la cantidad de espectros
-  | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
+    | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
 }
 
 export interface SpectrumData {
