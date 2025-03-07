@@ -20,6 +20,10 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
         id: index,
         name: `Plate${index}#Spectrum`,
         image,
+        images: {
+          lamps: [],
+          scienceSpectrum: "",
+        },
       })),
     }))
   }
