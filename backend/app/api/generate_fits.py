@@ -86,13 +86,20 @@ def api_generate_fits():
     if not (os.path.exists(output_path)):
         os.mkdir(output_path)
 
+    # Create a directory for this specific image's outputs
+    image_output_dir = os.path.join(output_path, img_name)
+    if not os.path.exists(image_output_dir):
+        os.mkdir(image_output_dir)
+
+    # Copy the original image file to the output directory
+    shutil.copy2(image_path, os.path.join(image_output_dir, img_name + "." + img_ext))
+
     # Borrado de archivos viejos de la placa en caso de que los haya
-    files = os.listdir(output_path)
-    print("---------------------------------")
-    for file in files:
-        print(file)
-        if (file.startswith(img_name+"_")):
-            os.remove(os.path.join(output_path, file))
+    if os.path.exists(image_output_dir):
+        files = os.listdir(image_output_dir)
+        for file in files:
+            if file != img_name + "." + img_ext and file.startswith(img_name+"_"):
+                os.remove(os.path.join(image_output_dir, file))
 
     # cropped
     for bbox, data in zip(bbox_arr, data_arr):
@@ -139,7 +146,7 @@ def api_generate_fits():
         file_output_name = f'{img_name}_{data["MAIN-ID"]}_{data["SUFFIX"]}'
         # saved image crop
         cv2.imwrite(os.path.join(
-            output_path, f'{file_output_name}.png'), crop_img)
+            image_output_dir, f'{file_output_name}.png'), crop_img)
 
         # generated fit
         prihdr = fits.Header()
@@ -161,11 +168,11 @@ def api_generate_fits():
             prihdr["EQUINOX"] = None
 
         fits.writeto(
-            (os.path.join(output_path, f'{file_output_name}.fits')),
+            (os.path.join(image_output_dir, f'{file_output_name}.fits')),
             crop_img,
             prihdr,
             overwrite=True)
-        generate_txt(plate_data, data, output_path, file_output_name)
+        generate_txt(plate_data, data, image_output_dir, file_output_name)
     working_path = os.path.join(get_workspace_path(
     ), 'cache', 'working', img_name+"."+img_ext+".json")
     saved_path = os.path.join(get_workspace_path(
@@ -177,3 +184,4 @@ def api_generate_fits():
     }
 
     return json.jsonify(**data)
+
