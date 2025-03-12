@@ -16,6 +16,7 @@ def api_generate_fits():
     data_arr = request.json["data_arr"]
     plate_data = request.json["plate_data"]
     fields = request.json["fields"]
+    invert_image = request.json.get("invert_image", False)
 
     # Verificar que se esta recibiendo el campo MAIN-ID en todos los espectros
     for metadata_dict in data_arr:
@@ -131,6 +132,10 @@ def api_generate_fits():
         # crop image
         crop_img = img[y:y+h, x:x+w]
         crop_img = crop_img[:, :]
+
+        if invert_image:
+            crop_img = 255 - crop_img
+
         file_output_name = f'{img_name}_{data["MAIN-ID"]}_{data["SUFFIX"]}'
         # saved image crop
         cv2.imwrite(os.path.join(

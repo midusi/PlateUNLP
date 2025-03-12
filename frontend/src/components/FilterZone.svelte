@@ -3,12 +3,16 @@
   import Brightness from "./Filters/Brightness.svelte";
   import Contrast from "./Filters/Contrast.svelte";
   import Colorize from "./Filters/Colorize.svelte";
+  import { createEventDispatcher } from "svelte";
   // import Zoom from "./Filters/Zoom.svelte";
   export let spectrogramCanvas
   export let reset_filters_flag
   // export let scale = 0.1
   export let rotate
+  export let invertImage
   
+  const dispatch = createEventDispatcher();
+
   let brightness_input = 0
   let contrast_input = 0
   let colorize_input = "#ffffff"
@@ -68,6 +72,8 @@
     enabled_filters = !enabled_filters
   }
 
+  $: invertImage, dispatch('changeInvert', { value: invertImage });
+
 </script>
 
 <div class="card">
@@ -91,6 +97,12 @@
       <Contrast canvas={spectrogramCanvas} bind:contrast_input={contrast_input}/>
       <!-- <Zoom canvas={spectrogramCanvas} bind:scale={scale}/> -->
       <Colorize canvas={spectrogramCanvas} bind:colorize_input={colorize_input}/>
+      <div class="col">
+        <label class="form-check-label">
+          <input type="checkbox" class="form-check-input" bind:checked={invertImage}>
+          Invertir imagen
+        </label>
+      </div>
     </div>
   </div>
 </div>

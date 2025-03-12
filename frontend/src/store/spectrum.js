@@ -3,7 +3,7 @@ import apiSpectrum from '../api/spectrum'
 import {
   loadingAlert, errorAlert, showAlert, closeAlert
 } from '../helpers/Alert'
-import {serverUp} from './serverUp'
+import { serverUp } from './serverUp'
 
 function createStoreSpectrogram() {
   const { subscribe, update } = writable({
@@ -21,7 +21,7 @@ function createStoreSpectrogram() {
   return {
     subscribe,
     getPredictions: async (spectrogramCanvas, pathDir, imageName) => {
-      loadingAlert("Detectando Espectros...")
+      loadingAlert('Detectando Espectros...')
       try {
         const response = await apiSpectrum.predict({
           img_path: pathDir,
@@ -41,7 +41,7 @@ function createStoreSpectrogram() {
           prev.state.error = error
           return prev
         })
-        if(await serverUp())
+        if (await serverUp())
           errorAlert()
       }
       update((prev) => {
@@ -49,8 +49,8 @@ function createStoreSpectrogram() {
         return prev
       })
     },
-    autoSaveValues: async(bboxArr,dataArr,plateData,path,imgName) => {
-      let resp;
+    autoSaveValues: async (bboxArr, dataArr, plateData, path, imgName, invertImage) => {
+      let resp
       try {
         resp = await apiSpectrum.autoSave({
           path_dir: path,
@@ -62,15 +62,14 @@ function createStoreSpectrogram() {
       } catch (error) {
         serverUp()
       }
-    }
-    ,
-    generateFits: async (bboxArr,dataArr,plateData, path, imgName, fields) => {
+    },
+    generateFits: async (bboxArr, dataArr, plateData, path, imgName, fields, invertImage) => {
       update((prev) => {
         prev.stateGeneratingFits.loading = true
         return prev
       })
       loadingAlert('Guardando...')
-      let response;
+      let response
       try {
         response = await apiSpectrum.generatefits({
           path_dir: path,
@@ -78,7 +77,8 @@ function createStoreSpectrogram() {
           bbox_arr: bboxArr,
           img_name: imgName,
           plate_data: plateData,
-          fields
+          fields,
+          invert_image: invertImage
         })
       } catch (error) {
         update((prev) => {

@@ -53,6 +53,11 @@
   let dataLoaded = false;
   let reset_filters_flag = false;
   let rotateImage = false;
+  let invertImage = true;
+
+  function setInvertImage(event) {
+    invertImage = event.detail.value;
+  }
 
   $: bboxSelected &&
     $metadataStore.formActions != undefined &&
@@ -280,7 +285,8 @@
           $metadataStore.plateData,
           pathDir,
           imageName,
-          $metadataStore.fields
+          $metadataStore.fields,
+          invertImage
         );
         if (response["status"]) {
           imageName = "";
@@ -598,7 +604,7 @@
         </div>
         <div id="witdh_ruler" class="col-lg-10 col-xl-10">
           <div style="display:{uploadedImage === true ? 'inline' : 'none'}">
-            <FilterZone {spectrogramCanvas} {rotate} bind:reset_filters_flag />
+            <FilterZone {spectrogramCanvas} {rotate} {invertImage} on:changeInvert={setInvertImage}  bind:reset_filters_flag />
             <canvas
               id="canvas-container"
               style="border-width: 1px;
