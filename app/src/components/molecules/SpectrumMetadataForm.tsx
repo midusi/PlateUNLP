@@ -29,6 +29,7 @@ export interface SpectrumMetadata {
     SPTYPE: string
     JD: number // float
     EQUINOX: number // float
+    AIRMASS: number
 }
 
 type FormData = z.infer<typeof spectrumMetadataFormSchema>
@@ -265,6 +266,17 @@ export const SpectrumMetadataForm = forwardRef((_props, ref) => {
                             className="border p-2 rounded"
                         />
                         {errors.EQUINOX && <p className="text-red-500">{errors.EQUINOX.message}</p>}
+                    </div>
+                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label>AIRMASS</Label>
+                        <Input
+                            {...register("AIRMASS", {
+                                setValueAs: value => (value === "" ? undefined : Number.isNaN(value) ? Number.NaN : Number(value)),
+                            })}
+                            placeholder="AIRMASS"
+                            className="border p-2 rounded"
+                        />
+                        {errors.AIRMASS && <p className="text-red-500">{errors.AIRMASS.message}</p>}
                     </div>
                 </div>
             </form>

@@ -12,5 +12,8 @@
   "packageManager": "pnpm@10.5.2",
   "devDependencies": {
     "turbo": "^2.4.4"
+  },
+  "dependencies": {
+    "geo-tz": "^8.1.3"
   }
 }
