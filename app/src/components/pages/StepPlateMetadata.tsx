@@ -21,8 +21,8 @@ export function StepPlateMetadata({ index, setProcessInfo }: StepProps) {
         state: index === i
           ? "COMPLETE"
           : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
+            ? "NECESSARY_CHANGES"
+            : step.state),
       })),
     }))
     setActualStep(index + 1)

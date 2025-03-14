@@ -4,6 +4,8 @@ import { useRef } from "react"
 import { Button } from "../atoms/button"
 import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { calculateMetadata } from "@/lib/calculateMetadata/calculateAllMetadata"
+import { observatories } from "@/lib/observatories"
 
 export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: StepProps) {
     const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
@@ -55,6 +57,13 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
                     className=" bg-blue-500 w-1/4"
                 >
                     Reset fields
+                </Button>
+
+                <Button
+                    onClick={() => spectrumMetadataFormRef.current?.setValues(calculateMetadata(spectrumMetadataFormRef.current?.getValues(), observatories[1].value))}
+                    className=" bg-blue-500 w-1/4"
+                >
+                    Calculate Metadata
                 </Button>
 
                 <Button className="w-1/4"
