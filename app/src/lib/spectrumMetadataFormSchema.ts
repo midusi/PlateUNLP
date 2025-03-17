@@ -21,4 +21,5 @@ export const spectrumMetadataFormSchema = z.object({
     SPTYPE: z.string().optional(),
     JD: z.union([z.undefined(), z.number()]),
     EQUINOX: z.union([z.undefined(), z.number()]),
+    AIRMASS: z.union([z.undefined(), z.number()])
 })
