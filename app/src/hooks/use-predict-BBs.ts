@@ -30,7 +30,7 @@ export function usePredictBBs(size: number, model: string): (img_src: string) =>
     //     console.log("Modelo cargado")
     //     return m
     // })
-  }, [])
+  }, [modelPath])
 
   function prepare_input(img_src: string) {
     const image = new Image()
