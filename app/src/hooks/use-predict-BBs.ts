@@ -9,7 +9,11 @@ interface Response {
   output: BoundingBox[]
 }
 
-export function usePredictBBs(size: number, model: string): (img_src: string) => Promise<BoundingBox[]> {
+export function usePredictBBs(
+  size: number,
+  model: string,
+  forceMaxWidth: boolean = false,
+): (img_src: string) => Promise<BoundingBox[]> {
   const SIZE_M = size
   const CLASSES = [Spectrum.Lamp, Spectrum.Science]
   const CONFIDENCE_THRESHOLD = 0.75
@@ -98,8 +102,10 @@ export function usePredictBBs(size: number, model: string): (img_src: string) =>
       h = h * (NATURALHEIGHT / SIZE_M)
 
       // Modificacion para que el ancho valla hasta los extremos
-      x1 = 0
-      w = NATURALWIDTH
+      if (forceMaxWidth) {
+        x1 = 0
+        w = NATURALWIDTH
+      }
 
       const boundingBox: BoundingBox = {
         id: id++,

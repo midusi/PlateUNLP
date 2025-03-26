@@ -14,7 +14,7 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
     s.setActualStep,
     s.selectedSpectrum,
   ])
-  const determineBBFunction = usePredictBBs(1088, "spectrum_part_segmentator.onnx")
+  const determineBBFunction = usePredictBBs(1088, "spectrum_part_segmentator.onnx", true)
 
   function saveCroppedImages(croppedImages: string[]) {
     setProcessInfo(prev => ({
