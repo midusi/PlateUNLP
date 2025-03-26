@@ -2,6 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
 import { LoadFile } from "../molecules/LoadFile"
 import { SegmentationUI } from "../organisms/SegmentationUI"
@@ -13,6 +14,7 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
     s.setActualStep,
     s.selectedSpectrum,
   ])
+  const determineBBFunction = usePredictBBs(1088, "spectrum_part_segmentator.onnx")
 
   function saveCroppedImages(croppedImages: string[]) {
     setProcessInfo(prev => ({
@@ -20,12 +22,12 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
       spectrums: prev.spectrums.map((spectrum, index) => (
         index === selectedSpectrum
           ? {
-            ...spectrum,
-            images: {
-              lamps: croppedImages,
-              scienceSpectrum: croppedImages[0],
-            }, // FALTA: DISTINGUIR ENTRE LAMPARA Y ESPECTRO DE CIENCIA, AHORA SOLO LO ASIGNO AL AZAR.
-          }
+              ...spectrum,
+              images: {
+                lamps: croppedImages,
+                scienceSpectrum: croppedImages[0],
+              }, // FALTA: DISTINGUIR ENTRE LAMPARA Y ESPECTRO DE CIENCIA, AHORA SOLO LO ASIGNO AL AZAR.
+            }
           : spectrum
       )),
     }))
@@ -42,24 +44,24 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
       perSpectrum: prev.perSpectrum.map((step, i) => (
         (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
           ? {
-            ...step,
-            states: step.states!.map((state, j) => (
-              j === selectedSpectrum
-                ? "COMPLETE" as const
-                : state
-            )),
-          }
-          : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-            ? {
               ...step,
               states: step.states!.map((state, j) => (
                 j === selectedSpectrum
-                  ? "NECESSARY_CHANGES" as const
+                  ? "COMPLETE" as const
                   : state
               )),
             }
-            : step // Cualquier otra etapa mantiene su informacion
-          )
+          : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+              ? {
+                  ...step,
+                  states: step.states!.map((state, j) => (
+                    j === selectedSpectrum
+                      ? "NECESSARY_CHANGES" as const
+                      : state
+                  )),
+                }
+              : step // Cualquier otra etapa mantiene su informacion
+            )
       )),
     }))
     setActualStep(index + 1)
@@ -76,6 +78,7 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
           boundingBoxes={boundingBoxes}
           setBoundingBoxes={setBoundingBoxes}
           saveCroppedImages={saveCroppedImages} // no pasar funcion de estado sino funcion de guardado personalizada
+          determineBBFunction={determineBBFunction}
         />
       )}
     </div>

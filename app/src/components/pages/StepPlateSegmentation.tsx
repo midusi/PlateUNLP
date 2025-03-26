@@ -1,6 +1,7 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
 import { LoadFile } from "../molecules/LoadFile"
 import { SegmentationUI } from "../organisms/SegmentationUI"
@@ -11,6 +12,7 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
   ])
+  const determineBBFunction = usePredictBBs(1024, "spectrum_detector.onnx")
 
   function saveCroppedImages(croppedImages: string[]) {
     setProcessInfo(prev => ({
@@ -63,10 +65,11 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
           <SegmentationUI
             file={file}
             onComplete={onComplete}
-            enableAutodetect={false}
+            enableAutodetect
             boundingBoxes={boundingBoxes}
             setBoundingBoxes={setBoundingBoxes}
             saveCroppedImages={saveCroppedImages}
+            determineBBFunction={determineBBFunction}
           />
         )}
       </div>
