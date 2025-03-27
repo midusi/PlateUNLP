@@ -1,5 +1,5 @@
+import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-import { Spectrum } from "@/enums/Spectrum"
 import { iou } from "@/lib/utils"
 import * as ort from "onnxruntime-web"
 import { useMemo, useRef, useState } from "react"
@@ -12,11 +12,13 @@ interface Response {
 export function usePredictBBs(
   size: number,
   model: string,
+  classes: BBClassesProps[],
   forceMaxWidth: boolean = false,
+  confidence_threshold:number = 0.75
 ): (img_src: string) => Promise<BoundingBox[]> {
   const SIZE_M = size
-  const CLASSES = [Spectrum.Lamp, Spectrum.Science]
-  const CONFIDENCE_THRESHOLD = 0.75
+  const CLASSES = classes
+  const CONFIDENCE_THRESHOLD = confidence_threshold
   const IOU_THRESHOLD = 0.7
   const modelPath = `/models/${model}`
 
@@ -109,12 +111,12 @@ export function usePredictBBs(
 
       const boundingBox: BoundingBox = {
         id: id++,
-        name: label,
+        name: label.name,
         x: x1,
         y: y1,
         width: w,
         height: h,
-        class_name: CLASSES[class_id],
+        class_info: CLASSES[class_id] as BBClassesProps,
         prob,
       }
 

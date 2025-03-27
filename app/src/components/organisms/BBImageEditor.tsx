@@ -1,16 +1,11 @@
+import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
 import { Button } from "@/components/atoms/button"
-import { Spectrum } from "@/enums/Spectrum"
+import { BBClasses } from "@/enums/BBClasses"
 import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
-
-const spectrumColors: Record<Spectrum, string> = {
-  [Spectrum.Lamp]: "red",
-  [Spectrum.Science]: "green",
-}
-const getColorForSpectrum = (spectrum: Spectrum): string => spectrumColors[spectrum]
 
 function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
   const [scale, setScale] = useState({ x: 1, y: 1 })
@@ -197,7 +192,7 @@ function BoundingBoxElement({
 }: BoundingBoxElementProps) {
   const [isHovered, setIsHovered] = useState<boolean>(false)
   const { id: boxId, x: boxX, y: boxY, width:
-        boxWidth, height: boxHeight, class_name: boxClass, name: boxName } = box
+        boxWidth, height: boxHeight, class_info, name: boxName } = box
   const { x: scaleX, y: scaleY } = scale
 
   const resizeHandles = [
@@ -221,7 +216,7 @@ function BoundingBoxElement({
         width: `${boxWidth * scaleX}px`,
         height: `${boxHeight * scaleY}px`,
         border: `${selected ? "3px" : "2px"
-        } solid ${getColorForSpectrum(boxClass)}`,
+        } solid ${class_info.color}`,
         cursor: dragged ? "grabbing" : "grab",
         boxSizing: "border-box",
         zIndex: selected ? 1000 : 1,
@@ -279,15 +274,15 @@ function useBoundingBoxesAddRemove(
 ) {
   const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
 
-  function addBoundingBox() {
+  function addBoundingBox(defaultClass: BBClassesProps) {
     const newBox: BoundingBox = {
       id: getNextId(boundingBoxes),
-      name: "Spectrum",
+      name: defaultClass.name,
       x: nextPos.x,
       y: nextPos.y,
       width: 200,
       height: 100,
-      class_name: Spectrum.Lamp,
+      class_info: defaultClass,
       prob: 1,
     }
     setBoundingBoxes([...boundingBoxes, newBox])
@@ -340,11 +335,12 @@ interface ItemOfBoxListProps {
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   isSelected: boolean
   onSelect: (id: number) => void
+  classes: BBClassesProps[]
 }
 
-function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBoxListProps) {
-  const { id, name, class_name } = box
-  const [spectrumContent, setSpectrumContent] = useState<Spectrum>(class_name)
+function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }: ItemOfBoxListProps) {
+  const { id, name, class_info } = box
+  const [selected, setSelected] = useState<BBClassesProps>(class_info)
 
   function handleInteractableClick(e: React.MouseEvent) {
     e.stopPropagation()
@@ -385,26 +381,26 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
       </div>
       <div className="flex items-center ml-2 space-x-2">
         <select
-          value={spectrumContent}
+          value={selected.name}
           onChange={(e) => {
-            const newSpectrum = e.target.value as Spectrum
-            if (class_name !== newSpectrum) {
+            const newSelected = Object.values(classes).find(bb => bb.name === e.target.value)
+            if (class_info.name !== newSelected!.name) {
               setBoundingBoxes(prevBoxes =>
                 prevBoxes.map(b =>
-                  b.id === box.id ? { ...b, class_name: newSpectrum } : b,
+                  b.id === box.id ? { ...b, class_info: newSelected! } : b,
                 ),
               )
-              setSpectrumContent(newSpectrum)
+              setSelected(newSelected!)
             }
           }}
           className={`ml-2 border border-gray-400 rounded
                         ${isSelected ? "bg-blue-100" : "bg-white"}`}
           onClick={handleInteractableClick}
         >
-          {Object.values(Spectrum).map(spectrum => (
-            <option key={spectrum} value={spectrum}>
+          {Object.values(classes).map(class_type => (
+            <option key={class_type.name} value={class_type.name}>
               {
-                spectrum
+                class_type.name
               }
             </option>
           ))}
@@ -412,7 +408,7 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect }: ItemOfBo
         <span
           className="ml-1 inline-block w-3 rounded-none"
           style={{
-            backgroundColor: getColorForSpectrum(class_name),
+            backgroundColor: selected.color,
             aspectRatio: "0.5",
           }}
 
@@ -427,9 +423,10 @@ interface BoxListProps {
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   selected: number | null
   setSelected: React.Dispatch<React.SetStateAction<number | null>>
+  classes: BBClassesProps[]
 }
 
-function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected }: BoxListProps) {
+function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes }: BoxListProps) {
   function handleSelect(id: number) {
     if (selected === id) {
       setSelected(null)
@@ -448,6 +445,7 @@ function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected }: Box
           setBoundingBoxes={setBoundingBoxes}
           isSelected={box.id === selected}
           onSelect={handleSelect}
+          classes={classes}
         />
       ))}
     </div>
@@ -607,6 +605,7 @@ interface BBImageEditorProps {
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   enableAutodetect: boolean
   determineBB: (img_src: string) => Promise<BoundingBox[]>
+  classes: BBClassesProps[]
 }
 
 export function BBImageEditor({
@@ -616,6 +615,7 @@ export function BBImageEditor({
   setBoundingBoxes,
   enableAutodetect,
   determineBB,
+  classes,
 }: BBImageEditorProps) {
   const [selectedBB, setSelectedBB] = useState<number | null>(null)
   const [zoomInfo, setZoomInfo] = useState<{
@@ -686,7 +686,7 @@ export function BBImageEditor({
           <div className="flex w-full space-x-2">
             <Button
               className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
-              onClick={addBoundingBox}
+              onClick={() => addBoundingBox(classes[0])}
             >
               ➕
             </Button>
@@ -702,6 +702,7 @@ export function BBImageEditor({
             setBoundingBoxes={setBoundingBoxes}
             selected={selectedBB}
             setSelected={setSelectedBB}
+            classes={classes}
           />
         </div>
       </Pane>

@@ -1,3 +1,4 @@
+import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Dispatch, SetStateAction } from "react"
 import { Button } from "@/components/atoms/button"
@@ -11,6 +12,7 @@ interface SegmentationUIProps {
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
   saveCroppedImages: (croppedImages: string[]) => void
   determineBBFunction: (img_src: string) => Promise<BoundingBox[]>
+  classes: BBClassesProps[]
 }
 
 export function SegmentationUI({
@@ -21,6 +23,7 @@ export function SegmentationUI({
   setBoundingBoxes,
   saveCroppedImages,
   determineBBFunction,
+  classes,
 }: SegmentationUIProps) {
   async function saveImages() {
     if (!file || boundingBoxes.length === 0)
@@ -56,6 +59,7 @@ export function SegmentationUI({
         setBoundingBoxes={setBoundingBoxes}
         enableAutodetect={enableAutodetect}
         determineBB={determineBBFunction}
+        classes={classes}
       />
       <div className="flex justify-center pt-4">
         <Button

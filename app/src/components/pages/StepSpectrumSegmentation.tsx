@@ -1,6 +1,6 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-
 import type { StepProps } from "@/interfaces/StepProps"
+import { classesSpectrumPartSegmentation } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
@@ -14,7 +14,12 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
     s.setActualStep,
     s.selectedSpectrum,
   ])
-  const determineBBFunction = usePredictBBs(1088, "spectrum_part_segmentator.onnx", true)
+  const determineBBFunction = usePredictBBs(
+    1088,
+    "spectrum_part_segmentator.onnx",
+    classesSpectrumPartSegmentation,
+    true,
+  )
 
   function saveCroppedImages(croppedImages: string[]) {
     setProcessInfo(prev => ({
@@ -79,6 +84,7 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
           setBoundingBoxes={setBoundingBoxes}
           saveCroppedImages={saveCroppedImages} // no pasar funcion de estado sino funcion de guardado personalizada
           determineBBFunction={determineBBFunction}
+          classes={classesSpectrumPartSegmentation}
         />
       )}
     </div>
