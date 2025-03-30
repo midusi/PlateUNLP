@@ -12,12 +12,20 @@ import { StepSpectrumSelection } from "./components/pages/StepSpectrumSelection"
 
 export default function App() {
   const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
-    general: [
-      { state: "NECESSARY_CHANGES" },
-      ...Array.from({ length: 2 }, () => ({ state: "NOT_REACHED" as const })),
-    ],
-    perSpectrum: Array.from({ length: 4 }, () => ({ states: null })),
-    spectrums: [],
+    processingStatus: {
+      generalSteps: [
+        { state: "NECESSARY_CHANGES" },
+        ...Array.from({ length: 2 }, () => ({ state: "NOT_REACHED" as const })),
+      ],
+      specificSteps: Array.from({ length: 4 }, () => ({ states: null })),
+    },
+    data: {
+      plate: {
+        scanImage: null,
+        sharedMetadata: [],
+      },
+      spectrums: [],
+    },
   })
 
   // Steps info form

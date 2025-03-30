@@ -7,9 +7,10 @@ import { useState } from "react"
 import { LoadFile } from "../molecules/LoadFile"
 import { SegmentationUI } from "../organisms/SegmentationUI"
 
-export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
-  const [file, setFile] = useState<string | null>(null)
-  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
+  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
+    processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
+  )
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
   ])
@@ -18,21 +19,25 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
     "spectrum_detector.onnx",
     classesSpectrumDetection,
     false,
-    0.65
+    0.65,
   )
 
-  function saveCroppedImages(croppedImages: string[]) {
+  function saveBoundingBoxes(boundingBoxes: BoundingBox[]) {
     setProcessInfo(prev => ({
       ...prev,
-      spectrums: croppedImages.map((image, index) => ({
-        id: index,
-        name: `Plate${index}#Spectrum`,
-        image,
-        images: {
-          lamps: [],
-          scienceSpectrum: "",
-        },
-      })),
+      data: {
+        ...prev.data,
+        spectrums: boundingBoxes.map((bb, index) => ({
+          id: index,
+          name: `Plate${index}#Spectrum`,
+          spectrumBoundingBox: bb,
+          partsBoundingBoxes: {
+            lamp1: null,
+            lamp2: null,
+            science: null,
+          },
+        })),
+      },
     }))
   }
 
@@ -41,25 +46,25 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
     /// que necesita actualizaciones
     setProcessInfo(prev => ({
       ...prev,
-      general: prev.general.map((step, i) => ({
-        ...step,
-        state: index === i
-          ? "COMPLETE"
-          : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
-      })),
-      perSpectrum: prev.perSpectrum.map((step, i) => (
-        {
+      processingStatus: {
+        ...prev.processingStatus,
+        generalSteps: prev.processingStatus.generalSteps.map((step, i) => ({
+          ...step,
+          state: index === i
+            ? "COMPLETE"
+            : (index + 1 === i
+                ? "NECESSARY_CHANGES"
+                : step.state),
+        })),
+        specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
           ...step,
           states: boundingBoxes.map(_ => (
             i === 0
               ? "NECESSARY_CHANGES" as const
               : "NOT_REACHED" as const
           )),
-        }
-
-      )),
+        })),
+      },
     }))
     setActualStep(index + 1)
   }
@@ -67,15 +72,31 @@ export function StepPlateSegmentation({ index, setProcessInfo }: StepProps) {
   return (
     <>
       <div className="w-full p-6">
-        {!file && <LoadFile onSelect={(fileValue: string) => setFile(fileValue)} />}
-        {file && (
+        {!processInfo.data.plate.scanImage && (
+          <LoadFile onSelect={(fileValue: string) => {
+            // Si no hay archivo de escaneo cargado etonces solicita uno al usuario.
+            // Lo guarda en processInfo.data.plate.scanImage
+            setProcessInfo(prev => ({
+              ...prev,
+              data: {
+                ...prev.data,
+                plate: {
+                  ...prev.data.plate,
+                  scanImage: fileValue,
+                },
+              },
+            }))
+          }}
+          />
+        )}
+        {processInfo.data.plate.scanImage && (
           <SegmentationUI
-            file={file}
+            file={processInfo.data.plate.scanImage}
             onComplete={onComplete}
             enableAutodetect
             boundingBoxes={boundingBoxes}
             setBoundingBoxes={setBoundingBoxes}
-            saveCroppedImages={saveCroppedImages}
+            saveBoundingBoxes={saveBoundingBoxes}
             determineBBFunction={determineBBFunction}
             classes={classesSpectrumDetection}
           />
