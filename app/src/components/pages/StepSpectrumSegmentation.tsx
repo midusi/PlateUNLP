@@ -4,16 +4,25 @@ import { classesSpectrumPartSegmentation } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useEffect, useState } from "react"
-import { LoadFile } from "../molecules/LoadFile"
 import { SegmentationUI } from "../organisms/SegmentationUI"
 import { cropImages } from "@/lib/cropImage"
 
 export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
-  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum!,
   ])
+
+  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
+    (processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.lamp1 !== null)
+    ? [
+      processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.lamp1!,
+      processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.lamp2!,
+      processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.science!,
+    ]
+    : []
+  )
+
   const determineBBFunction = usePredictBBs(
     1088,
     "spectrum_part_segmentator.onnx",
