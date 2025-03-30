@@ -1,6 +1,7 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-import { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
-import { type ClassValue, clsx } from "clsx"
+import type { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
+import type { ClassValue } from "clsx"
+import { clsx } from "clsx"
 import { inv, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 
@@ -213,8 +214,8 @@ export function legendreAlgoritm(x: number[], y: number[], degree: number = -1):
   return function (value: number): number {
     const val = normalizator(value)
     return (coefficients.toArray() as number[]).reduce(
-      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasisIterative(val, k)
-      , 0,
+      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasisIterative(val, k),
+      0,
     )
   }
 }
