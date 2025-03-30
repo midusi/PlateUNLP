@@ -1,19 +1,29 @@
 import type { SpectrumData } from "@/interfaces/ProcessInfoForm"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { totalStepsCompleted } from "@/lib/utils"
 import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/24/outline"
 import clsx from "clsx"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
-import { totalStepsCompleted } from "@/lib/utils"
+import { cropImages } from "@/lib/cropImage"
+import { useEffect, useState } from "react"
 
 export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepProps) {
-  const stepsNum = processInfo.perSpectrum.length
-  const spectrums: SpectrumData[] = processInfo.spectrums
+
+  const stepsNum = processInfo.processingStatus.specificSteps.length
+  const spectrums: SpectrumData[] = processInfo.data.spectrums
   const [setSpecificObject, setActualStep] = useGlobalStore(s => [
     s.setSelectedSpectrum,
     s.setActualStep,
   ])
+  const [croppedImages, setCroppedImages] = useState<string[] | null>(null)
+  useEffect(() => {
+    cropImages(
+      processInfo.data.plate.scanImage!, 
+      spectrums.map(s => s.spectrumBoundingBox)
+    ).then(setCroppedImages)
+  }, [processInfo.data.plate.scanImage, spectrums])
 
   return (
     <>
@@ -31,13 +41,13 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
           </thead>
           <tbody>
             {spectrums.map((spectrum, index) => {
-              const completedSteps = totalStepsCompleted(index, processInfo.perSpectrum)
+              const completedSteps = totalStepsCompleted(index, processInfo.processingStatus.specificSteps)
               const complete: boolean = completedSteps / stepsNum === 1
               return (
                 <tr key={spectrum.id} className="hover:bg-gray-50">
                   <td className="border px-4 py-2">{spectrum.name}</td>
                   <td className="border px-4 py-2">
-                    <img src={spectrum.image} alt={spectrum.name} className="w-full h-auto" />
+                    {croppedImages && <img src={croppedImages[index]} alt={spectrum.name} className="w-full h-auto" />}
                   </td>
                   <td className="border px-6 py-2">
                     {`${completedSteps}/${stepsNum}`}
@@ -45,15 +55,15 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                   <td className="border px-4 py-2">
                     {complete
                       ? (
-                        <div className="text-green-400">
-                          Complete
-                        </div>
-                      )
+                          <div className="text-green-400">
+                            Complete
+                          </div>
+                        )
                       : (
-                        <div className="text-orange-400">
-                          Pending
-                        </div>
-                      )}
+                          <div className="text-orange-400">
+                            Pending
+                          </div>
+                        )}
                   </td>
                   <td className="border-none px-4 py-2 text-center">
                     <Button

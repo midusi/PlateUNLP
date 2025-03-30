@@ -5,7 +5,7 @@ import { useRef } from "react"
 import { Button } from "../atoms/button"
 import { PlateMetadataForm } from "../molecules/PlateMetadataForm"
 
-export function StepPlateMetadata({ index, setProcessInfo }: StepProps) {
+export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepProps) {
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
   ])
@@ -16,14 +16,17 @@ export function StepPlateMetadata({ index, setProcessInfo }: StepProps) {
     /// que necesita actualizaciones
     setProcessInfo(prev => ({
       ...prev,
-      general: prev.general.map((step, i) => ({
-        ...step,
-        state: index === i
-          ? "COMPLETE"
-          : (index + 1 === i
-            ? "NECESSARY_CHANGES"
-            : step.state),
-      })),
+      processingStatus: {
+        ...prev.processingStatus,
+        generalSteps: prev.processingStatus.generalSteps.map((step, i) => ({
+          ...step,
+          state: index === i
+            ? "COMPLETE"
+            : (index + 1 === i
+                ? "NECESSARY_CHANGES"
+                : step.state),
+        })),
+      },
     }))
     setActualStep(index + 1)
   }

@@ -1,7 +1,17 @@
+import type { BoundingBox } from "./BoundingBox"
+
 export interface ProcessInfoForm {
-  general: StepGeneralInfoForm[] // Info etapas que realizar por cada placa
-  perSpectrum: StepSpecificInfoForm[] // Info etapas que realizar por cada espectro
-  spectrums: SpectrumData[] // Informacion sobre el estado de cada espectro
+  processingStatus: { // Info estado de procesado de cada etapa de la barra de navegación
+    generalSteps: StepGeneralInfoForm[] // Etapas compartidas por toda la placas
+    specificSteps: StepSpecificInfoForm[] // Etapas especificas para cada espectro
+  }
+  data: { // Informacion como tal, imagen, metadatos, ...
+    plate: {
+      scanImage: string | null // Imagen de la placa escaneada (formato base64)
+      sharedMetadata: Metadata[] // Metadatos comunes a todos los espectros de la placa
+    }
+    spectrums: SpectrumData[] // Informacion sobre de cada espectro
+  }
 }
 
 export interface StepGeneralInfoForm {
@@ -13,12 +23,18 @@ export interface StepSpecificInfoForm {
     | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
 }
 
+interface Metadata {
+  key: string
+  value: string | number | Date
+}
+
 export interface SpectrumData {
   id: number
   name: string
-  image: string
-  images: {
-    lamps: string[]
-    scienceSpectrum: string
+  spectrumBoundingBox: BoundingBox
+  partsBoundingBoxes: {
+    lamp1: BoundingBox | null
+    lamp2: BoundingBox | null
+    science: BoundingBox | null
   }
 }

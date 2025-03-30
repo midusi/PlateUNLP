@@ -23,11 +23,13 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
 
         /// Marca el paso actual como completado y el que le sigue como
         /// que necesita actualizaciones
-        const generalTotal = processInfo.general.length
+        const generalTotal = processInfo.processingStatus.generalSteps.length
         setProcessInfo(prev => ({
             ...prev,
-            perSpectrum: prev.perSpectrum.map((step, i) => (
-                (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
+            processingStatus: {
+                ...prev.processingStatus,
+                specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
+                    (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
                     ? {
                         ...step,
                         states: step.states!.map((state, j) => (
@@ -47,9 +49,9 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
                         }
                         : step // Cualquier otra etapa mantiene su informacion
                     )
-            )),
+                ))
+            }
         }))
-
         setActualStep(2) // Redirige a Spectrum Selection
     }
 
