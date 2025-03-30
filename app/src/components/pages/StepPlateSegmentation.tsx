@@ -19,7 +19,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     "spectrum_detector.onnx",
     classesSpectrumDetection,
     false,
-    0.65,
+    0.70,
   )
 
   function saveBoundingBoxes(boundingBoxes: BoundingBox[]) {
