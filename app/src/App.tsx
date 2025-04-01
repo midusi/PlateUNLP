@@ -25,6 +25,14 @@ export default function App() {
         sharedMetadata: [],
       },
       spectrums: [],
+      plateMetadata: {
+        OBSERVAT: "",
+        OBSERVER: "",
+        DIGITALI: 0,
+        SCANNER: "",
+        SOFTWARE: "",
+        PLATE_N: ""
+      }
     },
   })
 

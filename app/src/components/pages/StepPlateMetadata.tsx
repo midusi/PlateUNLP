@@ -9,8 +9,15 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
   ])
-  function onComplete() {
+  function onComplete(plateMetadata: PlateMetadata) {
     /// AGREGAR GUARDADO DE METADATOS
+    setProcessInfo(prev => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        plateMetadata: plateMetadata
+      }
+    }));
 
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
@@ -23,8 +30,8 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
           state: index === i
             ? "COMPLETE"
             : (index + 1 === i
-                ? "NECESSARY_CHANGES"
-                : step.state),
+              ? "NECESSARY_CHANGES"
+              : step.state),
         })),
       },
     }))
@@ -46,8 +53,10 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
         <Button
           className="w-1/4"
           onClick={() => {
-            if (plateMetadataFormRef.current?.validate())
-              onComplete()
+            if (plateMetadataFormRef.current?.validate()) {
+
+              onComplete(plateMetadataFormRef.current?.getValues())
+            }
           }}
         >
           Save
