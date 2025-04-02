@@ -50,19 +50,21 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
 
   const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, resetValues: () => void, getValues: () => SpectrumMetadata, validate: () => void }>(null)
   return (
-    <>
-      <SpectrumMetadataForm ref={spectrumMetadataFormRef} />
-      <div className="flex justify-evenly mt-6">
+    <div className="flex flex-col items-center w-full ">
+      <div className="w-full flex justify-center mb-6">
+        <SpectrumMetadataForm ref={spectrumMetadataFormRef} />
+      </div>
+      <div className="flex gap-4 justify-center">
         <Button
           onClick={() => spectrumMetadataFormRef.current?.resetValues()}
-          className=" bg-blue-500 w-1/4"
+          className=" bg-blue-500"
         >
           Reset fields
         </Button>
 
         <Button
           onClick={() => { }}
-          className=" bg-blue-500 w-1/4"
+          className=" bg-blue-500"
         >
           Calculate Metadata
         </Button>
@@ -77,6 +79,6 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
           Save
         </Button>
       </div>
-    </>
+    </div>
   )
 }
