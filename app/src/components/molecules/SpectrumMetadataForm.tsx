@@ -34,7 +34,11 @@ export interface SpectrumMetadata {
 
 type FormData = z.infer<typeof spectrumMetadataFormSchema>
 
-export function SpectrumMetadataForm({ ref, ..._props }) {
+interface SpectrumMetadataFormProps {
+  ref: any
+}
+
+export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
   const {
     register,
     watch,

@@ -22,7 +22,11 @@ const options = observatories
 
 type FormData = z.infer<typeof plateMetadataFormSchema>
 
-export function PlateMetadataForm({ ref, ..._props }) {
+interface PlateMetadataFormProps {
+  ref: any
+}
+
+export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
   const {
     register,
     watch,
