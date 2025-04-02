@@ -53,7 +53,7 @@ export default function App() {
       content: <StepSpectrumSegmentation index={4} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
-      id: "Feature Extraction",
+      id: "Extraction",
       content: <StepFeatureExtraction index={5} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
