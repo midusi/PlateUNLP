@@ -5,7 +5,7 @@ import { useRef } from "react"
 import { Button } from "../atoms/button"
 import { PlateMetadataForm } from "../molecules/PlateMetadataForm"
 
-export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepProps) {
+export function StepPlateMetadata({ index, /* processInfo, */ setProcessInfo }: StepProps) {
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
   ])
@@ -33,18 +33,18 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
 
   const plateMetadataFormRef = useRef<{ setValues: (spectrumMetadata: PlateMetadata) => void, resetValues: () => void, getValues: () => PlateMetadata, validate: () => void }>(null)
   return (
-    <>
-      <PlateMetadataForm ref={plateMetadataFormRef} />
-      <div className="flex justify-evenly mt-6">
+    <div className="flex flex-col items-center w-full ">
+      <div className="w-full flex justify-center mb-6">
+        <PlateMetadataForm ref={plateMetadataFormRef} />
+      </div>
+      <div className="flex gap-4 justify-center">
         <Button
           onClick={() => plateMetadataFormRef.current?.resetValues()}
-          className=" bg-blue-500 w-1/4"
+          className=" bg-blue-500"
         >
           Reset fields
         </Button>
-
         <Button
-          className="w-1/4"
           onClick={() => {
             if (plateMetadataFormRef.current?.validate())
               onComplete()
@@ -53,6 +53,6 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
           Save
         </Button>
       </div>
-    </>
+    </div>
   )
 }

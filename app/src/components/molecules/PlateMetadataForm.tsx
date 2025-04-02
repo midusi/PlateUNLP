@@ -55,12 +55,12 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
     },
   }))
 
-  const inputContainerClassName = "w-full max-w-sm items-center gap-1.5"
+  const inputContainerClassName = "w-full max-w-xs items-center gap-1.5"
   const inputClassName = "border p-2 rounded"
   return (
     <>
-      <form>
-        <div className="flex flex-wrap content-normal gap-4">
+      <form className="w-full max-w-7xl">
+        <div className="flex flex-wrap justify-center content-normal gap-4">
           <div className={inputContainerClassName}>
             <Label>OBSERVAT</Label>
             <Controller
