@@ -45,12 +45,12 @@ export default function App() {
   }
   const specificSteps: StepData[] = [
     {
-      id: "Spectrum Segmentation",
-      content: <StepSpectrumSegmentation index={3} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+      id: "Spectrum Metadata",
+      content: <StepMetadataRetrieval index={3} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
-      id: "Spectrum Metadata",
-      content: <StepMetadataRetrieval index={4} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
+      id: "Spectrum Segmentation",
+      content: <StepSpectrumSegmentation index={4} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
     {
       id: "Feature Extraction",
