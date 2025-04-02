@@ -11,13 +11,28 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
   ])
   function onComplete(plateMetadata: PlateMetadata) {
     /// AGREGAR GUARDADO DE METADATOS
-    setProcessInfo(prev => ({
+
+    setProcessInfo((prev) => ({
       ...prev,
       data: {
         ...prev.data,
-        plateMetadata: plateMetadata
-      }
+        plate: {
+          ...prev.data.plate,
+          sharedMetadata: [
+            ...prev.data.plate.sharedMetadata.filter(
+              (item) => !["OBSERVAT", "OBSERVER", "DIGITALI", "SCANNER", "SOFTWARE", "PLATE_N"].includes(item.key)
+            ), // Para no tener claves duplicadas borra las anteriores si existen
+            { key: "OBSERVAT", value: plateMetadata.OBSERVAT },
+            { key: "OBSERVER", value: plateMetadata.OBSERVER },
+            { key: "DIGITALI", value: plateMetadata.DIGITALI },
+            { key: "SCANNER", value: plateMetadata.SCANNER },
+            { key: "SOFTWARE", value: plateMetadata.SOFTWARE },
+            { key: "PLATE_N", value: plateMetadata.PLATE_N },
+          ],
+        },
+      },
     }));
+
 
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones

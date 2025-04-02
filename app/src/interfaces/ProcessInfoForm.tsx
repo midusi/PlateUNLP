@@ -1,4 +1,3 @@
-import { PlateMetadata } from "@/components/molecules/PlateMetadataForm"
 import type { BoundingBox } from "./BoundingBox"
 
 export interface ProcessInfoForm {
@@ -12,7 +11,6 @@ export interface ProcessInfoForm {
       sharedMetadata: Metadata[] // Metadatos comunes a todos los espectros de la placa
     }
     spectrums: SpectrumData[] // Informacion sobre de cada espectro
-    plateMetadata: PlateMetadata // Informacion de los metadatos de la placa
   }
 }
 

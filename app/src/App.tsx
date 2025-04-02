@@ -24,15 +24,7 @@ export default function App() {
         scanImage: null,
         sharedMetadata: [],
       },
-      spectrums: [],
-      plateMetadata: {
-        OBSERVAT: "",
-        OBSERVER: "",
-        DIGITALI: 0,
-        SCANNER: "",
-        SOFTWARE: "",
-        PLATE_N: ""
-      }
+      spectrums: []
     },
   })
 
