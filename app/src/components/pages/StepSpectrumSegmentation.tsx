@@ -36,7 +36,7 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
       processInfo.data.plate.scanImage!,
       [processInfo.data.spectrums[selectedSpectrum].spectrumBoundingBox],
     ).then((images) => { setSpectrumImage(images[0]) })
-  }, [processInfo.data.plate.scanImage, processInfo.data.spectrums[selectedSpectrum].spectrumBoundingBox])
+  }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
 
   function saveBoundingBoxes(boundingBoxes: BoundingBox[]) {
     setProcessInfo(prev => ({
