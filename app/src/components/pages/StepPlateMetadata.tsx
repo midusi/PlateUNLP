@@ -18,12 +18,7 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
         ...prev.data,
         plate: {
           ...prev.data.plate,
-          sharedMetadata: [
-            ...prev.data.plate.sharedMetadata.filter(
-              (item) => !["PlateMetaData"].includes(item.key)
-            ), // Para no tener claves duplicadas borra las anteriores si existen
-            { key: "PlateMetaData", value: plateMetadata }
-          ],
+          sharedMetadata: plateMetadata
         },
       },
     }));
