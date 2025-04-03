@@ -20,14 +20,9 @@ export function StepPlateMetadata({ index, processInfo, setProcessInfo }: StepPr
           ...prev.data.plate,
           sharedMetadata: [
             ...prev.data.plate.sharedMetadata.filter(
-              (item) => !["OBSERVAT", "OBSERVER", "DIGITALI", "SCANNER", "SOFTWARE", "PLATE_N"].includes(item.key)
+              (item) => !["PlateMetaData"].includes(item.key)
             ), // Para no tener claves duplicadas borra las anteriores si existen
-            { key: "OBSERVAT", value: plateMetadata.OBSERVAT },
-            { key: "OBSERVER", value: plateMetadata.OBSERVER },
-            { key: "DIGITALI", value: plateMetadata.DIGITALI },
-            { key: "SCANNER", value: plateMetadata.SCANNER },
-            { key: "SOFTWARE", value: plateMetadata.SOFTWARE },
-            { key: "PLATE_N", value: plateMetadata.PLATE_N },
+            { key: "PlateMetaData", value: plateMetadata }
           ],
         },
       },

@@ -1,3 +1,4 @@
+import { PlateMetadata } from "@/components/molecules/PlateMetadataForm"
 import type { BoundingBox } from "./BoundingBox"
 
 export interface ProcessInfoForm {
@@ -25,7 +26,7 @@ export interface StepSpecificInfoForm {
 
 interface Metadata {
   key: string
-  value: string | number | Date
+  value: string | number | Date | PlateMetadata
 }
 
 export interface SpectrumData {
