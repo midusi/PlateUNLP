@@ -22,9 +22,16 @@ export default function App() {
     data: {
       plate: {
         scanImage: null,
-        sharedMetadata: [],
+        sharedMetadata: {
+          OBSERVAT: "",
+          OBSERVER: "",
+          DIGITALI: 0,
+          SCANNER: "",
+          SOFTWARE: "",
+          PLATE_N: ""
+        },
       },
-      spectrums: [],
+      spectrums: []
     },
   })
 

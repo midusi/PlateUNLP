@@ -1,3 +1,4 @@
+import { PlateMetadata } from "@/components/molecules/PlateMetadataForm"
 import type { BoundingBox } from "./BoundingBox"
 
 export interface ProcessInfoForm {
@@ -8,7 +9,7 @@ export interface ProcessInfoForm {
   data: { // Informacion como tal, imagen, metadatos, ...
     plate: {
       scanImage: string | null // Imagen de la placa escaneada (formato base64)
-      sharedMetadata: Metadata[] // Metadatos comunes a todos los espectros de la placa
+      sharedMetadata: PlateMetadata // Metadatos comunes a todos los espectros de la placa
     }
     spectrums: SpectrumData[] // Informacion sobre de cada espectro
   }
@@ -20,12 +21,7 @@ export interface StepGeneralInfoForm {
 
 export interface StepSpecificInfoForm {
   states: null // Todavia no se dividio la cantidad de espectros
-    | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
-}
-
-interface Metadata {
-  key: string
-  value: string | number | Date
+  | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
 }
 
 export interface SpectrumData {
