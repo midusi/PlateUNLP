@@ -32,7 +32,7 @@ export function SegmentationUI({
   useEffect(() => {
     const processImage = async () => {
       const aligned = await align(file)
-      const ensuredWhite = ensureWhite(aligned)
+      const ensuredWhite = await ensureWhite(aligned)
       setFileNormalized(ensuredWhite)
     }
 
