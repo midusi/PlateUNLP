@@ -44,6 +44,9 @@ export async function ensureWhite(imageb64: string): Promise<string> {
     // Detectar color fondo (Blanco | Negro)
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+
     if (!ctx) throw new Error('No se pudo obtener el contexto del canvas');
 
     ctx.drawImage(image, 0, 0)
@@ -72,11 +75,21 @@ export async function ensureWhite(imageb64: string): Promise<string> {
 
     const avgBrightness = brightnessSum / (height * width)
 
+    // Si el fondo es negro lo invertimos a blanco
+    let imageProcessed = imageb64
     if (avgBrightness < 128) {
-        console.log("Fondo Negro")
-    } else {
-        console.log("Fondo Blanco")
+        for (let i = 0; i < height; i++) {
+            for (let j = 0; j < width; j++) {
+                const idx = (i * width + j) * 4
+                data[idx] = 255 - data[idx]
+                data[idx + 1] = 255 - data[idx + 1]
+                data[idx + 2] = 255 - data[idx + 2]
+            }
+        }
+        ctx.putImageData(imageData, 0, 0)
+
+        imageProcessed = canvas.toDataURL();
     }
 
-    return imageb64
+    return imageProcessed
 }
