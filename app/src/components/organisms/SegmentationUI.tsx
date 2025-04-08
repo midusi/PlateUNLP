@@ -1,6 +1,7 @@
 import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react"
+import { RotateCw, Palette } from "lucide-react"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
 import { align, ensureWhite } from "@/lib/imageNormalizer"
@@ -28,6 +29,7 @@ export function SegmentationUI({
 }: SegmentationUIProps) {
 
   const [fileNormalized, setFileNormalized] = useState<string | null>(null)
+  const [inverted, setInverted] = useState(false)
 
   useEffect(() => {
     const processImage = async () => {
@@ -45,6 +47,34 @@ export function SegmentationUI({
 
   return (
     <>
+      <div className="bg-slate-100 p-4 border-b">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-medium">Tools</h2>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => { }}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 text-black bg-white hover:bg-slate-50"
+            >
+              <RotateCw className="h-4 w-4" />
+              <span>"Rotate 90º</span>
+            </Button>
+            <Button
+              onClick={() => { }}
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-2 
+                ${false
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-white text-black hover:bg-slate-50"}`}
+            >
+              <Palette className="h-4 w-4" />
+              <span>Invert colors</span>
+            </Button>
+          </div>
+        </div>
+      </div>
       <BBImageEditor
         className="w-full"
         src={fileNormalized}
