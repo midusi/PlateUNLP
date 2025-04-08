@@ -1,8 +1,9 @@
 import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { Dispatch, SetStateAction } from "react"
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
+import { align, ensureWhite } from "@/lib/imageNormalizer"
 
 interface SegmentationUIProps {
   file: string
@@ -25,11 +26,28 @@ export function SegmentationUI({
   determineBBFunction,
   classes,
 }: SegmentationUIProps) {
+
+  const [fileNormalized, setFileNormalized] = useState<string | null>(null)
+
+  useEffect(() => {
+    const processImage = async () => {
+      const aligned = await align(file)
+      const ensuredWhite = ensureWhite(aligned)
+      setFileNormalized(ensuredWhite)
+    }
+
+    processImage()
+  }, [file])
+
+  if (!fileNormalized) {
+    return <div>Loading Image...</div>
+  }
+
   return (
     <>
       <BBImageEditor
         className="w-full"
-        src={file}
+        src={fileNormalized}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         enableAutodetect={enableAutodetect}
