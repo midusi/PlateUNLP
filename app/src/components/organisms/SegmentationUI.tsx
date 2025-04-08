@@ -4,6 +4,7 @@ import type { Dispatch, SetStateAction } from "react"
 import { Button } from "@/components/atoms/button"
 import { BBImageEditor } from "@/components/organisms/BBImageEditor"
 import { align, ensureWhite } from "@/lib/imageNormalizer"
+import clsx from "clsx"
 import { Palette, RotateCw } from "lucide-react"
 import { useEffect, useState } from "react"
 
@@ -29,13 +30,14 @@ export function SegmentationUI({
   classes,
 }: SegmentationUIProps) {
   const [fileNormalized, setFileNormalized] = useState<string | null>(null)
-  const [inverted, setInverted] = useState(false)
+  const [bgWhite, setBgWhite] = useState(false)
 
   useEffect(() => {
     const processImage = async () => {
       const aligned = await align(file)
-      const ensuredWhite = await ensureWhite(aligned)
-      setFileNormalized(ensuredWhite)
+      const ensuredWhite = await ensureWhite(aligned, "white")
+      setFileNormalized(ensuredWhite.image)
+      setBgWhite(ensuredWhite.bgColor === "white")
     }
 
     processImage()
@@ -43,6 +45,15 @@ export function SegmentationUI({
 
   if (!fileNormalized) {
     return <div>Loading Image...</div>
+  }
+
+  async function handleInvert() {
+    const ensuredWhite = await ensureWhite(
+      fileNormalized!,
+      bgWhite ? "black" : "white",
+    )
+    setFileNormalized(ensuredWhite.image)
+    setBgWhite(ensuredWhite.bgColor === "white")
   }
 
   return (
@@ -61,13 +72,15 @@ export function SegmentationUI({
               <span>"Rotate 90º</span>
             </Button>
             <Button
-              onClick={() => { }}
+              onClick={() => { handleInvert() }}
               variant="outline"
               size="sm"
-              className={`flex items-center gap-2 
-                ${false
-      ? "bg-slate-800 text-white hover:bg-slate-700"
-      : "bg-white text-black hover:bg-slate-50"}`}
+              className={clsx(
+                "flex items-center gap-2",
+                bgWhite
+                  ? "bg-white text-black hover:bg-slate-50"
+                  : "bg-slate-800 text-white hover:bg-slate-700",
+              )}
             >
               <Palette className="h-4 w-4" />
               <span>Invert colors</span>
