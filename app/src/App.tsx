@@ -10,6 +10,10 @@ import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
 import { StepSpectrumSelection } from "./components/pages/StepSpectrumSelection"
 
+import { trpc } from "./lib/trpc"
+
+trpc.dummy.query().then(resultado => console.log(resultado))
+
 export default function App() {
   const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
     processingStatus: {
