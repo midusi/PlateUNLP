@@ -95,7 +95,12 @@ export default function App() {
         III-LIDI, Facultad de Informática, Universidad Nacional de la Plata
       </footer>
 
-      <button onClick={() => trpc.crearUsuario.mutate().then(resultado => console.log(resultado))}>crear</button>
+      <button
+        onClick={() =>
+          trpc.crearUsuario.mutate({
+            name: Math.random().toString(), email: Math.random().toString() + "@gmail.com"
+          }).then(resultado => console.log(resultado))}
+      >crear</button>
       <button onClick={() => trpc.consulta.query().then(resultado => console.log(resultado))}>consulta</button>
     </div>
   )
