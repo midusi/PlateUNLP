@@ -28,10 +28,10 @@ export default function App() {
           DIGITALI: 0,
           SCANNER: "",
           SOFTWARE: "",
-          PLATE_N: ""
+          PLATE_N: "",
         },
       },
-      spectrums: []
+      spectrums: [],
     },
   })
 
