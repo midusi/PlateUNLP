@@ -72,7 +72,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
 
   return (
     <div className="flex flex-col w-full">
-      <BBUI image="12354" />
+      <BBUI />
       <div className="w-full p-6">
         {!processInfo.data.plate.scanImage && (
           <LoadFile onSelect={(fileValue: string) => {
