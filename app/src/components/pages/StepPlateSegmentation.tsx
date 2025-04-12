@@ -5,6 +5,7 @@ import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
 import { LoadFile } from "../molecules/LoadFile"
+import { BBUI } from "../organisms/BBUI"
 import { SegmentationUI } from "../organisms/SegmentationUI"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
@@ -70,7 +71,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   }
 
   return (
-    <>
+    <div className="flex flex-col w-full">
+      <BBUI image="12354" />
       <div className="w-full p-6">
         {!processInfo.data.plate.scanImage && (
           <LoadFile onSelect={(fileValue: string) => {
@@ -102,6 +104,6 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           />
         )}
       </div>
-    </>
+    </div>
   )
 }
