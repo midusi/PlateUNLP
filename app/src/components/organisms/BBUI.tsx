@@ -76,7 +76,7 @@ export function BBUI() {
 function ImageViewer({ image }: { image: string }) {
   return (
     <div
-      className="bg-green-100 w-full h-full"
+      className="w-full h-full"
       style={{ width: "100%", height: "100%" }}
     >
       <TransformWrapper
@@ -85,12 +85,24 @@ function ImageViewer({ image }: { image: string }) {
         minScale={0.25}
         doubleClick={{ step: 0.7 }}
       >
-        <TransformComponent>
+        <TransformComponent
+          wrapperStyle={{
+            backgroundImage: `
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%)
+            `,
+            backgroundSize: "60px 60px",
+            backgroundPosition: "0 0, 0 30px, 30px -30px, -30px 0px",
+            height: "100%",
+            width: "100%",
+          }}
+          contentStyle={{ background: "blue", objectFit: "contain", maxHeight: "100%", maxWidth: "100%" }}
+        >
           <img
-            className="bg-blue-500 border-black"
-            style={{
-              objectFit: "contain",
-            }}
+            className="border-black"
+            style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }}
             src={image}
             alt="Bounding Box Editor"
           />
