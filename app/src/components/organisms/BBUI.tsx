@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react"
 import clsx from "clsx"
 import { Palette, RotateCw } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
@@ -57,7 +57,7 @@ export function BBUI() {
         )}
         >
           {image
-            ? <ImageViewer image={image} />
+            ? <ImageViewer src={image} />
             : <ImageLoader setImage={setImage} />}
         </div>
       </Card>
@@ -73,41 +73,114 @@ export function BBUI() {
   )
 }
 
-function ImageViewer({ image }: { image: string }) {
+// Ref https://github.com/BetterTyped/react-zoom-pan-pinch/blob/master/src/stories/examples/image-responsive/example.tsx
+function ImageViewer({ src }: { src: string }) {
+  const scaleUp = true
+  //   const backgroundColor = "black"
+  const zoomFactor = 30
+
+  const [container, setContainer] = useState<HTMLDivElement | null>(null)
+
+  const [containerWidth, setContainerWidth] = useState<number>(0)
+  const [containerHeight, setContainerHeight] = useState<number>(0)
+
+  const [imageNaturalWidth, setImageNaturalWidth] = useState<number>(0)
+  const [imageNaturalHeight, setImageNaturalHeight] = useState<number>(0)
+
+  const imageScale = useMemo(() => {
+    if (
+      containerWidth === 0
+      || containerHeight === 0
+      || imageNaturalWidth === 0
+      || imageNaturalHeight === 0
+    ) {
+      return 0
+    }
+    const scale = Math.min(
+      containerWidth / imageNaturalWidth,
+      containerHeight / imageNaturalHeight,
+    )
+    return scaleUp ? scale : Math.max(scale, 1)
+  }, [
+    scaleUp,
+    containerWidth,
+    containerHeight,
+    imageNaturalWidth,
+    imageNaturalHeight,
+  ])
+
+  const handleResize = useCallback(() => {
+    if (container !== null) {
+      const rect = container.getBoundingClientRect()
+      setContainerWidth(rect.width)
+      setContainerHeight(rect.height)
+    }
+    else {
+      setContainerWidth(0)
+      setContainerHeight(0)
+    }
+  }, [container])
+
+  useEffect(() => {
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [handleResize])
+
+  const handleImageOnLoad = (image: HTMLImageElement) => {
+    setImageNaturalWidth(image.naturalWidth)
+    setImageNaturalHeight(image.naturalHeight)
+  }
+
+  useEffect(() => {
+    const image = new Image()
+    image.onload = () => handleImageOnLoad(image)
+    image.src = src
+  }, [src])
+
   return (
     <div
-      className="w-full h-full"
-      style={{ width: "100%", height: "100%" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        backgroundImage: `
+            linear-gradient(45deg, #ccc 25%, transparent 25%),
+            linear-gradient(-45deg, #ccc 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #ccc 75%),
+            linear-gradient(-45deg, transparent 75%, #ccc 75%)
+        `,
+        backgroundSize: "60px 60px",
+        backgroundPosition: "0 0, 0 30px, 30px -30px, -30px 0px",
+      }}
+      ref={(el: HTMLDivElement | null) => setContainer(el)}
     >
-      <TransformWrapper
-        centerOnInit
-        initialScale={1}
-        minScale={0.25}
-        doubleClick={{ step: 0.7 }}
-      >
-        <TransformComponent
-          wrapperStyle={{
-            backgroundImage: `
-                linear-gradient(45deg, #ccc 25%, transparent 25%),
-                linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #ccc 75%),
-                linear-gradient(-45deg, transparent 75%, #ccc 75%)
-            `,
-            backgroundSize: "60px 60px",
-            backgroundPosition: "0 0, 0 30px, 30px -30px, -30px 0px",
-            height: "100%",
-            width: "100%",
-          }}
-          contentStyle={{ background: "blue", objectFit: "contain", maxHeight: "100%", maxWidth: "100%" }}
+      {imageScale > 0 && (
+        <TransformWrapper
+          key={`${containerWidth}x${containerHeight}`}
+          initialScale={imageScale * 0.75}
+          minScale={imageScale * 0.25}
+          maxScale={imageScale * zoomFactor}
+          centerOnInit
+          doubleClick={{ step: 0.7 }}
+
         >
-          <img
-            className="border-black"
-            style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }}
-            src={image}
-            alt="Bounding Box Editor"
-          />
-        </TransformComponent>
-      </TransformWrapper>
+          <TransformComponent
+            wrapperStyle={{
+              height: "100%",
+              width: "100%",
+            }}
+            contentStyle={{ background: "blue", objectFit: "contain", maxHeight: "100%", maxWidth: "100%" }}
+          >
+            <img
+              className="border-black"
+              src={src}
+              alt="Bounding Box Editor"
+            />
+          </TransformComponent>
+        </TransformWrapper>
+      )}
     </div>
   )
 }
