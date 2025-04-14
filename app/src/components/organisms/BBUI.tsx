@@ -101,6 +101,8 @@ export function BBUI() {
             ? (
                 <ImageViewer
                   src={image}
+                  rotation={rotation}
+                  bgWhite={bgWhite}
                   isDrawingMode={isDrawingMode}
                   setIsDrawingMode={setIsDrawingMode}
                   selectedBoxId={selectedBoxId}
@@ -126,6 +128,8 @@ export function BBUI() {
 
 interface ImageViewerProps {
   src: string
+  rotation: number
+  bgWhite: boolean
   isDrawingMode: boolean
   setIsDrawingMode: Dispatch<SetStateAction<boolean>>
   selectedBoxId: string | null
@@ -137,6 +141,8 @@ interface ImageViewerProps {
 // Ref https://github.com/BetterTyped/react-zoom-pan-pinch/blob/master/src/stories/examples/image-responsive/example.tsx
 function ImageViewer({
   src,
+  rotation,
+  bgWhite,
   setIsDrawingMode,
   isDrawingMode,
   selectedBoxId,
@@ -248,6 +254,8 @@ function ImageViewer({
           >
             <ImageWithBoundingBoxes
               src={src}
+              rotation={rotation}
+              bgWhite={bgWhite}
               isDrawingMode={isDrawingMode}
               setIsDrawingMode={setIsDrawingMode}
               selectedBoxId={selectedBoxId}
@@ -264,6 +272,8 @@ function ImageViewer({
 
 interface ImageWithBoundingBoxesProps {
   src: string
+  rotation: number
+  bgWhite: boolean
   isDrawingMode: boolean
   setIsDrawingMode: Dispatch<SetStateAction<boolean>>
   selectedBoxId: string | null
@@ -273,6 +283,8 @@ interface ImageWithBoundingBoxesProps {
 }
 function ImageWithBoundingBoxes({
   src,
+  rotation,
+  bgWhite,
   isDrawingMode,
   setIsDrawingMode,
   selectedBoxId,
@@ -387,6 +399,11 @@ function ImageWithBoundingBoxes({
         ref={imageRef}
         src={src}
         alt="Bounding Box Editor"
+        style={{
+          transform: `rotate(${rotation}deg)`,
+          filter: bgWhite ? "none" : "invert(1)",
+          transition: "filter 0.3s ease",
+        }}
       />
       {/* Cajas delimitadoras existentes */}
       {boundingBoxes.map(box => (
