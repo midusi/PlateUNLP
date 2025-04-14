@@ -1,8 +1,11 @@
+import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Dispatch, SetStateAction } from "react"
+import { classesSpectrumDetection } from "@/enums/BBClasses"
 import clsx from "clsx"
-import { Palette, RotateCw } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
+import { Palette, RotateCw, Square, Trash2 } from "lucide-react"
+import { nanoid } from "nanoid"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { TransformComponent, TransformWrapper, useTransformComponent } from "react-zoom-pan-pinch"
 import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
 
@@ -14,6 +17,16 @@ export function BBUI() {
   const [image, setImage] = useState<null | string> (null)
   const [bgWhite, setBgWhite] = useState(true)
   const [rotation, setRotation] = useState(0)
+  const [isDrawingMode, setIsDrawingMode] = useState(false)
+  const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null)
+  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
+
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedBoxId) {
+      setBoundingBoxes(prev => prev.filter(box => box.id !== selectedBoxId))
+      setSelectedBoxId(null)
+    }
+  }, [selectedBoxId])
 
   return (
     <>
@@ -47,6 +60,34 @@ export function BBUI() {
                 <Palette className="h-4 w-4" />
                 <span>Invert colors</span>
               </Button>
+              <Button
+                onClick={() => {
+                  setIsDrawingMode(!isDrawingMode)
+                  // setSelectedBoxId(null)
+                }}
+                variant="outline"
+                size="sm"
+                className={clsx(
+                  "flex items-center gap-2",
+                  isDrawingMode
+                    ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                    : "bg-white text-black hover:bg-slate-50",
+                )}
+              >
+                <Square className="h-4 w-4" />
+                <span>{isDrawingMode ? "Cancel Drawing" : "Draw Box"}</span>
+              </Button>
+              {selectedBoxId && (
+                <Button
+                  onClick={handleDeleteSelected}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete Box</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -57,7 +98,17 @@ export function BBUI() {
         )}
         >
           {image
-            ? <ImageViewer src={image} />
+            ? (
+                <ImageViewer
+                  src={image}
+                  isDrawingMode={isDrawingMode}
+                  setIsDrawingMode={setIsDrawingMode}
+                  selectedBoxId={selectedBoxId}
+                  setSelectedBoxId={setSelectedBoxId}
+                  boundingBoxes={boundingBoxes}
+                  setBoundingBoxes={setBoundingBoxes}
+                />
+              )
             : <ImageLoader setImage={setImage} />}
         </div>
       </Card>
@@ -73,8 +124,26 @@ export function BBUI() {
   )
 }
 
+interface ImageViewerProps {
+  src: string
+  isDrawingMode: boolean
+  setIsDrawingMode: Dispatch<SetStateAction<boolean>>
+  selectedBoxId: string | null
+  setSelectedBoxId: Dispatch<SetStateAction<string | null>>
+  boundingBoxes: BoundingBox[]
+  setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+}
+
 // Ref https://github.com/BetterTyped/react-zoom-pan-pinch/blob/master/src/stories/examples/image-responsive/example.tsx
-function ImageViewer({ src }: { src: string }) {
+function ImageViewer({
+  src,
+  setIsDrawingMode,
+  isDrawingMode,
+  selectedBoxId,
+  setSelectedBoxId,
+  boundingBoxes,
+  setBoundingBoxes,
+}: ImageViewerProps) {
   const scaleUp = true
   //   const backgroundColor = "black"
   const zoomFactor = 30
@@ -164,7 +233,6 @@ function ImageViewer({ src }: { src: string }) {
           maxScale={imageScale * zoomFactor}
           centerOnInit
           doubleClick={{ step: 0.7 }}
-
         >
           <TransformComponent
             wrapperStyle={{
@@ -178,13 +246,180 @@ function ImageViewer({ src }: { src: string }) {
               maxWidth: "100%",
             }}
           >
-            <img
-              // className="border-black"
+            <ImageWithBoundingBoxes
               src={src}
-              alt="Bounding Box Editor"
+              isDrawingMode={isDrawingMode}
+              setIsDrawingMode={setIsDrawingMode}
+              selectedBoxId={selectedBoxId}
+              setSelectedBoxId={setSelectedBoxId}
+              boundingBoxes={boundingBoxes}
+              setBoundingBoxes={setBoundingBoxes}
             />
           </TransformComponent>
         </TransformWrapper>
+      )}
+    </div>
+  )
+}
+
+interface ImageWithBoundingBoxesProps {
+  src: string
+  isDrawingMode: boolean
+  setIsDrawingMode: Dispatch<SetStateAction<boolean>>
+  selectedBoxId: string | null
+  setSelectedBoxId: Dispatch<SetStateAction<string | null>>
+  boundingBoxes: BoundingBox[]
+  setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+}
+function ImageWithBoundingBoxes({
+  src,
+  isDrawingMode,
+  setIsDrawingMode,
+  selectedBoxId,
+  setSelectedBoxId,
+  boundingBoxes,
+  setBoundingBoxes,
+}: ImageWithBoundingBoxesProps) {
+  const transformedComponent = useTransformComponent(({ state, instance: _ }) => {
+    return state // { previousScale: 1, scale: 1, positionX: 0, positionY: 0 }
+  })
+  const scale = transformedComponent.scale
+  const imageRef = useRef<HTMLImageElement | null>(null)
+  const [tempBox, setTempBox] = useState<
+    Omit<BoundingBox, "id" | "prob" | "name" | "class_info"> | null
+  >(null)// ({ x: 50, y: 150, width: 100, height: 100 })
+  const drawingRef = useRef<{
+    isDrawing: boolean
+    startX: number
+    startY: number
+  }>({
+    isDrawing: false,
+    startX: 0,
+    startY: 0,
+  })
+
+  // Funciones para dibujar cajas
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!isDrawingMode || !imageRef.current)
+        return
+
+      const rect = imageRef.current.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / scale
+      const y = (e.clientY - rect.top) / scale
+
+      drawingRef.current = {
+        isDrawing: true,
+        startX: x,
+        startY: y,
+      }
+
+      setTempBox({
+        x,
+        y,
+        width: 0,
+        height: 0,
+      })
+    },
+    [isDrawingMode, scale],
+  )
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!drawingRef.current.isDrawing || !imageRef.current || !tempBox)
+        return
+
+      const rect = imageRef.current.getBoundingClientRect()
+      const currentX = (e.clientX - rect.left) / scale
+      const currentY = (e.clientY - rect.top) / scale
+
+      const width = currentX - drawingRef.current.startX
+      const height = currentY - drawingRef.current.startY
+
+      setTempBox({
+        x: width >= 0 ? drawingRef.current.startX : currentX,
+        y: height >= 0 ? drawingRef.current.startY : currentY,
+        width: Math.abs(width),
+        height: Math.abs(height),
+      })
+    },
+    [scale, tempBox],
+  )
+
+  const handleMouseUp = useCallback(() => {
+    if (drawingRef.current.isDrawing && tempBox && tempBox.width > 5 && tempBox.height > 5) {
+      setBoundingBoxes(prev => [
+        ...prev,
+        {
+          id: nanoid(),
+          name: `box-${Date.now()}`,
+          ...tempBox,
+          class_info: classesSpectrumDetection[0],
+          prob: 1,
+        },
+      ])
+    }
+
+    drawingRef.current.isDrawing = false
+    setTempBox(null)
+    setIsDrawingMode(false)
+  }, [tempBox, setBoundingBoxes, setIsDrawingMode])
+
+  const handleBoxClick = useCallback(
+    (e: React.MouseEvent, boxId: string) => {
+      e.stopPropagation()
+      setSelectedBoxId(boxId === selectedBoxId ? null : boxId)
+    },
+    [selectedBoxId, setSelectedBoxId],
+  )
+
+  return (
+    <div
+      // ref={containerRef}
+      className="relative"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      <img
+        // className="border-black"
+        ref={imageRef}
+        src={src}
+        alt="Bounding Box Editor"
+      />
+      {/* Cajas delimitadoras existentes */}
+      {boundingBoxes.map(box => (
+        <div
+          key={box.id}
+          className={clsx(
+            "absolute border-2 cursor-pointer",
+            selectedBoxId === box.id
+              ? "border-blue-500"
+              : "border-red-500",
+          )}
+          style={{
+            left: `${box.x}px`,
+            top: `${box.y}px`,
+            width: `${box.width}px`,
+            height: `${box.height}px`,
+            backgroundColor: "rgba(255, 0, 0, 0.1)",
+          }}
+          onClick={e => handleBoxClick(e, `${box.id}`)}
+        />
+      ))}
+      {/* Caja temporal durante el dibujo */}
+      {tempBox && (
+        <div
+          className="absolute border-2 border-blue-500"
+          style={{
+            left: `${tempBox.x}px`,
+            top: `${tempBox.y}px`,
+            width: `${tempBox.width}px`,
+            height: `${tempBox.height}px`,
+            backgroundColor: "rgba(0, 0, 255, 0.1)",
+          }}
+        />
       )}
     </div>
   )
