@@ -315,11 +315,22 @@ function ImageWithBoundingBoxes({
       if (!imageRef.current)
         return { x, y, width, height }
 
+      const params = {
+        x: x,
+        y: y,
+        width: width,
+        height: height
+      }
+
+      const imgRect = imageRef.current.getBoundingClientRect()
+
+      const diff = Math.abs(imgRect.width - imgRect.height) / 2
+
       const imgWidth = imageRef.current.clientWidth
       const imgHeight = imageRef.current.clientHeight
 
-      const centerX = imgWidth / 2
-      const centerY = imgHeight / 2
+      // const centerX = imgWidth / 2
+      // const centerY = imgHeight / 2
 
       // Ajustar según la rotación
       let newX = x
@@ -327,19 +338,33 @@ function ImageWithBoundingBoxes({
       let newWidth = width
       let newHeight = height
 
+      const newPos = {
+        x: x,
+        y: y,
+        width: width,
+        height: height
+      }
+
+      console.log("ant:", params)
+      console.log("diff", diff)
+      console.log("act:", newPos)
+
       const rot = reverse ? (360 - rotation) % 360 : rotation
 
-      // Convertir coordenadas relativas al centro
-      const relX = x - centerX
-      const relY = y - centerY
+      // // Convertir coordenadas relativas al centro
+      // const relX = x - centerX
+      // const relY = y - centerY
 
-      console.log(rot)
       if (rot === 90) {
         // Rotar 90 grados
-        newX = imgWidth - y - height
-        newY = x
-        newWidth = height
-        newHeight = width
+        newPos.x = x + diff
+        newPos.y = y + diff
+        newPos.width = height
+        newPos.height = width
+        // newX = imgWidth - y - height
+        // newY = x
+        // newWidth = height
+        // newHeight = width
       }
       else if (rot === 180) {
         // Rotar 180 grados
@@ -354,7 +379,7 @@ function ImageWithBoundingBoxes({
         newHeight = width
       }
 
-      return { x: newX, y: newY, width: newWidth, height: newHeight }
+      return newPos
     },
     [rotation, imageRef],
   )
