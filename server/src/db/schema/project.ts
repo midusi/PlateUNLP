@@ -2,14 +2,15 @@ import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { nanoid } from "nanoid"
 import { relations } from 'drizzle-orm'
 import { userProject } from "./userProject";
+import { plate } from "./plate";
 
-export const user = sqliteTable("user", {
+
+export const project = sqliteTable("project", {
     id: text().primaryKey().$default(() => nanoid(10)),
-    name: text().notNull(),
-    email: text().notNull().unique(),
-    hashedPassword: text().notNull(),
+    name: text().notNull()
 });
 
-export const userRelations = relations(user, ({ many }) => ({
+export const projectRelations = relations(project, ({ many }) => ({
     userProject: many(userProject),
+    plate: many(plate),
 }));
