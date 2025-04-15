@@ -1,5 +1,5 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { Dispatch, SetStateAction } from "react"
+import type { Dispatch, RefObject, SetStateAction } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import clsx from "clsx"
 import { Palette, RotateCw, Square, Trash2 } from "lucide-react"
@@ -310,6 +310,55 @@ function ImageWithBoundingBoxes({
     startY: 0,
   })
 
+  const transformCoordinates = useCallback(
+    (x: number, y: number, width: number, height: number, reverse = false) => {
+      if (!imageRef.current)
+        return { x, y, width, height }
+
+      const imgWidth = imageRef.current.clientWidth
+      const imgHeight = imageRef.current.clientHeight
+
+      const centerX = imgWidth / 2
+      const centerY = imgHeight / 2
+
+      // Ajustar según la rotación
+      let newX = x
+      let newY = y
+      let newWidth = width
+      let newHeight = height
+
+      const rot = reverse ? (360 - rotation) % 360 : rotation
+
+      // Convertir coordenadas relativas al centro
+      const relX = x - centerX
+      const relY = y - centerY
+
+      console.log(rot)
+      if (rot === 90) {
+        // Rotar 90 grados
+        newX = imgWidth - y - height
+        newY = x
+        newWidth = height
+        newHeight = width
+      }
+      else if (rot === 180) {
+        // Rotar 180 grados
+        newX = imgWidth - x - width
+        newY = imgHeight - y - height
+      }
+      else if (rot === 270) {
+        // Rotar 270 grados
+        newX = y
+        newY = imgHeight - x - width
+        newWidth = height
+        newHeight = width
+      }
+
+      return { x: newX, y: newY, width: newWidth, height: newHeight }
+    },
+    [rotation, imageRef],
+  )
+
   // Funciones para dibujar cajas
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -320,20 +369,23 @@ function ImageWithBoundingBoxes({
       const x = (e.clientX - rect.left) / scale
       const y = (e.clientY - rect.top) / scale
 
+      // Transformar coordenadas según la rotación
+      const transformed = transformCoordinates(x, y, 0, 0, true)
+
       drawingRef.current = {
         isDrawing: true,
-        startX: x,
-        startY: y,
+        startX: transformed.x,
+        startY: transformed.y,
       }
 
       setTempBox({
-        x,
-        y,
+        x: transformed.x,
+        y: transformed.y,
         width: 0,
         height: 0,
       })
     },
-    [isDrawingMode, scale],
+    [isDrawingMode, scale, transformCoordinates],
   )
 
   const handleMouseMove = useCallback(
@@ -342,8 +394,13 @@ function ImageWithBoundingBoxes({
         return
 
       const rect = imageRef.current.getBoundingClientRect()
-      const currentX = (e.clientX - rect.left) / scale
-      const currentY = (e.clientY - rect.top) / scale
+      let currentX = (e.clientX - rect.left) / scale
+      let currentY = (e.clientY - rect.top) / scale
+
+      // Transformar coordenadas según la rotación
+      const transformed = transformCoordinates(currentX, currentY, 0, 0, true)
+      currentX = transformed.x
+      currentY = transformed.y
 
       const width = currentX - drawingRef.current.startX
       const height = currentY - drawingRef.current.startY
@@ -355,7 +412,7 @@ function ImageWithBoundingBoxes({
         height: Math.abs(height),
       })
     },
-    [scale, tempBox],
+    [scale, tempBox, transformCoordinates],
   )
 
   const handleMouseUp = useCallback(() => {
@@ -385,6 +442,38 @@ function ImageWithBoundingBoxes({
     [selectedBoxId, setSelectedBoxId],
   )
 
+  // Renderizar una caja con la rotación aplicada
+  const renderBox = (box: BoundingBox, isTemp = false) => {
+    // Transformar las coordenadas según la rotación actual
+    const transformed = transformCoordinates(box.x, box.y, box.width, box.height)
+
+    return (
+      <div
+        key={isTemp ? "temp-box" : box.id}
+        className={clsx(
+          "absolute border-2",
+          isTemp
+            ? "border-blue-500"
+            : selectedBoxId === box.id
+              ? "border-blue-500 cursor-pointer"
+              : "border-red-500 cursor-pointer",
+        )}
+        style={{
+          left: `${transformed.x}px`,
+          top: `${transformed.y}px`,
+          width: `${transformed.width}px`,
+          height: `${transformed.height}px`,
+          backgroundColor: isTemp ? "rgba(0, 0, 255, 0.1)" : "rgba(255, 0, 0, 0.1)",
+          // transform: `rotate(${rotation}deg)`,
+          // transformOrigin: "top left",
+        }}
+        onClick={isTemp ? undefined : e => handleBoxClick(e, `${box.id}`)}
+      >
+        {/* {!isTemp && renderResizeHandles(box)} */}
+      </div>
+    )
+  }
+
   return (
     <div
       // ref={containerRef}
@@ -405,39 +494,19 @@ function ImageWithBoundingBoxes({
           transition: "filter 0.3s ease",
         }}
       />
-      {/* Cajas delimitadoras existentes */}
-      {boundingBoxes.map(box => (
-        <div
-          key={box.id}
-          className={clsx(
-            "absolute border-2 cursor-pointer",
-            selectedBoxId === box.id
-              ? "border-blue-500"
-              : "border-red-500",
-          )}
-          style={{
-            left: `${box.x}px`,
-            top: `${box.y}px`,
-            width: `${box.width}px`,
-            height: `${box.height}px`,
-            backgroundColor: "rgba(255, 0, 0, 0.1)",
-          }}
-          onClick={e => handleBoxClick(e, `${box.id}`)}
-        />
-      ))}
-      {/* Caja temporal durante el dibujo */}
-      {tempBox && (
-        <div
-          className="absolute border-2 border-blue-500"
-          style={{
-            left: `${tempBox.x}px`,
-            top: `${tempBox.y}px`,
-            width: `${tempBox.width}px`,
-            height: `${tempBox.height}px`,
-            backgroundColor: "rgba(0, 0, 255, 0.1)",
-          }}
-        />
-      )}
+      {/* Contenedor para las cajas delimitadoras */}
+      <div
+        className="absolute top-0 left-0 w-full h-full"
+        style={{
+          // pointerEvents: "none", // Para que los eventos pasen a través al contenedor principal
+        }}
+      >
+        {/* Cajas delimitadoras existentes */}
+        {boundingBoxes.map(box => renderBox(box))}
+
+        {/* Caja temporal durante el dibujo */}
+        {tempBox && renderBox(tempBox as BoundingBox, true)}
+      </div>
     </div>
   )
 }
