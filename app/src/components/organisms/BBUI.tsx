@@ -1,5 +1,5 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { Dispatch, RefObject, SetStateAction } from "react"
+import type { Dispatch, SetStateAction } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import clsx from "clsx"
 import { Palette, RotateCw, Square, Trash2 } from "lucide-react"
@@ -14,7 +14,7 @@ import { Card } from "../atoms/card"
 // }
 
 export function BBUI() {
-  const [image, setImage] = useState<null | string> (null)
+  const [image, setImage] = useState<null | string>(null)
   const [bgWhite, setBgWhite] = useState(true)
   const [rotation, setRotation] = useState(0)
   const [isDrawingMode, setIsDrawingMode] = useState(false)
@@ -99,18 +99,18 @@ export function BBUI() {
         >
           {image
             ? (
-                <ImageViewer
-                  src={image}
-                  rotation={rotation}
-                  bgWhite={bgWhite}
-                  isDrawingMode={isDrawingMode}
-                  setIsDrawingMode={setIsDrawingMode}
-                  selectedBoxId={selectedBoxId}
-                  setSelectedBoxId={setSelectedBoxId}
-                  boundingBoxes={boundingBoxes}
-                  setBoundingBoxes={setBoundingBoxes}
-                />
-              )
+              <ImageViewer
+                src={image}
+                rotation={rotation}
+                bgWhite={bgWhite}
+                isDrawingMode={isDrawingMode}
+                setIsDrawingMode={setIsDrawingMode}
+                selectedBoxId={selectedBoxId}
+                setSelectedBoxId={setSelectedBoxId}
+                boundingBoxes={boundingBoxes}
+                setBoundingBoxes={setBoundingBoxes}
+              />
+            )
             : <ImageLoader setImage={setImage} />}
         </div>
       </Card>
