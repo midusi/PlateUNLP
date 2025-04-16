@@ -99,18 +99,18 @@ export function BBUI() {
         >
           {image
             ? (
-              <ImageViewer
-                src={image}
-                rotation={rotation}
-                bgWhite={bgWhite}
-                isDrawingMode={isDrawingMode}
-                setIsDrawingMode={setIsDrawingMode}
-                selectedBoxId={selectedBoxId}
-                setSelectedBoxId={setSelectedBoxId}
-                boundingBoxes={boundingBoxes}
-                setBoundingBoxes={setBoundingBoxes}
-              />
-            )
+                <ImageViewer
+                  src={image}
+                  rotation={rotation}
+                  bgWhite={bgWhite}
+                  isDrawingMode={isDrawingMode}
+                  setIsDrawingMode={setIsDrawingMode}
+                  selectedBoxId={selectedBoxId}
+                  setSelectedBoxId={setSelectedBoxId}
+                  boundingBoxes={boundingBoxes}
+                  setBoundingBoxes={setBoundingBoxes}
+                />
+              )
             : <ImageLoader setImage={setImage} />}
         </div>
       </Card>
@@ -316,49 +316,43 @@ function ImageWithBoundingBoxes({
         return { x, y, width, height }
 
       const params = {
-        x: x,
-        y: y,
-        width: width,
-        height: height
+        x,
+        y,
+        width,
+        height,
       }
 
       const imgRect = imageRef.current.getBoundingClientRect()
 
-      const diff = Math.abs(imgRect.width - imgRect.height) / 2
+      // const diff = Math.abs(imgRect.width - imgRect.height) / 2
 
+      // Tamaño natural
       const imgWidth = imageRef.current.clientWidth
       const imgHeight = imageRef.current.clientHeight
 
-      // const centerX = imgWidth / 2
-      // const centerY = imgHeight / 2
-
-      // Ajustar según la rotación
-      let newX = x
-      let newY = y
-      let newWidth = width
-      let newHeight = height
-
       const newPos = {
-        x: x,
-        y: y,
-        width: width,
-        height: height
+        x,
+        y,
+        width,
+        height,
       }
-
-      console.log("ant:", params)
-      console.log("diff", diff)
-      console.log("act:", newPos)
+      // console.log("rect:", imgRect)
+      // console.log("ant:", params)
+      // console.log("diff", diff)
+      // console.log("act:", newPos)
 
       const rot = reverse ? (360 - rotation) % 360 : rotation
 
-      // // Convertir coordenadas relativas al centro
-      // const relX = x - centerX
-      // const relY = y - centerY
+      const centerX = imgWidth / 2
+      const centerY = imgHeight / 2
+      // Convertir coordenadas relativas al centro
+      const relX = x - centerX
+      const relY = y - centerY
 
       if (rot === 90) {
         // Rotar 90 grados
-        newPos.x = x + diff
-        newPos.y = y + diff
+        newPos.x = relX
+        newPos.y = y
         newPos.width = height
         newPos.height = width
         // newX = imgWidth - y - height
@@ -368,15 +362,15 @@ function ImageWithBoundingBoxes({
       }
       else if (rot === 180) {
         // Rotar 180 grados
-        newX = imgWidth - x - width
-        newY = imgHeight - y - height
+        newPos.x = imgWidth - x - width
+        newPos.y = imgHeight - y - height
       }
       else if (rot === 270) {
         // Rotar 270 grados
-        newX = y
-        newY = imgHeight - x - width
-        newWidth = height
-        newHeight = width
+        // newX = y
+        // newY = imgHeight - x - width
+        // newWidth = height
+        // newHeight = width
       }
 
       return newPos
