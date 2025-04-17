@@ -12,30 +12,30 @@ export const observation = sqliteTable("observation", {
     width: integer(),
     plateId: text("plateId").references(() => plate.id),
 
-    OBJECT: text().notNull(), // required
-    DATE_OBS: text().notNull(), // required CAMBIAR
-    TIME_OBS: real(), // time/timestamp
-    MAIN_ID: text().notNull(), // required
-    UT: real().notNull(), // float required
-    ST: real(), // float
-    HA: real(), // float
-    RA: real(), // float (grados o radianes)
-    DEC: real(), // float (grados o radianes)
-    GAIN: real(), // float
-    RA2000: real(), // float (grados o radianes)
-    DEC2000: real(), // float (grados o radianes)
-    RA1950: real(), // float (grados o radianes)
-    DEC1950: real(), // float (grados o radianes)
-    EXPTIME: real(), // float (segundos) / timestamp
+    OBJECT: text().notNull(),
+    DATE_OBS: text().notNull(),
+    TIME_OBS: real(),
+    MAIN_ID: text().notNull(),
+    UT: real().notNull(),
+    ST: real(),
+    HA: real(),
+    RA: real(),
+    DEC: real(),
+    GAIN: real(),
+    RA2000: real(),
+    DEC2000: real(),
+    RA1950: real(),
+    DEC1950: real(),
+    EXPTIME: real(),
     DETECTOR: text(),
     IMAGETYP: text(),
     SPTYPE: text(),
-    JD: real(), // float
-    EQUINOX: real(), // float
+    JD: real(),
+    EQUINOX: real(),
     AIRMASS: real()
 });
 
-export const observationRelations = relations(plate, ({ one, many }) => ({
+export const observationRelations = relations(observation, ({ one, many }) => ({
     plate: one(plate, {
         fields: [observation.plateId],
         references: [plate.id],

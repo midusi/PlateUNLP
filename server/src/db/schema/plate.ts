@@ -10,7 +10,7 @@ export const plate = sqliteTable("plate", {
     observer: text(),
     digitali: real(),
     scanner: text(),
-    software: text(), // no esta en la tabla
+    software: text(),
     plateN: text(),
     scanImage: text()
 });
