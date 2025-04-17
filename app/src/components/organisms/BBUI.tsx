@@ -312,65 +312,41 @@ function ImageWithBoundingBoxes({
 
   const transformCoordinates = useCallback(
     (x: number, y: number, width: number, height: number, reverse = false) => {
-      if (!imageRef.current)
-        return { x, y, width, height }
-
-      const params = {
-        x,
-        y,
-        width,
-        height,
-      }
-
-      const imgRect = imageRef.current.getBoundingClientRect()
-
-      // const diff = Math.abs(imgRect.width - imgRect.height) / 2
-
-      // Tamaño natural
-      const imgWidth = imageRef.current.clientWidth
-      const imgHeight = imageRef.current.clientHeight
-
-      const newPos = {
-        x,
-        y,
-        width,
-        height,
-      }
-      // console.log("rect:", imgRect)
-      // console.log("ant:", params)
-      // console.log("diff", diff)
-      // console.log("act:", newPos)
-
       const rot = reverse ? (360 - rotation) % 360 : rotation
 
-      const centerX = imgWidth / 2
-      const centerY = imgHeight / 2
-      // Convertir coordenadas relativas al centro
+      // Si no hay imagen o no hay rotación no hay necesidad de tranformar las cordenadas
+      if (!imageRef.current || rot === 0)
+        return { x, y, width, height }
+
+      // Centro respecto al tamaño natural de la imagen
+      const centerX = imageRef.current.clientWidth / 2
+      const centerY = imageRef.current.clientHeight / 2
+
+      // Cordenadas relativas al centro de la imagen
       const relX = x - centerX
       const relY = y - centerY
 
+      // Default: Asumimos pocicion en centro absoluto luego
+      // sumamos la modificacion correspondiente en x e y
+      const newPos = { x: centerX, y: centerY, width, height }
       if (rot === 90) {
         // Rotar 90 grados
-        newPos.x = relX
-        newPos.y = y
+        newPos.x += -relY - height // (- height) rotacion de punto principal
+        newPos.y += relX
         newPos.width = height
         newPos.height = width
-        // newX = imgWidth - y - height
-        // newY = x
-        // newWidth = height
-        // newHeight = width
       }
       else if (rot === 180) {
         // Rotar 180 grados
-        newPos.x = imgWidth - x - width
-        newPos.y = imgHeight - y - height
+        newPos.x += -relX - width // (- width) rotacion de punto principal
+        newPos.y += -relY - height // (- height) rotacion de punto principal
       }
       else if (rot === 270) {
         // Rotar 270 grados
-        // newX = y
-        // newY = imgHeight - x - width
-        // newWidth = height
-        // newHeight = width
+        newPos.x += relY
+        newPos.y += -relX - width // (- width) rotacion de punto principal
+        newPos.width = height
+        newPos.height = width
       }
 
       return newPos
