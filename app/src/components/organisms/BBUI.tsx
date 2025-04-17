@@ -239,6 +239,7 @@ function ImageViewer({
           maxScale={imageScale * zoomFactor}
           centerOnInit
           doubleClick={{ step: 0.7 }}
+          disablePadding={isDrawingMode}
         >
           <TransformComponent
             wrapperStyle={{
