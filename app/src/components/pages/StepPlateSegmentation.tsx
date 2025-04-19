@@ -4,10 +4,7 @@ import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
-import { Button } from "../atoms/button"
-import { LoadFile } from "../molecules/LoadFile"
 import { BBUI } from "../organisms/BBUI"
-import { SegmentationUI } from "../organisms/SegmentationUI"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
@@ -93,20 +90,10 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         onComplete={onComplete}
         saveBoundingBoxes={saveBoundingBoxes}
         saveImageLoading={saveImage}
+        classes={classesSpectrumDetection}
       />
 
-      <div className="flex justify-center pt-4">
-        <Button
-          onClick={() => {
-            saveBoundingBoxes(boundingBoxes)
-            onComplete()
-          }}
-          disabled={processInfo.data.plate.scanImage === null || boundingBoxes.length === 0}
-        >
-          Save
-        </Button>
-      </div>
-      <div className="w-full p-6">
+      {/* <div className="w-full p-6">
         {!processInfo.data.plate.scanImage && (
           <LoadFile onSelect={(fileValue: string) => {
             // Si no hay archivo de escaneo cargado etonces solicita uno al usuario.
@@ -136,7 +123,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
             classes={classesSpectrumDetection}
           />
         )}
-      </div>
+      </div> */}
     </div>
   )
 }

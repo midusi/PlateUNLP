@@ -1,3 +1,4 @@
+import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Dispatch, SetStateAction } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
@@ -8,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { TransformComponent, TransformWrapper, useTransformComponent } from "react-zoom-pan-pinch"
 import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
+import { BoxList } from "./BBList"
 
 interface BBUIProps {
   file?: string | null
@@ -16,6 +18,7 @@ interface BBUIProps {
   onComplete: () => void
   saveBoundingBoxes: (boundingBoxes: BoundingBox[]) => void
   saveImageLoading: (src: string) => void
+  classes: BBClassesProps[]
 }
 
 export function BBUI({
@@ -25,6 +28,7 @@ export function BBUI({
   onComplete,
   saveBoundingBoxes,
   saveImageLoading,
+  classes,
 }: BBUIProps) {
   const [image, setImage] = useState<null | string>(file)
   const [bgWhite, setBgWhite] = useState(true)
@@ -130,6 +134,13 @@ export function BBUI({
             : <ImageLoader handleImageLoad={handleImageLoad} />}
         </div>
       </Card>
+      <BoxList
+        boundingBoxes={boundingBoxes}
+        setBoundingBoxes={setBoundingBoxes}
+        selected={selectedBoxId}
+        setSelected={setSelectedBoxId}
+        classes={classes}
+      />
       <div className="flex justify-center pt-4">
         <Button
           onClick={() => {
