@@ -345,10 +345,14 @@ function ImageWithBoundingBoxes({
       const centerY = imageRef.current.clientHeight / 2
 
       // Cordenadas relativas al centro de la imagen
-      const relX = x - centerX
+      // let diff = 0
+      // if (rotation === 90 || rotation === 270) {
+      //   diff = (imageRef.current.clientWidth - imageRef.current.clientHeight) / 2
+      // }
+      const relX = x - centerX // + diff
       const relY = y - centerY
 
-      // Default: Asumimos pocicion en centro absoluto luego
+      // Default: Asumimos posicion en centro absoluto luego
       // sumamos la modificacion correspondiente en x e y
       const newPos = { x: centerX, y: centerY, width, height }
       if (rot === 90) {
@@ -415,18 +419,18 @@ function ImageWithBoundingBoxes({
       const x = (e.clientX - rect.left) / scale
       const y = (e.clientY - rect.top) / scale
 
-      // Transformar coordenadas según la rotación
-      const transformed = transformCoordinates(x, y, 0, 0, true)
+      // Transforma las cordenadas para obtener la poscicion base original
+      const basePos = transformCoordinates(x, y, 0, 0, true)
 
       drawingRef.current = {
         isDrawing: true,
-        startX: transformed.x,
-        startY: transformed.y,
+        startX: basePos.x,
+        startY: basePos.y,
       }
 
       setTempBox({
-        x: transformed.x,
-        y: transformed.y,
+        x: basePos.x,
+        y: basePos.y,
         width: 0,
         height: 0,
       })
@@ -560,7 +564,7 @@ function ImageWithBoundingBoxes({
       setResizeHandle(null)
       resizeRef.current.originalBox = null
     }
-  }, [tempBox, setBoundingBoxes, setIsDrawingMode, isResizing])
+  }, [tempBox, setIsDrawingMode, isResizing, setBoundingBoxes, setIsResizing])
 
   const handleBoxClick = useCallback(
     (e: React.MouseEvent, boxId: string) => {
