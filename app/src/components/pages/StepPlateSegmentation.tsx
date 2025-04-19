@@ -87,12 +87,14 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   return (
     <div className="flex flex-col w-full">
       <BBUI
+        file={processInfo.data.plate.scanImage}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         onComplete={onComplete}
         saveBoundingBoxes={saveBoundingBoxes}
         saveImageLoading={saveImage}
       />
+
       <div className="flex justify-center pt-4">
         <Button
           onClick={() => {

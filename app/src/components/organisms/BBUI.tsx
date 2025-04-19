@@ -10,6 +10,7 @@ import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
 
 interface BBUIProps {
+  file?: string | null
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
   onComplete: () => void
@@ -18,13 +19,14 @@ interface BBUIProps {
 }
 
 export function BBUI({
+  file = null,
   boundingBoxes,
   setBoundingBoxes,
   onComplete,
   saveBoundingBoxes,
   saveImageLoading,
 }: BBUIProps) {
-  const [image, setImage] = useState<null | string>(null)
+  const [image, setImage] = useState<null | string>(file)
   const [bgWhite, setBgWhite] = useState(true)
   const [rotation, setRotation] = useState(0)
   const [isDrawingMode, setIsDrawingMode] = useState(false)
