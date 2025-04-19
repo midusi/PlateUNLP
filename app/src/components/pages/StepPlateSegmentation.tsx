@@ -91,6 +91,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         saveBoundingBoxes={saveBoundingBoxes}
         saveImageLoading={saveImage}
         classes={classesSpectrumDetection}
+        determineBBFunction={determineBBFunction}
       />
 
       {/* <div className="w-full p-6">

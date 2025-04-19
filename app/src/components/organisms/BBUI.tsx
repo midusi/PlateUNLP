@@ -3,7 +3,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Dispatch, SetStateAction } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import clsx from "clsx"
-import { Palette, RotateCw, Square, Trash2 } from "lucide-react"
+import { Bot, Palette, RotateCw, Square, Trash2 } from "lucide-react"
 import { nanoid } from "nanoid"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { TransformComponent, TransformWrapper, useTransformComponent } from "react-zoom-pan-pinch"
@@ -17,8 +17,9 @@ interface BBUIProps {
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
   onComplete: () => void
   saveBoundingBoxes: (boundingBoxes: BoundingBox[]) => void
-  saveImageLoading: (src: string) => void
+  saveImageLoading?: (src: string) => void
   classes: BBClassesProps[]
+  determineBBFunction: (img_src: string) => Promise<BoundingBox[]>
 }
 
 export function BBUI({
@@ -29,6 +30,7 @@ export function BBUI({
   saveBoundingBoxes,
   saveImageLoading,
   classes,
+  determineBBFunction,
 }: BBUIProps) {
   const [image, setImage] = useState<null | string>(file)
   const [bgWhite, setBgWhite] = useState(true)
@@ -45,8 +47,20 @@ export function BBUI({
 
   function handleImageLoad(src: string) {
     setImage(src)
-    saveImageLoading(src)
+    if (saveImageLoading){
+      saveImageLoading(src)
+    }
   }
+
+  async function handleAutodetect(src: string) {
+      const bbAutodetectedPromise = determineBBFunction(src)
+      const newBBs: BoundingBox[] = [...boundingBoxes]
+      for (const bb of await bbAutodetectedPromise) {
+        const newBB = { ...bb, name: `box-${Date.now()}`, id: nanoid() }
+        newBBs.push(newBB)
+      }
+      setBoundingBoxes(newBBs)
+    }
 
   return (
     <>
@@ -55,6 +69,19 @@ export function BBUI({
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-medium">Tools</h2>
             <div className="flex gap-2">
+              {image && (
+                <Button
+                  onClick={() => { handleAutodetect(image) }}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 text-black bg-white hover:bg-slate-50"
+                >
+                  <Bot className="h-4 w-4" />
+                  <span>
+                    {`Autodetect Bounding Boxes`}
+                  </span>
+                </Button>
+              )}
               <Button
                 onClick={() => { setRotation((rotation + 90) % 360) }}
                 variant="outline"
