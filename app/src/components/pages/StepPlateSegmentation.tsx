@@ -4,6 +4,7 @@ import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
+import { Button } from "../atoms/button"
 import { LoadFile } from "../molecules/LoadFile"
 import { BBUI } from "../organisms/BBUI"
 import { SegmentationUI } from "../organisms/SegmentationUI"
@@ -42,6 +43,19 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     }))
   }
 
+  function saveImage(src: string) {
+    setProcessInfo(prev => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        plate: {
+          ...prev.data.plate,
+          scanImage: src,
+        },
+      },
+    }))
+  }
+
   function onComplete() {
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
@@ -72,7 +86,24 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
 
   return (
     <div className="flex flex-col w-full">
-      <BBUI />
+      <BBUI
+        boundingBoxes={boundingBoxes}
+        setBoundingBoxes={setBoundingBoxes}
+        onComplete={onComplete}
+        saveBoundingBoxes={saveBoundingBoxes}
+        saveImageLoading={saveImage}
+      />
+      <div className="flex justify-center pt-4">
+        <Button
+          onClick={() => {
+            saveBoundingBoxes(boundingBoxes)
+            onComplete()
+          }}
+          disabled={processInfo.data.plate.scanImage === null || boundingBoxes.length === 0}
+        >
+          Save
+        </Button>
+      </div>
       <div className="w-full p-6">
         {!processInfo.data.plate.scanImage && (
           <LoadFile onSelect={(fileValue: string) => {

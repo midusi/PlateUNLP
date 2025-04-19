@@ -9,24 +9,38 @@ import { TransformComponent, TransformWrapper, useTransformComponent } from "rea
 import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
 
-// interface BBUIProps {
+interface BBUIProps {
+  boundingBoxes: BoundingBox[]
+  setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+  onComplete: () => void
+  saveBoundingBoxes: (boundingBoxes: BoundingBox[]) => void
+  saveImageLoading: (src: string) => void
+}
 
-// }
-
-export function BBUI() {
+export function BBUI({
+  boundingBoxes,
+  setBoundingBoxes,
+  onComplete,
+  saveBoundingBoxes,
+  saveImageLoading,
+}: BBUIProps) {
   const [image, setImage] = useState<null | string>(null)
   const [bgWhite, setBgWhite] = useState(true)
   const [rotation, setRotation] = useState(0)
   const [isDrawingMode, setIsDrawingMode] = useState(false)
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null)
-  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedBoxId) {
       setBoundingBoxes(prev => prev.filter(box => box.id !== selectedBoxId))
       setSelectedBoxId(null)
     }
-  }, [selectedBoxId])
+  }, [selectedBoxId, setBoundingBoxes])
+
+  function handleImageLoad(src: string) {
+    setImage(src)
+    saveImageLoading(src)
+  }
 
   return (
     <>
@@ -111,13 +125,16 @@ export function BBUI() {
                   setBoundingBoxes={setBoundingBoxes}
                 />
               )
-            : <ImageLoader setImage={setImage} />}
+            : <ImageLoader handleImageLoad={handleImageLoad} />}
         </div>
       </Card>
       <div className="flex justify-center pt-4">
         <Button
-          onClick={() => { }}
-          disabled
+          onClick={() => {
+            saveBoundingBoxes(boundingBoxes)
+            onComplete()
+          }}
+          disabled={image === null || boundingBoxes.length === 0}
         >
           Save
         </Button>
@@ -602,7 +619,7 @@ function ImageWithBoundingBoxes({
       setResizeHandle(handle)
       setSelectedBoxId(boxId)
     },
-    [boundingBoxes, scale, setSelectedBoxId, transformCoordinates],
+    [boundingBoxes, scale, setIsResizing, setSelectedBoxId, transformCoordinates],
 
   )
 
@@ -727,16 +744,16 @@ function ImageWithBoundingBoxes({
 }
 
 interface ImageLoaderProps {
-  setImage: Dispatch<SetStateAction<string | null>>
+  handleImageLoad: (src: string) => void
 }
 
-function ImageLoader({ setImage }: ImageLoaderProps) {
+function ImageLoader({ handleImageLoad }: ImageLoaderProps) {
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        setImage(e.target?.result as string)
+        handleImageLoad(e.target?.result as string)
       }
       reader.readAsDataURL(file)
     }
