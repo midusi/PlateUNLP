@@ -319,7 +319,7 @@ function ImageWithBoundingBoxes({
     startX: 0,
     startY: 0,
   })
-  
+
   // State for resize handling
   const [resizeHandle, setResizeHandle] = useState<string | null>(null)
   const resizeRef = useRef<{
@@ -334,7 +334,7 @@ function ImageWithBoundingBoxes({
 
   const transformCoordinates = useCallback(
     (x: number, y: number, width: number, height: number, reverse = false) => {
-      const rot = reverse ? (360 - rotation) % 360 : rotation 
+      const rot = reverse ? (360 - rotation) % 360 : rotation
 
       // Si no hay imagen o no hay rotación no hay necesidad de tranformar las cordenadas
       if (!imageRef.current || rot === 0)
@@ -377,19 +377,22 @@ function ImageWithBoundingBoxes({
   )
 
   /**
-   * Función para transformar deltas según la rotación 
-   */ 
+   * Función para transformar deltas según la rotación
+   */
   const transformDeltas = useCallback(
     (deltaX: number, deltaY: number) => {
       const rot = rotation % 360
 
       if (rot === 0) {
         return { deltaX, deltaY }
-      } else if (rot === 90) {
+      }
+      else if (rot === 90) {
         return { deltaX: -deltaY, deltaY: deltaX }
-      } else if (rot === 180) {
+      }
+      else if (rot === 180) {
         return { deltaX: -deltaX, deltaY: -deltaY }
-      } else if (rot === 270) {
+      }
+      else if (rot === 270) {
         return { deltaX: deltaY, deltaY: -deltaX }
       }
 
@@ -401,9 +404,9 @@ function ImageWithBoundingBoxes({
   // Funciones para dibujar cajas
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if(!imageRef.current)
+      if (!imageRef.current)
         return
-      if (isResizing) 
+      if (isResizing)
         return
       if (!isDrawingMode)
         return
@@ -428,7 +431,7 @@ function ImageWithBoundingBoxes({
         height: 0,
       })
     },
-    [isDrawingMode, scale, transformCoordinates],
+    [isDrawingMode, isResizing, scale, transformCoordinates],
   )
 
   const handleMouseMove = useCallback(
@@ -447,10 +450,9 @@ function ImageWithBoundingBoxes({
 
       /** Dibujo de nueva caja */
       if (drawingRef.current.isDrawing && tempBox) {
-        
         const width = currentX - drawingRef.current.startX
         const height = currentY - drawingRef.current.startY
-        
+
         setTempBox({
           x: width >= 0 ? drawingRef.current.startX : currentX,
           y: height >= 0 ? drawingRef.current.startY : currentY,
@@ -460,7 +462,6 @@ function ImageWithBoundingBoxes({
       }
       /** Redimensionado de caja */
       else if (selectedBoxId && isResizing && resizeHandle && resizeRef.current.originalBox) {
-
         const originalBox = resizeRef.current.originalBox
 
         // Calcular deltas en coordenadas de pantalla
@@ -474,10 +475,8 @@ function ImageWithBoundingBoxes({
 
         const newBox = { ...originalBox }
 
-        const centerX = imageRef.current.width / 2
-        const centerY = imageRef.current.height / 2
-
-        console.log(centerX, centerY)
+        // const centerX = imageRef.current.width / 2
+        // const centerY = imageRef.current.height / 2
 
         switch (resizeHandle) {
           case "top-left":
@@ -534,8 +533,7 @@ function ImageWithBoundingBoxes({
         setBoundingBoxes(prev => prev.map(box => (box.id === selectedBoxId ? newBox : box)))
       }
     },
-    [scale, tempBox, transformCoordinates, isResizing, resizeHandle, 
-      setBoundingBoxes, selectedBoxId, transformDeltas],
+    [scale, tempBox, transformCoordinates, isResizing, resizeHandle, setBoundingBoxes, selectedBoxId, transformDeltas],
   )
 
   const handleMouseUp = useCallback(() => {
@@ -574,10 +572,9 @@ function ImageWithBoundingBoxes({
 
   const handleResizeStart = useCallback(
     (e: React.MouseEvent, boxId: string, handle: string) => {
-
       e.stopPropagation()
       e.preventDefault()
-      
+
       if (!imageRef.current) {
         return
       }
@@ -587,11 +584,11 @@ function ImageWithBoundingBoxes({
       const rect = imageRef.current.getBoundingClientRect()
       const x = e.clientX - rect.left / scale
       const y = e.clientY - rect.left / scale
-      
+
       // Transformar coordenadas según la rotación
       const transformed = transformCoordinates(x, y, 0, 0, true)
-      
-      resizeRef.current = { 
+
+      resizeRef.current = {
         startX: transformed.x,
         startY: transformed.y,
         originalBox: { ...box! },
@@ -611,25 +608,25 @@ function ImageWithBoundingBoxes({
    * @returns - Código HTML correspondiente a los controles
    */
   const renderResizeHandles = (box: BoundingBox) => {
-    if(box.id !== selectedBoxId) {
+    if (box.id !== selectedBoxId) {
       return
     }
 
-    const handleSize = 8 
+    const handleSize = 8
     const handleOffset = -handleSize / 2
 
     const handles = [
-      {name:"top-left", style: { top: handleOffset, left: handleOffset }},
-      {name:"top-right", style: { top: handleOffset, right: handleOffset }},
-      {name:"bottom-left", style: { bottom: handleOffset, left: handleOffset }},
-      {name:"bottom-right", style: { bottom: handleOffset, right: handleOffset }},
-      {name:"top", style: { top: handleOffset, left: "50%", transform: "translateX(-50%)" }},
-      {name:"right", style: { top: "50%", right: handleOffset, transform: "translateY(-50%)" }},
-      {name:"bottom", style: { bottom: handleOffset, left: "50%", transform: "translateX(-50%)" }},
-      {name:"left", style: { top: "50%", left: handleOffset, transform: "translateY(-50%)" }},
+      { name: "top-left", style: { top: handleOffset, left: handleOffset } },
+      { name: "top-right", style: { top: handleOffset, right: handleOffset } },
+      { name: "bottom-left", style: { bottom: handleOffset, left: handleOffset } },
+      { name: "bottom-right", style: { bottom: handleOffset, right: handleOffset } },
+      { name: "top", style: { top: handleOffset, left: "50%", transform: "translateX(-50%)" } },
+      { name: "right", style: { top: "50%", right: handleOffset, transform: "translateY(-50%)" } },
+      { name: "bottom", style: { bottom: handleOffset, left: "50%", transform: "translateX(-50%)" } },
+      { name: "left", style: { top: "50%", left: handleOffset, transform: "translateY(-50%)" } },
     ]
 
-    return handles.map((handle) => (
+    return handles.map(handle => (
       <div
         key={handle.name}
         className="absolute w-2 h-2 bg-white border border-blue500 rounded-sm cursor-pointer"
@@ -642,12 +639,12 @@ function ImageWithBoundingBoxes({
               : handle.name.includes("left") || handle.name.includes("right")
                 ? "ew-resize"
                 : "ns-resize",
-          zIndex:10
+          zIndex: 10,
         }}
         onMouseDown={(e) => {
           e.stopPropagation()
-          handleResizeStart(e, box.id.toString(), handle.name)}
-        }
+          handleResizeStart(e, box.id.toString(), handle.name)
+        }}
       />
     ))
   }
