@@ -10,6 +10,8 @@ import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
 import { StepSpectrumSelection } from "./components/pages/StepSpectrumSelection"
 
+import { trpc } from "./lib/trpc"
+
 export default function App() {
   const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
     processingStatus: {
@@ -92,6 +94,14 @@ export default function App() {
         {" "}
         III-LIDI, Facultad de Informática, Universidad Nacional de la Plata
       </footer>
+
+      <button
+        onClick={() =>
+          trpc.crearUsuario.mutate({
+            name: Math.random().toString(), email: Math.random().toString() + "@gmail.com"
+          }).then(resultado => console.log(resultado))}
+      >crear</button>
+      <button onClick={() => trpc.consulta.query().then(resultado => console.log(resultado))}>consulta</button>
     </div>
   )
 }
