@@ -30,10 +30,10 @@ export default function App() {
           DIGITALI: 0,
           SCANNER: "",
           SOFTWARE: "",
-          PLATE_N: ""
+          PLATE_N: "",
         },
       },
-      spectrums: []
+      spectrums: [],
     },
   })
 
@@ -79,7 +79,7 @@ export default function App() {
         </h1>
       </header>
 
-      <main className="px-8">
+      <main>
         <NewNavigationProgressBar
           general={generalSteps}
           bridgeStep={bridgeStep}

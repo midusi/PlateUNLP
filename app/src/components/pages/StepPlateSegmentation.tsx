@@ -4,8 +4,7 @@ import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
-import { LoadFile } from "../molecules/LoadFile"
-import { SegmentationUI } from "../organisms/SegmentationUI"
+import { BBUI } from "../organisms/BBUI"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
@@ -41,6 +40,19 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     }))
   }
 
+  function saveImage(src: string) {
+    setProcessInfo(prev => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        plate: {
+          ...prev.data.plate,
+          scanImage: src,
+        },
+      },
+    }))
+  }
+
   function onComplete() {
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
@@ -70,8 +82,19 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   }
 
   return (
-    <>
-      <div className="w-full p-6">
+    <div className="flex flex-col w-full">
+      <BBUI
+        file={processInfo.data.plate.scanImage}
+        boundingBoxes={boundingBoxes}
+        setBoundingBoxes={setBoundingBoxes}
+        onComplete={onComplete}
+        saveBoundingBoxes={saveBoundingBoxes}
+        saveImageLoading={saveImage}
+        classes={classesSpectrumDetection}
+        determineBBFunction={determineBBFunction}
+      />
+
+      {/* <div className="w-full p-6">
         {!processInfo.data.plate.scanImage && (
           <LoadFile onSelect={(fileValue: string) => {
             // Si no hay archivo de escaneo cargado etonces solicita uno al usuario.
@@ -101,7 +124,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
             classes={classesSpectrumDetection}
           />
         )}
-      </div>
-    </>
+      </div> */}
+    </div>
   )
 }

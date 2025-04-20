@@ -46,12 +46,12 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   }
 
   return (
-    <>
-      <h1> FEATURE EXTRACTION </h1>
-      <hr></hr>
+    <div className="w-full p-6 flex flex-col items-center">
+      <h1 className="text-center font-bold text-xl mb-2"> FEATURE EXTRACTION </h1>
+      <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
         Save
       </Button>
-    </>
+    </div>
   )
 }
