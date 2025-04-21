@@ -9302,9 +9302,6 @@ snapshots:
       d3-time-format: 4.1.0
       internmap: 2.0.3
 
-<<<<<<< HEAD
-  '@vitejs/plugin-react@4.3.4(vite@6.2.0(@types/node@22.13.9)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1))':
-=======
   '@visx/voronoi@3.12.0(react@19.0.0)':
     dependencies:
       '@types/d3-voronoi': 1.1.12
@@ -9342,8 +9339,7 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@vitejs/plugin-react@4.3.4(vite@6.2.0(@types/node@22.13.9)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0))':
->>>>>>> 9e999894313b5752ad00765e558fde804c972b4e
+  '@vitejs/plugin-react@4.3.4(vite@6.2.0(@types/node@22.13.9)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1))':
     dependencies:
       '@babel/core': 7.26.0
       '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.0)
