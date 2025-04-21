@@ -1,8 +1,10 @@
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { XYChart } from "@visx/xychart"
 import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
+  const imageSrc = "/forTest/Lamp1.png"
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
@@ -47,11 +49,40 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
   return (
     <div className="w-full p-6 flex flex-col items-center">
-      <h1 className="text-center font-bold text-xl mb-2"> FEATURE EXTRACTION </h1>
+      <SimpleImage src={imageSrc} />
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
         Save
       </Button>
     </div>
+  )
+}
+
+function SimpleImage({ src }: { src: string }) {
+  return (
+    <div className="relative w-full h-[300px] mb-6">
+      <img
+        src={src}
+        alt="Feature Extraction Image"
+      />
+    </div>
+  )
+}
+
+function SimpleFunctionXY({ src }: { src: string }) {
+  return (
+    <XYChart
+      theme={theme}
+      xScale={config.x}
+      yScale={config.y}
+      height={Math.min(400, height)}
+      captureEvents={!editAnnotationLabelPosition}
+      onPointerUp={(d) => {
+        setAnnotationDataKey(d.key as "New York" | "San Francisco" | "Austin")
+        setAnnotationDataIndex(d.index)
+      }}
+    >
+
+    </XYChart>
   )
 }
