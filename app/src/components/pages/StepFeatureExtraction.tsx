@@ -1,6 +1,7 @@
+import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { XYChart } from "@visx/xychart"
+import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
@@ -50,6 +51,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   return (
     <div className="w-full p-6 flex flex-col items-center">
       <SimpleImage src={imageSrc} />
+      <SimpleFunctionXY />
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
         Save
@@ -69,20 +71,30 @@ function SimpleImage({ src }: { src: string }) {
   )
 }
 
-function SimpleFunctionXY({ src }: { src: string }) {
+function SimpleFunctionXY() {
+  const data1 = [
+    { x: 1, y: 50 },
+    { x: 2, y: 10 },
+    { x: 3, y: 20 },
+    { x: 4, y: 80 },
+    { x: 9, y: 1 },
+  ]
+
+  const accessors = {
+    xAccessor: (d: Point) => d.x,
+    yAccessor: (d: Point) => d.y,
+  }
+
   return (
     <XYChart
-      theme={theme}
-      xScale={config.x}
-      yScale={config.y}
-      height={Math.min(400, height)}
-      captureEvents={!editAnnotationLabelPosition}
-      onPointerUp={(d) => {
-        setAnnotationDataKey(d.key as "New York" | "San Francisco" | "Austin")
-        setAnnotationDataIndex(d.index)
-      }}
+      theme={darkTheme}
+      xScale={{ type: "linear" }}
+      yScale={{ type: "linear" }}
+      height={260}
     >
-
+      <AnimatedAxis orientation="bottom" />
+      <AnimatedGrid columns={false} numTicks={4} />
+      <AnimatedLineSeries dataKey="Line 1" data={data1} {...accessors} />
     </XYChart>
   )
 }
