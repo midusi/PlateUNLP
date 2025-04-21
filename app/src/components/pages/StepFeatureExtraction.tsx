@@ -3,6 +3,7 @@ import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { Button } from "../atoms/button"
+import { useEffect, useRef } from "react"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Lamp1.png"
@@ -24,24 +25,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
           (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
             ? {
+              ...step,
+              states: step.states!.map((state, j) => (
+                j === selectedSpectrum
+                  ? "COMPLETE" as const
+                  : state
+              )),
+            }
+            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+              ? {
                 ...step,
                 states: step.states!.map((state, j) => (
                   j === selectedSpectrum
-                    ? "COMPLETE" as const
+                    ? "NECESSARY_CHANGES" as const
                     : state
                 )),
               }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-                ? {
-                    ...step,
-                    states: step.states!.map((state, j) => (
-                      j === selectedSpectrum
-                        ? "NECESSARY_CHANGES" as const
-                        : state
-                    )),
-                  }
-                : step // Cualquier otra etapa mantiene su informacion
-              )
+              : step // Cualquier otra etapa mantiene su informacion
+            )
         )),
       },
     }))
@@ -97,4 +98,30 @@ function SimpleFunctionXY() {
       <AnimatedLineSeries dataKey="Line 1" data={data1} {...accessors} />
     </XYChart>
   )
+}
+
+/**Funcion que dada una imagen retorna su matriz de pixeles*/
+async function obtainimageMatrix({
+  src
+}: { src: string }): Promise<Uint8ClampedArray<ArrayBufferLike>> {
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src
+    img.crossOrigin = "Anonymous"
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      if (!canvas) return
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return
+      ctx.drawImage(img, 0, 0)
+      const imageData = ctx.getImageData(0, 0, img.width, img.height)
+      const { data } = imageData;
+      resolve(data)
+    }
+    img.onerror = () => reject("No se pudo cargar la imagen");
+  })
+
 }
