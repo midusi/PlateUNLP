@@ -47,24 +47,24 @@ export function BBUI({
 
   function handleImageLoad(src: string) {
     setImage(src)
-    if (saveImageLoading){
+    if (saveImageLoading) {
       saveImageLoading(src)
     }
   }
 
   async function handleAutodetect(src: string) {
-      const bbAutodetectedPromise = determineBBFunction(src)
-      const newBBs: BoundingBox[] = [...boundingBoxes]
-      for (const bb of await bbAutodetectedPromise) {
-        const newBB = { ...bb, name: `box-${Date.now()}`, id: nanoid() }
-        newBBs.push(newBB)
-      }
-      setBoundingBoxes(newBBs)
+    const bbAutodetectedPromise = determineBBFunction(src)
+    const newBBs: BoundingBox[] = [...boundingBoxes]
+    for (const bb of await bbAutodetectedPromise) {
+      const newBB = { ...bb, name: `box-${Date.now()}`, id: nanoid() }
+      newBBs.push(newBB)
     }
+    setBoundingBoxes(newBBs)
+  }
 
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden mb-6">
         <div className="bg-slate-100 p-2 border-b">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-medium">Tools</h2>
@@ -139,25 +139,25 @@ export function BBUI({
           </div>
         </div>
         <div className={clsx(
-          "w-full h-[500px]",
+          "w-full h-[300px]",
           "flex items-center justify-center",
           " bg-slate-50 overflow-hidden",
         )}
         >
           {image
             ? (
-                <ImageViewer
-                  src={image}
-                  rotation={rotation}
-                  bgWhite={bgWhite}
-                  isDrawingMode={isDrawingMode}
-                  setIsDrawingMode={setIsDrawingMode}
-                  selectedBoxId={selectedBoxId}
-                  setSelectedBoxId={setSelectedBoxId}
-                  boundingBoxes={boundingBoxes}
-                  setBoundingBoxes={setBoundingBoxes}
-                />
-              )
+              <ImageViewer
+                src={image}
+                rotation={rotation}
+                bgWhite={bgWhite}
+                isDrawingMode={isDrawingMode}
+                setIsDrawingMode={setIsDrawingMode}
+                selectedBoxId={selectedBoxId}
+                setSelectedBoxId={setSelectedBoxId}
+                boundingBoxes={boundingBoxes}
+                setBoundingBoxes={setBoundingBoxes}
+              />
+            )
             : <ImageLoader handleImageLoad={handleImageLoad} />}
         </div>
       </Card>
