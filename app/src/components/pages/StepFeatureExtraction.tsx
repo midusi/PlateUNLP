@@ -1,8 +1,11 @@
+import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
+  const imageSrc = "/forTest/Lamp1.png"
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
@@ -47,11 +50,51 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
   return (
     <div className="w-full p-6 flex flex-col items-center">
-      <h1 className="text-center font-bold text-xl mb-2"> FEATURE EXTRACTION </h1>
+      <SimpleImage src={imageSrc} />
+      <SimpleFunctionXY />
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
         Save
       </Button>
     </div>
+  )
+}
+
+function SimpleImage({ src }: { src: string }) {
+  return (
+    <div className="relative w-full h-[300px] mb-6">
+      <img
+        src={src}
+        alt="Feature Extraction Image"
+      />
+    </div>
+  )
+}
+
+function SimpleFunctionXY() {
+  const data1 = [
+    { x: 1, y: 50 },
+    { x: 2, y: 10 },
+    { x: 3, y: 20 },
+    { x: 4, y: 80 },
+    { x: 9, y: 1 },
+  ]
+
+  const accessors = {
+    xAccessor: (d: Point) => d.x,
+    yAccessor: (d: Point) => d.y,
+  }
+
+  return (
+    <XYChart
+      theme={darkTheme}
+      xScale={{ type: "linear" }}
+      yScale={{ type: "linear" }}
+      height={260}
+    >
+      <AnimatedAxis orientation="bottom" />
+      <AnimatedGrid columns={false} numTicks={4} />
+      <AnimatedLineSeries dataKey="Line 1" data={data1} {...accessors} />
+    </XYChart>
   )
 }
