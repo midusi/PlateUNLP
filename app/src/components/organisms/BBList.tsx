@@ -4,6 +4,7 @@ import clsx from "clsx"
 import { Check, ChevronDown, Edit2, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Card } from "../atoms/card"
+import { BoxMetadata, BoxMetadataForm } from "../molecules/BoxMetadataForm"
 
 interface BoxListProps {
   boundingBoxes: BoundingBox[]
@@ -16,7 +17,7 @@ interface BoxListProps {
 export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes }: BoxListProps) {
   function handleSelect(id: string) {
     if (selected === id) {
-      setSelected(null)
+      //setSelected(null)
     }
     else {
       setSelected(id)
@@ -64,6 +65,8 @@ interface ItemOfBoxListProps {
   onDelete?: (id: string) => void
 }
 
+const boxMetadatas: { [id: number | string]: BoxMetadata } = {}
+
 function ItemOfBoxList({
   box,
   setBoundingBoxes,
@@ -75,7 +78,6 @@ function ItemOfBoxList({
   const { id, name, class_info } = box
   const [selected, setSelected] = useState<BBClassesProps>(class_info)
   const [isSelectOpen, setIsSelectOpen] = useState(false)
-
   useEffect(() => {
     if (!isSelected) {
       setIsSelectOpen(false)
@@ -114,6 +116,16 @@ function ItemOfBoxList({
     }
     setIsSelectOpen(false)
   }
+  const boxMetadataFormRef = useRef<{ setValues: (spectrumMetadata: BoxMetadata) => void, resetValues: () => void, getValues: () => BoxMetadata, validate: () => void }>(null)
+  if (id in boxMetadatas) {
+    boxMetadataFormRef.current?.setValues(boxMetadatas[id])
+  }
+  const handleFormChange = (data: BoxMetadata) => {
+    if (Object.keys(data).length > 0) {
+      boxMetadatas[id] = data
+    }
+    // Acá podés hacer lo que quieras con los datos del formulario
+  }
 
   return (
     <div
@@ -149,6 +161,12 @@ function ItemOfBoxList({
           <Edit2 className="w-3 h-3 text-slate-400 ml-1" />
         </div>
 
+
+
+        {isSelected && (
+          <BoxMetadataForm ref={boxMetadataFormRef} onChange={handleFormChange} />
+
+        )}
         <div className="flex items-center mt-1 text-xs text-slate-500">
           <span className="mr-2">
             W:
@@ -267,32 +285,32 @@ function InputWhitTemp({ value, onEnter, className, onClick }: InputWhitTempProp
 
   return isEditing
     ? (
-        <input
-          ref={inputRef}
-          className={clsx(
-            "bg-white border border-blue-300",
-            "rounded px-2 py-1 outline-none",
-            "focus:ring-2 focus:ring-blue-200",
-            className,
-          )}
-          value={temp}
-          onChange={e => setTemp(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={() => {
-            setIsEditing(false)
-            onEnter(temp)
-          }}
-        />
-      )
+      <input
+        ref={inputRef}
+        className={clsx(
+          "bg-white border border-blue-300",
+          "rounded px-2 py-1 outline-none",
+          "focus:ring-2 focus:ring-blue-200",
+          className,
+        )}
+        value={temp}
+        onChange={e => setTemp(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => {
+          setIsEditing(false)
+          onEnter(temp)
+        }}
+      />
+    )
     : (
-        <div
-          className={clsx("cursor-text", className)}
-          onClick={(e) => {
-            setIsEditing(true)
-            onClick(e)
-          }}
-        >
-          {temp}
-        </div>
-      )
+      <div
+        className={clsx("cursor-text", className)}
+        onClick={(e) => {
+          setIsEditing(true)
+          onClick(e)
+        }}
+      >
+        {temp}
+      </div>
+    )
 }
