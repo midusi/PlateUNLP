@@ -8,7 +8,7 @@ export const plate = sqliteTable("plate", {
     projectId: text("projectId").references(() => project.id),
     observat: text(),
     observer: text(),
-    digitali: real(),
+    digitali: text(),
     scanner: text(),
     software: text(),
     plateN: text(),

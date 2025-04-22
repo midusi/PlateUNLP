@@ -7,12 +7,11 @@ import { useImperativeHandle } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "../atoms/input"
 import SelectForm from "../atoms/selectForm"
-import { TimePicker } from "../atoms/timePicker"
 
 export interface PlateMetadata {
   OBSERVAT: string
   OBSERVER: string
-  DIGITALI: number // time/timestamp
+  DIGITALI: string
   SCANNER: string
   SOFTWARE: string
   PLATE_N: string
@@ -86,16 +85,7 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
           </div>
           <div className={inputContainerClassName}>
             <Label>DIGITALI</Label>
-            <Controller
-              control={control}
-              name="DIGITALI"
-              render={({ field: { value, onChange } }) => (
-                <TimePicker
-                  date={value ? new Date(value * 1000) : undefined}
-                  setDate={date => onChange(date ? date.getTime() / 1000 : 0)}
-                />
-              )}
-            />
+            <Input {...register("DIGITALI")} placeholder="DIGITALI" className={inputClassName} />
             {errors.DIGITALI && <p className="text-red-500">{errors.DIGITALI.message}</p>}
           </div>
           <div className={inputContainerClassName}>
