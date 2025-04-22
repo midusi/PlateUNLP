@@ -1,7 +1,7 @@
 import type { BBClassesProps } from "@/enums/BBClasses"
 
 export interface BoundingBox {
-  id: number
+  id: number | string
   name: string
   x: number
   y: number

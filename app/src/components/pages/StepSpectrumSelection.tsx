@@ -1,16 +1,15 @@
 import type { SpectrumData } from "@/interfaces/ProcessInfoForm"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { cropImages } from "@/lib/cropImage"
 import { totalStepsCompleted } from "@/lib/utils"
 import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/24/outline"
 import clsx from "clsx"
+import { useEffect, useState } from "react"
 import { Tooltip } from "react-tooltip"
 import { Button } from "../atoms/button"
-import { cropImages } from "@/lib/cropImage"
-import { useEffect, useState } from "react"
 
 export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepProps) {
-
   const stepsNum = processInfo.processingStatus.specificSteps.length
   const spectrums: SpectrumData[] = processInfo.data.spectrums
   const [setSpecificObject, setActualStep] = useGlobalStore(s => [
@@ -20,8 +19,8 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
   const [croppedImages, setCroppedImages] = useState<string[] | null>(null)
   useEffect(() => {
     cropImages(
-      processInfo.data.plate.scanImage!, 
-      spectrums.map(s => s.spectrumBoundingBox)
+      processInfo.data.plate.scanImage!,
+      spectrums.map(s => s.spectrumBoundingBox),
     ).then(setCroppedImages)
   }, [processInfo.data.plate.scanImage, spectrums])
 

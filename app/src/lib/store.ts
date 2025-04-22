@@ -1,4 +1,5 @@
-import { LAMP_MATERIALS, type LampMaterial } from "@/lib/spectral-data"
+import type { LampMaterial } from "@/lib/spectral-data"
+import { LAMP_MATERIALS } from "@/lib/spectral-data"
 import { create } from "zustand"
 import { CustomError, ErrorCodes } from "./utils"
 

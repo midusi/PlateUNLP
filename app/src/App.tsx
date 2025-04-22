@@ -10,6 +10,8 @@ import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
 import { StepSpectrumSelection } from "./components/pages/StepSpectrumSelection"
 
+import { trpc } from "./lib/trpc"
+
 export default function App() {
   const [processInfo, setProcessInfo] = useState<ProcessInfoForm>({
     processingStatus: {
@@ -25,13 +27,13 @@ export default function App() {
         sharedMetadata: {
           OBSERVAT: "",
           OBSERVER: "",
-          DIGITALI: 0,
+          DIGITALI: "",
           SCANNER: "",
           SOFTWARE: "",
-          PLATE_N: ""
+          PLATE_N: "",
         },
       },
-      spectrums: []
+      spectrums: [],
     },
   })
 
@@ -77,7 +79,7 @@ export default function App() {
         </h1>
       </header>
 
-      <main className="px-8">
+      <main>
         <NewNavigationProgressBar
           general={generalSteps}
           bridgeStep={bridgeStep}
@@ -92,6 +94,14 @@ export default function App() {
         {" "}
         III-LIDI, Facultad de Informática, Universidad Nacional de la Plata
       </footer>
+
+      <button
+        onClick={() =>
+          trpc.crearUsuario.mutate({
+            name: Math.random().toString(), email: Math.random().toString() + "@gmail.com"
+          }).then(resultado => console.log(resultado))}
+      >crear</button>
+      <button onClick={() => trpc.consulta.query().then(resultado => console.log(resultado))}>consulta</button>
     </div>
   )
 }

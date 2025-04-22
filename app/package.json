@@ -24,8 +24,8 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-toast": "^1.2.6",
     "@tanstack/react-query": "^5.70.0",
-    "@trpc/client": "11.0.0-rc.795",
-    "@trpc/server": "11.0.0-rc.795",
+    "@trpc/client": "11.1.0",
+    "@trpc/server": "11.1.0",
     "@visx/axis": "^3.12.0",
     "@visx/curve": "^3.12.0",
     "@visx/grid": "^3.12.0",
@@ -40,6 +40,7 @@
     "decimal.js": "^10.5.0",
     "dedent": "^1.5.3",
     "fits2js": "^0.0.4",
+    "lucide-react": "0.487.0",
     "mathjs": "^14.3.0",
     "onnxruntime-web": "1.20.1",
     "react": "^19.0.0",
@@ -48,12 +49,14 @@
     "react-hook-form": "^7.54.2",
     "react-icons": "5.5.0",
     "react-tooltip": "^5.28.0",
+    "react-zoom-pan-pinch": "3.7.0",
     "resizable-panes-react": "6.0.26",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "vinxi": "^0.5.3",
-    "zod": "4.0.0-beta.20250417T043022",
-    "zustand": "^5.0.3"
+    "zod": "4.0.0-beta.20250417T043022"
+    "zustand": "^5.0.3",
+    "nanoid": "5.1.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.4.0",

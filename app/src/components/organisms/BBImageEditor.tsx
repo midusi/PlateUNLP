@@ -2,7 +2,6 @@ import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
 import { Button } from "@/components/atoms/button"
-import { BBClasses } from "@/enums/BBClasses"
 import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
@@ -47,7 +46,7 @@ function useBoundingBoxesDrag(
   zoomInfo: { scale: number, origin: { x: number, y: number } },
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
 ) {
-  const [draggedBB, setDraggedBB] = useState<number | null>(null)
+  const [draggedBB, setDraggedBB] = useState<number | string | null>(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
   function startDragging(event: React.MouseEvent, box: BoundingBox) {
@@ -97,10 +96,10 @@ function useBoundingBoxesDrag(
 function useBoundingBoxesResizing(
   imageRef: React.RefObject<HTMLImageElement>,
   scale: { x: number, y: number },
-  selectedBB: number | null,
+  selectedBB: number | string | null,
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
 ) {
-  const [resizingBB, setResizingBB] = useState<number | null>(null)
+  const [resizingBB, setResizingBB] = useState<number | string | null>(null)
   const [resizeDirection, setResizeDirection] = useState<string | null>(null)
 
   function handleResizeStart(event: React.MouseEvent, direction: string) {
@@ -269,8 +268,8 @@ function BoundingBoxElement({
 function useBoundingBoxesAddRemove(
   boundingBoxes: BoundingBox[],
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
-  selectedBB: number | null,
-  setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>,
+  selectedBB: number | string | null,
+  setSelectedBB: React.Dispatch<React.SetStateAction<number | string | null>>,
 ) {
   const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
 
@@ -292,7 +291,7 @@ function useBoundingBoxesAddRemove(
     }
   };
 
-  function removeBoundingBox(id: number | null) {
+  function removeBoundingBox(id: number | string | null) {
     if (selectedBB) {
       const newBBArr = boundingBoxes.filter(box => box.id !== id)
       setBoundingBoxes(newBBArr)
@@ -334,7 +333,7 @@ interface ItemOfBoxListProps {
   box: BoundingBox
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   isSelected: boolean
-  onSelect: (id: number) => void
+  onSelect: (id: number | string) => void
   classes: BBClassesProps[]
 }
 
@@ -421,13 +420,13 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }:
 interface BoxListProps {
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
-  selected: number | null
-  setSelected: React.Dispatch<React.SetStateAction<number | null>>
+  selected: number | string | null
+  setSelected: React.Dispatch<React.SetStateAction<number | string | null>>
   classes: BBClassesProps[]
 }
 
 function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes }: BoxListProps) {
-  function handleSelect(id: number) {
+  function handleSelect(id: number | string) {
     if (selected === id) {
       setSelected(null)
     }
@@ -455,8 +454,8 @@ function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, class
 interface ImageBBDisplayProps {
   className: string
   src: string
-  selectedBB: number | null
-  setSelectedBB: React.Dispatch<React.SetStateAction<number | null>>
+  selectedBB: number | string | null
+  setSelectedBB: React.Dispatch<React.SetStateAction<number | string | null>>
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   zoomInfo: { scale: number, origin: { x: number, y: number } }
@@ -617,7 +616,7 @@ export function BBImageEditor({
   determineBB,
   classes,
 }: BBImageEditorProps) {
-  const [selectedBB, setSelectedBB] = useState<number | null>(null)
+  const [selectedBB, setSelectedBB] = useState<number | string | null>(null)
   const [zoomInfo, setZoomInfo] = useState<{
     scale: number
     origin: { x: number, y: number }
