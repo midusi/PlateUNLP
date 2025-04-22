@@ -47,20 +47,20 @@ export function BBUI({
 
   function handleImageLoad(src: string) {
     setImage(src)
-    if (saveImageLoading){
+    if (saveImageLoading) {
       saveImageLoading(src)
     }
   }
 
   async function handleAutodetect(src: string) {
-      const bbAutodetectedPromise = determineBBFunction(src)
-      const newBBs: BoundingBox[] = [...boundingBoxes]
-      for (const bb of await bbAutodetectedPromise) {
-        const newBB = { ...bb, name: `box-${Date.now()}`, id: nanoid() }
-        newBBs.push(newBB)
-      }
-      setBoundingBoxes(newBBs)
+    const bbAutodetectedPromise = determineBBFunction(src)
+    const newBBs: BoundingBox[] = [...boundingBoxes]
+    for (const bb of await bbAutodetectedPromise) {
+      const newBB = { ...bb, name: `box-${Date.now()}`, id: nanoid() }
+      newBBs.push(newBB)
     }
+    setBoundingBoxes(newBBs)
+  }
 
   return (
     <>
@@ -146,18 +146,18 @@ export function BBUI({
         >
           {image
             ? (
-                <ImageViewer
-                  src={image}
-                  rotation={rotation}
-                  bgWhite={bgWhite}
-                  isDrawingMode={isDrawingMode}
-                  setIsDrawingMode={setIsDrawingMode}
-                  selectedBoxId={selectedBoxId}
-                  setSelectedBoxId={setSelectedBoxId}
-                  boundingBoxes={boundingBoxes}
-                  setBoundingBoxes={setBoundingBoxes}
-                />
-              )
+              <ImageViewer
+                src={image}
+                rotation={rotation}
+                bgWhite={bgWhite}
+                isDrawingMode={isDrawingMode}
+                setIsDrawingMode={setIsDrawingMode}
+                selectedBoxId={selectedBoxId}
+                setSelectedBoxId={setSelectedBoxId}
+                boundingBoxes={boundingBoxes}
+                setBoundingBoxes={setBoundingBoxes}
+              />
+            )
             : <ImageLoader handleImageLoad={handleImageLoad} />}
         </div>
       </Card>
@@ -789,15 +789,44 @@ interface ImageLoaderProps {
 
 function ImageLoader({ handleImageLoad }: ImageLoaderProps) {
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        handleImageLoad(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        const img = new Image();
+
+        img.onload = () => {
+          const canvas = padImageToSquare(img);
+          const squaredDataUrl = canvas.toDataURL("image/png");
+
+          handleImageLoad(squaredDataUrl as string)
+        };
+
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
     }
   }
+
+  // Función para convertir en cuadrado con padding transparente
+  function padImageToSquare(image: HTMLImageElement): HTMLCanvasElement {
+    const maxSide = Math.max(image.width, image.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = maxSide;
+    canvas.height = maxSide;
+
+    const ctx = canvas.getContext("2d")!;
+    ctx.clearRect(0, 0, maxSide, maxSide);
+
+    const offsetX = (maxSide - image.width) / 2;
+    const offsetY = (maxSide - image.height) / 2;
+
+    ctx.drawImage(image, offsetX, offsetY);
+
+    return canvas;
+  }
+
 
   return (
     <div className="w-full h-full p-6 rounded-lg">
