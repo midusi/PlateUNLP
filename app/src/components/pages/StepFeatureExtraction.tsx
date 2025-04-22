@@ -3,7 +3,8 @@ import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { Button } from "../atoms/button"
-import { useEffect, useRef } from "react"
+import { findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments } from "@/lib/image"
+import { useEffect, useState } from "react"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Lamp1.png"
@@ -11,6 +12,28 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.setActualStep,
     s.selectedSpectrum,
   ])
+  const [imageData, setImageData] = useState<Uint8ClampedArray<ArrayBufferLike> | null>(null)
+  const [segmentsData, setSegmentsData] = useState<{
+    data: Uint8ClampedArray<ArrayBufferLike>[],
+    width: number,
+    height: number
+  } | null>(null)
+  useEffect(() => {
+    obtainimageMatrix(imageSrc, true).then(({ data, width, height }) => {
+      if (!data) return
+      setImageData(data)
+      const points = findXspacedPoints(width, 3)
+      const segmentWidth = 10
+      const segmentsData = obtainImageSegments(data, width, height, points, segmentWidth)
+      for (let sd in segmentsData) {
+        if (sd.length !== segmentWidth * height * 4)
+          console.warn("Segment size mismatch:", sd.length, segmentWidth * height * 4);
+      }
+      setSegmentsData({ data: segmentsData, width: segmentWidth, height })
+    }).catch(err => {
+      console.error("Error loading Image Data:", err)
+    })
+  }, [imageSrc])
 
   function onComplete() {
     /// AGREGAR GUARDADO DE DATOS EXTRAIDOS
@@ -52,6 +75,17 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   return (
     <div className="w-full p-6 flex flex-col items-center">
       <SimpleImage src={imageSrc} />
+      {segmentsData && <div className="p-2 bg-slate-200">
+        {segmentsData.data.map(data => (
+          <div key={data[0]} className="p-2 m-2 bg-red-300">
+            <SimpleImage src={matrixToUrl(
+              data,
+              segmentsData.width,
+              segmentsData.height
+            )} />
+          </div>
+        ))}
+      </div>}
       <SimpleFunctionXY />
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
