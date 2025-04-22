@@ -76,13 +76,18 @@ const queryObjectByIdResultSchema = z.interface({
 /**
  * Queries SIMBAD and gets the metadata for a given object by its identifier.
  * @param object The identifier of the object to be queried.
- * @param epoch The epoch of the coordinates to be returned.
+ * @param epoch The epoch of the coordinates to be returned (like "J2000.0" or "B1950.0").
+ * @param equinox The equinox of the coordinates to be returned (like "2000.0" or "1950.0").
  */
-export async function queryObjectById(object: string, epoch: string): Promise<{ success: true, data: z.output<typeof queryObjectByIdResultSchema> } | { success: false, error: string }> {
+export async function queryObjectById(
+  object: string,
+  epoch: string,
+  equinox: string,
+): Promise<{ success: true, data: z.output<typeof queryObjectByIdResultSchema> } | { success: false, error: string }> {
   const script = dedent.withOptions({ escapeSpecialCharacters: false })`
     format object "%MAIN_ID\n"+
-    "%COO(d;A;FK4;${epoch};1950)\n"+
-    "%COO(d;D;FK4;${epoch};1950)\n"+
+    "%COO(d;A;FK4;${epoch};${equinox})\n"+
+    "%COO(d;D;FK4;${epoch};${equinox})\n"+
     "%COO(d;A;ICRS;J2000;2000)\n"+
     "%COO(d;D;ICRS;J2000;2000)\n"+
     "%COO(d;A;FK4;B1950;1950)\n"+
@@ -108,83 +113,4 @@ export async function queryObjectById(object: string, epoch: string): Promise<{ 
     return { success: false, error: z.prettifyError(parsed.error) }
   }
   return { success: true, data: parsed.data }
-}
-
-/**
- * Queries SIMBAD TAP service using ADQL (Astronomical Data Query Language).
- * It automatically constructs the query string from the provided template literal and values,
- * and does some simple sanitation.
- * @return a JSON object with the results of the query.
- */
-async function querySimbadTAP(strings: TemplateStringsArray, ...values: unknown[]) {
-  // Construct the query string from the template literal and values
-  let adql = strings[0]
-  for (let i = 0; i < values.length; i++) {
-    const value = values[i]
-    if (typeof value === "string")
-      adql += `'${value.replaceAll("'", "''")}'`
-    else if (typeof value === "undefined")
-      adql += ""
-    else if (value === null)
-      adql += "NULL"
-    else if (typeof value === "number")
-      adql += value.toString()
-    else if (typeof value === "boolean")
-      adql += value ? "TRUE" : "FALSE"
-    else
-      throw new Error(`Unsupported value type: ${typeof value}`)
-    adql += strings.at(i + 1) ?? ""
-  }
-
-  const data = new URLSearchParams()
-  data.set("request", "doQuery") // to execute a query
-  data.set("phase", "run")
-  data.set("lang", "adql") // we'll send ADQL (https://simbad.cds.unistra.fr/simbad/tap/help/adqlHelp.html)
-  data.set("format", "json") // we want the result in JSON format
-  data.set("maxrec", "-1") // no limit on the number of records returned
-  data.set("query", adql)
-  const result = await fetch(SIMBAD_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Accept": "application/json",
-    },
-    body: data,
-  })
-  if (!result.ok) {
-    throw new Error(`Error querying SIMBAD: ${result.status} ${result.statusText}`)
-  }
-  return await result.json()
-}
-
-const queryObjectResultSchema = z.interface({
-  data: z.tuple([
-    z.string(), // "main_id"
-    z.number(), // "ra"
-    z.number(), // "dec"
-    z.string().nullable(), // "sp_type"
-  ]).array(),
-})
-
-/**
- * Gets the metadata for a given object by its identifier.
- * @param object The identifier of the object to be queried.
- */
-export async function queryObjectTAP(object: string) {
-  const result = await querySimbadTAP`
-    SELECT
-      basic."main_id",
-      basic."ra",
-      basic."dec",
-      basic."sp_type"
-    FROM basic
-    JOIN ident ON basic."oid" = ident."oidref"
-    WHERE ident."id" = ${object};
-  `
-  return queryObjectResultSchema.parse(result).data.map(row => ({
-    main_id: row[0],
-    ra: row[1],
-    dec: row[2],
-    sptype: row[3],
-  }))
 }

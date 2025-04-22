@@ -1,17 +1,18 @@
 import type { GetSpectrumMetadataInput } from "./schema"
 import { degToDMS, degToHMS } from "@/lib/format"
-import { getBesselianEpoch, getJulianDate } from "./dates"
+import { getJulianDate, getJulianEpoch } from "./dates"
 import { queryObjectById } from "./simbad"
 
 export async function getSpectrumMetadata(input: GetSpectrumMetadataInput) {
   const { OBJECT } = input
   const JD = getJulianDate(input["DATE-OBS"], input.UT)
-  const EPOCH = getBesselianEpoch(JD)
-  const simbad = await queryObjectById(OBJECT, EPOCH)
+  const EPOCH = getJulianEpoch(JD)
+  const EQUINOX = EPOCH.slice(1) // Remove leading "J" from the epoch string
+  const simbad = await queryObjectById(OBJECT, EPOCH, EQUINOX)
   console.log({
     simbad,
-    RA: simbad.success ? degToHMS(simbad.data.RA2000) : null,
-    DEC: simbad.success ? degToDMS(simbad.data.DEC2000) : null,
+    RA: simbad.success ? degToHMS(simbad.data.RA) : null,
+    DEC: simbad.success ? degToDMS(simbad.data.DEC) : null,
   })
 }
 
