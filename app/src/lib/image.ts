@@ -1,3 +1,34 @@
+
+/**
+ * Funcion que dada una imagen retorna su matriz de pixeles
+ * @param {string} src - Src de la imagen.
+ * @returns {Promise<Uint8ClampedArray<ArrayBufferLike>>} -
+ * El arreglo de pixeles correspondiente a la imagen.
+ */
+async function obtainimageMatrix({
+  src
+}: { src: string }): Promise<Uint8ClampedArray<ArrayBufferLike>> {
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src
+    img.crossOrigin = "Anonymous"
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      if (!canvas) return
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return
+      ctx.drawImage(img, 0, 0)
+      const imageData = ctx.getImageData(0, 0, img.width, img.height)
+      const { data } = imageData;
+      resolve(data)
+    }
+    img.onerror = () => reject("No se pudo cargar la imagen");
+  })
+}
+
 /**
  * Revisa la alineacion vertical|horizontal de una imagen, si es vertical la vuelve horizontal.
  * @param {string} imageb64 - La imagen a alinear.

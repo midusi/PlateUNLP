@@ -99,29 +99,3 @@ function SimpleFunctionXY() {
     </XYChart>
   )
 }
-
-/**Funcion que dada una imagen retorna su matriz de pixeles*/
-async function obtainimageMatrix({
-  src
-}: { src: string }): Promise<Uint8ClampedArray<ArrayBufferLike>> {
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.src = src
-    img.crossOrigin = "Anonymous"
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      if (!canvas) return
-      canvas.width = img.width
-      canvas.height = img.height
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-      ctx.drawImage(img, 0, 0)
-      const imageData = ctx.getImageData(0, 0, img.width, img.height)
-      const { data } = imageData;
-      resolve(data)
-    }
-    img.onerror = () => reject("No se pudo cargar la imagen");
-  })
-
-}
