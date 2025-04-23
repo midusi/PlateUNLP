@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
-  const imageSrc = "/forTest/Lamp1.png"
+  const imageSrc = "/forTest/Science1.png"
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
