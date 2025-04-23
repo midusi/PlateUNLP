@@ -8,6 +8,7 @@ import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
+  const checkpoints = 3
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
@@ -20,19 +21,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   } | null>(null)
 
   useEffect(() => {
+    // Obtener informacion de imagen
     obtainimageMatrix(imageSrc, false).then(({ data, width, height }) => {
       if (!data)
         return
       setImageData(data)
-      const points = findXspacedPoints(width, 3)
+
+      // Segmentar la imagen
+      const points = findXspacedPoints(width, checkpoints)
       const segmentWidth = 60
       const segmentsData = obtainImageSegments(data, width, height, points, segmentWidth)
       for (const sd of segmentsData) {
         if (sd.length !== segmentWidth * height * 4)
           console.warn("Segment size mismatch:", sd.length, segmentWidth * height * 4)
       }
-
       setSegmentsData({ data: segmentsData, width: segmentWidth, height })
+
+      // Obtener funciones de cada segmento
+      const functions = []
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
@@ -79,20 +85,20 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     <div className="w-full p-6 flex flex-col items-center">
       <SimpleImage src={imageSrc} />
       {segmentsData && (
-        <div className="p-2 bg-slate-200">
+        <div className="flex flex-col gap-6 bg-fuchsia-200 w-600">
           {segmentsData.data.map(data => (
-            <div key={data[0]} className="p-2 m-2 bg-red-300">
+            <div key={data[0]} className="p-2 m-2 bg-red-300 flex flex-row items-start gap-4">
               <SimpleImage src={matrixToUrl(
                 data,
                 segmentsData.width,
                 segmentsData.height,
               )}
               />
+              <SimpleFunctionXY />
             </div>
           ))}
         </div>
       )}
-      <SimpleFunctionXY />
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
         Save
