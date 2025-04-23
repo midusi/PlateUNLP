@@ -8,26 +8,27 @@
 export function matrixToUrl(
   data: Uint8ClampedArray,
   width: number,
-  height: number
+  height: number,
 ): string {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+  const canvas = document.createElement("canvas")
+  canvas.width = width
+  canvas.height = height
 
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return "";
+  const ctx = canvas.getContext("2d")
+  if (!ctx)
+    return ""
 
-  const imageData = new ImageData(data, width, height);
-  ctx.putImageData(imageData, 0, 0);
+  const imageData = new ImageData(data, width, height)
+  ctx.putImageData(imageData, 0, 0)
 
-  return canvas.toDataURL("image/png");
+  return canvas.toDataURL("image/png")
 }
 
 /**
  * En un valor numerico busca las pocisiones de N puntos medios.
  * @param {number} large - Numero entre el que se quieren hallar puntos medios
  * @param {number} n - Cantidad de puntos medios buscada
- * @returns {number[]} - 
+ * @returns {number[]} -
  * Puntos medios encontrados
  */
 export function findXspacedPoints(large: number, n: number): number[] {
@@ -41,12 +42,12 @@ export function findXspacedPoints(large: number, n: number): number[] {
 
 /**
  * Obtiene segmentos de una imagen dependiendo de como este ordenada, los segmentos
- * son tan anchos/altos como el 1er criterio de ordenacion (filas/columnas) y la 
+ * son tan anchos/altos como el 1er criterio de ordenacion (filas/columnas) y la
  * dimencion restante se indica por parametro.
  * @param {Uint8ClampedArray} image - Imagen a segmentar
  * @param {number[]} points - Arreglo de puntos respecto a la 1ra dimencion de orden
  * que indican el centro de cada segmento.
- * @param {number} segmentWidth - Que tanto se extienden los segmentos respecto la 
+ * @param {number} segmentWidth - Que tanto se extienden los segmentos respecto la
  * dimension restante.
  * @returns {Uint8ClampedArray} -
  * Arreglo de segmentos de la imagen recibida.
@@ -56,10 +57,9 @@ export function obtainImageSegments(
   width: number,
   height: number,
   points: number[],
-  segmentWidth: number
+  segmentWidth: number,
 ): Uint8ClampedArray[] {
-
-  const segments: Uint8ClampedArray[] = [];
+  const segments: Uint8ClampedArray[] = []
 
   for (const centerX of points) {
     const startX = Math.max(0, centerX - Math.floor(segmentWidth / 2))
@@ -69,27 +69,21 @@ export function obtainImageSegments(
 
     for (let y = 0; y < height; y++) {
       for (let x = startX; x < endX; x++) {
-        const srcIdX = (y * width + x) * 4;
-        const destIdx = ((y * (endX - startX)) + (x - startX)) * 4;
+        const srcIdX = (y * width + x) * 4
+        const destIdx = ((y * (endX - startX)) + (x - startX)) * 4
 
-        segment[destIdx] = image[srcIdX];       // R
-        segment[destIdx + 1] = image[srcIdX + 1]; // G
-        segment[destIdx + 2] = image[srcIdX + 2]; // B
-        segment[destIdx + 3] = image[srcIdX + 3]; // A
+        segment[destIdx] = image[srcIdX] // R
+        segment[destIdx + 1] = image[srcIdX + 1] // G
+        segment[destIdx + 2] = image[srcIdX + 2] // B
+        segment[destIdx + 3] = image[srcIdX + 3] // A
       }
     }
 
-    segments.push(segment);
-
-    return segments
+    segments.push(segment)
   }
 
-  return points.map((point) => image.slice(
-    (point - segmentWidth) * 4,
-    (point + segmentWidth) * 4
-  ))
+  return segments
 }
-
 
 /**
  * Funcion que dado una matriz ordenado por filas la ordena por columnas.
@@ -102,18 +96,18 @@ export function obtainImageSegments(
 function invertOrder(
   data: Uint8ClampedArray,
   width: number,
-  height: number
+  height: number,
 ): Uint8ClampedArray {
-  const colMajorData = new Uint8ClampedArray(data.length);
+  const colMajorData = new Uint8ClampedArray(data.length)
 
-  let idx = 0;
+  let idx = 0
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
-      const i = (y * width + x) * 4;
-      colMajorData[idx++] = data[i];     // R
-      colMajorData[idx++] = data[i + 1]; // G
-      colMajorData[idx++] = data[i + 2]; // B
-      colMajorData[idx++] = data[i + 3]; // A
+      const i = (y * width + x) * 4
+      colMajorData[idx++] = data[i] // R
+      colMajorData[idx++] = data[i + 1] // G
+      colMajorData[idx++] = data[i + 2] // B
+      colMajorData[idx++] = data[i + 3] // A
     }
   }
 
@@ -123,44 +117,45 @@ function invertOrder(
 /**
  * Funcion que dada una imagen retorna su matriz de pixeles
  * @param {string} src - Src de la imagen.
- * @param {boolean} colMajor - Indicador si los datos tienen que estar 
+ * @param {boolean} colMajor - Indicador si los datos tienen que estar
  * ordenados por columnas.
  * @returns {Promise<{
- * data: Uint8ClampedArray, 
- * width: number, 
+ * data: Uint8ClampedArray,
+ * width: number,
  * height: number}>} -
- * El arreglo de pixeles correspondiente a la imagen, el ancho de la 
+ * El arreglo de pixeles correspondiente a la imagen, el ancho de la
  * imagen, el alto de la imagen.
  */
 export async function obtainimageMatrix(
   src: string,
-  colMajor: boolean
+  colMajor: boolean,
 ): Promise<{
-  data: Uint8ClampedArray,
-  width: number,
-  height: number
-}> {
-
+    data: Uint8ClampedArray
+    width: number
+    height: number
+  }> {
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    const img = new Image()
     img.src = src
     img.crossOrigin = "Anonymous"
     img.onload = () => {
-      const canvas = document.createElement("canvas");
-      if (!canvas) return
+      const canvas = document.createElement("canvas")
+      if (!canvas)
+        return
       canvas.width = img.width
       canvas.height = img.height
       const ctx = canvas.getContext("2d")
-      if (!ctx) return
+      if (!ctx)
+        return
       ctx.drawImage(img, 0, 0)
       const imageData = ctx.getImageData(0, 0, img.width, img.height)
-      let { data, width, height } = imageData;
+      let { data, width, height } = imageData
       if (colMajor)
         data = invertOrder(data, width, height)
 
       resolve({ data, width, height })
     }
-    img.onerror = () => reject("No se pudo cargar la imagen");
+    img.onerror = () => reject(new Error("No se pudo cargar la imagen"))
   })
 }
 
