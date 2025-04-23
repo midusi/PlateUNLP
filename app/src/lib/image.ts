@@ -1,3 +1,36 @@
+import { levenbergMarquardt } from "ml-levenberg-marquardt"
+
+/**
+ * Ajusta una funcion Gaussiana a un arreglo de datos.
+ * @param dataY Datos en el eje Y de la funcion a ajustar.
+ * @returns {{a: number, mu: number, sigma: number}} -
+ * Parametros de la funcion gaissiana ajustada.
+ */
+export function fitGaussian(dataY: number[]): { a: number, mu: number, sigma: number } {
+  const gaussian = ([a, mu, sigma]: number[]) => (x: number) =>
+    a * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2))
+
+  const dataX = dataY.map((_, index) => index)
+
+  const options = {
+    damping: 1.5,
+    initialValues: [1, Math.round(dataY.length / 2), 1], // a, mu, sigma
+    maxIterations: 5,
+  }
+
+  const fit = levenbergMarquardt(
+    { x: dataX, y: dataY },
+    gaussian,
+    options,
+  )
+
+  return {
+    a: fit.parameterValues[0],
+    mu: fit.parameterValues[1],
+    sigma: fit.parameterValues[2],
+  }
+}
+
 /**
  * Promedia los pixeles horizontales de una imagen y retorna un vector con los
  * resultados de promediar a cada altura.

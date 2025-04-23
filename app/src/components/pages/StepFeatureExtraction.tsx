@@ -1,7 +1,7 @@
 import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
+import { findXspacedPoints, fitGaussian, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { curveStep } from "@visx/curve"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { useEffect, useState } from "react"
@@ -10,6 +10,7 @@ import { Button } from "../atoms/button"
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
   const checkpoints = 3
+  const segmentWidth = 120
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
@@ -21,6 +22,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     height: number
   } | null>(null)
   const [avgFunctions, setAvgFunctions] = useState<number[][]>([])
+  const [pointsWMed, setPointsWMed] = useState<Point[]>([])
 
   useEffect(() => {
     // Obtener informacion de imagen
@@ -31,7 +33,6 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
       // Segmentar la imagen
       const points = findXspacedPoints(width, checkpoints)
-      const segmentWidth = 60
       const segmentsData = obtainImageSegments(data, width, height, points, segmentWidth)
       for (const sd of segmentsData) {
         if (sd.length !== segmentWidth * height * 4)
@@ -43,6 +44,14 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       const functions = segmentsData.map(data =>
         promediadoHorizontal(data, segmentWidth, height))
       setAvgFunctions(functions)
+
+      // Obtener las medias de cada funcion
+      const medias = functions.map(funct => fitGaussian(funct).mu)
+
+      const pointsWhitMedias = points.map((point, index) => (
+        { x: point, y: medias[index] }
+      ))
+      setPointsWMed(pointsWhitMedias)
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
@@ -87,16 +96,17 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
   return (
     <div className="w-full p-6 flex flex-col items-center">
-      <SimpleImage src={imageSrc} />
+      <SimpleImage src={imageSrc} points={pointsWMed} />
       {segmentsData && (
         <div className="flex flex-col gap-6 bg-fuchsia-200 w-full  ">
           {segmentsData.data.map((data, index) => (
             <div key={data[0]} className="p-2 m-2 bg-red-300 flex flex-row items-start gap-4">
-              <SimpleImage src={matrixToUrl(
-                data,
-                segmentsData.width,
-                segmentsData.height,
-              )}
+              <SimpleImage
+                src={matrixToUrl(
+                  data,
+                  segmentsData.width,
+                  segmentsData.height,
+                )}
               />
               <SimpleFunctionXY data={avgFunctions[index]} />
             </div>
@@ -111,13 +121,36 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   )
 }
 
-function SimpleImage({ src }: { src: string }) {
+interface SimpleImageProps {
+  src: string
+  points?: Point[]
+}
+
+function SimpleImage({ src, points }: SimpleImageProps) {
+  const pointSize = 8
   return (
-    <div className="relative w-full h-[300px] mb-6">
+    <div className="relative w-full h-[300px] mb-2">
       <img
         src={src}
-        alt="Feature Extraction Image"
+        alt="Feature Extraction Image wahit referenece points"
+        className="w-full h-full object-contain"
       />
+      {/* Puntos de referencia estáticos */}
+      {points && points.map(point => (
+        <div
+          key={`${point.x}-${point.y}`}
+          className="absolute rounded-full border-2 border-white"
+          style={{
+            left: `${point.x}px`,
+            top: `${point.y}px`,
+            width: `${pointSize}px`,
+            height: `${pointSize}px`,
+            backgroundColor: "red",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+        </div>
+      ))}
     </div>
   )
 }

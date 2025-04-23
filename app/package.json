@@ -41,6 +41,7 @@
     "fits2js": "^0.0.4",
     "lucide-react": "0.487.0",
     "mathjs": "^14.3.0",
+    "ml-levenberg-marquardt": "4.1.3",
     "nanoid": "5.1.5",
     "onnxruntime-web": "1.20.1",
     "react": "^19.0.0",
