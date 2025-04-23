@@ -18,18 +18,20 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     width: number
     height: number
   } | null>(null)
+
   useEffect(() => {
-    obtainimageMatrix(imageSrc, true).then(({ data, width, height }) => {
+    obtainimageMatrix(imageSrc, false).then(({ data, width, height }) => {
       if (!data)
         return
       setImageData(data)
       const points = findXspacedPoints(width, 3)
-      const segmentWidth = 10
+      const segmentWidth = 60
       const segmentsData = obtainImageSegments(data, width, height, points, segmentWidth)
-      for (let sd in segmentsData) {
+      for (const sd of segmentsData) {
         if (sd.length !== segmentWidth * height * 4)
           console.warn("Segment size mismatch:", sd.length, segmentWidth * height * 4)
       }
+
       setSegmentsData({ data: segmentsData, width: segmentWidth, height })
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
