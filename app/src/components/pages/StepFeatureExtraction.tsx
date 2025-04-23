@@ -128,6 +128,7 @@ interface SimpleImageProps {
 
 function SimpleImage({ src, points }: SimpleImageProps) {
   const pointSize = 8
+
   return (
     <div className="relative w-full h-[300px] mb-2">
       <img
