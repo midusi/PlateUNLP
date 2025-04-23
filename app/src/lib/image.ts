@@ -45,6 +45,8 @@ export function findXspacedPoints(large: number, n: number): number[] {
  * son tan anchos/altos como el 1er criterio de ordenacion (filas/columnas) y la
  * dimencion restante se indica por parametro.
  * @param {Uint8ClampedArray} image - Imagen a segmentar
+ * @param {number} width - Ancho de la imagen
+ * @param {number} height - Alto de la imagen
  * @param {number[]} points - Arreglo de puntos respecto a la 1ra dimencion de orden
  * que indican el centro de cada segmento.
  * @param {number} segmentWidth - Que tanto se extienden los segmentos respecto la
