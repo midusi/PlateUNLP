@@ -2,6 +2,7 @@ import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
+import { curveStep } from "@visx/curve"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
@@ -143,7 +144,7 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
     >
       <AnimatedAxis orientation="bottom" />
       <AnimatedGrid columns={false} numTicks={4} />
-      <AnimatedLineSeries dataKey="Line 1" data={data1} {...accessors} />
+      <AnimatedLineSeries curve={curveStep} dataKey="Line 1" data={data1} {...accessors} />
     </XYChart>
   )
 }
