@@ -85,7 +85,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     <div className="w-full p-6 flex flex-col items-center">
       <SimpleImage src={imageSrc} />
       {segmentsData && (
-        <div className="flex flex-col gap-6 bg-fuchsia-200 w-600">
+        <div className="flex flex-col gap-6 bg-fuchsia-200 w-600  ">
           {segmentsData.data.map(data => (
             <div key={data[0]} className="p-2 m-2 bg-red-300 flex flex-row items-start gap-4">
               <SimpleImage src={matrixToUrl(
