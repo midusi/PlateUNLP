@@ -1,4 +1,37 @@
 /**
+ * Promedia los pixeles horizontales de una imagen y retorna un vector con los
+ * resultados de promediar a cada altura.
+ * @param {Uint8ClampedArray} image - Imagen
+ * @param {number} width - Ancho de la imagen
+ * @param {number} height - Alto de la imagen
+ * @returns {number[]} - Vector con valores promediados.
+ */
+export function promediadoHorizontal(
+  image: Uint8ClampedArray,
+  width: number,
+  height: number,
+): number[] {
+  const avgArr = []
+  for (let y = 0; y < height; y++) {
+    let sum = 0
+    for (let x = 0; x < width; x++) {
+      const index = (y * width + x) * 4
+      const r = image[index]
+      const g = image[index + 1]
+      const b = image[index + 2]
+
+      // Calculo de intensidad
+      // const gray = 0.299 * r + 0.587 * g + 0.114 * b // Ponderado
+      const gray = (r + g + b) / 3 // Balanceado
+      sum += gray
+    }
+    avgArr.push(sum / width)
+  }
+
+  return avgArr
+}
+
+/**
  * Transforma una imagen en formato matriz a una url.
  * @param {Uint8ClampedArray} data - Imagen
  * @param {number} width - Ancho

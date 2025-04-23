@@ -1,7 +1,7 @@
 import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments } from "@/lib/image"
+import { findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
@@ -19,6 +19,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     width: number
     height: number
   } | null>(null)
+  const [avgFunctions, setAvgFunctions] = useState<number[][]>([])
 
   useEffect(() => {
     // Obtener informacion de imagen
@@ -38,7 +39,9 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setSegmentsData({ data: segmentsData, width: segmentWidth, height })
 
       // Obtener funciones de cada segmento
-      const functions = []
+      const functions = segmentsData.map(data =>
+        promediadoHorizontal(data, segmentWidth, height))
+      setAvgFunctions(functions)
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
@@ -85,8 +88,8 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     <div className="w-full p-6 flex flex-col items-center">
       <SimpleImage src={imageSrc} />
       {segmentsData && (
-        <div className="flex flex-col gap-6 bg-fuchsia-200 w-600  ">
-          {segmentsData.data.map(data => (
+        <div className="flex flex-col gap-6 bg-fuchsia-200 w-full  ">
+          {segmentsData.data.map((data, index) => (
             <div key={data[0]} className="p-2 m-2 bg-red-300 flex flex-row items-start gap-4">
               <SimpleImage src={matrixToUrl(
                 data,
@@ -94,7 +97,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
                 segmentsData.height,
               )}
               />
-              <SimpleFunctionXY />
+              <SimpleFunctionXY data={avgFunctions[index]} />
             </div>
           ))}
         </div>
@@ -118,14 +121,13 @@ function SimpleImage({ src }: { src: string }) {
   )
 }
 
-function SimpleFunctionXY() {
-  const data1 = [
-    { x: 1, y: 50 },
-    { x: 2, y: 10 },
-    { x: 3, y: 20 },
-    { x: 4, y: 80 },
-    { x: 9, y: 1 },
-  ]
+interface SimpleFunctionXYProps {
+  data?: number[]
+}
+function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
+  const data1 = data
+    ? data.map((value, index) => ({ x: index, y: value }))
+    : [{ x: 1, y: 50 }, { x: 2, y: 10 }, { x: 3, y: 20 }, { x: 4, y: 80 }, { x: 9, y: 1 }]
 
   const accessors = {
     xAccessor: (d: Point) => d.x,
