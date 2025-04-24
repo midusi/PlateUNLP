@@ -18,16 +18,81 @@ function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
   return data.map(x => (x - min) / (max - min))
 }
 
+/**
+ * Dada una funcion busca el altiplano mas prominente que posea.
+ * @param {number[]} dataY - Datos en el eje Y de la funcion.
+ * @param {number} threshold - Umbral Porcentual entre 0 y 1 de
+ * la altura minima a considerar para el corte de altiplano.
+ * @returns {medium: number, opening: number} -
+ * Media y Tamaño de apertura del altiplano encontrado. Ambos en 
+ * relacion al eje X.
+ */
+export function findPlateau(dataY: number[], threshold: number): {
+  medium: number,
+  opening: number
+} {
 
+  const minY = 0 // mathjsMin(dataY)
+  const maxY = mathjsMax(dataY)
 
+  const scaledThreshold = minY + (maxY - minY) * threshold
+
+  const segments: { values: number[], indexes: number[] }[] = []
+  let currentValues: number[] = []
+  let currentIndexes: number[] = []
+  for (let i = 0; i < dataY.length; i++) {
+    const d = dataY[i]
+    if (d > scaledThreshold) {
+      currentValues.push(d)
+      currentIndexes.push(i)
+    } else {
+      // Si la lista tiene algo entonces es el primero que no cumple
+      // entonces añadimos el segmento a la lista y reiniciamos 
+      // actualSegment. Si no es el primero no hacemos algo.
+      if (currentValues.length > 0) {
+        segments.push({
+          values: currentValues,
+          indexes: currentIndexes
+        })
+        currentValues = []
+        currentIndexes = []
+      }
+    }
+  }
+
+  // En caso de que el segmento más largo esté al final del array
+  if (currentValues.length > 0) {
+    segments.push({ values: currentValues, indexes: currentIndexes })
+  }
+
+  const moreLargeSegmentIdx = segments.map(segment => segment.values.length)
+    .reduce((maxIdx, currVal, idx, arr) => currVal > arr[maxIdx] ? idx : maxIdx, 0)
+
+  //const _plateauValues = segments[moreLargeSegmentIdx].values
+  const plateauIndexes = segments[moreLargeSegmentIdx].indexes
+
+  const opening = plateauIndexes[plateauIndexes.length - 1] - plateauIndexes[0]
+  const medium = (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
+
+  // console.log({
+  //   segments,
+  //   moreLargeSegmentIdx,
+  //   opening,
+  //   medium
+  // })
+
+  return { medium, opening }
+}
 
 /**
  * Ajusta una funcion Gaussiana a un arreglo de datos.
- * @param dataY Datos en el eje Y de la funcion a ajustar.
+ * @param {number[]} dataY - Datos en el eje Y de la funcion a ajustar.
+ * @param {number} maxIterations - Cantidad maxima de iteraciones a 
+ * realizar para ajustar la Gaussiana.
  * @returns {{a: number, mu: number, sigma: number}} -
  * Parametros de la funcion gaissiana ajustada.
  */
-export function fitGaussian(dataY: number[]): { a: number, mu: number, sigma: number } {
+export function fitGaussian(dataY: number[], maxIterations: number): { a: number, mu: number, sigma: number } {
   const gaussian = ([a, mu, sigma]: number[]) => (x: number) =>
     a * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2))
 
@@ -36,7 +101,7 @@ export function fitGaussian(dataY: number[]): { a: number, mu: number, sigma: nu
   const options = {
     damping: 1.5,
     initialValues: [1, Math.round(dataY.length / 2), 1], // a, mu, sigma
-    maxIterations: 10,
+    maxIterations: maxIterations,
   }
 
   const fit = levenbergMarquardt(
