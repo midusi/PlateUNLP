@@ -1,4 +1,25 @@
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
+import { min as mathjsMin, max as mathjsMax } from 'mathjs'
+
+/**
+ * Recibe un arreglo de datos y los normaliza.
+ * @param {number[]} data - Arreglo de datos a normalizar.
+ * @param {number} min - Minimo a considerar para la conversion de rango.
+ * @param {number} max - Maximo a considerar para la conversion de rango.
+ * @returns {number[]} -
+ * Arreglo de datos normalizado.
+ */
+function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
+  if (!min)
+    min = mathjsMin(data)
+  if (!max)
+    max = mathjsMax(data)
+
+  return data.map(x => (x - min) / (max - min))
+}
+
+
+
 
 /**
  * Ajusta una funcion Gaussiana a un arreglo de datos.
