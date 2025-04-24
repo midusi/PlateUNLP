@@ -1,7 +1,7 @@
 import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { findXspacedPoints, fitGaussian, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
+import { findPlateau, findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { curveStep } from "@visx/curve"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { useEffect, useRef, useState } from "react"
@@ -50,7 +50,10 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setAvgFunctions(functions)
 
       // Obtener las medias de cada funcion
-      const medias = functions.map(funct => fitGaussian(funct).mu)
+      const medias = functions.map(funct => {
+        const fit = findPlateau(funct, 0.5)
+        return fit.medium
+      })
 
       const pointsWhitMedias = points.map((point, index) => (
         { x: point, y: medias[index] }
@@ -138,7 +141,7 @@ interface SimpleImageProps {
 }
 
 function SimpleImage({ src, points, originalWidth, originalHeight }: SimpleImageProps) {
-  const pointSize = 8
+  const pointSize = 5
 
   const imgRef = useRef<HTMLImageElement>(null)
   const [scale, setScale] = useState({ x: 1, y: 1 })
