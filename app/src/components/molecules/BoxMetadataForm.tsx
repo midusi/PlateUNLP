@@ -61,13 +61,13 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
         },
     }))
 
-    const inputContainerClassName = "w-full max-w-xs items-center gap-1.5"
-    const inputClassName = "border p-2 rounded"
+    const inputContainerClassName = "flex flex-col w-full max-w-xs items-center gap-1.5"
+    const inputClassName = "border p-2 rounded w-4/5"
 
     return (
         <>
-            <form className="w-full max-w-7xl">
-                <div>
+            <form>
+                <div className="flex justify-between">
                     <div className={inputContainerClassName}>
                         <Label>OBJECT</Label>
                         <Input
@@ -77,7 +77,7 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
                         />
                         {errors.OBJECT && <p className="text-red-500">{errors.OBJECT.message}</p>}
                     </div>
-                    <div className="flex flex-col w-full max-w-xs gap-1.5">
+                    <div className={inputContainerClassName}>
                         <Label>DATE-OBS</Label>
                         <Controller
                             name="DATE_OBS"
@@ -86,7 +86,7 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
                                 <DatePicker
                                     value={field.value}
                                     onChange={field.onChange}
-                                    placeholder="Local time at the start of the observation"
+                                    placeholder="Local time"
                                 />
                             )}
                         />

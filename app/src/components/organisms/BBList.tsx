@@ -131,7 +131,7 @@ function ItemOfBoxList({
     <div
       key={id}
       className={clsx(
-        "flex items-center p-3 transition-colors cursor-pointer",
+        "flex  p-3 transition-colors cursor-pointer",
         isSelected
           ? "bg-blue-50 border-l-2 border-l-blue-500"
           : "bg-white hover:bg-slate-50 border-l-2 border-l-transparent",
@@ -150,7 +150,7 @@ function ItemOfBoxList({
         {id.toString().slice(0, 2)}
       </div>
 
-      <div className="flex-grow min-w-0">
+      <div className="flex flex-col flex-grow min-w-0">
         <div className="flex items-center">
           <InputWhitTemp
             value={name}
@@ -163,10 +163,6 @@ function ItemOfBoxList({
 
 
 
-        {isSelected && (
-          <BoxMetadataForm ref={boxMetadataFormRef} onChange={handleFormChange} />
-
-        )}
         <div className="flex items-center mt-1 text-xs text-slate-500">
           <span className="mr-2">
             W:
@@ -178,10 +174,19 @@ function ItemOfBoxList({
             {Math.round(box.height)}
             px
           </span>
+
+        </div>
+        {isSelected && (
+          <hr />
+        )}
+        <div>
+          {isSelected && (
+            <BoxMetadataForm ref={boxMetadataFormRef} onChange={handleFormChange} />
+          )}
         </div>
       </div>
 
-      <div className="flex items-center ml-2 space-x-3">
+      <div className="flex ml-2 space-x-3">
         <div className="relative">
           <button
             type="button"
@@ -239,14 +244,15 @@ function ItemOfBoxList({
             </div>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="p-1.5 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <div>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="p-1.5 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
 
       </div>
     </div>
