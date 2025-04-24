@@ -20,6 +20,13 @@ interface BBUIProps {
   saveImageLoading?: (src: string) => void
   classes: BBClassesProps[]
   determineBBFunction: (img_src: string) => Promise<BoundingBox[]>
+  parameters: BBUIParameters
+}
+
+interface BBUIParameters {
+  rotateButton: boolean,
+  invertColorButton: boolean,
+  fieldsMetadata: boolean
 }
 
 export function BBUI({
@@ -31,6 +38,7 @@ export function BBUI({
   saveImageLoading,
   classes,
   determineBBFunction,
+  parameters
 }: BBUIProps) {
   const [image, setImage] = useState<null | string>(file)
   const [bgWhite, setBgWhite] = useState(true)
@@ -82,7 +90,7 @@ export function BBUI({
                   </span>
                 </Button>
               )}
-              <Button
+              {parameters.rotateButton && <Button
                 onClick={() => { setRotation((rotation + 90) % 360) }}
                 variant="outline"
                 size="sm"
@@ -92,21 +100,24 @@ export function BBUI({
                 <span>
                   {`Rotate 90º from ${rotation}º`}
                 </span>
-              </Button>
-              <Button
-                onClick={() => { setBgWhite(!bgWhite) }}
-                variant="outline"
-                size="sm"
-                className={clsx(
-                  "flex items-center gap-2",
-                  bgWhite
-                    ? "bg-white text-black hover:bg-slate-50"
-                    : "bg-slate-800 text-white hover:bg-slate-700",
-                )}
-              >
-                <Palette className="h-4 w-4" />
-                <span>Invert colors</span>
-              </Button>
+              </Button>}
+
+              {parameters.invertColorButton &&
+                <Button
+                  onClick={() => { setBgWhite(!bgWhite) }}
+                  variant="outline"
+                  size="sm"
+                  className={clsx(
+                    "flex items-center gap-2",
+                    bgWhite
+                      ? "bg-white text-black hover:bg-slate-50"
+                      : "bg-slate-800 text-white hover:bg-slate-700",
+                  )}
+                >
+                  <Palette className="h-4 w-4" />
+                  <span>Invert colors</span>
+                </Button>
+              }
               <Button
                 onClick={() => {
                   setIsDrawingMode(!isDrawingMode)
@@ -167,6 +178,7 @@ export function BBUI({
         selected={selectedBoxId}
         setSelected={setSelectedBoxId}
         classes={classes}
+        parameters={{ fieldsMetadata: parameters.fieldsMetadata }}
       />
       <div className="flex justify-center pt-4">
         <Button
