@@ -4,18 +4,22 @@ import { useGlobalStore } from "@/hooks/use-global-store"
 import { findXspacedPoints, fitGaussian, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { curveStep } from "@visx/curve"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
-  const checkpoints = 3
+  const checkpoints = 10
   const segmentWidth = 120
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
   ])
-  const [imageData, setImageData] = useState<Uint8ClampedArray<ArrayBufferLike> | null>(null)
+  const [imageData, setImageData] = useState<{
+    data: Uint8ClampedArray<ArrayBufferLike>
+    width: number
+    height: number
+  } | null>(null)
   const [segmentsData, setSegmentsData] = useState<{
     data: Uint8ClampedArray<ArrayBufferLike>[]
     width: number
@@ -29,7 +33,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     obtainimageMatrix(imageSrc, false).then(({ data, width, height }) => {
       if (!data)
         return
-      setImageData(data)
+      setImageData({ data, width, height })
 
       // Segmentar la imagen
       const points = findXspacedPoints(width, checkpoints)
@@ -70,24 +74,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
           (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
             ? {
+              ...step,
+              states: step.states!.map((state, j) => (
+                j === selectedSpectrum
+                  ? "COMPLETE" as const
+                  : state
+              )),
+            }
+            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+              ? {
                 ...step,
                 states: step.states!.map((state, j) => (
                   j === selectedSpectrum
-                    ? "COMPLETE" as const
+                    ? "NECESSARY_CHANGES" as const
                     : state
                 )),
               }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-                ? {
-                    ...step,
-                    states: step.states!.map((state, j) => (
-                      j === selectedSpectrum
-                        ? "NECESSARY_CHANGES" as const
-                        : state
-                    )),
-                  }
-                : step // Cualquier otra etapa mantiene su informacion
-              )
+              : step // Cualquier otra etapa mantiene su informacion
+            )
         )),
       },
     }))
@@ -96,7 +100,12 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
   return (
     <div className="w-full p-6 flex flex-col items-center">
-      <SimpleImage src={imageSrc} points={pointsWMed} />
+      {imageData && <SimpleImage
+        src={imageSrc}
+        points={pointsWMed}
+        originalWidth={imageData?.width}
+        originalHeight={imageData?.height}
+      />}
       {segmentsData && (
         <div className="flex flex-col gap-6 bg-fuchsia-200 w-full  ">
           {segmentsData.data.map((data, index) => (
@@ -124,17 +133,39 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 interface SimpleImageProps {
   src: string
   points?: Point[]
+  originalWidth?: number
+  originalHeight?: number
 }
 
-function SimpleImage({ src, points }: SimpleImageProps) {
+function SimpleImage({ src, points, originalWidth, originalHeight }: SimpleImageProps) {
   const pointSize = 8
 
+  const imgRef = useRef<HTMLImageElement>(null)
+  const [scale, setScale] = useState({ x: 1, y: 1 })
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (imgRef.current && originalWidth && originalHeight) {
+        const rect = imgRef.current.getBoundingClientRect()
+        setScale({
+          x: rect.width / originalWidth,
+          y: rect.height / originalHeight,
+        })
+      }
+    }
+
+    updateScale()
+    window.addEventListener("resize", updateScale)
+    return () => window.removeEventListener("resize", updateScale)
+  }, [originalWidth, originalHeight])
+
   return (
-    <div className="relative w-full h-[300px] mb-2">
+    <div className="relative w-full mb-2">
       <img
+        ref={imgRef}
         src={src}
         alt="Feature Extraction Image wahit referenece points"
-        className="w-full h-full object-contain"
+        className="w-full h-full"
       />
       {/* Puntos de referencia estáticos */}
       {points && points.map(point => (
@@ -142,8 +173,8 @@ function SimpleImage({ src, points }: SimpleImageProps) {
           key={`${point.x}-${point.y}`}
           className="absolute rounded-full border-2 border-white"
           style={{
-            left: `${point.x}px`,
-            top: `${point.y}px`,
+            left: `${point.x * scale.x}px`,
+            top: `${point.y * scale.y}px`,
             width: `${pointSize}px`,
             height: `${pointSize}px`,
             backgroundColor: "red",

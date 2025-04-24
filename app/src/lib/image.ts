@@ -15,7 +15,7 @@ export function fitGaussian(dataY: number[]): { a: number, mu: number, sigma: nu
   const options = {
     damping: 1.5,
     initialValues: [1, Math.round(dataY.length / 2), 1], // a, mu, sigma
-    maxIterations: 5,
+    maxIterations: 10,
   }
 
   const fit = levenbergMarquardt(
@@ -198,10 +198,10 @@ export async function obtainimageMatrix(
   src: string,
   colMajor: boolean,
 ): Promise<{
-    data: Uint8ClampedArray
-    width: number
-    height: number
-  }> {
+  data: Uint8ClampedArray
+  width: number
+  height: number
+}> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.src = src
