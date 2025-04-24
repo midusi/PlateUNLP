@@ -298,6 +298,7 @@ function ImageViewer({
           minScale={imageScale * 0.25}
           maxScale={imageScale * zoomFactor}
           centerOnInit
+          centerZoomedOut
           doubleClick={{ step: 0.7 }}
           disabled={isDrawingMode || isResizing}
         >
@@ -808,9 +809,27 @@ function ImageLoader({ handleImageLoad }: ImageLoaderProps) {
       reader.readAsDataURL(file);
     }
   }
-
-  // Función para convertir en cuadrado con padding transparente
   function padImageToSquare(image: HTMLImageElement): HTMLCanvasElement {
+    const maxSide = Math.max(image.width, image.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = maxSide;
+    canvas.height = maxSide;
+
+    const ctx = canvas.getContext("2d")!;
+
+    // Rellenar con blanco
+    //ctx.fillStyle = "white";
+    //ctx.fillRect(0, 0, maxSide, maxSide);
+
+    const offsetX = (maxSide - image.width) / 2;
+    const offsetY = 0;
+
+    ctx.drawImage(image, offsetX, offsetY);
+
+    return canvas;
+  }
+  // Función para convertir en cuadrado con padding transparente
+  /*function padImageToSquare(image: HTMLImageElement): HTMLCanvasElement {
     const maxSide = Math.max(image.width, image.height);
     const canvas = document.createElement("canvas");
     canvas.width = maxSide;
@@ -826,7 +845,7 @@ function ImageLoader({ handleImageLoad }: ImageLoaderProps) {
 
     return canvas;
   }
-
+*/
 
   return (
     <div className="w-full h-full p-6 rounded-lg">
