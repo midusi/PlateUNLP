@@ -11,9 +11,13 @@ interface BoxListProps {
   selected: string | null
   setSelected: React.Dispatch<React.SetStateAction<string | null>>
   classes: BBClassesProps[]
+  parameters: BBListParameters
+}
+interface BBListParameters {
+  fieldsMetadata: boolean
 }
 
-export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes }: BoxListProps) {
+export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes, parameters }: BoxListProps) {
   function handleSelect(id: string) {
     if (selected === id) {
       setSelected(null)
@@ -47,6 +51,7 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected
               isSelected={box.id === selected}
               onSelect={handleSelect}
               classes={classes}
+              parameters={parameters}
             />
           ))
         )}
@@ -62,6 +67,7 @@ interface ItemOfBoxListProps {
   onSelect: (id: string) => void
   classes: BBClassesProps[]
   onDelete?: (id: string) => void
+  parameters: BBListParameters
 }
 
 function ItemOfBoxList({
@@ -71,6 +77,7 @@ function ItemOfBoxList({
   onSelect,
   classes,
   onDelete,
+  parameters
 }: ItemOfBoxListProps) {
   const { id, name, class_info } = box
   const [selected, setSelected] = useState<BBClassesProps>(class_info)
@@ -242,6 +249,8 @@ interface InputWhitTempProps {
   onClick: (e: React.MouseEvent) => void
 }
 
+
+
 function InputWhitTemp({ value, onEnter, className, onClick }: InputWhitTempProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [temp, setTemp] = useState<string>(value || "Unnamed box")
@@ -267,32 +276,32 @@ function InputWhitTemp({ value, onEnter, className, onClick }: InputWhitTempProp
 
   return isEditing
     ? (
-        <input
-          ref={inputRef}
-          className={clsx(
-            "bg-white border border-blue-300",
-            "rounded px-2 py-1 outline-none",
-            "focus:ring-2 focus:ring-blue-200",
-            className,
-          )}
-          value={temp}
-          onChange={e => setTemp(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={() => {
-            setIsEditing(false)
-            onEnter(temp)
-          }}
-        />
-      )
+      <input
+        ref={inputRef}
+        className={clsx(
+          "bg-white border border-blue-300",
+          "rounded px-2 py-1 outline-none",
+          "focus:ring-2 focus:ring-blue-200",
+          className,
+        )}
+        value={temp}
+        onChange={e => setTemp(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => {
+          setIsEditing(false)
+          onEnter(temp)
+        }}
+      />
+    )
     : (
-        <div
-          className={clsx("cursor-text", className)}
-          onClick={(e) => {
-            setIsEditing(true)
-            onClick(e)
-          }}
-        >
-          {temp}
-        </div>
-      )
+      <div
+        className={clsx("cursor-text", className)}
+        onClick={(e) => {
+          setIsEditing(true)
+          onClick(e)
+        }}
+      >
+        {temp}
+      </div>
+    )
 }
