@@ -6,6 +6,7 @@ import { curveStep } from "@visx/curve"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "../atoms/button"
+import { linearRegression } from "@/lib/utils"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
@@ -106,8 +107,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       {imageData && <SimpleImage
         src={imageSrc}
         points={pointsWMed}
-        originalWidth={imageData?.width}
-        originalHeight={imageData?.height}
+        drawFunction={linearRegression(pointsWMed.map(p => p.x), pointsWMed.map(p => p.y))}
       />}
       {segmentsData && (
         <div className="flex flex-col gap-6 bg-fuchsia-200 w-full  ">
@@ -136,57 +136,63 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 interface SimpleImageProps {
   src: string
   points?: Point[]
-  originalWidth?: number
-  originalHeight?: number
+  drawFunction?: (x: number) => number
 }
 
-function SimpleImage({ src, points, originalWidth, originalHeight }: SimpleImageProps) {
-  const pointSize = 5
+function SimpleImage({ src, points, drawFunction }: SimpleImageProps) {
+  const pointSize = 8
 
-  const imgRef = useRef<HTMLImageElement>(null)
-  const [scale, setScale] = useState({ x: 1, y: 1 })
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    const updateScale = () => {
-      if (imgRef.current && originalWidth && originalHeight) {
-        const rect = imgRef.current.getBoundingClientRect()
-        setScale({
-          x: rect.width / originalWidth,
-          y: rect.height / originalHeight,
-        })
-      }
-    }
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+    const img = new Image()
+    img.onload = function () {
+      canvas.width = img.width
+      canvas.height = img.height
 
-    updateScale()
-    window.addEventListener("resize", updateScale)
-    return () => window.removeEventListener("resize", updateScale)
-  }, [originalWidth, originalHeight])
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(img, 0, 0)
+
+      // Dibujar función si está definida
+      if (drawFunction) {
+        ctx.strokeStyle = "red"
+        ctx.lineWidth = 4
+        ctx.beginPath()
+        for (let x = 0; x < canvas.width; x++) {
+          const y = drawFunction(x)
+          if (x === 0) {
+            ctx.moveTo(x, y)
+          } else {
+            ctx.lineTo(x, y)
+          }
+        }
+        ctx.stroke()
+      }
+
+      // Dibujar puntos si están definidos
+      if (points) {
+        ctx.fillStyle = "red"
+        for (const point of points) {
+          ctx.beginPath()
+          ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
+          ctx.fill()
+        }
+      }
+    };
+    img.src = src
+
+  }, [src, points, drawFunction])
 
   return (
-    <div className="relative w-full mb-2">
-      <img
-        ref={imgRef}
-        src={src}
-        alt="Feature Extraction Image wahit referenece points"
-        className="w-full h-full"
-      />
-      {/* Puntos de referencia estáticos */}
-      {points && points.map(point => (
-        <div
-          key={`${point.x}-${point.y}`}
-          className="absolute rounded-full border-2 border-white"
-          style={{
-            left: `${point.x * scale.x}px`,
-            top: `${point.y * scale.y}px`,
-            width: `${pointSize}px`,
-            height: `${pointSize}px`,
-            backgroundColor: "red",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-        </div>
-      ))}
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="w-full h-full"
+      style={{ width: "100%", height: "auto", display: "block" }}
+    />
   )
 }
 
