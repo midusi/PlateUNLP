@@ -1,5 +1,5 @@
+import { max as mathjsMax, min as mathjsMin } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
-import { min as mathjsMin, max as mathjsMax } from 'mathjs'
 
 /**
  * Recibe un arreglo de datos y los normaliza.
@@ -24,14 +24,13 @@ function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
  * @param {number} threshold - Umbral Porcentual entre 0 y 1 de
  * la altura minima a considerar para el corte de altiplano.
  * @returns {medium: number, opening: number} -
- * Media y Tamaño de apertura del altiplano encontrado. Ambos en 
+ * Media y Tamaño de apertura del altiplano encontrado. Ambos en
  * relacion al eje X.
  */
 export function findPlateau(dataY: number[], threshold: number): {
-  medium: number,
+  medium: number
   opening: number
 } {
-
   const minY = 0 // mathjsMin(dataY)
   const maxY = mathjsMax(dataY)
 
@@ -45,14 +44,15 @@ export function findPlateau(dataY: number[], threshold: number): {
     if (d > scaledThreshold) {
       currentValues.push(d)
       currentIndexes.push(i)
-    } else {
+    }
+    else {
       // Si la lista tiene algo entonces es el primero que no cumple
-      // entonces añadimos el segmento a la lista y reiniciamos 
+      // entonces añadimos el segmento a la lista y reiniciamos
       // actualSegment. Si no es el primero no hacemos algo.
       if (currentValues.length > 0) {
         segments.push({
           values: currentValues,
-          indexes: currentIndexes
+          indexes: currentIndexes,
         })
         currentValues = []
         currentIndexes = []
@@ -68,7 +68,7 @@ export function findPlateau(dataY: number[], threshold: number): {
   const moreLargeSegmentIdx = segments.map(segment => segment.values.length)
     .reduce((maxIdx, currVal, idx, arr) => currVal > arr[maxIdx] ? idx : maxIdx, 0)
 
-  //const _plateauValues = segments[moreLargeSegmentIdx].values
+  // const _plateauValues = segments[moreLargeSegmentIdx].values
   const plateauIndexes = segments[moreLargeSegmentIdx].indexes
 
   const opening = plateauIndexes[plateauIndexes.length - 1] - plateauIndexes[0]
@@ -87,7 +87,7 @@ export function findPlateau(dataY: number[], threshold: number): {
 /**
  * Ajusta una funcion Gaussiana a un arreglo de datos.
  * @param {number[]} dataY - Datos en el eje Y de la funcion a ajustar.
- * @param {number} maxIterations - Cantidad maxima de iteraciones a 
+ * @param {number} maxIterations - Cantidad maxima de iteraciones a
  * realizar para ajustar la Gaussiana.
  * @returns {{a: number, mu: number, sigma: number}} -
  * Parametros de la funcion gaissiana ajustada.
@@ -101,7 +101,7 @@ export function fitGaussian(dataY: number[], maxIterations: number): { a: number
   const options = {
     damping: 1.5,
     initialValues: [1, Math.round(dataY.length / 2), 1], // a, mu, sigma
-    maxIterations: maxIterations,
+    maxIterations,
   }
 
   const fit = levenbergMarquardt(
@@ -284,10 +284,10 @@ export async function obtainimageMatrix(
   src: string,
   colMajor: boolean,
 ): Promise<{
-  data: Uint8ClampedArray
-  width: number
-  height: number
-}> {
+    data: Uint8ClampedArray
+    width: number
+    height: number
+  }> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.src = src

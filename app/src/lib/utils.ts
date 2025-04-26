@@ -36,21 +36,90 @@ export class CustomError extends Error {
   }
 }
 
-export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
-  /**
-   * x e y contienen una serie de valores que se corresponden
-   * cada uno con el de la misma posición en el otro arreglo.
-   * Esta función busca una recta que dado un valor de x
-   * devuelva el un valor de y, o lo más cercano que se pueda
-   * al minimizar el error que pueda haber entre todos los
-   * pares de números.
-   * La función devuelta, dado cualquier x, devuelve un y que
-   * aproxima el valor ideal que debería corresponderle.
-   * Dentro de las limitaciones de lo que se puede hacer con
-   * una aproximación lineal a una correspondencia de
-   * complejidad desconocida.
-   */
+/**
+ * Recibe una serie de cordenadas (x, y) y construye un aproximacion
+ * Spline Cuadratica para los mismos.
+ * @param {number[]} x - Valores en el eje X. Largo minimo 2
+ * @param {number[]} y - Valores en el eje Y
+ * @returns {(value: number) => number} -
+ * Función de interpolación para ubicar nuebvos x.
+ */
+export function splineCuadratic(x: number[], y: number[]): ((value: number) => number) {
+  if (x.length < 2)
+    throw new Error(`At least two points are needed to buil a spline. Count of points: ${x.length}`)
 
+  const n = x.length - 1 // Cantidad de intervalos, vamos a ajustar 1 polinomio por intervalo
+  const cantEquations = 2 * n - 1
+  const filas = 3 * n
+  const columnas = 3 * n
+  const coeff: { a: number, b: number, c: number }[] = [] // Hay n*3 coeficientes por polinomio
+
+  // Inicializamos c[0]
+  coeff.push({ a: 0, b: 0, c: y[0] })
+
+  const h: number[] = []
+  for (let i = 0; i < n; i++) {
+    h.push(x[i + 1] - x[i])
+  }
+
+  const b: number[] = []
+  for (let i = 0; i < n; i++) {
+    b.push((y[i + 1] - y[i]) / h[i])
+  }
+
+  const c: number[] = [0] // Segunda derivada inicial nula (spline natural)
+
+  // Calculamos c usando continuidad de la derivada
+  for (let i = 1; i < n; i++) {
+    c.push(b[i] - b[i - 1])
+  }
+
+  // Ahora armamos los coeficientes
+  for (let i = 0; i < n; i++) {
+    const a = c[i] / (2 * h[i])
+    const bVal = b[i] - a * (2 * (x[i + 1] - x[i]))
+    coeff[i] = {
+      a,
+      b: bVal,
+      c: y[i],
+    }
+  }
+
+  return (value: number) => {
+    // Buscamos el intervalo correcto
+    let i = 0
+    while (i < n && value > x[i + 1]) {
+      i++
+    }
+    if (i >= n)
+      i = n - 1
+
+    const dx = value - x[i]
+    const { a, b, c } = coeff[i]
+    return a * dx * dx + b * dx + c
+  }
+
+  // El primer y último polinomio deben pasar por los puntos extremos
+
+  // Generalmente se toma como condición que la derivada segunda es nula en uno de los polinomios extremos.
+
+  return () => 2
+}
+
+/**
+ * x e y contienen una serie de valores que se corresponden
+ * cada uno con el de la misma posición en el otro arreglo.
+ * Esta función busca una recta que dado un valor de x
+ * devuelva el un valor de y, o lo más cercano que se pueda
+ * al minimizar el error que pueda haber entre todos los
+ * pares de números.
+ * La función devuelta, dado cualquier x, devuelve un y que
+ * aproxima el valor ideal que debería corresponderle.
+ * Dentro de las limitaciones de lo que se puede hacer con
+ * una aproximación lineal a una correspondencia de
+ * complejidad desconocida.
+ */
+export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
   if (x.length !== y.length) {
     throw new CustomError(
       ErrorCodes.DIFFERENT_PROMP_SIZE,

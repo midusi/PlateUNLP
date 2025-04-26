@@ -2,11 +2,11 @@ import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { findPlateau, findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
+import { linearRegression, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "../atoms/button"
-import { linearRegression } from "@/lib/utils"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
@@ -51,7 +51,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setAvgFunctions(functions)
 
       // Obtener las medias de cada funcion
-      const medias = functions.map(funct => {
+      const medias = functions.map((funct) => {
         const fit = findPlateau(funct, 0.5)
         return fit.medium
       })
@@ -78,24 +78,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
           (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
             ? {
-              ...step,
-              states: step.states!.map((state, j) => (
-                j === selectedSpectrum
-                  ? "COMPLETE" as const
-                  : state
-              )),
-            }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-              ? {
                 ...step,
                 states: step.states!.map((state, j) => (
                   j === selectedSpectrum
-                    ? "NECESSARY_CHANGES" as const
+                    ? "COMPLETE" as const
                     : state
                 )),
               }
-              : step // Cualquier otra etapa mantiene su informacion
-            )
+            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+                ? {
+                    ...step,
+                    states: step.states!.map((state, j) => (
+                      j === selectedSpectrum
+                        ? "NECESSARY_CHANGES" as const
+                        : state
+                    )),
+                  }
+                : step // Cualquier otra etapa mantiene su informacion
+              )
         )),
       },
     }))
@@ -104,11 +104,13 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
   return (
     <div className="w-full p-6 flex flex-col items-center">
-      {imageData && <SimpleImage
-        src={imageSrc}
-        points={pointsWMed}
-        drawFunction={linearRegression(pointsWMed.map(p => p.x), pointsWMed.map(p => p.y))}
-      />}
+      {imageData && (
+        <SimpleImage
+          src={imageSrc}
+          points={pointsWMed}
+          drawFunction={splineCuadratic(pointsWMed.map(p => p.x), pointsWMed.map(p => p.y))}
+        />
+      )}
       {segmentsData && (
         <div className="flex flex-col gap-6 bg-fuchsia-200 w-full  ">
           {segmentsData.data.map((data, index) => (
@@ -146,9 +148,11 @@ function SimpleImage({ src, points, drawFunction }: SimpleImageProps) {
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas)
+      return
     const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    if (!ctx)
+      return
     const img = new Image()
     img.onload = function () {
       canvas.width = img.width
@@ -166,7 +170,8 @@ function SimpleImage({ src, points, drawFunction }: SimpleImageProps) {
           const y = drawFunction(x)
           if (x === 0) {
             ctx.moveTo(x, y)
-          } else {
+          }
+          else {
             ctx.lineTo(x, y)
           }
         }
@@ -182,9 +187,8 @@ function SimpleImage({ src, points, drawFunction }: SimpleImageProps) {
           ctx.fill()
         }
       }
-    };
+    }
     img.src = src
-
   }, [src, points, drawFunction])
 
   return (
