@@ -39,6 +39,7 @@ export class CustomError extends Error {
 /**
  * Recibe una serie de cordenadas (x, y) y construye un aproximacion
  * Spline Cuadratica para los mismos.
+ * Explicacion spline (https://math.libretexts.org/Workbench/Numerical_Methods_with_Applications_(Kaw)/5%3A_Interpolation/5.05%3A_Spline_Method_of_Interpolation)
  * @param {number[]} x - Valores en el eje X. Largo minimo 2
  * @param {number[]} y - Valores en el eje Y
  * @returns {(value: number) => number} -
