@@ -128,11 +128,10 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
     for (let i=0; i<intervals.length; i++) {
       if(value >= intervals[i].start && value < intervals[i].end){
         result= functionsArr[i](value)
-        console.log(value, i, intervals)
         break;
       }
     }
-    
+
     if(value < intervals[0].start) 
       result = functionsArr[0](value)
     else if(value >= intervals[intervals.length-1].start) 
