@@ -2,7 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 import type { ClassValue } from "clsx"
 import { clsx } from "clsx"
-import { inv, matrix, multiply, transpose } from "mathjs"
+import { inv, lusolve, matrix, multiply, pow, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -49,62 +49,99 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
   if (x.length < 2)
     throw new Error(`At least two points are needed to buil a spline. Count of points: ${x.length}`)
 
-  const n = x.length - 1 // Cantidad de intervalos, vamos a ajustar 1 polinomio por intervalo
-  const cantEquations = 2 * n - 1
-  const filas = 3 * n
-  const columnas = 3 * n
-  const coeff: { a: number, b: number, c: number }[] = [] // Hay n*3 coeficientes por polinomio
+  const puntos = x.map((value, i) => ({x:value, y:y[i]})) // [
+//     { x: 0, y: 0 },
+//     { x: 10, y: 227.04 },
+//     { x: 15, y: 362.78 },
+//     { x: 20, y: 517.35 },
+//     { x: 22.5, y: 602.97 },
+//     { x: 30, y: 901.67 },
+//   ]
 
-  // Inicializamos c[0]
-  coeff.push({ a: 0, b: 0, c: y[0] })
+  const n: number = puntos.length - 1 // Cantidad de intervalos, vamos a ajustar 1 polinomio por intervalo
+  // const cols: number = 3 * n // 3 incognitas por polinomio
+  // const rows: number = cols // 1 ecuacion para resolver cada incognita
 
-  const h: number[] = []
+  const coeffMatrix: number[][] = []
+  const results: number[] = []
+  // Primeras 2*n ecuaciones
   for (let i = 0; i < n; i++) {
-    h.push(x[i + 1] - x[i])
+    // Ecuacion 1
+    let row: number[] = Array.from({ length: 3 * n }, () => 0)
+    let idx = i * 3
+    row[idx] = puntos[i].x ** 2
+    row[idx + 1] = puntos[i].x
+    row[idx + 2] = 1
+    coeffMatrix.push(row)
+    results.push(puntos[i].y)
+
+    // Ecuacion 2
+    row = Array.from({ length: 3 * n }, () => 0)
+    row[idx] = puntos[i + 1].x ** 2
+    row[idx + 1] = puntos[i + 1].x
+    row[idx + 2] = 1
+    coeffMatrix.push(row)
+    results.push(puntos[i + 1].y)
   }
 
-  const b: number[] = []
-  for (let i = 0; i < n; i++) {
-    b.push((y[i + 1] - y[i]) / h[i])
+  // Siguientes n-1 ecuaciones
+  for (let i = 0; i < n - 1; i++) {
+    const row: number[] = Array.from({ length: 3 * n }, () => 0)
+    row[i * 3] = 2 * puntos[i].x // ai * 2 * xi
+    row[i * 3 + 1] = 1 // bi
+    row[(i + 1) * 3] = 2 * puntos[i].x // a(i+1) * 2 * xi
+    row[(i + 1) * 3 + 1] = 1 // (bi+1)
+    coeffMatrix.push(row)
+    results.push(0)
   }
 
-  const c: number[] = [0] // Segunda derivada inicial nula (spline natural)
+  // Ultima ecuacion (1er a vale 0)
+  const row: number[] = Array.from({ length: 3 * n }, () => 0)
+  row[0] = 1 // row[(n - 1) * 3] = 0
+  coeffMatrix.push(row)
+  results.push(0)
 
-  // Calculamos c usando continuidad de la derivada
-  for (let i = 1; i < n; i++) {
-    c.push(b[i] - b[i - 1])
-  }
+  // resolver: coeffMatrix * unknowns = results
+  const coeff = matrix(coeffMatrix)
+  const res = matrix(results)
 
-  // Ahora armamos los coeficientes
+  const solution = lusolve(coeff, res) // mathjs devuelve una matriz columna
+
+  // Coeficientes a1, b1, c1, a2, b2, c2, ..., an, bn, cn
+  const coef: number[] = solution.valueOf().flat().map(c => Number(c))
+
+  // Funcion por partes
+  const functionsArr: ((value: number) => number)[] = []
   for (let i = 0; i < n; i++) {
-    const a = c[i] / (2 * h[i])
-    const bVal = b[i] - a * (2 * (x[i + 1] - x[i]))
-    coeff[i] = {
-      a,
-      b: bVal,
-      c: y[i],
+    const idx=i*3
+    const segmentFunction = (value:number) => {
+      return (coef[idx]*(value**2))+(coef[idx+1]*value)+ coef[idx+2]
     }
+    functionsArr.push(segmentFunction)
   }
+  const intervals:{start: number, end:number }[] = functionsArr.map((_, idx) => (
+    {start:puntos[idx].x, end:puntos[idx+1].x}
+  ))
 
-  return (value: number) => {
-    // Buscamos el intervalo correcto
-    let i = 0
-    while (i < n && value > x[i + 1]) {
-      i++
+  const splineCase: (value: number) => number = (value:number) => {
+    let result:number
+    for (let i=0; i<intervals.length; i++) {
+      if(value >= intervals[i].start && value < intervals[i].end){
+        result= functionsArr[i](value)
+        console.log(value, i, intervals)
+        break;
+      }
     }
-    if (i >= n)
-      i = n - 1
+    
+    if(value < intervals[0].start) 
+      result = functionsArr[0](value)
+    else if(value >= intervals[intervals.length-1].start) 
+      result = functionsArr[intervals.length-1](value)
 
-    const dx = value - x[i]
-    const { a, b, c } = coeff[i]
-    return a * dx * dx + b * dx + c
-  }
+    return result!
+  };
 
-  // El primer y último polinomio deben pasar por los puntos extremos
-
-  // Generalmente se toma como condición que la derivada segunda es nula en uno de los polinomios extremos.
-
-  return () => 2
+  return splineCase
 }
 
 /**
