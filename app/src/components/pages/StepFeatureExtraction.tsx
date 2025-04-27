@@ -28,6 +28,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   } | null>(null)
   const [avgFunctions, setAvgFunctions] = useState<number[][]>([])
   const [pointsWMed, setPointsWMed] = useState<Point[]>([])
+  const [perpendicularRects, setPerpendicularRects] = useState<{m: number,large: number}[]>([])
 
   useEffect(() => {
     // Obtener informacion de imagen
@@ -51,15 +52,28 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setAvgFunctions(functions)
 
       // Obtener las medias de cada funcion
-      const medias = functions.map((funct) => {
-        const fit = findPlateau(funct, 0.5)
-        return fit.medium
-      })
+      const plateauInfo:{
+        medium:number, 
+        opening: number
+      }[] = functions.map((funct) => findPlateau(funct, 0.5))
 
       const pointsWhitMedias = points.map((point, index) => (
-        { x: point, y: medias[index] }
+        { x: point, y: plateauInfo[index].medium }
       ))
       setPointsWMed(pointsWhitMedias)
+
+      const perpendicularRects:{
+        m: number,
+        large: number
+      }[] = []
+      for (let i=0; i<pointsWhitMedias.length-1; i++){
+        const act = pointsWhitMedias[i]
+        const sig = pointsWhitMedias[i+1]
+        perpendicularRects.push({
+          m:(sig.y-act.y)/(sig.x-act.x),
+          large: plateauInfo[i].opening
+        })
+      }
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
