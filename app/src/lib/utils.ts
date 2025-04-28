@@ -49,14 +49,14 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
   if (x.length < 2)
     throw new Error(`At least two points are needed to buil a spline. Count of points: ${x.length}`)
 
-  const puntos = x.map((value, i) => ({x:value, y:y[i]})) // [
-//     { x: 0, y: 0 },
-//     { x: 10, y: 227.04 },
-//     { x: 15, y: 362.78 },
-//     { x: 20, y: 517.35 },
-//     { x: 22.5, y: 602.97 },
-//     { x: 30, y: 901.67 },
-//   ]
+  const puntos = x.map((value, i) => ({ x: value, y: y[i] })) // [
+  //     { x: 0, y: 0 },
+  //     { x: 10, y: 227.04 },
+  //     { x: 15, y: 362.78 },
+  //     { x: 20, y: 517.35 },
+  //     { x: 22.5, y: 602.97 },
+  //     { x: 30, y: 901.67 },
+  //   ]
 
   const n: number = puntos.length - 1 // Cantidad de intervalos, vamos a ajustar 1 polinomio por intervalo
   // const cols: number = 3 * n // 3 incognitas por polinomio
@@ -68,7 +68,7 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
   for (let i = 0; i < n; i++) {
     // Ecuacion 1
     let row: number[] = Array.from({ length: 3 * n }, () => 0)
-    let idx = i * 3
+    const idx = i * 3
     row[idx] = puntos[i].x ** 2
     row[idx + 1] = puntos[i].x
     row[idx + 2] = 1
@@ -113,32 +113,32 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
   // Funcion por partes
   const functionsArr: ((value: number) => number)[] = []
   for (let i = 0; i < n; i++) {
-    const idx=i*3
-    const segmentFunction = (value:number) => {
-      return (coef[idx]*(value**2))+(coef[idx+1]*value)+ coef[idx+2]
+    const idx = i * 3
+    const segmentFunction = (value: number) => {
+      return (coef[idx] * (value ** 2)) + (coef[idx + 1] * value) + coef[idx + 2]
     }
     functionsArr.push(segmentFunction)
   }
-  const intervals:{start: number, end:number }[] = functionsArr.map((_, idx) => (
-    {start:puntos[idx].x, end:puntos[idx+1].x}
+  const intervals: { start: number, end: number }[] = functionsArr.map((_, idx) => (
+    { start: puntos[idx].x, end: puntos[idx + 1].x }
   ))
 
-  const splineCase: (value: number) => number = (value:number) => {
-    let result:number
-    for (let i=0; i<intervals.length; i++) {
-      if(value >= intervals[i].start && value < intervals[i].end){
-        result= functionsArr[i](value)
-        break;
+  const splineCase: (value: number) => number = (value: number) => {
+    let result: number
+    for (let i = 0; i < intervals.length; i++) {
+      if (value >= intervals[i].start && value < intervals[i].end) {
+        result = functionsArr[i](value)
+        break
       }
     }
 
-    if(value < intervals[0].start) 
+    if (value < intervals[0].start)
       result = functionsArr[0](value)
-    else if(value >= intervals[intervals.length-1].start) 
-      result = functionsArr[intervals.length-1](value)
+    else if (value >= intervals[intervals.length - 1].start)
+      result = functionsArr[intervals.length - 1](value)
 
     return result!
-  };
+  }
 
   return splineCase
 }
