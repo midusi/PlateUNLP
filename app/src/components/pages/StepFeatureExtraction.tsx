@@ -1,17 +1,20 @@
 import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { findPlateau, findXspacedPoints, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
+import { findPlateau, findXspacedPoints, getPointsInRect, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
+import { extremePoints } from "@/lib/trigonometry"
 import { linearRegression, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
+import { ParentSize } from "@visx/responsive"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
-import { mean } from "mathjs"
+import { Forward } from "lucide-react"
+import { max, mean, min, round } from "mathjs"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
-  const checkpoints = 2
+  const checkpoints = 20
   const segmentWidth = 120
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
@@ -26,11 +29,12 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   const [rectMedium, setRectMedium] = useState<(x: number) => number>(() => (x: number) => x)
   const [rects, setRects] = useState<{ m: number, funct: ((x: number) => number) }[]>([])
   const [opening, setOpening] = useState<number>(0)
+  const [avgsPerpendicularArr, setAvgsPerpendicularArr] = useState<number[]>([])
 
   useEffect(() => {
     // Obtener informacion de imagen
     obtainimageMatrix(imageSrc, false).then(({ data, width, height }) => {
-      if (!data)
+      if (!data || data.length === 0)
         return
       setImageData({ data, width, height })
 
@@ -60,7 +64,8 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setPointsWMed(pointsWhitMedias)
 
       // Infiere funcion medio del espectro
-      const splineCase = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
+      const splineCase = linearRegression(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y)) // Version lineal
+      // const splineCase = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
       setRectMedium(() => splineCase)
 
       /**
@@ -101,6 +106,26 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
        */
       const avgOpening = mean(plateauInfo.map(pi => pi.opening))
       setOpening(avgOpening)
+
+      const avgsPerpendicular: number[] = []
+      for (let i = 0; i < perpendicularFunctions.length; i++) {
+        const point = { x: i, y: splineCase(i) }
+        const { forward, backward } = extremePoints(
+          point,
+          perpendicularFunctions[i].m,
+          avgOpening / 2,
+        )
+
+        const minY = round(min(forward.y, backward.y))
+        const maxY = round(max(forward.y, backward.y))
+        const values: number[] = getPointsInRect(data, width, perpendicularFunctions[i].funct, minY, maxY)
+
+        if (values.length === 0)
+          avgsPerpendicular.push(0)
+        else
+          avgsPerpendicular.push(mean(values))
+      }
+      setAvgsPerpendicularArr(avgsPerpendicular)
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
@@ -146,13 +171,16 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   return (
     <div className="w-full p-6 flex flex-col items-center">
       {imageData && (
-        <ImageWithDraws
-          src={imageSrc}
-          points={pointsWMed}
-          drawFunction={rectMedium}
-          perpendicularFunctions={rects}
-          opening={opening}
-        />
+        <>
+          <ImageWithDraws
+            src={imageSrc}
+            points={pointsWMed}
+            drawFunction={rectMedium}
+            perpendicularFunctions={rects}
+            opening={opening}
+          />
+          <SimpleFunctionXY data={avgsPerpendicularArr} />
+        </>
       )}
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
@@ -235,18 +263,8 @@ function ImageWithDraws({ src, points, drawFunction, perpendicularFunctions, ope
           ctx.lineWidth = 6
           ctx.beginPath()
 
-          // Linea perpendicular con la altura de la funcion
-          // Datos conocidos
-          const hipotenusa = opening / 2
-          const anguloDeM = Math.atan(m) * (180 / Math.PI)
-          // Calculo cateto opuesto
-          const opuesto = Math.sin(anguloDeM) * hipotenusa
-          // Calculo cateto adyacente
-          const adyacente = Math.cos(anguloDeM) * hipotenusa
-          // Punto destino arriba
-          const pdup = { x: point.x + adyacente, y: point.y + opuesto }
-          // Punto destino abajo
-          const pddown = { x: point.x - adyacente, y: point.y - opuesto }
+          // Punto destino arriba y abajo
+          const { forward: pdup, backward: pddown } = extremePoints(point, m, opening / 2)
 
           ctx.moveTo(pdup.x, pdup.y)
           ctx.lineTo(pddown.x, pddown.y)
@@ -287,15 +305,21 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
   }
 
   return (
-    <XYChart
-      theme={darkTheme}
-      xScale={{ type: "linear" }}
-      yScale={{ type: "linear" }}
-      height={260}
-    >
-      <AnimatedAxis orientation="bottom" />
-      <AnimatedGrid columns={false} numTicks={4} />
-      <AnimatedLineSeries curve={curveStep} dataKey="Line 1" data={data1} {...accessors} />
-    </XYChart>
+    <ParentSize>
+      {({ width }) => (
+        <XYChart
+          theme={darkTheme}
+          xScale={{ type: "linear" }}
+          yScale={{ type: "linear" }}
+          height={260}
+          width={width}
+          margin={{ top: 40, right: 0, bottom: 40, left: 0 }}
+        >
+          <AnimatedAxis orientation="bottom" />
+          <AnimatedGrid columns={false} numTicks={4} />
+          <AnimatedLineSeries curve={curveStep} dataKey="Line 1" data={data1} {...accessors} />
+        </XYChart>
+      )}
+    </ParentSize>
   )
 }
