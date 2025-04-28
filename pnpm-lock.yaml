@@ -69,6 +69,9 @@ importers:
       '@visx/pattern':
         specifier: ^3.12.0
         version: 3.12.0(react@19.0.0)
+      '@visx/responsive':
+        specifier: 2.4.1
+        version: 2.4.1(react@19.0.0)
       '@visx/scale':
         specifier: ^3.12.0
         version: 3.12.0
@@ -2886,6 +2889,11 @@ packages:
     peerDependencies:
       '@react-spring/web': ^9.4.5
       react: ^16.3.0-0 || ^17.0.0 || ^18.0.0
+
+  '@visx/responsive@2.4.1':
+    resolution: {integrity: sha512-x5zPUmmsdVX/QaeDj9rLg3mGtNuiomBWUvwBo5oQs2KOtAFiviHx0NpLfY09h+p5gvkmGfTM+8gHEtVtIwLXPg==}
+    peerDependencies:
+      react: ^16.0.0-0 || ^17.0.0-0
 
   '@visx/responsive@3.12.0':
     resolution: {integrity: sha512-GV1BTYwAGlk/K5c9vH8lS2syPnTuIqEacI7L6LRPbsuaLscXMNi+i9fZyzo0BWvAdtRV8v6Urzglo++lvAXT1Q==}
@@ -5757,6 +5765,9 @@ packages:
     peerDependencies:
       react: '*'
       react-dom: '*'
+
+  resize-observer-polyfill@1.5.1:
+    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -9253,6 +9264,15 @@ snapshots:
       prop-types: 15.8.1
       react: 19.0.0
 
+  '@visx/responsive@2.4.1(react@19.0.0)':
+    dependencies:
+      '@types/lodash': 4.17.13
+      '@types/react': 19.0.10
+      lodash: 4.17.21
+      prop-types: 15.8.1
+      react: 19.0.0
+      resize-observer-polyfill: 1.5.1
+
   '@visx/responsive@3.12.0(react@19.0.0)':
     dependencies:
       '@types/lodash': 4.17.13
@@ -12626,6 +12646,8 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       throttleit: 2.1.0
+
+  resize-observer-polyfill@1.5.1: {}
 
   resolve-from@4.0.0: {}
 
