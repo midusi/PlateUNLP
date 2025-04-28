@@ -65,6 +65,12 @@ export function findPlateau(dataY: number[], threshold: number): {
     segments.push({ values: currentValues, indexes: currentIndexes })
   }
 
+  // ⚠️ Chequeo de seguridad:
+  if (segments.length === 0) {
+    // No se encontró altiplano -> devolver valores por defecto
+    return { medium: 0, opening: 0 }
+  }
+
   const moreLargeSegmentIdx = segments.map(segment => segment.values.length)
     .reduce((maxIdx, currVal, idx, arr) => currVal > arr[maxIdx] ? idx : maxIdx, 0)
 

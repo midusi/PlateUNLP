@@ -1,16 +1,17 @@
 import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { findPlateau, findXspacedPoints, matrixToUrl, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
+import { findPlateau, findXspacedPoints, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { linearRegression, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
+import { mean } from "mathjs"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
-  const checkpoints = 10
+  const checkpoints = 2
   const segmentWidth = 120
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
@@ -21,14 +22,10 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     width: number
     height: number
   } | null>(null)
-  const [segmentsData, setSegmentsData] = useState<{
-    data: Uint8ClampedArray<ArrayBufferLike>[]
-    width: number
-    height: number
-  } | null>(null)
-  const [avgFunctions, setAvgFunctions] = useState<number[][]>([])
   const [pointsWMed, setPointsWMed] = useState<Point[]>([])
-  const [perpendicularRects, setPerpendicularRects] = useState<{m: number,large: number}[]>([])
+  const [rectMedium, setRectMedium] = useState<(x: number) => number>(() => (x: number) => x)
+  const [rects, setRects] = useState<((x: number) => number)[]>([])
+  const [opening, setOpening] = useState<number>(0)
 
   useEffect(() => {
     // Obtener informacion de imagen
@@ -44,36 +41,60 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         if (sd.length !== segmentWidth * height * 4)
           console.warn("Segment size mismatch:", sd.length, segmentWidth * height * 4)
       }
-      setSegmentsData({ data: segmentsData, width: segmentWidth, height })
 
-      // Obtener funciones de cada segmento
+      /**
+       * Funciones de cada segmento promediado horizontalmente
+       */
       const functions = segmentsData.map(data =>
         promediadoHorizontal(data, segmentWidth, height))
-      setAvgFunctions(functions)
 
       // Obtener las medias de cada funcion
-      const plateauInfo:{
-        medium:number, 
+      const plateauInfo: {
+        medium: number
         opening: number
-      }[] = functions.map((funct) => findPlateau(funct, 0.5))
+      }[] = functions.map(funct => findPlateau(funct, 0.5))
 
       const pointsWhitMedias = points.map((point, index) => (
-        { x: point, y: plateauInfo[index].medium }
+        { x: point, y: plateauInfo[index]?.medium ?? 0 }
       ))
       setPointsWMed(pointsWhitMedias)
 
-      const perpendicularRects:{
-        m: number,
-        large: number
+      // Infiere funcion medio del espectro
+      const splineCase = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
+      setRectMedium(() => splineCase)
+
+      /**
+       * Arreglo de funciones que para cada punto de la recta, dada una altura Y
+       * indica el pixel X que le corresponde.
+       */
+      const perpendicularRects: {
+        m: number
+        point: Point
       }[] = []
-      for (let i=0; i<pointsWhitMedias.length-1; i++){
-        const act = pointsWhitMedias[i]
-        const sig = pointsWhitMedias[i+1]
+      for (let i = 0; i < width - 1; i++) {
+        const act = { x: i, y: splineCase(i) }
+        const sig = { x: (i + 1), y: splineCase((i + 1)) }
         perpendicularRects.push({
-          m:(sig.y-act.y)/(sig.x-act.x),
-          large: plateauInfo[i].opening
+          m: (sig.y - act.y) / (sig.x - act.x),
+          point: act,
         })
       }
+
+      const perpendicularFunctions: ((h: number) => number)[] = perpendicularRects.map((info) => {
+        const p1 = info.point
+        const m = -1 / info.m
+        const b = p1.y - m * p1.x
+        return (y: number) => ((y - b) / m) // Para cada Y me da ele x que le corresponde
+      })
+      // Duplica el ultimo elemento
+      perpendicularFunctions.push(perpendicularFunctions[perpendicularFunctions.length - 1])
+      setRects(perpendicularFunctions)
+
+      /**
+       * Apertura promedio
+       */
+      const avgOpening = mean(plateauInfo.map(pi => pi.opening))
+      setOpening(avgOpening)
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
@@ -119,11 +140,12 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   return (
     <div className="w-full p-6 flex flex-col items-center">
       {imageData && (
-        <SimpleImage
+        <ImageWithDraws
           src={imageSrc}
           points={pointsWMed}
-          drawFunction={splineCuadratic(pointsWMed.map(p => p.x), pointsWMed.map(p => p.y))}
+          drawFunction={rectMedium}
           perpendicularFunctions={rects}
+          opening={opening}
         />
       )}
       <hr className="w-full mb-4"></hr>
@@ -134,13 +156,15 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   )
 }
 
-interface SimpleImageProps {
+interface ImageWithDrawsProps {
   src: string
-  points?: Point[]
-  drawFunction?: (x: number) => number
+  points: Point[]
+  drawFunction?: ((x: number) => number)
+  perpendicularFunctions: ((y: number) => number)[]
+  opening?: number
 }
 
-function SimpleImage({ src, points, drawFunction }: SimpleImageProps) {
+function ImageWithDraws({ src, points, drawFunction, perpendicularFunctions, opening }: ImageWithDrawsProps) {
   const pointSize = 8
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -160,6 +184,16 @@ function SimpleImage({ src, points, drawFunction }: SimpleImageProps) {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(img, 0, 0)
 
+      // Dibujar puntos si están definidos
+      if (points) {
+        ctx.fillStyle = "red"
+        for (const point of points) {
+          ctx.beginPath()
+          ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
+          ctx.fill()
+        }
+      }
+
       // Dibujar función si está definida
       if (drawFunction) {
         ctx.strokeStyle = "red"
@@ -177,18 +211,39 @@ function SimpleImage({ src, points, drawFunction }: SimpleImageProps) {
         ctx.stroke()
       }
 
-      // Dibujar puntos si están definidos
-      if (points) {
-        ctx.fillStyle = "red"
-        for (const point of points) {
-          ctx.beginPath()
-          ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
-          ctx.fill()
-        }
+      // Dibujar rectas si está definidas
+      if (perpendicularFunctions && drawFunction && opening) {
+        const point = { x: 2000, y: drawFunction(2000) }
+        ctx.fillStyle = "steelblue"
+        ctx.strokeStyle = "black" // borde negro
+        ctx.beginPath()
+        ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
+        ctx.fill()
+
+        const verticalRect = perpendicularFunctions[point.x]
+        ctx.strokeStyle = "steelblue"
+        ctx.lineWidth = 6
+        ctx.beginPath()
+
+        // Linea perpendicular con la altura de la funcion
+        const minY = point.y - opening / 2
+        const maxY = point.y + opening / 2
+        let x = verticalRect(minY)
+        ctx.moveTo(x, minY)
+        x = verticalRect(maxY)
+        ctx.lineTo(x, maxY)
+        ctx.stroke()
+
+        // inicio y fin
+        ctx.fillStyle = "steelblue"
+        ctx.beginPath()
+        ctx.arc(verticalRect(minY), minY, 10, 0, 2 * Math.PI)
+        ctx.arc(verticalRect(maxY), maxY, 10, 0, 2 * Math.PI)
+        ctx.fill()
       }
     }
     img.src = src
-  }, [src, points, drawFunction])
+  }, [src, points, drawFunction, perpendicularFunctions, opening])
 
   return (
     <canvas
