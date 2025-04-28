@@ -219,42 +219,46 @@ function ImageWithDraws({ src, points, drawFunction, perpendicularFunctions, ope
 
       // Dibujar rectas si está definidas
       if (perpendicularFunctions && drawFunction && opening) {
-        const point = { x: 2000, y: drawFunction(2000) }
-        ctx.fillStyle = "steelblue"
-        ctx.strokeStyle = "black" // borde negro
-        ctx.beginPath()
-        ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
-        ctx.fill()
+        for (let i = 0; i < perpendicularFunctions.length; i += 100) {
+          const point = { x: i, y: drawFunction(i) }
 
-        const verticalRect = perpendicularFunctions[point.x].funct
-        const m = perpendicularFunctions[point.x].m
-        ctx.strokeStyle = "steelblue"
-        ctx.lineWidth = 6
-        ctx.beginPath()
+          // // Punto central
+          // ctx.fillStyle = "steelblue"
+          // ctx.strokeStyle = "black" // borde negro
+          // ctx.beginPath()
+          // ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
+          // ctx.fill()
 
-        // Linea perpendicular con la altura de la funcion
-        // Datos conocidos
-        const hipotenusa = point.y - opening / 2
-        const anguloDeM = Math.atan(m) * (180 / Math.PI)
-        // Calculo cateto opuesto
-        const opuesto = Math.sin(anguloDeM) * hipotenusa
-        // Calculo cateto adyacente
-        const adyacente = Math.cos(anguloDeM) * hipotenusa
-        // Punto destino arriba
-        const pdup = { x: point.x + adyacente, y: point.y + opuesto }
-        // Punto destino abajo
-        const pddown = { x: point.x - adyacente, y: point.y - opuesto }
+          // const verticalRect = perpendicularFunctions[point.x].funct
+          const m = perpendicularFunctions[point.x].m
+          ctx.strokeStyle = "steelblue"
+          ctx.lineWidth = 6
+          ctx.beginPath()
 
-        ctx.moveTo(pdup.x, pdup.y)
-        ctx.lineTo(pddown.x, pddown.y)
-        ctx.stroke()
+          // Linea perpendicular con la altura de la funcion
+          // Datos conocidos
+          const hipotenusa = opening / 2
+          const anguloDeM = Math.atan(m) * (180 / Math.PI)
+          // Calculo cateto opuesto
+          const opuesto = Math.sin(anguloDeM) * hipotenusa
+          // Calculo cateto adyacente
+          const adyacente = Math.cos(anguloDeM) * hipotenusa
+          // Punto destino arriba
+          const pdup = { x: point.x + adyacente, y: point.y + opuesto }
+          // Punto destino abajo
+          const pddown = { x: point.x - adyacente, y: point.y - opuesto }
 
-        // inicio y fin
-        ctx.fillStyle = "steelblue"
-        ctx.beginPath()
-        ctx.arc(pddown.x, pddown.y, 10, 0, 2 * Math.PI)
-        ctx.arc(pdup.x, pdup.y, 10, 0, 2 * Math.PI)
-        ctx.fill()
+          ctx.moveTo(pdup.x, pdup.y)
+          ctx.lineTo(pddown.x, pddown.y)
+          ctx.stroke()
+
+          // // inicio y fin
+          // ctx.fillStyle = "steelblue"
+          // ctx.beginPath()
+          // ctx.arc(pddown.x, pddown.y, 10, 0, 2 * Math.PI)
+          // ctx.arc(pdup.x, pdup.y, 10, 0, 2 * Math.PI)
+          // ctx.fill()
+        }
       }
     }
     img.src = src
