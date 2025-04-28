@@ -1,5 +1,39 @@
-import { max as mathjsMax, min as mathjsMin } from "mathjs"
+import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
+
+/**
+ * Retorna los valores (en grises) de los pixeles de una imagen que corresponden a las
+ * coordenadas por las que pasa una recta.
+ * @param {Uint8ClampedArray} data - Matriz de pixeles.
+ * @param {number} width - Ancho de la matriz.
+ * @param {(y: number) => number} rect - Recta que dado un y indica que x le corresponde
+ * @param {number} minY - Valor Y minimo.
+ * @param {number} maxY - Valor Y Maximo.
+ * @returns {number[]} - Arreglo de valores que corresponden a las coordenadas por las
+ * que pasa la funcion.
+ */
+export function getPointsInRect(
+  data: Uint8ClampedArray,
+  width: number,
+  rect: ((y: number) => number),
+  minY: number,
+  maxY: number,
+): number[] {
+  const rectPoints: number[] = []
+  for (let y = minY; y < maxY; y++) {
+    const coordenadaX = round(rect(y))
+    if(coordenadaX<0 ||coordenadaX >= width)
+      continue
+    // Valor correspondiente a imagen en pixel (coordenadaX, y)
+    const index = (y * width + coordenadaX) * 4
+    const r = data[index]
+    const g = data[index + 1]
+    const b = data[index + 2]
+    const avg = round((r + g + b) / 3)
+    rectPoints.push(avg)
+  }
+  return rectPoints
+}
 
 /**
  * Recibe un arreglo de datos y los normaliza.
