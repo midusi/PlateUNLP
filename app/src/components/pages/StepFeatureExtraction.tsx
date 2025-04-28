@@ -24,7 +24,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   } | null>(null)
   const [pointsWMed, setPointsWMed] = useState<Point[]>([])
   const [rectMedium, setRectMedium] = useState<(x: number) => number>(() => (x: number) => x)
-  const [rects, setRects] = useState<((x: number) => number)[]>([])
+  const [rects, setRects] = useState<{ m: number, funct: ((x: number) => number) }[]>([])
   const [opening, setOpening] = useState<number>(0)
 
   useEffect(() => {
@@ -80,11 +80,17 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         })
       }
 
-      const perpendicularFunctions: ((h: number) => number)[] = perpendicularRects.map((info) => {
+      const perpendicularFunctions: {
+        m: number
+        funct: ((h: number) => number)
+      }[] = perpendicularRects.map((info) => {
         const p1 = info.point
         const m = -1 / info.m
         const b = p1.y - m * p1.x
-        return (y: number) => ((y - b) / m) // Para cada Y me da ele x que le corresponde
+        return {
+          m,
+          funct: (y: number) => ((y - b) / m),
+        } // Para cada Y me da ele x que le corresponde
       })
       // Duplica el ultimo elemento
       perpendicularFunctions.push(perpendicularFunctions[perpendicularFunctions.length - 1])
@@ -160,7 +166,7 @@ interface ImageWithDrawsProps {
   src: string
   points: Point[]
   drawFunction?: ((x: number) => number)
-  perpendicularFunctions: ((y: number) => number)[]
+  perpendicularFunctions: { m: number, funct: ((x: number) => number) }[]
   opening?: number
 }
 
@@ -220,25 +226,34 @@ function ImageWithDraws({ src, points, drawFunction, perpendicularFunctions, ope
         ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
         ctx.fill()
 
-        const verticalRect = perpendicularFunctions[point.x]
+        const verticalRect = perpendicularFunctions[point.x].funct
+        const m = perpendicularFunctions[point.x].m
         ctx.strokeStyle = "steelblue"
         ctx.lineWidth = 6
         ctx.beginPath()
 
         // Linea perpendicular con la altura de la funcion
-        const minY = point.y - opening / 2
-        const maxY = point.y + opening / 2
-        let x = verticalRect(minY)
-        ctx.moveTo(x, minY)
-        x = verticalRect(maxY)
-        ctx.lineTo(x, maxY)
+        // Datos conocidos
+        const hipotenusa = point.y - opening / 2
+        const anguloDeM = Math.atan(m) * (180 / Math.PI)
+        // Calculo cateto opuesto
+        const opuesto = Math.sin(anguloDeM) * hipotenusa
+        // Calculo cateto adyacente
+        const adyacente = Math.cos(anguloDeM) * hipotenusa
+        // Punto destino arriba
+        const pdup = { x: point.x + adyacente, y: point.y + opuesto }
+        // Punto destino abajo
+        const pddown = { x: point.x - adyacente, y: point.y - opuesto }
+
+        ctx.moveTo(pdup.x, pdup.y)
+        ctx.lineTo(pddown.x, pddown.y)
         ctx.stroke()
 
         // inicio y fin
         ctx.fillStyle = "steelblue"
         ctx.beginPath()
-        ctx.arc(verticalRect(minY), minY, 10, 0, 2 * Math.PI)
-        ctx.arc(verticalRect(maxY), maxY, 10, 0, 2 * Math.PI)
+        ctx.arc(pddown.x, pddown.y, 10, 0, 2 * Math.PI)
+        ctx.arc(pdup.x, pdup.y, 10, 0, 2 * Math.PI)
         ctx.fill()
       }
     }
