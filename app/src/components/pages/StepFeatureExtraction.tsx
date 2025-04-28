@@ -123,23 +123,8 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
           src={imageSrc}
           points={pointsWMed}
           drawFunction={splineCuadratic(pointsWMed.map(p => p.x), pointsWMed.map(p => p.y))}
+          perpendicularFunctions={rects}
         />
-      )}
-      {segmentsData && (
-        <div className="flex flex-col gap-6 bg-fuchsia-200 w-full  ">
-          {segmentsData.data.map((data, index) => (
-            <div key={data[0]} className="p-2 m-2 bg-red-300 flex flex-row items-start gap-4">
-              <SimpleImage
-                src={matrixToUrl(
-                  data,
-                  segmentsData.width,
-                  segmentsData.height,
-                )}
-              />
-              <SimpleFunctionXY data={avgFunctions[index]} />
-            </div>
-          ))}
-        </div>
       )}
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
