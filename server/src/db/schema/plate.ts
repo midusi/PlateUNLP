@@ -12,7 +12,10 @@ export const plate = sqliteTable("plate", {
     scanner: text(),
     software: text(),
     plateN: text(),
-    scanImage: text()
+    scanImage: text(),
+    telescope: text(),
+    detector: text(),
+    instrument: text()
 });
 
 export const plateRelations = relations(plate, ({ one }) => ({
