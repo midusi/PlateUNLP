@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react"
 import clsx from "clsx"
 
 interface ImageWithPixelExtractionProps {
+    title?: string
     imageUrl: string
     imageAlt?: string
     children: React.ReactNode
@@ -18,6 +19,7 @@ interface ImageWithPixelExtractionProps {
 }
 
 export function ImageWithPixelExtraction({
+    title,
     imageUrl,
     imageAlt,
     children,
@@ -27,25 +29,29 @@ export function ImageWithPixelExtraction({
     opening
 }: ImageWithPixelExtractionProps) {
     const px = "px-2"
-    const py = "py-2"
     return (
         <Card className="overflow-hidden bg-slate-100">
             <div
                 className={clsx(
                     "relative w-full items-center flex justify-center ",
-                    px, py
+                    px, "py-2"
                 )}
             >
-                <ImageWithDraws
-                    src={imageUrl}
-                    alt={imageAlt}
-                    points={pointsWMed}
-                    drawFunction={drawFunction}
-                    perpendicularFunctions={perpendicularFunctions}
-                    opening={opening}
-                />
+                <div className="flex flex-col">
+                    {title && <h2 className="pb-2 flex justify-center text-xl font-semibold text-slate-500">
+                        {title}
+                    </h2>}
+                    <ImageWithDraws
+                        src={imageUrl}
+                        alt={imageAlt}
+                        points={pointsWMed}
+                        drawFunction={drawFunction}
+                        perpendicularFunctions={perpendicularFunctions}
+                        opening={opening}
+                    />
+                </div>
             </div>
-            <CardFooter className={clsx(px, py)}>{children}</CardFooter>
+            <CardFooter className={clsx(px, "mt-2")}>{children}</CardFooter>
         </Card>
     )
 }

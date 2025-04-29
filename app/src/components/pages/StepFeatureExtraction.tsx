@@ -174,6 +174,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       {imageData && (
         <>
           <ImageWithPixelExtraction
+            title="Science Spectrum"
             imageUrl={imageSrc}
             imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function"
             pointsWMed={pointsWMed}
