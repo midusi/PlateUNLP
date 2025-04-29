@@ -28,17 +28,17 @@ export function ImageWithPixelExtraction({
     perpendicularFunctions,
     opening
 }: ImageWithPixelExtractionProps) {
-    const px = "px-2"
     return (
         <Card className="overflow-hidden bg-slate-100">
             <div
                 className={clsx(
                     "relative w-full items-center flex justify-center ",
-                    px, "py-2"
+                    "px-16", "pt-2",
                 )}
             >
                 <div className="flex flex-col">
-                    {title && <h2 className="pb-2 flex justify-center text-xl font-semibold text-slate-500">
+                    {title && <h2
+                        className="pb-2 flex justify-center text-xl font-semibold text-slate-500">
                         {title}
                     </h2>}
                     <ImageWithDraws
@@ -51,7 +51,7 @@ export function ImageWithPixelExtraction({
                     />
                 </div>
             </div>
-            <CardFooter className={clsx(px, "mt-2")}>{children}</CardFooter>
+            <CardFooter className={clsx("mx-2", "mt-2")}>{children}</CardFooter>
         </Card>
     )
 }

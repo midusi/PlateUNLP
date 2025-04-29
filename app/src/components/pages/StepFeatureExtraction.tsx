@@ -6,7 +6,7 @@ import { extremePoints } from "@/lib/trigonometry"
 import { linearRegression, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { ParentSize } from "@visx/responsive"
-import { AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, XYChart } from "@visx/xychart"
+import { AnimatedAreaSeries, AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, lightTheme, XYChart } from "@visx/xychart"
 import { Forward } from "lucide-react"
 import { max, mean, min, round } from "mathjs"
 import { useEffect, useRef, useState } from "react"
@@ -218,7 +218,7 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
           yScale={{ type: "linear" }}
           height={260}
           width={width}
-          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+            margin={{ top: 0, right: 32, bottom: 20, left: 32 }}
         >
           <AnimatedAxis orientation="bottom" />
           <AnimatedGrid columns={false} numTicks={4} />
