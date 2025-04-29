@@ -279,6 +279,8 @@ function ImageViewer({
 
   /** To know if show or not resizing controls */
   const [isResizing, setIsResizing] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragOffsetRef = useRef({ x: 0, y: 0 })
 
   const imageScale = useMemo(() => {
     if (
@@ -358,7 +360,7 @@ function ImageViewer({
           centerOnInit
           centerZoomedOut
           doubleClick={{ step: 0.7 }}
-          disabled={isDrawingMode || isResizing}
+          disabled={isDrawingMode || isResizing || isDragging}
         >
           <TransformComponent
             wrapperStyle={{
@@ -380,6 +382,8 @@ function ImageViewer({
               setIsDrawingMode={setIsDrawingMode}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
+              setIsDragging={setIsDragging}
+              dragOffsetRef={dragOffsetRef}
               selectedBoxId={selectedBoxId}
               setSelectedBoxId={setSelectedBoxId}
               boundingBoxes={boundingBoxes}
@@ -400,6 +404,8 @@ interface ImageWithBoundingBoxesProps {
   setIsDrawingMode: Dispatch<SetStateAction<boolean>>
   isResizing: boolean
   setIsResizing: Dispatch<SetStateAction<boolean>>
+  setIsDragging: Dispatch<SetStateAction<boolean>>
+  dragOffsetRef: React.MutableRefObject<{ x: number; y: number }>
   selectedBoxId: string | null
   setSelectedBoxId: Dispatch<SetStateAction<string | null>>
   boundingBoxes: BoundingBox[]
@@ -413,6 +419,8 @@ function ImageWithBoundingBoxes({
   setIsDrawingMode,
   isResizing,
   setIsResizing,
+  setIsDragging,
+  dragOffsetRef,
   selectedBoxId,
   setSelectedBoxId,
   boundingBoxes,
@@ -566,7 +574,25 @@ function ImageWithBoundingBoxes({
       const transformed = transformCoordinates(currentX, currentY, 0, 0, true)
       currentX = transformed.x
       currentY = transformed.y
+      const box_selected = boundingBoxes.find(b => b.id === selectedBoxId)
+      if ((selectedBoxId && !isResizing && !isDrawingMode && e.buttons === 1 && box_selected != undefined)) {
+        if (dragOffsetRef.current.x == -1) {
+          const offsetX = currentX - box_selected.x
+          const offsetY = currentY - box_selected.y
+          dragOffsetRef.current = { x: offsetX, y: offsetY }
+        }
+        setIsDragging(true)
+        const newBox = { ...box_selected }
+        newBox.x = currentX - dragOffsetRef.current.x //- previousMouseX
+        newBox.y = currentY - dragOffsetRef.current.y  //- previousMouseY
+        // Update the bounding box
+        setBoundingBoxes(prev => prev.map(box => (box.id === selectedBoxId ? newBox : box)))
 
+      }
+      else {
+        dragOffsetRef.current = { x: -1, y: 0 }
+        setIsDragging(false)
+      }
       /** Dibujo de nueva caja */
       if (drawingRef.current.isDrawing && tempBox) {
         const width = currentX - drawingRef.current.startX
@@ -601,8 +627,6 @@ function ImageWithBoundingBoxes({
 
         switch (actualHandle) {
           case "top-left":
-            console.log(e.clientX, e.clientY)
-            console.log("top-left ", originalBox, deltaX, deltaY)
             newBox.x = currentX
             newBox.y = currentY
             newBox.width = originalBox.width - (currentX - originalBox.x)
