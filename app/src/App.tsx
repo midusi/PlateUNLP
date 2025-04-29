@@ -31,6 +31,9 @@ export default function App() {
           SCANNER: "",
           SOFTWARE: "",
           PLATE_N: "",
+          DETECTOR: "",
+          INSTRUMENT: "",
+          TELESCOPE: ""
         },
       },
       spectrums: [],
