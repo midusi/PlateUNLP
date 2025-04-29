@@ -64,13 +64,12 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setPointsWMed(pointsWhitMedias)
 
       // Infiere funcion medio del espectro
-      const splineCase = linearRegression(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y)) // Version lineal
+      const { funct: splineCase, derived } = linearRegression(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y)) // Version lineal
       // const splineCase = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
       setRectMedium(() => splineCase)
 
       /**
-       * Arreglo de funciones que para cada punto de la recta, dada una altura Y
-       * indica el pixel X que le corresponde.
+       * Arreglo con informacion de la pendiente que le corresponde a cada punto de la funcion.
        */
       const perpendicularRects: {
         m: number
@@ -78,13 +77,16 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       }[] = []
       for (let i = 0; i < width - 1; i++) {
         const act = { x: i, y: splineCase(i) }
-        const sig = { x: (i + 1), y: splineCase((i + 1)) }
         perpendicularRects.push({
-          m: (sig.y - act.y) / (sig.x - act.x),
+          m: derived(i),
           point: act,
         })
       }
 
+      /**
+       * Arreglo de funciones que para cada punto de la recta, dada una altura Y
+       * indica el pixel X que le corresponde.
+       */
       const perpendicularFunctions: {
         m: number
         funct: ((h: number) => number)
@@ -98,7 +100,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         } // Para cada Y me da ele x que le corresponde
       })
       // Duplica el ultimo elemento
-      perpendicularFunctions.push(perpendicularFunctions[perpendicularFunctions.length - 1])
+      //perpendicularFunctions.push(perpendicularFunctions[perpendicularFunctions.length - 1])
       setRects(perpendicularFunctions)
 
       /**
@@ -144,24 +146,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
           (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
             ? {
+              ...step,
+              states: step.states!.map((state, j) => (
+                j === selectedSpectrum
+                  ? "COMPLETE" as const
+                  : state
+              )),
+            }
+            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+              ? {
                 ...step,
                 states: step.states!.map((state, j) => (
                   j === selectedSpectrum
-                    ? "COMPLETE" as const
+                    ? "NECESSARY_CHANGES" as const
                     : state
                 )),
               }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-                ? {
-                    ...step,
-                    states: step.states!.map((state, j) => (
-                      j === selectedSpectrum
-                        ? "NECESSARY_CHANGES" as const
-                        : state
-                    )),
-                  }
-                : step // Cualquier otra etapa mantiene su informacion
-              )
+              : step // Cualquier otra etapa mantiene su informacion
+            )
         )),
       },
     }))

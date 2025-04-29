@@ -144,19 +144,21 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
 }
 
 /**
- * x e y contienen una serie de valores que se corresponden
- * cada uno con el de la misma posición en el otro arreglo.
- * Esta función busca una recta que dado un valor de x
- * devuelva el un valor de y, o lo más cercano que se pueda
- * al minimizar el error que pueda haber entre todos los
- * pares de números.
- * La función devuelta, dado cualquier x, devuelve un y que
- * aproxima el valor ideal que debería corresponderle.
- * Dentro de las limitaciones de lo que se puede hacer con
- * una aproximación lineal a una correspondencia de
- * complejidad desconocida.
+ * Recibe una serie de cordenadas (x, y) y construye un aproximacion
+ * lineal para los mismos.
+ * @param {number[]} x - Valores en el eje X. Largo minimo 2
+ * @param {number[]} y - Valores en el eje Y
+ * @returns {{
+ *  funct: ((value: number) => number)
+ *  derived: ((value: number) => number)
+ * }} -
+ * Función de interpolación para ubicar nuevos x y Funcion de para hallar 
+ * calcular derivada en un punto dado
  */
-export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
+export function linearRegression(x: number[], y: number[]): {
+  funct: ((value: number) => number)
+  derived: ((value: number) => number)
+} {
   if (x.length !== y.length) {
     throw new CustomError(
       ErrorCodes.DIFFERENT_PROMP_SIZE,
@@ -164,7 +166,7 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  if (x.length <= 1) {
+  if (x.length < 2) {
     throw new CustomError(
       ErrorCodes.INSUFFICIENT_MATCHES,
       "Insufficient matches, at least 2 are required for inference with linear regression.",
@@ -182,8 +184,13 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
   const m = (n * sumMul - sumX * sumY) / (n * sumXCuad - sumX ** 2)
   const b = promY - m * promX
 
-  return function (value: number): number {
-    return m * value + b
+  return {
+    funct: function (value: number): number {
+      return m * value + b
+    },
+    derived: function (value: number): number {
+      return m
+    }
   }
 }
 
