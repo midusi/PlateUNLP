@@ -11,6 +11,7 @@ import { Forward } from "lucide-react"
 import { max, mean, min, round } from "mathjs"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "../atoms/button"
+import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
@@ -172,122 +173,25 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     <div className="w-full p-6 flex flex-col items-center">
       {imageData && (
         <>
-          <ImageWithDraws
-            src={imageSrc}
-            points={pointsWMed}
+          <ImageWithPixelExtraction
+            imageUrl={imageSrc}
+            imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function"
+            pointsWMed={pointsWMed}
             drawFunction={rectMedium}
             perpendicularFunctions={rects}
             opening={opening}
-          />
-          <SimpleFunctionXY data={avgsPerpendicularArr} />
+          >
+            <SimpleFunctionXY data={avgsPerpendicularArr} />
+          </ImageWithPixelExtraction>
+
         </>
-      )}
+      )
+      }
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
         Save
       </Button>
-    </div>
-  )
-}
-
-interface ImageWithDrawsProps {
-  src: string
-  points: Point[]
-  drawFunction?: ((x: number) => number)
-  perpendicularFunctions: { m: number, funct: ((x: number) => number) }[]
-  opening?: number
-}
-
-function ImageWithDraws({ src, points, drawFunction, perpendicularFunctions, opening }: ImageWithDrawsProps) {
-  const pointSize = 8
-
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas)
-      return
-    const ctx = canvas.getContext("2d")
-    if (!ctx)
-      return
-    const img = new Image()
-    img.onload = function () {
-      canvas.width = img.width
-      canvas.height = img.height
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Dibujar puntos si están definidos
-      if (points) {
-        ctx.fillStyle = "red"
-        for (const point of points) {
-          ctx.beginPath()
-          ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
-          ctx.fill()
-        }
-      }
-
-      // Dibujar función si está definida
-      if (drawFunction) {
-        ctx.strokeStyle = "red"
-        ctx.lineWidth = 4
-        ctx.beginPath()
-        for (let x = 0; x < canvas.width; x++) {
-          const y = drawFunction(x)
-          if (x === 0) {
-            ctx.moveTo(x, y)
-          }
-          else {
-            ctx.lineTo(x, y)
-          }
-        }
-        ctx.stroke()
-      }
-
-      // Dibujar rectas si está definidas
-      if (perpendicularFunctions && drawFunction && opening) {
-        for (let i = 0; i < perpendicularFunctions.length; i += 100) {
-          const point = { x: i, y: drawFunction(i) }
-
-          // // Punto central
-          // ctx.fillStyle = "steelblue"
-          // ctx.strokeStyle = "black" // borde negro
-          // ctx.beginPath()
-          // ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
-          // ctx.fill()
-
-          // const verticalRect = perpendicularFunctions[point.x].funct
-          const m = perpendicularFunctions[point.x].m
-          ctx.strokeStyle = "steelblue"
-          ctx.lineWidth = 6
-          ctx.beginPath()
-
-          // Punto destino arriba y abajo
-          const { forward: pdup, backward: pddown } = extremePoints(point, m, opening / 2)
-
-          ctx.moveTo(pdup.x, pdup.y)
-          ctx.lineTo(pddown.x, pddown.y)
-          ctx.stroke()
-
-          // // inicio y fin
-          // ctx.fillStyle = "steelblue"
-          // ctx.beginPath()
-          // ctx.arc(pddown.x, pddown.y, 10, 0, 2 * Math.PI)
-          // ctx.arc(pdup.x, pdup.y, 10, 0, 2 * Math.PI)
-          // ctx.fill()
-        }
-      }
-    }
-    img.src = src
-  }, [src, points, drawFunction, perpendicularFunctions, opening])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-full"
-      style={{ width: "100%", height: "auto", display: "block" }}
-    />
+    </div >
   )
 }
 
@@ -313,7 +217,7 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
           yScale={{ type: "linear" }}
           height={260}
           width={width}
-          margin={{ top: 40, right: 0, bottom: 40, left: 0 }}
+          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
         >
           <AnimatedAxis orientation="bottom" />
           <AnimatedGrid columns={false} numTicks={4} />
