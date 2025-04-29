@@ -14,7 +14,7 @@ import { Button } from "../atoms/button"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const imageSrc = "/forTest/Science1.png"
-  const checkpoints = 20
+  const checkpoints = 10
   const segmentWidth = 120
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
@@ -64,9 +64,9 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setPointsWMed(pointsWhitMedias)
 
       // Infiere funcion medio del espectro
-      const { funct: splineCase, derived } = linearRegression(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y)) // Version lineal
-      // const splineCase = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
-      setRectMedium(() => splineCase)
+      const { funct: interpolateFunct, derived } = linearRegression(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y)) // Version lineal
+      //const { funct: interpolateFunct, derived } = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
+      setRectMedium(() => interpolateFunct)
 
       /**
        * Arreglo con informacion de la pendiente que le corresponde a cada punto de la funcion.
@@ -75,8 +75,8 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         m: number
         point: Point
       }[] = []
-      for (let i = 0; i < width - 1; i++) {
-        const act = { x: i, y: splineCase(i) }
+      for (let i = 0; i < width; i++) {
+        const act = { x: i, y: interpolateFunct(i) }
         perpendicularRects.push({
           m: derived(i),
           point: act,
@@ -99,8 +99,6 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
           funct: (y: number) => ((y - b) / m),
         } // Para cada Y me da ele x que le corresponde
       })
-      // Duplica el ultimo elemento
-      //perpendicularFunctions.push(perpendicularFunctions[perpendicularFunctions.length - 1])
       setRects(perpendicularFunctions)
 
       /**
@@ -111,7 +109,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
       const avgsPerpendicular: number[] = []
       for (let i = 0; i < perpendicularFunctions.length; i++) {
-        const point = { x: i, y: splineCase(i) }
+        const point = { x: i, y: interpolateFunct(i) }
         const { forward, backward } = extremePoints(
           point,
           perpendicularFunctions[i].m,

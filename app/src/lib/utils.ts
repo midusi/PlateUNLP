@@ -42,21 +42,21 @@ export class CustomError extends Error {
  * Explicacion spline (https://math.libretexts.org/Workbench/Numerical_Methods_with_Applications_(Kaw)/5%3A_Interpolation/5.05%3A_Spline_Method_of_Interpolation)
  * @param {number[]} x - Valores en el eje X. Largo minimo 2
  * @param {number[]} y - Valores en el eje Y
- * @returns {(value: number) => number} -
- * Función de interpolación para ubicar nuebvos x.
+ * @returns {{
+ *  funct: ((value: number) => number)
+ *  derived: ((value: number) => number)
+ * }} -
+ * Función de interpolación para ubicar nuevos x y Funcion de para hallar 
+ * calcular derivada en un punto dado
  */
-export function splineCuadratic(x: number[], y: number[]): ((value: number) => number) {
+export function splineCuadratic(x: number[], y: number[]): {
+  funct: ((value: number) => number)
+  derived: ((value: number) => number)
+} {
   if (x.length < 2)
     throw new Error(`At least two points are needed to buil a spline. Count of points: ${x.length}`)
 
-  const puntos = x.map((value, i) => ({ x: value, y: y[i] })) // [
-  //     { x: 0, y: 0 },
-  //     { x: 10, y: 227.04 },
-  //     { x: 15, y: 362.78 },
-  //     { x: 20, y: 517.35 },
-  //     { x: 22.5, y: 602.97 },
-  //     { x: 30, y: 901.67 },
-  //   ]
+  const puntos = x.map((value, i) => ({ x: value, y: y[i] }))
 
   const n: number = puntos.length - 1 // Cantidad de intervalos, vamos a ajustar 1 polinomio por intervalo
   // const cols: number = 3 * n // 3 incognitas por polinomio
@@ -110,14 +110,19 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
   // Coeficientes a1, b1, c1, a2, b2, c2, ..., an, bn, cn
   const coef: number[] = solution.valueOf().flat().map(c => Number(c))
 
-  // Funcion por partes
-  const functionsArr: ((value: number) => number)[] = []
+  // Funciones por partes
+  const functionsArr: ((x: number) => number)[] = [] // Funcion como tal
+  const derivedArr: ((x: number) => number)[] = [] // Derivadas
   for (let i = 0; i < n; i++) {
     const idx = i * 3
-    const segmentFunction = (value: number) => {
-      return (coef[idx] * (value ** 2)) + (coef[idx + 1] * value) + coef[idx + 2]
+    const segmentFunction = (x: number) => {
+      return (coef[idx] * (x ** 2)) + (coef[idx + 1] * x) + coef[idx + 2]
     }
     functionsArr.push(segmentFunction)
+    const segmentDerived = (x: number) => {
+      return (2 * coef[idx] * x) + coef[idx + 1]
+    }
+    derivedArr.push(segmentDerived)
   }
   const intervals: { start: number, end: number }[] = functionsArr.map((_, idx) => (
     { start: puntos[idx].x, end: puntos[idx + 1].x }
@@ -140,7 +145,24 @@ export function splineCuadratic(x: number[], y: number[]): ((value: number) => n
     return result!
   }
 
-  return splineCase
+  const derived: (value: number) => number = (value: number) => {
+    let result: number
+    for (let i = 0; i < intervals.length; i++) {
+      if (value >= intervals[i].start && value < intervals[i].end) {
+        result = derivedArr[i](value)
+        break
+      }
+    }
+
+    if (value < intervals[0].start)
+      result = derivedArr[0](value)
+    else if (value >= intervals[intervals.length - 1].start)
+      result = derivedArr[intervals.length - 1](value)
+
+    return result!
+  }
+
+  return { funct: splineCase, derived }
 }
 
 /**
