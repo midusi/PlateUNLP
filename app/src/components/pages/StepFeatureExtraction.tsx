@@ -211,20 +211,40 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
 
   return (
     <ParentSize>
-      {({ width }) => (
-        <XYChart
-          theme={darkTheme}
-          xScale={{ type: "linear" }}
-          yScale={{ type: "linear" }}
-          height={260}
-          width={width}
+      {({ width }) => {
+        if (width === 0) return null; // Esperar a que se mida
+        return (
+          <XYChart
+            theme={lightTheme}
+            xScale={{ type: "linear" }}
+            yScale={{ type: "linear" }}
+            height={200}
+            width={width}
             margin={{ top: 0, right: 32, bottom: 20, left: 32 }}
-        >
-          <AnimatedAxis orientation="bottom" />
-          <AnimatedGrid columns={false} numTicks={4} />
-          <AnimatedLineSeries curve={curveStep} dataKey="Line 1" data={data1} {...accessors} />
-        </XYChart>
-      )}
-    </ParentSize>
+          >
+            <AnimatedAxis
+              orientation="bottom"
+              tickFormat={(d) => `${d}`}
+              numTicks={5}
+            />
+            <AnimatedAxis
+              orientation="left"
+              tickFormat={(d) => `${d}`}
+              numTicks={5}
+            />
+            <AnimatedGrid columns={true} numTicks={10} />
+            <AnimatedAreaSeries
+              curve={curveStep}
+              dataKey="Line 1"
+              data={data1}
+              fill="#60a5fa"       // Color del área
+              fillOpacity={0.3}    // Transparencia
+              stroke="#3b82f6"     // Color del borde (línea superior)
+              {...accessors}
+            />
+          </XYChart>
+        )
+      }}
+    </ParentSize >
   )
 }
