@@ -11,6 +11,52 @@ import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
 import { BoxList } from "./BBList"
 
+const rotatedHandleMap: Record<number, Record<string, string>> = {
+  0: {
+    "top-left": "top-left",
+    "top": "top",
+    "top-right": "top-right",
+    "right": "right",
+    "bottom-right": "bottom-right",
+    "bottom": "bottom",
+    "bottom-left": "bottom-left",
+    "left": "left"
+  },
+  90: {
+    "top-left": "bottom-left",
+    "top": "left",
+    "top-right": "top-left",
+    "right": "top",
+    "bottom-right": "top-right",
+    "bottom": "right",
+    "bottom-left": "bottom-right",
+    "left": "bottom"
+  },
+  180: {
+    "top-left": "bottom-right",
+    "top": "bottom",
+    "top-right": "bottom-left",
+    "right": "left",
+    "bottom-right": "top-left",
+    "bottom": "top",
+    "bottom-left": "top-right",
+    "left": "right"
+  },
+  270: {
+    "top-left": "top-right",
+    "top": "right",
+    "top-right": "bottom-right",
+    "right": "bottom",
+    "bottom-right": "bottom-left",
+    "bottom": "left",
+    "bottom-left": "top-left",
+    "left": "top"
+  }
+}
+
+
+
+
 interface BBUIProps {
   file?: string | null
   boundingBoxes: BoundingBox[]
@@ -511,7 +557,6 @@ function ImageWithBoundingBoxes({
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!imageRef.current)
         return
-
       const rect = imageRef.current.getBoundingClientRect()
       let currentX = (e.clientX - rect.left) / scale
       let currentY = (e.clientY - rect.top) / scale
@@ -551,40 +596,44 @@ function ImageWithBoundingBoxes({
         // const centerX = imageRef.current.width / 2
         // const centerY = imageRef.current.height / 2
 
-        switch (resizeHandle) {
+        const actualHandle = rotatedHandleMap[rotation][resizeHandle]
+
+        switch (actualHandle) {
           case "top-left":
-            newBox.x = originalBox.x + deltaX
-            newBox.y = originalBox.y + deltaY
-            newBox.width = originalBox.width - deltaX
-            newBox.height = originalBox.height - deltaY
+            console.log(e.clientX, e.clientY)
+            console.log("top-left ", originalBox, deltaX, deltaY)
+            newBox.x = currentX
+            newBox.y = currentY
+            newBox.width = originalBox.width - (currentX - originalBox.x)
+            newBox.height = originalBox.height - (currentY - originalBox.y)
             break
           case "top-right":
-            newBox.y = originalBox.y + deltaY
-            newBox.width = originalBox.width + deltaX
-            newBox.height = originalBox.height - deltaY
+            newBox.y = currentY
+            newBox.width = currentX - originalBox.x
+            newBox.height = originalBox.height - (currentY - originalBox.y)
             break
           case "bottom-left":
-            newBox.x = originalBox.x + deltaX
-            newBox.width = originalBox.width - deltaX
-            newBox.height = originalBox.height + deltaY
+            newBox.x = currentX
+            newBox.width = originalBox.width - (currentX - originalBox.x)
+            newBox.height = currentY - originalBox.y
             break
           case "bottom-right":
-            newBox.width = originalBox.width + deltaX
-            newBox.height = originalBox.height + deltaY
+            newBox.width = currentX - originalBox.x
+            newBox.height = currentY - originalBox.y
             break
           case "top":
-            newBox.y = originalBox.y + deltaY
-            newBox.height = originalBox.height - deltaY
+            newBox.y = currentY
+            newBox.height = originalBox.height - (currentY - originalBox.y)
             break
           case "right":
-            newBox.width = originalBox.width + deltaX
+            newBox.width = currentX - originalBox.x
             break
           case "bottom":
-            newBox.height = originalBox.height + deltaY
+            newBox.height = currentY - originalBox.y
             break
           case "left":
-            newBox.x = originalBox.x + deltaX
-            newBox.width = originalBox.width - deltaX
+            newBox.x = currentX
+            newBox.width = originalBox.width - (currentX - originalBox.x)
             break
         }
 
