@@ -13,7 +13,9 @@ import { Button } from "../atoms/button"
 import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
-  const imageSrc = "/forTest/Science1.png"
+  const urlScience1 = "/forTest/Test1_Science1.png"
+  const urlLamp1 = "/forTest/Test1_Lamp1.png"
+  const urlLamp2 = "/forTest/Test1_Lamp2.png"
   const checkpoints = 10
   const segmentWidth = 120
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
@@ -31,9 +33,15 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   const [opening, setOpening] = useState<number>(0)
   const [avgsPerpendicularArr, setAvgsPerpendicularArr] = useState<number[]>([])
 
+  // Para espectro de Lamp 1
+  const [lamp1pointsMed, setLamp1pointsMed] = useState<Point[]>([])
+  const [lamp1RectMedium, setLamp1RectMedium] = useState<(x: number) => number>(() => (x: number) => x)
+  const [lamp1Rects, setLamp1Rects] = useState<{ m: number, funct: ((x: number) => number) }[]>([])
+  const [lamp1AvgsPerpendicularArr, setLamp1AvgsPerpendicularArr] = useState<number[]>([])
+
   useEffect(() => {
     // Obtener informacion de imagen
-    obtainimageMatrix(imageSrc, false).then(({ data, width, height }) => {
+    obtainimageMatrix(urlScience1, false).then(({ data, width, height }) => {
       if (!data || data.length === 0)
         return
       setImageData({ data, width, height })
@@ -69,36 +77,22 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       setRectMedium(() => interpolateFunct)
 
       /**
-       * Arreglo con informacion de la pendiente que le corresponde a cada punto de la funcion.
-       */
-      const perpendicularRects: {
-        m: number
-        point: Point
-      }[] = []
-      for (let i = 0; i < width; i++) {
-        const act = { x: i, y: interpolateFunct(i) }
-        perpendicularRects.push({
-          m: derived(i),
-          point: act,
-        })
-      }
-
-      /**
        * Arreglo de funciones que para cada punto de la recta, dada una altura Y
        * indica el pixel X que le corresponde.
        */
       const perpendicularFunctions: {
         m: number
         funct: ((h: number) => number)
-      }[] = perpendicularRects.map((info) => {
-        const p1 = info.point
-        const m = -1 / info.m
-        const b = p1.y - m * p1.x
-        return {
-          m,
-          funct: (y: number) => ((y - b) / m),
-        } // Para cada Y me da ele x que le corresponde
-      })
+      }[] = []
+      for (let i = 0; i < width; i++) {
+        const p1 = { x: i, y: interpolateFunct(i) }
+        const m_perp = -1 / derived(i)
+        const b = p1.y - m_perp * p1.x
+        perpendicularFunctions.push({
+          m: m_perp,
+          funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+        })
+      }
       setRects(perpendicularFunctions)
 
       /**
@@ -107,6 +101,9 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
       const avgOpening = mean(plateauInfo.map(pi => pi.opening))
       setOpening(avgOpening)
 
+      /**
+       * Promedio de pixeles perpendiculares a la pendiente para cada pixel horizontal.
+       */
       const avgsPerpendicular: number[] = []
       for (let i = 0; i < perpendicularFunctions.length; i++) {
         const point = { x: i, y: interpolateFunct(i) }
@@ -126,10 +123,85 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
           avgsPerpendicular.push(mean(values))
       }
       setAvgsPerpendicularArr(avgsPerpendicular)
+
+      // Lampara 1 datos relevantes.
+      // Obtener informacion de imagen de Lamp1
+      obtainimageMatrix(urlLamp1, false).then((lamp1) => {
+        /**
+         * Relacion de escala de dlampara 1 respecto al espectro de ciencia.
+         * valorLamp1 * scaleLamp1 === equivalenteScience1
+         */
+        const scaleLamp1 = width / lamp1.width
+
+        const valuesX = pointsWhitMedias.map(p => p.x)
+        const valuesY = pointsWhitMedias.map(p => p.y)
+
+        const scaledValuesX = valuesX.map(val => val * scaleLamp1)
+        const scaledValuesY = valuesY.map(val => val * scaleLamp1)
+
+        /** Puntos medios del espectro de lampara 1. */
+        const lamp1points = scaledValuesX.map((x, idx) => ({ x, y: scaledValuesY[idx] }))
+        setLamp1pointsMed(lamp1points)
+
+        /**
+         * Funcion media para Lampara 1, siempre da lo mismo que la del espectro de
+         * ciencia pero lo escala a la relacion de lamp1.
+         */
+        const l1RectMedium = (x: number) => (interpolateFunct(x) * scaleLamp1)
+        setLamp1RectMedium(() => l1RectMedium)
+
+        /** Funciones perpendiculares para Lampara 1. */
+        const lamp1PerpendicularFunctions: {
+          m: number
+          funct: ((h: number) => number)
+        }[] = []
+        for (let i = 0; i < lamp1.width; i++) {
+          const p1 = { x: i, y: l1RectMedium(i) }
+          const m_perp = -1 / derived(i) // Usa la deribada original, POSIBLE FUENTE DE ERROR
+          const b = p1.y - m_perp * p1.x
+          lamp1PerpendicularFunctions.push({
+            m: m_perp,
+            funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+          })
+        }
+        setLamp1Rects(lamp1PerpendicularFunctions)
+
+        /**
+         * Promedio de pixeles perpendiculares a la pendiente para cada pixel horizontal
+         * de Lampara 1.
+         */
+        const avgsPerp: number[] = []
+        for (let i = 0; i < lamp1PerpendicularFunctions.length; i++) {
+          const point = { x: i, y: l1RectMedium(i) }
+          const { forward, backward } = extremePoints(
+            point,
+            lamp1PerpendicularFunctions[i].m,
+            avgOpening / 2,
+          )
+
+          const minY = round(min(forward.y, backward.y))
+          const maxY = round(max(forward.y, backward.y))
+          const values: number[] = getPointsInRect(
+            lamp1.data,
+            lamp1.width,
+            lamp1PerpendicularFunctions[i].funct,
+            minY,
+            maxY,
+          )
+
+          if (values.length === 0)
+            avgsPerp.push(0)
+          else
+            avgsPerp.push(mean(values))
+        }
+        setLamp1AvgsPerpendicularArr(avgsPerp)
+      }).catch((err) => {
+        console.error("Error loading Image Data:", err)
+      })
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
-  }, [imageSrc])
+  }, [urlScience1])
 
   function onComplete() {
     /// AGREGAR GUARDADO DE DATOS EXTRAIDOS
@@ -171,11 +243,11 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   return (
     <div className="w-full p-6 flex flex-col items-center">
       {imageData && (
-        <>
+        <div className="flex flex-col gap-4">
           <ImageWithPixelExtraction
             title="Science Spectrum"
-            imageUrl={imageSrc}
-            imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function"
+            imageUrl={urlScience1}
+            imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
             pointsWMed={pointsWMed}
             drawFunction={rectMedium}
             perpendicularFunctions={rects}
@@ -184,7 +256,19 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
             <SimpleFunctionXY data={avgsPerpendicularArr} />
           </ImageWithPixelExtraction>
 
-        </>
+          <ImageWithPixelExtraction
+            title="Lamp 1 Spectrum"
+            imageUrl={urlLamp1}
+            imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
+            pointsWMed={lamp1pointsMed}
+            drawFunction={lamp1RectMedium}
+            perpendicularFunctions={lamp1Rects}
+            opening={opening}
+          >
+            <SimpleFunctionXY data={lamp1AvgsPerpendicularArr} />
+          </ImageWithPixelExtraction>
+
+        </div>
       )}
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>

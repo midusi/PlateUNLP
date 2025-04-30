@@ -22,7 +22,7 @@ export function getPointsInRect(
   const rectPoints: number[] = []
   for (let y = minY; y < maxY; y++) {
     const coordenadaX = round(rect(y))
-    if(coordenadaX<0 ||coordenadaX >= width)
+    if (coordenadaX < 0 || coordenadaX >= width)
       continue
     // Valor correspondiente a imagen en pixel (coordenadaX, y)
     const index = (y * width + coordenadaX) * 4
