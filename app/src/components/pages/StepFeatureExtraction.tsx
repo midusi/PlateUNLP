@@ -6,10 +6,9 @@ import { extremePoints } from "@/lib/trigonometry"
 import { linearRegression, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { ParentSize } from "@visx/responsive"
-import { AnimatedAreaSeries, AnimatedAxis, AnimatedGrid, AnimatedLineSeries, darkTheme, lightTheme, XYChart } from "@visx/xychart"
-import { Forward } from "lucide-react"
+import { AnimatedAreaSeries, AnimatedAxis, AnimatedGrid, lightTheme, XYChart } from "@visx/xychart"
 import { max, mean, min, round } from "mathjs"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
 import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
 
@@ -66,7 +65,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
       // Infiere funcion medio del espectro
       const { funct: interpolateFunct, derived } = linearRegression(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y)) // Version lineal
-      //const { funct: interpolateFunct, derived } = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
+      // const { funct: interpolateFunct, derived } = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
       setRectMedium(() => interpolateFunct)
 
       /**
@@ -145,24 +144,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
           (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
             ? {
-              ...step,
-              states: step.states!.map((state, j) => (
-                j === selectedSpectrum
-                  ? "COMPLETE" as const
-                  : state
-              )),
-            }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-              ? {
                 ...step,
                 states: step.states!.map((state, j) => (
                   j === selectedSpectrum
-                    ? "NECESSARY_CHANGES" as const
+                    ? "COMPLETE" as const
                     : state
                 )),
               }
-              : step // Cualquier otra etapa mantiene su informacion
-            )
+            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+                ? {
+                    ...step,
+                    states: step.states!.map((state, j) => (
+                      j === selectedSpectrum
+                        ? "NECESSARY_CHANGES" as const
+                        : state
+                    )),
+                  }
+                : step // Cualquier otra etapa mantiene su informacion
+              )
         )),
       },
     }))
@@ -186,13 +185,12 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
           </ImageWithPixelExtraction>
 
         </>
-      )
-      }
+      )}
       <hr className="w-full mb-4"></hr>
       <Button onClick={() => onComplete()}>
         Save
       </Button>
-    </div >
+    </div>
   )
 }
 
@@ -212,7 +210,8 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
   return (
     <ParentSize>
       {({ width }) => {
-        if (width === 0) return null; // Esperar a que se mida
+        if (width === 0)
+          return null // Esperar a que se mida
         return (
           <XYChart
             theme={lightTheme}
@@ -224,27 +223,27 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
           >
             <AnimatedAxis
               orientation="bottom"
-              tickFormat={(d) => `${d}`}
+              tickFormat={d => `${d}`}
               numTicks={5}
             />
             <AnimatedAxis
               orientation="left"
-              tickFormat={(d) => `${d}`}
+              tickFormat={d => `${d}`}
               numTicks={5}
             />
-            <AnimatedGrid columns={true} numTicks={10} />
+            <AnimatedGrid numTicks={10} />
             <AnimatedAreaSeries
               curve={curveStep}
               dataKey="Line 1"
               data={data1}
-              fill="#60a5fa"       // Color del área
-              fillOpacity={0.3}    // Transparencia
-              stroke="#3b82f6"     // Color del borde (línea superior)
+              fill="#60a5fa" // Color del área
+              fillOpacity={0.3} // Transparencia
+              stroke="#3b82f6" // Color del borde (línea superior)
               {...accessors}
             />
           </XYChart>
         )
       }}
-    </ParentSize >
+    </ParentSize>
   )
 }
