@@ -2,7 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 import type { ClassValue } from "clsx"
 import { clsx } from "clsx"
-import { inv, lusolve, matrix, multiply, pow, transpose } from "mathjs"
+import { inv, lusolve, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -46,7 +46,7 @@ export class CustomError extends Error {
  *  funct: ((value: number) => number)
  *  derived: ((value: number) => number)
  * }} -
- * Función de interpolación para ubicar nuevos x y Funcion de para hallar 
+ * Función de interpolación para ubicar nuevos x y Funcion de para hallar
  * calcular derivada en un punto dado
  */
 export function splineCuadratic(x: number[], y: number[]): {
@@ -174,7 +174,7 @@ export function splineCuadratic(x: number[], y: number[]): {
  *  funct: ((value: number) => number)
  *  derived: ((value: number) => number)
  * }} -
- * Función de interpolación para ubicar nuevos x y Funcion de para hallar 
+ * Función de interpolación para ubicar nuevos x y Funcion de para hallar
  * calcular derivada en un punto dado
  */
 export function linearRegression(x: number[], y: number[]): {
@@ -207,12 +207,12 @@ export function linearRegression(x: number[], y: number[]): {
   const b = promY - m * promX
 
   return {
-    funct: function (value: number): number {
+    funct(value: number): number {
       return m * value + b
     },
-    derived: function (value: number): number {
+    derived(_value: number): number {
       return m
-    }
+    },
   }
 }
 
