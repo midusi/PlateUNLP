@@ -228,8 +228,6 @@ function useExtractFeatures(
   lamp1Url: string,
   lamp2Url: string,
 ): useExtractFeaturesResponse {
-  console.log("useExtractFeatures")
-
   /** Resultados a devolver */
   const [response, setResponse] = useState<useExtractFeaturesResponse>({
     scienceInfo: null,
@@ -251,8 +249,24 @@ function useExtractFeatures(
   })
 
   useEffect(() => {
-    console.log("UsseEffect (useExtractFeatures)")
-    let bag: useExtractFeaturesResponse = { ...response }
+    let bag: useExtractFeaturesResponse = {
+      scienceInfo: null,
+      scienceMediasPoints: [],
+      scienceAvgOpening: 0,
+      scienceFunction: null,
+      scienceTransversalFunctions: [],
+      scienceTransversalAvgs: [],
+      lamp1MediasPoints: [],
+      lamp1AvgOpening: 0,
+      lamp1Function: null,
+      lamp1TransversalFunctions: [],
+      lamp1TransversalAvgs: [],
+      lamp2MediasPoints: [],
+      lamp2AvgOpening: 0,
+      lamp2Function: null,
+      lamp2TransversalFunctions: [],
+      lamp2TransversalAvgs: [],
+    }
     // Obtener informacion de imagen SCIENCE
     obtainimageMatrix(scienceUrl, false).then((science) => {
       if (!science.data || science.data.length === 0)
@@ -435,7 +449,7 @@ function useExtractFeatures(
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
-  }, [countCheckpoints, lamp1Url, lamp2Url, response, scienceUrl, segmentWidth])
+  }, [countCheckpoints, lamp1Url, lamp2Url, scienceUrl, segmentWidth])
 
   return response
 }

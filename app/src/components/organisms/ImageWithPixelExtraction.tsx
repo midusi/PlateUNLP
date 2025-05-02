@@ -134,7 +134,6 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
           ctx.lineWidth = 2
           ctx.beginPath()
 
-          console.log(m)
           // Punto destino arriba y abajo
           const { forward: pdup, backward: pddown } = extremePoints(point, m, opening / 2)
 
