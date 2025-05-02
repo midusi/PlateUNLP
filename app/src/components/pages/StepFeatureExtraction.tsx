@@ -6,7 +6,7 @@ import { extremePoints } from "@/lib/trigonometry"
 import { linearRegression, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { ParentSize } from "@visx/responsive"
-import { AnimatedAreaSeries, AnimatedAxis, AnimatedGrid, lightTheme, XYChart } from "@visx/xychart"
+import { AnimatedAreaSeries, AnimatedAxis, AnimatedGrid, AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
 import { max, mean, min, round } from "mathjs"
 import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
@@ -23,7 +23,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.selectedSpectrum,
   ])
 
-  const { 
+  const {
     scienceInfo,
     scienceMediasPoints,
     scienceAvgOpening,
@@ -34,12 +34,18 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     lamp1AvgOpening,
     lamp1Function,
     lamp1TransversalFunctions,
-    lamp1TransversalAvgs, 
+    lamp1TransversalAvgs,
+    lamp2MediasPoints,
+    lamp2AvgOpening,
+    lamp2Function,
+    lamp2TransversalFunctions,
+    lamp2TransversalAvgs,
   } = useExtractFeatures(
     countCheckpoints,
     segmentWidth,
     urlScience1,
     urlLamp1,
+    urlLamp2,
   )
 
   function onComplete() {
@@ -107,6 +113,18 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
             <SimpleFunctionXY data={lamp1TransversalAvgs} />
           </ImageWithPixelExtraction>
 
+          <ImageWithPixelExtraction
+            title="Lamp 2 Spectrum"
+            imageUrl={urlLamp2}
+            imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 2."
+            pointsWMed={lamp2MediasPoints}
+            drawFunction={lamp2Function!}
+            perpendicularFunctions={lamp2TransversalFunctions}
+            opening={lamp2AvgOpening}
+          >
+            <SimpleFunctionXY data={lamp2TransversalAvgs} />
+          </ImageWithPixelExtraction>
+
         </div>
       )}
       <hr className="w-full mb-4"></hr>
@@ -144,18 +162,18 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
             width={width}
             margin={{ top: 0, right: 32, bottom: 20, left: 32 }}
           >
-            <AnimatedAxis
+            <Axis
               orientation="bottom"
               tickFormat={d => `${d}`}
               numTicks={5}
             />
-            <AnimatedAxis
+            <Axis
               orientation="left"
               tickFormat={d => `${d}`}
               numTicks={5}
             />
-            <AnimatedGrid numTicks={10} />
-            <AnimatedAreaSeries
+            <Grid numTicks={10} />
+            <AreaSeries
               curve={curveStep}
               dataKey="Line 1"
               data={data1}
@@ -193,6 +211,14 @@ interface useExtractFeaturesResponse {
     funct: ((h: number) => number)
   }[]
   lamp1TransversalAvgs: number[]
+  lamp2MediasPoints: Point[]
+  lamp2AvgOpening: number
+  lamp2Function: ((value: number) => number) | null
+  lamp2TransversalFunctions: {
+    m: number
+    funct: ((h: number) => number)
+  }[]
+  lamp2TransversalAvgs: number[]
 }
 
 function useExtractFeatures(
@@ -200,9 +226,11 @@ function useExtractFeatures(
   segmentWidth: number,
   scienceUrl: string,
   lamp1Url: string,
+  lamp2Url: string,
 ): useExtractFeaturesResponse {
-  /** Resultados a devolver */
+  console.log("useExtractFeatures")
 
+  /** Resultados a devolver */
   const [response, setResponse] = useState<useExtractFeaturesResponse>({
     scienceInfo: null,
     scienceMediasPoints: [],
@@ -215,10 +243,16 @@ function useExtractFeatures(
     lamp1Function: null,
     lamp1TransversalFunctions: [],
     lamp1TransversalAvgs: [],
+    lamp2MediasPoints: [],
+    lamp2AvgOpening: 0,
+    lamp2Function: null,
+    lamp2TransversalFunctions: [],
+    lamp2TransversalAvgs: [],
   })
 
   useEffect(() => {
-    const bag: useExtractFeaturesResponse = {... response}
+    console.log("UsseEffect (useExtractFeatures)")
+    let bag: useExtractFeaturesResponse = { ...response }
     // Obtener informacion de imagen SCIENCE
     obtainimageMatrix(scienceUrl, false).then((science) => {
       if (!science.data || science.data.length === 0)
@@ -326,6 +360,7 @@ function useExtractFeatures(
         const minY = round(min(forward.y, backward.y))
         /** Punto maximo de la recta en Y */
         const maxY = round(max(forward.y, backward.y))
+
         /** Valor numerico de todos los puntos por los que pasa la recta */
         const values: number[] = getPointsInRect(
           science.data,
@@ -342,92 +377,183 @@ function useExtractFeatures(
           scienceTransversalAvgs.push(mean(values))
       }
       bag.scienceTransversalAvgs = scienceTransversalAvgs
-
       // Lampara 1 datos relevantes.
       // Obtener informacion de imagen de Lamp1
       obtainimageMatrix(lamp1Url, false).then((lamp1) => {
-      /**
-       * Relacion de escala de dlampara 1 respecto al espectro de ciencia.
-       * valorLamp1 * scaleLamp1 === equivalenteScience1
-       */
-        const scaleLamp1 = {
-          x: science.width / lamp1.width,
-          y: science.height / lamp1.height,
+        const lamp1Data = extractLampData({
+          science: {
+            ...science,
+            mediasPoints: bag.scienceMediasPoints,
+            avgOpening: bag.scienceAvgOpening,
+            mediaFunction: bag.scienceFunction!,
+          },
+          lamp: lamp1,
+        })
+
+        // Actualizar salida del metodo con informacion de lamp1
+        bag = {
+          ...bag,
+          lamp1MediasPoints: lamp1Data.mediasPoints,
+          lamp1AvgOpening: lamp1Data.avgOpening,
+          lamp1Function: lamp1Data.mediaFunction,
+          lamp1TransversalFunctions: lamp1Data.transversalFunctions,
+          lamp1TransversalAvgs: lamp1Data.transversalAvgs,
         }
 
-        /**
-         * Puntos medios del espectro de lampara 1.
-         * Calculados escalando los puntos del espectro de ciencia.
-         */
-        const lamp1MediasPoints = bag.scienceMediasPoints.map(({ x, y }) => ({
-          x: round(x * scaleLamp1.x),
-          y: y * scaleLamp1.y,
-        }))
-        bag.lamp1MediasPoints = lamp1MediasPoints
-
-        /** Apertura promedio de lampara 1*/
-        bag.lamp1AvgOpening = bag.scienceAvgOpening
-
-        /**
-         * Funcion media para Lampara 1, siempre da lo mismo que la del espectro de
-         * ciencia pero lo escala a la relacion de lamp1.
-         */
-        const lamp1Function = (x: number) => (
-          bag.scienceFunction!(round(x * scaleLamp1.x)) * scaleLamp1.y
-        )
-        bag.lamp1Function = lamp1Function
-
-        /** Funciones perpendiculares para Lampara 1. */
-        const lamp1TransversalFunctions: {
-          m: number
-          funct: ((h: number) => number)
-        }[] = []
-        for (let i = 0; i < lamp1.width; i++) {
-          const p1 = { x: i, y: lamp1Function(i) }
-          const m_perp = -1 / interpolated.derived(p1.x)
-          const b = p1.y - m_perp * p1.x
-          lamp1TransversalFunctions.push({
-            m: m_perp,
-            funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+        // Lampara 2 datos relevantes.
+        // Obtener informacion de imagen de Lamp2
+        // Las invocaciones tienen que ser anidadas por que sino
+        // corremos riesgo de sobreescritura de variables entre hilos.
+        obtainimageMatrix(lamp2Url, false).then((lamp2) => {
+          const lamp2Data = extractLampData({
+            science: {
+              ...science,
+              mediasPoints: bag.scienceMediasPoints,
+              avgOpening: bag.scienceAvgOpening,
+              mediaFunction: bag.scienceFunction!,
+            },
+            lamp: lamp2,
           })
-        }
-        bag.lamp1TransversalFunctions = lamp1TransversalFunctions
 
-        /** Promedio de pixeles que pasan por cada lamp1TransversalFunction. */
-        const scienceTransversalAvgs: number[] = []
-        for (let i = 0; i < lamp1TransversalFunctions.length; i++) {
-          const point = { x: i, y: lamp1Function(i) }
-          const { forward, backward } = extremePoints(
-            point,
-            lamp1TransversalFunctions[i].m,
-            avgOpening / 2,
-          )
+          // Actualizar salida del metodo con informacion de lamp2
+          bag = {
+            ...bag,
+            lamp2MediasPoints: lamp2Data.mediasPoints,
+            lamp2AvgOpening: lamp2Data.avgOpening,
+            lamp2Function: lamp2Data.mediaFunction,
+            lamp2TransversalFunctions: lamp2Data.transversalFunctions,
+            lamp2TransversalAvgs: lamp2Data.transversalAvgs,
+          }
 
-          const minY = round(min(forward.y, backward.y))
-          const maxY = round(max(forward.y, backward.y))
-          const values: number[] = getPointsInRect(
-            lamp1.data,
-            lamp1.width,
-            lamp1TransversalFunctions[i].funct,
-            minY,
-            maxY,
-          )
-
-          if (values.length === 0)
-            scienceTransversalAvgs.push(0)
-          else
-            scienceTransversalAvgs.push(mean(values))
-        }
-        bag.lamp1TransversalAvgs = scienceTransversalAvgs
-
-        setResponse(bag)
+          setResponse(bag)
+        }).catch((err) => {
+          console.error("Error loading Image Data:", err)
+        })
       }).catch((err) => {
         console.error("Error loading Image Data:", err)
       })
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
-  }, [scienceUrl])
+  }, [countCheckpoints, lamp1Url, lamp2Url, response, scienceUrl, segmentWidth])
+
+  return response
+}
+
+interface extractLampDataProps {
+  science: {
+    data: Uint8ClampedArray
+    width: number
+    height: number
+    mediasPoints: Point[]
+    avgOpening: number
+    mediaFunction: ((value: number) => number)
+  }
+  lamp: {
+    data: Uint8ClampedArray
+    width: number
+    height: number
+  }
+}
+
+interface extractLampDataResponse {
+  mediasPoints: Point[]
+  avgOpening: number
+  mediaFunction: ((value: number) => number) | null
+  transversalFunctions: {
+    m: number
+    funct: ((h: number) => number)
+  }[]
+  transversalAvgs: number[]
+}
+function extractLampData({ science, lamp }: extractLampDataProps): extractLampDataResponse {
+  const response: extractLampDataResponse = {
+    mediasPoints: [],
+    avgOpening: 0,
+    mediaFunction: null,
+    transversalFunctions: [],
+    transversalAvgs: [],
+  }
+  /**
+   * Relacion de escala de lampara respecto al espectro de ciencia.
+   * valorLamp * scaleLamp === equivalenteScience
+   */
+  const scaleLamp = {
+    x: science.width / lamp.width,
+    y: science.height / lamp.height,
+  }
+
+  /**
+   * Puntos medios del espectro de lampara.
+   * Calculados escalando los puntos del espectro de ciencia.
+   */
+  const mediasPoints = science.mediasPoints.map(({ x, y }) => ({
+    x: round(x * scaleLamp.x),
+    y: y * scaleLamp.y,
+  }))
+  response.mediasPoints = mediasPoints
+
+  /** Apertura promedio de lampara. Tomamos la misma que la del espectro */
+  response.avgOpening = science.avgOpening
+
+  /**
+   * Funcion media para Lampara, siempre da lo mismo que la del espectro de
+   * ciencia pero lo escala a la relacion de lamp1.
+   */
+  const mediaFunction = (x: number) => (
+    science.mediaFunction!(round(x * scaleLamp.x)) * scaleLamp.y
+  )
+  response.mediaFunction = mediaFunction
+
+  /** Funciones perpendiculares para Lampara 1. */
+  const transversalFunctions: {
+    m: number
+    funct: ((h: number) => number)
+  }[] = []
+  for (let i = 0; i < lamp.width; i++) {
+    const p1 = { x: i, y: mediaFunction(i) }
+    // // Perpendicular a lamp1Function(i).
+    // const m_perp = -1 / interpolated.derived(p1.x)
+    // const b = p1.y - m_perp * p1.x
+    // transversalFunctions.push({
+    //   m: m_perp,
+    //   funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+    // })
+    // Perpendicular a la imagen.
+    transversalFunctions.push({
+      m: Infinity,
+      funct: (_y: number) => (p1.x), // Para cada Y me da ele x que le corresponde.
+    // En el caso Vertical siempre va a ser el X del punto.
+    })
+  }
+  response.transversalFunctions = transversalFunctions
+
+  /** Promedio de pixeles que pasan por cada lamp1TransversalFunction. */
+  const transversalAvgs: number[] = []
+  for (let i = 0; i < transversalFunctions.length; i++) {
+    const point = { x: i, y: mediaFunction(i) }
+    const { forward, backward } = extremePoints(
+      point,
+      transversalFunctions[i].m,
+      response.avgOpening / 2,
+    )
+
+    const minY = round(min(forward.y, backward.y))
+    const maxY = round(max(forward.y, backward.y))
+    const values: number[] = getPointsInRect(
+      lamp.data,
+      lamp.width,
+      transversalFunctions[i].funct,
+      minY,
+      maxY,
+    )
+
+    if (values.length === 0)
+      transversalAvgs.push(0)
+    else
+      transversalAvgs.push(mean(values))
+  }
+  response.transversalAvgs = transversalAvgs
 
   return response
 }
