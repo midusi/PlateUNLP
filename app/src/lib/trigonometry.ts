@@ -4,7 +4,7 @@ import type { Point } from "@/interfaces/Point"
  * Funcion que dado un punto, una pendiente y una distancia devuelve los puntos
  * que corresponden siguiedo la pendiente a la distancia indicada.
  * @param {Point} point - Punto medio desde el que hacer las cuentas.
- * @param {number} m - Pendiente
+ * @param {number} m - Pendiente. Si es totalmente vertical mandar 'Infinity'.
  * @param {number} distance - Distancia entre el punto medio y los puntos buscados
  * @returns { forward: Point, backward: Point } -
  * Puntos recorriendo la distancia hacia delante y hacia atrás
@@ -12,7 +12,7 @@ import type { Point } from "@/interfaces/Point"
 export function extremePoints(point: Point, m: number, distance: number): { forward: Point, backward: Point } {
   let forward: Point
   let backward: Point
-  if (m === Infinity) {
+  if (m === Infinity) { // Funcion totalmente vertical.
     forward = { x: point.x, y: point.y + distance }
     backward = { x: point.x, y: point.y - distance }
   }
