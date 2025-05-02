@@ -20,7 +20,8 @@ export function getPointsInRect(
   maxY: number,
 ): number[] {
   const rectPoints: number[] = []
-  for (let y = minY; y < maxY; y++) {
+  for (let y = minY; y < maxY; y++) { // Dada una recta, Para cada pixel vertical
+    /** Coordenada X que le corresponde a un determinado Y. */
     const coordenadaX = round(rect(y))
     if (coordenadaX < 0 || coordenadaX >= width)
       continue
@@ -29,6 +30,7 @@ export function getPointsInRect(
     const r = data[index]
     const g = data[index + 1]
     const b = data[index + 2]
+    /** Promedio de valores de pixel en canales r, g, b. */
     const avg = round((r + g + b) / 3)
     rectPoints.push(avg)
   }
