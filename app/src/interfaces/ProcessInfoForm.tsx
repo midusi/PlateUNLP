@@ -41,21 +41,26 @@ export interface SpectrumData {
   /** Bounding Box que delimita las dimensiones y localización del espectro. */
   spectrumBoundingBox: BoundingBox
   /** Informacion respecto a las partes del espectro (science, lamp1, lamp2) */
-  partsBoundingBoxes: {
-    /**
-     * Bounding Box que delimita las dimensiones y localización del espectro
-     * de la lampara de comparación Nº1.
-     */
-    lamp1: BoundingBox | null
-    /**
-     * Bounding Box que delimita las dimensiones y localización del espectro
-     * de la lampara de comparación Nº2.
-     */
-    lamp2: BoundingBox | null
-    /**
-     * Bounding Box que delimita las dimensiones y localización del espectro
-     * de ciencia.
-     */
-    science: BoundingBox | null
+  parts: {
+    /** Información relacionada a la lampara de comparación 1. */
+    lamp1: SpectrumPartData
+    /** Información relacionada a la lampara de comparación 2. */
+    lamp2: SpectrumPartData
+    /** Información relacionada al espectro de ciencia. */
+    science: SpectrumPartData
   }
+}
+
+/** Información de una parte especifica de un espectro. */
+export interface SpectrumPartData {
+  /**
+   * Bounding Box que delimita las dimensiones y localización del espectro
+   * de la lampara de comparación Nº1.
+   */
+  boundingBox: BoundingBox | null
+  /**
+   * Espectro extraido en forma de arreglo de intensidad para cada pixel
+   * horizontal
+   */
+  extractedSpectrum: number[] | null
 }

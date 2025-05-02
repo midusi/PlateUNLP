@@ -30,10 +30,10 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           id: index,
           name: `Plate${index}#Spectrum`,
           spectrumBoundingBox: bb,
-          partsBoundingBoxes: {
-            lamp1: null,
-            lamp2: null,
-            science: null,
+          parts: {
+            lamp1: { boundingBox: null, extractedSpectrum: null },
+            lamp2: { boundingBox: null, extractedSpectrum: null },
+            science: { boundingBox: null, extractedSpectrum: null },
           },
         })),
       },
