@@ -6,7 +6,7 @@ import { extremePoints } from "@/lib/trigonometry"
 import { linearRegression, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { ParentSize } from "@visx/responsive"
-import { AnimatedAreaSeries, AnimatedAxis, AnimatedGrid, AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
+import { AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
 import { max, mean, min, round } from "mathjs"
 import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
@@ -22,6 +22,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.setActualStep,
     s.selectedSpectrum,
   ])
+  console.log(processInfo)
 
   const {
     scienceInfo,
@@ -49,13 +50,39 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   )
 
   function onComplete() {
-    /// AGREGAR GUARDADO DE DATOS EXTRAIDOS
-
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
+    /// Tambien realiza el guardado de los espectros extraidos para cada parte del espectro.
     const generalTotal = processInfo.processingStatus.generalSteps.length
     setProcessInfo(prev => ({
       ...prev,
+      /** Modificaciones relativas a guardar los espectros de ciencia adquiridos. */
+      data: {
+        ...prev.data,
+        spectrums: prev.data.spectrums.map((spectrum, idx) => (
+          (idx === selectedSpectrum) // ¿Es el espectro seleccionado?
+            ? { // Si => Actualiza la información de los espectros extraidos con lo que calculo.
+                ...spectrum,
+                parts: {
+                  ...spectrum.parts,
+                  science: {
+                    ...spectrum.parts.science,
+                    extractedSpectrum: scienceTransversalAvgs,
+                  },
+                  lamp1: {
+                    ...spectrum.parts.lamp1,
+                    extractedSpectrum: lamp1TransversalAvgs,
+                  },
+                  lamp2: {
+                    ...spectrum.parts.lamp2,
+                    extractedSpectrum: lamp2TransversalAvgs,
+                  },
+                },
+              }
+            : spectrum // No => mantener datos.
+        )),
+      },
+      /** Modificaciones relativas a avisar que el paso esta completado. */
       processingStatus: {
         ...prev.processingStatus,
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (

@@ -9,7 +9,7 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Line, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
-import { useMemo } from "react"
+import { JSX, useMemo } from "react"
 
 // data accessors
 const getX = (p: SpectrumPoint) => p?.wavelength ?? 0
