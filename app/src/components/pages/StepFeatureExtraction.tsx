@@ -23,26 +23,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.selectedSpectrum,
   ])
 
-  // Para espectro de ciencia
-  let scienceInfo = null
-  const [pointsWMed, setPointsWMed] = useState<Point[]>([])
-  const [rectMedium, setRectMedium] = useState<(x: number) => number>(() => (x: number) => x)
-  const [rects, setRects] = useState<{ m: number, funct: ((x: number) => number) }[]>([])
-  const [opening, setOpening] = useState<number>(0)
-  const [avgsPerpendicularArr, setAvgsPerpendicularArr] = useState<number[]>([])
-
-  // Para espectro de Lamp 1
-  const [lamp1pointsMed, setLamp1pointsMed] = useState<Point[]>([])
-  const [lamp1RectMedium, setLamp1RectMedium] = useState<(x: number) => number>(() => (x: number) => x)
-  const [lamp1Rects, setLamp1Rects] = useState<{ m: number, funct: ((x: number) => number) }[]>([])
-  const [lamp1AvgsPerpendicularArr, setLamp1AvgsPerpendicularArr] = useState<number[]>([])
-  useEffect(() => {
-    {scienceInfo} = processSpectrum({
-      countCheckpoints,
-      segmentWidth,
-      scienceUrl: urlScience1
-    })
-  }, [urlScience1])
+  const { 
+    scienceInfo,
+    scienceMediasPoints,
+    scienceAvgOpening,
+    scienceFunction,
+    scienceTransversalFunctions,
+    scienceTransversalAvgs,
+    lamp1MediasPoints,
+    lamp1AvgOpening,
+    lamp1Function,
+    lamp1TransversalFunctions,
+    lamp1TransversalAvgs, 
+  } = useExtractFeatures(
+    countCheckpoints,
+    segmentWidth,
+    urlScience1,
+    urlLamp1,
+  )
 
   function onComplete() {
     /// AGREGAR GUARDADO DE DATOS EXTRAIDOS
@@ -89,24 +87,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
             title="Science Spectrum"
             imageUrl={urlScience1}
             imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
-            pointsWMed={pointsWMed}
-            drawFunction={rectMedium}
-            perpendicularFunctions={rects}
-            opening={opening}
+            pointsWMed={scienceMediasPoints}
+            drawFunction={scienceFunction!}
+            perpendicularFunctions={scienceTransversalFunctions}
+            opening={scienceAvgOpening}
           >
-            <SimpleFunctionXY data={avgsPerpendicularArr} />
+            <SimpleFunctionXY data={scienceTransversalAvgs} />
           </ImageWithPixelExtraction>
 
           <ImageWithPixelExtraction
             title="Lamp 1 Spectrum"
             imageUrl={urlLamp1}
             imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
-            pointsWMed={lamp1pointsMed}
-            drawFunction={lamp1RectMedium}
-            perpendicularFunctions={lamp1Rects}
-            opening={opening}
+            pointsWMed={lamp1MediasPoints}
+            drawFunction={lamp1Function!}
+            perpendicularFunctions={lamp1TransversalFunctions}
+            opening={lamp1AvgOpening}
           >
-            <SimpleFunctionXY data={lamp1AvgsPerpendicularArr} />
+            <SimpleFunctionXY data={lamp1TransversalAvgs} />
           </ImageWithPixelExtraction>
 
         </div>
@@ -173,193 +171,263 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
   )
 }
 
-interface processInfoProps {
-  countCheckpoints:number
-  segmentWidth:number
-  scienceUrl:string
+interface useExtractFeaturesResponse {
+  scienceInfo: {
+    data: Uint8ClampedArray<ArrayBufferLike>
+    width: number
+    height: number
+  } | null
+  scienceMediasPoints: Point[]
+  scienceAvgOpening: number
+  scienceFunction: ((value: number) => number) | null
+  scienceTransversalFunctions: {
+    m: number
+    funct: ((h: number) => number)
+  }[]
+  scienceTransversalAvgs: number[]
+  lamp1MediasPoints: Point[]
+  lamp1AvgOpening: number
+  lamp1Function: ((value: number) => number) | null
+  lamp1TransversalFunctions: {
+    m: number
+    funct: ((h: number) => number)
+  }[]
+  lamp1TransversalAvgs: number[]
 }
-function processSpectrum({ countCheckpoints, segmentWidth, scienceUrl }: processInfoProps) {
 
-  const respose: {
-    scienceInfo: {
-      data: Uint8ClampedArray<ArrayBufferLike>
-      width: number
-      height: number
-    } | null
-  }
+function useExtractFeatures(
+  countCheckpoints: number,
+  segmentWidth: number,
+  scienceUrl: string,
+  lamp1Url: string,
+): useExtractFeaturesResponse {
+  /** Resultados a devolver */
 
-  // Obtener informacion de imagen
-  obtainimageMatrix(scienceUrl, false).then((science) => {
-    if (!science.data || science.data.length === 0)
-      return
-    respose.scienceInfo = { data:science.data, width:science.width, height:science.height }
+  const [response, setResponse] = useState<useExtractFeaturesResponse>({
+    scienceInfo: null,
+    scienceMediasPoints: [],
+    scienceAvgOpening: 0,
+    scienceFunction: null,
+    scienceTransversalFunctions: [],
+    scienceTransversalAvgs: [],
+    lamp1MediasPoints: [],
+    lamp1AvgOpening: 0,
+    lamp1Function: null,
+    lamp1TransversalFunctions: [],
+    lamp1TransversalAvgs: [],
+  })
 
-    // Segmentar la imagen
-    const points = findXspacedPoints(science.width, countCheckpoints)
-    const segmentsData = obtainImageSegments(
-      science.data, science.width, science.height, points, segmentWidth)
-    for (const sd of segmentsData) {
-      if (sd.length !== segmentWidth * science.height * 4)
-        console.warn("Segment size mismatch:", sd.length, segmentWidth * science.height * 4)
-    }
+  useEffect(() => {
+    const bag: useExtractFeaturesResponse = {... response}
+    // Obtener informacion de imagen SCIENCE
+    obtainimageMatrix(scienceUrl, false).then((science) => {
+      if (!science.data || science.data.length === 0)
+        return
+      bag.scienceInfo = { data: science.data, width: science.width, height: science.height }
 
-    /**
-     * Funciones de cada segmento promediado horizontalmente
-     */
-    const functions = segmentsData.map(data =>
-      promediadoHorizontal(data, segmentWidth, science.height))
-
-    // Obtener las medias de cada funcion
-    const plateauInfo: {
-      medium: number
-      opening: number
-    }[] = functions.map(funct => findPlateau(funct, 0.5))
-
-    const pointsWhitMedias = points.map((point, index) => (
-      { x: point, y: plateauInfo[index]?.medium ?? 0 }
-    ))
-    setPointsWMed(pointsWhitMedias)
-
-    // Infiere funcion medio del espectro
-    const { funct: interpolateFunct, derived } = linearRegression(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y)) // Version lineal
-    // const { funct: interpolateFunct, derived } = splineCuadratic(pointsWhitMedias.map(p => p.x), pointsWhitMedias.map(p => p.y))
-    setRectMedium(() => interpolateFunct)
-
-    /**
-     * Arreglo de funciones que para cada punto de la recta, dada una altura Y
-     * indica el pixel X que le corresponde.
-     */
-    const perpendicularFunctions: {
-      m: number
-      funct: ((h: number) => number)
-    }[] = []
-    for (let i = 0; i < science.width; i++) {
-      const p1 = { x: i, y: interpolateFunct(i) }
-      // // Perpendicular a la recta.
-      // const m_perp = -1 / derived(i)
-      // const b = p1.y - m_perp * p1.x
-      // perpendicularFunctions.push({
-      //   m: m_perp,
-      //   funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
-      // })
-      // 90º contra la imagen.
-      perpendicularFunctions.push({
-        m: Infinity,
-        funct: (_y: number) => (i), // Para cada Y me da ele x que le corresponde.
-      })
-    }
-    setRects(perpendicularFunctions)
-
-    /**
-     * Apertura promedio
-     */
-    const avgOpening = mean(plateauInfo.map(pi => pi.opening))
-    setOpening(avgOpening)
-
-    /**
-     * Promedio de pixeles verticales/perpendiculares a la pendiente para cada pixel horizontal.
-     */
-    const avgsPerpendicular: number[] = []
-    for (let i = 0; i < perpendicularFunctions.length; i++) {
-      const point = { x: i, y: interpolateFunct(i) }
-      const { forward, backward } = extremePoints(
-        point,
-        perpendicularFunctions[i].m,
-        avgOpening / 2,
+      // Segmentar la imagen
+      /** Coordenadas X medias a lo largo de toda la imagen de SCIENCE */
+      const sciencePoints = findXspacedPoints(science.width, countCheckpoints)
+      /** Segmentos medios de imagen de SCIENCE */
+      const segmentsData = obtainImageSegments(
+        science.data,
+        science.width,
+        science.height,
+        sciencePoints,
+        segmentWidth,
       )
-
-      const minY = round(min(forward.y, backward.y))
-      const maxY = round(max(forward.y, backward.y))
-      const values: number[] = getPointsInRect(
-        science.data, 
-        science.width, 
-        perpendicularFunctions[i].funct, 
-        minY, 
-        maxY
-      )
-
-      if (values.length === 0)
-        avgsPerpendicular.push(0)
-      else
-        avgsPerpendicular.push(mean(values))
-    }
-    setAvgsPerpendicularArr(avgsPerpendicular)
-
-    // Lampara 1 datos relevantes.
-    // Obtener informacion de imagen de Lamp1
-    obtainimageMatrix(urlLamp1, false).then((lamp1) => {
-      /**
-       * Relacion de escala de dlampara 1 respecto al espectro de ciencia.
-       * valorLamp1 * scaleLamp1 === equivalenteScience1
-       */
-      const scaleLamp1 = science.width / lamp1.width
-
-      const valuesX = pointsWhitMedias.map(p => p.x)
-      const valuesY = pointsWhitMedias.map(p => p.y)
-
-      const scaledValuesX = valuesX.map(val => val * scaleLamp1)
-      const scaledValuesY = valuesY.map(val => val * scaleLamp1)
-
-      /** Puntos medios del espectro de lampara 1. */
-      const lamp1points = scaledValuesX.map((x, idx) => ({ x, y: scaledValuesY[idx] }))
-      setLamp1pointsMed(lamp1points)
+      for (const sd of segmentsData) {
+        if (sd.length !== segmentWidth * science.height * 4)
+          console.warn("Segment size mismatch:", sd.length, segmentWidth * science.height * 4)
+      }
 
       /**
-       * Funcion media para Lampara 1, siempre da lo mismo que la del espectro de
-       * ciencia pero lo escala a la relacion de lamp1.
+       * Funciones de cada segmento promediado horizontalmente
+       * Osea, para cada pixel vertical se hace un avg de los pixeles
+       * horizontales. x=>pixelVertical, y=>avgHorizontal
        */
-      const l1RectMedium = (x: number) => (interpolateFunct(x) * scaleLamp1)
-      setLamp1RectMedium(() => l1RectMedium)
+      const scienceFunctions = segmentsData.map(data =>
+        promediadoHorizontal(data, segmentWidth, science.height))
 
-      /** Funciones perpendiculares para Lampara 1. */
-      const lamp1PerpendicularFunctions: {
+      /**
+       * Arreglo con informacion de para cada funcion de un segmento el
+       * punto vertical medio y la apartura que le corresponde.
+       */
+      const sciencePlateauInfo: {
+        medium: number
+        opening: number
+      }[] = scienceFunctions.map(funct => findPlateau(funct, 0.5))
+
+      /** Apertura promedio */
+      const avgOpening = mean(sciencePlateauInfo.map(pi => pi.opening))
+      bag.scienceAvgOpening = avgOpening
+
+      /**
+       * Conjuntos de cordenadas (x,y) de los puntos que trazan la recta
+       * media de la función.
+       */
+      const scienceMediasPoints = sciencePoints.map((point, index) => (
+        { x: point, y: sciencePlateauInfo[index]?.medium ?? 0 }
+      ))
+      bag.scienceMediasPoints = scienceMediasPoints
+
+      // Infiere funcion medio del espectro
+      const interpolated: {
+        funct: ((x: number) => number)
+        derived: ((x: number) => number)
+      } = linearRegression(
+        scienceMediasPoints.map(p => p.x),
+        scienceMediasPoints.map(p => p.y),
+      ) // Aproximación lineal
+      // const { funct: interpolateFunct, derived } = splineCuadratic(
+      //   pointsWhitMedias.map(p => p.x),
+      //   pointsWhitMedias.map(p => p.y),
+      // ) // Aproximación spline
+      bag.scienceFunction = interpolated.funct
+
+      /**
+       * Arreglo de funciones que para cada punto de la recta, dada una altura Y
+       * indica el pixel X que le corresponde.
+       */
+      const scienceTransversalFunctions: {
         m: number
         funct: ((h: number) => number)
       }[] = []
-      for (let i = 0; i < lamp1.width; i++) {
-        const p1 = { x: i, y: l1RectMedium(i) }
-        const m_perp = -1 / derived(i) // Usa la deribada original, POSIBLE FUENTE DE ERROR
-        const b = p1.y - m_perp * p1.x
-        lamp1PerpendicularFunctions.push({
-          m: m_perp,
-          funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+      for (let i = 0; i < science.width; i++) {
+        const p1 = { x: i, y: interpolated.funct(i) }
+        // // Perpendicular a la recta.
+        // const m_perp = -1 / derived(i)
+        // const b = p1.y - m_perp * p1.x
+        // scienceTransversalFunctions.push({
+        //   m: m_perp,
+        //   funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+        // })
+        // Perpendicular a la imagen.
+        scienceTransversalFunctions.push({
+          m: Infinity,
+          funct: (_y: number) => (p1.x), // Para cada Y me da ele x que le corresponde.
+          // En el caso Vertical siempre va a ser el X del punto.
         })
       }
-      setLamp1Rects(lamp1PerpendicularFunctions)
+      bag.scienceTransversalFunctions = scienceTransversalFunctions
 
-      /**
-       * Promedio de pixeles perpendiculares a la pendiente para cada pixel horizontal
-       * de Lampara 1.
-       */
-      const avgsPerp: number[] = []
-      for (let i = 0; i < lamp1PerpendicularFunctions.length; i++) {
-        const point = { x: i, y: l1RectMedium(i) }
+      /** Promedio de pixeles que pasan por cada scienceTransversalFunction. */
+      const scienceTransversalAvgs: number[] = []
+      for (let i = 0; i < scienceTransversalFunctions.length; i++) {
+        const point = { x: i, y: interpolated.funct(i) }
+        /** Punnto inicial y final a considerar para promediado consiiderando la apertura */
         const { forward, backward } = extremePoints(
           point,
-          lamp1PerpendicularFunctions[i].m,
+          scienceTransversalFunctions[i].m,
           avgOpening / 2,
         )
 
+        /** Punto minimo de la recta en Y */
         const minY = round(min(forward.y, backward.y))
+        /** Punto maximo de la recta en Y */
         const maxY = round(max(forward.y, backward.y))
+        /** Valor numerico de todos los puntos por los que pasa la recta */
         const values: number[] = getPointsInRect(
-          lamp1.data,
-          lamp1.width,
-          lamp1PerpendicularFunctions[i].funct,
+          science.data,
+          science.width,
+          scienceTransversalFunctions[i].funct,
           minY,
           maxY,
         )
 
+        // si no hay valores entonces devuelve 0
         if (values.length === 0)
-          avgsPerp.push(0)
+          scienceTransversalAvgs.push(0)
         else
-          avgsPerp.push(mean(values))
+          scienceTransversalAvgs.push(mean(values))
       }
-      setLamp1AvgsPerpendicularArr(avgsPerp)
+      bag.scienceTransversalAvgs = scienceTransversalAvgs
+
+      // Lampara 1 datos relevantes.
+      // Obtener informacion de imagen de Lamp1
+      obtainimageMatrix(lamp1Url, false).then((lamp1) => {
+      /**
+       * Relacion de escala de dlampara 1 respecto al espectro de ciencia.
+       * valorLamp1 * scaleLamp1 === equivalenteScience1
+       */
+        const scaleLamp1 = {
+          x: science.width / lamp1.width,
+          y: science.height / lamp1.height,
+        }
+
+        /**
+         * Puntos medios del espectro de lampara 1.
+         * Calculados escalando los puntos del espectro de ciencia.
+         */
+        const lamp1MediasPoints = bag.scienceMediasPoints.map(({ x, y }) => ({
+          x: round(x * scaleLamp1.x),
+          y: y * scaleLamp1.y,
+        }))
+        bag.lamp1MediasPoints = lamp1MediasPoints
+
+        /** Apertura promedio de lampara 1*/
+        bag.lamp1AvgOpening = bag.scienceAvgOpening
+
+        /**
+         * Funcion media para Lampara 1, siempre da lo mismo que la del espectro de
+         * ciencia pero lo escala a la relacion de lamp1.
+         */
+        const lamp1Function = (x: number) => (
+          bag.scienceFunction!(round(x * scaleLamp1.x)) * scaleLamp1.y
+        )
+        bag.lamp1Function = lamp1Function
+
+        /** Funciones perpendiculares para Lampara 1. */
+        const lamp1TransversalFunctions: {
+          m: number
+          funct: ((h: number) => number)
+        }[] = []
+        for (let i = 0; i < lamp1.width; i++) {
+          const p1 = { x: i, y: lamp1Function(i) }
+          const m_perp = -1 / interpolated.derived(p1.x)
+          const b = p1.y - m_perp * p1.x
+          lamp1TransversalFunctions.push({
+            m: m_perp,
+            funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+          })
+        }
+        bag.lamp1TransversalFunctions = lamp1TransversalFunctions
+
+        /** Promedio de pixeles que pasan por cada lamp1TransversalFunction. */
+        const scienceTransversalAvgs: number[] = []
+        for (let i = 0; i < lamp1TransversalFunctions.length; i++) {
+          const point = { x: i, y: lamp1Function(i) }
+          const { forward, backward } = extremePoints(
+            point,
+            lamp1TransversalFunctions[i].m,
+            avgOpening / 2,
+          )
+
+          const minY = round(min(forward.y, backward.y))
+          const maxY = round(max(forward.y, backward.y))
+          const values: number[] = getPointsInRect(
+            lamp1.data,
+            lamp1.width,
+            lamp1TransversalFunctions[i].funct,
+            minY,
+            maxY,
+          )
+
+          if (values.length === 0)
+            scienceTransversalAvgs.push(0)
+          else
+            scienceTransversalAvgs.push(mean(values))
+        }
+        bag.lamp1TransversalAvgs = scienceTransversalAvgs
+
+        setResponse(bag)
+      }).catch((err) => {
+        console.error("Error loading Image Data:", err)
+      })
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
-  }).catch((err) => {
-    console.error("Error loading Image Data:", err)
-  })
+  }, [scienceUrl])
+
+  return response
 }

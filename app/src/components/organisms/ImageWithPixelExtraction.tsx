@@ -121,17 +121,17 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
         for (let i = 0; i < perpendicularFunctions.length; i += 100) {
           const point = { x: i, y: drawFunction(i) }
 
-          // // Punto central
-          // ctx.fillStyle = "steelblue"
-          // ctx.strokeStyle = "black" // borde negro
-          // ctx.beginPath()
-          // ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
-          // ctx.fill()
+          // Punto central
+          ctx.fillStyle = "steelblue"
+          ctx.strokeStyle = "black" // borde negro
+          ctx.beginPath()
+          ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
+          ctx.fill()
 
           // const verticalRect = perpendicularFunctions[point.x].funct
           const m = perpendicularFunctions[point.x].m
           ctx.strokeStyle = "steelblue"
-          ctx.lineWidth = 6
+          ctx.lineWidth = 2
           ctx.beginPath()
 
           // Punto destino arriba y abajo
@@ -144,8 +144,8 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
           // inicio y fin
           ctx.fillStyle = "steelblue"
           ctx.beginPath()
-          ctx.arc(pddown.x, pddown.y, 10, 0, 2 * Math.PI)
-          ctx.arc(pdup.x, pdup.y, 10, 0, 2 * Math.PI)
+          ctx.arc(pddown.x, pddown.y, pointSize, 0, 2 * Math.PI)
+          ctx.arc(pdup.x, pdup.y, pointSize, 0, 2 * Math.PI)
           ctx.fill()
         }
       }
