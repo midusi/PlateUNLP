@@ -1,6 +1,8 @@
+import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { cropImages } from "@/lib/cropImage"
 import { findPlateau, findXspacedPoints, getPointsInRect, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { extremePoints } from "@/lib/trigonometry"
 import { linearRegression, splineCuadratic } from "@/lib/utils"
@@ -8,11 +10,9 @@ import { curveStep } from "@visx/curve"
 import { ParentSize } from "@visx/responsive"
 import { AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
 import { max, mean, min, round } from "mathjs"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
 import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
-import { cropImages } from "@/lib/cropImage"
-import { BoundingBox } from "@/interfaces/BoundingBox"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const countCheckpoints = 10
@@ -22,26 +22,21 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.selectedSpectrum,
   ])
 
-  
   // const urlScience1 = processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox! // "/forTest/Test1_Science1.png"
   // const urlLamp1 = processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox! // "/forTest/Test1_Lamp1.png"
   // const urlLamp2 = processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox! // "/forTest/Test1_Lamp2.png"
-  const [urls, setUrls] = useState<{science:string, lamp1:string, lamp2:string} | null>(null) 
+  const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
   useEffect(() => {
-      const boundingBoxes:BoundingBox[] = [
-        processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox!,
-        processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox!,
-        processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox!,
-      ]
-      cropImages(
-        processInfo.data.plate.scanImage!,
-        boundingBoxes,
-      ).then(([science, lamp1, lamp2]) => setUrls({ science, lamp1, lamp2 }))
-    }, [
+    const boundingBoxes: BoundingBox[] = [
       processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox!,
       processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox!,
-      processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox!
-    ])
+      processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox!,
+    ]
+    cropImages(
+      processInfo.data.plate.scanImage!,
+      boundingBoxes,
+    ).then(([science, lamp1, lamp2]) => setUrls({ science, lamp1, lamp2 }))
+  }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
 
   const {
     scienceInfo,
@@ -61,12 +56,12 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     lamp2TransversalFunctions,
     lamp2TransversalAvgs,
   } = useExtractFeatures(
-      countCheckpoints,
-      segmentWidth,
-      urls?.science,
-      urls?.lamp1,
-      urls?.lamp2,
-    )
+    countCheckpoints,
+    segmentWidth,
+    urls?.science,
+    urls?.lamp1,
+    urls?.lamp2,
+  )
 
   function onComplete() {
     /// Marca el paso actual como completado y el que le sigue como
@@ -137,7 +132,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         <div className="flex flex-col gap-4">
           <ImageWithPixelExtraction
             title="Science Spectrum"
-            imageUrl={urls?.science!}
+            imageUrl={urls?.science}
             imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
             pointsWMed={scienceMediasPoints}
             drawFunction={scienceFunction!}
@@ -149,7 +144,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
           <ImageWithPixelExtraction
             title="Lamp 1 Spectrum"
-            imageUrl={urls?.lamp1!}
+            imageUrl={urls?.lamp1}
             imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
             pointsWMed={lamp1MediasPoints}
             drawFunction={lamp1Function!}
@@ -161,7 +156,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
           <ImageWithPixelExtraction
             title="Lamp 2 Spectrum"
-            imageUrl={urls?.lamp2!}
+            imageUrl={urls?.lamp2}
             imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 2."
             pointsWMed={lamp2MediasPoints}
             drawFunction={lamp2Function!}
@@ -313,7 +308,7 @@ function useExtractFeatures(
       lamp2TransversalFunctions: [],
       lamp2TransversalAvgs: [],
     }
-    if(!scienceUrl || !lamp1Url || !lamp2Url)
+    if (!scienceUrl || !lamp1Url || !lamp2Url)
       return
     // Obtener informacion de imagen SCIENCE
     obtainimageMatrix(scienceUrl, false).then((science) => {
