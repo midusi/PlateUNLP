@@ -31,6 +31,14 @@ function trimImageToBase64(
   return canvas.toDataURL("image/png")
 }
 
+/**
+ * Dada una imagen y un conjunto de bounding boxes retorna el listado de recortes 
+ * de imagen que corresponden.
+ * @param {string} file - Archivo (base64) de la imagen a recortar
+ * @param {BoundingBox[]} boundingBoxes - Listado de recortes a realizar en la imagen.
+ * @returns {Promise<string[]>} -
+ * Promesa de arreglos de recortes (base64).
+ */
 export async function cropImages(file: string, boundingBoxes: BoundingBox[]): Promise<string[]> {
   if (!file || boundingBoxes.length === 0)
     return []
