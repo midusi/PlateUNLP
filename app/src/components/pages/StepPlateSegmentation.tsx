@@ -10,7 +10,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   const parameters = {
     rotateButton: true,
     invertColorButton: true,
-    fieldsMetadata: true
+    fieldsMetadata: true,
   }
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
@@ -70,8 +70,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           state: index === i
             ? "COMPLETE"
             : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
+                ? "NECESSARY_CHANGES"
+                : step.state),
         })),
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
           ...step,
@@ -99,38 +99,6 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         determineBBFunction={determineBBFunction}
         parameters={parameters}
       />
-
-      {/* <div className="w-full p-6">
-        {!processInfo.data.plate.scanImage && (
-          <LoadFile onSelect={(fileValue: string) => {
-            // Si no hay archivo de escaneo cargado etonces solicita uno al usuario.
-            // Lo guarda en processInfo.data.plate.scanImage
-            setProcessInfo(prev => ({
-              ...prev,
-              data: {
-                ...prev.data,
-                plate: {
-                  ...prev.data.plate,
-                  scanImage: fileValue,
-                },
-              },
-            }))
-          }}
-          />
-        )}
-        {processInfo.data.plate.scanImage && (
-          <SegmentationUI
-            file={processInfo.data.plate.scanImage}
-            onComplete={onComplete}
-            enableAutodetect
-            boundingBoxes={boundingBoxes}
-            setBoundingBoxes={setBoundingBoxes}
-            saveBoundingBoxes={saveBoundingBoxes}
-            determineBBFunction={determineBBFunction}
-            classes={classesSpectrumDetection}
-          />
-        )}
-      </div> */}
     </div>
   )
 }
