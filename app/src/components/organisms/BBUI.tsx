@@ -187,6 +187,16 @@ export function BBUI({
       <div className="flex justify-center pt-4">
         <Button
           onClick={() => {
+            // console.log("BB: ", boundingBoxes)
+            // cropImages(image!, boundingBoxes).then((srcs) => {
+            //   for (let i = 0; i < srcs.length; i++) {
+            //     const a = document.createElement("a")
+            //     a.href = srcs[i]
+            //     a.download = "imagen.png"
+            //     a.click()
+            //   }
+            // })
+
             saveBoundingBoxes(boundingBoxes)
             onComplete()
           }}
