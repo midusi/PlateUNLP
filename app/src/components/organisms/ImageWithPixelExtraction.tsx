@@ -9,13 +9,13 @@ interface ImageWithPixelExtractionProps {
   imageUrl: string
   imageAlt?: string
   children: React.ReactNode
-  pointsWMed: Point[]
+  pointsWMed?: Point[]
   drawFunction: ((x: number) => number)
-  perpendicularFunctions: {
+  perpendicularFunctions?: {
     m: number
     funct: ((x: number) => number)
   }[]
-  opening: number
+  opening?: number
 }
 
 export function ImageWithPixelExtraction({
@@ -63,14 +63,13 @@ export function ImageWithPixelExtraction({
 interface ImageWithDrawsProps {
   src: string
   alt?: string
-  points: Point[]
+  points?: Point[]
   drawFunction?: ((x: number) => number)
-  perpendicularFunctions: { m: number, funct: ((x: number) => number) }[]
+  perpendicularFunctions?: { m: number, funct: ((x: number) => number) }[]
   opening?: number
 }
 
 function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions, opening }: ImageWithDrawsProps) {
-  const pointSize = 8
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -81,10 +80,14 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
     const ctx = canvas.getContext("2d")
     if (!ctx)
       return
+
     const img = new Image()
     img.onload = function () {
       canvas.width = img.width
       canvas.height = img.height
+
+      const lineSize = img.height * 0.03
+      const pointSize = img.height * 0.05
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(img, 0, 0)
@@ -102,7 +105,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
       // Dibujar función si está definida
       if (drawFunction) {
         ctx.strokeStyle = "red"
-        ctx.lineWidth = 4
+        ctx.lineWidth = lineSize
         ctx.beginPath()
         for (let x = 0; x < canvas.width; x++) {
           const y = drawFunction(x)
@@ -131,7 +134,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
           // const verticalRect = perpendicularFunctions[point.x].funct
           const m = perpendicularFunctions[point.x].m
           ctx.strokeStyle = "steelblue"
-          ctx.lineWidth = 2
+          ctx.lineWidth = lineSize
           ctx.beginPath()
 
           // Punto destino arriba y abajo
