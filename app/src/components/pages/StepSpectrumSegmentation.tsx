@@ -6,7 +6,6 @@ import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { cropImages } from "@/lib/cropImage"
 import { useEffect, useState } from "react"
 import { BBUI } from "../organisms/BBUI"
-import { SegmentationUI } from "../organisms/SegmentationUI"
 
 export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const parameters = {
@@ -124,18 +123,6 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
           parameters={parameters}
         />
       )}
-      {/* {spectrumImage && (
-        <SegmentationUI
-          file={spectrumImage}
-          onComplete={onComplete}
-          enableAutodetect
-          boundingBoxes={boundingBoxes}
-          setBoundingBoxes={setBoundingBoxes}
-          saveBoundingBoxes={saveBoundingBoxes} // funcion de guardado personalizada para los bounding boxes
-          determineBBFunction={determineBBFunction}
-          classes={classesSpectrumPartSegmentation}
-        />
-      )} */}
     </div>
   )
 }
