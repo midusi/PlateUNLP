@@ -2,21 +2,35 @@ import type { EmpiricalSpectrumPoint } from "@/components/molecules/EmpiricalSpe
 import type { StepProps } from "@/interfaces/StepProps"
 import { CardTitle } from "@/components/atoms/card"
 import { ContinueButton } from "@/components/molecules/ContinueButton"
+import { EmpiricalSpectrum } from "@/components/molecules/EmpiricalSpectrum"
 import { ReferenceLampRangeUI } from "@/components/molecules/ReferenceLampRangeUI"
 import { ReferenceLampSpectrum } from "@/components/molecules/ReferenceLampSpectrum"
 import { FitsLoader } from "@/components/organisms/FitsLoader"
 import { InferenceForm } from "@/components/organisms/InferenceForm"
 import { ReferenceLampForm } from "@/components/organisms/ReferenceLampForm"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 
 export function StepCalibration({ index, processInfo, setProcessInfo }: StepProps) {
-  const [scienceSpectrumData, setScienceSpectrumData] = useState<EmpiricalSpectrumPoint[] | null>(null)
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
   ])
+  const scienceSpectrum = processInfo.data.spectrums[selectedSpectrum!].parts.science.extractedSpectrum!
+    .map((y, idx) => ({
+      pixel: idx,
+      intensity: y,
+    }))
+  const lamp1Spectrum = processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.extractedSpectrum!
+    .map((y, idx) => ({
+      pixel: idx,
+      intensity: y,
+    }))
+  const lamp2Spectrum = processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.extractedSpectrum!
+    .map((y, idx) => ({
+      pixel: idx,
+      intensity: y,
+    }))
 
   function onComplete() {
     /// AGREGAR GUARDADO DE DATOS EXTRAIDOS
@@ -75,11 +89,11 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
               <ReferenceLampSpectrum />
             </div>
             <div className="flex-1">
-              <CardTitle>Empirical Comparison Lamp</CardTitle>
+              <CardTitle>Empirical Comparison Lamp 1</CardTitle>
               <div className="flex-1 h-full">
-                <FitsLoader
-                  plotColor="#0ea5e9"
-                  setData={() => { }}
+                <EmpiricalSpectrum
+                  data={lamp1Spectrum!}
+                  color="#0ea5e9"
                   interactable
                   preview
                 />
@@ -87,11 +101,11 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
             </div>
 
             <div className="flex-1">
-              <CardTitle>Empirical Spectrum</CardTitle>
-              <FitsLoader
-                plotColor="#16a34a"
-                setData={setScienceSpectrumData}
-                interactable={false}
+              <CardTitle>Empirical Science Spectrum</CardTitle>
+              <EmpiricalSpectrum
+                data={scienceSpectrum}
+                color="#0ea5e9"
+                interactable
                 preview
               />
             </div>
@@ -101,7 +115,7 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
       </ResizablePanes>
       <ContinueButton
         className="flex justify-center pt-4"
-        data={scienceSpectrumData}
+        data={scienceSpectrum}
         inSuccessfulCase={onComplete}
       />
     </>

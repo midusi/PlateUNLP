@@ -22,21 +22,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.selectedSpectrum,
   ])
 
-  // const urlScience1 = processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox! // "/forTest/Test1_Science1.png"
-  // const urlLamp1 = processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox! // "/forTest/Test1_Lamp1.png"
-  // const urlLamp2 = processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox! // "/forTest/Test1_Lamp2.png"
-  const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
-  useEffect(() => {
-    const boundingBoxes: BoundingBox[] = [
-      processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox!,
-      processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox!,
-      processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox!,
-    ]
-    cropImages(
-      processInfo.data.plate.scanImage!,
-      boundingBoxes,
-    ).then(([science, lamp1, lamp2]) => setUrls({ science, lamp1, lamp2 }))
-  }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
+  const urls = {
+    science: "/forTest/Test1_Science1.png",
+    lamp1: "/forTest/Test1_Lamp1.png",
+    lamp2: "/forTest/Test1_Lamp2.png",
+  }
+
+  // const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
+  // useEffect(() => {
+  //   const boundingBoxes: BoundingBox[] = [
+  //     processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox!,
+  //     processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox!,
+  //     processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox!,
+  //   ]
+  //   cropImages(
+  //     processInfo.data.plate.scanImage!,
+  //     boundingBoxes,
+  //   ).then(([science, lamp1, lamp2]) => setUrls({ science, lamp1, lamp2 }))
+  // }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
 
   const {
     scienceInfo,
