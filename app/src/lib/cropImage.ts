@@ -1,17 +1,24 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 
+/**
+ * Dada una imagen y una bounding box genera el base64 de la seccion de la
+ * imagen correspondiente al bounding box.
+ * @param {HTMLImageElement} image - Imagen completa.
+ * @param {BoundingBox} box - Bounding Box.
+ * @returns {string} -
+ * Base64 del recorte de la imagen.
+ */
 function trimImageToBase64(
   image: HTMLImageElement,
   box: BoundingBox,
-  scale: { x: number, y: number },
 ): string {
   const canvas = document.createElement("canvas")
   const ctx = canvas.getContext("2d")
 
-  const realX = box.x * scale.x
-  const realY = box.y * scale.y
-  const realWidth = box.width * scale.x
-  const realHeight = box.height * scale.y
+  const realX = box.x
+  const realY = box.y
+  const realWidth = box.width
+  const realHeight = box.height
 
   canvas.width = realWidth
   canvas.height = realHeight
@@ -22,17 +29,17 @@ function trimImageToBase64(
     realY, // Coordenada Y en la imagen real
     realWidth, // Ancho real de la bounding box
     realHeight, // Alto real de la bounding box
-    0,
-    0,
-    realWidth,
-    realHeight,
+    0, // Pocicion X donde se empezara a dibujar la imagen
+    0, // Pocicion Y donde se empezara a dibujar la imagen
+    realWidth, // Ancho con el que se dibujara el recorte.
+    realHeight, // Alto con el que se dibujara el recorte.
   )
 
   return canvas.toDataURL("image/png")
 }
 
 /**
- * Dada una imagen y un conjunto de bounding boxes retorna el listado de recortes 
+ * Dada una imagen y un conjunto de bounding boxes retorna el listado de recortes
  * de imagen que corresponden.
  * @param {string} file - Archivo (base64) de la imagen a recortar
  * @param {BoundingBox[]} boundingBoxes - Listado de recortes a realizar en la imagen.
@@ -52,13 +59,8 @@ export async function cropImages(file: string, boundingBoxes: BoundingBox[]): Pr
     image.onload = resolve
   })
 
-  // Informacion de escala
-  const { naturalWidth, naturalHeight, width, height } = image
-  const scaleX = naturalWidth / width
-  const scaleY = naturalHeight / height
-
   boundingBoxes.forEach((box) => {
-    croppedImages.push(trimImageToBase64(image, box, { x: scaleX, y: scaleY }))
+    croppedImages.push(trimImageToBase64(image, box))
   })
 
   return croppedImages
