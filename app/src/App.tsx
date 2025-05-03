@@ -27,10 +27,13 @@ export default function App() {
         sharedMetadata: {
           OBSERVAT: "",
           OBSERVER: "",
-          DIGITALI: 0,
+          DIGITALI: "",
           SCANNER: "",
           SOFTWARE: "",
           PLATE_N: "",
+          DETECTOR: "",
+          INSTRUMENT: "",
+          TELESCOPE: ""
         },
       },
       spectrums: [],

@@ -7,6 +7,11 @@ import { useState } from "react"
 import { BBUI } from "../organisms/BBUI"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
+  const parameters = {
+    rotateButton: true,
+    invertColorButton: true,
+    fieldsMetadata: true
+  }
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
   )
@@ -65,8 +70,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           state: index === i
             ? "COMPLETE"
             : (index + 1 === i
-                ? "NECESSARY_CHANGES"
-                : step.state),
+              ? "NECESSARY_CHANGES"
+              : step.state),
         })),
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
           ...step,
@@ -92,6 +97,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         saveImageLoading={saveImage}
         classes={classesSpectrumDetection}
         determineBBFunction={determineBBFunction}
+        parameters={parameters}
       />
 
       {/* <div className="w-full p-6">

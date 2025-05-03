@@ -11,6 +11,52 @@ import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
 import { BoxList } from "./BBList"
 
+const rotatedHandleMap: Record<number, Record<string, string>> = {
+  0: {
+    "top-left": "top-left",
+    "top": "top",
+    "top-right": "top-right",
+    "right": "right",
+    "bottom-right": "bottom-right",
+    "bottom": "bottom",
+    "bottom-left": "bottom-left",
+    "left": "left"
+  },
+  90: {
+    "top-left": "bottom-left",
+    "top": "left",
+    "top-right": "top-left",
+    "right": "top",
+    "bottom-right": "top-right",
+    "bottom": "right",
+    "bottom-left": "bottom-right",
+    "left": "bottom"
+  },
+  180: {
+    "top-left": "bottom-right",
+    "top": "bottom",
+    "top-right": "bottom-left",
+    "right": "left",
+    "bottom-right": "top-left",
+    "bottom": "top",
+    "bottom-left": "top-right",
+    "left": "right"
+  },
+  270: {
+    "top-left": "top-right",
+    "top": "right",
+    "top-right": "bottom-right",
+    "right": "bottom",
+    "bottom-right": "bottom-left",
+    "bottom": "left",
+    "bottom-left": "top-left",
+    "left": "top"
+  }
+}
+
+
+
+
 interface BBUIProps {
   file?: string | null
   boundingBoxes: BoundingBox[]
@@ -20,6 +66,13 @@ interface BBUIProps {
   saveImageLoading?: (src: string) => void
   classes: BBClassesProps[]
   determineBBFunction: (img_src: string) => Promise<BoundingBox[]>
+  parameters: BBUIParameters
+}
+
+interface BBUIParameters {
+  rotateButton: boolean,
+  invertColorButton: boolean,
+  fieldsMetadata: boolean
 }
 
 export function BBUI({
@@ -31,6 +84,7 @@ export function BBUI({
   saveImageLoading,
   classes,
   determineBBFunction,
+  parameters
 }: BBUIProps) {
   const [image, setImage] = useState<null | string>(file)
   const [bgWhite, setBgWhite] = useState(true)
@@ -82,7 +136,7 @@ export function BBUI({
                   </span>
                 </Button>
               )}
-              <Button
+              {parameters.rotateButton && <Button
                 onClick={() => { setRotation((rotation + 90) % 360) }}
                 variant="outline"
                 size="sm"
@@ -92,21 +146,24 @@ export function BBUI({
                 <span>
                   {`Rotate 90º from ${rotation}º`}
                 </span>
-              </Button>
-              <Button
-                onClick={() => { setBgWhite(!bgWhite) }}
-                variant="outline"
-                size="sm"
-                className={clsx(
-                  "flex items-center gap-2",
-                  bgWhite
-                    ? "bg-white text-black hover:bg-slate-50"
-                    : "bg-slate-800 text-white hover:bg-slate-700",
-                )}
-              >
-                <Palette className="h-4 w-4" />
-                <span>Invert colors</span>
-              </Button>
+              </Button>}
+
+              {parameters.invertColorButton &&
+                <Button
+                  onClick={() => { setBgWhite(!bgWhite) }}
+                  variant="outline"
+                  size="sm"
+                  className={clsx(
+                    "flex items-center gap-2",
+                    bgWhite
+                      ? "bg-white text-black hover:bg-slate-50"
+                      : "bg-slate-800 text-white hover:bg-slate-700",
+                  )}
+                >
+                  <Palette className="h-4 w-4" />
+                  <span>Invert colors</span>
+                </Button>
+              }
               <Button
                 onClick={() => {
                   setIsDrawingMode(!isDrawingMode)
@@ -167,6 +224,7 @@ export function BBUI({
         selected={selectedBoxId}
         setSelected={setSelectedBoxId}
         classes={classes}
+        parameters={{ fieldsMetadata: parameters.fieldsMetadata }}
       />
       <div className="flex justify-center pt-4">
         <Button
@@ -221,6 +279,8 @@ function ImageViewer({
 
   /** To know if show or not resizing controls */
   const [isResizing, setIsResizing] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragOffsetRef = useRef({ x: 0, y: 0 })
 
   const imageScale = useMemo(() => {
     if (
@@ -298,8 +358,9 @@ function ImageViewer({
           minScale={imageScale * 0.25}
           maxScale={imageScale * zoomFactor}
           centerOnInit
+          centerZoomedOut
           doubleClick={{ step: 0.7 }}
-          disabled={isDrawingMode || isResizing}
+          disabled={isDrawingMode || isResizing || isDragging}
         >
           <TransformComponent
             wrapperStyle={{
@@ -321,6 +382,8 @@ function ImageViewer({
               setIsDrawingMode={setIsDrawingMode}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
+              setIsDragging={setIsDragging}
+              dragOffsetRef={dragOffsetRef}
               selectedBoxId={selectedBoxId}
               setSelectedBoxId={setSelectedBoxId}
               boundingBoxes={boundingBoxes}
@@ -341,6 +404,8 @@ interface ImageWithBoundingBoxesProps {
   setIsDrawingMode: Dispatch<SetStateAction<boolean>>
   isResizing: boolean
   setIsResizing: Dispatch<SetStateAction<boolean>>
+  setIsDragging: Dispatch<SetStateAction<boolean>>
+  dragOffsetRef: React.MutableRefObject<{ x: number; y: number }>
   selectedBoxId: string | null
   setSelectedBoxId: Dispatch<SetStateAction<string | null>>
   boundingBoxes: BoundingBox[]
@@ -354,6 +419,8 @@ function ImageWithBoundingBoxes({
   setIsDrawingMode,
   isResizing,
   setIsResizing,
+  setIsDragging,
+  dragOffsetRef,
   selectedBoxId,
   setSelectedBoxId,
   boundingBoxes,
@@ -499,7 +566,6 @@ function ImageWithBoundingBoxes({
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!imageRef.current)
         return
-
       const rect = imageRef.current.getBoundingClientRect()
       let currentX = (e.clientX - rect.left) / scale
       let currentY = (e.clientY - rect.top) / scale
@@ -508,7 +574,25 @@ function ImageWithBoundingBoxes({
       const transformed = transformCoordinates(currentX, currentY, 0, 0, true)
       currentX = transformed.x
       currentY = transformed.y
+      const box_selected = boundingBoxes.find(b => b.id === selectedBoxId)
+      if ((selectedBoxId && !isResizing && !isDrawingMode && e.buttons === 1 && box_selected != undefined)) {
+        if (dragOffsetRef.current.x == -1) {
+          const offsetX = currentX - box_selected.x
+          const offsetY = currentY - box_selected.y
+          dragOffsetRef.current = { x: offsetX, y: offsetY }
+        }
+        setIsDragging(true)
+        const newBox = { ...box_selected }
+        newBox.x = currentX - dragOffsetRef.current.x //- previousMouseX
+        newBox.y = currentY - dragOffsetRef.current.y  //- previousMouseY
+        // Update the bounding box
+        setBoundingBoxes(prev => prev.map(box => (box.id === selectedBoxId ? newBox : box)))
 
+      }
+      else {
+        dragOffsetRef.current = { x: -1, y: 0 }
+        setIsDragging(false)
+      }
       /** Dibujo de nueva caja */
       if (drawingRef.current.isDrawing && tempBox) {
         const width = currentX - drawingRef.current.startX
@@ -539,40 +623,42 @@ function ImageWithBoundingBoxes({
         // const centerX = imageRef.current.width / 2
         // const centerY = imageRef.current.height / 2
 
-        switch (resizeHandle) {
+        const actualHandle = rotatedHandleMap[rotation][resizeHandle]
+
+        switch (actualHandle) {
           case "top-left":
-            newBox.x = originalBox.x + deltaX
-            newBox.y = originalBox.y + deltaY
-            newBox.width = originalBox.width - deltaX
-            newBox.height = originalBox.height - deltaY
+            newBox.x = currentX
+            newBox.y = currentY
+            newBox.width = originalBox.width - (currentX - originalBox.x)
+            newBox.height = originalBox.height - (currentY - originalBox.y)
             break
           case "top-right":
-            newBox.y = originalBox.y + deltaY
-            newBox.width = originalBox.width + deltaX
-            newBox.height = originalBox.height - deltaY
+            newBox.y = currentY
+            newBox.width = currentX - originalBox.x
+            newBox.height = originalBox.height - (currentY - originalBox.y)
             break
           case "bottom-left":
-            newBox.x = originalBox.x + deltaX
-            newBox.width = originalBox.width - deltaX
-            newBox.height = originalBox.height + deltaY
+            newBox.x = currentX
+            newBox.width = originalBox.width - (currentX - originalBox.x)
+            newBox.height = currentY - originalBox.y
             break
           case "bottom-right":
-            newBox.width = originalBox.width + deltaX
-            newBox.height = originalBox.height + deltaY
+            newBox.width = currentX - originalBox.x
+            newBox.height = currentY - originalBox.y
             break
           case "top":
-            newBox.y = originalBox.y + deltaY
-            newBox.height = originalBox.height - deltaY
+            newBox.y = currentY
+            newBox.height = originalBox.height - (currentY - originalBox.y)
             break
           case "right":
-            newBox.width = originalBox.width + deltaX
+            newBox.width = currentX - originalBox.x
             break
           case "bottom":
-            newBox.height = originalBox.height + deltaY
+            newBox.height = currentY - originalBox.y
             break
           case "left":
-            newBox.x = originalBox.x + deltaX
-            newBox.width = originalBox.width - deltaX
+            newBox.x = currentX
+            newBox.width = originalBox.width - (currentX - originalBox.x)
             break
         }
 
@@ -789,15 +875,62 @@ interface ImageLoaderProps {
 
 function ImageLoader({ handleImageLoad }: ImageLoaderProps) {
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        handleImageLoad(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        const img = new Image();
+
+        img.onload = () => {
+          const canvas = padImageToSquare(img);
+          const squaredDataUrl = canvas.toDataURL("image/png");
+
+          handleImageLoad(squaredDataUrl as string)
+        };
+
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
     }
   }
+  function padImageToSquare(image: HTMLImageElement): HTMLCanvasElement {
+    const maxSide = Math.max(image.width, image.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = maxSide;
+    canvas.height = maxSide;
+
+    const ctx = canvas.getContext("2d")!;
+
+    // Rellenar con blanco
+    //ctx.fillStyle = "white";
+    //ctx.fillRect(0, 0, maxSide, maxSide);
+
+    const offsetX = (maxSide - image.width) / 2;
+    const offsetY = 0;
+
+    ctx.drawImage(image, offsetX, offsetY);
+
+    return canvas;
+  }
+  // Función para convertir en cuadrado con padding transparente
+  /*function padImageToSquare(image: HTMLImageElement): HTMLCanvasElement {
+    const maxSide = Math.max(image.width, image.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = maxSide;
+    canvas.height = maxSide;
+
+    const ctx = canvas.getContext("2d")!;
+    ctx.clearRect(0, 0, maxSide, maxSide);
+
+    const offsetX = (maxSide - image.width) / 2;
+    const offsetY = (maxSide - image.height) / 2;
+
+    ctx.drawImage(image, offsetX, offsetY);
+
+    return canvas;
+  }
+*/
 
   return (
     <div className="w-full h-full p-6 rounded-lg">

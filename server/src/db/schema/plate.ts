@@ -8,11 +8,14 @@ export const plate = sqliteTable("plate", {
     projectId: text("projectId").references(() => project.id),
     observat: text(),
     observer: text(),
-    digitali: real(),
+    digitali: text(),
     scanner: text(),
     software: text(),
     plateN: text(),
-    scanImage: text()
+    scanImage: text(),
+    telescope: text(),
+    detector: text(),
+    instrument: text()
 });
 
 export const plateRelations = relations(plate, ({ one }) => ({

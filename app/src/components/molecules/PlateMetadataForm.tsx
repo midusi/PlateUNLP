@@ -7,15 +7,17 @@ import { useImperativeHandle } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "../atoms/input"
 import SelectForm from "../atoms/selectForm"
-import { TimePicker } from "../atoms/timePicker"
 
 export interface PlateMetadata {
   OBSERVAT: string
   OBSERVER: string
-  DIGITALI: number // time/timestamp
+  DIGITALI: string
   SCANNER: string
   SOFTWARE: string
   PLATE_N: string
+  TELESCOPE: string
+  DETECTOR: string
+  INSTRUMENT: string
 }
 
 const options = observatories
@@ -86,16 +88,7 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
           </div>
           <div className={inputContainerClassName}>
             <Label>DIGITALI</Label>
-            <Controller
-              control={control}
-              name="DIGITALI"
-              render={({ field: { value, onChange } }) => (
-                <TimePicker
-                  date={value ? new Date(value * 1000) : undefined}
-                  setDate={date => onChange(date ? date.getTime() / 1000 : 0)}
-                />
-              )}
-            />
+            <Input {...register("DIGITALI")} placeholder="DIGITALI" className={inputClassName} />
             {errors.DIGITALI && <p className="text-red-500">{errors.DIGITALI.message}</p>}
           </div>
           <div className={inputContainerClassName}>
@@ -112,6 +105,21 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
             <Label>PLATE-N</Label>
             <Input {...register("PLATE_N")} placeholder="Identification number" className={inputClassName} />
             {errors.PLATE_N && <p className="text-red-500">{errors.PLATE_N.message}</p>}
+          </div>
+          <div className={inputContainerClassName}>
+            <Label>TELESCOPE</Label>
+            <Input {...register("TELESCOPE")} placeholder="Telescope name" className={inputClassName} />
+            {errors.TELESCOPE && <p className="text-red-500">{errors.TELESCOPE.message}</p>}
+          </div>
+          <div className={inputContainerClassName}>
+            <Label>DETECTOR</Label>
+            <Input {...register("DETECTOR")} placeholder="Detector" className={inputClassName} />
+            {errors.DETECTOR && <p className="text-red-500">{errors.DETECTOR.message}</p>}
+          </div>
+          <div className={inputContainerClassName}>
+            <Label>INSTRUMENT</Label>
+            <Input {...register("INSTRUMENT")} placeholder="Instrument" className={inputClassName} />
+            {errors.INSTRUMENT && <p className="text-red-500">{errors.INSTRUMENT.message}</p>}
           </div>
         </div>
       </form>

@@ -1,11 +1,7 @@
 import { z } from "zod"
 
 export const spectrumMetadataFormSchema = z.object({
-    OBJECT: z.string().nonempty(),
-    DATE_OBS: z.date(),
     TIME_OBS: z.number().optional(),
-    MAIN_ID: z.string().nonempty(),
-    UT: z.number(),
     ST: z.union([z.undefined(), z.number()]),
     HA: z.union([z.undefined(), z.number()]),
     RA: z.union([z.undefined(), z.number()]),

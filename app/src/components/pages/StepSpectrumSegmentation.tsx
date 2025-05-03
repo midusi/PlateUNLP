@@ -9,6 +9,11 @@ import { BBUI } from "../organisms/BBUI"
 import { SegmentationUI } from "../organisms/SegmentationUI"
 
 export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
+  const parameters = {
+    rotateButton: false,
+    invertColorButton: false,
+    fieldsMetadata: false,
+  }
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum!,
@@ -116,6 +121,7 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
           saveBoundingBoxes={saveBoundingBoxes}
           classes={classesSpectrumPartSegmentation}
           determineBBFunction={determineBBFunction}
+          parameters={parameters}
         />
       )}
       {/* {spectrumImage && (
