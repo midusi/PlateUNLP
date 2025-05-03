@@ -70,18 +70,14 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
   }
 
   return (
-    <>
+    <div className="w-full flex flex-col">
       <ResizablePanes
         vertical
         uniqueId="uniqueId"
         resizerSize={5}
-        resizerClass="w-full bg-gradient-to-t from-sky-300 to-sky-200 border-2 border-gray-300 rounded-md flex justify-center items-center"
+        resizerClass=" bg-gradient-to-t bg-green border border-gray-300  flex justify-center items-center"
       >
-        <Pane id="P0" size={30} minSize={20} className="bg-gray-200 p-4">
-          <ReferenceLampForm />
-          <InferenceForm />
-        </Pane>
-        <Pane id="P1" size={70} minSize={20} className="bg-gray-100 p-4">
+        <Pane id="P0" size={80} minSize={20} className="bg-slate-100 p-6">
           <CardTitle>Teorical Comparison Lamp</CardTitle>
           <ReferenceLampRangeUI />
           <div className="flex flex-col h-screen">
@@ -90,7 +86,7 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
             </div>
             <div className="flex-1">
               <CardTitle>Empirical Comparison Lamp 1</CardTitle>
-              <div className="flex-1 h-full">
+              <div className="flex-1">
                 <EmpiricalSpectrum
                   data={lamp1Spectrum!}
                   color="#0ea5e9"
@@ -110,7 +106,10 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
               />
             </div>
           </div>
-
+        </Pane>
+        <Pane id="P1" size={20} minSize={10} className="bg-gray-50 border-l p-4">
+          <ReferenceLampForm />
+          <InferenceForm />
         </Pane>
       </ResizablePanes>
       <ContinueButton
@@ -118,6 +117,6 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
         data={scienceSpectrum}
         inSuccessfulCase={onComplete}
       />
-    </>
+    </div>
   )
 }
