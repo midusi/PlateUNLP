@@ -16,8 +16,8 @@ import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
   const countCheckpoints = 5
-  const segmentWidth = 300
-  const useSpline = true
+  const segmentWidth = 120
+  const useSpline = false
   const reuseScienceFunction = true
 
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
