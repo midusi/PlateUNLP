@@ -15,19 +15,22 @@ import { Button } from "../atoms/button"
 import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
-  const countCheckpoints = 10
-  const segmentWidth = 120
+  const countCheckpoints = 5
+  const segmentWidth = 300
+  const useSpline = true
+  const reuseScienceFunction = true
+
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
   ])
+  
 
-  const urls = {
+  const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>({
     science: "/forTest/Test1_Science1.png",
     lamp1: "/forTest/Test1_Lamp1.png",
-    lamp2: "/forTest/Test1_Lamp2.png",
-  }
-
+    lamp2: "/forTest/Test1_Lamp2.png"
+  })
   // const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
   // useEffect(() => {
   //   const boundingBoxes: BoundingBox[] = [
@@ -64,6 +67,8 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     urls?.science,
     urls?.lamp1,
     urls?.lamp2,
+    useSpline,
+    reuseScienceFunction
   )
 
   function onComplete() {
@@ -271,6 +276,8 @@ function useExtractFeatures(
   scienceUrl?: string,
   lamp1Url?: string,
   lamp2Url?: string,
+  useSpline?:boolean,
+  reuseScienceFunction?:boolean
 ): useExtractFeaturesResponse {
   /** Resultados a devolver */
   const [response, setResponse] = useState<useExtractFeaturesResponse>({
@@ -366,17 +373,18 @@ function useExtractFeatures(
       bag.scienceMediasPoints = scienceMediasPoints
 
       // Infiere funcion medio del espectro
-      const interpolated: {
-        funct: ((x: number) => number)
-        derived: ((x: number) => number)
-      } = linearRegressionWhitDerived(
-        scienceMediasPoints.map(p => p.x),
-        scienceMediasPoints.map(p => p.y),
-      ) // Aproximación lineal
-      // const { funct: interpolateFunct, derived } = splineCuadratic(
-      //   pointsWhitMedias.map(p => p.x),
-      //   pointsWhitMedias.map(p => p.y),
-      // ) // Aproximación spline
+      let interpolated: { funct: ((x: number) => number), derived: ((x: number) => number) }
+      if (useSpline) { // Aproximación spline
+        interpolated = splineCuadratic(
+          scienceMediasPoints.map(p => p.x),
+          scienceMediasPoints.map(p => p.y),
+        ) 
+      } else { // Aproximación lineal
+        interpolated = linearRegressionWhitDerived(
+          scienceMediasPoints.map(p => p.x),
+          scienceMediasPoints.map(p => p.y),
+        ) 
+      }
       bag.scienceFunction = interpolated.funct
 
       /**
@@ -448,6 +456,10 @@ function useExtractFeatures(
             mediaFunction: bag.scienceFunction!,
           },
           lamp: lamp1,
+          reuseScienceFunction: reuseScienceFunction,
+          useSpline:useSpline,
+          countCheckpoints: countCheckpoints,
+          segmentWidth: segmentWidth,
         })
 
         // Actualizar salida del metodo con informacion de lamp1
@@ -473,6 +485,10 @@ function useExtractFeatures(
               mediaFunction: bag.scienceFunction!,
             },
             lamp: lamp2,
+            reuseScienceFunction: reuseScienceFunction,
+            useSpline:useSpline,
+            countCheckpoints: countCheckpoints,
+            segmentWidth: segmentWidth,
           })
 
           // Actualizar salida del metodo con informacion de lamp2
@@ -514,6 +530,10 @@ interface extractLampDataProps {
     width: number
     height: number
   }
+  reuseScienceFunction?:boolean
+  useSpline?:boolean,
+  countCheckpoints?:number
+  segmentWidth?:number,
 }
 
 interface extractLampDataResponse {
@@ -526,7 +546,7 @@ interface extractLampDataResponse {
   }[]
   transversalAvgs: number[]
 }
-function extractLampData({ science, lamp }: extractLampDataProps): extractLampDataResponse {
+function extractLampData({ science, lamp, reuseScienceFunction, useSpline, countCheckpoints, segmentWidth }: extractLampDataProps): extractLampDataResponse {
   const response: extractLampDataResponse = {
     mediasPoints: [],
     avgOpening: 0,
@@ -547,22 +567,57 @@ function extractLampData({ science, lamp }: extractLampDataProps): extractLampDa
    * Puntos medios del espectro de lampara.
    * Calculados escalando los puntos del espectro de ciencia.
    */
-  const mediasPoints = science.mediasPoints.map(({ x, y }) => ({
-    x: round(x * scaleLamp.x),
-    y: y * scaleLamp.y,
-  }))
+  let mediasPoints
+  if (reuseScienceFunction) { // Reusar los del espectro de ciencia pero los escala.
+    mediasPoints = science.mediasPoints.map(({ x, y }) => ({
+      x: round(x * scaleLamp.x),
+      y: y * scaleLamp.y,
+    }))
+  } else { // Infiere los suyos.
+    const lampPoints = findXspacedPoints(science.width, countCheckpoints!)
+      
+      const segmentsData = obtainImageSegments(
+        lamp.data,
+        lamp.width,
+        lamp.height,
+        lampPoints,
+        segmentWidth!,
+      )
+    const lampFunctions = segmentsData.map(data =>
+      promediadoHorizontal(data, segmentWidth!, science.height))
+
+    const lampPlateauInfo: {
+      medium: number
+      opening: number
+    }[] = lampFunctions.map(funct => findPlateau(funct, 0.5))
+    mediasPoints = lampPoints.map((point, index) => (
+      { x: point, y: lampPlateauInfo[index]?.medium ?? 0 }
+    ))
+  }
   response.mediasPoints = mediasPoints
 
   /** Apertura promedio de lampara. Tomamos la misma que la del espectro */
   response.avgOpening = science.avgOpening
 
-  /**
-   * Funcion media para Lampara, siempre da lo mismo que la del espectro de
-   * ciencia pero lo escala a la relacion de lamp1.
-   */
-  const mediaFunction = (x: number) => (
-    science.mediaFunction!(round(x * scaleLamp.x)) * scaleLamp.y
-  )
+  /** Funcion media para Lampara */
+  let mediaFunction: (value: number) => number
+  if (reuseScienceFunction) { // Reusar la del espectro de ciencia pero lo escala.
+    mediaFunction = (x: number) => (
+      science.mediaFunction!(round(x * scaleLamp.x)) * scaleLamp.y
+    )
+  } else { // Infiere la suya en base a sus medias points
+    if (useSpline) { // Aproximación spline
+      mediaFunction = splineCuadratic(
+        response.mediasPoints.map(p => p.x),
+        response.mediasPoints.map(p => p.y),
+      ).funct
+    } else { // Aproximación lineal
+      mediaFunction = linearRegressionWhitDerived(
+        response.mediasPoints.map(p => p.x),
+        response.mediasPoints.map(p => p.y),
+      ).funct
+    }
+  }
   response.mediaFunction = mediaFunction
 
   /** Funciones perpendiculares para Lampara 1. */
