@@ -78,26 +78,45 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
         resizerClass=" bg-gradient-to-t bg-green border border-gray-300  flex justify-center items-center"
       >
         <Pane id="P0" size={80} minSize={20} className="bg-slate-100 p-6">
-          <CardTitle>Teorical Comparison Lamp</CardTitle>
+          {/* Grafico de interacción para calibrar respecto a lampara teorica */}
+          <h3 className="text-lg font-serif tracking-tight">
+            Teorical Comparison Lamp
+          </h3>
           <ReferenceLampRangeUI />
-          <div className="flex flex-col h-screen">
-            <div className="flex-1">
-              <ReferenceLampSpectrum />
-            </div>
-            <div className="flex-1">
-              <CardTitle>Empirical Comparison Lamp 1</CardTitle>
-              <div className="flex-1">
-                <EmpiricalSpectrum
-                  data={lamp1Spectrum!}
-                  color="#0ea5e9"
-                  interactable
-                  preview
-                />
-              </div>
+          <div className="flex flex-col ">
+            <ReferenceLampSpectrum />
+
+            {/* Grafico espectro calibrado lampara 1 */}
+            <div>
+              <h3 className="text-lg font-serif tracking-tight">
+                Empirical Comparison Lamp 1
+              </h3>
+              <EmpiricalSpectrum
+                data={lamp1Spectrum!}
+                color="#0ea5e9"
+                interactable
+                preview
+              />
             </div>
 
-            <div className="flex-1">
-              <CardTitle>Empirical Science Spectrum</CardTitle>
+            {/* Grafico espectro calibrado lampara 2 */}
+            <div>
+              <h3 className="text-lg font-serif tracking-tight">
+                Empirical Comparison Lamp 2
+              </h3>
+              <EmpiricalSpectrum
+                data={lamp2Spectrum!}
+                color="#0ea5e9"
+                interactable
+                preview
+              />
+            </div>
+
+            {/* Grafico espectro calibrado ciencia */}
+            <div>
+              <h3 className="text-lg font-serif  tracking-tight">
+                Empirical Science Spectrum
+              </h3>
               <EmpiricalSpectrum
                 data={scienceSpectrum}
                 color="#0ea5e9"

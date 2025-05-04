@@ -17,7 +17,7 @@ const getX = (p: SpectrumPoint) => p?.wavelength ?? 0
 const getY = (p: SpectrumPoint) => p?.intensity ?? 0
 
 const height = 150
-const margin = { top: 20, right: 30, bottom: 40, left: 50 }
+const margin = { top: 20, right: 8, bottom: 40, left: 50 }
 
 export function ReferenceLampRange() {
   const patternId = useId()
@@ -78,7 +78,7 @@ export function ReferenceLampRange() {
   }, [data, material])
 
   return (
-    <div ref={measureRef}>
+    <div ref={measureRef} className="flex justify-center">
       <svg width={width} height={height}>
         <Group top={margin.top} left={margin.left}>
           <GridColumns

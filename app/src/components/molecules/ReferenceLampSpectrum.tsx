@@ -1,4 +1,5 @@
 import type { SpectrumPoint } from "@/lib/spectral-data"
+import type { JSX } from "react"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useMeasure } from "@/hooks/use-measure"
 import { getMaterialSpectralData } from "@/lib/spectral-data"
@@ -9,14 +10,14 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Line, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
-import { JSX, useMemo } from "react"
+import { useMemo } from "react"
 
 // data accessors
 const getX = (p: SpectrumPoint) => p?.wavelength ?? 0
 const getY = (p: SpectrumPoint) => p?.intensity ?? 0
 
-const height = 300
-const margin = { top: 40, right: 30, bottom: 50, left: 55 }
+const height = 200
+const margin = { top: 6, right: 0, bottom: 40, left: 50 }
 
 export function ReferenceLampSpectrum() {
   const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette, lampPoints, oneTeoricalSpectrum] = useGlobalStore(s => [
@@ -144,7 +145,7 @@ export function ReferenceLampSpectrum() {
   }
 
   return (
-    <div ref={measureRef}>
+    <div ref={measureRef} style={{ height: `${height}px` }}>
       <svg width={width} height={height} onClick={onClick}>
         {spotsInGraph}
         <Group top={margin.top} left={margin.left}>

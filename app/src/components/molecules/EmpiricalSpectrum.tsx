@@ -21,17 +21,22 @@ export interface EmpiricalSpectrumPoint {
 const getX = (p: EmpiricalSpectrumPoint) => p?.pixel ?? 0
 const getY = (p: EmpiricalSpectrumPoint) => p?.intensity ?? 0
 
-const height = 300
-const margin = { top: 40, right: 30, bottom: 100, left: 55 }
-
 interface EmpiricalSpectrumProps {
   data: EmpiricalSpectrumPoint[]
   color: string
   interactable: boolean
   preview: boolean
+  showPixel?: boolean
 }
 
-export function EmpiricalSpectrum({ data, color, interactable = true, preview = true }: EmpiricalSpectrumProps) {
+export function EmpiricalSpectrum({ data, color, interactable = true, preview = true, showPixel = false }: EmpiricalSpectrumProps) {
+  const height = 200
+  const margin = {
+    top: showPixel ? 40 : 0,
+    right: 0,
+    bottom: 40,
+    left: 50,
+  }
   const [lampPoints, setLampPoints, linesPalette, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
     s.lampPoints,
     s.setLampPoints,
@@ -146,11 +151,13 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
             className="stroke-1"
             style={{ stroke: color }}
           />
-          <AxisTop
-            scale={xScalePixel}
-            label="Pixel"
-            numTicks={Math.floor(xMax / 80)}
-          />
+          {showPixel && (
+            <AxisTop
+              scale={xScalePixel}
+              label="Pixel"
+              numTicks={Math.floor(xMax / 80)}
+            />
+          )}
           {preview && (
             <>
               <AxisBottom
@@ -161,11 +168,11 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
                 tickFormat={
                   isPixelToWavelengthValid
                     ? (value: NumberValue) => {
-                      const numericValue = Number(value)
-                      return Number.isNaN(numericValue)
-                        ? "-"
-                        : pixelToWavelengthFunction(numericValue).toFixed(2)
-                    }
+                        const numericValue = Number(value)
+                        return Number.isNaN(numericValue)
+                          ? "-"
+                          : pixelToWavelengthFunction(numericValue).toFixed(2)
+                      }
                     : (_value: NumberValue) => "-"
                 }
               />
