@@ -5,7 +5,7 @@ import { useGlobalStore } from "@/hooks/use-global-store"
 import { cropImages } from "@/lib/cropImage"
 import { findPlateau, findXspacedPoints, getPointsInRect, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { extremePoints } from "@/lib/trigonometry"
-import { linearRegression, splineCuadratic } from "@/lib/utils"
+import { linearRegressionWhitDerived, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { ParentSize } from "@visx/responsive"
 import { AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
@@ -369,7 +369,7 @@ function useExtractFeatures(
       const interpolated: {
         funct: ((x: number) => number)
         derived: ((x: number) => number)
-      } = linearRegression(
+      } = linearRegressionWhitDerived(
         scienceMediasPoints.map(p => p.x),
         scienceMediasPoints.map(p => p.y),
       ) // Aproximación lineal

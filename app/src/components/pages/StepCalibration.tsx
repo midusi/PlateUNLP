@@ -1,6 +1,4 @@
-import type { EmpiricalSpectrumPoint } from "@/components/molecules/EmpiricalSpectrum"
 import type { StepProps } from "@/interfaces/StepProps"
-import { CardTitle } from "@/components/atoms/card"
 import { ContinueButton } from "@/components/molecules/ContinueButton"
 import { EmpiricalSpectrum } from "@/components/molecules/EmpiricalSpectrum"
 import { ReferenceLampRangeUI } from "@/components/molecules/ReferenceLampRangeUI"

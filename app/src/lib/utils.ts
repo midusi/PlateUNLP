@@ -177,7 +177,7 @@ export function splineCuadratic(x: number[], y: number[]): {
  * Función de interpolación para ubicar nuevos x y Funcion de para hallar
  * calcular derivada en un punto dado
  */
-export function linearRegression(x: number[], y: number[]): {
+export function linearRegressionWhitDerived(x: number[], y: number[]): {
   funct: ((value: number) => number)
   derived: ((value: number) => number)
 } {
@@ -214,6 +214,47 @@ export function linearRegression(x: number[], y: number[]): {
       return m
     },
   }
+}
+
+/**
+ * Recibe una serie de cordenadas (x, y) y construye un aproximacion
+ * lineal para los mismos.
+ * @param {number[]} x - Valores en el eje X. Largo minimo 2
+ * @param {number[]} y - Valores en el eje Y
+ * @returns {funct: ((value: number) => number)}
+ * Función de interpolación para ubicar nuevos x.
+ */
+export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
+  if (x.length !== y.length) {
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
+  }
+
+  if (x.length < 2) {
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with linear regression.",
+    )
+  }
+
+  const n = x.length
+  const sumX = x.reduce((acc, cur) => acc + cur, 0)
+  const sumY = y.reduce((acc, cur) => acc + cur, 0)
+  const sumMul = x.map((val, i) => val * y[i]).reduce((acc, cur) => acc + cur, 0)
+  const sumXCuad = x.map(val => val ** 2).reduce((acc, cur) => acc + cur, 0)
+  const promX = sumX / n
+  const promY = sumY / n
+
+  const m = (n * sumMul - sumX * sumY) / (n * sumXCuad - sumX ** 2)
+  const b = promY - m * promX
+
+  function regFun(value: number): number {
+    return m * value + b
+  }
+
+  return regFun
 }
 
 export function piecewiseLinearRegression(x: number[], y: number[]): ((value: number) => number) {
