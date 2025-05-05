@@ -2,7 +2,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 import type { ClassValue } from "clsx"
 import { clsx } from "clsx"
-import { inv, matrix, multiply, transpose } from "mathjs"
+import { inv, lusolve, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -36,21 +36,151 @@ export class CustomError extends Error {
   }
 }
 
-export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
-  /**
-   * x e y contienen una serie de valores que se corresponden
-   * cada uno con el de la misma posición en el otro arreglo.
-   * Esta función busca una recta que dado un valor de x
-   * devuelva el un valor de y, o lo más cercano que se pueda
-   * al minimizar el error que pueda haber entre todos los
-   * pares de números.
-   * La función devuelta, dado cualquier x, devuelve un y que
-   * aproxima el valor ideal que debería corresponderle.
-   * Dentro de las limitaciones de lo que se puede hacer con
-   * una aproximación lineal a una correspondencia de
-   * complejidad desconocida.
-   */
+/**
+ * Recibe una serie de cordenadas (x, y) y construye un aproximacion
+ * Spline Cuadratica para los mismos.
+ * Explicacion spline (https://math.libretexts.org/Workbench/Numerical_Methods_with_Applications_(Kaw)/5%3A_Interpolation/5.05%3A_Spline_Method_of_Interpolation)
+ * @param {number[]} x - Valores en el eje X. Largo minimo 2
+ * @param {number[]} y - Valores en el eje Y
+ * @returns {{
+ *  funct: ((value: number) => number)
+ *  derived: ((value: number) => number)
+ * }} -
+ * Función de interpolación para ubicar nuevos x y Funcion de para hallar
+ * calcular derivada en un punto dado
+ */
+export function splineCuadratic(x: number[], y: number[]): {
+  funct: ((value: number) => number)
+  derived: ((value: number) => number)
+} {
+  if (x.length < 2)
+    throw new Error(`At least two points are needed to buil a spline. Count of points: ${x.length}`)
 
+  const puntos = x.map((value, i) => ({ x: value, y: y[i] }))
+
+  const n: number = puntos.length - 1 // Cantidad de intervalos, vamos a ajustar 1 polinomio por intervalo
+  // const cols: number = 3 * n // 3 incognitas por polinomio
+  // const rows: number = cols // 1 ecuacion para resolver cada incognita
+
+  const coeffMatrix: number[][] = []
+  const results: number[] = []
+  // Primeras 2*n ecuaciones
+  for (let i = 0; i < n; i++) {
+    // Ecuacion 1
+    let row: number[] = Array.from({ length: 3 * n }, () => 0)
+    const idx = i * 3
+    row[idx] = puntos[i].x ** 2
+    row[idx + 1] = puntos[i].x
+    row[idx + 2] = 1
+    coeffMatrix.push(row)
+    results.push(puntos[i].y)
+
+    // Ecuacion 2
+    row = Array.from({ length: 3 * n }, () => 0)
+    row[idx] = puntos[i + 1].x ** 2
+    row[idx + 1] = puntos[i + 1].x
+    row[idx + 2] = 1
+    coeffMatrix.push(row)
+    results.push(puntos[i + 1].y)
+  }
+
+  // Siguientes n-1 ecuaciones
+  for (let i = 0; i < n - 1; i++) {
+    const row: number[] = Array.from({ length: 3 * n }, () => 0)
+    row[i * 3] = 2 * puntos[i].x // ai * 2 * xi
+    row[i * 3 + 1] = 1 // bi
+    row[(i + 1) * 3] = 2 * puntos[i].x // a(i+1) * 2 * xi
+    row[(i + 1) * 3 + 1] = 1 // (bi+1)
+    coeffMatrix.push(row)
+    results.push(0)
+  }
+
+  // Ultima ecuacion (1er a vale 0)
+  const row: number[] = Array.from({ length: 3 * n }, () => 0)
+  row[0] = 1 // row[(n - 1) * 3] = 0
+  coeffMatrix.push(row)
+  results.push(0)
+
+  // resolver: coeffMatrix * unknowns = results
+  const coeff = matrix(coeffMatrix)
+  const res = matrix(results)
+
+  const solution = lusolve(coeff, res) // mathjs devuelve una matriz columna
+
+  // Coeficientes a1, b1, c1, a2, b2, c2, ..., an, bn, cn
+  const coef: number[] = solution.valueOf().flat().map(c => Number(c))
+
+  // Funciones por partes
+  const functionsArr: ((x: number) => number)[] = [] // Funcion como tal
+  const derivedArr: ((x: number) => number)[] = [] // Derivadas
+  for (let i = 0; i < n; i++) {
+    const idx = i * 3
+    const segmentFunction = (x: number) => {
+      return (coef[idx] * (x ** 2)) + (coef[idx + 1] * x) + coef[idx + 2]
+    }
+    functionsArr.push(segmentFunction)
+    const segmentDerived = (x: number) => {
+      return (2 * coef[idx] * x) + coef[idx + 1]
+    }
+    derivedArr.push(segmentDerived)
+  }
+  const intervals: { start: number, end: number }[] = functionsArr.map((_, idx) => (
+    { start: puntos[idx].x, end: puntos[idx + 1].x }
+  ))
+
+  const splineCase: (value: number) => number = (value: number) => {
+    let result: number
+    for (let i = 0; i < intervals.length; i++) {
+      if (value >= intervals[i].start && value < intervals[i].end) {
+        result = functionsArr[i](value)
+        break
+      }
+    }
+
+    if (value < intervals[0].start)
+      result = functionsArr[0](value)
+    else if (value >= intervals[intervals.length - 1].start)
+      result = functionsArr[intervals.length - 1](value)
+
+    return result!
+  }
+
+  const derived: (value: number) => number = (value: number) => {
+    let result: number
+    for (let i = 0; i < intervals.length; i++) {
+      if (value >= intervals[i].start && value < intervals[i].end) {
+        result = derivedArr[i](value)
+        break
+      }
+    }
+
+    if (value < intervals[0].start)
+      result = derivedArr[0](value)
+    else if (value >= intervals[intervals.length - 1].start)
+      result = derivedArr[intervals.length - 1](value)
+
+    return result!
+  }
+
+  return { funct: splineCase, derived }
+}
+
+/**
+ * Recibe una serie de cordenadas (x, y) y construye un aproximacion
+ * lineal para los mismos.
+ * @param {number[]} x - Valores en el eje X. Largo minimo 2
+ * @param {number[]} y - Valores en el eje Y
+ * @returns {{
+ *  funct: ((value: number) => number)
+ *  derived: ((value: number) => number)
+ * }} -
+ * Función de interpolación para ubicar nuevos x y Funcion de para hallar
+ * calcular derivada en un punto dado
+ */
+export function linearRegressionWhitDerived(x: number[], y: number[]): {
+  funct: ((value: number) => number)
+  derived: ((value: number) => number)
+} {
   if (x.length !== y.length) {
     throw new CustomError(
       ErrorCodes.DIFFERENT_PROMP_SIZE,
@@ -58,7 +188,7 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
     )
   }
 
-  if (x.length <= 1) {
+  if (x.length < 2) {
     throw new CustomError(
       ErrorCodes.INSUFFICIENT_MATCHES,
       "Insufficient matches, at least 2 are required for inference with linear regression.",
@@ -76,9 +206,55 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
   const m = (n * sumMul - sumX * sumY) / (n * sumXCuad - sumX ** 2)
   const b = promY - m * promX
 
-  return function (value: number): number {
+  return {
+    funct(value: number): number {
+      return m * value + b
+    },
+    derived(_value: number): number {
+      return m
+    },
+  }
+}
+
+/**
+ * Recibe una serie de cordenadas (x, y) y construye un aproximacion
+ * lineal para los mismos.
+ * @param {number[]} x - Valores en el eje X. Largo minimo 2
+ * @param {number[]} y - Valores en el eje Y
+ * @returns {funct: ((value: number) => number)}
+ * Función de interpolación para ubicar nuevos x.
+ */
+export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
+  if (x.length !== y.length) {
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
+  }
+
+  if (x.length < 2) {
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      "Insufficient matches, at least 2 are required for inference with linear regression.",
+    )
+  }
+
+  const n = x.length
+  const sumX = x.reduce((acc, cur) => acc + cur, 0)
+  const sumY = y.reduce((acc, cur) => acc + cur, 0)
+  const sumMul = x.map((val, i) => val * y[i]).reduce((acc, cur) => acc + cur, 0)
+  const sumXCuad = x.map(val => val ** 2).reduce((acc, cur) => acc + cur, 0)
+  const promX = sumX / n
+  const promY = sumY / n
+
+  const m = (n * sumMul - sumX * sumY) / (n * sumXCuad - sumX ** 2)
+  const b = promY - m * promX
+
+  function regFun(value: number): number {
     return m * value + b
   }
+
+  return regFun
 }
 
 export function piecewiseLinearRegression(x: number[], y: number[]): ((value: number) => number) {

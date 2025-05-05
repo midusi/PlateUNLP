@@ -1,18 +1,17 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepProps } from "@/interfaces/StepProps"
-import { classesSpectrumPartSegmentation } from "@/enums/BBClasses"
+import { BBClasses, classesSpectrumPartSegmentation } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { cropImages } from "@/lib/cropImage"
 import { useEffect, useState } from "react"
 import { BBUI } from "../organisms/BBUI"
-import { SegmentationUI } from "../organisms/SegmentationUI"
 
 export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const parameters = {
     rotateButton: false,
     invertColorButton: false,
-    fieldsMetadata: false
+    fieldsMetadata: false,
   }
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
@@ -20,11 +19,11 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
   ])
 
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    (processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.lamp1 !== null)
+    (processInfo.data.spectrums[selectedSpectrum].parts.lamp1.boundingBox !== null)
       ? [
-        processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.lamp1!,
-        processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.lamp2!,
-        processInfo.data.spectrums[selectedSpectrum].partsBoundingBoxes.science!,
+        processInfo.data.spectrums[selectedSpectrum].parts.lamp1.boundingBox!,
+        processInfo.data.spectrums[selectedSpectrum].parts.lamp2.boundingBox!,
+        processInfo.data.spectrums[selectedSpectrum].parts.science.boundingBox!,
       ]
       : [],
   )
@@ -45,6 +44,8 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
   }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
 
   function saveBoundingBoxes(boundingBoxes: BoundingBox[]) {
+    const scienceBb = boundingBoxes.filter(bb => bb.class_info === BBClasses.Science)[0]
+    const lampsBbs = boundingBoxes.filter(bb => bb.class_info === BBClasses.Lamp)
     setProcessInfo(prev => ({
       ...prev,
       data: {
@@ -53,11 +54,20 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
           index === selectedSpectrum
             ? {
               ...spectrum,
-              partsBoundingBoxes: {
-                ...spectrum.partsBoundingBoxes,
-                lamp1: boundingBoxes[0],
-                lamp2: boundingBoxes[1],
-                science: boundingBoxes[2],
+              parts: {
+                ...spectrum.parts,
+                lamp1: {
+                  ...spectrum.parts.lamp1,
+                  boundingBox: lampsBbs[0],
+                },
+                lamp2: {
+                  ...spectrum.parts.lamp2,
+                  boundingBox: lampsBbs[1],
+                },
+                science: {
+                  ...spectrum.parts.science,
+                  boundingBox: scienceBb,
+                },
               },
             }
             : spectrum
@@ -115,18 +125,6 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
           parameters={parameters}
         />
       )}
-      {/* {spectrumImage && (
-        <SegmentationUI
-          file={spectrumImage}
-          onComplete={onComplete}
-          enableAutodetect
-          boundingBoxes={boundingBoxes}
-          setBoundingBoxes={setBoundingBoxes}
-          saveBoundingBoxes={saveBoundingBoxes} // funcion de guardado personalizada para los bounding boxes
-          determineBBFunction={determineBBFunction}
-          classes={classesSpectrumPartSegmentation}
-        />
-      )} */}
     </div>
   )
 }
