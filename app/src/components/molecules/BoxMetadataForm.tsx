@@ -12,7 +12,6 @@ import { useEffect } from "react"
 export interface BoxMetadata {
     OBJECT: string // required
     DATE_OBS: Date // required
-    MAIN_ID: string // required
     UT: number // float required
 }
 
@@ -91,15 +90,6 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
                             )}
                         />
                         {errors.DATE_OBS && <p className="text-red-500">{errors.DATE_OBS.message}</p>}
-                    </div>
-                    <div className={inputContainerClassName}>
-                        <Label>MAIN-ID</Label>
-                        <Input
-                            {...register("MAIN_ID")}
-                            placeholder="Simbad main ID object name"
-                            className={inputClassName}
-                        />
-                        {errors.MAIN_ID && <p className="text-red-500">{errors.MAIN_ID.message}</p>}
                     </div>
                     <div className={inputContainerClassName}>
                         <Label>UT (Universal Time)</Label>
