@@ -7,10 +7,10 @@ import { TimePickerInput } from "./timePickerInput"
 interface TimePickerProps {
     date: Date | undefined
     setDate: (date: Date | undefined) => void
+    disabled?: boolean
 }
 
-export function TimePicker({ date, setDate }: TimePickerProps) {
-
+export function TimePicker({ date, setDate, disabled = false }: TimePickerProps) {
     const minuteRef = React.useRef<HTMLInputElement>(null)
     const hourRef = React.useRef<HTMLInputElement>(null)
     const secondRef = React.useRef<HTMLInputElement>(null)
@@ -24,9 +24,10 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                 <TimePickerInput
                     picker="hours"
                     date={date}
-                    setDate={setDate ? date => setDate(date) : () => { }}
+                    setDate={setDate}
                     ref={hourRef}
                     onRightFocus={() => minuteRef.current?.focus()}
+                    disabled={disabled}
                 />
             </div>
             <div className="flex">
@@ -37,10 +38,11 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     picker="minutes"
                     id="minutes12"
                     date={date}
-                    setDate={setDate ? date => setDate(date) : () => { }}
+                    setDate={setDate}
                     ref={minuteRef}
                     onLeftFocus={() => hourRef.current?.focus()}
                     onRightFocus={() => secondRef.current?.focus()}
+                    disabled={disabled}
                 />
             </div>
             <div className="flex">
@@ -51,9 +53,10 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
                     picker="seconds"
                     id="seconds12"
                     date={date}
-                    setDate={setDate ? date => setDate(date) : () => { }}
+                    setDate={setDate}
                     ref={secondRef}
                     onLeftFocus={() => minuteRef.current?.focus()}
+                    disabled={disabled}
                 />
             </div>
         </div>
