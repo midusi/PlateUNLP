@@ -14,8 +14,12 @@ interface BoxListProps {
   classes: BBClassesProps[]
   parameters: BBListParameters
 }
+export enum Step {
+  Plate,
+  Spectrum
+}
 interface BBListParameters {
-  fieldsMetadata: boolean
+  step: Step
 }
 
 export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes, parameters }: BoxListProps) {
@@ -187,7 +191,7 @@ function ItemOfBoxList({
           <hr />
         )}
         <div>
-          {isSelected && (
+          {isSelected && parameters.step == Step.Plate && (
             <BoxMetadataForm ref={boxMetadataFormRef} onChange={handleFormChange} />
           )}
         </div>

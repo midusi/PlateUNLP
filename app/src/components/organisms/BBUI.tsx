@@ -8,7 +8,7 @@ import { nanoid } from "nanoid"
 import { useCallback, useState } from "react"
 import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
-import { BoxList } from "./BBList"
+import { BoxList, Step } from "./BBList"
 import { ImageLoader } from "./ImageLoader"
 import { ImageViewer } from "./ImageViewer"
 
@@ -27,7 +27,7 @@ interface BBUIProps {
 interface BBUIParameters {
   rotateButton: boolean
   invertColorButton: boolean
-  fieldsMetadata: boolean
+  step: Step
 }
 
 export function BBUI({
@@ -161,18 +161,18 @@ export function BBUI({
         >
           {image
             ? (
-                <ImageViewer
-                  src={image}
-                  rotation={rotation}
-                  bgWhite={bgWhite}
-                  isDrawingMode={isDrawingMode}
-                  setIsDrawingMode={setIsDrawingMode}
-                  selectedBoxId={selectedBoxId}
-                  setSelectedBoxId={setSelectedBoxId}
-                  boundingBoxes={boundingBoxes}
-                  setBoundingBoxes={setBoundingBoxes}
-                />
-              )
+              <ImageViewer
+                src={image}
+                rotation={rotation}
+                bgWhite={bgWhite}
+                isDrawingMode={isDrawingMode}
+                setIsDrawingMode={setIsDrawingMode}
+                selectedBoxId={selectedBoxId}
+                setSelectedBoxId={setSelectedBoxId}
+                boundingBoxes={boundingBoxes}
+                setBoundingBoxes={setBoundingBoxes}
+              />
+            )
             : <ImageLoader handleImageLoad={handleImageLoad} />}
         </div>
       </Card>
@@ -182,7 +182,7 @@ export function BBUI({
         selected={selectedBoxId}
         setSelected={setSelectedBoxId}
         classes={classes}
-        parameters={{ fieldsMetadata: parameters.fieldsMetadata }}
+        parameters={{ step: parameters.step }}
       />
       <div className="flex justify-center pt-4">
         <Button

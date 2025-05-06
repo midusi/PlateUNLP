@@ -6,12 +6,13 @@ import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { cropImages } from "@/lib/cropImage"
 import { useEffect, useState } from "react"
 import { BBUI } from "../organisms/BBUI"
+import { Step } from "../organisms/BBList"
 
 export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const parameters = {
     rotateButton: false,
     invertColorButton: false,
-    fieldsMetadata: false,
+    step: Step.Spectrum,
   }
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,

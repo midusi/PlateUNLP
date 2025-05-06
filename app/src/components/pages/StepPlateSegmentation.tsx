@@ -5,12 +5,13 @@ import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
 import { BBUI } from "../organisms/BBUI"
+import { Step } from "../organisms/BBList"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const parameters = {
     rotateButton: true,
     invertColorButton: true,
-    fieldsMetadata: true,
+    step: Step.Plate,
   }
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
@@ -70,8 +71,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           state: index === i
             ? "COMPLETE"
             : (index + 1 === i
-                ? "NECESSARY_CHANGES"
-                : step.state),
+              ? "NECESSARY_CHANGES"
+              : step.state),
         })),
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
           ...step,
