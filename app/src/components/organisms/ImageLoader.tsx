@@ -32,8 +32,8 @@ export function ImageLoader({ handleImageLoad }: ImageLoaderProps) {
     const ctx = canvas.getContext("2d")!
 
     // Rellenar con blanco
-    ctx.fillStyle = "white"
-    ctx.fillRect(0, 0, maxSide, maxSide)
+    // ctx.fillStyle = "white"
+    // ctx.fillRect(0, 0, maxSide, maxSide)
 
     const offsetX = (maxSide - image.width) / 2
     const offsetY = 0
