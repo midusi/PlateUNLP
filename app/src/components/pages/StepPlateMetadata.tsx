@@ -50,12 +50,12 @@ export function StepPlateMetadata({ index, /* processInfo, */ setProcessInfo }: 
         <PlateMetadataForm ref={plateMetadataFormRef} />
       </div>
       <div className="flex gap-4 justify-center">
-        <Button
+        {/* <Button
           onClick={() => plateMetadataFormRef.current?.resetValues()}
           className=" bg-blue-500"
         >
           Reset fields
-        </Button>
+        </Button> */}
         <Button
           onClick={() => {
             if (plateMetadataFormRef.current?.validate()) {
