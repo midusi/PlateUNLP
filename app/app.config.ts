@@ -5,6 +5,7 @@ import tsconfigPaths from "vite-tsconfig-paths"
 
 export default createApp({
   server: {
+    esbuild: { options: { target: "ES2024" } },
     preset: "node-server", // change to 'netlify' or 'bun' or anyof the supported presets for nitro (nitro.unjs.io)
   },
   routers: [
