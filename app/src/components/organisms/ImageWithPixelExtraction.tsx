@@ -87,7 +87,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
       canvas.height = img.height
 
       const lineSize = img.height * 0.03
-      const pointSize = img.height * 0.05
+      const pointSize = img.height * 0.06
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(img, 0, 0)
@@ -121,36 +121,43 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
 
       // Dibujar rectas si está definidas
       if (perpendicularFunctions && drawFunction && opening) {
-        for (let i = 0; i < perpendicularFunctions.length; i += 100) {
-          const point = { x: i, y: drawFunction(i) }
-
-          // Punto central
-          ctx.fillStyle = "steelblue"
-          ctx.strokeStyle = "black" // borde negro
-          ctx.beginPath()
-          ctx.arc(point.x, point.y, pointSize, 0, 2 * Math.PI)
-          ctx.fill()
-
-          // const verticalRect = perpendicularFunctions[point.x].funct
-          const m = perpendicularFunctions[point.x].m
-          ctx.strokeStyle = "steelblue"
-          ctx.lineWidth = lineSize
-          ctx.beginPath()
-
-          // Punto destino arriba y abajo
-          const { forward: pdup, backward: pddown } = extremePoints(point, m, opening / 2)
-
-          ctx.moveTo(pdup.x, pdup.y)
-          ctx.lineTo(pddown.x, pddown.y)
-          ctx.stroke()
-
-          // inicio y fin
-          ctx.fillStyle = "steelblue"
-          ctx.beginPath()
-          ctx.arc(pddown.x, pddown.y, pointSize, 0, 2 * Math.PI)
-          ctx.arc(pdup.x, pdup.y, pointSize, 0, 2 * Math.PI)
-          ctx.fill()
+        const diffToCenter = opening / 2
+        function funcionUP(x: number): number {
+          return drawFunction!(x) + diffToCenter
         }
+        function funcionDown(x: number): number {
+          return drawFunction!(x) - diffToCenter
+        }
+
+        ctx.strokeStyle = "red"
+        ctx.lineWidth = lineSize
+        ctx.setLineDash([5, 5]) // Linea punteada
+        ctx.beginPath()
+        for (let x = 0; x < canvas.width; x++) {
+          const y = funcionUP(x)
+          if (x === 0) {
+            ctx.moveTo(x, y)
+          }
+          else {
+            ctx.lineTo(x, y)
+          }
+        }
+        ctx.stroke()
+
+        ctx.strokeStyle = "red"
+        ctx.lineWidth = lineSize
+        ctx.setLineDash([5, 5]) // Linea punteada
+        ctx.beginPath()
+        for (let x = 0; x < canvas.width; x++) {
+          const y = funcionDown(x)
+          if (x === 0) {
+            ctx.moveTo(x, y)
+          }
+          else {
+            ctx.lineTo(x, y)
+          }
+        }
+        ctx.stroke()
       }
     }
     img.src = src
