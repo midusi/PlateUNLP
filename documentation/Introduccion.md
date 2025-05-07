@@ -23,15 +23,17 @@ Lo primero que uno se encuentra al abrir el software es la seccion de metadatos 
 
 En esta seccion se busca obtener los metadatos que son comunes a todos espectros que hay en una misma placa, sean estos:
 
-- OBSERVAT (obligatorio): Observatorio donde se capturo la placa
-- PLATE-N (obligatorio): identificador de placa.
-- OBSERVER: Persona que realizo las observaciones
-- DIGITALI: Persona que digitalizo las observaciones.
-- SCANNER: Especificacion tecnica de escaner usado para digitalizar la placa.
-- SOFTWARE: Software usado para digitalizar la placa.
-- TELESCOPE: Telescopio con el que se capturaron los datos.
-- DETECTOR: Instrumento que se capturo la imagen.
-- INSTRUMENT: El instrumento que se utilizo (ej: espectrógrafo).
+| Metadato | Definición |
+|:---------|:----------:|
+| OBSERVAT (obligatorio) | Observatorio donde se capturo la placa |
+| PLATE-N (obligatorio) | Identificador de placa |
+| OBSERVER | Persona que realizo las observaciones |
+| DIGITALI | Persona que digitalizo las observaciones |
+| SCANNER | Especificación tecnica del escaner empleado |
+| SOFTWARE | Software usado para digitalizar la placa |
+| TELESCOPE | Telescopio con el que se capturaron los datos |
+| DETECTOR | Instrumento que se capturo la imagen |
+| INSTRUMENT | El instrumento que se utilizo (ej: espectrógrafo) |
 
 Una ves especificados todos los metadatos (minimo los obligatorios) el usuario puede acceder a la siguiente etapa por medio del boton _Save_.
 
@@ -95,6 +97,28 @@ En el mismo se muestra una tabla en la cual, de cada espectro se muestra la sigu
 En esta seccion se busca obtener los metadatos que corresponden especificamente al espectro con el que se esta trabajando: 
 
 ![alt text](SpectrumMetadata.png)
+
+El sistema aprovecha los datos ingresados hasta el momento por el usuario para obtener los valores de los siguientes metadatos:
+
+| Metadato | Definición |
+|:---------|:----------:|
+| TIME-OBS | Tiempo local al inicio de la observación |
+| ST | Tiempo sideral medio local|
+| HA | Ángulo horario |
+| RA | Ascensión recta |
+| DEC | Declinación |
+| GAIN | Ganancia, electrones por adu |
+| RA2000 | Ascensión recta ICRS J2000 |
+| DEC2000 | Declinación ICRS J2000 |
+| RA1950 | Sistema de coordenadas FK4 |
+| DEC1950 | Sistema de coordenadas FK4 |
+| EXPTIME | Tiempo de integración en segundos |
+| DETECTOR | Instrumento que captura la imagen |
+| IMGTYP | Object, dark, zero, etc. |
+| SPTYPE | Tipo espectral SIMBAD |
+| JD | Fecha Juliana |
+| EQUINOX | Época de RA y DEC |
+| AIRMASS | Masa de aire |
 
 // Explicar que en base a los campos ingresados hasta ahora se pueden autocalcular una serie de otros metadatos.
 
