@@ -39,7 +39,7 @@ Una ves especificados todos los metadatos (minimo los obligatorios) el usuario p
 
 **NOTA**: Si faltan metadatos obligatorios se le señalara al usuario marcando los campos faltantes al cliquiear _Save_.
 
-# Segmentacón de placa (Identificación de espectros)
+# Segmentación de placa (Identificación de espectros)
 
 La etapa de Segmentacion de placa busca identificar las porciones del escaneo original que se corresponden a cada espectro a procesar.
 
@@ -120,7 +120,20 @@ El sistema aprovecha los datos ingresados hasta el momento por el usuario para o
 | EQUINOX | Época de RA y DEC |
 | AIRMASS | Masa de aire |
 
-// Explicar que en base a los campos ingresados hasta ahora se pueden autocalcular una serie de otros metadatos.
+Escencialmente solo se requieren 4 metadatos para calcular el maximo posible de informacion, sean estos OBJECT, DATE-OBS, OBSERVAT, UT. En este punto los mismos ya fueron especificados por el usuario por lo que al entrar a la etapa PlateUNLP empieza a calcular los demas.
 
-// Cuadro de dependencias
+SPTYPE y MAIN-ID no son obtenibles de forma analitica, es necesario consultarlo al repositorio externo [SIMBAD](https://simbad.cfa.harvard.edu/simbad/). 
+
+Ademas, el usuario puede indicar que no conoce algunos de los 4 metadatos escenciales. Dependiendo de la información disponible el sistema calculara mas o menos informacion. El siguiente diagrama muestra que metadatos se requieren para obtener cada uno y si los mismos requieren la interaccion del usuario o de un repositorio externo:
+
+![Diagrama de dependencias de metadatos. Con icono de usuario aquellos que si o si deben ser ingresados por el usuario. Con icono de SIMBAD aquellos que son consultados al repositorio de igual nombre.](dependenciasMetadatos.png)
+
+Una vez calculados todos los datos el usuario puede modificar los valores determinados por PlateUNLP si es que no le parece correcto. 
+
+Al presionar el boton _Save_ se guardan los valores actuales y se pasa a la etapa siguiente.
+
+# Segmentación de partes de espectros.
+
+Para segmentar un espectro en sus distintas partes se emplea una interfaz visual similar a la vista en [Segmentación de Placa](#segmentación-de-placa-identificación-de-espectros) pero con algunas diferencias:
+
 
