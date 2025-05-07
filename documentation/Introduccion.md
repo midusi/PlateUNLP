@@ -30,8 +30,8 @@ En esta seccion se busca obtener los metadatos que son comunes a todos espectros
 - SCANNER: Especificacion tecnica de escaner usado para digitalizar la placa.
 - SOFTWARE: Software usado para digitalizar la placa.
 - TELESCOPE: Telescopio con el que se capturaron los datos.
-- DETECTOR: ...
-- INSTRUMENT: ...
+- DETECTOR: Instrumento que se capturo la imagen.
+- INSTRUMENT: El instrumento que se utilizo (ej: espectrógrafo).
 
 Una ves especificados todos los metadatos (minimo los obligatorios) el usuario puede acceder a la siguiente etapa por medio del boton _Save_.
 
@@ -49,4 +49,54 @@ Cargado el archivo se habilita la interfaz de segmentacion de espectros, compues
 
 ![alt text](elementosSegmentadorPlaca.png)
 
-1.
+1. **Boton _Autodetect Bounding Boxes_**: al cliquearlo se ejecuta un modelo detector de espectrografiass sobre la imagen. Sus predicciones se aprovechan para identificar las posiciones de cada espectro y señalarlas con cajas delimitadoras. 
+![alt text](plateSegmentationinfer.png)
+
+2. **_Rotate 90º_**: al cliquear, la imagen es rotada la imagen 90º a la derecha. Solo visualización (no afecta como se almacenan los datos mas adelante)9.
+
+3. **_Invert colors_**: invierte los colores de la imagen. Solo visualización. 
+
+4. **_Draw Box_**: al seleccionarlo se entra en modo de seleccion, que permite al usuario crear cajas delimitadoras sobre la imagen. Asi este puede indicar la posicion de espectros de forma manual.
+
+5. **_Area de vizualización_**: se muestra el escaneo seleccionado en un menu interactivo que permite acercar/alejar/arrastrar la imagen. Tambien muestra las cajas delimitadoras especificadas y permite su redimension/arrastre. Para interactuar con una caja delimitadora hay que hacer click sobre ella y entrara en modo de edicion, para deseleccionarla basta con volver a cliquear la caja seleccionada o seleccionar otra caja.
+![alt text](plateSegmentationBBEdit.gif)
+
+6. **_Bounding Boxes List_**: Aqui se muestran un listado de cada una de las cajas delimitadoras especificadas sobre la imagen:
+![alt text](boundingBoxList.png)
+De cada caja se muestra su identificador (izquierda), el tipo de objeto que hay dentro (derecha), un boton para eliminar la caja delimitadora desde el listado (derecha). Cuando una caja delimitadora esta seleccionada tambien se muestra un conjunto de inputs con informacion que se tiene que especificar sobre cada caja:
+    - OBJECT: Nombre del objeto observado. 
+    - DATE-OBS: Fecha de observación.
+    - MAIN-ID: ID principal en la base de datos astronomica Simbad.
+    -UT: tiempo universal. 
+
+    Se usaran mas adelante para obtener el valor de un listado mas grande de metadatos.
+
+Una vez especificada la ubicacion de todos los espectros y sus valores especificados se habilita el boton _Save_ con el que se podra pasar a la siguiente etapa.
+
+# Eleccion de espectro
+
+A partir de esta etapa el usuario tendra que elegir con que espectro trabajara a cada momento, para facilitar esto aparece el menu de seleccion de espectros:
+
+![alt text](SpectrumSelection.png)
+
+En el mismo se muestra una tabla en la cual, de cada espectro se muestra la siguiente información:
+1. **_Name_**: nombre identificador del espectro.
+2. **_Image_**: recorte de la porcion del escaneo que corresponde al espectro.
+3. **_Steps_**: cantidad de etapas que faltan completar para obtener los datos procesados de cada espectro.
+4. **_Status_**: un espectro estar en 1 de 2 estados:
+    - _Pending_: faltan realizar tareas para terminar de procesar el espectro.
+    - _Complete_: el espectro esta totalmente procesado y listo para su descarga.
+5. **_Download Button_**: permite la descarga de los datos procesados de un espectro. Si el espectro no esta del todo procesado descarga los archivos de procesado en el estado intermedio en que se encuentren.
+6. **_Select and Work Button_**: al cliquear indica a _PlateUNLP_ que el usuario quiere continuar con el procesado de ese espectro. El usuario es redirigido a la siguiente etapa de procesamiento y la barra de navegacion se actualiza para reflejar con que espectro se esta trabajando:
+![alt text](SpectrumSelectionSelectSpectrum.png)
+
+# Metadatos de espectro
+
+En esta seccion se busca obtener los metadatos que corresponden especificamente al espectro con el que se esta trabajando: 
+
+![alt text](SpectrumMetadata.png)
+
+// Explicar que en base a los campos ingresados hasta ahora se pueden autocalcular una serie de otros metadatos.
+
+// Cuadro de dependencias
+
