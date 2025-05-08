@@ -9,6 +9,7 @@ import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
 import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
 import { StepPlateSegmentation } from "./components/pages/StepPlateSegmentation"
 import { StepSpectrumSelection } from "./components/pages/StepSpectrumSelection"
+import { loginForm, LoginForm } from "./components/molecules/LoginForm"
 
 import { trpc } from "./lib/trpc"
 
@@ -74,6 +75,12 @@ export default function App() {
     },
   ]
 
+  const handleLogin = (UserData: loginForm) => {
+    trpc.login.mutate({
+      Email: UserData.Email, Password: UserData.Password
+    }).then(resultado => console.log(resultado))
+  };
+
   return (
     <div className="w-full mx-auto">
       <header className="mb-12 bg-[#2D3748]">
@@ -81,7 +88,7 @@ export default function App() {
           🌌 PlateUNLP
         </h1>
       </header>
-
+      <LoginForm login={handleLogin} />
       <main>
         <NewNavigationProgressBar
           general={generalSteps}

@@ -28,8 +28,23 @@ export const appRouter = router({
         id: true, name: true,
       }
     })
-  })
-});
+
+  }),
+  login: publicProcedure
+    .input(
+      z.object({
+        Email: z.string().nonempty().email(),
+        Password: z.string().nonempty().min(6)
+      })
+    )
+    .mutation(async ({ input: { Email, Password } }) => {
+      console.log("antes de buscar ", Email, Password)
+      const u = await db.select().from(s.user)
+      console.log(u)
+      return u
+    })
+})
+
 
 // Export type router type signature,
 // NOT the router itself.
