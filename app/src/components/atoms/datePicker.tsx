@@ -11,15 +11,23 @@ import {
     PopoverTrigger,
 } from "./popover"
 
-export function DatePicker({ value, onChange, placeholder = "Pick a date" }: { value?: Date, onChange?: (date?: Date) => void, placeholder?: string }) {
+type DatePickerProps = {
+    value?: Date
+    onChange?: (date?: Date) => void
+    placeholder?: string
+    disabled?: boolean
+}
+
+export function DatePicker({ value, onChange, placeholder = "Pick a date", disabled = false }: DatePickerProps) {
     return (
         <Popover>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
+                    disabled={disabled}
                     className={cn(
-                        " justify-start text-left font-normal w-full",
-                        !value && "text-muted-foreground",
+                        "justify-start text-left font-normal w-full",
+                        !value && "text-muted-foreground"
                     )}
                 >
                     <CalendarIcon />

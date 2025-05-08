@@ -8,6 +8,7 @@ import { Input } from "../atoms/input"
 import { TimePicker } from "../atoms/timePicker"
 
 export interface SpectrumMetadata {
+  MAIN_ID: string // required
   TIME_OBS: number // time/timestamp
   ST: number // float
   HA: number // float
@@ -69,6 +70,15 @@ export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
     <>
       <form className="w-full max-w-7xl">
         <div className="flex flex-wrap justify-center content-normal gap-4">
+          <div className={inputContainerClassName}>
+            <Label>MAIN-ID</Label>
+            <Input
+              {...register("MAIN_ID")}
+              placeholder="Simbad main ID object name"
+              className={inputClassName}
+            />
+            {errors.MAIN_ID && <p className="text-red-500">{errors.MAIN_ID.message}</p>}
+          </div>
           <div className={inputContainerClassName}>
             <Label>TIME-OBS</Label>
             <Controller
