@@ -65,7 +65,7 @@ Para saber mas leer [Detector de Espectros](./DetectorDeEspectros.md)
 ![alt text](./images/PlateSegmentation/plateSegmentationBBEdit.gif)
 
 6. **_Bounding Boxes List_**: Aqui se muestran un listado de cada una de las cajas delimitadoras especificadas sobre la imagen:
-![alt text](documentation/images/PlateSegmentation/boundingBoxList.png)
+![alt text](./images/PlateSegmentation/boundingBoxList.png)
 De cada caja se muestra su identificador (izquierda), el tipo de objeto que hay dentro (derecha), un boton para eliminar la caja (derecha). Cuando una caja delimitadora esta seleccionada tambien se muestra un conjunto de inputs con informacion que se tiene que especificar sobre cada caja:
     - OBJECT: Nombre del objeto observado.
     - DATE-OBS: Fecha de observación.
@@ -98,7 +98,7 @@ En el mismo se muestra una tabla en la cual, de cada espectro se muestra la sigu
 
 En esta seccion se busca obtener los metadatos que corresponden especificamente al espectro con el que se esta trabajando:
 
-![alt text](/images/SpectrumMetadata/SpectrumMetadata.png)
+![alt text](./images/SpectrumMetadata/SpectrumMetadata.png)
 
 El sistema aprovecha los datos ingresados hasta el momento por el usuario para obtener los valores de los siguientes metadatos:
 
@@ -219,8 +219,41 @@ $$
 c_{i} = (x_i, y_i)
 $$
 
+$$
+C = \{(x_i, y_i)\}_{i=0}^{N-1}
+$$
+
 Tambien aprovechando los grupos $G_i$ calculados antes obtenemos el valor promedio de que tan ancho es el espectroentre todos los $S_i$:
 
 $$
 Opening = \frac{1}{N} \cdot ∑_{i=0}^{N-1} |G_i|
 $$
+
+Con los centros separados, lo que sigue es trazar la función que recorre el centro del espectro de ciencia. Se contemplaron dos métodos para construir dicha función:
+
+$$
+f(x) = Interp_{linear}(C)
+$$
+
+o
+
+$$
+f(x) = Spline_{quadratic}(C)
+$$
+
+PlateUNLP delega al usuario la elección del método de interpolación para realizar el trazado de la recta media a través de la imagen del espectro de ciencia. Para tener mas información respecto a cada opción consultar [Funciones de Interpolación](FuncionesDeInterpolación.md).
+
+Una vez definida la función $f(x)$, que dado cualquier pixel horizontal $x$ indica la altura por la que pasa el centro del espectro, es posible obtener las funciones que delimitan el borde superior $u(x)$ e inferior $d(x)$ del espectro, utilizando el valor promedio de apertura $Opening$:
+
+$$
+u(x) := x → f(x) + Opening / 2
+$$
+
+$$
+d(x) := x → f(x) - Opening / 2
+$$
+
+A continuacion se muestran las trazas de estas 3 funciones sobre la imagen del espectro. En medio $f(x)$ como una linea roja continua, arriba y abajo, $u(x)$ y $d(x)$ respectivamente como lineas rojas punteadas:
+
+![alt text](./images/FeatureExtraction/ScienceConTrazas.png)
+
