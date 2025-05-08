@@ -62,7 +62,7 @@ Para saber mas leer [Detector de Espectros](./DetectorDeEspectros.md)
 4. **_Draw Box_**: al seleccionarlo se entra en modo de dibujo, que permite al usuario crear cajas delimitadoras sobre la imagen. Asi este puede indicar la posicion de espectros de forma manual.
 
 5. **_Area de vizualización_**: se muestra el escaneo seleccionado en un menu interactivo que permite acercar/alejar/arrastrar la imagen. Tambien muestra las cajas delimitadoras especificadas y permite su redimension/arrastre. Para interactuar con una caja delimitadora hay que hacer click sobre ella y entrara en modo de edicion, para deseleccionarla basta con volver a cliquear la caja seleccionada o seleccionar otra caja.
-![alt text](documentation/images/PlateSegmentation/plateSegmentationBBEdit.gif)
+![alt text](./images/PlateSegmentation/plateSegmentationBBEdit.gif)
 
 6. **_Bounding Boxes List_**: Aqui se muestran un listado de cada una de las cajas delimitadoras especificadas sobre la imagen:
 ![alt text](documentation/images/PlateSegmentation/boundingBoxList.png)
@@ -189,3 +189,15 @@ Dada una fila $row$ el valor se su promedio horizontal se calcula como:
 $$
 S_iAvgH[row] = (1 / S_{i(width)}) * ∑_{col=0}^{S_{i(width)}-1} S_i[row][col]
 $$
+
+Teniendo los vectores $S_iAvgH$ se hace un filtrado de todos aquellos valores que queden por debajo de un umbral $τ$, por defecto $τ=0.6$. Entonces definimos a los arreglos $F_i$ como:
+
+$$
+F_i= \{ x \in S_iAvgH \mid x \geq κ \} 
+$$
+
+$$
+κ = \min(S_iAvgH) + (\max(S_iAvgH) - \min(S_iAvgH)) \cdot \tau
+$$
+
+Al conjunto de valores filtrados lo llamamos
