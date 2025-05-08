@@ -7,13 +7,12 @@ import { DatePicker } from "../atoms/datePicker"
 import { Input } from "../atoms/input"
 import { TimePicker } from "../atoms/timePicker"
 import { boxMetadataFormSchema } from "@/lib/boxMetadataFormSchema"
-import { useEffect } from "react"
-import { Check } from "lucide-react"
+import { CustomCheckbox } from "../atoms/CustomCheckbox"
 
 export interface BoxMetadata {
-    OBJECT: string // required
-    DATE_OBS: Date // required
-    UT: number // float required
+    OBJECT: string | null // required
+    DATE_OBS: Date | null // required
+    UT: number | null // float required
 }
 
 type FormData = z.infer<typeof boxMetadataFormSchema>
@@ -85,9 +84,9 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
                             {errors.OBJECT && !isObjectActive && <p className="text-red-500">{errors.OBJECT.message}</p>}
                         </div>
                         <div className="flex justify-start">
-                            <input type="checkbox"
-                                onChange={e => { setObjectActive(e.target.checked) }} />
-                            Missing
+                            <CustomCheckbox
+                                label="Missing"
+                                onChange={e => { setObjectActive(e) }} />
                         </div>
                     </div>
                     <div className={inputContainerClassName}>
@@ -109,9 +108,9 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
                             {errors.DATE_OBS && !isDateObs && <p className="text-red-500">{errors.DATE_OBS.message}</p>}
                         </div>
                         <div className="flex justify-start">
-                            <input type="checkbox"
-                                onChange={e => { setDateObs(e.target.checked) }} />
-                            Missing
+                            <CustomCheckbox
+                                label="Missing"
+                                onChange={e => { setDateObs(e) }} />
                         </div>
                     </div>
                     <div className={inputContainerClassName}>
@@ -132,9 +131,9 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
                             {errors.UT && !isUniversalTime && <p className="text-red-500">{errors.UT.message}</p>}
                         </div>
                         <div className="flex justify-start">
-                            <input type="checkbox"
-                                onChange={e => { setUniversalTime(e.target.checked) }} />
-                            Missing
+                            <CustomCheckbox
+                                label="Missing"
+                                onChange={e => { setUniversalTime(e) }} />
                         </div>
                     </div>
                 </div>
