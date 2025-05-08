@@ -187,7 +187,7 @@ $$
 Dada una fila $row$ el valor se su promedio horizontal se calcula como:
 
 $$
-S_iAvgH[row] = (1 / S_{i(width)}) * ∑_{col=0}^{S_{i(width)}-1} S_i[row][col]
+S_iAvgH[row] = \frac{1}{S_{i(width)}} \cdot ∑_{col=0}^{S_{i(width)}-1} S_i[row][col]
 $$
 
 Teniendo los vectores $S_iAvgH$ se hace un filtrado de todos aquellos valores que queden por debajo de un umbral $τ$, por defecto $τ=0.6$. Entonces definimos a los arreglos $F_i$ como:
@@ -200,4 +200,27 @@ $$
 κ = \min(S_iAvgH) + (\max(S_iAvgH) - \min(S_iAvgH)) \cdot \tau
 $$
 
-Al conjunto de valores filtrados lo llamamos
+Luego de obtener el arreglo filtrado $𝐹_𝑖$, identificamos segmentos contiguos de valores que estaban ubicados en posiciones consecutivas en el arreglo original $𝑆_iAvgH$. Es decir, si dos valores filtrados en $𝐹_i$ provienen de posiciones $𝑗$ y $𝑗+1$ en $𝑆_iAvgH$, se consideran parte del mismo grupo.
+
+A partir de esta agrupación, se forman subconjuntos $𝐺_{i,1}, 𝐺_{i,2}, ..., 𝐺_{i,k} tales que cada grupo contiene valores contiguos (según su posición original). Finalmente, se elige el grupo más largo:
+$$
+G_i = \arg\max_{G_{i,j}} \, |G_{i,j}|
+$$
+
+Los valores contenidos en $G_i$ se corresponden con el rango de píxeles verticales donde se estima que se encuentra el espectro. Dado el índice superior $y_{i, up}$ el inferior $y_{i, down}$, se calcula el píxel central del espectro en el segmento $S_i$ como:
+
+$$
+y_i = \mathrm{round}(\frac{y_{i, up} + y_{i, down}}{2})
+$$
+
+Ahora que conocemos que a cada píxel horizontal $x_i$ le corresponde una fila $y_i$. que representa el centro del espectro, se puede definir una serie de $N$ puntos que trazan el centro del espectro de ciencia como:
+
+$$
+c_{i} = (x_i, y_i)
+$$
+
+Tambien aprovechando los grupos $G_i$ calculados antes obtenemos el valor promedio de que tan ancho es el espectroentre todos los $S_i$:
+
+$$
+Opening = \frac{1}{N} \cdot ∑_{i=0}^{N-1} |G_i|
+$$
