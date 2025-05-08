@@ -161,8 +161,31 @@ Esta etapa consiste en la obtencion de los espectros 1D correspondientes a las i
 
 ![alt text](./images/FeatureExtraction/FeatureExtraction.png)
 
-Para lograr la extraccion de los espectros 1D lo primero es partir de la imagen del espectro de ciencia:
+Para lograr la extraccion de los espectros 1D lo primero es partir de la imagen $ImgSc$ del espectro de ciencia:
 
 ![Recorte crudo del espectro de ciencia](./images/FeatureExtraction/Science1.png)
 
-Dado el ancho `width`
+Se buscan $N$ valores equidistantes $x_i$ sobre el ancho ancho $W$ total de la imagen, por defecto $N=5$. Los $x_i$ se obtienen acorde a la formula:
+
+$$
+x_i = i \cdot \left( \frac{W}{N} \right) + \frac{1}{2} \cdot \left( \frac{W}{N} \right)
+$$
+
+Cada valor $x_i$ se lo ubica sobre el eje X de la matriz de la imagen y se copian en una nueva imagen las columnas que corresponden al intervalo de columnas $[x_i - S_{width}: x_i + S_{width}]$ respecto a la matriz de la imagen original. $S_{width}$ es el ancho en pixeles de los segmentos a recortar, por defecto $S_{width}=60$. La subimagen correspondiente a cada $x_i$ la definimos como $S_i$
+
+$$
+S_i = ImgSc[...][ x_i - S_{width} : x_i + S_{width}]
+$$
+
+Dada cada subimagen $S_i$, la cual corresponde a una matriz de pixeles de 2 dimensiones vamos a mapear sus valores a un arreglo donde cada posicion se corresponde con una fila del segmento y los valores de todos los pixeles de una misma fila son promediados. Llamamos al arreglo resultante arreglo de promedios horizontales $S_iAvgH$,
+
+$$
+
+S_iAvgH = [AvgH_{1}, AvgH_{2}, ..., AvgH_{S_{height}}]
+$$
+
+Dada una fila $row$ el valor se su promedio horizontal se calcula como:
+
+$$
+S_iAvgH[row] = (1 / S_{i(width)}) * ∑_{col=0}^{S_{i(width)}-1} S_i[row][col]
+$$
