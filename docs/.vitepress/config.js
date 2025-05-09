@@ -14,8 +14,16 @@ export default {
                     { text: 'Segmentación de Espectro', link: '/spectrum-segmentation' },
                     { text: 'Extracción de Caracteristicas', link: '/feature-extraction' },
                 ],
+            },
+            {
+                text: 'Other topics',
+                items: [
+                    { text: 'Detector de Espectro', link: '/spectrum-detector' },
+                    { text: 'Detector de Partes de Esspectro', link: '/spectrum-part-detector' },
+                    { text: 'Funciones de Interpolación', link: '/interpolation-functions' },
+                ],
             }
-        ]
+        ],
     },
     markdown: {
         math: true

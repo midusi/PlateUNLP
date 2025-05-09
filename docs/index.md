@@ -1,7 +1,7 @@
 # Introducción
 
-PlateUNLP es un software diseñado para procesar la informacion de imagenes de espectros de luz (usualmente ruidosas) para conseguir la información importante extraida y limpia.
+PlateUNLP es un software diseñado para procesar imágenes de espectros de luz (usualmente ruidosas), con el objetivo de extraer y limpiar la información relevante.
 
 ![alt text](./images/Introduction/PipelineDeep0.png)
 
-De cada placa se separa la informacion relacionada a cada espectro que contiene, recopilando funciones de cada espectro, calibradas en la longitud de onda que les corresponda asi como los metadatos mas relevantes que le corresponden (Main-Id, UT, ...).
+De cada placa se separa la información correspondiente a cada espectro que contiene, recopilando funciones representativas calibradas longitud, así como los metadatos más relevantes (Main-ID, UT, etc.).
