@@ -257,3 +257,30 @@ A continuacion se muestran las trazas de estas 3 funciones sobre la imagen del e
 
 ![alt text](./images/FeatureExtraction/ScienceConTrazas.png)
 
+Para cada valor de $x$, utilizando las funciones $u(x)$ y $d(x)$, podemos determinar el intervalo vertical que contiene el espectro en la columna correspondiente de la imagen. Así, definimos un subconjunto de píxeles por columna:
+
+$$
+ArrCol_i = \{ Img[i,j] \}_{j=u(i)}^{d(i)}
+$$
+
+Luego, calculamos el valor promedio de intensidad en cada una de estas columnas para obtener el espectro de ciencia unidimensional, $ScienceSpectrum1D$:
+
+$$
+M = |ArrCol_i|
+$$
+
+$$
+ScienceSpectrum1D = \{ \frac{1}{M} \cdot ∑_{k=0}^{M} ArrCol_i[k] \}_{i=0}^{Img_{width}}
+$$
+
+Finalmente, se grafica el espectro resultante, representando la intensidad promedio del espectro de ciencia para cada píxel horizontal de la imagen:
+
+![Science spectrum 1D](./images/FeatureExtraction/ScienceSpectrum1D.png)
+
+El siguiente gráfico proporciona una visión general de todo el procedimiento necesario para obtener el espectro de ciencia unidimensional (1D):
+
+![alt text](./images/FeatureExtraction/TotalProcessSicience1D.png)
+
+## Lamparas de comparación
+
+![Lamp 1 spectrum 1D](./images/FeatureExtraction/Lamp1Spectrum1D.png)
