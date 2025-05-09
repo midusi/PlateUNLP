@@ -1,23 +1,23 @@
 # Metadatos de Placa
 
-Lo primero que uno se encuentra al abrir el software es la seccion de metadatos de Placa:
+Lo primero que se encuentra al abrir el software es la sección de metadatos de Placa:
 
 ![alt text](./images/PlateMetadata/plateMetadata.png)
 
-En esta seccion se busca obtener los metadatos que son comunes a todos espectros que hay en una misma placa, sean estos:
+En esta sección se completan los metadatos comunes a todos los espectros contenidos en una misma placa. Estos son:
 
 | Metadato | Definición |
 |:---------|:----------:|
-| OBSERVAT (obligatorio) | Observatorio donde se capturo la placa |
+| OBSERVAT (obligatorio) | Observatorio donde se capturó la placa |
 | PLATE-N (obligatorio) | Identificador de placa |
-| OBSERVER | Persona que realizo las observaciones |
+| OBSERVER | Persona que realizó las observaciones |
 | DIGITALI | Persona que digitalizo las observaciones |
-| SCANNER | Especificación tecnica del escaner empleado |
+| SCANNER | Especificación técnica del escáner empleado |
 | SOFTWARE | Software usado para digitalizar la placa |
 | TELESCOPE | Telescopio con el que se capturaron los datos |
-| DETECTOR | Instrumento que se capturo la imagen |
-| INSTRUMENT | El instrumento que se utilizo (ej: espectrógrafo) |
+| DETECTOR | Instrumento que se capturó la imagen |
+| INSTRUMENT | El instrumento que se utilizó (ej: espectrógrafo) |
 
-Una ves especificados todos los metadatos (minimo los obligatorios) el usuario puede acceder a la siguiente etapa por medio del boton _Save_.
+Una vez especificados todos los metadatos (como mínimo, los obligatorios), el usuario puede avanzar a la siguiente etapa haciendo clic en el botón _Save_.
 
-**NOTA**: Si faltan metadatos obligatorios se le señalara al usuario marcando los campos faltantes al cliquiear _Save_.
+**NOTA**: Si faltan metadatos obligatorios, se señalarán los campos faltantes al hacer clic en _Save_.
