@@ -1,10 +1,10 @@
 # Metadatos de espectro
 
-En esta seccion se busca obtener los metadatos que corresponden especificamente al espectro con el que se esta trabajando:
+En esta sección se busca obtener los metadatos que corresponden específicamente al espectro con el que se está trabajando:
 
 ![alt text](./images/SpectrumMetadata/SpectrumMetadata.png)
 
-El sistema aprovecha los datos ingresados hasta el momento por el usuario para obtener los valores de los siguientes metadatos:
+PlateUNLP aprovecha los datos ingresados hasta el momento por el usuario para calcular automáticamente los valores de los siguientes metadatos:
 
 | Metadato | Definición |
 |:---------|:----------:|
@@ -26,14 +26,14 @@ El sistema aprovecha los datos ingresados hasta el momento por el usuario para o
 | EQUINOX | Época de RA y DEC |
 | AIRMASS | Masa de aire |
 
-Escencialmente solo se requieren 4 metadatos para calcular el maximo posible de informacion, sean estos OBJECT, DATE-OBS, OBSERVAT, UT. En este punto los mismos ya fueron especificados por el usuario por lo que al entrar a la etapa PlateUNLP empieza a calcular los demas.
+Solo se requieren cuatro metadatos esenciales para calcular la mayor parte de la información: OBJECT, DATE-OBS, OBSERVAT y UT. Estos ya deberían haber sido especificados previamente, por lo que al ingresar a esta etapa, PlateUNLP calcula automáticamente el resto de los valores.
 
-SPTYPE y MAIN-ID no son obtenibles de forma analitica, es necesario consultarlo al repositorio externo [SIMBAD](https://simbad.cfa.harvard.edu/simbad/).
+SPTYPE y MAIN-ID no son obtenibles de forma puramente analítica por lo que es necesario consultarlo al repositorio externo [SIMBAD](https://simbad.cfa.harvard.edu/simbad/).
 
-Ademas, el usuario puede indicar que no conoce algunos de los 4 metadatos escenciales. Dependiendo de la información disponible el sistema calculara mas o menos informacion. El siguiente diagrama muestra que metadatos se requieren para obtener cada uno y si los mismos requieren la interaccion del usuario o de un repositorio externo:
+Además, el usuario puede indicar que no conoce algunos de los 4 metadatos esenciales. Dependiendo de la información disponible el sistema calculara mas o menos información. El siguiente diagrama muestra que metadatos se requieren para obtener cada uno  y si estos requieren la interacción del usuario o una consulta a un repositorio externo:
 
 ![Diagrama de dependencias de metadatos. Con icono de usuario aquellos que si o si deben ser ingresados por el usuario. Con icono de SIMBAD aquellos que son consultados al repositorio de igual nombre.](./images/SpectrumMetadata/dependenciasMetadatos.png)
 
-Una vez calculados todos los datos el usuario puede modificar los valores determinados por PlateUNLP si es que no le parece correcto.
+Una vez calculados todos los datos, el usuario puede modificar los valores determinados por PlateUNLP si considera que no son correctos.
 
-Al presionar el boton _Save_ se guardan los valores actuales y se pasa a la etapa siguiente.
+Al presionar el botón _Save_ se guardan los valores actuales y se pasa a la siguiente etapa.

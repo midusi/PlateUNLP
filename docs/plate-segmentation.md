@@ -12,7 +12,7 @@ Una vez cargado el archivo, se habilita la interfaz de segmentación de espectro
 
 1. **Boton _Autodetect Bounding Boxes_**: al hacer clic, se ejecuta un modelo detector de espectros sobre la imagen. Sus predicciones se aprovechan para identificar las posiciones de cada espectro y señalarlas con cajas delimitadoras.
 ![alt text](./images/PlateSegmentation/plateSegmentationinfer.png)
-Para saber mas leer [Detector de Espectros](./DetectorDeEspectros.md)
+Para saber mas leer [Detector de Espectros](./spectrum-detector.md)
 
 2. **_Rotate 90º_**:  al hacer clic, la imagen es rotada la imagen 90º a la derecha. Solo afecta la visualización (no modifica cómo se almacenan los datos más adelante).
 
@@ -25,7 +25,7 @@ Para saber mas leer [Detector de Espectros](./DetectorDeEspectros.md)
 
 6. **_Bounding Boxes List_**: se muestra un listado de cada una de las cajas delimitadoras especificadas sobre la imagen:
 ![alt text](./images/PlateSegmentation/boundingBoxList.png)
-De cada caja se muestra su identificador (izquierda), el tipo de objeto que hay dentro (derecha), un botón para eliminar la caja (derecha). Cuando una caja delimitadora está seleccionada también se muestra un conjunto de inputs con información que se tiene que especificar sobre cada caja:
+De cada caja se muestra su identificador (izquierda), el tipo de objeto que hay dentro (centro-derecha), un botón para eliminar la caja (derecha). Cuando una caja delimitadora está seleccionada también se muestra un conjunto de inputs con información que se tiene que especificar sobre cada caja:
     - OBJECT: Nombre del objeto observado.
     - DATE-OBS: Fecha de observación.
     - MAIN-ID: ID principal en la base de datos astronómica Simbad.
