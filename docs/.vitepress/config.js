@@ -16,6 +16,12 @@ export default {
                 ],
             },
             {
+                text: 'Technical information',
+                items: [
+                    { text: 'Instalación', link: '/Install' },
+                ],
+            },
+            {
                 text: 'Other topics',
                 items: [
                     { text: 'Detector de Espectro', link: '/spectrum-detector' },
