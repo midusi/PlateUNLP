@@ -193,7 +193,7 @@ $$
 Teniendo los vectores $S_iAvgH$ se hace un filtrado de todos aquellos valores que queden por debajo de un umbral $τ$, por defecto $τ=0.6$. Entonces definimos a los arreglos $F_i$ como:
 
 $$
-F_i= \{ x \in S_iAvgH \mid x \geq κ \} 
+F_i= \{ x \in S_iAvgH \mid x \geq κ \}
 $$
 
 $$
@@ -266,11 +266,16 @@ $$
 Luego, calculamos el valor promedio de intensidad en cada una de estas columnas para obtener el espectro de ciencia unidimensional, $ScienceSpectrum1D$:
 
 $$
-M = |ArrCol_i|
+\begin{equation}
+    M = |ArrCol_i|
+\end{equation}
 $$
 
+\label{eq:pepdsd}
 $$
-ScienceSpectrum1D = \{ \frac{1}{M} \cdot ∑_{k=0}^{M} ArrCol_i[k] \}_{i=0}^{Img_{width}}
+\begin{equation}
+\text{ScienceSpectrum1D} = \{ \frac{1}{M} \cdot ∑_{k=0}^{M} ArrCol_i[k] \}_{i=0}^{Img_{width}}
+\end{equation}
 $$
 
 Finalmente, se grafica el espectro resultante, representando la intensidad promedio del espectro de ciencia para cada píxel horizontal de la imagen:
