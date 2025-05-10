@@ -2,13 +2,13 @@
 
 Esta etapa consiste en la obtención de los espectros 1D correspondientes a las imágenes del espectro de ciencia y los 2 espectros de lámparas aislados en [Segmentación de espectro](#segmentación-de-espectro).
 
-![alt text](./images/FeatureExtraction/FeatureExtraction.png)
+![alt text](./FeatureExtraction.png)
 
 ## Espectro de ciencia
 
 Para lograr la extracción de los espectros 1D lo primero es partir de la imagen $ImgSc$ del espectro de ciencia:
 
-![Recorte crudo del espectro de ciencia](./images/FeatureExtraction/Science1.png)
+![Recorte crudo del espectro de ciencia](./Science1.png)
 
 Se buscan $N$ valores equidistantes $x_i$ sobre el ancho ancho $W$ total de la imagen, por defecto $N=5$. Los $x_i$ se obtienen acorde a la fórmula:
 
@@ -112,7 +112,7 @@ f(x) = Spline_{quadratic}(C)
 \end{equation}
 $$
 
-PlateUNLP delega al usuario la elección del método de interpolación para realizar el trazado de la recta media a través de la imagen del espectro de ciencia. Para tener más información respecto a cada opción consultar [Funciones de Interpolación](FuncionesDeInterpolación.md).
+PlateUNLP delega al usuario la elección del método de interpolación para realizar el trazado de la recta media a través de la imagen del espectro de ciencia. Para tener más información respecto a cada opción consultar [Funciones de Interpolación](../interpolation-functions/index.md).
 
 Una vez definida la función $f(x)$, que dado cualquier píxel horizontal $x$ indica la altura por la que pasa el centro del espectro, es posible obtener las funciones que delimitan el borde superior $u(x)$ e inferior $d(x)$ del espectro, utilizando el valor promedio de apertura $Opening$:
 
@@ -132,7 +132,7 @@ $$
 
 A continuación se muestran las trazas de estas 3 funciones sobre la imagen del espectro. En medio $f(x)$ como una línea roja continua, arriba y abajo, $u(x)$ y $d(x)$ respectivamente como líneas rojas punteadas:
 
-![alt text](./images/FeatureExtraction/ScienceConTrazas.png)
+![alt text](./ScienceConTrazas.png)
 
 Para cada valor de $x$, utilizando las funciones $u(x)$ y $d(x)$, podemos determinar el intervalo vertical que contiene el espectro en la columna correspondiente de la imagen. Así, definimos un subconjunto de píxeles por columna:
 
@@ -158,11 +158,11 @@ $$
 
 Finalmente, se grafica el espectro resultante, representando la intensidad promedio del espectro de ciencia para cada píxel horizontal de la imagen:
 
-![Science spectrum 1D](./images/FeatureExtraction/ScienceSpectrum1D.png)
+![Science spectrum 1D](./ScienceSpectrum1D.png)
 
 El siguiente gráfico proporciona una visión general de todo el procedimiento necesario para obtener el espectro de ciencia unidimensional (1D):
 
-![alt text](./images/FeatureExtraction/TotalProcessSicience1D.png)
+![alt text](./TotalProcessSicience1D.png)
 
 ## Lamparas de comparación
 
@@ -212,4 +212,4 @@ $$
 
 Este procedimiento se repite para ambas lamparas de comparación, obteniendo asi las funciones descriptivas de cada una:
 
-![All spectrums with images](./images/FeatureExtraction/Spectrums1D.png)
+![All spectrums with images](./Spectrums1D.png)

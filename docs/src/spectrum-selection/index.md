@@ -2,7 +2,7 @@
 
 A partir de esta etapa el usuario tendrá que elegir con que espectro trabajara a cada momento. Para facilitar esta tarea, se presenta el menú de selección de espectros:
 
-![alt text](./images/SpectrumSelection/SpectrumSelection.png)
+![alt text](./SpectrumSelection.png)
 
 En este menú se muestra una tabla en la que, para cada espectro, se detalla la siguiente información:
 
@@ -14,4 +14,4 @@ En este menú se muestra una tabla en la que, para cada espectro, se detalla la 
     - _Complete_: el espectro está totalmente procesado y listo para su descarga.
 5. **_Download Button_**: permite la descarga de los datos procesados de un espectro. Si el espectro no está del todo procesado descarga los archivos de procesado en el estado intermedio en que se encuentren.
 6. **_Select and Work Button_**: al cliquear indica a _PlateUNLP_ que el usuario quiere continuar con el procesado de ese espectro. El usuario es redirigido a la siguiente etapa de procesamiento y la barra de navegación se actualiza para reflejar con qué espectro se está trabajando:
-![alt text](./images/SpectrumSelection/SpectrumSelectionSelectSpectrum.png)
+![alt text](./SpectrumSelectionSelectSpectrum.png)

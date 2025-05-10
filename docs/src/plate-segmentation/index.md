@@ -4,15 +4,15 @@ La etapa de Segmentación de placa busca identificar las porciones del escaneo o
 
 Lo primero que hay que hacer es cargar el archivo de la placa escaneada:
 
-![alt text](./images/PlateSegmentation/cargarEscaneo.png)
+![alt text](./cargarEscaneo.png)
 
 Una vez cargado el archivo, se habilita la interfaz de segmentación de espectros, compuesta por los siguientes elementos:
 
-![alt text](./images/PlateSegmentation/elementosSegmentadorPlaca.png)
+![alt text](./elementosSegmentadorPlaca.png)
 
 1. **Boton _Autodetect Bounding Boxes_**: al hacer clic, se ejecuta un modelo detector de espectros sobre la imagen. Sus predicciones se aprovechan para identificar las posiciones de cada espectro y señalarlas con cajas delimitadoras.
-![alt text](./images/PlateSegmentation/plateSegmentationinfer.png)
-Para saber mas leer [Detector de Espectros](./spectrum-detector.md)
+![alt text](./plateSegmentationinfer.png)
+Para saber mas leer [Detector de Espectros](../spectrum-detector/index.md)
 
 2. **_Rotate 90º_**:  al hacer clic, la imagen es rotada la imagen 90º a la derecha. Solo afecta la visualización (no modifica cómo se almacenan los datos más adelante).
 
@@ -21,10 +21,10 @@ Para saber mas leer [Detector de Espectros](./spectrum-detector.md)
 4. **_Draw Box_**: al seleccionarlo se entra en modo de dibujo, lo cual permite al usuario crear cajas delimitadoras sobre la imagen. Así se puede indicar manualmente la posición de espectros.
 
 5. **_Área de vizualización_**: se muestra el escaneo seleccionado en un menú interactivo que permite acercar, alejar y arrastrar la imagen. También se muestran las cajas delimitadoras especificadas y se permite redimensionarlas o moverlas. Para interactuar con una caja delimitadora, hacer clic sobre ella para entrar en modo de edición. Para deseleccionarla, hacer clic nuevamente sobre la misma caja o seleccionar otra.
-![alt text](./images/PlateSegmentation/plateSegmentationBBEdit.gif)
+![alt text](./plateSegmentationBBEdit.gif)
 
 6. **_Bounding Boxes List_**: se muestra un listado de cada una de las cajas delimitadoras especificadas sobre la imagen:
-![alt text](./images/PlateSegmentation/boundingBoxList.png)
+![alt text](./boundingBoxList.png)
 De cada caja se muestra su identificador (izquierda), el tipo de objeto que hay dentro (centro-derecha), un botón para eliminar la caja (derecha). Cuando una caja delimitadora está seleccionada también se muestra un conjunto de inputs con información que se tiene que especificar sobre cada caja:
     - OBJECT: Nombre del objeto observado.
     - DATE-OBS: Fecha de observación.
