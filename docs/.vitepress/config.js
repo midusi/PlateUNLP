@@ -1,9 +1,21 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  title: "PlateUNLP Docs",
+  titleTemplate: ':title /// PlateUNLP',
+  lang: 'es-AR',
+  base: '/docs/',
+  cleanUrls: true,
+
+  srcDir: './src',
+  outDir: "./dist",
+
+  appearance: true,
+  lastUpdated: true,
   markdown: {
     math: true
   },
+
   themeConfig: {
     sidebar: [
       {
@@ -35,5 +47,12 @@ export default defineConfig({
         ],
       }
     ],
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/midusi/PlateUNLP' },
+    ],
+    footer: {
+      message: `This work is licensed under <a target="_blank" rel="license noopener noreferrer" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.`,
+    },
+    editLink: { pattern: "https://github.com/midusi/PlateUNLP/edit/main/docs/src/:path" },
   }
 })
