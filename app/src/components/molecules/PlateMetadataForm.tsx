@@ -80,6 +80,11 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
 
             {errors.OBSERVER && <p className="text-red-500">{errors.OBSERVER.message}</p>}
           </div>
+          <div className={inputContainerClassName}>
+            <Label>PLATE-N</Label>
+            <Input {...register("PLATE_N")} placeholder="Identification number" className={inputClassName} />
+            {errors.PLATE_N && <p className="text-red-500">{errors.PLATE_N.message}</p>}
+          </div>
 
           <div className={inputContainerClassName}>
             <Label>OBSERVER</Label>
@@ -100,11 +105,6 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
             <Label>SOFTWARE</Label>
             <Input {...register("SOFTWARE")} placeholder="Scan software" className={inputClassName} />
             {errors.SOFTWARE && <p className="text-red-500">{errors.SOFTWARE.message}</p>}
-          </div>
-          <div className={inputContainerClassName}>
-            <Label>PLATE-N</Label>
-            <Input {...register("PLATE_N")} placeholder="Identification number" className={inputClassName} />
-            {errors.PLATE_N && <p className="text-red-500">{errors.PLATE_N.message}</p>}
           </div>
           <div className={inputContainerClassName}>
             <Label>TELESCOPE</Label>
