@@ -166,4 +166,50 @@ El siguiente gráfico proporciona una visión general de todo el procedimiento n
 
 ## Lamparas de comparación
 
-![Lamp 1 spectrum 1D](./images/FeatureExtraction/Lamp1Spectrum1D.png)
+Para realizar la extraccion de los espectros de los espectros 1D de las lamparas de comparación se parte de la funciones $u(x)$ y $d(x)$ halladas para el espectro de ciencia. No obstante, hay que tener en cuenta que la lampara del espectro de lampara puede llegar a tener una altura mayor o menor que la de la imagen del espectro de ciencia por lo que se calcula la escala $\text{Scale}_Y$ necesaria para mapear una altura del espectro de ciencia a una altura para un espectro de lampara de comparación.
+
+$$
+\begin{equation}
+\text{Scale}_Y=\frac{\text{Science}_{heigth}}{\text{Lamp1}_{heigth}}
+\end{equation}
+$$
+
+Con esto podemos calcular $u'(x)$ y $d'(x)$:
+
+$$
+\begin{equation}
+u'(x) = u(x) \cdot \text{Scale}_Y
+\end{equation}
+$$
+
+$$
+\begin{equation}
+d'(x)= d(x) \cdot \text{Scale}_Y
+\end{equation}
+$$
+
+Podemos definir los grupos de valores de pixeles que entran dentro rango definido por $u'(x)$ y $d'(x)$ para cada columna $i$ de la imagen:
+
+$$
+\begin{equation}
+ArrCol_i = \{ Img[i,j] \}_{j=u'(i)}^{d'(i)}
+\end{equation}
+$$
+
+Luego, se calcula calculamos el valor promedio de intensidad en cada columnas para obtener el espectro de Lampara unidimensional, $LampSpectrum1D$,:
+
+$$
+\begin{equation}
+M = |ArrCol_i|
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\text{LampSpectrum1D} = \{ \frac{1}{M} \cdot ∑_{k=0}^{M} ArrCol_i[k] \}_{i=0}^{Img_{width}}
+\end{equation}
+$$
+
+Este procedimiento se repite para ambas lamparas de comparación, obteniendo asi las funciones descriptivas de cada una:
+
+![All spectrums with images](./images/FeatureExtraction/Spectrums1D.png)
