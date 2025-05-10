@@ -1,5 +1,6 @@
 import type { PlateMetadata } from "@/components/molecules/PlateMetadataForm"
 import type { BoundingBox } from "./BoundingBox"
+import { BoxMetadata } from "@/components/molecules/BoxMetadataForm"
 
 export interface ProcessInfoForm {
   /** Info estado de procesado de cada etapa de la barra de navegación */
@@ -29,7 +30,7 @@ export interface StepGeneralInfoForm {
 
 export interface StepSpecificInfoForm {
   states: null // Todavia no se dividio la cantidad de espectros
-    | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
+  | ("NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE")[] // Indexado numero de espectro
 }
 
 /** Interfaz que define los elementos que se deben conocer de un espectro. */
@@ -40,6 +41,7 @@ export interface SpectrumData {
   name: string
   /** Bounding Box que delimita las dimensiones y localización del espectro. */
   spectrumBoundingBox: BoundingBox
+  metadata: BoxMetadata
   /** Informacion respecto a las partes del espectro (science, lamp1, lamp2) */
   parts: {
     /** Información relacionada a la lampara de comparación 1. */

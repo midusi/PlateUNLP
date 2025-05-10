@@ -5,6 +5,7 @@ import clsx from "clsx"
 import { nanoid } from "nanoid"
 import { useCallback, useRef, useState } from "react"
 import { useTransformComponent } from "react-zoom-pan-pinch"
+import { BoxMetadata } from "./BoxMetadataForm"
 
 /**
  * Mapeo de esquinas y aristas al rotar una imagen X grados.
@@ -73,6 +74,8 @@ interface ImageWithBoundingBoxesProps {
   setSelectedBoxId: Dispatch<SetStateAction<string | null>>
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+  boxMetadatas: BoxMetadata[]
+  setBoxMetadatas: Dispatch<SetStateAction<BoxMetadata[]>>
 }
 
 /**
@@ -95,6 +98,8 @@ export function ImageWithBoundingBoxes({
   setSelectedBoxId,
   boundingBoxes,
   setBoundingBoxes,
+  boxMetadatas,
+  setBoxMetadatas,
 }: ImageWithBoundingBoxesProps) {
   const transformedComponent = useTransformComponent(({ state, instance: _ }) => {
     return state // { previousScale: 1, scale: 1, positionX: 0, positionY: 0 }
@@ -102,7 +107,7 @@ export function ImageWithBoundingBoxes({
   const scale = transformedComponent.scale
   const imageRef = useRef<HTMLImageElement | null>(null)
   const [tempBox, setTempBox] = useState<
-        Omit<BoundingBox, "id" | "prob" | "name" | "class_info"> | null
+    Omit<BoundingBox, "id" | "prob" | "name" | "class_info"> | null
   >(null)// ({ x: 50, y: 150, width: 100, height: 100 })
   const drawingRef = useRef<{
     isDrawing: boolean
@@ -369,16 +374,25 @@ export function ImageWithBoundingBoxes({
   const handleMouseUp = useCallback(() => {
     // Complete drawing
     if (drawingRef.current.isDrawing && tempBox && tempBox.width > 5 && tempBox.height > 5) {
-      setBoundingBoxes(prev => [
-        ...prev,
-        {
-          id: nanoid(),
-          name: `box-${Date.now()}`,
-          ...tempBox,
-          class_info: classesSpectrumDetection[0],
-          prob: 1,
-        },
-      ])
+      {
+        setBoundingBoxes(prev => [
+          ...prev,
+          {
+            id: nanoid(),
+            name: `box-${Date.now()}`,
+            ...tempBox,
+            class_info: classesSpectrumDetection[0],
+            prob: 1,
+          },
+        ])
+        boxMetadatas.push({
+          OBJECT: null,
+          DATE_OBS: null,
+          UT: null
+        })
+        setBoxMetadatas(boxMetadatas)
+      }
+
     }
     drawingRef.current.isDrawing = false
     setTempBox(null)

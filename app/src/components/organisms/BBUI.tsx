@@ -11,13 +11,16 @@ import { Card } from "../atoms/card"
 import { BoxList, Step } from "./BBList"
 import { ImageLoader } from "./ImageLoader"
 import { ImageViewer } from "./ImageViewer"
+import { BoxMetadata } from "../molecules/BoxMetadataForm"
 
 interface BBUIProps {
   file?: string | null
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+  boxMetadatas: BoxMetadata[]
+  setBoxMetadatas: Dispatch<SetStateAction<BoxMetadata[]>>
   onComplete: () => void
-  saveBoundingBoxes: (boundingBoxes: BoundingBox[]) => void
+  saveBoundingBoxes: (boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) => void
   saveImageLoading?: (src: string) => void
   classes: BBClassesProps[]
   determineBBFunction: (img_src: string) => Promise<BoundingBox[]>
@@ -34,6 +37,8 @@ export function BBUI({
   file = null,
   boundingBoxes,
   setBoundingBoxes,
+  boxMetadatas,
+  setBoxMetadatas,
   onComplete,
   saveBoundingBoxes,
   saveImageLoading,
@@ -171,6 +176,8 @@ export function BBUI({
                 setSelectedBoxId={setSelectedBoxId}
                 boundingBoxes={boundingBoxes}
                 setBoundingBoxes={setBoundingBoxes}
+                boxMetadatas={boxMetadatas}
+                setBoxMetadatas={setBoxMetadatas}
               />
             )
             : <ImageLoader handleImageLoad={handleImageLoad} />}
@@ -179,6 +186,8 @@ export function BBUI({
       <BoxList
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
+        boxMetadatas={boxMetadatas}
+        setBoxMetadatas={setBoxMetadatas}
         selected={selectedBoxId}
         setSelected={setSelectedBoxId}
         classes={classes}
@@ -197,7 +206,7 @@ export function BBUI({
             //   }
             // })
 
-            saveBoundingBoxes(boundingBoxes)
+            saveBoundingBoxes(boundingBoxes, boxMetadatas)
             onComplete()
           }}
           disabled={image === null || boundingBoxes.length === 0}
