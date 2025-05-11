@@ -13,7 +13,7 @@ Para saber más leer [Detector de Partes de Espectros](../spectrum-part-detector
 2. **_Area de vizualización_**: se muestra el escaneo seleccionado en un menú interactivo que permite acercar, alejar y arrastrar la imagen. También se visualizan las cajas delimitadoras creadas y es posible redimensionarlas o moverlas. Para interactuar con una caja, se debe hacer clic sobre ella para entrar en modo de edición. Para deseleccionarla, basta con volver a hacer clic sobre la misma caja o seleccionar otra.
 ![alt text](./spectrumSegmentationBBEdit.gif)
 
-1. **_Bounding Boxes List_**: aquí se muestra un listado de todas las cajas delimitadoras definidas sobre la imagen:
+3. **_Bounding Boxes List_**: aquí se muestra un listado de todas las cajas delimitadoras definidas sobre la imagen:
 ![alt text](./bbList.png)
 De cada caja se indica su identificador (izquierda), el tipo de objeto que contiene (centro-derecha) y un botón para eliminarla (derecha).
 
