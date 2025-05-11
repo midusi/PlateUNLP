@@ -15,14 +15,6 @@ export default createApp({
       name: "public",
       dir: "./public",
     },
-    {
-      type: "http",
-      name: "trpc",
-      base: "/api/trpc",
-      handler: "./server/handler.ts",
-      target: "server",
-      plugins: () => [tsconfigPaths()],
-    },
     ...(process.env.NODE_ENV === "production"
       ? [{
         type: "static",
@@ -31,6 +23,14 @@ export default createApp({
         dir: "../docs/dist",
       } as const]
       : []),
+    {
+      type: "http",
+      name: "trpc",
+      base: "/api/trpc",
+      handler: "./server/handler.ts",
+      target: "server",
+      plugins: () => [tsconfigPaths()],
+    },
     {
       type: "spa",
       name: "client",

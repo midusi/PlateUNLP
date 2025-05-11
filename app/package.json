@@ -5,9 +5,10 @@
   "private": true,
   "scripts": {
     "with-env": "dotenvx run -f .env.local -f .env --",
+    "with-env-prod": "dotenvx run -f .env.local -f .env --env NODE_ENV=production --",
     "dev": "pnpm with-env vinxi dev",
-    "build": "pnpm with-env vinxi build",
-    "start": "pnpm with-env vinxi start --host",
+    "build": "pnpm with-env-prod vinxi build",
+    "start": "pnpm with-env-prod vinxi start --host",
     "check-types": "pnpm with-env tsc --noEmit",
     "lint": "pnpm with-env eslint .",
     "lint:fix": "pnpm with-env eslint . --fix",
