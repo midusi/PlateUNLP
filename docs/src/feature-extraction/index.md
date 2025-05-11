@@ -162,7 +162,7 @@ Finalmente, se grafica el espectro resultante, representando la intensidad prome
 
 El siguiente gráfico proporciona una visión general de todo el procedimiento necesario para obtener el espectro de ciencia unidimensional (1D):
 
-![alt text](./TotalProcessSicience1D.png)
+![alt text](./TotalProcessScience1D.png)
 
 ## Lamparas de comparación
 
