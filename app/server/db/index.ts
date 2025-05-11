@@ -1,9 +1,9 @@
-import { drizzle } from 'drizzle-orm/libsql';
+import { drizzle } from "drizzle-orm/libsql"
+import { env } from "../env"
+
 import * as schema from "./schema"
 
-const dbfile = new URL("../../db.sqlite", import.meta.url)
-
 export const db = drizzle({
-    connection: { url: dbfile.toString() },
-    schema
-});
+    connection: { url: env.DATABASE_URL, authToken: env.DATABASE_TOKEN },
+    schema,
+})

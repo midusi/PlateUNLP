@@ -21,7 +21,7 @@ export default createApp({
       base: "/api/trpc",
       handler: "./server/handler.ts",
       target: "server",
-      plugins: () => [],
+      plugins: () => [tsconfigPaths()],
     },
     ...(process.env.NODE_ENV === "production"
       ? [{
