@@ -4,6 +4,9 @@
     "build": {
       "outputs": ["dist/**", ".output/**", ".vinxi/**"]
     },
+    "@plateunlp/app#build": {
+      "dependsOn": ["@plateunlp/docs#build"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },

@@ -2,4 +2,3 @@ packages:
   - "app/"
   - "docs/"
   - "scripts/"
-  - "server/"
