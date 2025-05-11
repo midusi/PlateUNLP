@@ -10,4 +10,4 @@ pnpm-debug.log*
 
 # Vitepress
 .vitepress/cache/
-.vitepress/dist/
+dist/
