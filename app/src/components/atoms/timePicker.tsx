@@ -8,9 +8,10 @@ interface TimePickerProps {
     date: Date | undefined
     setDate: (date: Date | undefined) => void
     disabled?: boolean
+    onChange?: (event: Date | undefined) => void
 }
 
-export function TimePicker({ date, setDate, disabled = false }: TimePickerProps) {
+export function TimePicker({ date, setDate, disabled = false, onChange }: TimePickerProps) {
     const minuteRef = React.useRef<HTMLInputElement>(null)
     const hourRef = React.useRef<HTMLInputElement>(null)
     const secondRef = React.useRef<HTMLInputElement>(null)
@@ -24,7 +25,10 @@ export function TimePicker({ date, setDate, disabled = false }: TimePickerProps)
                 <TimePickerInput
                     picker="hours"
                     date={date}
-                    setDate={setDate}
+                    setDate={(newDate) => {
+                        setDate(newDate);
+                        onChange?.(newDate);
+                    }}
                     ref={hourRef}
                     onRightFocus={() => minuteRef.current?.focus()}
                     disabled={disabled}
@@ -38,7 +42,10 @@ export function TimePicker({ date, setDate, disabled = false }: TimePickerProps)
                     picker="minutes"
                     id="minutes12"
                     date={date}
-                    setDate={setDate}
+                    setDate={(newDate) => {
+                        setDate(newDate);
+                        onChange?.(newDate);
+                    }}
                     ref={minuteRef}
                     onLeftFocus={() => hourRef.current?.focus()}
                     onRightFocus={() => secondRef.current?.focus()}
@@ -53,7 +60,10 @@ export function TimePicker({ date, setDate, disabled = false }: TimePickerProps)
                     picker="seconds"
                     id="seconds12"
                     date={date}
-                    setDate={setDate}
+                    setDate={(newDate) => {
+                        setDate(newDate);
+                        onChange?.(newDate);
+                    }}
                     ref={secondRef}
                     onLeftFocus={() => minuteRef.current?.focus()}
                     disabled={disabled}

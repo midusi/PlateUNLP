@@ -355,6 +355,12 @@ export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
                 <TimePicker
                   date={value ? new Date(value * 1000) : undefined}
                   setDate={date => onChange(date ? date.getTime() / 1000 : 0)}
+                  onChange={() => {
+                    setSpectrumMetadataIcons({
+                      ...spectrumMetadataIcons,
+                      EXPTIME: { icon: "", className: "" }
+                    })
+                  }}
                 />
               )}
             />
