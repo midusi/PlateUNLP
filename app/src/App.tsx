@@ -74,11 +74,13 @@ export default function App() {
       content: <StepCalibration index={6} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
   ]
-
+  const [loginError, setLoginError] = useState<string>()
+  const [loginSuccess, setLoginSuccess] = useState<boolean>(false)
   const handleLogin = (UserData: loginForm) => {
+    setLoginError("")
     trpc.login.mutate({
       Email: UserData.Email, Password: UserData.Password
-    }).then(resultado => console.log(resultado))
+    }).then(resultado => { if (!resultado) { setLoginError("Incorrect credentials") } else { setLoginSuccess(true) } })
   };
 
   return (
@@ -88,14 +90,17 @@ export default function App() {
           🌌 PlateUNLP
         </h1>
       </header>
-      <LoginForm login={handleLogin} />
+
+
       <main>
-        <NewNavigationProgressBar
+        {!loginSuccess && <LoginForm login={handleLogin} errorMessage={loginError} />}
+        {loginSuccess && <NewNavigationProgressBar
           general={generalSteps}
           bridgeStep={bridgeStep}
           perSpectrum={specificSteps}
           processInfo={processInfo}
-        />
+        />}
+
       </main>
 
       <footer className="mt-40 mb-20 text-xs italic text-center text-muted-foreground">

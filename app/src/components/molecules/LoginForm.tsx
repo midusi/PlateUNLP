@@ -14,11 +14,12 @@ export interface loginForm {
 type FormData = z.infer<typeof loginFormSchema>
 
 type FormProps = {
-    login: (data: { Email: string; Password: string }) => void
+    login: (data: { Email: string; Password: string }) => void,
+    errorMessage?: string
 }
 
 
-export const LoginForm: React.FC<FormProps> = ({ login }) => {
+export const LoginForm: React.FC<FormProps> = ({ login, errorMessage }) => {
     const {
         register,
         watch,
@@ -67,7 +68,11 @@ export const LoginForm: React.FC<FormProps> = ({ login }) => {
                             />
                             {errors.Password && <p className="text-red-500">{errors.Password.message}</p>}
                         </div>
-
+                        {errorMessage && (
+                            <div style={{ color: 'red', marginTop: '10px' }}>
+                                {errorMessage}
+                            </div>
+                        )}
                     </form >
                     <Button
                         onClick={sendLogin}

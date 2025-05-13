@@ -1,8 +1,13 @@
 import { router, publicProcedure } from '../trpc';
-import { db } from "../db"
+import { db, seedUsers } from "../db"
 import * as s from "../db/schema"
 import { nanoid } from 'nanoid';
 import { z } from "zod"
+import { and, eq } from 'drizzle-orm';
+import { verifyPassword } from '../utils/hash';
+
+// Llamar a la función de semilla
+seedUsers();
 
 export const appRouter = router({
   dummy: publicProcedure.query(() => 'Hello, world!'),
@@ -38,10 +43,26 @@ export const appRouter = router({
       })
     )
     .mutation(async ({ input: { Email, Password } }) => {
-      console.log("antes de buscar ", Email, Password)
-      const u = await db.select().from(s.user)
-      console.log(u)
-      return u
+      const user = await db
+        .select()
+        .from(s.user)
+        .where(eq(s.user.email, Email))
+        .then(rows => rows[0])
+
+      if (!user) {
+        // Usuario no encontrado
+        return false
+      }
+
+      const passwordMatch = await verifyPassword(Password, user.hashedPassword)
+
+      if (!passwordMatch) {
+        // Contraseña incorrecta
+        return false
+      }
+
+      // Autenticado correctamente
+      return true
     })
 })
 
