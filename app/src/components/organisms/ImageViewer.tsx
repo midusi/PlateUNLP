@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 import { ImageWithBoundingBoxes } from "../molecules/ImageWithBoundingBoxes"
+import { BoxMetadata } from "../molecules/BoxMetadataForm"
 
 /**
  * Listado de props que espera recibir ImageViewer
@@ -18,6 +19,8 @@ interface ImageViewerProps {
   setSelectedBoxId: Dispatch<SetStateAction<string | null>>
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+  boxMetadatas: BoxMetadata[]
+  setBoxMetadatas: Dispatch<SetStateAction<BoxMetadata[]>>
 }
 
 // Ref https://github.com/BetterTyped/react-zoom-pan-pinch/blob/master/src/stories/examples/image-responsive/example.tsx
@@ -36,6 +39,8 @@ export function ImageViewer({
   setSelectedBoxId,
   boundingBoxes,
   setBoundingBoxes,
+  boxMetadatas,
+  setBoxMetadatas
 }: ImageViewerProps) {
   const scaleUp = true
   //   const backgroundColor = "black"
@@ -160,6 +165,8 @@ export function ImageViewer({
               setSelectedBoxId={setSelectedBoxId}
               boundingBoxes={boundingBoxes}
               setBoundingBoxes={setBoundingBoxes}
+              boxMetadatas={boxMetadatas}
+              setBoxMetadatas={setBoxMetadatas}
             />
           </TransformComponent>
         </TransformWrapper>

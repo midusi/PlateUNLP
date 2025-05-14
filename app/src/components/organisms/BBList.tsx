@@ -9,6 +9,8 @@ import { BoxMetadata, BoxMetadataForm } from "../molecules/BoxMetadataForm"
 interface BoxListProps {
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+  boxMetadatas: BoxMetadata[]
+  setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
   selected: string | null
   setSelected: React.Dispatch<React.SetStateAction<string | null>>
   classes: BBClassesProps[]
@@ -22,7 +24,7 @@ interface BBListParameters {
   step: Step
 }
 
-export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes, parameters }: BoxListProps) {
+export function BoxList({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxMetadatas, selected, setSelected, classes, parameters }: BoxListProps) {
   function handleSelect(id: string) {
     if (selected === id) {
       //setSelected(null)
@@ -48,11 +50,14 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected
       </div>
       <div className="divide-y divide-slate-100">
         {boundingBoxes.length > 0 && (
-          boundingBoxes.map(box => (
+          boundingBoxes.map((box, index) => (
             <ItemOfBoxList
               key={box.id}
               box={box}
+              boxIndex={index}
               setBoundingBoxes={setBoundingBoxes}
+              boxMetadatas={boxMetadatas}
+              setBoxMetadatas={setBoxMetadatas}
               isSelected={box.id === selected}
               onSelect={handleSelect}
               classes={classes}
@@ -67,7 +72,10 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected
 
 interface ItemOfBoxListProps {
   box: BoundingBox
+  boxIndex: number
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+  boxMetadatas: BoxMetadata[]
+  setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
   isSelected: boolean
   onSelect: (id: string) => void
   classes: BBClassesProps[]
@@ -75,11 +83,14 @@ interface ItemOfBoxListProps {
   parameters: BBListParameters
 }
 
-const boxMetadatas: { [id: number | string]: BoxMetadata } = {}
+const boxMetadatasDictionary: { [id: number | string]: BoxMetadata } = {}
 
 function ItemOfBoxList({
   box,
+  boxIndex,
   setBoundingBoxes,
+  boxMetadatas,
+  setBoxMetadatas,
   isSelected,
   onSelect,
   classes,
@@ -128,12 +139,15 @@ function ItemOfBoxList({
     setIsSelectOpen(false)
   }
   const boxMetadataFormRef = useRef<{ setValues: (spectrumMetadata: BoxMetadata) => void, resetValues: () => void, getValues: () => BoxMetadata, validate: () => void }>(null)
-  if (id in boxMetadatas) {
-    boxMetadataFormRef.current?.setValues(boxMetadatas[id])
+  if (id in boxMetadatasDictionary) {
+    boxMetadataFormRef.current?.setValues(boxMetadatasDictionary[id])
   }
   const handleFormChange = (data: BoxMetadata) => {
     if (Object.keys(data).length > 0) {
-      boxMetadatas[id] = data
+      boxMetadatasDictionary[id] = data
+      boxMetadatas[boxIndex] = data
+      setBoxMetadatas(boxMetadatas)
+
     }
     // Acá podés hacer lo que quieras con los datos del formulario
   }

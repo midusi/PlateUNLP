@@ -6,6 +6,7 @@ import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
 import { BBUI } from "../organisms/BBUI"
 import { Step } from "../organisms/BBList"
+import { BoxMetadata } from "../molecules/BoxMetadataForm"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const parameters = {
@@ -15,6 +16,9 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   }
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
+  )
+  const [boxMetadatas, setBoxMetadatas] = useState<BoxMetadata[]>(
+    processInfo.data.spectrums.map(spec => spec.metadata),
   )
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
@@ -27,7 +31,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     0.70,
   )
 
-  function saveBoundingBoxes(boundingBoxes: BoundingBox[]) {
+  function saveBoundingBoxes(boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) {
     setProcessInfo(prev => ({
       ...prev,
       data: {
@@ -36,6 +40,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           id: index,
           name: `Plate${index}#Spectrum`,
           spectrumBoundingBox: bb,
+          metadata: boxMetadata[index],
           parts: {
             lamp1: { boundingBox: null, extractedSpectrum: null },
             lamp2: { boundingBox: null, extractedSpectrum: null },
@@ -93,6 +98,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         file={processInfo.data.plate.scanImage}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
+        boxMetadatas={boxMetadatas}
+        setBoxMetadatas={setBoxMetadatas}
         onComplete={onComplete}
         saveBoundingBoxes={saveBoundingBoxes}
         saveImageLoading={saveImage}
