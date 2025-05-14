@@ -129,7 +129,6 @@ d(x) := x → f(x) - Opening / 2
 \end{equation}
 $$
 
-
 A continuación se muestran las trazas de estas 3 funciones sobre la imagen del espectro. En medio $f(x)$ como una línea roja continua, arriba y abajo, $u(x)$ y $d(x)$ respectivamente como líneas rojas punteadas:
 
 ![alt text](./ScienceConTrazas.png)
@@ -196,7 +195,7 @@ ArrCol_i = \{ Img[i,j] \}_{j=u'(i)}^{d'(i)}
 \end{equation}
 $$
 
-Luego, se calcula calculamos el valor promedio de intensidad en cada columnas para obtener el espectro de Lampara unidimensional, $LampSpectrum1D$,:
+Luego, se calcula el valor promedio de intensidad en cada columna para obtener el espectro de Lampara unidimensional, $LampSpectrum1D$:
 
 $$
 \begin{equation}
