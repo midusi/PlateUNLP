@@ -27,9 +27,9 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
 
 
   const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>({
-    science: "/forTest/Test1_Science1.png",
-    lamp1: "/forTest/Test1_Lamp1.png",
-    lamp2: "/forTest/Test1_Lamp2.png"
+    science: "/forTest/Test1_Science1_v2.png",
+    lamp1: "/forTest/Test1_Lamp1_v2.png",
+    lamp2: "/forTest/Test1_Lamp2_v2.png"
   })
   // const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
   // useEffect(() => {

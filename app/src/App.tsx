@@ -1,9 +1,11 @@
 import type { StepData } from "@/components/organisms/NewNavigationProgressBar"
+import type { loginForm } from "./components/molecules/LoginForm"
 import type { ProcessInfoForm } from "./interfaces/ProcessInfoForm"
 import { NewNavigationProgressBar } from "@/components/organisms/NewNavigationProgressBar"
 import { StepCalibration } from "@/components/pages/StepCalibration"
 import { StepSpectrumSegmentation } from "@/components/pages/StepSpectrumSegmentation"
 import { useState } from "react"
+import { LoginForm } from "./components/molecules/LoginForm"
 import { StepFeatureExtraction } from "./components/pages/StepFeatureExtraction"
 import { StepMetadataRetrieval } from "./components/pages/StepMetadataRetrieval"
 import { StepPlateMetadata } from "./components/pages/StepPlateMetadata"
@@ -33,7 +35,7 @@ export default function App() {
           PLATE_N: "",
           DETECTOR: "",
           INSTRUMENT: "",
-          TELESCOPE: ""
+          TELESCOPE: "",
         },
       },
       spectrums: [],
@@ -73,6 +75,20 @@ export default function App() {
       content: <StepCalibration index={6} processInfo={processInfo} setProcessInfo={setProcessInfo} />,
     },
   ]
+  const [loginError, setLoginError] = useState<string>()
+  const [loginSuccess, setLoginSuccess] = useState<boolean>(false)
+  const handleLogin = (UserData: loginForm) => {
+    setLoginError("")
+    trpc.login.mutate({
+      Email: UserData.Email,
+      Password: UserData.Password,
+    }).then((resultado) => {
+      if (!resultado) {
+        setLoginError("Incorrect credentials")
+      }
+      else { setLoginSuccess(true) }
+    })
+  }
 
   return (
     <div className="w-full mx-auto">
@@ -83,12 +99,16 @@ export default function App() {
       </header>
 
       <main>
-        <NewNavigationProgressBar
-          general={generalSteps}
-          bridgeStep={bridgeStep}
-          perSpectrum={specificSteps}
-          processInfo={processInfo}
-        />
+        {!loginSuccess && <LoginForm login={handleLogin} errorMessage={loginError} />}
+        {loginSuccess && (
+          <NewNavigationProgressBar
+            general={generalSteps}
+            bridgeStep={bridgeStep}
+            perSpectrum={specificSteps}
+            processInfo={processInfo}
+          />
+        )}
+
       </main>
 
       <footer className="mt-40 mb-20 text-xs italic text-center text-muted-foreground">
@@ -99,12 +119,21 @@ export default function App() {
       </footer>
 
       <button
+        type="button"
         onClick={() =>
           trpc.crearUsuario.mutate({
-            name: Math.random().toString(), email: Math.random().toString() + "@gmail.com"
+            name: Math.random().toString(),
+            email: `${Math.random().toString()}@gmail.com`,
           }).then(resultado => console.log(resultado))}
-      >crear</button>
-      <button onClick={() => trpc.consulta.query().then(resultado => console.log(resultado))}>consulta</button>
+      >
+        crear
+      </button>
+      <button
+        type="button"
+        onClick={() => trpc.consulta.query().then(resultado => console.log(resultado))}
+      >
+        consulta
+      </button>
     </div>
   )
 }
