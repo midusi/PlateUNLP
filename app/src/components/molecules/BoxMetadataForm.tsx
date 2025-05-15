@@ -58,6 +58,9 @@ export const BoxMetadataForm = forwardRef((props: FormProps, ref) => {
             trigger()
             return isValid
         },
+        getIsValid: () => {
+            return isValid
+        }
     }))
 
     const inputContainerClassName = "flex flex-col w-full max-w-xs gap-1.5"

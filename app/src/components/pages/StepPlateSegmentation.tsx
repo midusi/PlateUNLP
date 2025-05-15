@@ -3,7 +3,7 @@ import type { StepProps } from "@/interfaces/StepProps"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
-import { useState } from "react"
+import { useImperativeHandle, useRef, useState } from "react"
 import { BBUI } from "../organisms/BBUI"
 import { Step } from "../organisms/BBList"
 import { BoxMetadata } from "../molecules/BoxMetadataForm"
@@ -14,6 +14,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     invertColorButton: true,
     step: Step.Plate,
   }
+  const bBUIRef = useRef<{ showErrors: () => void }>(null)
+
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
   )
@@ -23,6 +25,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
   ])
+  const [validForms, setValidForms] = useState<boolean>(false)
   const determineBBFunction = usePredictBBs(
     1024,
     "spectrum_detector.onnx",
@@ -67,39 +70,46 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   function onComplete() {
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
-    setProcessInfo(prev => ({
-      ...prev,
-      processingStatus: {
-        ...prev.processingStatus,
-        generalSteps: prev.processingStatus.generalSteps.map((step, i) => ({
-          ...step,
-          state: index === i
-            ? "COMPLETE"
-            : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
-        })),
-        specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
-          ...step,
-          states: boundingBoxes.map(_ => (
-            i === 0
-              ? "NECESSARY_CHANGES" as const
-              : "NOT_REACHED" as const
-          )),
-        })),
-      },
-    }))
-    setActualStep(index + 1)
+    if (validForms) {
+      setProcessInfo(prev => ({
+        ...prev,
+        processingStatus: {
+          ...prev.processingStatus,
+          generalSteps: prev.processingStatus.generalSteps.map((step, i) => ({
+            ...step,
+            state: index === i
+              ? "COMPLETE"
+              : (index + 1 === i
+                ? "NECESSARY_CHANGES"
+                : step.state),
+          })),
+          specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
+            ...step,
+            states: boundingBoxes.map(_ => (
+              i === 0
+                ? "NECESSARY_CHANGES" as const
+                : "NOT_REACHED" as const
+            )),
+          })),
+        },
+      }))
+      setActualStep(index + 1)
+    }
+    else {
+      bBUIRef.current?.showErrors()
+    }
   }
 
   return (
     <div className="flex flex-col w-full">
       <BBUI
+        ref={bBUIRef}
         file={processInfo.data.plate.scanImage}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         boxMetadatas={boxMetadatas}
         setBoxMetadatas={setBoxMetadatas}
+        setValidForms={setValidForms}
         onComplete={onComplete}
         saveBoundingBoxes={saveBoundingBoxes}
         saveImageLoading={saveImage}

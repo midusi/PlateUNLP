@@ -2,7 +2,7 @@ import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import clsx from "clsx"
 import { Check, ChevronDown, Edit2, Trash2 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Card } from "../atoms/card"
 import { BoxMetadata, BoxMetadataForm } from "../molecules/BoxMetadataForm"
 
@@ -11,6 +11,7 @@ interface BoxListProps {
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
+  setValidForms: React.Dispatch<boolean>
   selected: string | null
   setSelected: React.Dispatch<React.SetStateAction<string | null>>
   classes: BBClassesProps[]
@@ -24,7 +25,7 @@ interface BBListParameters {
   step: Step
 }
 
-export function BoxList({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxMetadatas, selected, setSelected, classes, parameters }: BoxListProps) {
+export const BoxList = forwardRef(({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxMetadatas, setValidForms, selected, setSelected, classes, parameters }: BoxListProps, ref) => {
   function handleSelect(id: string) {
     if (selected === id) {
       //setSelected(null)
@@ -33,6 +34,12 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxM
       setSelected(id)
     }
   }
+  const itemOfBoxListRef = useRef<{ showErrors: () => void }>(null)
+  useImperativeHandle(ref, () => ({
+    showErrors: () => {
+      itemOfBoxListRef.current?.showErrors()
+    }
+  }));
 
   return (
     <Card className="overflow-visible border-slate-200">
@@ -53,12 +60,15 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxM
           boundingBoxes.map((box, index) => (
             <ItemOfBoxList
               key={box.id}
+              ref={itemOfBoxListRef}
               box={box}
               boxIndex={index}
               setBoundingBoxes={setBoundingBoxes}
               boxMetadatas={boxMetadatas}
               setBoxMetadatas={setBoxMetadatas}
+              setValidForms={setValidForms}
               isSelected={box.id === selected}
+              setBoxSelected={setSelected}
               onSelect={handleSelect}
               classes={classes}
               parameters={parameters}
@@ -68,7 +78,7 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxM
       </div>
     </Card>
   )
-}
+})
 
 interface ItemOfBoxListProps {
   box: BoundingBox
@@ -76,27 +86,31 @@ interface ItemOfBoxListProps {
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
+  setValidForms: React.Dispatch<boolean>
   isSelected: boolean
   onSelect: (id: string) => void
+  setBoxSelected: React.Dispatch<React.SetStateAction<string | null>>
   classes: BBClassesProps[]
   onDelete?: (id: string) => void
   parameters: BBListParameters
 }
 
-const boxMetadatasDictionary: { [id: number | string]: BoxMetadata } = {}
+const boxMetadatasIsValid: { [id: number | string]: boolean } = {}
 
-function ItemOfBoxList({
+const ItemOfBoxList = forwardRef(({
   box,
   boxIndex,
   setBoundingBoxes,
   boxMetadatas,
   setBoxMetadatas,
+  setValidForms,
   isSelected,
   onSelect,
+  setBoxSelected,
   classes,
   onDelete,
   parameters
-}: ItemOfBoxListProps) {
+}: ItemOfBoxListProps, ref) => {
   const { id, name, class_info } = box
   const [selected, setSelected] = useState<BBClassesProps>(class_info)
   const [isSelectOpen, setIsSelectOpen] = useState(false)
@@ -138,13 +152,30 @@ function ItemOfBoxList({
     }
     setIsSelectOpen(false)
   }
-  const boxMetadataFormRef = useRef<{ setValues: (spectrumMetadata: BoxMetadata) => void, resetValues: () => void, getValues: () => BoxMetadata, validate: () => void }>(null)
-  if (id in boxMetadatasDictionary) {
-    boxMetadataFormRef.current?.setValues(boxMetadatasDictionary[id])
-  }
+  const boxMetadataFormRef = useRef<{ setValues: (spectrumMetadata: BoxMetadata) => void, resetValues: () => void, getValues: () => BoxMetadata, validate: () => boolean, getIsValid: () => boolean }>(null)
+
+  useImperativeHandle(ref, () => ({
+    showErrors: () => {
+      if (boxMetadataFormRef.current?.validate()) {
+        for (const key in boxMetadatasIsValid) {
+          const isValid = boxMetadatasIsValid[key];
+          if (!isValid) {
+            console.log(key)
+            setBoxSelected(key)
+            break
+          }
+        }
+      }
+    }
+  }));
+
   const handleFormChange = (data: BoxMetadata) => {
     if (Object.keys(data).length > 0) {
-      boxMetadatasDictionary[id] = data
+      console.log(boxMetadataFormRef.current?.getValues())
+      const metadataIsValid = boxMetadataFormRef.current?.getIsValid()
+      if (metadataIsValid != undefined)
+        boxMetadatasIsValid[id] = metadataIsValid
+      setValidForms(Object.values(boxMetadatasIsValid).every(value => value === true))
       boxMetadatas[boxIndex] = data
       setBoxMetadatas(boxMetadatas)
 
@@ -282,7 +313,7 @@ function ItemOfBoxList({
       </div>
     </div>
   )
-}
+})
 
 interface InputWhitTempProps {
   value: string

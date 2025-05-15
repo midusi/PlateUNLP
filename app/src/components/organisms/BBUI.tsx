@@ -5,7 +5,7 @@ import { cropImages } from "@/lib/cropImage"
 import clsx from "clsx"
 import { Bot, Palette, RotateCw, Square, Trash2 } from "lucide-react"
 import { nanoid } from "nanoid"
-import { useCallback, useState } from "react"
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react"
 import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
 import { BoxList, Step } from "./BBList"
@@ -19,6 +19,7 @@ interface BBUIProps {
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: Dispatch<SetStateAction<BoxMetadata[]>>
+  setValidForms: Dispatch<boolean>,
   onComplete: () => void
   saveBoundingBoxes: (boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) => void
   saveImageLoading?: (src: string) => void
@@ -33,24 +34,33 @@ interface BBUIParameters {
   step: Step
 }
 
-export function BBUI({
+export const BBUI = forwardRef(({
   file = null,
   boundingBoxes,
   setBoundingBoxes,
   boxMetadatas,
   setBoxMetadatas,
+  setValidForms,
   onComplete,
   saveBoundingBoxes,
   saveImageLoading,
   classes,
   determineBBFunction,
   parameters,
-}: BBUIProps) {
+}: BBUIProps, ref) => {
   const [image, setImage] = useState<null | string>(file)
   const [bgWhite, setBgWhite] = useState(true)
   const [rotation, setRotation] = useState(0)
   const [isDrawingMode, setIsDrawingMode] = useState(false)
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null)
+
+  const bBListRef = useRef<{ showErrors: () => void }>(null)
+  useImperativeHandle(ref, () => ({
+    showErrors: () => {
+      bBListRef.current?.showErrors()
+    }
+  }));
+
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedBoxId) {
@@ -184,10 +194,12 @@ export function BBUI({
         </div>
       </Card>
       <BoxList
+        ref={bBListRef}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         boxMetadatas={boxMetadatas}
         setBoxMetadatas={setBoxMetadatas}
+        setValidForms={setValidForms}
         selected={selectedBoxId}
         setSelected={setSelectedBoxId}
         classes={classes}
@@ -216,4 +228,4 @@ export function BBUI({
       </div>
     </>
   )
-}
+})
