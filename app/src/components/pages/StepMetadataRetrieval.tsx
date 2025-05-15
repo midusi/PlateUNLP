@@ -1,7 +1,7 @@
 import type { StepProps } from "@/interfaces/StepProps"
-import type { SpectrumMetadata } from "../molecules/SpectrumMetadataForm"
+import type { SpectrumMetadata, SpectrumMetadataIcons } from "../molecules/SpectrumMetadataForm"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Button } from "../atoms/button"
 import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
 import { BoxMetadataReadOnly } from "../molecules/BoxMetadataReadOnly"
@@ -48,7 +48,9 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
     }))
     setActualStep(index + 1)
   }
-  const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, resetValues: () => void, getValues: () => SpectrumMetadata, validate: () => void }>(null)
+  const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, resetValues: () => void, getValues: () => SpectrumMetadata, validate: () => void, setIcons: (icons: SpectrumMetadataIcons) => void, getIcons: () => SpectrumMetadataIcons }>(null)
+
+
   return (
     <>
 
@@ -72,7 +74,28 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
           </Button>
 
           <Button
-            onClick={() => { }}
+            onClick={() => {
+              spectrumMetadataFormRef.current?.setIcons({
+                MAIN_ID: { icon: "simbad", className: "w-32 h-8" },
+                TIME_OBS: { icon: "simbad", className: "w-32 h-8" },
+                ST: { icon: "simbad", className: "w-32 h-8" },
+                HA: { icon: "simbad", className: "w-32 h-8" },
+                RA: { icon: "simbad", className: "w-32 h-8" },
+                DEC: { icon: "simbad", className: "w-32 h-8" },
+                GAIN: { icon: "simbad", className: "w-32 h-8" },
+                RA2000: { icon: "simbad", className: "w-32 h-8" },
+                DEC2000: { icon: "simbad", className: "w-32 h-8" },
+                RA1950: { icon: "simbad", className: "w-32 h-8" },
+                DEC1950: { icon: "simbad", className: "w-32 h-8" },
+                EXPTIME: { icon: "calculator", className: "w-8 h-8" },
+                DETECTOR: { icon: "calculator", className: "w-8 h-8" },
+                IMAGETYP: { icon: "calculator", className: "w-8 h-8" },
+                SPTYPE: { icon: "calculator", className: "w-8 h-8" },
+                JD: { icon: "simbad", className: "w-32 h-8" },
+                EQUINOX: { icon: "simbad", className: "w-32 h-8" },
+                AIRMASS: { icon: "simbad", className: "w-32 h-8" }
+              })
+            }}
             className=" bg-blue-500"
           >
             Calculate Metadata
