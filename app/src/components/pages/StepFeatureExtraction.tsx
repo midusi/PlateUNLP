@@ -1,7 +1,10 @@
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
+import { BBClasses, classesSpectrumPartSegmentation } from "@/enums/BBClasses"
+import { processSpectraPool } from "@/hooks/process-spectra-pool"
 import { useGlobalStore } from "@/hooks/use-global-store"
+import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { cropImages } from "@/lib/cropImage"
 import { findPlateau, findXspacedPoints, getPointsInRect, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
 import { extremePoints } from "@/lib/trigonometry"
@@ -19,6 +22,23 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
   const segmentWidth = 60
   const useSpline = false
   const reuseScienceFunction = true
+
+  /** Extrae los expectros 1D de un conjunto de imagenes y guarda su información como imagenes */
+  const determineBBFunction = usePredictBBs(
+    1088,
+    "spectrum_part_segmentator.onnx",
+    classesSpectrumPartSegmentation,
+    true,
+  )
+  useEffect(() => {
+    processSpectraPool(determineBBFunction)
+      .then((arr) => {
+        console.log("Proceso completado con éxito", arr)
+      })
+      .catch((err) => {
+        console.error("Error al procesar espectros:", err)
+      })
+  }, [determineBBFunction])
 
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
