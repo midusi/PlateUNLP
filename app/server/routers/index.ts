@@ -1,10 +1,9 @@
-import { and, eq } from "drizzle-orm"
-import { nanoid } from "nanoid"
+import { eq } from "drizzle-orm"
 import { z } from "zod"
+import { verifyPassword } from "../auth/password"
 import { db, seedUsers } from "../db"
 import * as s from "../db/schema"
 import { publicProcedure, router } from "../trpc"
-import { verifyPassword } from "../utils/hash"
 
 // Llamar a la función de semilla
 seedUsers()
@@ -54,7 +53,7 @@ export const appRouter = router({
         return false
       }
 
-      const passwordMatch = await verifyPassword(Password, user.hashedPassword)
+      const passwordMatch = await verifyPassword(user.hashedPassword, Password)
 
       if (!passwordMatch) {
         // Contraseña incorrecta
