@@ -3,8 +3,8 @@ import type { SpectrumMetadata, SpectrumMetadataIcons } from "../molecules/Spect
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { useEffect, useRef } from "react"
 import { Button } from "../atoms/button"
-import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
 import { BoxMetadataReadOnly } from "../molecules/BoxMetadataReadOnly"
+import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
 
 export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: StepProps) {
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
@@ -25,31 +25,30 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
           (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
             ? {
-              ...step,
-              states: step.states!.map((state, j) => (
-                j === selectedSpectrum
-                  ? "COMPLETE" as const
-                  : state
-              )),
-            }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-              ? {
                 ...step,
                 states: step.states!.map((state, j) => (
                   j === selectedSpectrum
-                    ? "NECESSARY_CHANGES" as const
+                    ? "COMPLETE" as const
                     : state
                 )),
               }
-              : step // Cualquier otra etapa mantiene su informacion
-            )
+            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+                ? {
+                    ...step,
+                    states: step.states!.map((state, j) => (
+                      j === selectedSpectrum
+                        ? "NECESSARY_CHANGES" as const
+                        : state
+                    )),
+                  }
+                : step // Cualquier otra etapa mantiene su informacion
+              )
         )),
       },
     }))
     setActualStep(index + 1)
   }
   const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, resetValues: () => void, getValues: () => SpectrumMetadata, validate: () => void, setIcons: (icons: SpectrumMetadataIcons) => void, getIcons: () => SpectrumMetadataIcons }>(null)
-
 
   return (
     <>
@@ -93,7 +92,7 @@ export function StepMetadataRetrieval({ index, processInfo, setProcessInfo }: St
                 SPTYPE: { icon: "calculator", className: "w-8 h-8" },
                 JD: { icon: "simbad", className: "w-32 h-8" },
                 EQUINOX: { icon: "simbad", className: "w-32 h-8" },
-                AIRMASS: { icon: "simbad", className: "w-32 h-8" }
+                AIRMASS: { icon: "simbad", className: "w-32 h-8" },
               })
             }}
             className=" bg-blue-500"

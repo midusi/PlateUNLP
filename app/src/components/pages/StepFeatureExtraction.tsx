@@ -25,11 +25,10 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.selectedSpectrum,
   ])
 
-
   const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>({
     science: "/forTest/Test1_Science1_v2.png",
     lamp1: "/forTest/Test1_Lamp1_v2.png",
-    lamp2: "/forTest/Test1_Lamp2_v2.png"
+    lamp2: "/forTest/Test1_Lamp2_v2.png",
   })
   // const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
   // useEffect(() => {
@@ -83,7 +82,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     urls?.lamp1,
     urls?.lamp2,
     useSpline,
-    reuseScienceFunction
+    reuseScienceFunction,
   )
 
   function onComplete() {
@@ -99,23 +98,23 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         spectrums: prev.data.spectrums.map((spectrum, idx) => (
           (idx === selectedSpectrum) // ¿Es el espectro seleccionado?
             ? { // Si => Actualiza la información de los espectros extraidos con lo que calculo.
-              ...spectrum,
-              parts: {
-                ...spectrum.parts,
-                science: {
-                  ...spectrum.parts.science,
-                  extractedSpectrum: scienceTransversalAvgs!,
+                ...spectrum,
+                parts: {
+                  ...spectrum.parts,
+                  science: {
+                    ...spectrum.parts.science,
+                    extractedSpectrum: scienceTransversalAvgs!,
+                  },
+                  lamp1: {
+                    ...spectrum.parts.lamp1,
+                    extractedSpectrum: lamp1TransversalAvgs!,
+                  },
+                  lamp2: {
+                    ...spectrum.parts.lamp2,
+                    extractedSpectrum: lamp2TransversalAvgs!,
+                  },
                 },
-                lamp1: {
-                  ...spectrum.parts.lamp1,
-                  extractedSpectrum: lamp1TransversalAvgs!,
-                },
-                lamp2: {
-                  ...spectrum.parts.lamp2,
-                  extractedSpectrum: lamp2TransversalAvgs!,
-                },
-              },
-            }
+              }
             : spectrum // No => mantener datos.
         )),
       },
@@ -125,24 +124,24 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
           (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
             ? {
-              ...step,
-              states: step.states!.map((state, j) => (
-                j === selectedSpectrum
-                  ? "COMPLETE" as const
-                  : state
-              )),
-            }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
-              ? {
                 ...step,
                 states: step.states!.map((state, j) => (
                   j === selectedSpectrum
-                    ? "NECESSARY_CHANGES" as const
+                    ? "COMPLETE" as const
                     : state
                 )),
               }
-              : step // Cualquier otra etapa mantiene su informacion
-            )
+            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+                ? {
+                    ...step,
+                    states: step.states!.map((state, j) => (
+                      j === selectedSpectrum
+                        ? "NECESSARY_CHANGES" as const
+                        : state
+                    )),
+                  }
+                : step // Cualquier otra etapa mantiene su informacion
+              )
         )),
       },
     }))
@@ -292,7 +291,7 @@ function useExtractFeatures(
   lamp1Url?: string,
   lamp2Url?: string,
   useSpline?: boolean,
-  reuseScienceFunction?: boolean
+  reuseScienceFunction?: boolean,
 ): useExtractFeaturesResponse {
   /** Resultados a devolver */
   const [response, setResponse] = useState<useExtractFeaturesResponse>({
@@ -394,7 +393,8 @@ function useExtractFeatures(
           scienceMediasPoints.map(p => p.x),
           scienceMediasPoints.map(p => p.y),
         )
-      } else { // Aproximación lineal
+      }
+      else { // Aproximación lineal
         interpolated = linearRegressionWhitDerived(
           scienceMediasPoints.map(p => p.x),
           scienceMediasPoints.map(p => p.y),
@@ -471,10 +471,10 @@ function useExtractFeatures(
             mediaFunction: bag.scienceFunction!,
           },
           lamp: lamp1,
-          reuseScienceFunction: reuseScienceFunction,
-          useSpline: useSpline,
-          countCheckpoints: countCheckpoints,
-          segmentWidth: segmentWidth,
+          reuseScienceFunction,
+          useSpline,
+          countCheckpoints,
+          segmentWidth,
         })
 
         // Actualizar salida del metodo con informacion de lamp1
@@ -500,10 +500,10 @@ function useExtractFeatures(
               mediaFunction: bag.scienceFunction!,
             },
             lamp: lamp2,
-            reuseScienceFunction: reuseScienceFunction,
-            useSpline: useSpline,
-            countCheckpoints: countCheckpoints,
-            segmentWidth: segmentWidth,
+            reuseScienceFunction,
+            useSpline,
+            countCheckpoints,
+            segmentWidth,
           })
 
           // Actualizar salida del metodo con informacion de lamp2
@@ -526,7 +526,7 @@ function useExtractFeatures(
     }).catch((err) => {
       console.error("Error loading Image Data:", err)
     })
-  }, [countCheckpoints, lamp1Url, lamp2Url, scienceUrl, segmentWidth])
+  }, [countCheckpoints, lamp1Url, lamp2Url, reuseScienceFunction, scienceUrl, segmentWidth, useSpline])
 
   return response
 }
@@ -546,9 +546,9 @@ interface extractLampDataProps {
     height: number
   }
   reuseScienceFunction?: boolean
-  useSpline?: boolean,
+  useSpline?: boolean
   countCheckpoints?: number
-  segmentWidth?: number,
+  segmentWidth?: number
 }
 
 interface extractLampDataResponse {
@@ -588,7 +588,8 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
       x: round(x * scaleLamp.x),
       y: y * scaleLamp.y,
     }))
-  } else { // Infiere los suyos.
+  }
+  else { // Infiere los suyos.
     const lampPoints = findXspacedPoints(science.width, countCheckpoints!)
 
     const segmentsData = obtainImageSegments(
@@ -620,13 +621,15 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
     mediaFunction = (x: number) => (
       science.mediaFunction!(round(x * scaleLamp.x)) * scaleLamp.y
     )
-  } else { // Infiere la suya en base a sus medias points
+  }
+  else { // Infiere la suya en base a sus medias points
     if (useSpline) { // Aproximación spline
       mediaFunction = splineCuadratic(
         response.mediasPoints.map(p => p.x),
         response.mediasPoints.map(p => p.y),
       ).funct
-    } else { // Aproximación lineal
+    }
+    else { // Aproximación lineal
       mediaFunction = linearRegressionWhitDerived(
         response.mediasPoints.map(p => p.x),
         response.mediasPoints.map(p => p.y),
