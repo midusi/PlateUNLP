@@ -1,22 +1,14 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { Point } from "@/interfaces/Point"
 import type { StepProps } from "@/interfaces/StepProps"
-import { BBClasses, classesSpectrumPartSegmentation } from "@/enums/BBClasses"
-import { processSpectraPool } from "@/lib/process-spectra-pool"
+import { classesSpectrumPartSegmentation } from "@/enums/BBClasses"
+import { useProcessSpectraPool } from "@/lib/use-process-spectra-pool"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useExtractFeatures } from "@/hooks/use-extract-features"
 import { cropImages } from "@/lib/cropImage"
-import { findPlateau, findXspacedPoints, getPointsInRect, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
-import { extremePoints } from "@/lib/trigonometry"
-import { linearRegressionWhitDerived, splineCuadratic } from "@/lib/utils"
-import { curveStep } from "@visx/curve"
-import { ParentSize } from "@visx/responsive"
-import { AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
-import { max, mean, min, round } from "mathjs"
 import { useEffect, useState } from "react"
 import { Button } from "../atoms/button"
 import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
+import { SimpleFunctionXY } from "../molecules/SimpleFunctionXY"
 
 
 export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
@@ -31,16 +23,9 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     "spectrum_part_segmentator.onnx",
     classesSpectrumPartSegmentation,
     true,
+    0.6
   )
-  useEffect(() => {
-    processSpectraPool(determineBBFunction)
-      .then((arr) => {
-        console.log("Proceso completado con éxito", arr)
-      })
-      .catch((err) => {
-        console.error("Error al procesar espectros:", err)
-      })
-  }, [determineBBFunction])
+  useProcessSpectraPool(determineBBFunction)
 
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
