@@ -108,6 +108,19 @@ Se dispone de los siguientes scripts: `pm2-start`, `pm2-stop`, `pm2-restart`,`pm
 
 Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráfica del software.
 
+```
+cd backend
+python -m venv venv
+source venv/Scripts/activate # gitbash
+pip install -r requirements.txt
+pm2 start cmd --name backend -- /c "python gateway.wsgi"
+
+cd frontend
+npm install
+npm run build
+pm2 start cmd --name frontend -- /c "npm run start"
+
+```
 
 ## Links de interés
 - [proyecto de Recuperación del Trabajo Observacional Histórico (ReTrOH)](https://retroh.fcaglp.unlp.edu.ar/)
