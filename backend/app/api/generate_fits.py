@@ -143,7 +143,8 @@ def api_generate_fits():
         if invert_image:
             crop_img = 255 - crop_img
 
-        file_output_name = f'{img_name}_{data["MAIN-ID"]}_{data["SUFFIX"]}'
+        pre_file_output_name = f'{img_name}_{data["MAIN-ID"]}' + (f'_{data["SUFFIX"]}' if data["SUFFIX"] else '')
+        file_output_name = pre_file_output_name.replace(" ", "")
         # saved image crop
         cv2.imwrite(os.path.join(
             image_output_dir, f'{file_output_name}.png'), crop_img)

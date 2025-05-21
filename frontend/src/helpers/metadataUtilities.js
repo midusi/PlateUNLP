@@ -69,111 +69,89 @@ function getObservat() {
     'lno: Langkawi National Observatory']
 }
 
-function getObserver(){
-  if(localStorage.getItem("observers")){
-    return JSON.parse(localStorage.getItem("observers"));
-  }
+function getObserver() {
+  if (localStorage.getItem('observers'))
+    return JSON.parse(localStorage.getItem('observers'))
 }
 
-function getObserverDef(){
-  if(localStorage.getItem("observerDefault")){
-    return JSON.parse(localStorage.getItem("observerDefault"));
-  }
-  else{
-    return ""
-  }
+function getObserverDef() {
+  if (localStorage.getItem('observerDefault'))
+    return JSON.parse(localStorage.getItem('observerDefault'))
+
+  return ''
 }
 
-function getImageTyp(){
-  if(localStorage.getItem("imageTypes")){
-    return JSON.parse(localStorage.getItem("imageTypes"));
-  }
+function getImageTyp() {
+  if (localStorage.getItem('imageTypes'))
+    return JSON.parse(localStorage.getItem('imageTypes'))
 }
 
-function getImageTypDef(){
-  if(localStorage.getItem("imageTypeDefault")){
-    return JSON.parse(localStorage.getItem("imageTypeDefault"));
-  }
-  else{
-    return ""
-  }
+function getImageTypDef() {
+  if (localStorage.getItem('imageTypeDefault'))
+    return JSON.parse(localStorage.getItem('imageTypeDefault'))
+
+  return ''
 }
 
-function getDigitali(){
-  if(localStorage.getItem("digitalis")){
-    return JSON.parse(localStorage.getItem("digitalis"));
-  }
+function getDigitali() {
+  if (localStorage.getItem('digitalis'))
+    return JSON.parse(localStorage.getItem('digitalis'))
 }
 
-function getDigitaliDef(){
-  if(localStorage.getItem("digitaliDefault")){
-    return JSON.parse(localStorage.getItem("digitaliDefault"));
-  }
-  else{
-    return ""
-  }
+function getDigitaliDef() {
+  if (localStorage.getItem('digitaliDefault'))
+    return JSON.parse(localStorage.getItem('digitaliDefault'))
+
+  return ''
 }
 
-function getScanner(){
-  if(localStorage.getItem("scanners")){
-    return JSON.parse(localStorage.getItem("scanners"));
-  }
+function getScanner() {
+  if (localStorage.getItem('scanners'))
+    return JSON.parse(localStorage.getItem('scanners'))
 }
 
-function getScannerDef(){
-  if(localStorage.getItem("scannerDefault")){
-    return JSON.parse(localStorage.getItem("scannerDefault"));
-  }
-  else{
-    return ""
-  }
+function getScannerDef() {
+  if (localStorage.getItem('scannerDefault'))
+    return JSON.parse(localStorage.getItem('scannerDefault'))
+
+  return ''
 }
 
-function getScanres(){
-  if(localStorage.getItem("scanress")){
-    return JSON.parse(localStorage.getItem("scanress"));
-  }
+function getScanres() {
+  if (localStorage.getItem('scanress'))
+    return JSON.parse(localStorage.getItem('scanress'))
 }
 
-function getScanresDef(){
-  if(localStorage.getItem("scanresDefault")){
-    return JSON.parse(localStorage.getItem("scanresDefault"));
-  }
-  else{
-    return ""
-  }
+function getScanresDef() {
+  if (localStorage.getItem('scanresDefault'))
+    return JSON.parse(localStorage.getItem('scanresDefault'))
+
+  return ''
 }
 
-function getScancol(){
-  if(localStorage.getItem("scancols")){
-    return JSON.parse(localStorage.getItem("scancols"));
-  }
+function getScancol() {
+  if (localStorage.getItem('scancols'))
+    return JSON.parse(localStorage.getItem('scancols'))
 }
 
-function getScancolDef(){
-  if(localStorage.getItem("scancolDefault")){
-    return JSON.parse(localStorage.getItem("scancolDefault"));
-  }
-  else{
-    return ""
-  }
+function getScancolDef() {
+  if (localStorage.getItem('scancolDefault'))
+    return JSON.parse(localStorage.getItem('scancolDefault'))
+
+  return ''
 }
 
-function getSoftware(){
-  if(localStorage.getItem("softwares")){
-    return JSON.parse(localStorage.getItem("softwares"));
-  }
+function getSoftware() {
+  if (localStorage.getItem('softwares'))
+    return JSON.parse(localStorage.getItem('softwares'))
 }
 
-function getSoftwareDef(){
-  if(localStorage.getItem("softwareDefault")){
-    return JSON.parse(localStorage.getItem("softwareDefault"));
-  }
-  else{
-    return ""
-  }
-}
+function getSoftwareDef() {
+  if (localStorage.getItem('softwareDefault'))
+    return JSON.parse(localStorage.getItem('softwareDefault'))
 
+  return ''
+}
 
 function getMetadataFields() {
   return {
@@ -322,7 +300,7 @@ function getMetadataFields() {
       info: 'Air mass measure',
       required: false,
       remote: true,
-      global: false,
+      global: false
     },
     jd: {
       label: 'JD',
@@ -348,7 +326,7 @@ function getMetadataFields() {
       required: true,
       global: true
     },
-    /*gain: {
+    /* gain: {
       label: 'GAIN',
       type: 'text',
       info: 'Gain, electrons per adu',
@@ -359,7 +337,7 @@ function getMetadataFields() {
       type: 'text',
       info: 'Read noise',
       required: false
-    },*/
+    }, */
     // selector
     imageTyp: {
       label: 'IMAGETYP',
@@ -435,12 +413,13 @@ function getMetadataFields() {
   }
 }
 
-export { 
-  getMetadataFields, 
-  getDigitaliDef, 
-  getImageTypDef, 
-  getObserverDef, 
-  getScannerDef, 
-  getScanresDef, 
-  getScancolDef, 
-  getSoftwareDef}
+export {
+  getMetadataFields,
+  getDigitaliDef,
+  getImageTypDef,
+  getObserverDef,
+  getScannerDef,
+  getScanresDef,
+  getScancolDef,
+  getSoftwareDef
+}
