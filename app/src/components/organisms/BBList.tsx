@@ -4,19 +4,30 @@ import clsx from "clsx"
 import { Check, ChevronDown, Edit2, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Card } from "../atoms/card"
+import { BoxMetadata, BoxMetadataForm } from "../molecules/BoxMetadataForm"
 
 interface BoxListProps {
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+  boxMetadatas: BoxMetadata[]
+  setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
   selected: string | null
   setSelected: React.Dispatch<React.SetStateAction<string | null>>
   classes: BBClassesProps[]
+  parameters: BBListParameters
+}
+export enum Step {
+  Plate,
+  Spectrum
+}
+interface BBListParameters {
+  step: Step
 }
 
-export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes }: BoxListProps) {
+export function BoxList({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxMetadatas, selected, setSelected, classes, parameters }: BoxListProps) {
   function handleSelect(id: string) {
     if (selected === id) {
-      setSelected(null)
+      //setSelected(null)
     }
     else {
       setSelected(id)
@@ -39,14 +50,18 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected
       </div>
       <div className="divide-y divide-slate-100">
         {boundingBoxes.length > 0 && (
-          boundingBoxes.map(box => (
+          boundingBoxes.map((box, index) => (
             <ItemOfBoxList
               key={box.id}
               box={box}
+              boxIndex={index}
               setBoundingBoxes={setBoundingBoxes}
+              boxMetadatas={boxMetadatas}
+              setBoxMetadatas={setBoxMetadatas}
               isSelected={box.id === selected}
               onSelect={handleSelect}
               classes={classes}
+              parameters={parameters}
             />
           ))
         )}
@@ -57,25 +72,34 @@ export function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected
 
 interface ItemOfBoxListProps {
   box: BoundingBox
+  boxIndex: number
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+  boxMetadatas: BoxMetadata[]
+  setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
   isSelected: boolean
   onSelect: (id: string) => void
   classes: BBClassesProps[]
   onDelete?: (id: string) => void
+  parameters: BBListParameters
 }
+
+const boxMetadatasDictionary: { [id: number | string]: BoxMetadata } = {}
 
 function ItemOfBoxList({
   box,
+  boxIndex,
   setBoundingBoxes,
+  boxMetadatas,
+  setBoxMetadatas,
   isSelected,
   onSelect,
   classes,
   onDelete,
+  parameters
 }: ItemOfBoxListProps) {
   const { id, name, class_info } = box
   const [selected, setSelected] = useState<BBClassesProps>(class_info)
   const [isSelectOpen, setIsSelectOpen] = useState(false)
-
   useEffect(() => {
     if (!isSelected) {
       setIsSelectOpen(false)
@@ -114,12 +138,25 @@ function ItemOfBoxList({
     }
     setIsSelectOpen(false)
   }
+  const boxMetadataFormRef = useRef<{ setValues: (spectrumMetadata: BoxMetadata) => void, resetValues: () => void, getValues: () => BoxMetadata, validate: () => void }>(null)
+  if (id in boxMetadatasDictionary) {
+    boxMetadataFormRef.current?.setValues(boxMetadatasDictionary[id])
+  }
+  const handleFormChange = (data: BoxMetadata) => {
+    if (Object.keys(data).length > 0) {
+      boxMetadatasDictionary[id] = data
+      boxMetadatas[boxIndex] = data
+      setBoxMetadatas(boxMetadatas)
+
+    }
+    // Acá podés hacer lo que quieras con los datos del formulario
+  }
 
   return (
     <div
       key={id}
       className={clsx(
-        "flex items-center p-3 transition-colors cursor-pointer",
+        "flex  p-3 transition-colors cursor-pointer",
         isSelected
           ? "bg-blue-50 border-l-2 border-l-blue-500"
           : "bg-white hover:bg-slate-50 border-l-2 border-l-transparent",
@@ -138,7 +175,7 @@ function ItemOfBoxList({
         {id.toString().slice(0, 2)}
       </div>
 
-      <div className="flex-grow min-w-0">
+      <div className="flex flex-col flex-grow min-w-0">
         <div className="flex items-center">
           <InputWhitTemp
             value={name}
@@ -148,6 +185,8 @@ function ItemOfBoxList({
           />
           <Edit2 className="w-3 h-3 text-slate-400 ml-1" />
         </div>
+
+
 
         <div className="flex items-center mt-1 text-xs text-slate-500">
           <span className="mr-2">
@@ -160,10 +199,19 @@ function ItemOfBoxList({
             {Math.round(box.height)}
             px
           </span>
+
+        </div>
+        {isSelected && (
+          <hr />
+        )}
+        <div>
+          {isSelected && parameters.step == Step.Plate && (
+            <BoxMetadataForm ref={boxMetadataFormRef} onChange={handleFormChange} />
+          )}
         </div>
       </div>
 
-      <div className="flex items-center ml-2 space-x-3">
+      <div className="flex ml-2 space-x-3">
         <div className="relative">
           <button
             type="button"
@@ -221,14 +269,15 @@ function ItemOfBoxList({
             </div>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="p-1.5 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <div>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="p-1.5 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
 
       </div>
     </div>
@@ -241,6 +290,8 @@ interface InputWhitTempProps {
   className: string
   onClick: (e: React.MouseEvent) => void
 }
+
+
 
 function InputWhitTemp({ value, onEnter, className, onClick }: InputWhitTempProps) {
   const [isEditing, setIsEditing] = useState(false)
@@ -267,32 +318,32 @@ function InputWhitTemp({ value, onEnter, className, onClick }: InputWhitTempProp
 
   return isEditing
     ? (
-        <input
-          ref={inputRef}
-          className={clsx(
-            "bg-white border border-blue-300",
-            "rounded px-2 py-1 outline-none",
-            "focus:ring-2 focus:ring-blue-200",
-            className,
-          )}
-          value={temp}
-          onChange={e => setTemp(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={() => {
-            setIsEditing(false)
-            onEnter(temp)
-          }}
-        />
-      )
+      <input
+        ref={inputRef}
+        className={clsx(
+          "bg-white border border-blue-300",
+          "rounded px-2 py-1 outline-none",
+          "focus:ring-2 focus:ring-blue-200",
+          className,
+        )}
+        value={temp}
+        onChange={e => setTemp(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => {
+          setIsEditing(false)
+          onEnter(temp)
+        }}
+      />
+    )
     : (
-        <div
-          className={clsx("cursor-text", className)}
-          onClick={(e) => {
-            setIsEditing(true)
-            onClick(e)
-          }}
-        >
-          {temp}
-        </div>
-      )
+      <div
+        className={clsx("cursor-text", className)}
+        onClick={(e) => {
+          setIsEditing(true)
+          onClick(e)
+        }}
+      >
+        {temp}
+      </div>
+    )
 }

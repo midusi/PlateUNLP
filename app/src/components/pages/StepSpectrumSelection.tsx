@@ -54,15 +54,15 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                   <td className="border px-4 py-2">
                     {complete
                       ? (
-                          <div className="text-green-400">
-                            Complete
-                          </div>
-                        )
+                        <div className="text-green-400">
+                          Complete
+                        </div>
+                      )
                       : (
-                          <div className="text-orange-400">
-                            Pending
-                          </div>
-                        )}
+                        <div className="text-orange-400">
+                          Pending
+                        </div>
+                      )}
                   </td>
                   <td className="border-none px-4 py-2 text-center">
                     <Button
@@ -71,8 +71,24 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                         "p-2",
                         "bg-blue-500 text-white rounded hover:bg-blue-600 transition",
                       )}
-                      onClick={() => { }}
-                      disabled={!complete}
+                      onClick={() => {
+                        const sharedMetadata = processInfo.data.plate.sharedMetadata
+                        const scanImage = processInfo.data.plate.scanImage
+                        const data = {
+                          ...processInfo.data.spectrums[index],
+                          sharedMetadata,
+                          scanImage
+                        };
+                        const jsonString = JSON.stringify(data, null, 2);
+                        const blob = new Blob([jsonString], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `plate_${index}.json`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                      }}
+
                     >
                       <ArrowDownTrayIcon className="w-5 h-5" />
                       <Tooltip

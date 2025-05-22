@@ -1,22 +1,34 @@
-import type { EmpiricalSpectrumPoint } from "@/components/molecules/EmpiricalSpectrum"
 import type { StepProps } from "@/interfaces/StepProps"
-import { CardTitle } from "@/components/atoms/card"
 import { ContinueButton } from "@/components/molecules/ContinueButton"
+import { EmpiricalSpectrum } from "@/components/molecules/EmpiricalSpectrum"
 import { ReferenceLampRangeUI } from "@/components/molecules/ReferenceLampRangeUI"
 import { ReferenceLampSpectrum } from "@/components/molecules/ReferenceLampSpectrum"
 import { FitsLoader } from "@/components/organisms/FitsLoader"
 import { InferenceForm } from "@/components/organisms/InferenceForm"
 import { ReferenceLampForm } from "@/components/organisms/ReferenceLampForm"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
 
 export function StepCalibration({ index, processInfo, setProcessInfo }: StepProps) {
-  const [scienceSpectrumData, setScienceSpectrumData] = useState<EmpiricalSpectrumPoint[] | null>(null)
   const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
     s.setActualStep,
     s.selectedSpectrum,
   ])
+  const scienceSpectrum = processInfo.data.spectrums[selectedSpectrum!].parts.science.extractedSpectrum!
+    .map((y, idx) => ({
+      pixel: idx,
+      intensity: y,
+    }))
+  const lamp1Spectrum = processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.extractedSpectrum!
+    .map((y, idx) => ({
+      pixel: idx,
+      intensity: y,
+    }))
+  const lamp2Spectrum = processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.extractedSpectrum!
+    .map((y, idx) => ({
+      pixel: idx,
+      intensity: y,
+    }))
 
   function onComplete() {
     /// AGREGAR GUARDADO DE DATOS EXTRAIDOS
@@ -56,54 +68,72 @@ export function StepCalibration({ index, processInfo, setProcessInfo }: StepProp
   }
 
   return (
-    <>
+    <div className="w-full flex flex-col">
       <ResizablePanes
         vertical
         uniqueId="uniqueId"
         resizerSize={5}
-        resizerClass="w-full bg-gradient-to-t from-sky-300 to-sky-200 border-2 border-gray-300 rounded-md flex justify-center items-center"
+        resizerClass=" bg-gradient-to-t bg-green border border-gray-300  flex justify-center items-center"
       >
-        <Pane id="P0" size={30} minSize={20} className="bg-gray-200 p-4">
-          <ReferenceLampForm />
-          <InferenceForm />
-        </Pane>
-        <Pane id="P1" size={70} minSize={20} className="bg-gray-100 p-4">
-          <CardTitle>Teorical Comparison Lamp</CardTitle>
+        <Pane id="P0" size={80} minSize={20} className="bg-slate-100 p-6">
+          {/* Grafico de interacción para calibrar respecto a lampara teorica */}
+          <h3 className="text-lg font-serif tracking-tight">
+            Teorical Comparison Lamp
+          </h3>
           <ReferenceLampRangeUI />
-          <div className="flex flex-col h-screen">
-            <div className="flex-1">
-              <ReferenceLampSpectrum />
-            </div>
-            <div className="flex-1">
-              <CardTitle>Empirical Comparison Lamp</CardTitle>
-              <div className="flex-1 h-full">
-                <FitsLoader
-                  plotColor="#0ea5e9"
-                  setData={() => { }}
-                  interactable
-                  preview
-                />
-              </div>
+          <div className="flex flex-col ">
+            <ReferenceLampSpectrum />
+
+            {/* Grafico espectro calibrado lampara 1 */}
+            <div>
+              <h3 className="text-lg font-serif tracking-tight">
+                Empirical Comparison Lamp 1
+              </h3>
+              <EmpiricalSpectrum
+                data={lamp1Spectrum!}
+                color="#0ea5e9"
+                interactable
+                preview
+              />
             </div>
 
-            <div className="flex-1">
-              <CardTitle>Empirical Spectrum</CardTitle>
-              <FitsLoader
-                plotColor="#16a34a"
-                setData={setScienceSpectrumData}
-                interactable={false}
+            {/* Grafico espectro calibrado lampara 2 */}
+            <div>
+              <h3 className="text-lg font-serif tracking-tight">
+                Empirical Comparison Lamp 2
+              </h3>
+              <EmpiricalSpectrum
+                data={lamp2Spectrum!}
+                color="#0ea5e9"
+                interactable
+                preview
+              />
+            </div>
+
+            {/* Grafico espectro calibrado ciencia */}
+            <div>
+              <h3 className="text-lg font-serif  tracking-tight">
+                Empirical Science Spectrum
+              </h3>
+              <EmpiricalSpectrum
+                data={scienceSpectrum}
+                color="#0ea5e9"
+                interactable
                 preview
               />
             </div>
           </div>
-
+        </Pane>
+        <Pane id="P1" size={20} minSize={10} className="bg-gray-50 border-l p-4">
+          <ReferenceLampForm />
+          <InferenceForm />
         </Pane>
       </ResizablePanes>
       <ContinueButton
         className="flex justify-center pt-4"
-        data={scienceSpectrumData}
+        data={scienceSpectrum}
         inSuccessfulCase={onComplete}
       />
-    </>
+    </div>
   )
 }

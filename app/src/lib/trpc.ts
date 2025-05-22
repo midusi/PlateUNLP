@@ -1,4 +1,4 @@
-import type { AppRouter } from "@plateunlp/server"
+import type { AppRouter } from "../../server/routers"
 //     👆 **type-only** import
 
 import { createTRPCClient, httpBatchLink } from "@trpc/client"

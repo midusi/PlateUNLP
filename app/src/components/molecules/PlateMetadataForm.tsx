@@ -15,6 +15,9 @@ export interface PlateMetadata {
   SCANNER: string
   SOFTWARE: string
   PLATE_N: string
+  TELESCOPE: string
+  DETECTOR: string
+  INSTRUMENT: string
 }
 
 const options = observatories
@@ -77,6 +80,11 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
 
             {errors.OBSERVER && <p className="text-red-500">{errors.OBSERVER.message}</p>}
           </div>
+          <div className={inputContainerClassName}>
+            <Label>PLATE-N</Label>
+            <Input {...register("PLATE_N")} placeholder="Identification number" className={inputClassName} />
+            {errors.PLATE_N && <p className="text-red-500">{errors.PLATE_N.message}</p>}
+          </div>
 
           <div className={inputContainerClassName}>
             <Label>OBSERVER</Label>
@@ -99,9 +107,19 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
             {errors.SOFTWARE && <p className="text-red-500">{errors.SOFTWARE.message}</p>}
           </div>
           <div className={inputContainerClassName}>
-            <Label>PLATE-N</Label>
-            <Input {...register("PLATE_N")} placeholder="Identification number" className={inputClassName} />
-            {errors.PLATE_N && <p className="text-red-500">{errors.PLATE_N.message}</p>}
+            <Label>TELESCOPE</Label>
+            <Input {...register("TELESCOPE")} placeholder="Telescope name" className={inputClassName} />
+            {errors.TELESCOPE && <p className="text-red-500">{errors.TELESCOPE.message}</p>}
+          </div>
+          <div className={inputContainerClassName}>
+            <Label>DETECTOR</Label>
+            <Input {...register("DETECTOR")} placeholder="Detector" className={inputClassName} />
+            {errors.DETECTOR && <p className="text-red-500">{errors.DETECTOR.message}</p>}
+          </div>
+          <div className={inputContainerClassName}>
+            <Label>INSTRUMENT</Label>
+            <Input {...register("INSTRUMENT")} placeholder="Instrument" className={inputClassName} />
+            {errors.INSTRUMENT && <p className="text-red-500">{errors.INSTRUMENT.message}</p>}
           </div>
         </div>
       </form>

@@ -5,10 +5,20 @@ import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useState } from "react"
 import { BBUI } from "../organisms/BBUI"
+import { Step } from "../organisms/BBList"
+import { BoxMetadata } from "../molecules/BoxMetadataForm"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
+  const parameters = {
+    rotateButton: true,
+    invertColorButton: true,
+    step: Step.Plate,
+  }
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
+  )
+  const [boxMetadatas, setBoxMetadatas] = useState<BoxMetadata[]>(
+    processInfo.data.spectrums.map(spec => spec.metadata),
   )
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
@@ -21,7 +31,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     0.70,
   )
 
-  function saveBoundingBoxes(boundingBoxes: BoundingBox[]) {
+  function saveBoundingBoxes(boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) {
     setProcessInfo(prev => ({
       ...prev,
       data: {
@@ -30,10 +40,11 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           id: index,
           name: `Plate${index}#Spectrum`,
           spectrumBoundingBox: bb,
-          partsBoundingBoxes: {
-            lamp1: null,
-            lamp2: null,
-            science: null,
+          metadata: boxMetadata[index],
+          parts: {
+            lamp1: { boundingBox: null, extractedSpectrum: null },
+            lamp2: { boundingBox: null, extractedSpectrum: null },
+            science: { boundingBox: null, extractedSpectrum: null },
           },
         })),
       },
@@ -65,8 +76,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           state: index === i
             ? "COMPLETE"
             : (index + 1 === i
-                ? "NECESSARY_CHANGES"
-                : step.state),
+              ? "NECESSARY_CHANGES"
+              : step.state),
         })),
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
           ...step,
@@ -87,44 +98,15 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         file={processInfo.data.plate.scanImage}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
+        boxMetadatas={boxMetadatas}
+        setBoxMetadatas={setBoxMetadatas}
         onComplete={onComplete}
         saveBoundingBoxes={saveBoundingBoxes}
         saveImageLoading={saveImage}
         classes={classesSpectrumDetection}
         determineBBFunction={determineBBFunction}
+        parameters={parameters}
       />
-
-      {/* <div className="w-full p-6">
-        {!processInfo.data.plate.scanImage && (
-          <LoadFile onSelect={(fileValue: string) => {
-            // Si no hay archivo de escaneo cargado etonces solicita uno al usuario.
-            // Lo guarda en processInfo.data.plate.scanImage
-            setProcessInfo(prev => ({
-              ...prev,
-              data: {
-                ...prev.data,
-                plate: {
-                  ...prev.data.plate,
-                  scanImage: fileValue,
-                },
-              },
-            }))
-          }}
-          />
-        )}
-        {processInfo.data.plate.scanImage && (
-          <SegmentationUI
-            file={processInfo.data.plate.scanImage}
-            onComplete={onComplete}
-            enableAutodetect
-            boundingBoxes={boundingBoxes}
-            setBoundingBoxes={setBoundingBoxes}
-            saveBoundingBoxes={saveBoundingBoxes}
-            determineBBFunction={determineBBFunction}
-            classes={classesSpectrumDetection}
-          />
-        )}
-      </div> */}
     </div>
   )
 }
