@@ -3,10 +3,6 @@ import { useGlobalStore } from "@/hooks/use-global-store"
 import type { StepProps } from "@/interfaces/StepProps"
 import { Button } from "../atoms/button"
 import { BoxMetadataReadOnly } from "../molecules/BoxMetadataReadOnly"
-import type {
-  SpectrumMetadata,
-  SpectrumMetadataIcons,
-} from "../molecules/SpectrumMetadataForm"
 import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
 
 export function StepMetadataRetrieval({
@@ -53,27 +49,16 @@ export function StepMetadataRetrieval({
     }))
     setActualStep(index + 1)
   }
-  const spectrumMetadataFormRef = useRef<{
-    setValues: (spectrumMetadata: SpectrumMetadata) => void
-    resetValues: () => void
-    getValues: () => SpectrumMetadata
-    validate: () => void
-    setIcons: (icons: SpectrumMetadataIcons) => void
-    getIcons: () => SpectrumMetadataIcons
-  }>(null)
+  const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, resetValues: () => void, getValues: () => SpectrumMetadata, validate: () => void, setIcons: (icons: SpectrumMetadataIcons) => void, getIcons: () => SpectrumMetadataIcons }>(null)
 
   return (
     <>
       <div className="flex flex-col items-center w-full ">
         <div className="flex flex-col w-full flex justify-center mb-6">
           <BoxMetadataReadOnly
-            OBJECT={
-              processInfo.data.spectrums[selectedSpectrum].metadata.OBJECT
-            }
-            DATE_OBS={
-              processInfo.data.spectrums[selectedSpectrum].metadata.DATE_OBS
-            }
-            UT={processInfo.data.spectrums[selectedSpectrum].metadata.UT}
+            OBJECT={processInfo.data.spectrums[selectedSpectrum!].metadata.OBJECT}
+            DATE_OBS={processInfo.data.spectrums[selectedSpectrum!].metadata.DATE_OBS}
+            UT={processInfo.data.spectrums[selectedSpectrum!].metadata.UT}
           />
           <hr className="my-4" />
           <SpectrumMetadataForm ref={spectrumMetadataFormRef} />

@@ -118,7 +118,7 @@ export default function App() {
     },
   ]
   const [loginError, setLoginError] = useState<string>()
-  const [loginSuccess, setLoginSuccess] = useState<boolean>(false)
+  const [loginSuccess, setLoginSuccess] = useState<boolean>(true)
   const handleLogin = (UserData: loginForm) => {
     setLoginError("")
     trpc.login
