@@ -1,11 +1,11 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { Dispatch, SetStateAction } from "react"
-import { classesSpectrumDetection } from "@/enums/BBClasses"
 import clsx from "clsx"
 import { nanoid } from "nanoid"
+import type { Dispatch, SetStateAction } from "react"
 import { useCallback, useRef, useState } from "react"
 import { useTransformComponent } from "react-zoom-pan-pinch"
-import { BoxMetadata } from "./BoxMetadataForm"
+import { classesSpectrumDetection } from "@/enums/BBClasses"
+import type { BoundingBox } from "@/interfaces/BoundingBox"
+import type { BoxMetadata } from "./BoxMetadataForm"
 
 /**
  * Mapeo de esquinas y aristas al rotar una imagen X grados.
@@ -16,43 +16,43 @@ import { BoxMetadata } from "./BoxMetadataForm"
 const rotatedHandleMap: Record<number, Record<string, string>> = {
   0: {
     "top-left": "top-left",
-    "top": "top",
+    top: "top",
     "top-right": "top-right",
-    "right": "right",
+    right: "right",
     "bottom-right": "bottom-right",
-    "bottom": "bottom",
+    bottom: "bottom",
     "bottom-left": "bottom-left",
-    "left": "left",
+    left: "left",
   },
   90: {
     "top-left": "bottom-left",
-    "top": "left",
+    top: "left",
     "top-right": "top-left",
-    "right": "top",
+    right: "top",
     "bottom-right": "top-right",
-    "bottom": "right",
+    bottom: "right",
     "bottom-left": "bottom-right",
-    "left": "bottom",
+    left: "bottom",
   },
   180: {
     "top-left": "bottom-right",
-    "top": "bottom",
+    top: "bottom",
     "top-right": "bottom-left",
-    "right": "left",
+    right: "left",
     "bottom-right": "top-left",
-    "bottom": "top",
+    bottom: "top",
     "bottom-left": "top-right",
-    "left": "right",
+    left: "right",
   },
   270: {
     "top-left": "top-right",
-    "top": "right",
+    top: "right",
     "top-right": "bottom-right",
-    "right": "bottom",
+    right: "bottom",
     "bottom-right": "bottom-left",
-    "bottom": "left",
+    bottom: "left",
     "bottom-left": "top-left",
-    "left": "top",
+    left: "top",
   },
 }
 
@@ -69,7 +69,7 @@ interface ImageWithBoundingBoxesProps {
   isResizing: boolean
   setIsResizing: Dispatch<SetStateAction<boolean>>
   setIsDragging: Dispatch<SetStateAction<boolean>>
-  dragOffsetRef: React.MutableRefObject<{ x: number, y: number }>
+  dragOffsetRef: React.MutableRefObject<{ x: number; y: number }>
   selectedBoxId: string | null
   setSelectedBoxId: Dispatch<SetStateAction<string | null>>
   boundingBoxes: BoundingBox[]
@@ -101,14 +101,17 @@ export function ImageWithBoundingBoxes({
   boxMetadatas,
   setBoxMetadatas,
 }: ImageWithBoundingBoxesProps) {
-  const transformedComponent = useTransformComponent(({ state, instance: _ }) => {
-    return state // { previousScale: 1, scale: 1, positionX: 0, positionY: 0 }
-  })
+  const transformedComponent = useTransformComponent(
+    ({ state, instance: _ }) => {
+      return state // { previousScale: 1, scale: 1, positionX: 0, positionY: 0 }
+    },
+  )
   const scale = transformedComponent.scale
   const imageRef = useRef<HTMLImageElement | null>(null)
-  const [tempBox, setTempBox] = useState<
-    Omit<BoundingBox, "id" | "prob" | "name" | "class_info"> | null
-  >(null)// ({ x: 50, y: 150, width: 100, height: 100 })
+  const [tempBox, setTempBox] = useState<Omit<
+    BoundingBox,
+    "id" | "prob" | "name" | "class_info"
+  > | null>(null) // ({ x: 50, y: 150, width: 100, height: 100 })
   const drawingRef = useRef<{
     isDrawing: boolean
     startX: number
@@ -136,8 +139,7 @@ export function ImageWithBoundingBoxes({
       const rot = reverse ? (360 - rotation) % 360 : rotation
 
       // Si no hay imagen o no hay rotación no hay necesidad de tranformar las cordenadas
-      if (!imageRef.current || rot === 0)
-        return { x, y, width, height }
+      if (!imageRef.current || rot === 0) return { x, y, width, height }
 
       // Centro respecto al tamaño natural de la imagen
       const centerX = imageRef.current.clientWidth / 2
@@ -160,13 +162,11 @@ export function ImageWithBoundingBoxes({
         newPos.y += relX
         newPos.width = height
         newPos.height = width
-      }
-      else if (rot === 180) {
+      } else if (rot === 180) {
         // Rotar 180 grados
         newPos.x += -relX - width // (- width) rotacion de punto principal
         newPos.y += -relY - height // (- height) rotacion de punto principal
-      }
-      else if (rot === 270) {
+      } else if (rot === 270) {
         // Rotar 270 grados
         newPos.x += relY
         newPos.y += -relX - width // (- width) rotacion de punto principal
@@ -188,14 +188,11 @@ export function ImageWithBoundingBoxes({
 
       if (rot === 0) {
         return { deltaX, deltaY }
-      }
-      else if (rot === 90) {
+      } else if (rot === 90) {
         return { deltaX: -deltaY, deltaY: deltaX }
-      }
-      else if (rot === 180) {
+      } else if (rot === 180) {
         return { deltaX: -deltaX, deltaY: -deltaY }
-      }
-      else if (rot === 270) {
+      } else if (rot === 270) {
         return { deltaX: deltaY, deltaY: -deltaX }
       }
 
@@ -207,12 +204,9 @@ export function ImageWithBoundingBoxes({
   // Funciones para dibujar cajas
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!imageRef.current)
-        return
-      if (isResizing)
-        return
-      if (!isDrawingMode)
-        return
+      if (!imageRef.current) return
+      if (isResizing) return
+      if (!isDrawingMode) return
 
       const rect = imageRef.current.getBoundingClientRect()
       const x = (e.clientX - rect.left) / scale
@@ -239,8 +233,7 @@ export function ImageWithBoundingBoxes({
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!imageRef.current)
-        return
+      if (!imageRef.current) return
       const rect = imageRef.current.getBoundingClientRect()
       let currentX = (e.clientX - rect.left) / scale
       let currentY = (e.clientY - rect.top) / scale
@@ -249,8 +242,14 @@ export function ImageWithBoundingBoxes({
       const transformed = transformCoordinates(currentX, currentY, 0, 0, true)
       currentX = transformed.x
       currentY = transformed.y
-      const box_selected = boundingBoxes.find(b => b.id === selectedBoxId)
-      if ((selectedBoxId && !isResizing && !isDrawingMode && e.buttons === 1 && box_selected !== undefined)) {
+      const box_selected = boundingBoxes.find((b) => b.id === selectedBoxId)
+      if (
+        selectedBoxId &&
+        !isResizing &&
+        !isDrawingMode &&
+        e.buttons === 1 &&
+        box_selected !== undefined
+      ) {
         if (dragOffsetRef.current.x === -1) {
           const offsetX = currentX - box_selected.x
           const offsetY = currentY - box_selected.y
@@ -261,9 +260,10 @@ export function ImageWithBoundingBoxes({
         newBox.x = currentX - dragOffsetRef.current.x // - previousMouseX
         newBox.y = currentY - dragOffsetRef.current.y // - previousMouseY
         // Update the bounding box
-        setBoundingBoxes(prev => prev.map(box => (box.id === selectedBoxId ? newBox : box)))
-      }
-      else {
+        setBoundingBoxes((prev) =>
+          prev.map((box) => (box.id === selectedBoxId ? newBox : box)),
+        )
+      } else {
         dragOffsetRef.current = { x: -1, y: 0 }
         setIsDragging(false)
       }
@@ -278,9 +278,13 @@ export function ImageWithBoundingBoxes({
           width: Math.abs(width),
           height: Math.abs(height),
         })
-      }
-      /** Redimensionado de caja */
-      else if (selectedBoxId && isResizing && resizeHandle && resizeRef.current.originalBox) {
+      } else if (
+        /** Redimensionado de caja */
+        selectedBoxId &&
+        isResizing &&
+        resizeHandle &&
+        resizeRef.current.originalBox
+      ) {
         const originalBox = resizeRef.current.originalBox
 
         // Calcular deltas en coordenadas de pantalla
@@ -351,7 +355,9 @@ export function ImageWithBoundingBoxes({
         }
 
         // Update the bounding box
-        setBoundingBoxes(prev => prev.map(box => (box.id === selectedBoxId ? newBox : box)))
+        setBoundingBoxes((prev) =>
+          prev.map((box) => (box.id === selectedBoxId ? newBox : box)),
+        )
       }
     },
     [
@@ -373,26 +379,28 @@ export function ImageWithBoundingBoxes({
 
   const handleMouseUp = useCallback(() => {
     // Complete drawing
-    if (drawingRef.current.isDrawing && tempBox && tempBox.width > 5 && tempBox.height > 5) {
-      {
-        setBoundingBoxes(prev => [
-          ...prev,
-          {
-            id: nanoid(),
-            name: `box-${Date.now()}`,
-            ...tempBox,
-            class_info: classesSpectrumDetection[0],
-            prob: 1,
-          },
-        ])
-        boxMetadatas.push({
-          OBJECT: null,
-          DATE_OBS: null,
-          UT: null
-        })
-        setBoxMetadatas(boxMetadatas)
-      }
-
+    if (
+      drawingRef.current.isDrawing &&
+      tempBox &&
+      tempBox.width > 5 &&
+      tempBox.height > 5
+    ) {
+      setBoundingBoxes((prev) => [
+        ...prev,
+        {
+          id: nanoid(),
+          name: `box-${Date.now()}`,
+          ...tempBox,
+          class_info: classesSpectrumDetection[0],
+          prob: 1,
+        },
+      ])
+      boxMetadatas.push({
+        OBJECT: null,
+        DATE_OBS: null,
+        UT: null,
+      })
+      setBoxMetadatas(boxMetadatas)
     }
     drawingRef.current.isDrawing = false
     setTempBox(null)
@@ -423,7 +431,7 @@ export function ImageWithBoundingBoxes({
         return
       }
 
-      const box = boundingBoxes.find(b => b.id === boxId)
+      const box = boundingBoxes.find((b) => b.id === boxId)
 
       const rect = imageRef.current.getBoundingClientRect()
       const x = e.clientX - rect.left / scale
@@ -442,8 +450,13 @@ export function ImageWithBoundingBoxes({
       setResizeHandle(handle)
       setSelectedBoxId(boxId)
     },
-    [boundingBoxes, scale, setIsResizing, setSelectedBoxId, transformCoordinates],
-
+    [
+      boundingBoxes,
+      scale,
+      setIsResizing,
+      setSelectedBoxId,
+      transformCoordinates,
+    ],
   )
 
   /**
@@ -462,27 +475,64 @@ export function ImageWithBoundingBoxes({
     const handles = [
       { name: "top-left", style: { top: handleOffset, left: handleOffset } },
       { name: "top-right", style: { top: handleOffset, right: handleOffset } },
-      { name: "bottom-left", style: { bottom: handleOffset, left: handleOffset } },
-      { name: "bottom-right", style: { bottom: handleOffset, right: handleOffset } },
-      { name: "top", style: { top: handleOffset, left: "50%", transform: "translateX(-50%)" } },
-      { name: "right", style: { top: "50%", right: handleOffset, transform: "translateY(-50%)" } },
-      { name: "bottom", style: { bottom: handleOffset, left: "50%", transform: "translateX(-50%)" } },
-      { name: "left", style: { top: "50%", left: handleOffset, transform: "translateY(-50%)" } },
+      {
+        name: "bottom-left",
+        style: { bottom: handleOffset, left: handleOffset },
+      },
+      {
+        name: "bottom-right",
+        style: { bottom: handleOffset, right: handleOffset },
+      },
+      {
+        name: "top",
+        style: {
+          top: handleOffset,
+          left: "50%",
+          transform: "translateX(-50%)",
+        },
+      },
+      {
+        name: "right",
+        style: {
+          top: "50%",
+          right: handleOffset,
+          transform: "translateY(-50%)",
+        },
+      },
+      {
+        name: "bottom",
+        style: {
+          bottom: handleOffset,
+          left: "50%",
+          transform: "translateX(-50%)",
+        },
+      },
+      {
+        name: "left",
+        style: {
+          top: "50%",
+          left: handleOffset,
+          transform: "translateY(-50%)",
+        },
+      },
     ]
 
-    return handles.map(handle => (
+    return handles.map((handle) => (
       <div
         key={handle.name}
         className="absolute w-2 h-2 bg-white border border-blue500 rounded-sm cursor-pointer"
         style={{
           ...handle.style,
-          cursor: handle.name.includes("top-left") || handle.name.includes("bottom-right")
-            ? "nwse-resize"
-            : handle.name.includes("top-right") || handle.name.includes("bottom-left")
-              ? "nesw-resize"
-              : handle.name.includes("left") || handle.name.includes("right")
-                ? "ew-resize"
-                : "ns-resize",
+          cursor:
+            handle.name.includes("top-left") ||
+            handle.name.includes("bottom-right")
+              ? "nwse-resize"
+              : handle.name.includes("top-right") ||
+                  handle.name.includes("bottom-left")
+                ? "nesw-resize"
+                : handle.name.includes("left") || handle.name.includes("right")
+                  ? "ew-resize"
+                  : "ns-resize",
           zIndex: 10,
         }}
         onMouseDown={(e) => {
@@ -496,7 +546,12 @@ export function ImageWithBoundingBoxes({
   // Renderizar una caja con la rotación aplicada
   const renderBox = (box: BoundingBox, isTemp = false) => {
     // Transformar las coordenadas según la rotación actual
-    const transformed = transformCoordinates(box.x, box.y, box.width, box.height)
+    const transformed = transformCoordinates(
+      box.x,
+      box.y,
+      box.width,
+      box.height,
+    )
 
     return (
       <div
@@ -514,9 +569,11 @@ export function ImageWithBoundingBoxes({
           top: `${transformed.y}px`,
           width: `${transformed.width}px`,
           height: `${transformed.height}px`,
-          backgroundColor: isTemp ? "rgba(0, 0, 255, 0.1)" : "rgba(255, 0, 0, 0.1)",
+          backgroundColor: isTemp
+            ? "rgba(0, 0, 255, 0.1)"
+            : "rgba(255, 0, 0, 0.1)",
         }}
-        onClick={isTemp ? undefined : e => handleBoxClick(e, `${box.id}`)}
+        onClick={isTemp ? undefined : (e) => handleBoxClick(e, `${box.id}`)}
       >
         {!isTemp && renderResizeHandles(box)}
         {/* Mostrar dimensiones para la caja seleccionada
@@ -552,12 +609,14 @@ export function ImageWithBoundingBoxes({
       {/* Contenedor para las cajas delimitadoras */}
       <div
         className="absolute top-0 left-0 w-full h-full"
-        style={{
-          // pointerEvents: "none", // Para que los eventos pasen a través al contenedor principal
-        }}
+        style={
+          {
+            // pointerEvents: "none", // Para que los eventos pasen a través al contenedor principal
+          }
+        }
       >
         {/* Cajas delimitadoras existentes */}
-        {boundingBoxes.map(box => renderBox(box))}
+        {boundingBoxes.map((box) => renderBox(box))}
 
         {/* Caja temporal durante el dibujo */}
         {tempBox && renderBox(tempBox as BoundingBox, true)}

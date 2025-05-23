@@ -8,10 +8,7 @@ import type { BoundingBox } from "@/interfaces/BoundingBox"
  * @returns {string} -
  * Base64 del recorte de la imagen.
  */
-function trimImageToBase64(
-  image: HTMLImageElement,
-  box: BoundingBox,
-): string {
+function trimImageToBase64(image: HTMLImageElement, box: BoundingBox): string {
   const canvas = document.createElement("canvas")
   const ctx = canvas.getContext("2d")
 
@@ -46,9 +43,11 @@ function trimImageToBase64(
  * @returns {Promise<string[]>} -
  * Promesa de arreglos de recortes (base64).
  */
-export async function cropImages(file: string, boundingBoxes: BoundingBox[]): Promise<string[]> {
-  if (!file || boundingBoxes.length === 0)
-    return []
+export async function cropImages(
+  file: string,
+  boundingBoxes: BoundingBox[],
+): Promise<string[]> {
+  if (!file || boundingBoxes.length === 0) return []
 
   const croppedImages: string[] = []
 

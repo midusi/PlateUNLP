@@ -1,8 +1,8 @@
+import { FITS } from "fits2js"
+import { type ChangeEvent, useEffect, useMemo, useState } from "react"
 import type { EmpiricalSpectrumPoint } from "@/components/molecules/EmpiricalSpectrum"
 import { EmpiricalSpectrum } from "@/components/molecules/EmpiricalSpectrum"
 import { Uploader } from "@/components/molecules/Uploader"
-import { FITS } from "fits2js"
-import { type ChangeEvent, useEffect, useMemo, useState } from "react"
 
 type LoadingState = "waiting" | "processing" | "finished" | "error"
 
@@ -13,7 +13,12 @@ interface FitsLoaderProps {
   preview: boolean
 }
 
-export function FitsLoader({ plotColor, setData, interactable = true, preview = true }: FitsLoaderProps) {
+export function FitsLoader({
+  plotColor,
+  setData,
+  interactable = true,
+  preview = true,
+}: FitsLoaderProps) {
   const [loadingState, setLoadingState] = useState<LoadingState>("waiting")
   const [fits, setFits] = useState<FITS | null>(null)
 
@@ -50,8 +55,7 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
             const result = FITS.fromBuffer(reader.result as ArrayBuffer, null)
             setFits(result)
             setLoadingState("finished")
-          }
-          catch (error) {
+          } catch (error) {
             console.error("Error parsing JSON:", error)
             setLoadingState("error")
           }
@@ -68,38 +72,39 @@ export function FitsLoader({ plotColor, setData, interactable = true, preview = 
     <div className="flex flex-col flex-1 h-full my-2">
       <div className="flex-1 flex h-full">
         {!loadedData && (
-          <Uploader accept=".fit,.fits" onChange={handleFileChange} showInfoDeleteRow={false} />
-        )}
-        {loadingState === "finished"
-          ? (
-            <p className="ml-4">
-              {
-                [
-                  fits?.getHeader("DATE-OBS")?.trim(),
-                  fits?.getHeader("TELESCOP")?.trim(),
-                  fits?.getHeader("INSTRUME")?.trim(),
-                  fits?.getHeader("OBSERVER")?.trim(),
-                  fits?.getHeader("OBJECT")?.trim(),
-                  fits?.getHeader("EQUINOX"),
-                  fits?.getHeader("EPOCH"),
-                ].filter(Boolean).join(" /// ")
-              }
-            </p>
-          )
-          : loadingState === "error"
-            ? <p className="text-red-500">Error loading file</p>
-            : null}
-      </div>
-      {loadingState === "processing" && <p>Loading content...</p>}
-      {loadedData
-        && (
-          <EmpiricalSpectrum
-            data={loadedData}
-            color={plotColor}
-            interactable={interactable}
-            preview={preview}
+          <Uploader
+            accept=".fit,.fits"
+            onChange={handleFileChange}
+            showInfoDeleteRow={false}
           />
         )}
+        {loadingState === "finished" ? (
+          <p className="ml-4">
+            {[
+              fits?.getHeader("DATE-OBS")?.trim(),
+              fits?.getHeader("TELESCOP")?.trim(),
+              fits?.getHeader("INSTRUME")?.trim(),
+              fits?.getHeader("OBSERVER")?.trim(),
+              fits?.getHeader("OBJECT")?.trim(),
+              fits?.getHeader("EQUINOX"),
+              fits?.getHeader("EPOCH"),
+            ]
+              .filter(Boolean)
+              .join(" /// ")}
+          </p>
+        ) : loadingState === "error" ? (
+          <p className="text-red-500">Error loading file</p>
+        ) : null}
+      </div>
+      {loadingState === "processing" && <p>Loading content...</p>}
+      {loadedData && (
+        <EmpiricalSpectrum
+          data={loadedData}
+          color={plotColor}
+          interactable={interactable}
+          preview={preview}
+        />
+      )}
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { useId } from "react"
 import { Button } from "@/components/atoms/button"
 import {
   Card,
@@ -16,7 +17,6 @@ import {
 } from "@/components/atoms/select"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { LAMP_MATERIALS } from "@/lib/spectral-data"
-import { useId } from "react"
 
 export function ReferenceLampForm() {
   return (
@@ -45,12 +45,13 @@ export function ReferenceLampForm() {
 
 function MaterialInput() {
   const inputId = useId()
-  const [material, setMaterial, oneTeoricalSpectrum, setOneTeoricalSpectrum] = useGlobalStore(s => [
-    s.material,
-    s.setMaterial,
-    s.oneTeoricalSpectrum,
-    s.setOneTeoricalSpectrum,
-  ])
+  const [material, setMaterial, oneTeoricalSpectrum, setOneTeoricalSpectrum] =
+    useGlobalStore((s) => [
+      s.material,
+      s.setMaterial,
+      s.oneTeoricalSpectrum,
+      s.setOneTeoricalSpectrum,
+    ])
 
   return (
     <div className="flex flex-col gap-2 col-span-2">
@@ -60,7 +61,7 @@ function MaterialInput() {
           <SelectValue placeholder="Select material" />
         </SelectTrigger>
         <SelectContent>
-          {LAMP_MATERIALS.map(m => (
+          {LAMP_MATERIALS.map((m) => (
             <SelectItem key={m} value={m}>
               {m}
             </SelectItem>
@@ -73,7 +74,7 @@ function MaterialInput() {
           id="checkbox-display-materials-in-a-single-spectrum"
           className="mr-2 cursor-pointer"
           checked={oneTeoricalSpectrum}
-          onChange={e => setOneTeoricalSpectrum(e.target.checked)}
+          onChange={(e) => setOneTeoricalSpectrum(e.target.checked)}
         />
         <label
           htmlFor="checkbox-display-materials-in-a-single-spectrum"

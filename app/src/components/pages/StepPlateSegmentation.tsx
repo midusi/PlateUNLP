@@ -1,38 +1,74 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { StepProps } from "@/interfaces/StepProps"
+import { useEffect } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
-import { useState } from "react"
+import { Button } from "../atoms/button"
+import type { BoxMetadata } from "../molecules/BoxMetadataForm"
 import { BBUI } from "../organisms/BBUI"
-import { Step } from "../organisms/BBList"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
 
-export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
-  const parameters = {
-    rotateButton: true,
-    invertColorButton: true,
-    step: Step.Plate,
-  }
-  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
-  )
-  const [boxMetadatas, setBoxMetadatas] = useState<BoxMetadata[]>(
-    processInfo.data.spectrums.map(spec => spec.metadata),
-  )
-  const [setActualStep] = useGlobalStore(s => [
-    s.setActualStep,
-  ])
+export function StepPlateSegmentation({
+  index,
+  processInfo,
+  setProcessInfo,
+}: StepProps) {
+  const [setActualStep] = useGlobalStore((s) => [s.setActualStep])
   const determineBBFunction = usePredictBBs(
     1024,
     "spectrum_detector.onnx",
     classesSpectrumDetection,
     false,
-    0.70,
+    0.7,
   )
 
-  function saveBoundingBoxes(boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) {
-    setProcessInfo(prev => ({
+  const [imageSegmentator, boundingBoxes, imageSelected] = useImageSegmentator(
+    processInfo,
+    determineBBFunction,
+  )
+
+  useEffect(() => {
+    // Almacena información de imagenes de la placa
+    setProcessInfo((prev) => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        plate: {
+          ...prev.data.plate,
+          scanImage: imageSelected,
+        },
+      },
+    }))
+  }, [imageSelected])
+
+  // const parameters = {
+  //   rotateButton: true,
+  //   invertColorButton: true,
+  //   step: Step.Plate,
+  // }
+  // const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
+  //   processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
+  // )
+  // const [boxMetadatas, setBoxMetadatas] = useState<BoxMetadata[]>(
+  //   processInfo.data.spectrums.map(spec => spec.metadata),
+  // )
+
+  // function saveImage(src: string) {
+  //   setProcessInfo(prev => ({
+  //     ...prev,
+  //     data: {
+  //       ...prev.data,
+  //       plate: {
+  //         ...prev.data.plate,
+  //         scanImage: src,
+  //       },
+  //     },
+  //   }))
+  // }
+
+  function saveBoundingBoxes(
+    boundingBoxes: BoundingBox[],
+    boxMetadata: BoxMetadata[],
+  ) {
+    setProcessInfo((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -51,41 +87,27 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     }))
   }
 
-  function saveImage(src: string) {
-    setProcessInfo(prev => ({
-      ...prev,
-      data: {
-        ...prev.data,
-        plate: {
-          ...prev.data.plate,
-          scanImage: src,
-        },
-      },
-    }))
-  }
-
   function onComplete() {
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
-    setProcessInfo(prev => ({
+    setProcessInfo((prev) => ({
       ...prev,
       processingStatus: {
         ...prev.processingStatus,
         generalSteps: prev.processingStatus.generalSteps.map((step, i) => ({
           ...step,
-          state: index === i
-            ? "COMPLETE"
-            : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
+          state:
+            index === i
+              ? "COMPLETE"
+              : index + 1 === i
+                ? "NECESSARY_CHANGES"
+                : step.state,
         })),
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
           ...step,
-          states: boundingBoxes.map(_ => (
-            i === 0
-              ? "NECESSARY_CHANGES" as const
-              : "NOT_REACHED" as const
-          )),
+          states: boundingBoxes.map((_) =>
+            i === 0 ? ("NECESSARY_CHANGES" as const) : ("NOT_REACHED" as const),
+          ),
         })),
       },
     }))
@@ -107,6 +129,17 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         determineBBFunction={determineBBFunction}
         parameters={parameters}
       />
+      <div className="flex justify-center pt-4">
+        <Button
+          onClick={() => {
+            saveBoundingBoxes(boundingBoxes, [])
+            onComplete()
+          }}
+          disabled={imageSelected === null || boundingBoxes.length === 0}
+        >
+          Save
+        </Button>
+      </div>
     </div>
   )
 }

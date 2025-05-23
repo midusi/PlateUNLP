@@ -1,18 +1,25 @@
-import type { SpectrumData } from "@/interfaces/ProcessInfoForm"
-import type { StepProps } from "@/interfaces/StepProps"
-import { useGlobalStore } from "@/hooks/use-global-store"
-import { cropImages } from "@/lib/cropImage"
-import { totalStepsCompleted } from "@/lib/utils"
-import { ArrowDownTrayIcon, ArrowRightIcon, PencilIcon } from "@heroicons/react/24/outline"
+import {
+  ArrowDownTrayIcon,
+  ArrowRightIcon,
+  PencilIcon,
+} from "@heroicons/react/24/outline"
 import clsx from "clsx"
 import { useEffect, useState } from "react"
 import { Tooltip } from "react-tooltip"
+import { useGlobalStore } from "@/hooks/use-global-store"
+import type { SpectrumData } from "@/interfaces/ProcessInfoForm"
+import type { StepProps } from "@/interfaces/StepProps"
+import { cropImages } from "@/lib/cropImage"
+import { totalStepsCompleted } from "@/lib/utils"
 import { Button } from "../atoms/button"
 
-export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepProps) {
+export function StepSpectrumSelection({
+  index: stepIndex,
+  processInfo,
+}: StepProps) {
   const stepsNum = processInfo.processingStatus.specificSteps.length
   const spectrums: SpectrumData[] = processInfo.data.spectrums
-  const [setSpecificObject, setActualStep] = useGlobalStore(s => [
+  const [setSpecificObject, setActualStep] = useGlobalStore((s) => [
     s.setSelectedSpectrum,
     s.setActualStep,
   ])
@@ -20,7 +27,7 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
   useEffect(() => {
     cropImages(
       processInfo.data.plate.scanImage!,
-      spectrums.map(s => s.spectrumBoundingBox),
+      spectrums.map((s) => s.spectrumBoundingBox),
     ).then(setCroppedImages)
   }, [processInfo.data.plate.scanImage, spectrums])
 
@@ -40,29 +47,32 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
           </thead>
           <tbody>
             {spectrums.map((spectrum, index) => {
-              const completedSteps = totalStepsCompleted(index, processInfo.processingStatus.specificSteps)
+              const completedSteps = totalStepsCompleted(
+                index,
+                processInfo.processingStatus.specificSteps,
+              )
               const complete: boolean = completedSteps / stepsNum === 1
               return (
                 <tr key={spectrum.id} className="hover:bg-gray-50">
                   <td className="border px-4 py-2">{spectrum.name}</td>
                   <td className="border px-4 py-2">
-                    {croppedImages && <img src={croppedImages[index]} alt={spectrum.name} className="w-full h-auto" />}
+                    {croppedImages && (
+                      <img
+                        src={croppedImages[index]}
+                        alt={spectrum.name}
+                        className="w-full h-auto"
+                      />
+                    )}
                   </td>
                   <td className="border px-6 py-2">
                     {`${completedSteps}/${stepsNum}`}
                   </td>
                   <td className="border px-4 py-2">
-                    {complete
-                      ? (
-                        <div className="text-green-400">
-                          Complete
-                        </div>
-                      )
-                      : (
-                        <div className="text-orange-400">
-                          Pending
-                        </div>
-                      )}
+                    {complete ? (
+                      <div className="text-green-400">Complete</div>
+                    ) : (
+                      <div className="text-orange-400">Pending</div>
+                    )}
                   </td>
                   <td className="border-none px-4 py-2 text-center">
                     <Button
@@ -72,23 +82,25 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                         "bg-blue-500 text-white rounded hover:bg-blue-600 transition",
                       )}
                       onClick={() => {
-                        const sharedMetadata = processInfo.data.plate.sharedMetadata
+                        const sharedMetadata =
+                          processInfo.data.plate.sharedMetadata
                         const scanImage = processInfo.data.plate.scanImage
                         const data = {
                           ...processInfo.data.spectrums[index],
                           sharedMetadata,
-                          scanImage
-                        };
-                        const jsonString = JSON.stringify(data, null, 2);
-                        const blob = new Blob([jsonString], { type: "application/json" });
-                        const url = URL.createObjectURL(blob);
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.download = `plate_${index}.json`;
-                        link.click();
-                        URL.revokeObjectURL(url);
+                          scanImage,
+                        }
+                        const jsonString = JSON.stringify(data, null, 2)
+                        const blob = new Blob([jsonString], {
+                          type: "application/json",
+                        })
+                        const url = URL.createObjectURL(blob)
+                        const link = document.createElement("a")
+                        link.href = url
+                        link.download = `plate_${index}.json`
+                        link.click()
+                        URL.revokeObjectURL(url)
                       }}
-
                     >
                       <ArrowDownTrayIcon className="w-5 h-5" />
                       <Tooltip
@@ -110,15 +122,19 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                           : "bg-orange-500 hover:bg-orange-400",
                         "text-white  transition",
                       )}
-                      data-tooltip-id={complete ? "edit-tooltip" : "complete-tooltip"}
+                      data-tooltip-id={
+                        complete ? "edit-tooltip" : "complete-tooltip"
+                      }
                       onClick={() => {
                         setSpecificObject(index)
                         setActualStep(stepIndex + 1)
                       }}
                     >
-                      {complete
-                        ? <PencilIcon className="w-5 h-5" />
-                        : <ArrowRightIcon className="w-5 h-5" />}
+                      {complete ? (
+                        <PencilIcon className="w-5 h-5" />
+                      ) : (
+                        <ArrowRightIcon className="w-5 h-5" />
+                      )}
 
                       <Tooltip
                         id={complete ? "edit-tooltip" : "complete-tooltip"}
@@ -130,11 +146,9 @@ export function StepSpectrumSelection({ index: stepIndex, processInfo }: StepPro
                       />
                     </Button>
                   </td>
-
                 </tr>
               )
-            },
-            )}
+            })}
           </tbody>
         </table>
         <Button

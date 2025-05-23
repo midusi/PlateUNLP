@@ -1,8 +1,8 @@
+import * as ort from "onnxruntime-web"
+import { useMemo, useRef, useState } from "react"
 import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { iou } from "@/lib/utils"
-import * as ort from "onnxruntime-web"
-import { useMemo, useRef, useState } from "react"
 
 interface Response {
   input: string
@@ -13,8 +13,8 @@ export function usePredictBBs(
   size: number,
   model: string,
   classes: BBClassesProps[],
-  forceMaxWidth: boolean = false,
-  confidence_threshold:number = 0.75
+  forceMaxWidth = false,
+  confidence_threshold = 0.75,
 ): (img_src: string) => Promise<BoundingBox[]> {
   const SIZE_M = size
   const CLASSES = classes
@@ -63,13 +63,21 @@ export function usePredictBBs(
     }
   }
 
-  async function runInference(session: ort.InferenceSession, input: Float32Array<ArrayBuffer>) {
-    const feeds = { images: new ort.Tensor("float32", input, [1, 3, SIZE_M, SIZE_M]) }
+  async function runInference(
+    session: ort.InferenceSession,
+    input: Float32Array<ArrayBuffer>,
+  ) {
+    const feeds = {
+      images: new ort.Tensor("float32", input, [1, 3, SIZE_M, SIZE_M]),
+    }
     const outputs = await session.run(feeds)
     return outputs
   }
 
-  function processOutputs(outputs: ort.InferenceSession.OnnxValueMapType, image: HTMLImageElement) {
+  function processOutputs(
+    outputs: ort.InferenceSession.OnnxValueMapType,
+    image: HTMLImageElement,
+  ) {
     const { naturalWidth: NATURALWIDTH, naturalHeight: NATURALHEIGHT } = image
 
     // console.log("salida", outputs.output0.data)
@@ -81,8 +89,8 @@ export function usePredictBBs(
     let id = 0
     for (let column = 0; column < COLS; column++) {
       const [class_id, prob] = [...Array.from({ length: ROWS - 4 }).keys()]
-        .map(row => [row, DATA[COLS * (row + 4) + column]])
-        .reduce((accum, item) => item[1] > accum[1] ? item : accum, [0, 0])
+        .map((row) => [row, DATA[COLS * (row + 4) + column]])
+        .reduce((accum, item) => (item[1] > accum[1] ? item : accum), [0, 0])
 
       if (prob < CONFIDENCE_THRESHOLD) {
         continue
@@ -94,8 +102,8 @@ export function usePredictBBs(
       let w: number = DATA[COLS * 2 + column]
       let h: number = DATA[COLS * 3 + column]
 
-      let x1 = (xc - w / 2)
-      let y1 = (yc - h / 2)
+      let x1 = xc - w / 2
+      let y1 = yc - h / 2
 
       // Escalado
       x1 = x1 * (NATURALWIDTH / SIZE_M)
@@ -127,7 +135,9 @@ export function usePredictBBs(
     const result = []
     while (boundingBoxes.length > 0) {
       result.push(boundingBoxes[0])
-      boundingBoxes = boundingBoxes.filter(bb => iou(boundingBoxes[0], bb) < IOU_THRESHOLD)
+      boundingBoxes = boundingBoxes.filter(
+        (bb) => iou(boundingBoxes[0], bb) < IOU_THRESHOLD,
+      )
     }
     return result
   }
@@ -138,7 +148,10 @@ export function usePredictBBs(
     }
     const { input, image } = prepare_input(img_src)
     const session: ort.InferenceSession = await modelRef.current!
-    const outputs: ort.InferenceSession.OnnxValueMapType = await runInference(session, input)
+    const outputs: ort.InferenceSession.OnnxValueMapType = await runInference(
+      session,
+      input,
+    )
     const processed_output: BoundingBox[] = processOutputs(outputs, image)
     setLastResponse({
       input: img_src,

@@ -1,8 +1,3 @@
-import type { SpectrumPoint } from "@/lib/spectral-data"
-import type { JSX } from "react"
-import { useGlobalStore } from "@/hooks/use-global-store"
-import { useMeasure } from "@/hooks/use-measure"
-import { getMaterialSpectralData } from "@/lib/spectral-data"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -10,7 +5,12 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Line, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
+import type { JSX } from "react"
 import { useMemo } from "react"
+import { useGlobalStore } from "@/hooks/use-global-store"
+import { useMeasure } from "@/hooks/use-measure"
+import type { SpectrumPoint } from "@/lib/spectral-data"
+import { getMaterialSpectralData } from "@/lib/spectral-data"
 
 // data accessors
 const getX = (p: SpectrumPoint) => p?.wavelength ?? 0
@@ -20,7 +20,16 @@ const height = 200
 const margin = { top: 6, right: 0, bottom: 40, left: 50 }
 
 export function ReferenceLampSpectrum() {
-  const [material, rangeMin, rangeMax, materialPoints, setMaterialPoints, linesPalette, lampPoints, oneTeoricalSpectrum] = useGlobalStore(s => [
+  const [
+    material,
+    rangeMin,
+    rangeMax,
+    materialPoints,
+    setMaterialPoints,
+    linesPalette,
+    lampPoints,
+    oneTeoricalSpectrum,
+  ] = useGlobalStore((s) => [
     s.material,
     s.rangeMin,
     s.rangeMax,
@@ -30,7 +39,7 @@ export function ReferenceLampSpectrum() {
     s.lampPoints,
     s.oneTeoricalSpectrum,
   ])
-  const materialsPalette = useGlobalStore(s => s.materialsPalette)
+  const materialsPalette = useGlobalStore((s) => s.materialsPalette)
 
   const data = useMemo(() => getMaterialSpectralData(material), [material])
 
@@ -57,13 +66,12 @@ export function ReferenceLampSpectrum() {
     if (oneTeoricalSpectrum) {
       materials = [`${material}`]
       filteredDatas = [filteredData]
-    }
-    else {
+    } else {
       materials = material.split("-")
       filteredDatas = []
       for (const m of materials) {
-        const nameList = [m].flatMap(m => [m, `${m} I`, `${m} II`])
-        const d = filteredData.filter(d => nameList.includes(d.material))
+        const nameList = [m].flatMap((m) => [m, `${m} I`, `${m} II`])
+        const d = filteredData.filter((d) => nameList.includes(d.material))
         filteredDatas.push(d)
       }
     }
@@ -83,8 +91,10 @@ export function ReferenceLampSpectrum() {
   // Spots logic
   const spotsInGraph: JSX.Element[] = []
   for (const [index, point] of materialPoints.entries()) {
-    if ((filteredData[0].wavelength <= point.x)
-      && (point.x <= filteredData[filteredData.length - 1].wavelength)) {
+    if (
+      filteredData[0].wavelength <= point.x &&
+      point.x <= filteredData[filteredData.length - 1].wavelength
+    ) {
       const xClick = xScale(point.x)
       // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
       spotsInGraph.push(
@@ -105,8 +115,7 @@ export function ReferenceLampSpectrum() {
             fontSize="12" // Tamaño de fuente
             fontFamily="Arial, sans-serif" // Familia de fuente
           >
-            #
-            {`${index}`}
+            #{`${index}`}
           </text>
         </g>,
       )
@@ -116,10 +125,15 @@ export function ReferenceLampSpectrum() {
     const svgRect = event.currentTarget.getBoundingClientRect()
     const xClick = event.clientX - svgRect.left - margin.left
     const xVal = xScale.invert(xClick)
-    if ((filteredData[0].wavelength <= xVal)
-      && (xVal <= filteredData[filteredData.length - 1].wavelength)) {
+    if (
+      filteredData[0].wavelength <= xVal &&
+      xVal <= filteredData[filteredData.length - 1].wavelength
+    ) {
       const yMatch = data.reduce((prev, curr) => {
-        return (Math.abs(curr.wavelength - xVal) < Math.abs(prev.wavelength - xVal) ? curr : prev)
+        return Math.abs(curr.wavelength - xVal) <
+          Math.abs(prev.wavelength - xVal)
+          ? curr
+          : prev
       })
       if (yMatch) {
         const newVal = {
@@ -127,10 +141,12 @@ export function ReferenceLampSpectrum() {
           y: yMatch.intensity,
         }
         // Si el punto cliquieado esta ocupado se borra la linea que lo ocupa
-        if (materialPoints.some(p => p.x === newVal.x && p.y === newVal.y)) {
-          setMaterialPoints(materialPoints.filter(
-            point => !(point.x === newVal.x && point.y === newVal.y),
-          ))
+        if (materialPoints.some((p) => p.x === newVal.x && p.y === newVal.y)) {
+          setMaterialPoints(
+            materialPoints.filter(
+              (point) => !(point.x === newVal.x && point.y === newVal.y),
+            ),
+          )
           return
         }
 
@@ -161,20 +177,18 @@ export function ReferenceLampSpectrum() {
             height={yMax}
             className="stroke-neutral-100"
           />
-          {
-            filteredDatas.map((fd, index) => (
-              <LinePath<SpectrumPoint>
-                key={`material_line-${materials[index]}`}
-                curve={curveLinear}
-                data={fd}
-                x={p => xScale(getX(p)) ?? 0}
-                y={p => yScale(getY(p)) ?? 0}
-                shapeRendering="geometricPrecision"
-                className="stroke-1"
-                stroke={materialsPalette[index % materialsPalette.length]}
-              />
-            ))
-          }
+          {filteredDatas.map((fd, index) => (
+            <LinePath<SpectrumPoint>
+              key={`material_line-${materials[index]}`}
+              curve={curveLinear}
+              data={fd}
+              x={(p) => xScale(getX(p)) ?? 0}
+              y={(p) => yScale(getY(p)) ?? 0}
+              shapeRendering="geometricPrecision"
+              className="stroke-1"
+              stroke={materialsPalette[index % materialsPalette.length]}
+            />
+          ))}
           <AxisBottom
             scale={xScale}
             top={yMax}

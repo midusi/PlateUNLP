@@ -1,8 +1,3 @@
-import type { NumberValue } from "@visx/vendor/d3-scale"
-import type { JSX } from "react/jsx-runtime"
-import { useGlobalStore } from "@/hooks/use-global-store"
-import { useMeasure } from "@/hooks/use-measure"
-import { CustomError } from "@/lib/utils"
 import { AxisBottom, AxisLeft, AxisTop } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -10,7 +5,12 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Line, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
+import type { NumberValue } from "@visx/vendor/d3-scale"
 import { useMemo } from "react"
+import type { JSX } from "react/jsx-runtime"
+import { useGlobalStore } from "@/hooks/use-global-store"
+import { useMeasure } from "@/hooks/use-measure"
+import { CustomError } from "@/lib/utils"
 
 export interface EmpiricalSpectrumPoint {
   pixel: number
@@ -29,7 +29,13 @@ interface EmpiricalSpectrumProps {
   showPixel?: boolean
 }
 
-export function EmpiricalSpectrum({ data, color, interactable = true, preview = true, showPixel = false }: EmpiricalSpectrumProps) {
+export function EmpiricalSpectrum({
+  data,
+  color,
+  interactable = true,
+  preview = true,
+  showPixel = false,
+}: EmpiricalSpectrumProps) {
   const height = 200
   const margin = {
     top: showPixel ? 40 : 0,
@@ -37,7 +43,13 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
     bottom: 40,
     left: 50,
   }
-  const [lampPoints, setLampPoints, linesPalette, materialPoints, pixelToWavelengthFunction] = useGlobalStore(s => [
+  const [
+    lampPoints,
+    setLampPoints,
+    linesPalette,
+    materialPoints,
+    pixelToWavelengthFunction,
+  ] = useGlobalStore((s) => [
     s.lampPoints,
     s.setLampPoints,
     s.linesPalette,
@@ -45,7 +57,9 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
     s.pixelToWavelengthFunction,
   ])
 
-  const isPixelToWavelengthValid = !(pixelToWavelengthFunction instanceof CustomError)
+  const isPixelToWavelengthValid = !(
+    pixelToWavelengthFunction instanceof CustomError
+  )
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
@@ -57,7 +71,9 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
     return {
       data,
       xScalePixel: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
-      xScaleWavelength: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
+      xScaleWavelength: scaleLinear<number>({
+        domain: [0, d3.max(data, getX)!],
+      }),
       yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
     }
   }, [data])
@@ -90,8 +106,7 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
             fontSize="12"
             fontFamily="Arial, sans-serif"
           >
-            #
-            {`${index}`}
+            #{`${index}`}
           </text>
         </g>,
       )
@@ -109,10 +124,12 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
         y: yMatch.intensity,
       }
       // Si el punto cliquieado esta ocupado se borra la linea que lo ocupa
-      if (lampPoints.some(p => p.x === newVal.x && p.y === newVal.y)) {
-        setLampPoints(lampPoints.filter(
-          point => !(point.x === newVal.x && point.y === newVal.y),
-        ))
+      if (lampPoints.some((p) => p.x === newVal.x && p.y === newVal.y)) {
+        setLampPoints(
+          lampPoints.filter(
+            (point) => !(point.x === newVal.x && point.y === newVal.y),
+          ),
+        )
         return
       }
 
@@ -127,7 +144,11 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
 
   return (
     <div ref={measureRef}>
-      <svg width={width} height={height} onClick={interactable ? onClick : undefined}>
+      <svg
+        width={width}
+        height={height}
+        onClick={interactable ? onClick : undefined}
+      >
         {interactable && spotsInGraph}
         <Group top={margin.top} left={margin.left}>
           <GridColumns
@@ -145,8 +166,8 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
           <LinePath<EmpiricalSpectrumPoint>
             curve={curveLinear}
             data={data}
-            x={p => xScalePixel(getX(p)) ?? 0}
-            y={p => yScale(getY(p)) ?? 0}
+            x={(p) => xScalePixel(getX(p)) ?? 0}
+            y={(p) => yScale(getY(p)) ?? 0}
             shapeRendering="geometricPrecision"
             className="stroke-1"
             style={{ stroke: color }}
@@ -176,19 +197,18 @@ export function EmpiricalSpectrum({ data, color, interactable = true, preview = 
                     : (_value: NumberValue) => "-"
                 }
               />
-              {!isPixelToWavelengthValid
-                && (
-                  <text
-                    x={width / 2}
-                    y={yMax + 20}
-                    fill="red"
-                    fontSize="12"
-                    fontFamily="Arial, sans-serif"
-                    textAnchor="middle"
-                  >
-                    {`${pixelToWavelengthFunction.message}`}
-                  </text>
-                )}
+              {!isPixelToWavelengthValid && (
+                <text
+                  x={width / 2}
+                  y={yMax + 20}
+                  fill="red"
+                  fontSize="12"
+                  fontFamily="Arial, sans-serif"
+                  textAnchor="middle"
+                >
+                  {`${pixelToWavelengthFunction.message}`}
+                </text>
+              )}
             </>
           )}
           <AxisLeft scale={yScale} label="Intensity" />

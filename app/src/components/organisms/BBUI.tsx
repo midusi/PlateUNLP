@@ -1,17 +1,16 @@
-import type { BBClassesProps } from "@/enums/BBClasses"
-import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { Dispatch, SetStateAction } from "react"
-import { cropImages } from "@/lib/cropImage"
 import clsx from "clsx"
 import { Bot, Palette, RotateCw, Square, Trash2 } from "lucide-react"
 import { nanoid } from "nanoid"
+import type { Dispatch, SetStateAction } from "react"
 import { useCallback, useState } from "react"
+import type { BBClassesProps } from "@/enums/BBClasses"
+import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { Button } from "../atoms/button"
 import { Card } from "../atoms/card"
-import { BoxList, Step } from "./BBList"
+import type { BoxMetadata } from "../molecules/BoxMetadataForm"
+import { BoxList, type Step } from "./BBList"
 import { ImageLoader } from "./ImageLoader"
 import { ImageViewer } from "./ImageViewer"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
 
 interface BBUIProps {
   file?: string | null
@@ -20,7 +19,10 @@ interface BBUIProps {
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: Dispatch<SetStateAction<BoxMetadata[]>>
   onComplete: () => void
-  saveBoundingBoxes: (boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) => void
+  saveBoundingBoxes: (
+    boundingBoxes: BoundingBox[],
+    boxMetadata: BoxMetadata[],
+  ) => void
   saveImageLoading?: (src: string) => void
   classes: BBClassesProps[]
   determineBBFunction: (img_src: string) => Promise<BoundingBox[]>
@@ -54,7 +56,7 @@ export function BBUI({
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedBoxId) {
-      setBoundingBoxes(prev => prev.filter(box => box.id !== selectedBoxId))
+      setBoundingBoxes((prev) => prev.filter((box) => box.id !== selectedBoxId))
       setSelectedBoxId(null)
     }
   }, [selectedBoxId, setBoundingBoxes])
@@ -85,48 +87,49 @@ export function BBUI({
             <div className="flex gap-2">
               {image && (
                 <Button
-                  onClick={() => { handleAutodetect(image) }}
+                  onClick={() => {
+                    handleAutodetect(image)
+                  }}
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2 text-black bg-white hover:bg-slate-50"
                 >
                   <Bot className="h-4 w-4" />
-                  <span>
-                    Autodetect Bounding Boxes
-                  </span>
+                  <span>Autodetect Bounding Boxes</span>
                 </Button>
               )}
               {parameters.rotateButton && (
                 <Button
-                  onClick={() => { setRotation((rotation + 90) % 360) }}
+                  onClick={() => {
+                    setRotation((rotation + 90) % 360)
+                  }}
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2 text-black bg-white hover:bg-slate-50"
                 >
                   <RotateCw className="h-4 w-4" />
-                  <span>
-                    {`Rotate 90º from ${rotation}º`}
-                  </span>
+                  <span>{`Rotate 90º from ${rotation}º`}</span>
                 </Button>
               )}
 
-              {parameters.invertColorButton
-                && (
-                  <Button
-                    onClick={() => { setBgWhite(!bgWhite) }}
-                    variant="outline"
-                    size="sm"
-                    className={clsx(
-                      "flex items-center gap-2",
-                      bgWhite
-                        ? "bg-white text-black hover:bg-slate-50"
-                        : "bg-slate-800 text-white hover:bg-slate-700",
-                    )}
-                  >
-                    <Palette className="h-4 w-4" />
-                    <span>Invert colors</span>
-                  </Button>
-                )}
+              {parameters.invertColorButton && (
+                <Button
+                  onClick={() => {
+                    setBgWhite(!bgWhite)
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className={clsx(
+                    "flex items-center gap-2",
+                    bgWhite
+                      ? "bg-white text-black hover:bg-slate-50"
+                      : "bg-slate-800 text-white hover:bg-slate-700",
+                  )}
+                >
+                  <Palette className="h-4 w-4" />
+                  <span>Invert colors</span>
+                </Button>
+              )}
               <Button
                 onClick={() => {
                   setIsDrawingMode(!isDrawingMode)
@@ -158,29 +161,30 @@ export function BBUI({
             </div>
           </div>
         </div>
-        <div className={clsx(
-          "w-full h-[300px]",
-          "flex items-center justify-center",
-          " bg-slate-50 overflow-hidden",
-        )}
+        <div
+          className={clsx(
+            "w-full h-[300px]",
+            "flex items-center justify-center",
+            " bg-slate-50 overflow-hidden",
+          )}
         >
-          {image
-            ? (
-              <ImageViewer
-                src={image}
-                rotation={rotation}
-                bgWhite={bgWhite}
-                isDrawingMode={isDrawingMode}
-                setIsDrawingMode={setIsDrawingMode}
-                selectedBoxId={selectedBoxId}
-                setSelectedBoxId={setSelectedBoxId}
-                boundingBoxes={boundingBoxes}
-                setBoundingBoxes={setBoundingBoxes}
-                boxMetadatas={boxMetadatas}
-                setBoxMetadatas={setBoxMetadatas}
-              />
-            )
-            : <ImageLoader handleImageLoad={handleImageLoad} />}
+          {image ? (
+            <ImageViewer
+              src={image}
+              rotation={rotation}
+              bgWhite={bgWhite}
+              isDrawingMode={isDrawingMode}
+              setIsDrawingMode={setIsDrawingMode}
+              selectedBoxId={selectedBoxId}
+              setSelectedBoxId={setSelectedBoxId}
+              boundingBoxes={boundingBoxes}
+              setBoundingBoxes={setBoundingBoxes}
+              boxMetadatas={boxMetadatas}
+              setBoxMetadatas={setBoxMetadatas}
+            />
+          ) : (
+            <ImageLoader handleImageLoad={handleImageLoad} />
+          )}
         </div>
       </Card>
       <BoxList

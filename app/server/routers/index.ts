@@ -1,12 +1,9 @@
 import { eq } from "drizzle-orm"
-import { z } from "zod"
+import { z } from "zod/v4"
 import { verifyPassword } from "../auth/password"
-import { db, seedUsers } from "../db"
+import { db } from "../db"
 import * as s from "../db/schema"
 import { publicProcedure, router } from "../trpc"
-
-// Llamar a la función de semilla
-seedUsers()
 
 export const appRouter = router({
   dummy: publicProcedure.query(() => "Hello, world!"),
@@ -46,7 +43,7 @@ export const appRouter = router({
         .select()
         .from(s.user)
         .where(eq(s.user.email, Email))
-        .then(rows => rows[0])
+        .then((rows) => rows[0])
 
       if (!user) {
         // Usuario no encontrado

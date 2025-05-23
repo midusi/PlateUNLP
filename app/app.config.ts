@@ -16,12 +16,14 @@ export default createApp({
       dir: "./public",
     },
     ...(process.env.NODE_ENV === "production"
-      ? [{
-        type: "static",
-        name: "docs",
-        base: "/docs",
-        dir: "../docs/dist",
-      } as const]
+      ? [
+          {
+            type: "static",
+            name: "docs",
+            base: "/docs",
+            dir: "../docs/dist",
+          } as const,
+        ]
       : []),
     {
       type: "http",
@@ -40,10 +42,12 @@ export default createApp({
         tsconfigPaths(),
         react(),
         viteStaticCopy({
-          targets: [{
-            src: "node_modules/onnxruntime-web/dist/*.wasm",
-            dest: "./models",
-          }],
+          targets: [
+            {
+              src: "node_modules/onnxruntime-web/dist/*.wasm",
+              dest: "./models",
+            },
+          ],
         }),
       ],
     },
