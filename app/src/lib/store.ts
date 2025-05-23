@@ -1,9 +1,12 @@
+import { create } from "zustand"
 import type { LampMaterial } from "@/lib/spectral-data"
 import { LAMP_MATERIALS } from "@/lib/spectral-data"
-import { create } from "zustand"
 import { CustomError, ErrorCodes } from "./utils"
 
-interface Point { x: number, y: number }
+interface Point {
+  x: number
+  y: number
+}
 
 export interface GlobalStore {
   material: LampMaterial
@@ -24,13 +27,15 @@ export interface GlobalStore {
   setRange: (min: number, max: number) => void
   setLampPoints: (arr: Point[]) => void
   setMaterialPoints: (arr: Point[]) => void
-  setPixelToWavelengthFunction: (arr: ((value: number) => number) | CustomError) => void
+  setPixelToWavelengthFunction: (
+    arr: ((value: number) => number) | CustomError,
+  ) => void
   setOneTeoricalSpectrum: (value: boolean) => void
   setActualStep: (value: number) => void
   setSelectedSpectrum: (value: number | null) => void
 }
 
-export const globalStore = create<GlobalStore>()(set => ({
+export const globalStore = create<GlobalStore>()((set) => ({
   /** The selected material for the reference lamp. */
   material: LAMP_MATERIALS[0],
   /** The low part of the range of the reference lamp. */
@@ -42,9 +47,7 @@ export const globalStore = create<GlobalStore>()(set => ({
   /** The points marked in the material lamp espectrum. */
   materialPoints: [],
   /** The color palette for the lines marked for the user. */
-  linesPalette: [
-    "#000000",
-  ],
+  linesPalette: ["#000000"],
 
   materialsPalette: [
     "#ff7f0e", // Naranja
@@ -69,18 +72,24 @@ export const globalStore = create<GlobalStore>()(set => ({
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {
       set({ material: value })
-    }
-    else {
+    } else {
       console.error(`Invalid material: ${value}`)
     }
   },
-  setRangeMin: value => set({ rangeMin: Math.round(value) }),
-  setRangeMax: value => set({ rangeMax: Math.round(value) }),
-  setRange: (min, max) => set({ rangeMin: Math.round(min), rangeMax: Math.round(max) }),
-  setLampPoints: (arr) => { set({ lampPoints: arr }) },
-  setMaterialPoints: (arr) => { set({ materialPoints: arr }) },
-  setPixelToWavelengthFunction: (value) => { set({ pixelToWavelengthFunction: value }) },
-  setOneTeoricalSpectrum: value => set({ oneTeoricalSpectrum: value }),
-  setActualStep: value => set({ actualStep: value }),
-  setSelectedSpectrum: value => set({ selectedSpectrum: value }),
+  setRangeMin: (value) => set({ rangeMin: Math.round(value) }),
+  setRangeMax: (value) => set({ rangeMax: Math.round(value) }),
+  setRange: (min, max) =>
+    set({ rangeMin: Math.round(min), rangeMax: Math.round(max) }),
+  setLampPoints: (arr) => {
+    set({ lampPoints: arr })
+  },
+  setMaterialPoints: (arr) => {
+    set({ materialPoints: arr })
+  },
+  setPixelToWavelengthFunction: (value) => {
+    set({ pixelToWavelengthFunction: value })
+  },
+  setOneTeoricalSpectrum: (value) => set({ oneTeoricalSpectrum: value }),
+  setActualStep: (value) => set({ actualStep: value }),
+  setSelectedSpectrum: (value) => set({ selectedSpectrum: value }),
 }))

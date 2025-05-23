@@ -1,9 +1,9 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Dispatch, SetStateAction } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
+import type { BoundingBox } from "@/interfaces/BoundingBox"
+import type { BoxMetadata } from "../molecules/BoxMetadataForm"
 import { ImageWithBoundingBoxes } from "../molecules/ImageWithBoundingBoxes"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
 
 /**
  * Listado de props que espera recibir ImageViewer
@@ -40,7 +40,7 @@ export function ImageViewer({
   boundingBoxes,
   setBoundingBoxes,
   boxMetadatas,
-  setBoxMetadatas
+  setBoxMetadatas,
 }: ImageViewerProps) {
   const scaleUp = true
   //   const backgroundColor = "black"
@@ -61,10 +61,10 @@ export function ImageViewer({
 
   const imageScale = useMemo(() => {
     if (
-      containerWidth === 0
-      || containerHeight === 0
-      || imageNaturalWidth === 0
-      || imageNaturalHeight === 0
+      containerWidth === 0 ||
+      containerHeight === 0 ||
+      imageNaturalWidth === 0 ||
+      imageNaturalHeight === 0
     ) {
       return 0
     }
@@ -86,8 +86,7 @@ export function ImageViewer({
       const rect = container.getBoundingClientRect()
       setContainerWidth(rect.width)
       setContainerHeight(rect.height)
-    }
-    else {
+    } else {
       setContainerWidth(0)
       setContainerHeight(0)
     }

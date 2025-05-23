@@ -1,8 +1,7 @@
-import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
-
-import * as React from "react"
+import type * as React from "react"
 import { DayPicker } from "react-day-picker"
+import { cn } from "@/lib/utils"
 import { buttonVariants } from "./button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>

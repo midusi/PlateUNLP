@@ -1,23 +1,36 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 import type { ClassValue } from "clsx"
 import { clsx } from "clsx"
 import { inv, lusolve, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
+import type { BoundingBox } from "@/interfaces/BoundingBox"
+import type { StepSpecificInfoForm } from "@/interfaces/ProcessInfoForm"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function generateRange(min: number, max: number, count: number): number[] {
-  return Array.from({ length: count }, (_, i) => min + (i * (max - min)) / (count - 1))
+export function generateRange(
+  min: number,
+  max: number,
+  count: number,
+): number[] {
+  return Array.from(
+    { length: count },
+    (_, i) => min + (i * (max - min)) / (count - 1),
+  )
 }
 
-function sortArraysByFirst(x: number[], y: number[]): [x: number[], y: number[]] {
-  const combined = x.map((value: number, index: number) => ({ x: value, y: y[index] }))
+function sortArraysByFirst(
+  x: number[],
+  y: number[],
+): [x: number[], y: number[]] {
+  const combined = x.map((value: number, index: number) => ({
+    x: value,
+    y: y[index],
+  }))
   combined.sort((a, b) => a.x - b.x)
-  const sortedX = combined.map(item => item.x)
-  const sortedY = combined.map(item => item.y)
+  const sortedX = combined.map((item) => item.x)
+  const sortedY = combined.map((item) => item.y)
   return [sortedX, sortedY]
 }
 
@@ -49,12 +62,17 @@ export class CustomError extends Error {
  * Función de interpolación para ubicar nuevos x y Funcion de para hallar
  * calcular derivada en un punto dado
  */
-export function splineCuadratic(x: number[], y: number[]): {
-  funct: ((value: number) => number)
-  derived: ((value: number) => number)
+export function splineCuadratic(
+  x: number[],
+  y: number[],
+): {
+  funct: (value: number) => number
+  derived: (value: number) => number
 } {
   if (x.length < 2)
-    throw new Error(`At least two points are needed to buil a spline. Count of points: ${x.length}`)
+    throw new Error(
+      `At least two points are needed to buil a spline. Count of points: ${x.length}`,
+    )
 
   const puntos = x.map((value, i) => ({ x: value, y: y[i] }))
 
@@ -108,7 +126,10 @@ export function splineCuadratic(x: number[], y: number[]): {
   const solution = lusolve(coeff, res) // mathjs devuelve una matriz columna
 
   // Coeficientes a1, b1, c1, a2, b2, c2, ..., an, bn, cn
-  const coef: number[] = solution.valueOf().flat().map(c => Number(c))
+  const coef: number[] = solution
+    .valueOf()
+    .flat()
+    .map((c) => Number(c))
 
   // Funciones por partes
   const functionsArr: ((x: number) => number)[] = [] // Funcion como tal
@@ -116,17 +137,17 @@ export function splineCuadratic(x: number[], y: number[]): {
   for (let i = 0; i < n; i++) {
     const idx = i * 3
     const segmentFunction = (x: number) => {
-      return (coef[idx] * (x ** 2)) + (coef[idx + 1] * x) + coef[idx + 2]
+      return coef[idx] * x ** 2 + coef[idx + 1] * x + coef[idx + 2]
     }
     functionsArr.push(segmentFunction)
     const segmentDerived = (x: number) => {
-      return (2 * coef[idx] * x) + coef[idx + 1]
+      return 2 * coef[idx] * x + coef[idx + 1]
     }
     derivedArr.push(segmentDerived)
   }
-  const intervals: { start: number, end: number }[] = functionsArr.map((_, idx) => (
-    { start: puntos[idx].x, end: puntos[idx + 1].x }
-  ))
+  const intervals: { start: number; end: number }[] = functionsArr.map(
+    (_, idx) => ({ start: puntos[idx].x, end: puntos[idx + 1].x }),
+  )
 
   const splineCase: (value: number) => number = (value: number) => {
     let result: number
@@ -137,8 +158,7 @@ export function splineCuadratic(x: number[], y: number[]): {
       }
     }
 
-    if (value < intervals[0].start)
-      result = functionsArr[0](value)
+    if (value < intervals[0].start) result = functionsArr[0](value)
     else if (value >= intervals[intervals.length - 1].start)
       result = functionsArr[intervals.length - 1](value)
 
@@ -154,8 +174,7 @@ export function splineCuadratic(x: number[], y: number[]): {
       }
     }
 
-    if (value < intervals[0].start)
-      result = derivedArr[0](value)
+    if (value < intervals[0].start) result = derivedArr[0](value)
     else if (value >= intervals[intervals.length - 1].start)
       result = derivedArr[intervals.length - 1](value)
 
@@ -177,9 +196,12 @@ export function splineCuadratic(x: number[], y: number[]): {
  * Función de interpolación para ubicar nuevos x y Funcion de para hallar
  * calcular derivada en un punto dado
  */
-export function linearRegressionWhitDerived(x: number[], y: number[]): {
-  funct: ((value: number) => number)
-  derived: ((value: number) => number)
+export function linearRegressionWhitDerived(
+  x: number[],
+  y: number[],
+): {
+  funct: (value: number) => number
+  derived: (value: number) => number
 } {
   if (x.length !== y.length) {
     throw new CustomError(
@@ -198,8 +220,10 @@ export function linearRegressionWhitDerived(x: number[], y: number[]): {
   const n = x.length
   const sumX = x.reduce((acc, cur) => acc + cur, 0)
   const sumY = y.reduce((acc, cur) => acc + cur, 0)
-  const sumMul = x.map((val, i) => val * y[i]).reduce((acc, cur) => acc + cur, 0)
-  const sumXCuad = x.map(val => val ** 2).reduce((acc, cur) => acc + cur, 0)
+  const sumMul = x
+    .map((val, i) => val * y[i])
+    .reduce((acc, cur) => acc + cur, 0)
+  const sumXCuad = x.map((val) => val ** 2).reduce((acc, cur) => acc + cur, 0)
   const promX = sumX / n
   const promY = sumY / n
 
@@ -224,7 +248,10 @@ export function linearRegressionWhitDerived(x: number[], y: number[]): {
  * @returns {funct: ((value: number) => number)}
  * Función de interpolación para ubicar nuevos x.
  */
-export function linearRegression(x: number[], y: number[]): ((value: number) => number) {
+export function linearRegression(
+  x: number[],
+  y: number[],
+): (value: number) => number {
   if (x.length !== y.length) {
     throw new CustomError(
       ErrorCodes.DIFFERENT_PROMP_SIZE,
@@ -242,8 +269,10 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
   const n = x.length
   const sumX = x.reduce((acc, cur) => acc + cur, 0)
   const sumY = y.reduce((acc, cur) => acc + cur, 0)
-  const sumMul = x.map((val, i) => val * y[i]).reduce((acc, cur) => acc + cur, 0)
-  const sumXCuad = x.map(val => val ** 2).reduce((acc, cur) => acc + cur, 0)
+  const sumMul = x
+    .map((val, i) => val * y[i])
+    .reduce((acc, cur) => acc + cur, 0)
+  const sumXCuad = x.map((val) => val ** 2).reduce((acc, cur) => acc + cur, 0)
   const promX = sumX / n
   const promY = sumY / n
 
@@ -257,7 +286,10 @@ export function linearRegression(x: number[], y: number[]): ((value: number) => 
   return regFun
 }
 
-export function piecewiseLinearRegression(x: number[], y: number[]): ((value: number) => number) {
+export function piecewiseLinearRegression(
+  x: number[],
+  y: number[],
+): (value: number) => number {
   /**
    * x e y contienen una serie de valores que se corresponden
    * cada uno con el de la misma posición en el otro arreglo.
@@ -308,11 +340,17 @@ export function piecewiseLinearRegression(x: number[], y: number[]): ((value: nu
       }
     }
 
-    throw new Error(`El valor ${value} no está contemplado por el dominio de la función`)
+    throw new Error(
+      `El valor ${value} no está contemplado por el dominio de la función`,
+    )
   }
 }
 
-export function legendreAlgoritm(x: number[], y: number[], degree: number = -1): ((value: number) => number) {
+export function legendreAlgoritm(
+  x: number[],
+  y: number[],
+  degree = -1,
+): (value: number) => number {
   if (x.length !== y.length) {
     throw new CustomError(
       ErrorCodes.DIFFERENT_PROMP_SIZE,
@@ -346,16 +384,14 @@ export function legendreAlgoritm(x: number[], y: number[], degree: number = -1):
   function obtainNormalizator(x: number[]): (value: number) => number {
     const min = Math.min(...x) // Valor mínimo en x
     const max = Math.max(...x) // Valor máximo en x
-    return (value: number) => ((2 * (value - min)) / (max - min) - 1)
+    return (value: number) => (2 * (value - min)) / (max - min) - 1
   }
   const normalizator = obtainNormalizator(x)
   const x_scaled = x.map(normalizator)
 
   function legendreBasisIterative(x: number, k: number): number {
-    if (k === 0)
-      return 1 // P0(x) = 1
-    if (k === 1)
-      return x // P1(x) = x
+    if (k === 0) return 1 // P0(x) = 1
+    if (k === 1) return x // P1(x) = x
 
     let Pk_2 = 1 // P0(x)
     let Pk_1 = x // P1(x)
@@ -370,7 +406,7 @@ export function legendreAlgoritm(x: number[], y: number[], degree: number = -1):
     return Pk
   }
 
-  const P = x_scaled.map(xi =>
+  const P = x_scaled.map((xi) =>
     Array.from({ length: degree + 1 }, (_, k) => legendreBasisIterative(xi, k)),
   )
 
@@ -382,15 +418,13 @@ export function legendreAlgoritm(x: number[], y: number[], degree: number = -1):
 
   // Calcular coeficientes: (XT * X)^-1 * XT * y
   const Y = matrix(y)
-  const coefficients = multiply(
-    inv(multiply(XT, X)),
-    multiply(XT, Y),
-  )
+  const coefficients = multiply(inv(multiply(XT, X)), multiply(XT, Y))
 
-  return function (value: number): number {
+  return (value: number): number => {
     const val = normalizator(value)
     return (coefficients.toArray() as number[]).reduce(
-      (sum: number, coeff: number, k: number) => sum + coeff * legendreBasisIterative(val, k),
+      (sum: number, coeff: number, k: number) =>
+        sum + coeff * legendreBasisIterative(val, k),
       0,
     )
   }
@@ -398,11 +432,21 @@ export function legendreAlgoritm(x: number[], y: number[], degree: number = -1):
 
 export function iou(box1: BoundingBox, box2: BoundingBox) {
   function union(box1: BoundingBox, box2: BoundingBox) {
-    const { x: box1_x1, y: box1_y1, width: box1_width, height: box1_height } = box1
+    const {
+      x: box1_x1,
+      y: box1_y1,
+      width: box1_width,
+      height: box1_height,
+    } = box1
     const box1_x2 = box1_x1 + box1_width
     const box1_y2 = box1_y1 + box1_height
 
-    const { x: box2_x1, y: box2_y1, width: box2_width, height: box2_height } = box2
+    const {
+      x: box2_x1,
+      y: box2_y1,
+      width: box2_width,
+      height: box2_height,
+    } = box2
     const box2_x2 = box2_x1 + box2_width
     const box2_y2 = box2_y1 + box2_height
 
@@ -412,11 +456,21 @@ export function iou(box1: BoundingBox, box2: BoundingBox) {
   }
 
   function intersection(box1: BoundingBox, box2: BoundingBox) {
-    const { x: box1_x1, y: box1_y1, width: box1_width, height: box1_height } = box1
+    const {
+      x: box1_x1,
+      y: box1_y1,
+      width: box1_width,
+      height: box1_height,
+    } = box1
     const box1_x2 = box1_x1 + box1_width
     const box1_y2 = box1_y1 + box1_height
 
-    const { x: box2_x1, y: box2_y1, width: box2_width, height: box2_height } = box2
+    const {
+      x: box2_x1,
+      y: box2_y1,
+      width: box2_width,
+      height: box2_height,
+    } = box2
     const box2_x2 = box2_x1 + box2_width
     const box2_y2 = box2_y1 + box2_height
 
@@ -435,7 +489,10 @@ export function getNextId(boundingBoxes: BoundingBox[]) {
   return maxId + 1
 }
 
-export function totalStepsCompleted(spectrumId: number, steps: StepSpecificInfoForm[]): number {
+export function totalStepsCompleted(
+  spectrumId: number,
+  steps: StepSpecificInfoForm[],
+): number {
   let stepsCompleted = 0
   // Recorrer etapas por las que tiene que pasar un espectro
   for (let stepId = 0; stepId < steps.length; stepId++) {

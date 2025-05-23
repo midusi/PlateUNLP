@@ -1,8 +1,6 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 
 export const loginFormSchema = z.object({
-    Email: z.string().nonempty("Email is required")
-        .email(),
-    Password: z.string().nonempty("Password is required")
-        .min(6, "Password must be at least 6 characters long")
+  Email: z.email(),
+  Password: z.string().min(6, "Password must be at least 6 characters long"),
 })

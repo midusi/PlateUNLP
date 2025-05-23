@@ -1,12 +1,15 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
 import html2canvas from "html2canvas"
-import { BBClasses, classesSpectrumPartSegmentation } from "@/enums/BBClasses"
-import { cropImages } from "@/lib/cropImage"
-import { extractFeatures, useExtractFeatures, useExtractFeaturesResponse } from "@/hooks/use-extract-features"
-import { ImageWithPixelExtraction } from "@/components/organisms/ImageWithPixelExtraction"
-import { SimpleFunctionXY } from "@/components/molecules/SimpleFunctionXY"
-import { createRoot } from "react-dom/client"
 import { useEffect, useRef, useState } from "react"
+import { createRoot } from "react-dom/client"
+import { SimpleFunctionXY } from "@/components/molecules/SimpleFunctionXY"
+import { ImageWithPixelExtraction } from "@/components/organisms/ImageWithPixelExtraction"
+import { BBClasses } from "@/enums/BBClasses"
+import {
+  extractFeatures,
+  type useExtractFeaturesResponse,
+} from "@/hooks/use-extract-features"
+import type { BoundingBox } from "@/interfaces/BoundingBox"
+import { cropImages } from "@/lib/cropImage"
 
 /**
  * Procesa un conjunto de imagenes de espectros, selecciona sus partes con
@@ -81,7 +84,11 @@ export function useProcessSpectraPool(
   /** Reusar funcion de ciencia */
   const reuseScienceFunction = true
 
-  const [partSrcs, setPartSrcs] = useState<{science:string , lamp1:string , lamp2:string }>()
+  const [partSrcs, setPartSrcs] = useState<{
+    science: string
+    lamp1: string
+    lamp2: string
+  }>()
   const [features, setFeatures] = useState<useExtractFeaturesResponse>()
   const hasRunOnce = useRef(false)
   const hasGeneratedImage = useRef(false)
@@ -89,63 +96,71 @@ export function useProcessSpectraPool(
   useEffect(() => {
     if (hasRunOnce.current) return
     hasRunOnce.current = true
-    Promise.all(spectras.map(async (src, idx) => {
-      console.log(idx, src)
-      const boundingBoxes = await separateParts(src, determineBBFunction)
-      const bblist = [boundingBoxes.science, boundingBoxes.lamp1, boundingBoxes.lamp2]
-      const parts = await cropImages(src, bblist)
-      setPartSrcs({
-        science:parts[0], 
-        lamp1:parts[1], 
-        lamp2:parts[2]
-      })
-      extractFeatures(
-        setFeatures,
-        countCheckpoints,
-        segmentWidth,
-        parts[0],
-        parts[1],
-        parts[2],
-        useSpline,
-        reuseScienceFunction,
-      )
-      //const images = await Promise.all(parts.map(loadImage))
-      //const resizeds = await Promise.all(images.map(img=>resize(img, width))) 
-      //combineAndDownload(resizeds)
-      return boundingBoxes
-    })).then((arr) => {
+    Promise.all(
+      spectras.map(async (src, idx) => {
+        console.log(idx, src)
+        const boundingBoxes = await separateParts(src, determineBBFunction)
+        const bblist = [
+          boundingBoxes.science,
+          boundingBoxes.lamp1,
+          boundingBoxes.lamp2,
+        ]
+        const parts = await cropImages(src, bblist)
+        setPartSrcs({
+          science: parts[0],
+          lamp1: parts[1],
+          lamp2: parts[2],
+        })
+        extractFeatures(
+          setFeatures,
+          countCheckpoints,
+          segmentWidth,
+          parts[0],
+          parts[1],
+          parts[2],
+          useSpline,
+          reuseScienceFunction,
+        )
+        //const images = await Promise.all(parts.map(loadImage))
+        //const resizeds = await Promise.all(images.map(img=>resize(img, width)))
+        //combineAndDownload(resizeds)
+        return boundingBoxes
+      }),
+    ).then((arr) => {
       console.log("Todo Listo", arr)
       return arr
     })
-  },[determineBBFunction])
+  }, [determineBBFunction])
 
   useEffect(() => {
-    if(features){
+    if (features) {
       if (hasGeneratedImage.current) return
       hasGeneratedImage.current = true
-      generateImageFromComponentAndDownload(
-        partSrcs!, 
-        features!
-      )
+      generateImageFromComponentAndDownload(partSrcs!, features!)
     }
-    
-  },[features,partSrcs])
-
+  }, [features, partSrcs])
 }
 
 /**
  * Procesa una unica imagen de espectro separando sus componentes
  * @returns {science:BoundingBox, lamp1:BoundingBox, lamp2:BoundingBox}
  */
-async function separateParts(src: string, determineBBFunction: (img_src: string) => Promise<BoundingBox[]>): Promise<{
+async function separateParts(
+  src: string,
+  determineBBFunction: (img_src: string) => Promise<BoundingBox[]>,
+): Promise<{
   science: BoundingBox
   lamp1: BoundingBox
   lamp2: BoundingBox
 }> {
   const boundingBoxes = await determineBBFunction(src)
   console.log("dentro", boundingBoxes)
-  const scienceBb = boundingBoxes.filter(bb => bb.class_info === BBClasses.Science)[0]
-  const lampsBbs = boundingBoxes.filter(bb => bb.class_info === BBClasses.Lamp)
+  const scienceBb = boundingBoxes.filter(
+    (bb) => bb.class_info === BBClasses.Science,
+  )[0]
+  const lampsBbs = boundingBoxes.filter(
+    (bb) => bb.class_info === BBClasses.Lamp,
+  )
   console.log("ok1")
 
   return {
@@ -175,7 +190,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
  */
 function combineAndDownload(images: HTMLImageElement[]) {
   const margin = 20
-  const width = Math.max(...images.map(img => img.width))
+  const width = Math.max(...images.map((img) => img.width))
   const height = images.reduce((sum, img) => sum + img.height, 0)
 
   const canvas = document.createElement("canvas")
@@ -191,12 +206,12 @@ function combineAndDownload(images: HTMLImageElement[]) {
 
   // Descargar como imagen única
   const a = document.createElement("a")
-  a.href = canvas.toDataURL("image/png") 
+  a.href = canvas.toDataURL("image/png")
   a.download = "combinada.png"
   a.click()
 }
 
-function resize(img:HTMLImageElement, w: number): Promise<HTMLImageElement> {
+function resize(img: HTMLImageElement, w: number): Promise<HTMLImageElement> {
   // Redimensionamos todas las imágenes a 400px de ancho, manteniendo la relación de aspecto
   const scale = w / img.width
   const width = w
@@ -215,14 +230,14 @@ function resize(img:HTMLImageElement, w: number): Promise<HTMLImageElement> {
   })
 }
 
-
-
 export async function generateImageFromComponentAndDownload(
   urls: {
-  science: string
-  lamp1: string
-  lamp2: string
-}, props:useExtractFeaturesResponse): Promise<string> {
+    science: string
+    lamp1: string
+    lamp2: string
+  },
+  props: useExtractFeaturesResponse,
+): Promise<string> {
   return new Promise((resolve) => {
     // 1. Crear contenedor offscreen
     const container = document.createElement("div")
@@ -236,67 +251,67 @@ export async function generateImageFromComponentAndDownload(
     const root = createRoot(container)
     root.render(
       <div className="flex flex-col gap-4">
-          <ImageWithPixelExtraction
-            title="Science Spectrum"
-            imageUrl={urls.science}
-            imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
-            pointsWMed={props.scienceMediasPoints}
-            drawFunction={props.scienceFunction!}
-            perpendicularFunctions={props.scienceTransversalFunctions}
-            opening={props.scienceAvgOpening}
-          >
-            <SimpleFunctionXY data={props.scienceTransversalAvgs} />
-          </ImageWithPixelExtraction>
+        <ImageWithPixelExtraction
+          title="Science Spectrum"
+          imageUrl={urls.science}
+          imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
+          pointsWMed={props.scienceMediasPoints}
+          drawFunction={props.scienceFunction!}
+          perpendicularFunctions={props.scienceTransversalFunctions}
+          opening={props.scienceAvgOpening}
+        >
+          <SimpleFunctionXY data={props.scienceTransversalAvgs} />
+        </ImageWithPixelExtraction>
 
-          <ImageWithPixelExtraction
-            title="Lamp 1 Spectrum"
-            imageUrl={urls.lamp1}
-            imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
-            pointsWMed={props.lamp1MediasPoints}
-            drawFunction={props.lamp1Function!}
-            perpendicularFunctions={props.lamp1TransversalFunctions}
-            opening={props.lamp1AvgOpening}
-          >
-            <SimpleFunctionXY data={props.lamp1TransversalAvgs} />
-          </ImageWithPixelExtraction>
+        <ImageWithPixelExtraction
+          title="Lamp 1 Spectrum"
+          imageUrl={urls.lamp1}
+          imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
+          pointsWMed={props.lamp1MediasPoints}
+          drawFunction={props.lamp1Function!}
+          perpendicularFunctions={props.lamp1TransversalFunctions}
+          opening={props.lamp1AvgOpening}
+        >
+          <SimpleFunctionXY data={props.lamp1TransversalAvgs} />
+        </ImageWithPixelExtraction>
 
-          <ImageWithPixelExtraction
-            title="Lamp 2 Spectrum"
-            imageUrl={urls.lamp2}
-            imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 2."
-            pointsWMed={props.lamp2MediasPoints}
-            drawFunction={props.lamp2Function!}
-            perpendicularFunctions={props.lamp2TransversalFunctions}
-            opening={props.lamp2AvgOpening}
-          >
-            <SimpleFunctionXY data={props.lamp2TransversalAvgs} />
-          </ImageWithPixelExtraction>
-      </div>
+        <ImageWithPixelExtraction
+          title="Lamp 2 Spectrum"
+          imageUrl={urls.lamp2}
+          imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 2."
+          pointsWMed={props.lamp2MediasPoints}
+          drawFunction={props.lamp2Function!}
+          perpendicularFunctions={props.lamp2TransversalFunctions}
+          opening={props.lamp2AvgOpening}
+        >
+          <SimpleFunctionXY data={props.lamp2TransversalAvgs} />
+        </ImageWithPixelExtraction>
+      </div>,
     )
 
     // 3. Esperar a que se renderice y capturar
     setTimeout(() => {
       html2canvas(container).then(async (canvas) => {
-      // 1. Convertir canvas a imagen
-      const image = new Image()
-      image.src = canvas.toDataURL("image/png")
-      image.crossOrigin = "anonymous"
+        // 1. Convertir canvas a imagen
+        const image = new Image()
+        image.src = canvas.toDataURL("image/png")
+        image.crossOrigin = "anonymous"
 
-      // 2. Esperar que cargue
-      image.onload = async () => {
-        // 3. Redimensionar a 600px de ancho
-        const resizedImage = await resize(image, 720)
+        // 2. Esperar que cargue
+        image.onload = async () => {
+          // 3. Redimensionar a 600px de ancho
+          const resizedImage = await resize(image, 720)
 
-        // 4. Descargar la imagen redimensionada
-        const a = document.createElement("a")
-        a.href = resizedImage.src
-        a.download = "combined-spectrum-resized.png"
-        a.click()
+          // 4. Descargar la imagen redimensionada
+          const a = document.createElement("a")
+          a.href = resizedImage.src
+          a.download = "combined-spectrum-resized.png"
+          a.click()
 
-        // 5. Limpiar
-        document.body.removeChild(container)
-      }
-    })
-  }, 3000) // esperar un poco para que el render termine (ajustá si hace falta)
+          // 5. Limpiar
+          document.body.removeChild(container)
+        }
+      })
+    }, 3000) // esperar un poco para que el render termine (ajustá si hace falta)
   })
 }

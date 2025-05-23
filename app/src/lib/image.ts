@@ -15,16 +15,16 @@ import { levenbergMarquardt } from "ml-levenberg-marquardt"
 export function getPointsInRect(
   data: Uint8ClampedArray,
   width: number,
-  rect: ((y: number) => number),
+  rect: (y: number) => number,
   minY: number,
   maxY: number,
 ): number[] {
   const rectPoints: number[] = []
-  for (let y = minY; y < maxY; y++) { // Dada una recta, Para cada pixel vertical
+  for (let y = minY; y < maxY; y++) {
+    // Dada una recta, Para cada pixel vertical
     /** Coordenada X que le corresponde a un determinado Y. */
     const coordenadaX = round(rect(y))
-    if (coordenadaX < 0 || coordenadaX >= width)
-      continue
+    if (coordenadaX < 0 || coordenadaX >= width) continue
     // Valor correspondiente a imagen en pixel (coordenadaX, y)
     const index = (y * width + coordenadaX) * 4
     const r = data[index]
@@ -46,12 +46,10 @@ export function getPointsInRect(
  * Arreglo de datos normalizado.
  */
 function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
-  if (!min)
-    min = mathjsMin(data)
-  if (!max)
-    max = mathjsMax(data)
+  if (!min) min = mathjsMin(data)
+  if (!max) max = mathjsMax(data)
 
-  return data.map(x => (x - min) / (max - min))
+  return data.map((x) => (x - min) / (max - min))
 }
 
 /**
@@ -63,7 +61,10 @@ function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
  * Media y Tamaño de apertura del altiplano encontrado. Ambos en
  * relacion al eje X.
  */
-export function findPlateau(dataY: number[], threshold: number): {
+export function findPlateau(
+  dataY: number[],
+  threshold: number,
+): {
   medium: number
   opening: number
 } {
@@ -72,7 +73,7 @@ export function findPlateau(dataY: number[], threshold: number): {
 
   const scaledThreshold = minY + (maxY - minY) * threshold
 
-  const segments: { values: number[], indexes: number[] }[] = []
+  const segments: { values: number[]; indexes: number[] }[] = []
   let currentValues: number[] = []
   let currentIndexes: number[] = []
   for (let i = 0; i < dataY.length; i++) {
@@ -80,8 +81,7 @@ export function findPlateau(dataY: number[], threshold: number): {
     if (d > scaledThreshold) {
       currentValues.push(d)
       currentIndexes.push(i)
-    }
-    else {
+    } else {
       // Si la lista tiene algo entonces es el primero que no cumple
       // entonces añadimos el segmento a la lista y reiniciamos
       // actualSegment. Si no es el primero no hacemos algo.
@@ -107,14 +107,19 @@ export function findPlateau(dataY: number[], threshold: number): {
     return { medium: 0, opening: 0 }
   }
 
-  const moreLargeSegmentIdx = segments.map(segment => segment.values.length)
-    .reduce((maxIdx, currVal, idx, arr) => currVal > arr[maxIdx] ? idx : maxIdx, 0)
+  const moreLargeSegmentIdx = segments
+    .map((segment) => segment.values.length)
+    .reduce(
+      (maxIdx, currVal, idx, arr) => (currVal > arr[maxIdx] ? idx : maxIdx),
+      0,
+    )
 
   // const _plateauValues = segments[moreLargeSegmentIdx].values
   const plateauIndexes = segments[moreLargeSegmentIdx].indexes
 
   const opening = plateauIndexes[plateauIndexes.length - 1] - plateauIndexes[0]
-  const medium = (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
+  const medium =
+    (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
 
   // console.log({
   //   segments,
@@ -134,9 +139,14 @@ export function findPlateau(dataY: number[], threshold: number): {
  * @returns {{a: number, mu: number, sigma: number}} -
  * Parametros de la funcion gaissiana ajustada.
  */
-export function fitGaussian(dataY: number[], maxIterations: number): { a: number, mu: number, sigma: number } {
-  const gaussian = ([a, mu, sigma]: number[]) => (x: number) =>
-    a * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2))
+export function fitGaussian(
+  dataY: number[],
+  maxIterations: number,
+): { a: number; mu: number; sigma: number } {
+  const gaussian =
+    ([a, mu, sigma]: number[]) =>
+    (x: number) =>
+      a * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2))
 
   const dataX = dataY.map((_, index) => index)
 
@@ -146,11 +156,7 @@ export function fitGaussian(dataY: number[], maxIterations: number): { a: number
     maxIterations,
   }
 
-  const fit = levenbergMarquardt(
-    { x: dataX, y: dataY },
-    gaussian,
-    options,
-  )
+  const fit = levenbergMarquardt({ x: dataX, y: dataY }, gaussian, options)
 
   return {
     a: fit.parameterValues[0],
@@ -209,8 +215,7 @@ export function matrixToUrl(
   canvas.height = height
 
   const ctx = canvas.getContext("2d")
-  if (!ctx)
-    return ""
+  if (!ctx) return ""
 
   const imageData = new ImageData(data, width, height)
   ctx.putImageData(imageData, 0, 0)
@@ -266,7 +271,7 @@ export function obtainImageSegments(
     for (let y = 0; y < height; y++) {
       for (let x = startX; x < endX; x++) {
         const srcIdX = (y * width + x) * 4
-        const destIdx = ((y * (endX - startX)) + (x - startX)) * 4
+        const destIdx = (y * (endX - startX) + (x - startX)) * 4
 
         segment[destIdx] = image[srcIdX] // R
         segment[destIdx + 1] = image[srcIdX + 1] // G
@@ -326,28 +331,25 @@ export async function obtainimageMatrix(
   src: string,
   colMajor: boolean,
 ): Promise<{
-    data: Uint8ClampedArray
-    width: number
-    height: number
-  }> {
+  data: Uint8ClampedArray
+  width: number
+  height: number
+}> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.src = src
     img.crossOrigin = "Anonymous"
     img.onload = () => {
       const canvas = document.createElement("canvas")
-      if (!canvas)
-        return
+      if (!canvas) return
       canvas.width = img.width
       canvas.height = img.height
       const ctx = canvas.getContext("2d")
-      if (!ctx)
-        return
+      if (!ctx) return
       ctx.drawImage(img, 0, 0)
       const imageData = ctx.getImageData(0, 0, img.width, img.height)
       let { data, width, height } = imageData
-      if (colMajor)
-        data = invertOrder(data, width, height)
+      if (colMajor) data = invertOrder(data, width, height)
 
       resolve({ data, width, height })
     }
@@ -361,7 +363,9 @@ export async function obtainimageMatrix(
  * @returns {Promise<{ image:string, degrees: number }>} -
  * Una promesa que contiene la imagen procesada y la cantidad de grados rotados.
  */
-export async function align(imageb64: string): Promise<{ image: string, degrees: number }> {
+export async function align(
+  imageb64: string,
+): Promise<{ image: string; degrees: number }> {
   // Cargar imagen
   const image = new Image()
   image.src = imageb64
@@ -378,8 +382,7 @@ export async function align(imageb64: string): Promise<{ image: string, degrees:
   if (naturalHeight > naturalWidth) {
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
-    if (!ctx)
-      throw new Error("No se pudo obtener el contexto del canvas")
+    if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
 
     canvas.width = naturalHeight
     canvas.height = naturalWidth
@@ -403,7 +406,10 @@ export async function align(imageb64: string): Promise<{ image: string, degrees:
  * @returns {Promise<string>} -
  * Una promesa que contiene la imagen rotada.
  */
-export async function rotate(imageb64: string, degrees: 90 | 180 | 270): Promise<string> {
+export async function rotate(
+  imageb64: string,
+  degrees: 90 | 180 | 270,
+): Promise<string> {
   // Cargar imagen
   const image = new Image()
   image.src = imageb64
@@ -419,24 +425,21 @@ export async function rotate(imageb64: string, degrees: 90 | 180 | 270): Promise
 
   const canvas = document.createElement("canvas")
   const ctx = canvas.getContext("2d")
-  if (!ctx)
-    throw new Error("No se pudo obtener el contexto del canvas")
+  if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
 
   canvas.width = naturalHeight
   canvas.height = naturalWidth
 
-  const rotateCoef = (degrees / 90) * Math.PI / 2
+  const rotateCoef = ((degrees / 90) * Math.PI) / 2
   if (degrees === 180) {
     canvas.width = naturalWidth
     canvas.height = naturalHeight
     ctx.translate(naturalWidth, naturalHeight)
-  }
-  else if (degrees === 90) {
+  } else if (degrees === 90) {
     canvas.width = naturalHeight
     canvas.height = naturalWidth
     ctx.translate(naturalHeight, 0)
-  }
-  else if (degrees === 270) {
+  } else if (degrees === 270) {
     canvas.width = naturalHeight
     canvas.height = naturalWidth
     ctx.translate(0, naturalWidth)
@@ -456,9 +459,7 @@ export async function rotate(imageb64: string, degrees: 90 | 180 | 270): Promise
  * @returns {Promise<"white" | "black"> } -
  * Una promesa que contiene el color del fondo.
  */
-export async function bgColor(
-  imageb64: string,
-): Promise<"white" | "black"> {
+export async function bgColor(imageb64: string): Promise<"white" | "black"> {
   const image = new Image()
   image.src = imageb64
   await new Promise((resolve, reject) => {
@@ -472,8 +473,7 @@ export async function bgColor(
   canvas.width = image.naturalWidth
   canvas.height = image.naturalHeight
 
-  if (!ctx)
-    throw new Error("No se pudo obtener el contexto del canvas")
+  if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
 
   ctx.drawImage(image, 0, 0)
 
@@ -505,8 +505,7 @@ export async function bgColor(
   let bgColor: "white" | "black"
   if (avgBrightness < 128) {
     bgColor = "black"
-  }
-  else {
+  } else {
     bgColor = "white"
   }
 
@@ -523,7 +522,7 @@ export async function bgColor(
 export async function ensureWhite(
   imageb64: string,
   targetColor: "white" | "black",
-): Promise<{ image: string, bgColor: "white" | "black" }> {
+): Promise<{ image: string; bgColor: "white" | "black" }> {
   const image = new Image()
   image.src = imageb64
   await new Promise((resolve, reject) => {
@@ -537,8 +536,7 @@ export async function ensureWhite(
   canvas.width = image.naturalWidth
   canvas.height = image.naturalHeight
 
-  if (!ctx)
-    throw new Error("No se pudo obtener el contexto del canvas")
+  if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
 
   ctx.drawImage(image, 0, 0)
 
@@ -573,8 +571,7 @@ export async function ensureWhite(
   let mainColor: "white" | "black"
   if (avgBrightness < 128) {
     mainColor = "black"
-  }
-  else {
+  } else {
     mainColor = "white"
   }
 
