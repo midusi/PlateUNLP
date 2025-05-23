@@ -1,8 +1,5 @@
-import type {
-  ToastActionElement,
-  ToastProps,
-} from "@/components/atoms/toast"
 import React from "react"
+import type { ToastActionElement, ToastProps } from "@/components/atoms/toast"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
@@ -30,21 +27,21 @@ function genId() {
 
 type Action =
   | {
-    type: ActionType["ADD_TOAST"]
-    toast: ToasterToast
-  }
+      type: ActionType["ADD_TOAST"]
+      toast: ToasterToast
+    }
   | {
-    type: ActionType["UPDATE_TOAST"]
-    toast: Partial<ToasterToast>
-  }
+      type: ActionType["UPDATE_TOAST"]
+      toast: Partial<ToasterToast>
+    }
   | {
-    type: ActionType["DISMISS_TOAST"]
-    toastId?: ToasterToast["id"]
-  }
+      type: ActionType["DISMISS_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
   | {
-    type: ActionType["REMOVE_TOAST"]
-    toastId?: ToasterToast["id"]
-  }
+      type: ActionType["REMOVE_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
 
 interface State {
   toasts: ToasterToast[]
@@ -79,7 +76,7 @@ export function reducer(state: State, action: Action): State {
     case "UPDATE_TOAST":
       return {
         ...state,
-        toasts: state.toasts.map(t =>
+        toasts: state.toasts.map((t) =>
           t.id === action.toast.id ? { ...t, ...action.toast } : t,
         ),
       }
@@ -91,8 +88,7 @@ export function reducer(state: State, action: Action): State {
       // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
-      }
-      else {
+      } else {
         state.toasts.forEach((toast) => {
           addToRemoveQueue(toast.id)
         })
@@ -100,12 +96,12 @@ export function reducer(state: State, action: Action): State {
 
       return {
         ...state,
-        toasts: state.toasts.map(t =>
+        toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-              ...t,
-              open: false,
-            }
+                ...t,
+                open: false,
+              }
             : t,
         ),
       }
@@ -119,7 +115,7 @@ export function reducer(state: State, action: Action): State {
       }
       return {
         ...state,
-        toasts: state.toasts.filter(t => t.id !== action.toastId),
+        toasts: state.toasts.filter((t) => t.id !== action.toastId),
       }
   }
 }
@@ -154,8 +150,7 @@ function toast({ ...props }: Toast) {
       id,
       open: true,
       onOpenChange: (open) => {
-        if (!open)
-          dismiss()
+        if (!open) dismiss()
       },
     },
   })

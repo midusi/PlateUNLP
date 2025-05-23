@@ -1,7 +1,6 @@
-import type { Point } from "@/interfaces/Point"
-import { extremePoints } from "@/lib/trigonometry"
 import clsx from "clsx"
 import { useEffect, useRef } from "react"
+import type { Point } from "@/interfaces/Point"
 import { Card, CardFooter } from "../atoms/card"
 
 interface ImageWithPixelExtractionProps {
@@ -10,10 +9,10 @@ interface ImageWithPixelExtractionProps {
   imageAlt?: string
   children: React.ReactNode
   pointsWMed?: Point[]
-  drawFunction: ((x: number) => number)
+  drawFunction: (x: number) => number
   perpendicularFunctions?: {
     m: number
-    funct: ((x: number) => number)
+    funct: (x: number) => number
   }[]
   opening?: number
 }
@@ -39,9 +38,7 @@ export function ImageWithPixelExtraction({
       >
         <div className="flex flex-col">
           {title && (
-            <h2
-              className="pb-2 flex justify-center text-xl font-semibold text-slate-500"
-            >
+            <h2 className="pb-2 flex justify-center text-xl font-semibold text-slate-500">
               {title}
             </h2>
           )}
@@ -64,25 +61,29 @@ interface ImageWithDrawsProps {
   src: string
   alt?: string
   points?: Point[]
-  drawFunction?: ((x: number) => number)
-  perpendicularFunctions?: { m: number, funct: ((x: number) => number) }[]
+  drawFunction?: (x: number) => number
+  perpendicularFunctions?: { m: number; funct: (x: number) => number }[]
   opening?: number
 }
 
-function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions, opening }: ImageWithDrawsProps) {
-
+function ImageWithDraws({
+  src,
+  alt,
+  points,
+  drawFunction,
+  perpendicularFunctions,
+  opening,
+}: ImageWithDrawsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas)
-      return
+    if (!canvas) return
     const ctx = canvas.getContext("2d")
-    if (!ctx)
-      return
+    if (!ctx) return
 
     const img = new Image()
-    img.onload = function () {
+    img.onload = () => {
       canvas.width = img.width
       canvas.height = img.height
 
@@ -111,8 +112,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
           const y = drawFunction(x)
           if (x === 0) {
             ctx.moveTo(x, y)
-          }
-          else {
+          } else {
             ctx.lineTo(x, y)
           }
         }
@@ -137,8 +137,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
           const y = funcionUP(x)
           if (x === 0) {
             ctx.moveTo(x, y)
-          }
-          else {
+          } else {
             ctx.lineTo(x, y)
           }
         }
@@ -152,8 +151,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
           const y = funcionDown(x)
           if (x === 0) {
             ctx.moveTo(x, y)
-          }
-          else {
+          } else {
             ctx.lineTo(x, y)
           }
         }
@@ -161,8 +159,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, perpendicularFunctions
       }
     }
     img.src = src
-    if (alt)
-      img.alt = alt
+    if (alt) img.alt = alt
   }, [src, points, drawFunction, perpendicularFunctions, opening, alt])
 
   return (

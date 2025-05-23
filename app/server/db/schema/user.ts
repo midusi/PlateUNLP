@@ -4,7 +4,9 @@ import { nanoid } from "nanoid"
 import { userProject } from "./userProject"
 
 export const user = sqliteTable("user", {
-  id: text().primaryKey().$default(() => nanoid(10)),
+  id: text()
+    .primaryKey()
+    .$default(() => nanoid(10)),
   name: text().notNull(),
   email: text().notNull().unique(),
   hashedPassword: text().notNull(),

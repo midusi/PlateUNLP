@@ -1,38 +1,43 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { StepProps } from "@/interfaces/StepProps"
+import { useState } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
-import { useState } from "react"
-import { BBUI } from "../organisms/BBUI"
+import type { BoundingBox } from "@/interfaces/BoundingBox"
+import type { StepProps } from "@/interfaces/StepProps"
+import type { BoxMetadata } from "../molecules/BoxMetadataForm"
 import { Step } from "../organisms/BBList"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
+import { BBUI } from "../organisms/BBUI"
 
-export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
+export function StepPlateSegmentation({
+  index,
+  processInfo,
+  setProcessInfo,
+}: StepProps) {
   const parameters = {
     rotateButton: true,
     invertColorButton: true,
     step: Step.Plate,
   }
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
+    processInfo.data.spectrums.map((spec) => spec.spectrumBoundingBox),
   )
   const [boxMetadatas, setBoxMetadatas] = useState<BoxMetadata[]>(
-    processInfo.data.spectrums.map(spec => spec.metadata),
+    processInfo.data.spectrums.map((spec) => spec.metadata),
   )
-  const [setActualStep] = useGlobalStore(s => [
-    s.setActualStep,
-  ])
+  const [setActualStep] = useGlobalStore((s) => [s.setActualStep])
   const determineBBFunction = usePredictBBs(
     1024,
     "spectrum_detector.onnx",
     classesSpectrumDetection,
     false,
-    0.70,
+    0.7,
   )
 
-  function saveBoundingBoxes(boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) {
-    setProcessInfo(prev => ({
+  function saveBoundingBoxes(
+    boundingBoxes: BoundingBox[],
+    boxMetadata: BoxMetadata[],
+  ) {
+    setProcessInfo((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -52,7 +57,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   }
 
   function saveImage(src: string) {
-    setProcessInfo(prev => ({
+    setProcessInfo((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -67,25 +72,24 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   function onComplete() {
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
-    setProcessInfo(prev => ({
+    setProcessInfo((prev) => ({
       ...prev,
       processingStatus: {
         ...prev.processingStatus,
         generalSteps: prev.processingStatus.generalSteps.map((step, i) => ({
           ...step,
-          state: index === i
-            ? "COMPLETE"
-            : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
+          state:
+            index === i
+              ? "COMPLETE"
+              : index + 1 === i
+                ? "NECESSARY_CHANGES"
+                : step.state,
         })),
         specificSteps: prev.processingStatus.specificSteps.map((step, i) => ({
           ...step,
-          states: boundingBoxes.map(_ => (
-            i === 0
-              ? "NECESSARY_CHANGES" as const
-              : "NOT_REACHED" as const
-          )),
+          states: boundingBoxes.map((_) =>
+            i === 0 ? ("NECESSARY_CHANGES" as const) : ("NOT_REACHED" as const),
+          ),
         })),
       },
     }))

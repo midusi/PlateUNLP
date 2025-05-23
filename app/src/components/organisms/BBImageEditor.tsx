@@ -1,10 +1,10 @@
-import type { BBClassesProps } from "@/enums/BBClasses"
-import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { ReactNode } from "react"
-import { Button } from "@/components/atoms/button"
-import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
+import { Button } from "@/components/atoms/button"
+import type { BBClassesProps } from "@/enums/BBClasses"
+import type { BoundingBox } from "@/interfaces/BoundingBox"
+import { getNextId } from "@/lib/utils"
 
 function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
   const [scale, setScale] = useState({ x: 1, y: 1 })
@@ -42,8 +42,8 @@ function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
 
 function useBoundingBoxesDrag(
   imageRef: React.RefObject<HTMLImageElement>,
-  imageScale: { x: number, y: number },
-  zoomInfo: { scale: number, origin: { x: number, y: number } },
+  imageScale: { x: number; y: number },
+  zoomInfo: { scale: number; origin: { x: number; y: number } },
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
 ) {
   const [draggedBB, setDraggedBB] = useState<number | string | null>(null)
@@ -54,8 +54,16 @@ function useBoundingBoxesDrag(
     if (image) {
       const rect = image.getBoundingClientRect()
 
-      const offsetX = (event.clientX - rect.left - (box.x - zoomInfo.origin.x) * imageScale.x * zoomInfo.scale) / (imageScale.x * zoomInfo.scale)
-      const offsetY = (event.clientY - rect.top - (box.y - zoomInfo.origin.y) * imageScale.y * zoomInfo.scale) / (imageScale.y * zoomInfo.scale)
+      const offsetX =
+        (event.clientX -
+          rect.left -
+          (box.x - zoomInfo.origin.x) * imageScale.x * zoomInfo.scale) /
+        (imageScale.x * zoomInfo.scale)
+      const offsetY =
+        (event.clientY -
+          rect.top -
+          (box.y - zoomInfo.origin.y) * imageScale.y * zoomInfo.scale) /
+        (imageScale.y * zoomInfo.scale)
 
       setDraggedBB(box.id)
       setDragOffset({ x: offsetX, y: offsetY })
@@ -68,16 +76,32 @@ function useBoundingBoxesDrag(
       if (image) {
         const rect = image.getBoundingClientRect()
 
-        const mouseX = ((event.clientX - rect.left) / (imageScale.x * zoomInfo.scale)) + zoomInfo.origin.x
-        const mouseY = ((event.clientY - rect.top) / (imageScale.y * zoomInfo.scale)) + zoomInfo.origin.y
+        const mouseX =
+          (event.clientX - rect.left) / (imageScale.x * zoomInfo.scale) +
+          zoomInfo.origin.x
+        const mouseY =
+          (event.clientY - rect.top) / (imageScale.y * zoomInfo.scale) +
+          zoomInfo.origin.y
 
-        setBoundingBoxes(prev =>
-          prev.map(box =>
+        setBoundingBoxes((prev) =>
+          prev.map((box) =>
             box.id === draggedBB
               ? {
                   ...box,
-                  x: Math.max(0, Math.min(mouseX - dragOffset.x, image.naturalWidth - box.width)),
-                  y: Math.max(0, Math.min(mouseY - dragOffset.y, image.naturalHeight - box.height)),
+                  x: Math.max(
+                    0,
+                    Math.min(
+                      mouseX - dragOffset.x,
+                      image.naturalWidth - box.width,
+                    ),
+                  ),
+                  y: Math.max(
+                    0,
+                    Math.min(
+                      mouseY - dragOffset.y,
+                      image.naturalHeight - box.height,
+                    ),
+                  ),
                 }
               : box,
           ),
@@ -95,7 +119,7 @@ function useBoundingBoxesDrag(
 
 function useBoundingBoxesResizing(
   imageRef: React.RefObject<HTMLImageElement>,
-  scale: { x: number, y: number },
+  scale: { x: number; y: number },
   selectedBB: number | string | null,
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
 ) {
@@ -108,7 +132,7 @@ function useBoundingBoxesResizing(
       setResizeDirection(direction)
     }
     event.stopPropagation() // Evita que active la lógica de arrastre
-  };
+  }
 
   function handleResizing(event: React.MouseEvent) {
     if (resizingBB !== null && resizeDirection) {
@@ -118,7 +142,7 @@ function useBoundingBoxesResizing(
         const mouseX = (event.clientX - rect.left) / scale.x
         const mouseY = (event.clientY - rect.top) / scale.y
 
-        setBoundingBoxes(prev =>
+        setBoundingBoxes((prev) =>
           prev.map((box) => {
             if (box.id === resizingBB) {
               let newWidth = box.width
@@ -156,7 +180,7 @@ function useBoundingBoxesResizing(
         )
       }
     }
-  };
+  }
 
   function stopResizing() {
     setResizingBB(null)
@@ -168,7 +192,7 @@ function useBoundingBoxesResizing(
 
 interface BoundingBoxElementProps {
   box: BoundingBox
-  scale: { x: number, y: number }
+  scale: { x: number; y: number }
   selected: boolean
   dragged: boolean
   onClick: () => void
@@ -190,19 +214,61 @@ function BoundingBoxElement({
   onResizeStart,
 }: BoundingBoxElementProps) {
   const [isHovered, setIsHovered] = useState<boolean>(false)
-  const { id: boxId, x: boxX, y: boxY, width:
-        boxWidth, height: boxHeight, class_info, name: boxName } = box
+  const {
+    id: boxId,
+    x: boxX,
+    y: boxY,
+    width: boxWidth,
+    height: boxHeight,
+    class_info,
+    name: boxName,
+  } = box
   const { x: scaleX, y: scaleY } = scale
 
   const resizeHandles = [
     { direction: "nw", style: { left: -5, top: -5, cursor: "nwse-resize" } },
-    { direction: "n", style: { left: "50%", top: -5, transform: "translateX(-50%)", cursor: "ns-resize" } },
+    {
+      direction: "n",
+      style: {
+        left: "50%",
+        top: -5,
+        transform: "translateX(-50%)",
+        cursor: "ns-resize",
+      },
+    },
     { direction: "ne", style: { right: -5, top: -5, cursor: "nesw-resize" } },
-    { direction: "e", style: { right: -5, top: "50%", transform: "translateY(-50%)", cursor: "ew-resize" } },
-    { direction: "se", style: { right: -5, bottom: -5, cursor: "nwse-resize" } },
-    { direction: "s", style: { left: "50%", bottom: -5, transform: "translateX(-50%)", cursor: "ns-resize" } },
+    {
+      direction: "e",
+      style: {
+        right: -5,
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "ew-resize",
+      },
+    },
+    {
+      direction: "se",
+      style: { right: -5, bottom: -5, cursor: "nwse-resize" },
+    },
+    {
+      direction: "s",
+      style: {
+        left: "50%",
+        bottom: -5,
+        transform: "translateX(-50%)",
+        cursor: "ns-resize",
+      },
+    },
     { direction: "sw", style: { left: -5, bottom: -5, cursor: "nesw-resize" } },
-    { direction: "w", style: { left: -5, top: "50%", transform: "translateY(-50%)", cursor: "ew-resize" } },
+    {
+      direction: "w",
+      style: {
+        left: -5,
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "ew-resize",
+      },
+    },
   ]
 
   return (
@@ -214,8 +280,7 @@ function BoundingBoxElement({
         top: `${boxY * scaleY}px`,
         width: `${boxWidth * scaleX}px`,
         height: `${boxHeight * scaleY}px`,
-        border: `${selected ? "3px" : "2px"
-        } solid ${class_info.color}`,
+        border: `${selected ? "3px" : "2px"} solid ${class_info.color}`,
         cursor: dragged ? "grabbing" : "grab",
         boxSizing: "border-box",
         zIndex: selected ? 1000 : 1,
@@ -246,11 +311,11 @@ function BoundingBoxElement({
       >
         {`#${boxId} ${boxName}`}
       </div>
-      {
-        selected && resizeHandles.map(handle => (
+      {selected &&
+        resizeHandles.map((handle) => (
           <div
             key={handle.direction}
-            onMouseDown={event => onResizeStart(event, handle.direction)}
+            onMouseDown={(event) => onResizeStart(event, handle.direction)}
             style={{
               position: "absolute",
               width: 10,
@@ -259,8 +324,7 @@ function BoundingBoxElement({
               ...handle.style,
             }}
           />
-        ))
-      }
+        ))}
     </div>
   )
 }
@@ -271,7 +335,10 @@ function useBoundingBoxesAddRemove(
   selectedBB: number | string | null,
   setSelectedBB: React.Dispatch<React.SetStateAction<number | string | null>>,
 ) {
-  const [nextPos, setNextPos] = useState<{ x: number, y: number }>({ x: 50, y: 50 })
+  const [nextPos, setNextPos] = useState<{ x: number; y: number }>({
+    x: 50,
+    y: 50,
+  })
 
   function addBoundingBox(defaultClass: BBClassesProps) {
     const newBox: BoundingBox = {
@@ -289,15 +356,15 @@ function useBoundingBoxesAddRemove(
     if (!selectedBB) {
       setSelectedBB(newBox.id)
     }
-  };
+  }
 
   function removeBoundingBox(id: number | string | null) {
     if (selectedBB) {
-      const newBBArr = boundingBoxes.filter(box => box.id !== id)
+      const newBBArr = boundingBoxes.filter((box) => box.id !== id)
       setBoundingBoxes(newBBArr)
       newBBArr[0] ? setSelectedBB(newBBArr[0]!.id) : setSelectedBB(null)
     }
-  };
+  }
 
   return { addBoundingBox, removeBoundingBox }
 }
@@ -309,20 +376,25 @@ interface InputWhitTempProps {
   onClick: (e: React.MouseEvent) => void
 }
 
-function InputWhitTemp({ value, onEnter, className, onClick }: InputWhitTempProps) {
+function InputWhitTemp({
+  value,
+  onEnter,
+  className,
+  onClick,
+}: InputWhitTempProps) {
   const [temp, setTemp] = useState<string>(value)
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       onEnter(temp)
     }
-  };
+  }
 
   return (
     <input
       className={className}
       value={temp}
-      onChange={e => setTemp(e.target.value)}
+      onChange={(e) => setTemp(e.target.value)}
       onKeyDown={handleKeyDown}
       onClick={onClick}
     />
@@ -337,7 +409,13 @@ interface ItemOfBoxListProps {
   classes: BBClassesProps[]
 }
 
-function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }: ItemOfBoxListProps) {
+function ItemOfBoxList({
+  box,
+  setBoundingBoxes,
+  isSelected,
+  onSelect,
+  classes,
+}: ItemOfBoxListProps) {
   const { id, name, class_info } = box
   const [selected, setSelected] = useState<BBClassesProps>(class_info)
 
@@ -346,7 +424,7 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }:
     if (!isSelected) {
       onSelect(id)
     }
-  };
+  }
 
   return (
     <div
@@ -357,16 +435,13 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }:
       onClick={() => onSelect(id)}
     >
       <div className="flex items-center flex-grow min-w-8">
-        <span className="mr-1 w-5">
-          #
-          {id}
-        </span>
+        <span className="mr-1 w-5">#{id}</span>
         <InputWhitTemp
           value={name}
           onEnter={(value: string) => {
             if (name !== value) {
-              setBoundingBoxes(prevBoxes =>
-                prevBoxes.map(b =>
+              setBoundingBoxes((prevBoxes) =>
+                prevBoxes.map((b) =>
                   b.id === box.id ? { ...b, name: value } : b,
                 ),
               )
@@ -382,10 +457,12 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }:
         <select
           value={selected.name}
           onChange={(e) => {
-            const newSelected = Object.values(classes).find(bb => bb.name === e.target.value)
+            const newSelected = Object.values(classes).find(
+              (bb) => bb.name === e.target.value,
+            )
             if (class_info.name !== newSelected!.name) {
-              setBoundingBoxes(prevBoxes =>
-                prevBoxes.map(b =>
+              setBoundingBoxes((prevBoxes) =>
+                prevBoxes.map((b) =>
                   b.id === box.id ? { ...b, class_info: newSelected! } : b,
                 ),
               )
@@ -396,11 +473,9 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }:
                         ${isSelected ? "bg-blue-100" : "bg-white"}`}
           onClick={handleInteractableClick}
         >
-          {Object.values(classes).map(class_type => (
+          {Object.values(classes).map((class_type) => (
             <option key={class_type.name} value={class_type.name}>
-              {
-                class_type.name
-              }
+              {class_type.name}
             </option>
           ))}
         </select>
@@ -410,7 +485,6 @@ function ItemOfBoxList({ box, setBoundingBoxes, isSelected, onSelect, classes }:
             backgroundColor: selected.color,
             aspectRatio: "0.5",
           }}
-
         />
       </div>
     </div>
@@ -425,19 +499,24 @@ interface BoxListProps {
   classes: BBClassesProps[]
 }
 
-function BoxList({ boundingBoxes, setBoundingBoxes, selected, setSelected, classes }: BoxListProps) {
+function BoxList({
+  boundingBoxes,
+  setBoundingBoxes,
+  selected,
+  setSelected,
+  classes,
+}: BoxListProps) {
   function handleSelect(id: number | string) {
     if (selected === id) {
       setSelected(null)
-    }
-    else {
+    } else {
       setSelected(id)
     }
   }
 
   return (
     <div className="w-full bg-white border border-gray-200">
-      {boundingBoxes.map(box => (
+      {boundingBoxes.map((box) => (
         <ItemOfBoxList
           key={box.id}
           box={box}
@@ -458,18 +537,28 @@ interface ImageBBDisplayProps {
   setSelectedBB: React.Dispatch<React.SetStateAction<number | string | null>>
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
-  zoomInfo: { scale: number, origin: { x: number, y: number } }
+  zoomInfo: { scale: number; origin: { x: number; y: number } }
 }
 
-function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBoxes, setBoundingBoxes, zoomInfo }: ImageBBDisplayProps) {
+function ImageBBDisplay({
+  className,
+  src,
+  selectedBB,
+  setSelectedBB,
+  boundingBoxes,
+  setBoundingBoxes,
+  zoomInfo,
+}: ImageBBDisplayProps) {
   const imageRef = useRef<HTMLImageElement>(null!)
   const imageScale = useImageScale(imageRef)
 
   // Arrastre de Bounding Boxes
-  const { draggedBB, startDragging, handleDragging, stopDragging } = useBoundingBoxesDrag(imageRef, imageScale, zoomInfo, setBoundingBoxes)
+  const { draggedBB, startDragging, handleDragging, stopDragging } =
+    useBoundingBoxesDrag(imageRef, imageScale, zoomInfo, setBoundingBoxes)
 
   // Redimenzionado de Bounding Boxes
-  const { handleResizeStart, handleResizing, stopResizing } = useBoundingBoxesResizing(imageRef, imageScale, selectedBB, setBoundingBoxes)
+  const { handleResizeStart, handleResizing, stopResizing } =
+    useBoundingBoxesResizing(imageRef, imageScale, selectedBB, setBoundingBoxes)
 
   const handleMouseUp = () => {
     stopDragging()
@@ -486,7 +575,6 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-
       <img
         className={className}
         ref={imageRef}
@@ -496,7 +584,7 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
         draggable={false}
       />
       {/* Dibujar las Bounding Boxes */}
-      {boundingBoxes.map(box => (
+      {boundingBoxes.map((box) => (
         <BoundingBoxElement
           key={box.id}
           box={box}
@@ -504,7 +592,7 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
           selected={selectedBB === box.id}
           dragged={draggedBB === box.id}
           onClick={() => setSelectedBB(box.id)}
-          onDragStart={event => startDragging(event, box)}
+          onDragStart={(event) => startDragging(event, box)}
           onDrag={handleDragging}
           onDragEnd={stopDragging}
           onResizeStart={handleResizeStart}
@@ -516,13 +604,15 @@ function ImageBBDisplay({ className, src, selectedBB, setSelectedBB, boundingBox
 
 interface ZoomComponentProps {
   children: ReactNode
-  setZoomInfo: React.Dispatch<React.SetStateAction<{
-    scale: number
-    origin: {
-      x: number
-      y: number
-    }
-  }>>
+  setZoomInfo: React.Dispatch<
+    React.SetStateAction<{
+      scale: number
+      origin: {
+        x: number
+        y: number
+      }
+    }>
+  >
   minZoom?: number
   maxZoom?: number
   sensitivity?: number
@@ -548,10 +638,11 @@ function ZoomComponent({
 
     // Manejador personalizado para el zoom
     function handleZoom(event: WheelEvent) {
-      if (event.ctrlKey || event.metaKey) { // Permitir zoom solo con Ctrl/Meta
+      if (event.ctrlKey || event.metaKey) {
+        // Permitir zoom solo con Ctrl/Meta
         event.preventDefault()
 
-        let newOrigin: { x: number, y: number } = { x: 0, y: 0 }
+        let newOrigin: { x: number; y: number } = { x: 0, y: 0 }
         if (container) {
           // Calcula la posición relativa del mouse dentro del contenedor
           const rect = container.getBoundingClientRect()
@@ -565,7 +656,10 @@ function ZoomComponent({
 
         // Ajusta el nivel de zoom
         const delta = -event.deltaY / sensitivity
-        const newZoomLevel = Math.min(Math.max(zoomLevel + delta, minZoom), maxZoom)
+        const newZoomLevel = Math.min(
+          Math.max(zoomLevel + delta, minZoom),
+          maxZoom,
+        )
         setZoomLevel(newZoomLevel)
         setZoomInfo({ scale: newZoomLevel, origin: newOrigin })
       }
@@ -619,7 +713,7 @@ export function BBImageEditor({
   const [selectedBB, setSelectedBB] = useState<number | string | null>(null)
   const [zoomInfo, setZoomInfo] = useState<{
     scale: number
-    origin: { x: number, y: number }
+    origin: { x: number; y: number }
   }>({
     scale: 1,
     origin: { x: 0, y: 0 },
@@ -636,7 +730,12 @@ export function BBImageEditor({
   }
 
   // Agregado y borrado de bounding box
-  const { addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(boundingBoxes, setBoundingBoxes, selectedBB, setSelectedBB)
+  const { addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(
+    boundingBoxes,
+    setBoundingBoxes,
+    selectedBB,
+    setSelectedBB,
+  )
 
   return (
     <ResizablePanes
@@ -671,7 +770,9 @@ export function BBImageEditor({
         className="w-full bg-gray-100 flex flex-col items-center space-y-2"
       >
         <div className="w-full p-4 flex flex-col items-center space-y-1">
-          <h3 className="text-lg font-semibold text-gray-700">Bounding Box Controls</h3>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Bounding Box Controls
+          </h3>
           {enableAutodetect && (
             <Button
               onClick={() => {
@@ -691,7 +792,9 @@ export function BBImageEditor({
             </Button>
             <Button
               className="w-full bg-orange-300 text-white rounded-none hover:bg-orange-600 transition"
-              onClick={() => { selectedBB && removeBoundingBox(selectedBB) }}
+              onClick={() => {
+                selectedBB && removeBoundingBox(selectedBB)
+              }}
             >
               ➖
             </Button>

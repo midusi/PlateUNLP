@@ -1,14 +1,29 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/atoms/card"
+import { useEffect, useMemo, useState } from "react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card"
 import { ErrorScatterGraph } from "@/components/molecules/ErrorScatterGraph"
 import { InferenceBoxGraph } from "@/components/molecules/InferenceBoxGraph"
 import { useGlobalStore } from "@/hooks/use-global-store"
-import { CustomError, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "@/lib/utils"
-import { useEffect, useMemo, useState } from "react"
+import {
+  CustomError,
+  legendreAlgoritm,
+  linearRegression,
+  piecewiseLinearRegression,
+} from "@/lib/utils"
 
 interface InferenceOption {
   id: number
   name: string
-  funct: ((x: number[], y: number[], degree?: number) => ((value: number) => number))
+  funct: (
+    x: number[],
+    y: number[],
+    degree?: number,
+  ) => (value: number) => number
   needDegree: boolean
 }
 
@@ -44,17 +59,21 @@ const radioOptions: InferenceOption[] = [
 ]
 
 export function InferenceForm() {
-  const [selectedOption, setSelectedOption] = useState<InferenceOption>(radioOptions[0])
+  const [selectedOption, setSelectedOption] = useState<InferenceOption>(
+    radioOptions[0],
+  )
   const [degree, setDegree] = useState<number | string>(3)
-  const [setPixelToWavelengthFunction, lampPoints, materialPoints] = useGlobalStore(s => [
-    s.setPixelToWavelengthFunction,
-    s.lampPoints,
-    s.materialPoints,
-  ])
+  const [setPixelToWavelengthFunction, lampPoints, materialPoints] =
+    useGlobalStore((s) => [
+      s.setPixelToWavelengthFunction,
+      s.lampPoints,
+      s.materialPoints,
+    ])
 
   const matches: Match[] = useMemo((): Match[] => {
     const matches: Match[] = []
-    const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
+    const smallArr =
+      lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
     for (let i = 0; i < smallArr.length; i++) {
       matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
     }
@@ -65,21 +84,18 @@ export function InferenceForm() {
   useEffect(() => {
     try {
       const inferenceFunction = selectedOption.funct(
-        matches.map(val => val.lamp.x),
-        matches.map(val => val.material.x),
+        matches.map((val) => val.lamp.x),
+        matches.map((val) => val.material.x),
         selectedOption.needDegree ? Number(degree) : undefined,
       )
       setPixelToWavelengthFunction(inferenceFunction)
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof CustomError) {
         setPixelToWavelengthFunction(error)
-      }
-      else {
+      } else {
         throw error
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matches, selectedOption, degree])
 
   function onChangeRadio(option: InferenceOption) {
@@ -90,8 +106,7 @@ export function InferenceForm() {
     const value = event.target.value
     if (value === "") {
       setDegree(value)
-    }
-    else if (/^\d{1,2}$/.test(value)) {
+    } else if (/^\d{1,2}$/.test(value)) {
       const numericValue = Number.parseInt(value, 10)
       if (numericValue > 0) {
         setDegree(numericValue)
@@ -110,7 +125,10 @@ export function InferenceForm() {
       <CardContent>
         <p>
           {radioOptions.map((option: InferenceOption) => (
-            <label key={option.name} style={{ display: "block", marginBottom: "8px" }}>
+            <label
+              key={option.name}
+              style={{ display: "block", marginBottom: "8px" }}
+            >
               <input
                 type="radio"
                 name="inferenceMethod"

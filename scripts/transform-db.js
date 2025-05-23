@@ -18,13 +18,13 @@ const nistRaw = fs.readFileSync(
 const nist = parse(nistRaw, { from: 2 })
   .map(
     /** @returns {SpectrumPoint} one point */
-    row => ({
+    (row) => ({
       wavelength: Number.parseFloat(row[1]),
       material: row[2],
       intensity: Number.parseInt(row[0].replace(/\D/g, "")) ?? -1,
     }),
   )
-  .filter(point => point.intensity > 0)
+  .filter((point) => point.intensity > 0)
 
 const generated = new URL("../app/src/generated/", import.meta.url)
 fs.mkdirSync(generated, { recursive: true })
@@ -38,7 +38,7 @@ function parseLibs(resolution) {
   const parsed = parse(raw, { from: 2 })
   return parsed.map(
     /** @returns {SpectrumPoint} one point */
-    row => ({
+    (row) => ({
       wavelength: Number.parseInt(row[0]),
       material: "HeArNe",
       intensity: Number.parseFloat(row[1]),
@@ -72,7 +72,7 @@ const json = {
   elements: [
     ...new Set(
       datasets
-        .map(dataset => dataset.points.map(point => point.material))
+        .map((dataset) => dataset.points.map((point) => point.material))
         .flat(2),
     ),
   ].sort(),

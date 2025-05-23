@@ -1,9 +1,9 @@
-import type { ProcessInfoForm } from "@/interfaces/ProcessInfoForm"
-import type { JSX } from "react"
-import { useGlobalStore } from "@/hooks/use-global-store"
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import clsx from "clsx"
+import type { JSX } from "react"
 import { Tooltip } from "react-tooltip"
+import { useGlobalStore } from "@/hooks/use-global-store"
+import type { ProcessInfoForm } from "@/interfaces/ProcessInfoForm"
 import { Button } from "../atoms/button"
 
 interface NewNavigationProgressBarProps {
@@ -18,10 +18,15 @@ export interface StepData {
   content: JSX.Element
 }
 
-function getStepState(index: number, processInfo: ProcessInfoForm, selectedSpectrum: number | null):
-    "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE" {
+function getStepState(
+  index: number,
+  processInfo: ProcessInfoForm,
+  selectedSpectrum: number | null,
+): "NOT_REACHED" | "NECESSARY_CHANGES" | "COMPLETE" {
   // Comprobar existencia de paso destino
-  const total = processInfo.processingStatus.generalSteps.length + processInfo.processingStatus.specificSteps.length
+  const total =
+    processInfo.processingStatus.generalSteps.length +
+    processInfo.processingStatus.specificSteps.length
   if (index < 0 || index >= total) {
     return "NOT_REACHED"
   }
@@ -29,14 +34,21 @@ function getStepState(index: number, processInfo: ProcessInfoForm, selectedSpect
   const slicePoint = processInfo.processingStatus.generalSteps.length
   return index < slicePoint
     ? processInfo.processingStatus.generalSteps[index].state
-    : ((processInfo.processingStatus.specificSteps[index - slicePoint].states && selectedSpectrum !== null)
-        ? processInfo.processingStatus.specificSteps[index - slicePoint].states![selectedSpectrum]
-        : "NOT_REACHED"
-      )
+    : processInfo.processingStatus.specificSteps[index - slicePoint].states &&
+        selectedSpectrum !== null
+      ? processInfo.processingStatus.specificSteps[index - slicePoint].states![
+          selectedSpectrum
+        ]
+      : "NOT_REACHED"
 }
 
-export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, processInfo }: NewNavigationProgressBarProps) {
-  const [actual, setActual, selectedSpectrum] = useGlobalStore(s => [
+export function NewNavigationProgressBar({
+  general,
+  bridgeStep,
+  perSpectrum,
+  processInfo,
+}: NewNavigationProgressBarProps) {
+  const [actual, setActual, selectedSpectrum] = useGlobalStore((s) => [
     s.actualStep,
     s.setActualStep,
     s.selectedSpectrum,
@@ -52,8 +64,13 @@ export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, pro
         "hover:text-black hover:bg-orange-600 transition active:bg-gray-400",
         "disabled:bg-white",
       )}
-      onClick={() => { setActual(actual - 1) }}
-      disabled={getStepState(actual - 1, processInfo, selectedSpectrum) === "NOT_REACHED"}
+      onClick={() => {
+        setActual(actual - 1)
+      }}
+      disabled={
+        getStepState(actual - 1, processInfo, selectedSpectrum) ===
+        "NOT_REACHED"
+      }
     >
       <ChevronLeftIcon className="h-5 w-5" />
     </Button>
@@ -68,7 +85,10 @@ export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, pro
         "disabled:bg-white",
       )}
       onClick={() => setActual(actual + 1)}
-      disabled={getStepState(actual + 1, processInfo, selectedSpectrum) === "NOT_REACHED"}
+      disabled={
+        getStepState(actual + 1, processInfo, selectedSpectrum) ===
+        "NOT_REACHED"
+      }
     >
       <ChevronRightIcon className="h-5 w-5" />
     </Button>
@@ -107,7 +127,6 @@ export function NewNavigationProgressBar({ general, bridgeStep, perSpectrum, pro
           {rigthButton}
         </div>
       </div>
-
     </>
   )
 }
@@ -155,31 +174,32 @@ function NavigationLine({
             setActualStep={setActualStep}
             showStepName
           />
-        ),
-        )}
+        ))}
       </div>
       <div
         className={clsx(
           "absolute bg-gray-50 border rounded-lg  border-dashed",
           "pb-4 pt-4",
-          spectrumSelected !== null ? "-z-10 border-yellow-300" : "-z-1 border-red-500 bg-opacity-90",
+          spectrumSelected !== null
+            ? "-z-10 border-yellow-300"
+            : "-z-1 border-red-500 bg-opacity-90",
         )}
         style={{
-          left: `${Math.round(100 * slicePoint / steps.length)}%`,
+          left: `${Math.round((100 * slicePoint) / steps.length)}%`,
           right: `-1%`,
         }}
       >
         {spectrumSelected !== null && (
-          <span className={clsx(
-            "absolute top-0 left-1 text-left -translate-y-4",
-            "text-xs font-semibold ",
-            "text-black",
-          )}
+          <span
+            className={clsx(
+              "absolute top-0 left-1 text-left -translate-y-4",
+              "text-xs font-semibold ",
+              "text-black",
+            )}
           >
             {processInfo.data.spectrums[spectrumSelected].name}
           </span>
         )}
-
       </div>
     </div>
   )
@@ -206,9 +226,7 @@ function StepPoint({
 }: StepPointProps) {
   const state = getStepState(index, processInfo, spectrumSelected)
   const clickAvailable: boolean = state !== "NOT_REACHED"
-  const size: string = index === actualStepIndex
-    ? "w-5 h-5"
-    : "w-4 h-4"
+  const size: string = index === actualStepIndex ? "w-5 h-5" : "w-4 h-4"
   const color: string = index <= actualStepIndex ? "bg-blue-500" : "bg-gray-400"
   return (
     <>
@@ -222,22 +240,25 @@ function StepPoint({
           index === actualStepIndex && "ring-2 ring-blue-300",
           clickAvailable && "cursor-pointer active:scale-90 active:bg-blue-700",
           "relative flex items-center justify-center",
-
         )}
-        onClick={clickAvailable
-          ? (_) => { setActualStep(index) }
-          : () => { }}
+        onClick={
+          clickAvailable
+            ? (_) => {
+                setActualStep(index)
+              }
+            : () => {}
+        }
         data-tooltip-id={`step-${step.id}-2tooltip`}
       >
         {showStepName && step.id}
-        {(index < processInfo.processingStatus.generalSteps.length || spectrumSelected !== null)
-          && (
-            <StatePoint
-              index={index}
-              actualStep={actualStepIndex}
-              state={state}
-            />
-          )}
+        {(index < processInfo.processingStatus.generalSteps.length ||
+          spectrumSelected !== null) && (
+          <StatePoint
+            index={index}
+            actualStep={actualStepIndex}
+            state={state}
+          />
+        )}
       </span>
       {!showStepName && (
         <Tooltip
@@ -258,8 +279,7 @@ interface StatePointProps {
 }
 
 function StatePoint({ index, actualStep, state }: StatePointProps) {
-  if (state === "NOT_REACHED")
-    return null
+  if (state === "NOT_REACHED") return null
   return (
     <span
       className={clsx(

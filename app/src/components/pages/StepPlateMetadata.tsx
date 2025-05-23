@@ -1,14 +1,15 @@
-import type { StepProps } from "@/interfaces/StepProps"
-import type { PlateMetadata } from "../molecules/PlateMetadataForm"
-import { useGlobalStore } from "@/hooks/use-global-store"
 import { useRef } from "react"
+import { useGlobalStore } from "@/hooks/use-global-store"
+import type { StepProps } from "@/interfaces/StepProps"
 import { Button } from "../atoms/button"
+import type { PlateMetadata } from "../molecules/PlateMetadataForm"
 import { PlateMetadataForm } from "../molecules/PlateMetadataForm"
 
-export function StepPlateMetadata({ index, /* processInfo, */ setProcessInfo }: StepProps) {
-  const [setActualStep] = useGlobalStore(s => [
-    s.setActualStep,
-  ])
+export function StepPlateMetadata({
+  index,
+  /* processInfo, */ setProcessInfo,
+}: StepProps) {
+  const [setActualStep] = useGlobalStore((s) => [s.setActualStep])
   function onComplete(plateMetadata: PlateMetadata) {
     /// AGREGAR GUARDADO DE METADATOS
 
@@ -18,32 +19,37 @@ export function StepPlateMetadata({ index, /* processInfo, */ setProcessInfo }: 
         ...prev.data,
         plate: {
           ...prev.data.plate,
-          sharedMetadata: plateMetadata
+          sharedMetadata: plateMetadata,
         },
       },
-    }));
-
+    }))
 
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
-    setProcessInfo(prev => ({
+    setProcessInfo((prev) => ({
       ...prev,
       processingStatus: {
         ...prev.processingStatus,
         generalSteps: prev.processingStatus.generalSteps.map((step, i) => ({
           ...step,
-          state: index === i
-            ? "COMPLETE"
-            : (index + 1 === i
-              ? "NECESSARY_CHANGES"
-              : step.state),
+          state:
+            index === i
+              ? "COMPLETE"
+              : index + 1 === i
+                ? "NECESSARY_CHANGES"
+                : step.state,
         })),
       },
     }))
     setActualStep(index + 1)
   }
 
-  const plateMetadataFormRef = useRef<{ setValues: (spectrumMetadata: PlateMetadata) => void, resetValues: () => void, getValues: () => PlateMetadata, validate: () => void }>(null)
+  const plateMetadataFormRef = useRef<{
+    setValues: (spectrumMetadata: PlateMetadata) => void
+    resetValues: () => void
+    getValues: () => PlateMetadata
+    validate: () => void
+  }>(null)
   return (
     <div className="flex flex-col items-center w-full ">
       <div className="w-full flex justify-center mb-6">
@@ -59,7 +65,6 @@ export function StepPlateMetadata({ index, /* processInfo, */ setProcessInfo }: 
         <Button
           onClick={() => {
             if (plateMetadataFormRef.current?.validate()) {
-
               onComplete(plateMetadataFormRef.current?.getValues())
             }
           }}

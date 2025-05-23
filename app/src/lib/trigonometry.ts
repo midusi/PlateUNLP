@@ -9,14 +9,18 @@ import type { Point } from "@/interfaces/Point"
  * @returns { forward: Point, backward: Point } -
  * Puntos recorriendo la distancia hacia delante y hacia atrás
  */
-export function extremePoints(point: Point, m: number, distance: number): { forward: Point, backward: Point } {
+export function extremePoints(
+  point: Point,
+  m: number,
+  distance: number,
+): { forward: Point; backward: Point } {
   let forward: Point
   let backward: Point
-  if (m === Infinity) { // Funcion totalmente vertical.
+  if (m === Number.POSITIVE_INFINITY) {
+    // Funcion totalmente vertical.
     forward = { x: point.x, y: point.y + distance }
     backward = { x: point.x, y: point.y - distance }
-  }
-  else {
+  } else {
     // Datos conocidos
     const hipotenusa = distance
     const anguloDeM = Math.atan(m) * (180 / Math.PI)

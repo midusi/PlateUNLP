@@ -5,7 +5,9 @@ import { plate } from "./plate"
 import { userProject } from "./userProject"
 
 export const project = sqliteTable("project", {
-  id: text().primaryKey().$default(() => nanoid(10)),
+  id: text()
+    .primaryKey()
+    .$default(() => nanoid(10)),
   name: text().notNull(),
 })
 

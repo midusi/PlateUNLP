@@ -4,7 +4,9 @@ import { nanoid } from "nanoid"
 import { observation } from "./observation"
 
 export const spectrum = sqliteTable("spectrum", {
-  id: text().primaryKey().$default(() => nanoid(10)),
+  id: text()
+    .primaryKey()
+    .$default(() => nanoid(10)),
   x: integer(),
   y: integer(),
   height: integer(),

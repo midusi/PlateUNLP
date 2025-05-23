@@ -1,8 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod"
+import type React from "react"
+import { useForm } from "react-hook-form"
 import type { z } from "zod/v4"
 import { loginFormSchema } from "@/lib/loginFormSchema"
-import { zodResolver } from "@hookform/resolvers/zod"
-import React, { forwardRef, useImperativeHandle } from "react"
-import { useForm } from "react-hook-form"
 import { Button } from "../atoms/button"
 import { Input } from "../atoms/input"
 
@@ -14,7 +14,7 @@ export interface loginForm {
 type FormData = z.infer<typeof loginFormSchema>
 
 interface FormProps {
-  login: (data: { Email: string, Password: string }) => void
+  login: (data: { Email: string; Password: string }) => void
   errorMessage?: string
 }
 
@@ -33,8 +33,7 @@ export const LoginForm: React.FC<FormProps> = ({ login, errorMessage }) => {
 
   const sendLogin = () => {
     trigger()
-    if (isValid)
-      login(watch())
+    if (isValid) login(watch())
   }
 
   return (
@@ -42,9 +41,14 @@ export const LoginForm: React.FC<FormProps> = ({ login, errorMessage }) => {
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-sm space-y-6">
           <form className="space-y-6">
-            <h2 className="text-2xl font-bold text-center text-gray-800">Welcome back</h2>
+            <h2 className="text-2xl font-bold text-center text-gray-800">
+              Welcome back
+            </h2>
             <div className="items-center">
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <Input
@@ -53,10 +57,15 @@ export const LoginForm: React.FC<FormProps> = ({ login, errorMessage }) => {
                 className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring focus:ring-blue-200 focus:outline-none"
               />
 
-              {errors.Email && <p className="text-red-500">{errors.Email.message}</p>}
+              {errors.Email && (
+                <p className="text-red-500">{errors.Email.message}</p>
+              )}
             </div>
             <div className="items-center">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <Input
@@ -65,7 +74,9 @@ export const LoginForm: React.FC<FormProps> = ({ login, errorMessage }) => {
                 placeholder="••••••••"
                 className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring focus:ring-blue-200 focus:outline-none"
               />
-              {errors.Password && <p className="text-red-500">{errors.Password.message}</p>}
+              {errors.Password && (
+                <p className="text-red-500">{errors.Password.message}</p>
+              )}
             </div>
             {errorMessage && (
               <div style={{ color: "red", marginTop: "10px" }}>

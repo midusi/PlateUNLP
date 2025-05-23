@@ -10,9 +10,7 @@ export const BBClasses = {
   Science: { id: 1, name: "Science spectrum", color: "green" },
 }
 
-export const classesSpectrumDetection: BBClassesProps[] = [
-  BBClasses.Spectrum,
-]
+export const classesSpectrumDetection: BBClassesProps[] = [BBClasses.Spectrum]
 
 export const classesSpectrumPartSegmentation: BBClassesProps[] = [
   BBClasses.Lamp,

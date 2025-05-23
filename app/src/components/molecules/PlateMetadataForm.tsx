@@ -1,10 +1,10 @@
-import type { z } from "zod/v4"
-import { observatories } from "@/lib/observatories"
-import { plateMetadataFormSchema } from "@/lib/plateMetadataFormSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Label } from "@radix-ui/react-label"
 import { useImperativeHandle } from "react"
 import { Controller, useForm } from "react-hook-form"
+import type { z } from "zod/v4"
+import { observatories } from "@/lib/observatories"
+import { plateMetadataFormSchema } from "@/lib/plateMetadataFormSchema"
 import { Input } from "../atoms/input"
 import SelectForm from "../atoms/selectForm"
 
@@ -78,48 +78,98 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
               )}
             />
 
-            {errors.OBSERVER && <p className="text-red-500">{errors.OBSERVER.message}</p>}
+            {errors.OBSERVER && (
+              <p className="text-red-500">{errors.OBSERVER.message}</p>
+            )}
           </div>
           <div className={inputContainerClassName}>
             <Label>PLATE-N</Label>
-            <Input {...register("PLATE_N")} placeholder="Identification number" className={inputClassName} />
-            {errors.PLATE_N && <p className="text-red-500">{errors.PLATE_N.message}</p>}
+            <Input
+              {...register("PLATE_N")}
+              placeholder="Identification number"
+              className={inputClassName}
+            />
+            {errors.PLATE_N && (
+              <p className="text-red-500">{errors.PLATE_N.message}</p>
+            )}
           </div>
 
           <div className={inputContainerClassName}>
             <Label>OBSERVER</Label>
-            <Input {...register("OBSERVER")} placeholder="OBSERVER" className={inputClassName} />
-            {errors.OBSERVER && <p className="text-red-500">{errors.OBSERVER.message}</p>}
+            <Input
+              {...register("OBSERVER")}
+              placeholder="OBSERVER"
+              className={inputClassName}
+            />
+            {errors.OBSERVER && (
+              <p className="text-red-500">{errors.OBSERVER.message}</p>
+            )}
           </div>
           <div className={inputContainerClassName}>
             <Label>DIGITALI</Label>
-            <Input {...register("DIGITALI")} placeholder="DIGITALI" className={inputClassName} />
-            {errors.DIGITALI && <p className="text-red-500">{errors.DIGITALI.message}</p>}
+            <Input
+              {...register("DIGITALI")}
+              placeholder="DIGITALI"
+              className={inputClassName}
+            />
+            {errors.DIGITALI && (
+              <p className="text-red-500">{errors.DIGITALI.message}</p>
+            )}
           </div>
           <div className={inputContainerClassName}>
             <Label>SCANNER</Label>
-            <Input {...register("SCANNER")} placeholder="Scanner name" className={inputClassName} />
-            {errors.SCANNER && <p className="text-red-500">{errors.SCANNER.message}</p>}
+            <Input
+              {...register("SCANNER")}
+              placeholder="Scanner name"
+              className={inputClassName}
+            />
+            {errors.SCANNER && (
+              <p className="text-red-500">{errors.SCANNER.message}</p>
+            )}
           </div>
           <div className={inputContainerClassName}>
             <Label>SOFTWARE</Label>
-            <Input {...register("SOFTWARE")} placeholder="Scan software" className={inputClassName} />
-            {errors.SOFTWARE && <p className="text-red-500">{errors.SOFTWARE.message}</p>}
+            <Input
+              {...register("SOFTWARE")}
+              placeholder="Scan software"
+              className={inputClassName}
+            />
+            {errors.SOFTWARE && (
+              <p className="text-red-500">{errors.SOFTWARE.message}</p>
+            )}
           </div>
           <div className={inputContainerClassName}>
             <Label>TELESCOPE</Label>
-            <Input {...register("TELESCOPE")} placeholder="Telescope name" className={inputClassName} />
-            {errors.TELESCOPE && <p className="text-red-500">{errors.TELESCOPE.message}</p>}
+            <Input
+              {...register("TELESCOPE")}
+              placeholder="Telescope name"
+              className={inputClassName}
+            />
+            {errors.TELESCOPE && (
+              <p className="text-red-500">{errors.TELESCOPE.message}</p>
+            )}
           </div>
           <div className={inputContainerClassName}>
             <Label>DETECTOR</Label>
-            <Input {...register("DETECTOR")} placeholder="Detector" className={inputClassName} />
-            {errors.DETECTOR && <p className="text-red-500">{errors.DETECTOR.message}</p>}
+            <Input
+              {...register("DETECTOR")}
+              placeholder="Detector"
+              className={inputClassName}
+            />
+            {errors.DETECTOR && (
+              <p className="text-red-500">{errors.DETECTOR.message}</p>
+            )}
           </div>
           <div className={inputContainerClassName}>
             <Label>INSTRUMENT</Label>
-            <Input {...register("INSTRUMENT")} placeholder="Instrument" className={inputClassName} />
-            {errors.INSTRUMENT && <p className="text-red-500">{errors.INSTRUMENT.message}</p>}
+            <Input
+              {...register("INSTRUMENT")}
+              placeholder="Instrument"
+              className={inputClassName}
+            />
+            {errors.INSTRUMENT && (
+              <p className="text-red-500">{errors.INSTRUMENT.message}</p>
+            )}
           </div>
         </div>
       </form>

@@ -1,6 +1,6 @@
-import { Toaster } from "@/components/atoms/toaster.tsx"
 import React from "react"
 import ReactDOM from "react-dom/client"
+import { Toaster } from "@/components/atoms/toaster.tsx"
 import App from "./App.tsx"
 import "./index.css"
 

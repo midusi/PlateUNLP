@@ -1,35 +1,47 @@
-import type { BoundingBox } from "@/interfaces/BoundingBox"
-import type { Point } from "@/interfaces/Point"
-import type { StepProps } from "@/interfaces/StepProps"
-import { useGlobalStore } from "@/hooks/use-global-store"
-import { cropImages } from "@/lib/cropImage"
-import { findPlateau, findXspacedPoints, getPointsInRect, obtainimageMatrix, obtainImageSegments, promediadoHorizontal } from "@/lib/image"
-import { extremePoints } from "@/lib/trigonometry"
-import { linearRegressionWhitDerived, splineCuadratic } from "@/lib/utils"
 import { curveStep } from "@visx/curve"
 import { ParentSize } from "@visx/responsive"
 import { AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
 import { max, mean, min, round } from "mathjs"
 import { useEffect, useState } from "react"
+import { useGlobalStore } from "@/hooks/use-global-store"
+import type { Point } from "@/interfaces/Point"
+import type { StepProps } from "@/interfaces/StepProps"
+import {
+  findPlateau,
+  findXspacedPoints,
+  getPointsInRect,
+  obtainImageSegments,
+  obtainimageMatrix,
+  promediadoHorizontal,
+} from "@/lib/image"
+import { extremePoints } from "@/lib/trigonometry"
+import { linearRegressionWhitDerived, splineCuadratic } from "@/lib/utils"
 import { Button } from "../atoms/button"
 import { ImageWithPixelExtraction } from "../organisms/ImageWithPixelExtraction"
 
-export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: StepProps) {
+export function StepFeatureExtraction({
+  index,
+  processInfo,
+  setProcessInfo,
+}: StepProps) {
   const countCheckpoints = 5
   const segmentWidth = 60
   const useSpline = false
   const reuseScienceFunction = true
 
-  const [setActualStep, selectedSpectrum] = useGlobalStore(s => [
+  const [setActualStep, selectedSpectrum] = useGlobalStore((s) => [
     s.setActualStep,
     s.selectedSpectrum,
   ])
 
-
-  const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>({
+  const [urls, setUrls] = useState<{
+    science: string
+    lamp1: string
+    lamp2: string
+  } | null>({
     science: "/forTest/Test1_Science1_v2.png",
     lamp1: "/forTest/Test1_Lamp1_v2.png",
-    lamp2: "/forTest/Test1_Lamp2_v2.png"
+    lamp2: "/forTest/Test1_Lamp2_v2.png",
   })
   // const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
   // useEffect(() => {
@@ -83,7 +95,7 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     urls?.lamp1,
     urls?.lamp2,
     useSpline,
-    reuseScienceFunction
+    reuseScienceFunction,
   )
 
   function onComplete() {
@@ -91,59 +103,59 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     /// que necesita actualizaciones
     /// Tambien realiza el guardado de los espectros extraidos para cada parte del espectro.
     const generalTotal = processInfo.processingStatus.generalSteps.length
-    setProcessInfo(prev => ({
+    setProcessInfo((prev) => ({
       ...prev,
       /** Modificaciones relativas a guardar los espectros de ciencia adquiridos. */
       data: {
         ...prev.data,
-        spectrums: prev.data.spectrums.map((spectrum, idx) => (
-          (idx === selectedSpectrum) // ¿Es el espectro seleccionado?
-            ? { // Si => Actualiza la información de los espectros extraidos con lo que calculo.
-              ...spectrum,
-              parts: {
-                ...spectrum.parts,
-                science: {
-                  ...spectrum.parts.science,
-                  extractedSpectrum: scienceTransversalAvgs!,
-                },
-                lamp1: {
-                  ...spectrum.parts.lamp1,
-                  extractedSpectrum: lamp1TransversalAvgs!,
-                },
-                lamp2: {
-                  ...spectrum.parts.lamp2,
-                  extractedSpectrum: lamp2TransversalAvgs!,
-                },
-              },
-            }
-            : spectrum // No => mantener datos.
-        )),
+        spectrums: prev.data.spectrums.map(
+          (spectrum, idx) =>
+            idx === selectedSpectrum // ¿Es el espectro seleccionado?
+              ? {
+                  // Si => Actualiza la información de los espectros extraidos con lo que calculo.
+                  ...spectrum,
+                  parts: {
+                    ...spectrum.parts,
+                    science: {
+                      ...spectrum.parts.science,
+                      extractedSpectrum: scienceTransversalAvgs!,
+                    },
+                    lamp1: {
+                      ...spectrum.parts.lamp1,
+                      extractedSpectrum: lamp1TransversalAvgs!,
+                    },
+                    lamp2: {
+                      ...spectrum.parts.lamp2,
+                      extractedSpectrum: lamp2TransversalAvgs!,
+                    },
+                  },
+                }
+              : spectrum, // No => mantener datos.
+        ),
       },
       /** Modificaciones relativas a avisar que el paso esta completado. */
       processingStatus: {
         ...prev.processingStatus,
-        specificSteps: prev.processingStatus.specificSteps.map((step, i) => (
-          (i === (index - generalTotal)) // La etapa actual de selectedSpectrum se marca como completado
-            ? {
-              ...step,
-              states: step.states!.map((state, j) => (
-                j === selectedSpectrum
-                  ? "COMPLETE" as const
-                  : state
-              )),
-            }
-            : ((i === (index - generalTotal + 1))// Si hay otra etapa adelante se la marca como que necesita cambios
+        specificSteps: prev.processingStatus.specificSteps.map(
+          (step, i) =>
+            i === index - generalTotal // La etapa actual de selectedSpectrum se marca como completado
               ? {
-                ...step,
-                states: step.states!.map((state, j) => (
-                  j === selectedSpectrum
-                    ? "NECESSARY_CHANGES" as const
-                    : state
-                )),
-              }
-              : step // Cualquier otra etapa mantiene su informacion
-            )
-        )),
+                  ...step,
+                  states: step.states!.map((state, j) =>
+                    j === selectedSpectrum ? ("COMPLETE" as const) : state,
+                  ),
+                }
+              : i === index - generalTotal + 1 // Si hay otra etapa adelante se la marca como que necesita cambios
+                ? {
+                    ...step,
+                    states: step.states!.map((state, j) =>
+                      j === selectedSpectrum
+                        ? ("NECESSARY_CHANGES" as const)
+                        : state,
+                    ),
+                  }
+                : step, // Cualquier otra etapa mantiene su informacion
+        ),
       },
     }))
     setActualStep(index + 1)
@@ -188,13 +200,10 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
           >
             <SimpleFunctionXY data={lamp2TransversalAvgs} />
           </ImageWithPixelExtraction>
-
         </div>
       )}
       <hr className="w-full mb-4"></hr>
-      <Button onClick={() => onComplete()}>
-        Save
-      </Button>
+      <Button onClick={() => onComplete()}>Save</Button>
     </div>
   )
 }
@@ -205,7 +214,13 @@ interface SimpleFunctionXYProps {
 function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
   const data1 = data
     ? data.map((value, index) => ({ x: index, y: value }))
-    : [{ x: 1, y: 50 }, { x: 2, y: 10 }, { x: 3, y: 20 }, { x: 4, y: 80 }, { x: 9, y: 1 }]
+    : [
+        { x: 1, y: 50 },
+        { x: 2, y: 10 },
+        { x: 3, y: 20 },
+        { x: 4, y: 80 },
+        { x: 9, y: 1 },
+      ]
 
   const accessors = {
     xAccessor: (d: Point) => d.x,
@@ -215,8 +230,7 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
   return (
     <ParentSize>
       {({ width }) => {
-        if (width === 0)
-          return null // Esperar a que se mida
+        if (width === 0) return null // Esperar a que se mida
         return (
           <XYChart
             theme={lightTheme}
@@ -228,14 +242,10 @@ function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
           >
             <Axis
               orientation="bottom"
-              tickFormat={d => `${d}`}
+              tickFormat={(d) => `${d}`}
               numTicks={5}
             />
-            <Axis
-              orientation="left"
-              tickFormat={d => `${d}`}
-              numTicks={5}
-            />
+            <Axis orientation="left" tickFormat={(d) => `${d}`} numTicks={5} />
             <Grid numTicks={10} />
             <AreaSeries
               curve={curveStep}
@@ -264,7 +274,7 @@ interface useExtractFeaturesResponse {
   scienceFunction: ((value: number) => number) | null
   scienceTransversalFunctions: {
     m: number
-    funct: ((h: number) => number)
+    funct: (h: number) => number
   }[]
   scienceTransversalAvgs: number[]
   lamp1MediasPoints: Point[]
@@ -272,7 +282,7 @@ interface useExtractFeaturesResponse {
   lamp1Function: ((value: number) => number) | null
   lamp1TransversalFunctions: {
     m: number
-    funct: ((h: number) => number)
+    funct: (h: number) => number
   }[]
   lamp1TransversalAvgs: number[]
   lamp2MediasPoints: Point[]
@@ -280,7 +290,7 @@ interface useExtractFeaturesResponse {
   lamp2Function: ((value: number) => number) | null
   lamp2TransversalFunctions: {
     m: number
-    funct: ((h: number) => number)
+    funct: (h: number) => number
   }[]
   lamp2TransversalAvgs: number[]
 }
@@ -292,7 +302,7 @@ function useExtractFeatures(
   lamp1Url?: string,
   lamp2Url?: string,
   useSpline?: boolean,
-  reuseScienceFunction?: boolean
+  reuseScienceFunction?: boolean,
 ): useExtractFeaturesResponse {
   /** Resultados a devolver */
   const [response, setResponse] = useState<useExtractFeaturesResponse>({
@@ -333,199 +343,216 @@ function useExtractFeatures(
       lamp2TransversalFunctions: [],
       lamp2TransversalAvgs: [],
     }
-    if (!scienceUrl || !lamp1Url || !lamp2Url)
-      return
+    if (!scienceUrl || !lamp1Url || !lamp2Url) return
     // Obtener informacion de imagen SCIENCE
-    obtainimageMatrix(scienceUrl, false).then((science) => {
-      if (!science.data || science.data.length === 0)
-        return
-      bag.scienceInfo = { data: science.data, width: science.width, height: science.height }
-
-      // Segmentar la imagen
-      /** Coordenadas X medias a lo largo de toda la imagen de SCIENCE */
-      const sciencePoints = findXspacedPoints(science.width, countCheckpoints)
-      /** Segmentos medios de imagen de SCIENCE */
-      const segmentsData = obtainImageSegments(
-        science.data,
-        science.width,
-        science.height,
-        sciencePoints,
-        segmentWidth,
-      )
-      for (const sd of segmentsData) {
-        if (sd.length !== segmentWidth * science.height * 4)
-          console.warn("Segment size mismatch:", sd.length, segmentWidth * science.height * 4)
-      }
-
-      /**
-       * Funciones de cada segmento promediado horizontalmente
-       * Osea, para cada pixel vertical se hace un avg de los pixeles
-       * horizontales. x=>pixelVertical, y=>avgHorizontal
-       */
-      const scienceFunctions = segmentsData.map(data =>
-        promediadoHorizontal(data, segmentWidth, science.height))
-
-      /**
-       * Arreglo con informacion de para cada funcion de un segmento el
-       * punto vertical medio y la apartura que le corresponde.
-       */
-      const sciencePlateauInfo: {
-        medium: number
-        opening: number
-      }[] = scienceFunctions.map(funct => findPlateau(funct, 0.5))
-
-      /** Apertura promedio */
-      const avgOpening = mean(sciencePlateauInfo.map(pi => pi.opening))
-      bag.scienceAvgOpening = avgOpening
-
-      /**
-       * Conjuntos de cordenadas (x,y) de los puntos que trazan la recta
-       * media de la función.
-       */
-      const scienceMediasPoints = sciencePoints.map((point, index) => (
-        { x: point, y: sciencePlateauInfo[index]?.medium ?? 0 }
-      ))
-      bag.scienceMediasPoints = scienceMediasPoints
-
-      // Infiere funcion medio del espectro
-      let interpolated: { funct: ((x: number) => number), derived: ((x: number) => number) }
-      if (useSpline) { // Aproximación spline
-        interpolated = splineCuadratic(
-          scienceMediasPoints.map(p => p.x),
-          scienceMediasPoints.map(p => p.y),
-        )
-      } else { // Aproximación lineal
-        interpolated = linearRegressionWhitDerived(
-          scienceMediasPoints.map(p => p.x),
-          scienceMediasPoints.map(p => p.y),
-        )
-      }
-      bag.scienceFunction = interpolated.funct
-
-      /**
-       * Arreglo de funciones que para cada punto de la recta, dada una altura Y
-       * indica el pixel X que le corresponde.
-       */
-      const scienceTransversalFunctions: {
-        m: number
-        funct: ((h: number) => number)
-      }[] = []
-      for (let i = 0; i < science.width; i++) {
-        const p1 = { x: i, y: interpolated.funct(i) }
-        // // Perpendicular a la recta.
-        // const m_perp = -1 / derived(i)
-        // const b = p1.y - m_perp * p1.x
-        // scienceTransversalFunctions.push({
-        //   m: m_perp,
-        //   funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
-        // })
-        // Perpendicular a la imagen.
-        scienceTransversalFunctions.push({
-          m: Infinity,
-          funct: (_y: number) => (p1.x), // Para cada Y me da ele x que le corresponde.
-          // En el caso Vertical siempre va a ser el X del punto.
-        })
-      }
-      bag.scienceTransversalFunctions = scienceTransversalFunctions
-
-      /** Promedio de pixeles que pasan por cada scienceTransversalFunction. */
-      const scienceTransversalAvgs: number[] = []
-      for (let i = 0; i < scienceTransversalFunctions.length; i++) {
-        const point = { x: i, y: interpolated.funct(i) }
-        /** Punnto inicial y final a considerar para promediado consiiderando la apertura */
-        const { forward, backward } = extremePoints(
-          point,
-          scienceTransversalFunctions[i].m,
-          avgOpening / 2,
-        )
-
-        /** Punto minimo de la recta en Y */
-        const minY = round(min(forward.y, backward.y))
-        /** Punto maximo de la recta en Y */
-        const maxY = round(max(forward.y, backward.y))
-
-        /** Valor numerico de todos los puntos por los que pasa la recta */
-        const values: number[] = getPointsInRect(
-          science.data,
-          science.width,
-          scienceTransversalFunctions[i].funct,
-          minY,
-          maxY,
-        )
-
-        // si no hay valores entonces devuelve 0
-        if (values.length === 0)
-          scienceTransversalAvgs.push(0)
-        else
-          scienceTransversalAvgs.push(mean(values))
-      }
-      bag.scienceTransversalAvgs = scienceTransversalAvgs
-      // Lampara 1 datos relevantes.
-      // Obtener informacion de imagen de Lamp1
-      obtainimageMatrix(lamp1Url, false).then((lamp1) => {
-        const lamp1Data = extractLampData({
-          science: {
-            ...science,
-            mediasPoints: bag.scienceMediasPoints,
-            avgOpening: bag.scienceAvgOpening,
-            mediaFunction: bag.scienceFunction!,
-          },
-          lamp: lamp1,
-          reuseScienceFunction: reuseScienceFunction,
-          useSpline: useSpline,
-          countCheckpoints: countCheckpoints,
-          segmentWidth: segmentWidth,
-        })
-
-        // Actualizar salida del metodo con informacion de lamp1
-        bag = {
-          ...bag,
-          lamp1MediasPoints: lamp1Data.mediasPoints,
-          lamp1AvgOpening: lamp1Data.avgOpening,
-          lamp1Function: lamp1Data.mediaFunction,
-          lamp1TransversalFunctions: lamp1Data.transversalFunctions,
-          lamp1TransversalAvgs: lamp1Data.transversalAvgs,
+    obtainimageMatrix(scienceUrl, false)
+      .then((science) => {
+        if (!science.data || science.data.length === 0) return
+        bag.scienceInfo = {
+          data: science.data,
+          width: science.width,
+          height: science.height,
         }
 
-        // Lampara 2 datos relevantes.
-        // Obtener informacion de imagen de Lamp2
-        // Las invocaciones tienen que ser anidadas por que sino
-        // corremos riesgo de sobreescritura de variables entre hilos.
-        obtainimageMatrix(lamp2Url, false).then((lamp2) => {
-          const lamp2Data = extractLampData({
-            science: {
-              ...science,
-              mediasPoints: bag.scienceMediasPoints,
-              avgOpening: bag.scienceAvgOpening,
-              mediaFunction: bag.scienceFunction!,
-            },
-            lamp: lamp2,
-            reuseScienceFunction: reuseScienceFunction,
-            useSpline: useSpline,
-            countCheckpoints: countCheckpoints,
-            segmentWidth: segmentWidth,
+        // Segmentar la imagen
+        /** Coordenadas X medias a lo largo de toda la imagen de SCIENCE */
+        const sciencePoints = findXspacedPoints(science.width, countCheckpoints)
+        /** Segmentos medios de imagen de SCIENCE */
+        const segmentsData = obtainImageSegments(
+          science.data,
+          science.width,
+          science.height,
+          sciencePoints,
+          segmentWidth,
+        )
+        for (const sd of segmentsData) {
+          if (sd.length !== segmentWidth * science.height * 4)
+            console.warn(
+              "Segment size mismatch:",
+              sd.length,
+              segmentWidth * science.height * 4,
+            )
+        }
+
+        /**
+         * Funciones de cada segmento promediado horizontalmente
+         * Osea, para cada pixel vertical se hace un avg de los pixeles
+         * horizontales. x=>pixelVertical, y=>avgHorizontal
+         */
+        const scienceFunctions = segmentsData.map((data) =>
+          promediadoHorizontal(data, segmentWidth, science.height),
+        )
+
+        /**
+         * Arreglo con informacion de para cada funcion de un segmento el
+         * punto vertical medio y la apartura que le corresponde.
+         */
+        const sciencePlateauInfo: {
+          medium: number
+          opening: number
+        }[] = scienceFunctions.map((funct) => findPlateau(funct, 0.5))
+
+        /** Apertura promedio */
+        const avgOpening = mean(sciencePlateauInfo.map((pi) => pi.opening))
+        bag.scienceAvgOpening = avgOpening
+
+        /**
+         * Conjuntos de cordenadas (x,y) de los puntos que trazan la recta
+         * media de la función.
+         */
+        const scienceMediasPoints = sciencePoints.map((point, index) => ({
+          x: point,
+          y: sciencePlateauInfo[index]?.medium ?? 0,
+        }))
+        bag.scienceMediasPoints = scienceMediasPoints
+
+        // Infiere funcion medio del espectro
+        let interpolated: {
+          funct: (x: number) => number
+          derived: (x: number) => number
+        }
+        if (useSpline) {
+          // Aproximación spline
+          interpolated = splineCuadratic(
+            scienceMediasPoints.map((p) => p.x),
+            scienceMediasPoints.map((p) => p.y),
+          )
+        } else {
+          // Aproximación lineal
+          interpolated = linearRegressionWhitDerived(
+            scienceMediasPoints.map((p) => p.x),
+            scienceMediasPoints.map((p) => p.y),
+          )
+        }
+        bag.scienceFunction = interpolated.funct
+
+        /**
+         * Arreglo de funciones que para cada punto de la recta, dada una altura Y
+         * indica el pixel X que le corresponde.
+         */
+        const scienceTransversalFunctions: {
+          m: number
+          funct: (h: number) => number
+        }[] = []
+        for (let i = 0; i < science.width; i++) {
+          const p1 = { x: i, y: interpolated.funct(i) }
+          // // Perpendicular a la recta.
+          // const m_perp = -1 / derived(i)
+          // const b = p1.y - m_perp * p1.x
+          // scienceTransversalFunctions.push({
+          //   m: m_perp,
+          //   funct: (y: number) => ((y - b) / m_perp), // Para cada Y me da ele x que le corresponde.
+          // })
+          // Perpendicular a la imagen.
+          scienceTransversalFunctions.push({
+            m: Number.POSITIVE_INFINITY,
+            funct: (_y: number) => p1.x, // Para cada Y me da ele x que le corresponde.
+            // En el caso Vertical siempre va a ser el X del punto.
           })
+        }
+        bag.scienceTransversalFunctions = scienceTransversalFunctions
 
-          // Actualizar salida del metodo con informacion de lamp2
-          bag = {
-            ...bag,
-            lamp2MediasPoints: lamp2Data.mediasPoints,
-            lamp2AvgOpening: lamp2Data.avgOpening,
-            lamp2Function: lamp2Data.mediaFunction,
-            lamp2TransversalFunctions: lamp2Data.transversalFunctions,
-            lamp2TransversalAvgs: lamp2Data.transversalAvgs,
-          }
+        /** Promedio de pixeles que pasan por cada scienceTransversalFunction. */
+        const scienceTransversalAvgs: number[] = []
+        for (let i = 0; i < scienceTransversalFunctions.length; i++) {
+          const point = { x: i, y: interpolated.funct(i) }
+          /** Punnto inicial y final a considerar para promediado consiiderando la apertura */
+          const { forward, backward } = extremePoints(
+            point,
+            scienceTransversalFunctions[i].m,
+            avgOpening / 2,
+          )
 
-          setResponse(bag)
-        }).catch((err) => {
-          console.error("Error loading Image Data:", err)
-        })
-      }).catch((err) => {
+          /** Punto minimo de la recta en Y */
+          const minY = round(min(forward.y, backward.y))
+          /** Punto maximo de la recta en Y */
+          const maxY = round(max(forward.y, backward.y))
+
+          /** Valor numerico de todos los puntos por los que pasa la recta */
+          const values: number[] = getPointsInRect(
+            science.data,
+            science.width,
+            scienceTransversalFunctions[i].funct,
+            minY,
+            maxY,
+          )
+
+          // si no hay valores entonces devuelve 0
+          if (values.length === 0) scienceTransversalAvgs.push(0)
+          else scienceTransversalAvgs.push(mean(values))
+        }
+        bag.scienceTransversalAvgs = scienceTransversalAvgs
+        // Lampara 1 datos relevantes.
+        // Obtener informacion de imagen de Lamp1
+        obtainimageMatrix(lamp1Url, false)
+          .then((lamp1) => {
+            const lamp1Data = extractLampData({
+              science: {
+                ...science,
+                mediasPoints: bag.scienceMediasPoints,
+                avgOpening: bag.scienceAvgOpening,
+                mediaFunction: bag.scienceFunction!,
+              },
+              lamp: lamp1,
+              reuseScienceFunction: reuseScienceFunction,
+              useSpline: useSpline,
+              countCheckpoints: countCheckpoints,
+              segmentWidth: segmentWidth,
+            })
+
+            // Actualizar salida del metodo con informacion de lamp1
+            bag = {
+              ...bag,
+              lamp1MediasPoints: lamp1Data.mediasPoints,
+              lamp1AvgOpening: lamp1Data.avgOpening,
+              lamp1Function: lamp1Data.mediaFunction,
+              lamp1TransversalFunctions: lamp1Data.transversalFunctions,
+              lamp1TransversalAvgs: lamp1Data.transversalAvgs,
+            }
+
+            // Lampara 2 datos relevantes.
+            // Obtener informacion de imagen de Lamp2
+            // Las invocaciones tienen que ser anidadas por que sino
+            // corremos riesgo de sobreescritura de variables entre hilos.
+            obtainimageMatrix(lamp2Url, false)
+              .then((lamp2) => {
+                const lamp2Data = extractLampData({
+                  science: {
+                    ...science,
+                    mediasPoints: bag.scienceMediasPoints,
+                    avgOpening: bag.scienceAvgOpening,
+                    mediaFunction: bag.scienceFunction!,
+                  },
+                  lamp: lamp2,
+                  reuseScienceFunction: reuseScienceFunction,
+                  useSpline: useSpline,
+                  countCheckpoints: countCheckpoints,
+                  segmentWidth: segmentWidth,
+                })
+
+                // Actualizar salida del metodo con informacion de lamp2
+                bag = {
+                  ...bag,
+                  lamp2MediasPoints: lamp2Data.mediasPoints,
+                  lamp2AvgOpening: lamp2Data.avgOpening,
+                  lamp2Function: lamp2Data.mediaFunction,
+                  lamp2TransversalFunctions: lamp2Data.transversalFunctions,
+                  lamp2TransversalAvgs: lamp2Data.transversalAvgs,
+                }
+
+                setResponse(bag)
+              })
+              .catch((err) => {
+                console.error("Error loading Image Data:", err)
+              })
+          })
+          .catch((err) => {
+            console.error("Error loading Image Data:", err)
+          })
+      })
+      .catch((err) => {
         console.error("Error loading Image Data:", err)
       })
-    }).catch((err) => {
-      console.error("Error loading Image Data:", err)
-    })
   }, [countCheckpoints, lamp1Url, lamp2Url, scienceUrl, segmentWidth])
 
   return response
@@ -538,7 +565,7 @@ interface extractLampDataProps {
     height: number
     mediasPoints: Point[]
     avgOpening: number
-    mediaFunction: ((value: number) => number)
+    mediaFunction: (value: number) => number
   }
   lamp: {
     data: Uint8ClampedArray
@@ -546,9 +573,9 @@ interface extractLampDataProps {
     height: number
   }
   reuseScienceFunction?: boolean
-  useSpline?: boolean,
+  useSpline?: boolean
   countCheckpoints?: number
-  segmentWidth?: number,
+  segmentWidth?: number
 }
 
 interface extractLampDataResponse {
@@ -557,11 +584,18 @@ interface extractLampDataResponse {
   mediaFunction: ((value: number) => number) | null
   transversalFunctions: {
     m: number
-    funct: ((h: number) => number)
+    funct: (h: number) => number
   }[]
   transversalAvgs: number[]
 }
-function extractLampData({ science, lamp, reuseScienceFunction, useSpline, countCheckpoints, segmentWidth }: extractLampDataProps): extractLampDataResponse {
+function extractLampData({
+  science,
+  lamp,
+  reuseScienceFunction,
+  useSpline,
+  countCheckpoints,
+  segmentWidth,
+}: extractLampDataProps): extractLampDataResponse {
   const response: extractLampDataResponse = {
     mediasPoints: [],
     avgOpening: 0,
@@ -583,12 +617,14 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
    * Calculados escalando los puntos del espectro de ciencia.
    */
   let mediasPoints
-  if (reuseScienceFunction) { // Reusar los del espectro de ciencia pero los escala.
+  if (reuseScienceFunction) {
+    // Reusar los del espectro de ciencia pero los escala.
     mediasPoints = science.mediasPoints.map(({ x, y }) => ({
       x: round(x * scaleLamp.x),
       y: y * scaleLamp.y,
     }))
-  } else { // Infiere los suyos.
+  } else {
+    // Infiere los suyos.
     const lampPoints = findXspacedPoints(science.width, countCheckpoints!)
 
     const segmentsData = obtainImageSegments(
@@ -598,16 +634,18 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
       lampPoints,
       segmentWidth!,
     )
-    const lampFunctions = segmentsData.map(data =>
-      promediadoHorizontal(data, segmentWidth!, science.height))
+    const lampFunctions = segmentsData.map((data) =>
+      promediadoHorizontal(data, segmentWidth!, science.height),
+    )
 
     const lampPlateauInfo: {
       medium: number
       opening: number
-    }[] = lampFunctions.map(funct => findPlateau(funct, 0.5))
-    mediasPoints = lampPoints.map((point, index) => (
-      { x: point, y: lampPlateauInfo[index]?.medium ?? 0 }
-    ))
+    }[] = lampFunctions.map((funct) => findPlateau(funct, 0.5))
+    mediasPoints = lampPoints.map((point, index) => ({
+      x: point,
+      y: lampPlateauInfo[index]?.medium ?? 0,
+    }))
   }
   response.mediasPoints = mediasPoints
 
@@ -616,20 +654,23 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
 
   /** Funcion media para Lampara */
   let mediaFunction: (value: number) => number
-  if (reuseScienceFunction) { // Reusar la del espectro de ciencia pero lo escala.
-    mediaFunction = (x: number) => (
+  if (reuseScienceFunction) {
+    // Reusar la del espectro de ciencia pero lo escala.
+    mediaFunction = (x: number) =>
       science.mediaFunction!(round(x * scaleLamp.x)) * scaleLamp.y
-    )
-  } else { // Infiere la suya en base a sus medias points
-    if (useSpline) { // Aproximación spline
+  } else {
+    // Infiere la suya en base a sus medias points
+    if (useSpline) {
+      // Aproximación spline
       mediaFunction = splineCuadratic(
-        response.mediasPoints.map(p => p.x),
-        response.mediasPoints.map(p => p.y),
+        response.mediasPoints.map((p) => p.x),
+        response.mediasPoints.map((p) => p.y),
       ).funct
-    } else { // Aproximación lineal
+    } else {
+      // Aproximación lineal
       mediaFunction = linearRegressionWhitDerived(
-        response.mediasPoints.map(p => p.x),
-        response.mediasPoints.map(p => p.y),
+        response.mediasPoints.map((p) => p.x),
+        response.mediasPoints.map((p) => p.y),
       ).funct
     }
   }
@@ -638,7 +679,7 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
   /** Funciones perpendiculares para Lampara 1. */
   const transversalFunctions: {
     m: number
-    funct: ((h: number) => number)
+    funct: (h: number) => number
   }[] = []
   for (let i = 0; i < lamp.width; i++) {
     const p1 = { x: i, y: mediaFunction(i) }
@@ -651,8 +692,8 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
     // })
     // Perpendicular a la imagen.
     transversalFunctions.push({
-      m: Infinity,
-      funct: (_y: number) => (p1.x), // Para cada Y me da ele x que le corresponde.
+      m: Number.POSITIVE_INFINITY,
+      funct: (_y: number) => p1.x, // Para cada Y me da ele x que le corresponde.
       // En el caso Vertical siempre va a ser el X del punto.
     })
   }
@@ -678,10 +719,8 @@ function extractLampData({ science, lamp, reuseScienceFunction, useSpline, count
       maxY,
     )
 
-    if (values.length === 0)
-      transversalAvgs.push(0)
-    else
-      transversalAvgs.push(mean(values))
+    if (values.length === 0) transversalAvgs.push(0)
+    else transversalAvgs.push(mean(values))
   }
   response.transversalAvgs = transversalAvgs
 

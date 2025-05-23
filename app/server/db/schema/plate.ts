@@ -4,7 +4,9 @@ import { nanoid } from "nanoid"
 import { project } from "./project"
 
 export const plate = sqliteTable("plate", {
-  id: text().primaryKey().$default(() => nanoid(10)),
+  id: text()
+    .primaryKey()
+    .$default(() => nanoid(10)),
   projectId: text("projectId").references(() => project.id),
   observat: text(),
   observer: text(),

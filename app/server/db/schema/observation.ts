@@ -5,7 +5,9 @@ import { plate } from "./plate"
 import { spectrum } from "./spectrum"
 
 export const observation = sqliteTable("observation", {
-  id: text().primaryKey().$default(() => nanoid(10)),
+  id: text()
+    .primaryKey()
+    .$default(() => nanoid(10)),
   x: integer(),
   y: integer(),
   height: integer(),

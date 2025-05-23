@@ -43,7 +43,7 @@ export const appRouter = router({
         .select()
         .from(s.user)
         .where(eq(s.user.email, Email))
-        .then(rows => rows[0])
+        .then((rows) => rows[0])
 
       if (!user) {
         // Usuario no encontrado

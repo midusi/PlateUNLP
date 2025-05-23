@@ -4,13 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "turbo dev",
-    "lint": "turbo check-types lint",
+    "lint:only": "biome lint .",
+    "lint:fix": "biome check --write .",
+    "lint": "turbo check-types && pnpm lint:only",
     "build": "turbo build",
     "start": "pnpm run -C app start",
     "postinstall": "pnpm run -C scripts generate"
   },
   "packageManager": "pnpm@10.5.2",
   "devDependencies": {
+    "@biomejs/biome": "2.0.0-beta.5",
     "turbo": "^2.4.4"
   }
 }
