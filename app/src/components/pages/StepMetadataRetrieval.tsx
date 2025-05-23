@@ -49,15 +49,26 @@ export function StepMetadataRetrieval({
     }))
     setActualStep(index + 1)
   }
-  const spectrumMetadataFormRef = useRef<{ setValues: (spectrumMetadata: SpectrumMetadata) => void, resetValues: () => void, getValues: () => SpectrumMetadata, validate: () => void, setIcons: (icons: SpectrumMetadataIcons) => void, getIcons: () => SpectrumMetadataIcons }>(null)
+  const spectrumMetadataFormRef = useRef<{
+    setValues: (spectrumMetadata: SpectrumMetadata) => void
+    resetValues: () => void
+    getValues: () => SpectrumMetadata
+    validate: () => void
+    setIcons: (icons: SpectrumMetadataIcons) => void
+    getIcons: () => SpectrumMetadataIcons
+  }>(null)
 
   return (
     <>
       <div className="flex flex-col items-center w-full ">
         <div className="flex flex-col w-full flex justify-center mb-6">
           <BoxMetadataReadOnly
-            OBJECT={processInfo.data.spectrums[selectedSpectrum!].metadata.OBJECT}
-            DATE_OBS={processInfo.data.spectrums[selectedSpectrum!].metadata.DATE_OBS}
+            OBJECT={
+              processInfo.data.spectrums[selectedSpectrum!].metadata.OBJECT
+            }
+            DATE_OBS={
+              processInfo.data.spectrums[selectedSpectrum!].metadata.DATE_OBS
+            }
             UT={processInfo.data.spectrums[selectedSpectrum!].metadata.UT}
           />
           <hr className="my-4" />

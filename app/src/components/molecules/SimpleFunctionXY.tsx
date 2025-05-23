@@ -1,7 +1,7 @@
-import { ParentSize } from "@visx/responsive"
-import { Point } from "./ContinueButton"
-import { AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
 import { curveStep } from "@visx/curve"
+import { ParentSize } from "@visx/responsive"
+import { AreaSeries, Axis, Grid, lightTheme, XYChart } from "@visx/xychart"
+import type { Point } from "./ContinueButton"
 
 interface SimpleFunctionXYProps {
   data?: number[]
@@ -9,7 +9,13 @@ interface SimpleFunctionXYProps {
 export function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
   const data1 = data
     ? data.map((value, index) => ({ x: index, y: value }))
-    : [{ x: 1, y: 50 }, { x: 2, y: 10 }, { x: 3, y: 20 }, { x: 4, y: 80 }, { x: 9, y: 1 }]
+    : [
+        { x: 1, y: 50 },
+        { x: 2, y: 10 },
+        { x: 3, y: 20 },
+        { x: 4, y: 80 },
+        { x: 9, y: 1 },
+      ]
 
   const accessors = {
     xAccessor: (d: Point) => d.x,
@@ -19,8 +25,7 @@ export function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
   return (
     <ParentSize>
       {({ width }) => {
-        if (width === 0)
-          return null // Esperar a que se mida
+        if (width === 0) return null // Esperar a que se mida
         return (
           <XYChart
             theme={lightTheme}
@@ -32,14 +37,10 @@ export function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
           >
             <Axis
               orientation="bottom"
-              tickFormat={d => `${d}`}
+              tickFormat={(d) => `${d}`}
               numTicks={5}
             />
-            <Axis
-              orientation="left"
-              tickFormat={d => `${d}`}
-              numTicks={5}
-            />
+            <Axis orientation="left" tickFormat={(d) => `${d}`} numTicks={5} />
             <Grid numTicks={10} />
             <AreaSeries
               curve={curveStep}

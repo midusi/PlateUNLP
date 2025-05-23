@@ -1,18 +1,17 @@
-import { useState } from "react"
+import { useEffect } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
-import { useEffect, useState } from "react"
-import { BBUI } from "../organisms/BBUI"
-import { Step } from "../organisms/BBList"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
 import { Button } from "../atoms/button"
+import type { BoxMetadata } from "../molecules/BoxMetadataForm"
+import { BBUI } from "../organisms/BBUI"
 
-export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
-
-  const [setActualStep] = useGlobalStore(s => [
-    s.setActualStep,
-  ])
+export function StepPlateSegmentation({
+  index,
+  processInfo,
+  setProcessInfo,
+}: StepProps) {
+  const [setActualStep] = useGlobalStore((s) => [s.setActualStep])
   const determineBBFunction = usePredictBBs(
     1024,
     "spectrum_detector.onnx",
@@ -21,15 +20,14 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     0.7,
   )
 
-  const [
-    imageSegmentator,
-    boundingBoxes,
-    imageSelected
-  ] = useImageSegmentator(processInfo, determineBBFunction)
+  const [imageSegmentator, boundingBoxes, imageSelected] = useImageSegmentator(
+    processInfo,
+    determineBBFunction,
+  )
 
   useEffect(() => {
     // Almacena información de imagenes de la placa
-    setProcessInfo(prev => ({
+    setProcessInfo((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -66,8 +64,11 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
   //   }))
   // }
 
-  function saveBoundingBoxes(boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) {
-    setProcessInfo(prev => ({
+  function saveBoundingBoxes(
+    boundingBoxes: BoundingBox[],
+    boxMetadata: BoxMetadata[],
+  ) {
+    setProcessInfo((prev) => ({
       ...prev,
       data: {
         ...prev.data,
