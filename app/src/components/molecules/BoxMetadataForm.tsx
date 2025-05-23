@@ -1,4 +1,4 @@
-import type { z } from "zod"
+import type { z } from "zod/v4"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Label } from "@radix-ui/react-label"
 import React, { forwardRef, useImperativeHandle, useState } from "react"

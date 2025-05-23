@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm"
-import { z } from "zod"
+import { z } from "zod/v4"
 import { verifyPassword } from "../auth/password"
 import { db, seedUsers } from "../db"
 import * as s from "../db/schema"

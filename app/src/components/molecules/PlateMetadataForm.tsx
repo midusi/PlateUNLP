@@ -1,4 +1,4 @@
-import type { z } from "zod"
+import type { z } from "zod/v4"
 import { observatories } from "@/lib/observatories"
 import { plateMetadataFormSchema } from "@/lib/plateMetadataFormSchema"
 import { zodResolver } from "@hookform/resolvers/zod"

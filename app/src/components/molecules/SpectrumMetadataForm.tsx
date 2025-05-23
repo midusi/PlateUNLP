@@ -1,4 +1,4 @@
-import type { z } from "zod"
+import type { z } from "zod/v4"
 import { spectrumMetadataFormSchema } from "@/lib/spectrumMetadataFormSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Label } from "@radix-ui/react-label"

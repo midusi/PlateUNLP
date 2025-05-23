@@ -1,4 +1,4 @@
-import type { z } from "zod"
+import type { z } from "zod/v4"
 import { loginFormSchema } from "@/lib/loginFormSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import React, { forwardRef, useImperativeHandle } from "react"
