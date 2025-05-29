@@ -4,7 +4,10 @@
  * @param opts.digits - The number of decimal places to include in the seconds part of the DMS string (default: 4).
  * @param opts.sep - The separator to use between the degrees, minutes, and seconds (default: ":").
  */
-export function degToDMS(deg: number, opts: { digits?: number, sep?: string } = {}) {
+export function degToDMS(
+  deg: number,
+  opts: { digits?: number; sep?: string } = {},
+) {
   const digits = opts.digits ?? 4
   const sep = opts.sep ?? ":"
 
@@ -37,7 +40,10 @@ export function degToDMS(deg: number, opts: { digits?: number, sep?: string } = 
  * @param opts.digits - The number of decimal places to include in the seconds part of the HMS string (default: 4).
  * @param opts.sep - The separator to use between the hours, minutes, and seconds (default: ":").
  */
-export function degToHMS(deg: number, opts: { digits?: number, sep?: string } = {}) {
+export function degToHMS(
+  deg: number,
+  opts: { digits?: number; sep?: string } = {},
+) {
   const digits = opts.digits ?? 4
   const sep = opts.sep ?? ":"
 
@@ -61,4 +67,18 @@ export function degToHMS(deg: number, opts: { digits?: number, sep?: string } = 
       ? Math.round(s).toString().padStart(2, "0")
       : s.toFixed(digits).padStart(3 + digits, "0"),
   ].join("")
+}
+
+/**
+ * Converts a radians to a string representation in hours, minutes, and seconds (HMS).
+ * It maxes at 24 hours, the value must be between 0 and 2π radians.
+ * @param rad - The radian value to convert.
+ * @param opts.digits - The number of decimal places to include in the seconds part of the HMS string (default: 4).
+ * @param opts.sep - The separator to use between the hours, minutes, and seconds (default: ":").
+ */
+export function radToHMS(
+  rad: number,
+  opts?: { digits?: number; sep?: string },
+) {
+  return degToHMS(rad * (180 / Math.PI), opts)
 }

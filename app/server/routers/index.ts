@@ -5,11 +5,16 @@ import { db } from "../db"
 import * as s from "../db/schema"
 import { publicProcedure, router } from "../trpc"
 
+import { iersRouter } from "./iers"
+import { observatoryRouter } from "./observatory"
+
 export const appRouter = router({
+  iers: iersRouter,
+  observatory: observatoryRouter,
+
   dummy: publicProcedure.query(() => "Hello, world!"),
   crearUsuario: publicProcedure
     .input(
-      // https://v4.zod.dev/error-customization
       z.object({
         name: z.string(),
         email: z.string().email(),

@@ -1,5 +1,12 @@
+/**
+ * @fileoverview
+ * This file contains functions to query the SIMBAD database.
+ * It uses the SIMBAD script service to query the database and get the metadata for a given object.
+ */
+
 import dedent from "dedent"
-import { z } from "zod"
+import { err, ok, type Result } from "neverthrow"
+import { z } from "zod/v4"
 
 /**
  * SIMBAD service hosted by the Strasbourg Astronomical Data Center (CDS)
@@ -22,13 +29,20 @@ const SIMBAD_URL = "https://simbad.cds.unistra.fr/simbad/sim-script"
  *
  * @see https://simbad.cds.unistra.fr/guide/sim-fscript.htx
  */
-async function querySimbad(script: string): Promise<{ success: true, data: string[] } | { success: false, error: string }> {
+async function querySimbad(script: string): Promise<Result<string[], Error>> {
   const url = new URL(SIMBAD_URL)
   script = `output script=off\n${script}` // add output script=off at the beginning of the script
   url.searchParams.set("script", script)
-  const response = await fetch(url, { method: "POST", headers: { Accept: "text/plain" } })
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Accept: "text/plain" },
+  })
   if (!response.ok) {
-    return { success: false, error: `Error querying SIMBAD: ${response.status} ${response.statusText}` }
+    return err(
+      new Error(
+        `Error querying SIMBAD: ${response.status} ${response.statusText}`,
+      ),
+    )
   }
 
   const text = await response.text()
@@ -36,41 +50,31 @@ async function querySimbad(script: string): Promise<{ success: true, data: strin
   let result: "data" | "error" | null = null
   let i = 0
   while (i < lines.length && result === null) {
-    if (lines[i].startsWith("::data::"))
-      result = "data"
-    if (lines[i].startsWith("::error::"))
-      result = "error"
+    if (lines[i].startsWith("::data::")) result = "data"
+    if (lines[i].startsWith("::error::")) result = "error"
     i++
   }
   if (result === "data") {
     i++ // skip extra empty line between header and data
-    return {
-      success: true,
-      data: lines.slice(i, -2), // SIMBAD adds two extra empty lines at the end of the output
-    }
-  }
-  else if (result === "error") {
+    return ok(lines.slice(i, -2)) // SIMBAD adds two extra empty lines at the end of the output
+  } else if (result === "error") {
     i++ // skip extra empty line between header and data
-    return {
-      success: false,
-      error: lines.slice(i, -2).join("\n"), // SIMBAD adds two extra empty lines at the end of the output
-    }
-  }
-  else {
+    return err(new Error(lines.slice(i, -2).join("\n"))) // SIMBAD adds two extra empty lines at the end of the output
+  } else {
     console.error(`SIMBAD response:`, text)
-    return { success: false, error: "Couldn't parse SIMBAD response" }
+    return err(new Error("Couldn't parse SIMBAD response"))
   }
 }
 
-const queryObjectByIdResultSchema = z.interface({
+const queryObjectByIdResultSchema = z.object({
   "MAIN-ID": z.string(),
-  "RA": z.coerce.number(),
-  "DEC": z.coerce.number(),
-  "RA2000": z.coerce.number(),
-  "DEC2000": z.coerce.number(),
-  "RA1950": z.coerce.number(),
-  "DEC1950": z.coerce.number(),
-  "SP-TYPE": z.string().transform(s => s || null),
+  RA: z.coerce.number(),
+  DEC: z.coerce.number(),
+  RA2000: z.coerce.number(),
+  DEC2000: z.coerce.number(),
+  RA1950: z.coerce.number(),
+  DEC1950: z.coerce.number(),
+  SPTYPE: z.string().transform((s) => s || null),
 })
 
 /**
@@ -83,7 +87,7 @@ export async function queryObjectById(
   object: string,
   epoch: string,
   equinox: string,
-): Promise<{ success: true, data: z.output<typeof queryObjectByIdResultSchema> } | { success: false, error: string }> {
+): Promise<Result<z.output<typeof queryObjectByIdResultSchema>, Error>> {
   const script = dedent.withOptions({ escapeSpecialCharacters: false })`
     format object "%MAIN_ID\n"+
     "%COO(d;A;FK4;${epoch};${equinox})\n"+
@@ -96,21 +100,19 @@ export async function queryObjectById(
     query id ${object}
   `
   const res = await querySimbad(script)
-  if (!res.success) {
-    return res
-  }
+  if (res.isErr()) return err(res.error)
+
   const parsed = queryObjectByIdResultSchema.safeParse({
-    "MAIN-ID": res.data[0],
-    "RA": res.data[1],
-    "DEC": res.data[2],
-    "RA2000": res.data[3],
-    "DEC2000": res.data[4],
-    "RA1950": res.data[5],
-    "DEC1950": res.data[6],
-    "SP-TYPE": res.data[7],
+    "MAIN-ID": res.value[0],
+    RA: res.value[1],
+    DEC: res.value[2],
+    RA2000: res.value[3],
+    DEC2000: res.value[4],
+    RA1950: res.value[5],
+    DEC1950: res.value[6],
+    SPTYPE: res.value[7],
   })
-  if (!parsed.success) {
-    return { success: false, error: z.prettifyError(parsed.error) }
-  }
-  return { success: true, data: parsed.data }
+  if (!parsed.success) return err(new Error(z.prettifyError(parsed.error)))
+
+  return ok(parsed.data)
 }

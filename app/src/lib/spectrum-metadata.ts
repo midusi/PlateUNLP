@@ -1,19 +1,56 @@
-import type { GetSpectrumMetadataInput } from "./schema"
-import { degToDMS, degToHMS } from "@/lib/format"
-import { getJulianDate, getJulianEpoch } from "./dates"
-import { queryObjectById } from "./simbad"
+import type { Result } from "neverthrow"
+import { err, ok, ResultAsync } from "neverthrow"
+import {
+  getJulianDate,
+  getJulianEpoch,
+  getLocalTime,
+  getSiderealTime,
+} from "@/common/astronomical/datetime"
+import { queryObjectById } from "@/common/astronomical/simbad"
+import { trpc } from "@/lib/trpc"
+import type { GetSpectrumMetadataInput } from "./spectrum-metadata/schema"
 
-export async function getSpectrumMetadata(input: GetSpectrumMetadataInput) {
-  const { OBJECT } = input
-  const JD = getJulianDate(input["DATE-OBS"], input.UT)
+export async function getSpectrumMetadata(
+  input: GetSpectrumMetadataInput,
+): Promise<Result<void, Error>> {
+  const { OBSERVAT, OBJECT, "DATE-OBS": DATE_OBS, UT } = input
+
+  // JD, EPOCH, EQUINOX
+  const JD = getJulianDate(DATE_OBS, UT)
   const EPOCH = getJulianEpoch(JD)
   const EQUINOX = EPOCH.slice(1) // Remove leading "J" from the epoch string
+  // MAIN-ID, SPTYPE, RA, DEC, RA2000, DEC2000, RA1950, DEC1950
   const simbad = await queryObjectById(OBJECT, EPOCH, EQUINOX)
+  if (simbad.isErr()) {
+    return err(simbad.error)
+  }
+  // Get observatory data (latitude, longitude and timezone)
+  const observatoryData = await ResultAsync.fromPromise(
+    trpc.observatory.get.query(OBSERVAT),
+    () => new Error("Couldn't get observatory data"),
+  )
+  if (observatoryData.isErr()) return err(observatoryData.error)
+  if (!observatoryData.value)
+    return err(new Error(`Observatory "${OBSERVAT}" wasn't found`))
+  const obsLongitude = observatoryData.value.longitude
+  const obsTimezone = observatoryData.value.timezone
+  // TIME-OBS
+  const TIME_OBS = getLocalTime(DATE_OBS, UT, obsTimezone)
+  const ST = await getSiderealTime(
+    JD,
+    obsLongitude,
+    (mjd) => trpc.iers.getDeltaT.query(mjd),
+    (mjd) => trpc.iers.getPolarMotion.query(mjd),
+  )
+  if (ST.isErr()) return err(ST.error)
   console.log({
     simbad,
-    RA: simbad.success ? degToHMS(simbad.data.RA) : null,
-    DEC: simbad.success ? degToDMS(simbad.data.DEC) : null,
+    ob: observatoryData.value,
+    TIME_OBS,
+    JD,
+    ST,
   })
+  return ok()
 }
 
 /*
