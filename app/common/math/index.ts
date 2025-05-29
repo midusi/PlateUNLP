@@ -24,16 +24,21 @@ export function div<T extends number | BigNumber>(a: T, b: T) {
 }
 
 /**
- * Normalizes an angle to the range [0, 2π).
+ * Normalizes an angle to the range [0, 2π) or [0, 360) depending on the system.
  * @param angle The angle in radians.
- * @returns The normalized angle in radians.
+ * @param system The system to normalize to, either "radians" or "degrees". Defaults to "radians".
+ * @returns The normalized angle in the specified system.
  */
-export function normalizeAngle<T extends number | BigNumber>(angle: T) {
+export function normalizeAngle<T extends number | BigNumber>(
+  angle: T,
+  system: "radians" | "degrees" = "radians",
+) {
   // math.tau is 2π
+  const turn = system === "radians" ? math.tau : 360
   // math.mod always returns a positive value,
   // since it configures Decimal.js with EUCLID mode
   // https://mikemcl.github.io/decimal.js/#modulo
-  return math.mod<T>(angle, math.tau)
+  return math.mod<T>(angle, turn)
 }
 
 /**

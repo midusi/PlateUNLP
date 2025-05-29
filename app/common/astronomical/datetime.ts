@@ -11,7 +11,6 @@ import { UTCDate } from "@date-fns/utc"
 import { formatDate } from "date-fns"
 import { err, ok, type Result, ResultAsync } from "neverthrow"
 import { z } from "zod/v4"
-import { radToHMS } from "@/common/format"
 import {
   type BigNumber,
   div,
@@ -20,8 +19,9 @@ import {
   rotationMatrix3D,
 } from "@/common/math"
 
-const DEG_TO_RAD = math.bignumber("1.745329251994329576923691e-2") // Degrees to radians
 const ARCSEC_TO_RAD = math.bignumber("4.848136811095359935899141e-6") // Arcseconds to radians
+const DEG_TO_RAD = math.bignumber("1.745329251994329576923691e-2") // Degrees to radians
+const RAD_TO_DEG = math.bignumber("57.29577951308232087679815") // Radians to degrees
 const JD_CENTURY = 36525 // Days in a Julian century
 const JD_J2000 = 2451545.0 // Reference epoch (J2000.0) as Julian date
 
@@ -144,7 +144,7 @@ export function getBesselianEpoch(jd: number) {
  * @param long The longitude of the observer, in degrees (positive for East, negative for West).
  * @param getΔT A function that returns the ΔT (Delta T) value for the given Modified Julian Date (MJD).
  * @param getPolarMotion A function that returns the polar motion for the given Modified Julian Date (MJD).
- * @return the sidereal time, in HH:MM:SS.
+ * @return the sidereal time in degrees.
  * @see {@link /docs/reference/astronomical/#getsiderealtime}
  */
 export async function getSiderealTime(
@@ -152,7 +152,7 @@ export async function getSiderealTime(
   long: number,
   getΔT: (mjd: number) => Promise<number | null>,
   getPolarMotion: (mjd: number) => Promise<{ x: number; y: number }>,
-): Promise<Result<string, Error>> {
+): Promise<Result<number, Error>> {
   const mjd = getModifiedJulianDate(jd)
 
   // Gets the Earth Rotation Angle (ERA) at the given date and time,
@@ -231,5 +231,6 @@ export async function getSiderealTime(
   ) as unknown as BigNumber
   const st = normalizeAngle(atan)
 
-  return ok(radToHMS(math.number(st)))
+  // Return the sidereal time in degrees
+  return ok(math.number(st.mul(RAD_TO_DEG)))
 }
