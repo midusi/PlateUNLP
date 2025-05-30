@@ -13,6 +13,10 @@ export const math = createMath(allMath, {
   precision: 32,
 })
 
+export const ARCSEC_TO_RAD = math.bignumber("4.848136811095359935899141e-6") // Arcseconds to radians
+export const DEG_TO_RAD = math.bignumber("1.745329251994329576923691e-2") // Degrees to radians
+export const RAD_TO_DEG = math.bignumber("57.29577951308232087679815") // Radians to degrees
+
 /**
  * Performs integer division, rounding towards zero.
  * @param a The dividend.

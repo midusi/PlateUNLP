@@ -12,16 +12,16 @@ import { formatDate } from "date-fns"
 import { err, ok, type Result, ResultAsync } from "neverthrow"
 import { z } from "zod/v4"
 import {
+  ARCSEC_TO_RAD,
   type BigNumber,
+  DEG_TO_RAD,
   div,
   math,
   normalizeAngle,
+  RAD_TO_DEG,
   rotationMatrix3D,
 } from "@/common/math"
 
-const ARCSEC_TO_RAD = math.bignumber("4.848136811095359935899141e-6") // Arcseconds to radians
-const DEG_TO_RAD = math.bignumber("1.745329251994329576923691e-2") // Degrees to radians
-const RAD_TO_DEG = math.bignumber("57.29577951308232087679815") // Radians to degrees
 const JD_CENTURY = 36525 // Days in a Julian century
 const JD_J2000 = 2451545.0 // Reference epoch (J2000.0) as Julian date
 

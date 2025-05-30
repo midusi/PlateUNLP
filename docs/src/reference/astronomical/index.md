@@ -10,6 +10,11 @@ Most of these functions follow the algorithms used by [SOFA](https://www.iausofa
 * [Datetime](#datetime)
   * [`getLocalTime`](#getlocaltime)
   * [`getJulianDate`](#getjuliandate)
+  * [`getSiderealTime`](#getsiderealtime)
+* [Misc.](#misc)
+  * [`getHourAngle`](#gethourangle)
+  * [`equatorialToHorizontal`](#equatorialtohorizontal)
+  * [`getAirmass`](#getairmass)
 
 ## Datetime
 
@@ -48,6 +53,24 @@ where $T_u$ is defined as the Julian days (in UT[^ut-note]) since the epoch J200
 Then, we get $\Delta\text{T} = \text{TT} - \text{UT}$ from IERS, managed by the U.S. Naval Observatory (see https://maia.usno.navy.mil/products/deltaT). With the date in terrestrial time (TT), we can compute the Greenwich mean sidereal time (GMST) as a simple polynomial described by Capitaine et al. (2005)[^capitaine2005].
 
 Finally, the local sidereal time is computed by rotating the GMST by the observer's longitude, the TIO (Terrestrial Intermediate Origin) locator $s'$ and the polar motion of the Earth (fetched from the IERS Bulletin A, see https://maia.usno.navy.mil/ser7/).
+
+## Misc.
+
+### `getHourAngle`
+
+Computes the hour angle of a celestial object given its right ascension in ICRS, and the mean local sidereal time. It just subtracts the right ascension from the local sidereal time.
+
+### `equatorialToHorizontal`
+
+Converts a point in equatorial coordinates (local hour angle and declination in ICRS) to horizontal coordinates (azimuth and altitude) using the observer's latitude. The algorithm is based on the one used by ERFA in its [`eraHd2ae`](https://github.com/liberfa/erfa/blob/df9f5c4ec8acc5c9fdf45fd1fe5b75af005abb0c/src/hd2ae.c) function.
+
+### `getAirmass`
+
+Computes the airmass of a celestial object given its altitude. The airmass is computed considering a plane-parallel atmosphere:
+
+$$
+  \text{airmass} = \frac{1}{\cos(\text{zenith angle})} = \frac{1}{\sin(\text{altitude angle})}.
+$$
 
 [^almanac]: S. E. Urban and P. K. Seidelmann, Eds. _Explanatory Supplement to the Astronomical Almanac_, 3rd ed. University Science Books, 2013, ch. 15, sec. 11, pp. 617-621.
 [^capitaine2003]: N. Capitaine, P. T. Wallace, and D. D. McCarthy, "Expressions to implement the IAU 2000 definition of UT1," _Astronomy & Astrophysics_, vol. 406, no. 3, pp. 1135–1149, Aug. 2003, doi: 10.1051/0004-6361:20030817.

@@ -1,14 +1,20 @@
 import type { Result } from "neverthrow"
 import { err, ok, ResultAsync } from "neverthrow"
+import { z } from "zod/v4"
 import {
   getJulianDate,
   getJulianEpoch,
   getLocalTime,
   getSiderealTime,
 } from "@/common/astronomical/datetime"
+import {
+  equatorialToHorizontal,
+  getAirmass,
+  getHourAngle,
+} from "@/common/astronomical/misc"
 import { queryObjectById } from "@/common/astronomical/simbad"
+import { degToHMS } from "@/common/format"
 import { trpc } from "@/lib/trpc"
-import type { GetSpectrumMetadataInput } from "./spectrum-metadata/schema"
 
 export async function getSpectrumMetadata(
   input: GetSpectrumMetadataInput,
@@ -32,6 +38,7 @@ export async function getSpectrumMetadata(
   if (observatoryData.isErr()) return err(observatoryData.error)
   if (!observatoryData.value)
     return err(new Error(`Observatory "${OBSERVAT}" wasn't found`))
+  const obsLatitude = observatoryData.value.latitude
   const obsLongitude = observatoryData.value.longitude
   const obsTimezone = observatoryData.value.timezone
   // TIME-OBS
@@ -43,15 +50,59 @@ export async function getSpectrumMetadata(
     (mjd) => trpc.iers.getPolarMotion.query(mjd),
   )
   if (ST.isErr()) return err(ST.error)
+  const HA = getHourAngle(simbad.value.RA2000, ST.value)
+  const { altitude } = equatorialToHorizontal(
+    HA,
+    simbad.value.DEC2000,
+    obsLatitude,
+  )
+  const AIRMASS = getAirmass(altitude)
   console.log({
     simbad,
     ob: observatoryData.value,
     TIME_OBS,
     JD,
-    ST,
+    ST: degToHMS(ST.value),
+    HA: degToHMS(HA),
+    AIRMASS,
   })
   return ok()
 }
+
+export const getSpectrumMetadataInputSchema = z.object({
+  OBSERVAT: z.string().nonempty(),
+  OBJECT: z.string().nonempty(),
+  "DATE-OBS": z.string().nonempty(),
+  UT: z.string().nonempty(),
+})
+
+export type GetSpectrumMetadataInput = z.infer<
+  typeof getSpectrumMetadataInputSchema
+>
+
+export const spectrumMetadataSchema = z.object({
+  OBJECT: z.string().nonempty(),
+  "DATE-OBS": z.iso.date(),
+  UT: z.iso.time({ precision: 0 }),
+  "TIME-OBS": z.iso.time().optional(),
+  MAIN_ID: z.string().nonempty(),
+  ST: z.union([z.undefined(), z.number()]),
+  HA: z.union([z.undefined(), z.number()]),
+  RA: z.union([z.undefined(), z.number()]),
+  DEC: z.union([z.undefined(), z.number()]),
+  GAIN: z.union([z.undefined(), z.number()]),
+  RA2000: z.union([z.undefined(), z.number()]),
+  DEC2000: z.union([z.undefined(), z.number()]),
+  RA1950: z.union([z.undefined(), z.number()]),
+  DEC1950: z.union([z.undefined(), z.number()]),
+  EXPTIME: z.number().optional(),
+  DETECTOR: z.string().optional(),
+  IMAGETYP: z.string().optional(),
+  SPTYPE: z.string().optional(),
+  JD: z.union([z.undefined(), z.number()]),
+  EQUINOX: z.union([z.undefined(), z.number()]),
+  AIRMASS: z.union([z.undefined(), z.number()]),
+})
 
 /*
   OBJECT: $metadataStore.spectraData[bboxSelected - 2]["OBJECT"],
@@ -63,43 +114,3 @@ export async function getSpectrumMetadata(
 
 // http://tdc-www.harvard.edu/wcstools/wcstools.wcs.html
 // RADECSYS     = 'FK4'
-
-// Updater_mainId_ra2000_dec2000.update(metadata)
-// Updater_SPTYPE.update(metadata)
-// Updater_EQUINOX.update(metadata)
-// Updater_EPOCH.update(metadata)
-
-// Updater_RA_DEC.update(metadata)
-// Updater_RA1950_DEC1950.update(metadata)
-// Updater_TIMEOBS.update(metadata)
-// Updater_ST.update(metadata)
-
-// Updater_HA.update(metadata)
-// Updater_AIRMASS.update(metadata)
-// Updater_JD.update(metadata)
-
-// -- Basic data from an object given one of its identifiers.
-// SELECT basic.OID,
-//        RA,
-//        DEC,
-//        main_id AS "Main identifier",
-//        coo_bibcode AS "Coord Reference",
-//        nbref AS "NbReferences",
-//        plx_value as "Parallax",
-//        rvz_radvel as "Radial velocity",
-//        galdim_majaxis,
-//        galdim_minaxis,
-//        galdim_angle AS "Galaxy ellipse angle",
-//        id
-// FROM basic JOIN ident ON oidref = oid
-// WHERE id = 'm13';
-
-// SELECT
-//   basic."main_id",
-// basic."ra",
-// basic."dec",
-// basic."coo_err_maj",
-// basic."coo_err_min",
-// basic."coo_err_angle", basic."coo_wavelength", basic."coo_bibcode", ident."id" AS "matched_id"
-// FROM basic JOIN ident ON basic."oid" = ident."oidref"
-// WHERE id = 'M 82'

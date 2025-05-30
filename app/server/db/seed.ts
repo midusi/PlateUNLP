@@ -125,7 +125,9 @@ async function seedIERSHistoricDeltaT() {
   )
 
   console.log(
-    pc.white(`✓ Inserted ${pc.bold(res.rowsAffected)} ΔT (TT - UT1) records`),
+    pc.white(
+      `✓ Inserted ${pc.bold(res.rowsAffected)} ΔT (TT - UT1) historic records`,
+    ),
   )
 }
 
