@@ -72,6 +72,7 @@ function getObservat() {
 function getObserver() {
   if (localStorage.getItem('observers'))
     return JSON.parse(localStorage.getItem('observers'))
+  return []
 }
 
 function getObserverDef() {
@@ -84,6 +85,7 @@ function getObserverDef() {
 function getImageTyp() {
   if (localStorage.getItem('imageTypes'))
     return JSON.parse(localStorage.getItem('imageTypes'))
+  return []
 }
 
 function getImageTypDef() {
@@ -93,9 +95,10 @@ function getImageTypDef() {
   return ''
 }
 
-function getDigitali() {
+const getDigitali = () => {
   if (localStorage.getItem('digitalis'))
     return JSON.parse(localStorage.getItem('digitalis'))
+  return []
 }
 
 function getDigitaliDef() {
@@ -108,6 +111,7 @@ function getDigitaliDef() {
 function getScanner() {
   if (localStorage.getItem('scanners'))
     return JSON.parse(localStorage.getItem('scanners'))
+  return []
 }
 
 function getScannerDef() {
@@ -120,6 +124,7 @@ function getScannerDef() {
 function getScanres() {
   if (localStorage.getItem('scanress'))
     return JSON.parse(localStorage.getItem('scanress'))
+  return []
 }
 
 function getScanresDef() {
@@ -132,6 +137,7 @@ function getScanresDef() {
 function getScancol() {
   if (localStorage.getItem('scancols'))
     return JSON.parse(localStorage.getItem('scancols'))
+  return []
 }
 
 function getScancolDef() {
@@ -144,6 +150,7 @@ function getScancolDef() {
 function getSoftware() {
   if (localStorage.getItem('softwares'))
     return JSON.parse(localStorage.getItem('softwares'))
+  return []
 }
 
 function getSoftwareDef() {
@@ -191,6 +198,21 @@ function getMetadataFields() {
       label: 'SUFFIX',
       type: 'text',
       info: 'Suffix for filename',
+      required: false,
+      pre_fetch: true,
+      global: false
+    },
+    plateComment: {
+      label: 'PLATE-COMMENTS',
+      type: 'text',
+      info: 'plate comments',
+      required: false,
+      global: true
+    },
+    comment: {
+      label: 'COMMENTS',
+      type: 'text',
+      info: 'comments',
       required: false,
       pre_fetch: true,
       global: false
@@ -339,23 +361,23 @@ function getMetadataFields() {
       required: false
     }, */
     // selector
-    imageTyp: {
-      label: 'IMAGETYP',
-      type: 'text',
-      info: 'Object, dark, zero, etc',
-      required: false,
-      options: getImageTyp(),
-      default: getImageTypDef(),
-      global: false
-    },
     observer: {
       label: 'OBSERVER',
       type: 'text',
       info: 'Observer name',
-      required: false,
+      required: true,
       options: getObserver(),
       default: getObserverDef(),
-      global: false
+      global: true
+    },
+    imageTyp: {
+      label: 'IMAGETYP',
+      type: 'text',
+      info: 'Object, dark, zero, etc',
+      required: true,
+      options: getImageTyp(),
+      default: getImageTypDef(),
+      global: true
     },
     digitali: {
       label: 'DIGITALI',
@@ -391,7 +413,6 @@ function getMetadataFields() {
       required: false,
       options: getScancol(),
       default: getScancolDef(),
-      required: false,
       global: true
     },
     software: {

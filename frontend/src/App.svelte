@@ -617,7 +617,7 @@
               <Tabs on:selectTab={setBbox}>
                 <TabList>
                   <div class="row">
-                    <div class="col-10 my-2">
+                    <div class="col-9 my-2">
                       <Tab>
                         <PlateTab bind:validated={plateValid} />
                       </Tab>
@@ -647,8 +647,12 @@
                         click={addBox}>+</NButton
                       >
                     </div>
-                    <div class="col-2 py-3">
-                      <ExportButton
+                    <div class="col-3 py-3 d-flex justify-content-end">
+                      <div class="controls mr-2">
+                        <SetParams />
+                      </div>
+                      <div >
+                        <ExportButton
                         {plateValid}
                         spectrums={$metadataStore.spectraData}
                         {validatedSpectrums}
@@ -656,6 +660,7 @@
                         click={generateFits}
                         disabled={invalidForm}
                       />
+                      </div>
                     </div>
                   </div>
                 </TabList>
@@ -696,11 +701,6 @@
                   </TabPanel>
                 {/each}
               </Tabs>
-              <div class="row mt-4 ml-1 mb-4">
-                <div class="controls mr-2">
-                  <SetParams />
-                </div>
-              </div>
             </div>
           {/if}
         </div>

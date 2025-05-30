@@ -61,7 +61,7 @@
         placeholder={$metadataStore.fields[name].info}
       />
     {/if}
-  {:else if $metadataStore.fields[name].label === "OBSERVAT"}
+  {:else if !!$metadataStore.fields[name].options  }
   <select
       id="Observat selector"
       bind:value={value}
