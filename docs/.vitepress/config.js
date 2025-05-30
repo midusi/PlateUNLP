@@ -1,3 +1,4 @@
+import markdownItFootnote from "markdown-it-footnote"
 import { defineConfig } from "vitepress"
 
 export default defineConfig({
@@ -14,6 +15,9 @@ export default defineConfig({
   lastUpdated: true,
   markdown: {
     math: true,
+    config: (md) => {
+      md.use(markdownItFootnote)
+    },
   },
 
   themeConfig: {
@@ -56,6 +60,15 @@ export default defineConfig({
           {
             text: "Funciones de Interpolación",
             link: "/interpolation-functions",
+          },
+        ],
+      },
+      {
+        text: "Reference",
+        items: [
+          {
+            text: "Astronomical calculations",
+            link: "/reference/astronomical",
           },
         ],
       },
