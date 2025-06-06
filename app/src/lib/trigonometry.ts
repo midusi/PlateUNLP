@@ -6,7 +6,7 @@ import type { Point } from "@/interfaces/Point"
  * @param {Point} point - Punto medio desde el que hacer las cuentas.
  * @param {number} m - Pendiente. Si es totalmente vertical mandar 'Infinity'.
  * @param {number} distance - Distancia entre el punto medio y los puntos buscados
- * @returns { forward: Point, backward: Point } -
+ * @returns { forward, backward: Point } -
  * Puntos recorriendo la distancia hacia delante y hacia atrás
  */
 export function extremePoints(
