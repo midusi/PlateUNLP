@@ -6,7 +6,7 @@ import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { useImperativeHandle, useRef, useState } from "react"
 import { BBUI } from "../organisms/BBUI"
 import { Step } from "../organisms/BBList"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
+import { BoxMetadata, BoxMetadataNulls } from "../molecules/BoxMetadataForm"
 
 export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
   const parameters = {
@@ -14,13 +14,16 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     invertColorButton: true,
     step: Step.Plate,
   }
-  const bBUIRef = useRef<{ showErrors: () => void }>(null)
+  const bBUIRef = useRef<{ showErrors: () => Promise<void> }>(null)
 
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
   )
   const [boxMetadatas, setBoxMetadatas] = useState<BoxMetadata[]>(
     processInfo.data.spectrums.map(spec => spec.metadata),
+  )
+  const [boxMetadataNulls, setBoxMetadataNulls] = useState<BoxMetadataNulls[]>(
+    processInfo.data.spectrums.map(spec => spec.metadataNulls),
   )
   const [setActualStep] = useGlobalStore(s => [
     s.setActualStep,
@@ -34,7 +37,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     0.70,
   )
 
-  function saveBoundingBoxes(boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) {
+  function saveBoundingBoxes(boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[], nulls: BoxMetadataNulls[]) {
     setProcessInfo(prev => ({
       ...prev,
       data: {
@@ -44,6 +47,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
           name: `Plate${index}#Spectrum`,
           spectrumBoundingBox: bb,
           metadata: boxMetadata[index],
+          metadataNulls: nulls[index],
           parts: {
             lamp1: { boundingBox: null, extractedSpectrum: null },
             lamp2: { boundingBox: null, extractedSpectrum: null },
@@ -67,7 +71,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
     }))
   }
 
-  function onComplete() {
+  const onComplete = async () => {
     /// Marca el paso actual como completado y el que le sigue como
     /// que necesita actualizaciones
     if (validForms) {
@@ -96,7 +100,7 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
       setActualStep(index + 1)
     }
     else {
-      bBUIRef.current?.showErrors()
+      await bBUIRef.current?.showErrors()
     }
   }
 
@@ -109,6 +113,8 @@ export function StepPlateSegmentation({ index, processInfo, setProcessInfo }: St
         setBoundingBoxes={setBoundingBoxes}
         boxMetadatas={boxMetadatas}
         setBoxMetadatas={setBoxMetadatas}
+        boxMetadataNulls={boxMetadataNulls}
+        setBoxMetadataNulls={setBoxMetadataNulls}
         setValidForms={setValidForms}
         onComplete={onComplete}
         saveBoundingBoxes={saveBoundingBoxes}

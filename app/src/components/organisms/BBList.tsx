@@ -2,15 +2,17 @@ import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import clsx from "clsx"
 import { Check, ChevronDown, Edit2, Trash2 } from "lucide-react"
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Card } from "../atoms/card"
-import { BoxMetadata, BoxMetadataForm } from "../molecules/BoxMetadataForm"
+import { BoxMetadata, BoxMetadataForm, BoxMetadataNulls } from "../molecules/BoxMetadataForm"
 
 interface BoxListProps {
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
+  boxMetadataNulls: BoxMetadataNulls[]
+  setBoxMetadataNulls: React.Dispatch<React.SetStateAction<BoxMetadataNulls[]>>
   setValidForms: React.Dispatch<boolean>
   selected: string | null
   setSelected: React.Dispatch<React.SetStateAction<string | null>>
@@ -25,7 +27,7 @@ interface BBListParameters {
   step: Step
 }
 
-export const BoxList = forwardRef(({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxMetadatas, setValidForms, selected, setSelected, classes, parameters }: BoxListProps, ref) => {
+export const BoxList = forwardRef(({ boundingBoxes, setBoundingBoxes, boxMetadatas, setBoxMetadatas, boxMetadataNulls, setBoxMetadataNulls, setValidForms, selected, setSelected, classes, parameters }: BoxListProps, ref) => {
   function handleSelect(id: string) {
     if (selected === id) {
       //setSelected(null)
@@ -34,10 +36,18 @@ export const BoxList = forwardRef(({ boundingBoxes, setBoundingBoxes, boxMetadat
       setSelected(id)
     }
   }
-  const itemOfBoxListRef = useRef<{ showErrors: () => void }>(null)
+  // Crear un mapa de referencias para cada elemento de la lista
+  const itemOfBoxListRefs = useRef<Map<string, { showErrors: () => void }>>(new Map())
+
   useImperativeHandle(ref, () => ({
-    showErrors: () => {
-      itemOfBoxListRef.current?.showErrors()
+    showErrors: async () => {
+      // Si hay un elemento seleccionado, mostrar sus errores
+      if (selected) {
+        itemOfBoxListRefs.current.get(selected)?.showErrors()
+      } else if (boundingBoxes.length > 0) {
+        // Si no hay seleccionado pero hay cajas, mostrar errores del primero
+        await itemOfBoxListRefs.current.get(boundingBoxes[0].id.toString())?.showErrors()
+      }
     }
   }));
 
@@ -60,12 +70,18 @@ export const BoxList = forwardRef(({ boundingBoxes, setBoundingBoxes, boxMetadat
           boundingBoxes.map((box, index) => (
             <ItemOfBoxList
               key={box.id}
-              ref={itemOfBoxListRef}
+              ref={(el) => {
+                if (el) {
+                  itemOfBoxListRefs.current.set(box.id.toString(), el)
+                }
+              }}
               box={box}
               boxIndex={index}
               setBoundingBoxes={setBoundingBoxes}
               boxMetadatas={boxMetadatas}
               setBoxMetadatas={setBoxMetadatas}
+              boxMetadataNulls={boxMetadataNulls}
+              setBoxMetadataNulls={setBoxMetadataNulls}
               setValidForms={setValidForms}
               isSelected={box.id === selected}
               setBoxSelected={setSelected}
@@ -86,6 +102,8 @@ interface ItemOfBoxListProps {
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
+  boxMetadataNulls: BoxMetadataNulls[]
+  setBoxMetadataNulls: React.Dispatch<React.SetStateAction<BoxMetadataNulls[]>>
   setValidForms: React.Dispatch<boolean>
   isSelected: boolean
   onSelect: (id: string) => void
@@ -103,6 +121,8 @@ const ItemOfBoxList = forwardRef(({
   setBoundingBoxes,
   boxMetadatas,
   setBoxMetadatas,
+  boxMetadataNulls,
+  setBoxMetadataNulls,
   setValidForms,
   isSelected,
   onSelect,
@@ -152,15 +172,38 @@ const ItemOfBoxList = forwardRef(({
     }
     setIsSelectOpen(false)
   }
-  const boxMetadataFormRef = useRef<{ setValues: (spectrumMetadata: BoxMetadata) => void, resetValues: () => void, getValues: () => BoxMetadata, validate: () => boolean, getIsValid: () => boolean }>(null)
+  // Referencia al formulario de metadatos para este elemento específico
+  const formRef = useRef<{
+    setValues: (spectrumMetadata: BoxMetadata) => void;
+    setNulls: (boxMetadataNulls: BoxMetadataNulls) => void;
+    resetValues: () => void;
+    getValues: () => BoxMetadata;
+    getNulls: () => BoxMetadataNulls;
+    validate: () => Promise<boolean>;
+    getIsValid: () => boolean;
+  }>(null);
+
+
 
   useImperativeHandle(ref, () => ({
-    showErrors: () => {
-      if (boxMetadataFormRef.current?.validate()) {
+    showErrors: async () => {
+      // Validar el formulario actual
+      await formRef.current?.validate()
+
+      // Verificar si este formulario es válido
+      const metadataIsValid = formRef.current?.getIsValid()
+      if (metadataIsValid !== undefined) {
+        boxMetadatasIsValid[id] = metadataIsValid
+
+        // Si este formulario no es válido, no necesitamos buscar más
+        if (!metadataIsValid) {
+          return
+        }
+
+        // Si este formulario es válido, buscar el primer formulario inválido
         for (const key in boxMetadatasIsValid) {
           const isValid = boxMetadatasIsValid[key];
           if (!isValid) {
-            console.log(key)
             setBoxSelected(key)
             break
           }
@@ -169,15 +212,16 @@ const ItemOfBoxList = forwardRef(({
     }
   }));
 
-  const handleFormChange = (data: BoxMetadata) => {
+  const handleFormChange = (data: BoxMetadata, nulls: BoxMetadataNulls) => {
     if (Object.keys(data).length > 0) {
-      console.log(boxMetadataFormRef.current?.getValues())
-      const metadataIsValid = boxMetadataFormRef.current?.getIsValid()
+      const metadataIsValid = formRef.current?.getIsValid()
       if (metadataIsValid != undefined)
         boxMetadatasIsValid[id] = metadataIsValid
       setValidForms(Object.values(boxMetadatasIsValid).every(value => value === true))
       boxMetadatas[boxIndex] = data
       setBoxMetadatas(boxMetadatas)
+      boxMetadataNulls[boxIndex] = nulls
+      setBoxMetadataNulls(boxMetadataNulls)
 
     }
     // Acá podés hacer lo que quieras con los datos del formulario
@@ -237,7 +281,12 @@ const ItemOfBoxList = forwardRef(({
         )}
         <div>
           {isSelected && parameters.step == Step.Plate && (
-            <BoxMetadataForm ref={boxMetadataFormRef} onChange={handleFormChange} />
+            <BoxMetadataForm
+              ref={formRef}
+              onChange={handleFormChange}
+              initialValues={boxMetadatas[boxIndex]}
+              initialNulls={boxMetadataNulls[boxIndex]}
+            />
           )}
         </div>
       </div>

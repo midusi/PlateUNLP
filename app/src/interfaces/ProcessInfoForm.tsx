@@ -1,6 +1,6 @@
 import type { PlateMetadata } from "@/components/molecules/PlateMetadataForm"
 import type { BoundingBox } from "./BoundingBox"
-import { BoxMetadata } from "@/components/molecules/BoxMetadataForm"
+import { BoxMetadata, BoxMetadataNulls } from "@/components/molecules/BoxMetadataForm"
 
 export interface ProcessInfoForm {
   /** Info estado de procesado de cada etapa de la barra de navegación */
@@ -42,6 +42,7 @@ export interface SpectrumData {
   /** Bounding Box que delimita las dimensiones y localización del espectro. */
   spectrumBoundingBox: BoundingBox
   metadata: BoxMetadata
+  metadataNulls: BoxMetadataNulls
   /** Informacion respecto a las partes del espectro (science, lamp1, lamp2) */
   parts: {
     /** Información relacionada a la lampara de comparación 1. */

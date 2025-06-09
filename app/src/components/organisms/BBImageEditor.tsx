@@ -5,6 +5,7 @@ import { Button } from "@/components/atoms/button"
 import { getNextId } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { Pane, ResizablePanes } from "resizable-panes-react"
+import { BoxMetadataNulls } from "../molecules/BoxMetadataForm"
 
 function useImageScale(imageRef: React.RefObject<HTMLImageElement>) {
   const [scale, setScale] = useState({ x: 1, y: 1 })
@@ -75,10 +76,10 @@ function useBoundingBoxesDrag(
           prev.map(box =>
             box.id === draggedBB
               ? {
-                  ...box,
-                  x: Math.max(0, Math.min(mouseX - dragOffset.x, image.naturalWidth - box.width)),
-                  y: Math.max(0, Math.min(mouseY - dragOffset.y, image.naturalHeight - box.height)),
-                }
+                ...box,
+                x: Math.max(0, Math.min(mouseX - dragOffset.x, image.naturalWidth - box.width)),
+                y: Math.max(0, Math.min(mouseY - dragOffset.y, image.naturalHeight - box.height)),
+              }
               : box,
           ),
         )
@@ -191,7 +192,7 @@ function BoundingBoxElement({
 }: BoundingBoxElementProps) {
   const [isHovered, setIsHovered] = useState<boolean>(false)
   const { id: boxId, x: boxX, y: boxY, width:
-        boxWidth, height: boxHeight, class_info, name: boxName } = box
+    boxWidth, height: boxHeight, class_info, name: boxName } = box
   const { x: scaleX, y: scaleY } = scale
 
   const resizeHandles = [
@@ -215,7 +216,7 @@ function BoundingBoxElement({
         width: `${boxWidth * scaleX}px`,
         height: `${boxHeight * scaleY}px`,
         border: `${selected ? "3px" : "2px"
-        } solid ${class_info.color}`,
+          } solid ${class_info.color}`,
         cursor: dragged ? "grabbing" : "grab",
         boxSizing: "border-box",
         zIndex: selected ? 1000 : 1,
@@ -268,6 +269,8 @@ function BoundingBoxElement({
 function useBoundingBoxesAddRemove(
   boundingBoxes: BoundingBox[],
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>,
+  boxMetadataNulls: BoxMetadataNulls[],
+  setBoxMetadataNulls: React.Dispatch<React.SetStateAction<BoxMetadataNulls[]>>,
   selectedBB: number | string | null,
   setSelectedBB: React.Dispatch<React.SetStateAction<number | string | null>>,
 ) {
@@ -602,6 +605,8 @@ interface BBImageEditorProps {
   src: string
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+  boxMetadataNulls: BoxMetadataNulls[]
+  setBoxMetadataNulls: React.Dispatch<React.SetStateAction<BoxMetadataNulls[]>>
   enableAutodetect: boolean
   determineBB: (img_src: string) => Promise<BoundingBox[]>
   classes: BBClassesProps[]
@@ -612,6 +617,8 @@ export function BBImageEditor({
   src,
   boundingBoxes,
   setBoundingBoxes,
+  boxMetadataNulls,
+  setBoxMetadataNulls,
   enableAutodetect,
   determineBB,
   classes,
@@ -636,7 +643,7 @@ export function BBImageEditor({
   }
 
   // Agregado y borrado de bounding box
-  const { addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(boundingBoxes, setBoundingBoxes, selectedBB, setSelectedBB)
+  const { addBoundingBox, removeBoundingBox } = useBoundingBoxesAddRemove(boundingBoxes, setBoundingBoxes, boxMetadataNulls, setBoxMetadataNulls, selectedBB, setSelectedBB)
 
   return (
     <ResizablePanes

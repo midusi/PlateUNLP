@@ -5,7 +5,7 @@ import clsx from "clsx"
 import { nanoid } from "nanoid"
 import { useCallback, useRef, useState } from "react"
 import { useTransformComponent } from "react-zoom-pan-pinch"
-import { BoxMetadata } from "./BoxMetadataForm"
+import { BoxMetadata, BoxMetadataNulls } from "./BoxMetadataForm"
 
 /**
  * Mapeo de esquinas y aristas al rotar una imagen X grados.
@@ -76,6 +76,8 @@ interface ImageWithBoundingBoxesProps {
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: Dispatch<SetStateAction<BoxMetadata[]>>
+  boxMetadataNulls: BoxMetadataNulls[]
+  setBoxMetadataNulls: React.Dispatch<React.SetStateAction<BoxMetadataNulls[]>>
 }
 
 /**
@@ -100,6 +102,8 @@ export function ImageWithBoundingBoxes({
   setBoundingBoxes,
   boxMetadatas,
   setBoxMetadatas,
+  boxMetadataNulls,
+  setBoxMetadataNulls
 }: ImageWithBoundingBoxesProps) {
   const transformedComponent = useTransformComponent(({ state, instance: _ }) => {
     return state // { previousScale: 1, scale: 1, positionX: 0, positionY: 0 }
@@ -391,6 +395,14 @@ export function ImageWithBoundingBoxes({
           UT: null
         })
         setBoxMetadatas(boxMetadatas)
+        setBoxMetadataNulls(prev => [
+          ...prev,
+          {
+            DATE_OBS: false,
+            OBJECT: false,
+            UT: false
+          }
+        ])
       }
 
     }

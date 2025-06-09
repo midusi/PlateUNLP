@@ -1,7 +1,6 @@
 import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { Dispatch, SetStateAction } from "react"
-import { cropImages } from "@/lib/cropImage"
 import clsx from "clsx"
 import { Bot, Palette, RotateCw, Square, Trash2 } from "lucide-react"
 import { nanoid } from "nanoid"
@@ -11,7 +10,7 @@ import { Card } from "../atoms/card"
 import { BoxList, Step } from "./BBList"
 import { ImageLoader } from "./ImageLoader"
 import { ImageViewer } from "./ImageViewer"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
+import { BoxMetadata, BoxMetadataNulls } from "../molecules/BoxMetadataForm"
 
 interface BBUIProps {
   file?: string | null
@@ -19,9 +18,11 @@ interface BBUIProps {
   setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
   boxMetadatas: BoxMetadata[]
   setBoxMetadatas: Dispatch<SetStateAction<BoxMetadata[]>>
+  boxMetadataNulls: BoxMetadataNulls[]
+  setBoxMetadataNulls: React.Dispatch<React.SetStateAction<BoxMetadataNulls[]>>
   setValidForms: Dispatch<boolean>,
   onComplete: () => void
-  saveBoundingBoxes: (boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[]) => void
+  saveBoundingBoxes: (boundingBoxes: BoundingBox[], boxMetadata: BoxMetadata[], nulls: BoxMetadataNulls[]) => void
   saveImageLoading?: (src: string) => void
   classes: BBClassesProps[]
   determineBBFunction: (img_src: string) => Promise<BoundingBox[]>
@@ -40,6 +41,8 @@ export const BBUI = forwardRef(({
   setBoundingBoxes,
   boxMetadatas,
   setBoxMetadatas,
+  boxMetadataNulls,
+  setBoxMetadataNulls,
   setValidForms,
   onComplete,
   saveBoundingBoxes,
@@ -56,8 +59,8 @@ export const BBUI = forwardRef(({
 
   const bBListRef = useRef<{ showErrors: () => void }>(null)
   useImperativeHandle(ref, () => ({
-    showErrors: () => {
-      bBListRef.current?.showErrors()
+    showErrors: async () => {
+      await bBListRef.current?.showErrors()
     }
   }));
 
@@ -188,6 +191,8 @@ export const BBUI = forwardRef(({
                 setBoundingBoxes={setBoundingBoxes}
                 boxMetadatas={boxMetadatas}
                 setBoxMetadatas={setBoxMetadatas}
+                boxMetadataNulls={boxMetadataNulls}
+                setBoxMetadataNulls={setBoxMetadataNulls}
               />
             )
             : <ImageLoader handleImageLoad={handleImageLoad} />}
@@ -199,6 +204,8 @@ export const BBUI = forwardRef(({
         setBoundingBoxes={setBoundingBoxes}
         boxMetadatas={boxMetadatas}
         setBoxMetadatas={setBoxMetadatas}
+        boxMetadataNulls={boxMetadataNulls}
+        setBoxMetadataNulls={setBoxMetadataNulls}
         setValidForms={setValidForms}
         selected={selectedBoxId}
         setSelected={setSelectedBoxId}
@@ -218,7 +225,7 @@ export const BBUI = forwardRef(({
             //   }
             // })
 
-            saveBoundingBoxes(boundingBoxes, boxMetadatas)
+            saveBoundingBoxes(boundingBoxes, boxMetadatas, boxMetadataNulls)
             onComplete()
           }}
           disabled={image === null || boundingBoxes.length === 0}
