@@ -47,6 +47,7 @@ export function StepPlateSegmentation({
 
   /** Almacena información de imagen de la placa en ProcessInfo */ 
   function saveImage(src: string) {
+    setImageSelected(src)
     setProcessInfo(prev => ({
       ...prev,
       data: {
@@ -142,7 +143,13 @@ export function StepPlateSegmentation({
 
   return (
     <div className="flex flex-col w-full">
-      <BoundingBoxer/>
+      <BoundingBoxer
+        file={imageSelected ?? undefined}
+        setFile={imageSelected! ? saveImage : undefined}
+        boundingBoxes={boundingBoxes}
+        setBoundingBoxes={setBoundingBoxes}
+        detectBBFunction={determineBBFunction}
+      />
       <BoxList 
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
@@ -161,19 +168,6 @@ export function StepPlateSegmentation({
           Save
         </Button>
       </div>
-      {/* <BBUI
-        file={processInfo.data.plate.scanImage}
-        boundingBoxes={boundingBoxes}
-        setBoundingBoxes={setBoundingBoxes}
-        boxMetadatas={boxMetadatas}
-        setBoxMetadatas={setBoxMetadatas}
-        onComplete={onComplete}
-        saveBoundingBoxes={saveBoundingBoxes}
-        saveImageLoading={saveImage}
-        classes={classesSpectrumDetection}
-        determineBBFunction={determineBBFunction}
-        parameters={parameters}
-      /> */}
     </div>
   )
 }
