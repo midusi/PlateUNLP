@@ -2,6 +2,20 @@ import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
 /**
+ * Dada una imagen informa su alto.
+ * @param {string} src - Imagen (base64).
+ * @returns {Promise<number>} - Alto de la imagen
+ */
+export function getHeight(src:string):Promise<number> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img.height);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+/**
  * Retorna los valores (en grises) de los pixeles de una imagen que corresponden a las
  * coordenadas por las que pasa una recta.
  * @param {Uint8ClampedArray} data - Matriz de pixeles.
