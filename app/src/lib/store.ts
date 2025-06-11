@@ -65,7 +65,7 @@ export const globalStore = create<GlobalStore>()((set) => ({
     "Insufficient matches, at least 2 are required for inference with linear regression.",
   ),
 
-  actualStep: 0,
+  actualStep: 1,
 
   selectedSpectrum: null,
 
