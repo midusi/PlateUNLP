@@ -2,14 +2,16 @@ import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
 /**
- * Dada una imagen informa su alto.
- * @param {string} src - Imagen (base64).
- * @returns {Promise<number>} - Alto de la imagen
+ * Carga una imagen desde un src y devuelve el objeto Image con sus dimensiones reales.
+ * @param {string} src - imagen (URL o base64)
+ * @returns {Promise<Image>} - Imagen cargada
  */
-export function getHeight(src:string):Promise<number> {
+export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve(img.height);
+    img.onload = () => {
+      resolve(img);
+    }
     img.onerror = reject;
     img.src = src;
   });

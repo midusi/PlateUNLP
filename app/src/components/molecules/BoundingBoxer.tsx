@@ -1,5 +1,13 @@
 import { BoundingBox } from "@/interfaces/BoundingBox"
-import { Dispatch, SetStateAction } from "react"
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react"
+import { Card } from "../atoms/card"
+import { Bot, Palette, RotateCw, Square, Trash2 } from "lucide-react"
+import { Button } from "../atoms/button"
+import { nanoid } from "nanoid"
+import clsx from "clsx"
+import { ImageLoader } from "../organisms/ImageLoader"
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
+import { loadImage } from "@/lib/image"
 
 /**
  * Listado de props que espera recibir BoundingBoxer
@@ -35,13 +43,267 @@ interface BoundingBoxerProps {
      * Puede no definirse si se quiere que la deteccion sea 100% manual.
      */
     detectBBFunction?: (img_src: string) => Promise<BoundingBox[]>
+    /** Especificacion de si habilitar o no un listado de funcionalidades */
+    enable?: {
+        /** Mostrar boton de autodetección de cajas delimitadoras*/
+        autodetecButton:boolean
+        /** Mostrar boton de rotación */
+        rotateButton:boolean
+        /** Mostrar boton de inversion de colores */
+        invertColorButton:boolean
+        /** Mostrar boton para dibujar manualmente cajas delimitadoras */
+        drawButton:boolean
+    }
 }
 
 /**
  * Retorna un componente que realiza segmentacion de imagenes.
  */
-export function BoundingBoxer({file, setFile, boundingBoxes, setBoundingBoxes, detectBBFunction}: BoundingBoxerProps){
-    return <div>
-        Interfaz visual de edicion
-    </div>
+export function BoundingBoxer({
+  file, 
+  setFile, 
+  boundingBoxes, 
+  setBoundingBoxes, 
+  detectBBFunction, 
+  enable = {
+    autodetecButton: true,
+    rotateButton: true,
+    invertColorButton: true,
+    drawButton: true
+  }
+}: BoundingBoxerProps){
+
+    const [rotation, setRotation] = useState<number>(0)
+    const [invertColor, setInvertColor] = useState<boolean>(false)
+    const [drawMode, setDrawMode] = useState<boolean>(false)
+    const [selectedId, setSelectedId] = useState<string|null>(null)
+
+    /**
+     * Manejador para el boton Atodetect 
+     * @param {string} src - Imgen donde realizar la deteccion (base64).
+     */
+    async function handleAutodetect(src: string) {
+        const bbAutodetectedPromise = detectBBFunction!(src)
+        const newBBs: BoundingBox[] = [...boundingBoxes]
+        for (const bb of await bbAutodetectedPromise) {
+        const newBB = { ...bb, name: `box-${Date.now()}`, id: nanoid() }
+        newBBs.push(newBB)
+        }
+        setBoundingBoxes(newBBs)
+    }
+
+    /** Manejador para el boton Rotate */
+    async function handleRotate() {
+        setRotation((rotation + 90) % 360)
+    }
+
+    /** Manejador para el boton Invert Color */
+    async function handleInvertColor() {
+        setInvertColor(!invertColor)
+    }
+
+    /** Manejador para el boton Dibujar Caja Delimitadora */
+    function handleDrawBB() {
+        setDrawMode(!drawMode)
+    }
+
+    /**
+     * Manejador para el boton Eliminar Caja Delimitadora
+     * @param {string} bbId - Identificador de la caja a borrar
+     */
+    function handleDeleteBB(bbId:string) {
+        setBoundingBoxes((prev) => prev.filter((box) => box.id !== bbId))
+        setSelectedId(null)
+    }
+
+    /**
+     * Manejador para cuando el usuario elije una imagen.
+     * @param {string} src - Imagen a guardar (base64)
+     */
+    function handleLoad(src: string) {
+        setFile!(src)
+    }
+
+    /** Referencia al elemento <img> dentro que muestra la imagen. */
+    const imgRef = useRef<HTMLImageElement>(null)
+    /** Referencia al elemento <div> que contiene la interfaz visual. */
+    const containerRef = useRef<HTMLDivElement>(null)
+    /** Imagen original */
+    const [originalImg, setOriginalImg] = useState<HTMLImageElement>()
+    useEffect(() => {
+      if(file) {
+        loadImage(file).then(img => {setOriginalImg(img)})
+      }
+    }, [file])
+    /** 
+     * Escala de conversion de la imagen que se esta mostrando
+     * respecto a la imagen original.
+     * x = imagen_mostrada / imagen_original 
+     * Si la imagen que se muestra es menor entonces x < 1. Si es mas
+     * grande x > 1. Si son iguales x = 1
+     */
+    const [imgScale, setImgScale] = useState<number>(1)
+    /**
+     * Escala del contenedor respecto al tamaño de la imagen original.
+     * x = contenedor / imagen_original 
+     * Si el contenedor es menor es menor entonces x < 1. Si es mas
+     * grande x > 1. Si son iguales x = 1
+     */
+    const [containerScale, setContainerScale] = useState<number>()
+    useEffect(() => {
+      if(file && containerRef.current && originalImg){
+        const rectContainer = containerRef.current!.getBoundingClientRect()
+        setContainerScale(rectContainer.height / originalImg.naturalHeight)
+      }
+    }, [file, containerRef.current, originalImg])
+
+    return <Card className="overflow-hidden mb-6">
+        {/* Listado de herramientas para la interaccion con la iamgen. */}
+        <div className="bg-slate-100 p-2 border-b">
+          <div id="Tools container" className="flex justify-between items-center">
+            <h2 className="text-lg font-medium">Tools</h2>
+            {file && <div id="Buttons Group" className="flex gap-2">
+              {enable.autodetecButton && detectBBFunction && (
+                <Button
+                  onClick={() => {handleAutodetect(file)}}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 text-black bg-white hover:bg-slate-50"
+                >
+                  <Bot className="h-4 w-4" />
+                  <span>Autodetect Bounding Boxes</span>
+                </Button>
+              )}
+              {enable.rotateButton && (
+                <Button
+                  onClick={() => {handleRotate()}}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 text-black bg-white hover:bg-slate-50"
+                >
+                  <RotateCw className="h-4 w-4" />
+                  <span>{`Rotate 90º from ${rotation}º`}</span>
+                </Button>
+              )}
+
+              {enable.invertColorButton && (
+                <Button
+                  onClick={() => {handleInvertColor()}}
+                  variant="outline"
+                  size="sm"
+                  className={clsx(
+                    "flex items-center gap-2",
+                    invertColor
+                      ? "bg-white text-black hover:bg-slate-50"
+                      : "bg-slate-800 text-white hover:bg-slate-700",
+                  )}
+                >
+                  <Palette className="h-4 w-4" />
+                  <span>Invert colors</span>
+                </Button>
+              )}
+              {enable.drawButton && <Button
+                onClick={() => { handleDrawBB() }}
+                variant="outline"
+                size="sm"
+                className={clsx(
+                  "flex items-center gap-2",
+                  drawMode
+                    ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                    : "bg-white text-black hover:bg-slate-50",
+                )}
+              >
+                <Square className="h-4 w-4" />
+                <span>{drawMode ? "Cancel Drawing" : "Draw Box"}</span>
+              </Button>}
+              {selectedId && <Button
+                  onClick={() => {handleDeleteBB(selectedId)}}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete Box</span>
+                </Button>
+              }
+            </div>}
+          </div>
+        </div>
+        {/* Visor/Cargador de imagen. */}
+        <div
+          className={clsx(
+            "w-full h-[400px]",
+            "flex items-center justify-center",
+            " bg-slate-50 overflow-hidden",
+          )}
+        >
+          {!file ? (
+            // Si no hay imagen disponible permite que el usuario la cargue
+            <ImageLoader handleImageLoad={handleLoad} />
+          ) : (
+            // Sino la muestra con el editor visual
+            /** 
+             * Div que asegura que la imagen ocupe todo el espacio disponible
+             * y que el fondo sea cuadriculado tipo fondo png.
+             */
+            <div 
+              ref={containerRef}
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundImage: `
+                      linear-gradient(45deg, #ccc 25%, transparent 25%),
+                      linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                      linear-gradient(45deg, transparent 75%, #ccc 75%),
+                      linear-gradient(-45deg, transparent 75%, #ccc 75%)
+                  `,
+                backgroundSize: "60px 60px",
+                backgroundPosition: "0 0, 0 30px, 30px -30px, -30px 0px",
+              }}
+            >
+              {/* Es necesaria modificar la escala en relacion a la imagen respecto al 
+              contenedor para que en un inicio la imagen encaje en el espacio disponible.
+              Y initial scale correspoda a la situacion donde el contenedor encaja 
+              perfecto */}
+              {containerScale && <TransformWrapper
+                  key={`TransformWrapper`}
+                  initialScale={containerScale}
+                  minScale={containerScale*0.25}
+                  maxScale={containerScale*10}
+                  centerOnInit
+                  centerZoomedOut
+                  doubleClick={{ step: 0.9 }}
+              >
+                  <TransformComponent
+                    wrapperStyle={{
+                      height: "100%",
+                      width: "100%",
+                      display: "flex",
+                    }}
+                    contentStyle={{
+                      position: "relative",
+                      //background: "blue"
+                    }}
+                  >
+                    <img
+                      // className="border-black"
+                      ref={imgRef}
+                      src={file}
+                      alt="Imagen de placa"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                        transform: `rotate(${rotation}deg)`,
+                        transformOrigin: "center center",
+                        filter: invertColor ? "none" : "invert(1)",
+                        transition: "filter 0.3s ease",
+                      }}
+                    />
+                  </TransformComponent>
+                </TransformWrapper>}
+            </div>
+          )}
+        </div>
+      </Card>
 }
