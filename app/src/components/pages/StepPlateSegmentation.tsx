@@ -145,7 +145,7 @@ export function StepPlateSegmentation({
     <div className="flex flex-col w-full">
       <BoundingBoxer
         file={imageSelected ?? undefined}
-        setFile={imageSelected! ? saveImage : undefined}
+        setFile={!imageSelected ? saveImage : undefined}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         detectBBFunction={determineBBFunction}
