@@ -414,6 +414,39 @@ export function BoundingBoxer({
                               }
                             ))
                       }}
+                      onResize={({
+                          target, width, height,
+                          dist, delta, direction,
+                          clientX, clientY, drag
+                      }: OnResize) => {
+                          const [translateX, translateY] = drag.beforeTranslate;
+
+                          /** Rect de la caja delimitadora */
+                          const targetRect = target.getBoundingClientRect(); 
+                          /** Rect de la imagen */
+                          const imageRect = imgRef.current!.getBoundingClientRect();
+
+                          const relativeX = targetRect.left - imageRect.left;
+                          const relativeY = targetRect.top - imageRect.top;
+                          
+
+                          delta[0] && (target!.style.width = `${width}px`);
+                          delta[1] && (target!.style.height = `${height}px`);
+                          
+                          target.style.transform = "translate(0px, 0px)";
+                          if(delta[0] > 0){
+                            const originalScaleX = (relativeX - delta[0]) / imgScale
+                            target.style.left = `${originalScaleX}px`;
+                          }
+                          if(delta[1] > 0){
+                            const originalScaleY = (relativeY - delta[1]) / imgScale
+                            target.style.top = `${originalScaleY}px`;
+                          }
+                          
+                      }}
+                      onResizeEnd={({ target, isDrag, clientX, clientY }) => {
+                          console.log("onResizeEnd", target, isDrag);
+                      }}
                     />
                   </TransformComponent>
                 </TransformWrapper>}
