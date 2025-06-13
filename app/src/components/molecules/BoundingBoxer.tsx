@@ -1,5 +1,5 @@
 import { BoundingBox } from "@/interfaces/BoundingBox"
-import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react"
+import { createRef, Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useRef, useState } from "react"
 import { Card } from "../atoms/card"
 import { Bot, Palette, RotateCw, Square, Trash2 } from "lucide-react"
 import { Button } from "../atoms/button"
@@ -8,6 +8,8 @@ import clsx from "clsx"
 import { ImageLoader } from "../organisms/ImageLoader"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 import { loadImage } from "@/lib/image"
+import Moveable, { OnDrag } from "react-moveable"
+import { classesSpectrumDetection } from "@/enums/BBClasses"
 
 /**
  * Listado de props que espera recibir BoundingBoxer
@@ -157,6 +159,51 @@ export function BoundingBoxer({
       }
     }, [file, containerRef.current, originalImg])
 
+    console.log(containerScale, imgScale)
+    /** Referencia a la caja delimitadora objetivo a cada momento */
+    const [target, setTarget] = useState<HTMLElement>()
+    /** Referencia a objeto encargado del movimiento de cajas */
+    const moveable = createRef<Moveable>();
+    /**
+     * Funcion a ejecutar cuando se cliquea una Caja delimitadora.
+     * Permite que el target se seleccione dinamicamente acorde a 
+     * la caja delimitadora que se haya cliqueado.
+     * @param e - event
+     */
+    function onMouseDown(e: React.MouseEvent<HTMLElement>) {
+        e.stopPropagation(); // Evitar que arrastrar Caja arrastre imagen de fondo.
+        const nativeEvent = e.nativeEvent
+        const targetElement = nativeEvent.target as HTMLElement
+        
+        setSelectedId(targetElement.id)
+        setTarget(targetElement)
+        moveable.current?.dragStart(nativeEvent)
+        
+    }
+    /** Cajas delimitadoras para pruebas */
+    const [boundingBoxesAux, setBoundingBoxesAux] = useState<BoundingBox[]>([
+      {
+        id: 1,
+        name: "1",
+        x: 0,
+        y: 0,
+        width: 360,
+        height: 240,
+        class_info: classesSpectrumDetection[0],
+        prob: 0.9,
+      }, {
+        id: 2,
+        name: "2",
+        x: 360,
+        y: 240,
+        width: 360,
+        height: 240,
+        class_info: classesSpectrumDetection[0],
+        prob: 0.9,
+      },
+    ])
+    console.log(boundingBoxesAux)
+
     return <Card className="overflow-hidden mb-6">
         {/* Listado de herramientas para la interaccion con la iamgen. */}
         <div className="bg-slate-100 p-2 border-b">
@@ -268,11 +315,14 @@ export function BoundingBoxer({
               {containerScale && <TransformWrapper
                   key={`TransformWrapper`}
                   initialScale={containerScale}
-                  minScale={containerScale*0.25}
-                  maxScale={containerScale*10}
+                  minScale={containerScale * 0.25}
+                  maxScale={containerScale * 10}
                   centerOnInit
                   centerZoomedOut
                   doubleClick={{ step: 0.9 }}
+                  onTransformed={(e) => {
+                    setImgScale(e.instance.transformState.scale);
+                  }}
               >
                   <TransformComponent
                     wrapperStyle={{
@@ -282,22 +332,87 @@ export function BoundingBoxer({
                     }}
                     contentStyle={{
                       position: "relative",
-                      //background: "blue"
+                      background: "blue"
                     }}
                   >
-                    <img
-                      // className="border-black"
-                      ref={imgRef}
-                      src={file}
-                      alt="Imagen de placa"
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                        objectFit: "contain",
-                        transform: `rotate(${rotation}deg)`,
-                        transformOrigin: "center center",
-                        filter: invertColor ? "none" : "invert(1)",
-                        transition: "filter 0.3s ease",
+                    <div id="imageWithBBcontainer" className="relative bg-green-600">                      
+                      <img
+                        // className="border-black"
+                        ref={imgRef}
+                        src={file}
+                        alt="Imagen de placa"
+                        style={{
+                          maxWidth: "100%",
+                          maxHeight: "100%",
+                          objectFit: "contain",
+                          transform: `rotate(${rotation}deg)`,
+                          transformOrigin: "center center",
+                          filter: invertColor ? "none" : "invert(1)",
+                          transition: "filter 0.3s ease",
+                        }}
+                      />
+                      {boundingBoxesAux.map((box) =>
+                        <div 
+                          id={''+box.id} 
+                          onMouseDown={onMouseDown}
+                          className={clsx(
+                            "absolute border-2 ",
+                            "border-blue-500",
+                            "cursor-pointer"
+                          )}
+                          style={{
+                            left: `${box.x}px`,
+                            top: `${box.y}px`,
+                            width: `${box.width}px`,
+                            height: `${box.height}px`,
+                            backgroundColor: "rgba(0, 0, 255, 0.1)"
+                          }}
+                        />
+                      )}
+                    </div>
+                    <Moveable 
+                      ref={moveable} 
+                      target={target} 
+                      draggable 
+                      resizable
+                      pinchable
+                      onDrag={({
+                          target,
+                          beforeDelta, beforeDist,
+                          left, top,
+                          right, bottom,
+                          delta, dist,
+                          transform,
+                          clientX, clientY,
+                      }: OnDrag) => {
+                          //console.log("onDrag translate", dist);
+                          target!.style.transform = transform;
+                      }}
+                      onDragEnd={({ target, isDrag, clientX, clientY }) => {
+                          /** Rect de la caja delimitadora */
+                          const targetRect = target.getBoundingClientRect(); 
+                          /** Rect de la imagen */
+                          const imageRect = imgRef.current!.getBoundingClientRect();
+
+                          const relativeX = targetRect.left - imageRect.left;
+                          const relativeY = targetRect.top - imageRect.top;
+
+                          const originalScaleX = relativeX / imgScale
+                          const originalScaleY = relativeY / imgScale
+                          
+                          target.style.transform = `translate(0px, 0px)`;
+                          target.style.left = `${originalScaleX}px`;
+                          target.style.top  = `${originalScaleY}px`;
+
+                          setBoundingBoxesAux(boundingBoxesAux.map((box) => 
+                            box.id != selectedId
+                              ? box
+                              : {
+                                ...box, 
+                                x: originalScaleX, 
+                                y: originalScaleY
+                              }
+                            ))
                       }}
                     />
                   </TransformComponent>
