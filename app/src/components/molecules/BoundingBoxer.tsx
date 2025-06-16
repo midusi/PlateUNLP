@@ -8,8 +8,9 @@ import clsx from "clsx"
 import { ImageLoader } from "../organisms/ImageLoader"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 import { loadImage } from "@/lib/image"
-import Moveable, { OnDrag } from "react-moveable"
+import Moveable, { OnDrag, OnResize } from "react-moveable"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
+import {round} from "mathjs"
 
 /**
  * Listado de props que espera recibir BoundingBoxer
@@ -77,7 +78,6 @@ export function BoundingBoxer({
 
     const [rotation, setRotation] = useState<number>(0)
     const [invertColor, setInvertColor] = useState<boolean>(false)
-    const [drawMode, setDrawMode] = useState<boolean>(false)
     const [selectedId, setSelectedId] = useState<string|null>(null)
 
     /**
@@ -102,11 +102,6 @@ export function BoundingBoxer({
     /** Manejador para el boton Invert Color */
     async function handleInvertColor() {
         setInvertColor(!invertColor)
-    }
-
-    /** Manejador para el boton Dibujar Caja Delimitadora */
-    function handleDrawBB() {
-        setDrawMode(!drawMode)
     }
 
     /**
@@ -138,6 +133,29 @@ export function BoundingBoxer({
       }
     }, [file])
     /** 
+     * Manejador para el boton Agregar Caja Delimitadora.
+     * Al ejecutar agrega una caja delimitadora con cordenadas 
+     * al centro de la imagen.
+     */
+    function addBB() { 
+        /** Pixels equivalentes al 1% del ancho de la imagen original */
+        const oneWidth = originalImg!.naturalWidth / 100
+        /** Pixels equivalentes al 1% del alto de la imagen original */
+        const oneHeight = originalImg!.naturalHeight / 100
+        /** Nueva caja delimitadora */
+        const bb: BoundingBox = {
+            id: nanoid(),
+            name: 'newObject',
+            x: round(oneWidth*45),
+            y: round(oneHeight*45),
+            width: round(oneWidth*10),
+            height: round(oneHeight*10),
+            class_info: classesSpectrumDetection[0],
+            prob: 1
+        }
+        setBoundingBoxes([...boundingBoxes, bb])
+    }
+    /** 
      * Escala de conversion de la imagen que se esta mostrando
      * respecto a la imagen original.
      * x = imagen_mostrada / imagen_original 
@@ -159,7 +177,6 @@ export function BoundingBoxer({
       }
     }, [file, containerRef.current, originalImg])
 
-    console.log(containerScale, imgScale)
     /** Referencia a la caja delimitadora objetivo a cada momento */
     const [target, setTarget] = useState<HTMLElement>()
     /** Referencia a objeto encargado del movimiento de cajas */
@@ -180,29 +197,6 @@ export function BoundingBoxer({
         moveable.current?.dragStart(nativeEvent)
         
     }
-    /** Cajas delimitadoras para pruebas */
-    const [boundingBoxesAux, setBoundingBoxesAux] = useState<BoundingBox[]>([
-      {
-        id: 1,
-        name: "1",
-        x: 0,
-        y: 0,
-        width: 360,
-        height: 240,
-        class_info: classesSpectrumDetection[0],
-        prob: 0.9,
-      }, {
-        id: 2,
-        name: "2",
-        x: 360,
-        y: 240,
-        width: 360,
-        height: 240,
-        class_info: classesSpectrumDetection[0],
-        prob: 0.9,
-      },
-    ])
-    console.log(boundingBoxesAux)
 
     return <Card className="overflow-hidden mb-6">
         {/* Listado de herramientas para la interaccion con la iamgen. */}
@@ -221,6 +215,7 @@ export function BoundingBoxer({
                   <span>Autodetect Bounding Boxes</span>
                 </Button>
               )}
+              {/* Esta rota la funcionalidad de rotar imagen, por ahora no usar
               {enable.rotateButton && (
                 <Button
                   onClick={() => {handleRotate()}}
@@ -231,7 +226,7 @@ export function BoundingBoxer({
                   <RotateCw className="h-4 w-4" />
                   <span>{`Rotate 90º from ${rotation}º`}</span>
                 </Button>
-              )}
+              )} */}
 
               {enable.invertColorButton && (
                 <Button
@@ -250,18 +245,16 @@ export function BoundingBoxer({
                 </Button>
               )}
               {enable.drawButton && <Button
-                onClick={() => { handleDrawBB() }}
+                onClick={() => { addBB() }}
                 variant="outline"
                 size="sm"
                 className={clsx(
                   "flex items-center gap-2",
-                  drawMode
-                    ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                    : "bg-white text-black hover:bg-slate-50",
+                  "bg-white text-black hover:bg-slate-50",
                 )}
               >
                 <Square className="h-4 w-4" />
-                <span>{drawMode ? "Cancel Drawing" : "Draw Box"}</span>
+                <span>Add Box</span>
               </Button>}
               {selectedId && <Button
                   onClick={() => {handleDeleteBB(selectedId)}}
@@ -351,7 +344,7 @@ export function BoundingBoxer({
                           transition: "filter 0.3s ease",
                         }}
                       />
-                      {boundingBoxesAux.map((box) =>
+                      {boundingBoxes.map((box) =>
                         <div 
                           id={''+box.id} 
                           onMouseDown={onMouseDown}
@@ -404,7 +397,7 @@ export function BoundingBoxer({
                           target.style.left = `${originalScaleX}px`;
                           target.style.top  = `${originalScaleY}px`;
 
-                          setBoundingBoxesAux(boundingBoxesAux.map((box) => 
+                          setBoundingBoxes(boundingBoxes.map((box) => 
                             box.id != selectedId
                               ? box
                               : {
@@ -412,7 +405,7 @@ export function BoundingBoxer({
                                 x: originalScaleX, 
                                 y: originalScaleY
                               }
-                            ))
+                          ))
                       }}
                       onResize={({
                           target, width, height,
@@ -420,7 +413,11 @@ export function BoundingBoxer({
                           clientX, clientY, drag
                       }: OnResize) => {
                           const [translateX, translateY] = drag.beforeTranslate;
-
+                          delta[0] && (target!.style.width = `${width}px`);
+                          delta[1] && (target!.style.height = `${height}px`);
+                          target.style.transform = `translate(${translateX}px, ${translateY}px)`;
+                      }}
+                      onResizeEnd={({ target, isDrag, clientX, clientY }) => {
                           /** Rect de la caja delimitadora */
                           const targetRect = target.getBoundingClientRect(); 
                           /** Rect de la imagen */
@@ -428,24 +425,29 @@ export function BoundingBoxer({
 
                           const relativeX = targetRect.left - imageRect.left;
                           const relativeY = targetRect.top - imageRect.top;
-                          
 
-                          delta[0] && (target!.style.width = `${width}px`);
-                          delta[1] && (target!.style.height = `${height}px`);
+                          const originalScaleX = relativeX / imgScale
+                          const originalScaleY = relativeY / imgScale
+                          const originalWidth = targetRect.width / imgScale
+                          const originalHeigth = targetRect.height / imgScale
                           
-                          target.style.transform = "translate(0px, 0px)";
-                          if(delta[0] > 0){
-                            const originalScaleX = (relativeX - delta[0]) / imgScale
-                            target.style.left = `${originalScaleX}px`;
-                          }
-                          if(delta[1] > 0){
-                            const originalScaleY = (relativeY - delta[1]) / imgScale
-                            target.style.top = `${originalScaleY}px`;
-                          }
-                          
-                      }}
-                      onResizeEnd={({ target, isDrag, clientX, clientY }) => {
-                          console.log("onResizeEnd", target, isDrag);
+                          target.style.transform = `translate(0px, 0px)`;
+                          target.style.left = `${originalScaleX}px`;
+                          target.style.top  = `${originalScaleY}px`;
+                          target.style.width  = `${originalWidth}px`;
+                          target.style.height  = `${originalHeigth}px`;
+
+                          setBoundingBoxes(boundingBoxes.map((box) => 
+                            box.id != selectedId
+                              ? box
+                              : {
+                                ...box, 
+                                x: originalScaleX, 
+                                y: originalScaleY,
+                                width: originalWidth,
+                                height: originalHeigth,
+                              }
+                          ))
                       }}
                     />
                   </TransformComponent>
