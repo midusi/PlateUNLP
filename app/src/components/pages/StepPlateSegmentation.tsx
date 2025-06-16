@@ -24,11 +24,6 @@ export function StepPlateSegmentation({
     0.7,
   )
 
-  // const parameters = {
-  //   rotateButton: true,
-  //   invertColorButton: true,
-  //   step: Step.Plate,
-  // }
   /** Cajas delimitadoras de cada observación */
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
@@ -149,6 +144,7 @@ export function StepPlateSegmentation({
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         detectBBFunction={determineBBFunction}
+        classes={classesSpectrumDetection}
       />
       <BoxList 
         boundingBoxes={boundingBoxes}

@@ -1,5 +1,5 @@
 import { BoundingBox } from "@/interfaces/BoundingBox"
-import { createRef, Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useRef, useState } from "react"
+import { createRef, Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from "react"
 import { Card } from "../atoms/card"
 import { Bot, Palette, RotateCw, Square, Trash2 } from "lucide-react"
 import { Button } from "../atoms/button"
@@ -9,7 +9,7 @@ import { ImageLoader } from "../organisms/ImageLoader"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 import { loadImage } from "@/lib/image"
 import Moveable, { OnDrag, OnResize } from "react-moveable"
-import { classesSpectrumDetection } from "@/enums/BBClasses"
+import { BBClassesProps} from "@/enums/BBClasses"
 import {round} from "mathjs"
 
 /**
@@ -57,6 +57,8 @@ interface BoundingBoxerProps {
         /** Mostrar boton para dibujar manualmente cajas delimitadoras */
         drawButton:boolean
     }
+    /** Arreglo de clases a considerar para las cajas delimitadoras */
+    classes: BBClassesProps[]
 }
 
 /**
@@ -73,7 +75,8 @@ export function BoundingBoxer({
     rotateButton: true,
     invertColorButton: true,
     drawButton: true
-  }
+  },
+  classes
 }: BoundingBoxerProps){
 
     const [rotation, setRotation] = useState<number>(0)
@@ -137,7 +140,7 @@ export function BoundingBoxer({
      * Al ejecutar agrega una caja delimitadora con cordenadas 
      * al centro de la imagen.
      */
-    function addBB() { 
+    function handleAddBB() { 
         /** Pixels equivalentes al 1% del ancho de la imagen original */
         const oneWidth = originalImg!.naturalWidth / 100
         /** Pixels equivalentes al 1% del alto de la imagen original */
@@ -150,7 +153,7 @@ export function BoundingBoxer({
             y: round(oneHeight*45),
             width: round(oneWidth*10),
             height: round(oneHeight*10),
-            class_info: classesSpectrumDetection[0],
+            class_info: classes[0],
             prob: 1
         }
         setBoundingBoxes([...boundingBoxes, bb])
@@ -245,7 +248,7 @@ export function BoundingBoxer({
                 </Button>
               )}
               {enable.drawButton && <Button
-                onClick={() => { addBB() }}
+                onClick={() => { handleAddBB() }}
                 variant="outline"
                 size="sm"
                 className={clsx(
