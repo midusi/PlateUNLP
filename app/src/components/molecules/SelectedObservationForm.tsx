@@ -15,7 +15,8 @@ import React from "react"
  * @interface SelectedObservationForm
  */
 interface SelectedObservationFormProps {
-  ref: any
+  
+  boxId: number
 }
 
 /** 
