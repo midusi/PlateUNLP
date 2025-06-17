@@ -147,6 +147,8 @@ export function StepSpectrumSegmentation({
         file={imageSelected}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
+        boundingBoxSelected={bbSelected}
+        setBoundingBoxSelected={setBBSelected}
         detectBBFunction={determineBBFunction}
         classes={classesSpectrumPartSegmentation}
       />

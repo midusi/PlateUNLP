@@ -40,6 +40,15 @@ interface BoundingBoxerProps {
      * de las cajas
      */
     setBoundingBoxes: Dispatch<SetStateAction<BoundingBox[]>>
+    /** Identificador de la caja delimitadora seleccionada a cada momento */
+    boundingBoxSelected: string | null
+    /** 
+     * Funcion para modificar el la caja delimitadora que se considera 
+     * seleccionada a cada momento.
+     * La funcion espera recibir el id de la caja a marcar como 
+     * seleccionada.
+     */
+    setBoundingBoxSelected: Dispatch<SetStateAction<string | null>>
     /** 
      * Funcion que dada una imagen base64 detecta las posiciones de cajas
      * delimitadoras enlazadas a un objeto concreto y las retorna.
@@ -69,6 +78,8 @@ export function BoundingBoxer({
   setFile, 
   boundingBoxes, 
   setBoundingBoxes, 
+  boundingBoxSelected,
+  setBoundingBoxSelected,
   detectBBFunction, 
   enable = {
     autodetecButton: true,
@@ -81,7 +92,6 @@ export function BoundingBoxer({
 
     const [rotation, setRotation] = useState<number>(0)
     const [invertColor, setInvertColor] = useState<boolean>(false)
-    const [selectedId, setSelectedId] = useState<string|null>(null)
 
     /**
      * Manejador para el boton Atodetect 
@@ -113,7 +123,7 @@ export function BoundingBoxer({
      */
     function handleDeleteBB(bbId:string) {
         setBoundingBoxes((prev) => prev.filter((box) => box.id !== bbId))
-        setSelectedId(null)
+        setBoundingBoxSelected(null)
     }
 
     /**
@@ -182,6 +192,18 @@ export function BoundingBoxer({
 
     /** Referencia a la caja delimitadora objetivo a cada momento */
     const [target, setTarget] = useState<HTMLElement>()
+    /** 
+     * Se asegura que si se cambia la caja seleccionada desde afuera del 
+     * componente la interfaz se corresponda con este cambio de seleccion.
+     */
+    useEffect(() => {
+      if(!boundingBoxSelected){
+        setTarget(undefined)
+      }
+      else{
+        setTarget(document.getElementById(String(boundingBoxSelected))!)
+      }
+    }, [boundingBoxSelected])
     /** Referencia a objeto encargado del movimiento de cajas */
     const moveable = createRef<Moveable>();
     /**
@@ -195,7 +217,7 @@ export function BoundingBoxer({
         const nativeEvent = e.nativeEvent
         const targetElement = nativeEvent.target as HTMLElement
         
-        setSelectedId(targetElement.id)
+        setBoundingBoxSelected(targetElement.id)
         setTarget(targetElement)
         moveable.current?.dragStart(nativeEvent)
         
@@ -259,8 +281,8 @@ export function BoundingBoxer({
                 <Square className="h-4 w-4" />
                 <span>Add Box</span>
               </Button>}
-              {selectedId && <Button
-                  onClick={() => {handleDeleteBB(selectedId)}}
+              {boundingBoxSelected && <Button
+                  onClick={() => {handleDeleteBB(boundingBoxSelected)}}
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200"
@@ -401,7 +423,7 @@ export function BoundingBoxer({
                           target.style.top  = `${originalScaleY}px`;
 
                           setBoundingBoxes(boundingBoxes.map((box) => 
-                            box.id != selectedId
+                            box.id != boundingBoxSelected
                               ? box
                               : {
                                 ...box, 
@@ -441,7 +463,7 @@ export function BoundingBoxer({
                           target.style.height  = `${originalHeigth}px`;
 
                           setBoundingBoxes(boundingBoxes.map((box) => 
-                            box.id != selectedId
+                            box.id != boundingBoxSelected
                               ? box
                               : {
                                 ...box, 

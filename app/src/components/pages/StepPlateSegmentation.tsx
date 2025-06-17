@@ -8,6 +8,7 @@ import { StepProps } from "@/interfaces/StepProps"
 import { BoundingBox } from "@/interfaces/BoundingBox"
 import { BoundingBoxer } from "../molecules/BoundingBoxer"
 import { BoxList, Step } from "../organisms/BBList"
+import { BoxList2 } from "../organisms/BBList2"
 
 export function StepPlateSegmentation({
   index,
@@ -142,10 +143,12 @@ export function StepPlateSegmentation({
         setFile={!imageSelected ? saveImage : undefined}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
+        boundingBoxSelected={observationSelected}
+        setBoundingBoxSelected={setObservationSelected}
         detectBBFunction={determineBBFunction}
         classes={classesSpectrumDetection}
       />
-      <BoxList 
+      <BoxList2 
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         boxMetadatas = {observationsMetadata}
@@ -154,7 +157,9 @@ export function StepPlateSegmentation({
         setSelected = {setObservationSelected}
         classes = {classesSpectrumDetection}
         parameters = {{step: Step.Plate}}
-      />
+      >
+        <span>Parte variable</span>
+      </BoxList2>
       <div className="flex justify-center pt-4">
         <Button
           onClick={() => handleSave()}
