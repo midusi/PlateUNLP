@@ -17,8 +17,6 @@ interface BoxListProps {
   children?: React.ReactElement;
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
-  boxMetadatas: BoxMetadata[]
-  setBoxMetadatas: React.Dispatch<React.SetStateAction<BoxMetadata[]>>
   selected: string | null
   setSelected: React.Dispatch<React.SetStateAction<string | null>>
   classes: BBClassesProps[]
