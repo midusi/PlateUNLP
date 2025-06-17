@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
@@ -28,10 +28,34 @@ export function StepPlateSegmentation({
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
   )
-  /** Metadatos de cada observacion */
-  const [observationsMetadata, setObservationsMetadata] = useState<BoxMetadata[]>(
-    processInfo.data.spectrums.map(spec => spec.metadata!)
+  /** 
+   * Metadatos de cada observacion, en forma de diccionario donde de cada 
+   * caja delimitadora se conocen los metadatos que le corresponden.
+   */
+  const [observationsMetadata, setObservationsMetadata] = useState<Record<string, BoxMetadata>>(
+    Object.fromEntries(
+      processInfo.data.spectrums.map((spec) => [spec.spectrumBoundingBox.id, spec.metadata!])
+    )
   )
+  /** 
+   * Cada vez que cambia el listado de cajas delimitadoras revisar que
+   * no se haya borrado u agregado alguna. Si alguna fue borrada entonces
+   * ya no guarda sus metadatos. Si alguna fue agregada entonces agrega un
+   * item para ella.
+   */
+  useEffect(()=>{
+    const dictForMetadata: Record<string, BoxMetadata> = {}
+    for (let i = 0; i < boundingBoxes.length; i++) {
+      let metadatas:BoxMetadata
+      if(boundingBoxes[i].id in observationsMetadata) {
+        metadatas = observationsMetadata[boundingBoxes[i].id]
+      } else {
+        metadatas = {OBJECT: null, DATE_OBS: null, UT: null}
+      }
+      dictForMetadata[boundingBoxes[i].id] = metadatas
+    }
+    setObservationsMetadata(dictForMetadata)
+  }, [boundingBoxes])
   /** Observacion seleccionada */
   const [observationSelected, setObservationSelected] = useState<string | null>(null)
 
@@ -127,11 +151,7 @@ export function StepPlateSegmentation({
   function handleSave(){
     saveBoundingBoxes(boundingBoxes)
     saveObservationsMetadata(
-      boundingBoxes.map(() => ({
-        "OBJECT": null,
-        "DATE_OBS": null,
-        "UT": null
-      }))
+      boundingBoxes.map((box) => observationsMetadata[box.id])
     )
     onComplete()
   }
@@ -158,7 +178,7 @@ export function StepPlateSegmentation({
         classes = {classesSpectrumDetection}
         parameters = {{step: Step.Plate}}
       >
-        <span>Parte variable</span>
+        <BoxMetadataForm />
       </BoxList2>
       <div className="flex justify-center pt-4">
         <Button

@@ -8,7 +8,12 @@ import { type BoxMetadata} from "../molecules/BoxMetadataForm"
 import React from "react"
 import { SelectorBBClass } from "../atoms/SelectorBBClass"
 
+/** 
+ * Interfaz del componente BoxList 
+ * @interface BoxList
+ */
 interface BoxListProps {
+
   children?: React.ReactElement;
   boundingBoxes: BoundingBox[]
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
@@ -28,6 +33,10 @@ interface BBListParameters {
   step: Step
 }
 
+/** 
+ * Componente que muestra un listado interactuable informacion de 
+ * cajas delimitadoras 
+ */
 export function BoxList2({
   children,
   boundingBoxes,
@@ -86,7 +95,6 @@ export function BoxList2({
                 )}
                 onClick={() => handleSelect(box.id as string)}
               >
-                {/** Parte fija */}
                 <div
                   id="circleWhit2DigitsOfName"
                   className={
@@ -127,7 +135,7 @@ export function BoxList2({
                   {/** Parte variable acorde a children */}
                   {selected==box.id && <div>
                       <hr />
-                      {children && React.cloneElement(children, { key: index})}
+                      {children && React.cloneElement(children, { boxId: box.id})}
                     </div>
                   }
                 </div>

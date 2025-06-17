@@ -5,3 +5,5 @@ export const boxMetadataFormSchema = z.object({
   DATE_OBS: z.date().nullable(),
   UT: z.number().nullable(),
 })
+
+export type FormData = z.infer<typeof boxMetadataFormSchema>
