@@ -9,21 +9,43 @@ import { DatePicker } from "../atoms/datePicker"
 import { Input } from "../atoms/input"
 import { TimePicker } from "../atoms/timePicker"
 import React from "react"
+import { BoxMetadata } from "./BoxMetadataForm"
 
 /** 
  * Parametros recibidos por SelectedObservationForm
  * @interface SelectedObservationForm
  */
 interface SelectedObservationFormProps {
-  
-  boxId: number
+  /** 
+   * Identificador de caja delimitadora de observacion. 
+   * Si undefined entonces el componente que aplica la interfaz no
+   * muestra nada.
+   */
+  boxId?: string
+  /** Diccionario de metadatos relacionados a cada observación*/
+  metadataDict: Record<string, BoxMetadata>
+  /** Funcion para modificar diccionario de metadatos metadatos */
+  setMetadataDict: (boxId:string, newMetadata: BoxMetadata) => void
 }
 
 /** 
  * Componente que muestra un formulario que permite editar algunos campos 
  * relecionados a una observacion.
  */
-export function SelectedObservationForm({}:SelectedObservationFormProps) {
+export function SelectedObservationForm({
+  boxId, 
+  metadataDict, 
+  setMetadataDict
+}:SelectedObservationFormProps) {
+
+  /** 
+   * Si no hay un boxId entonces no se muestra nada del componente. 
+   * Condicional escencial que permite mandar el componente como hijo
+   * que se clonara en un componente padre, de esta forma no es necesario
+   * indicar parametros para el hijo.
+  */
+  if(!boxId) return <></>
+
   const {
     register,
     watch,
@@ -34,16 +56,30 @@ export function SelectedObservationForm({}:SelectedObservationFormProps) {
   } = useForm<FormData>({
     resolver: zodResolver(boxMetadataFormSchema), // Conectar Zod con React Hook Form
     mode: "onChange",
+    defaultValues: metadataDict[boxId]
   })
 
   const [isObjectActive, setObjectActive] = useState(false)
   const [isDateObs, setDateObs] = useState(false)
   const [isUniversalTime, setUniversalTime] = useState(false)
 
+  /** Actualiza los valores default si cambia el boxId */
+  React.useEffect(() => {
+    reset(metadataDict[boxId])    
+  }, [boxId, metadataDict, reset])
+
+  /** Actualiza los valores guardados de cada campo al cambiar un valor */
   React.useEffect(() => {
     const subscription = watch((value, { name, type }) => {
       if (["OBJECT", "DATE_OBS", "UT"].includes(name || "")) {
-        // Ejecutá tu lógica acá
+        setMetadataDict(
+          boxId, 
+          {
+            OBJECT: isDateObs ? null : value.OBJECT ?? null ,
+            DATE_OBS: isDateObs ? null : value.DATE_OBS ?? null ,
+            UT: isDateObs ? null : value.UT ?? null
+          }
+        )
         console.log("Campo modificado:", name, "Nuevo valor:", value[name!])
       }
     });
@@ -88,7 +124,7 @@ export function SelectedObservationForm({}:SelectedObservationFormProps) {
                 control={control}
                 render={({ field }) => (
                   <DatePicker
-                    value={field.value}
+                    value={field.value!}
                     onChange={field.onChange}
                     placeholder="Local time"
                     disabled={isDateObs}

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import type { BBClassesProps } from "@/enums/BBClasses"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import { Card } from "../atoms/card"
-import { type BoxMetadata} from "../molecules/BoxMetadataForm"
 import React from "react"
 import { SelectorBBClass } from "../atoms/SelectorBBClass"
 
@@ -13,22 +12,25 @@ import { SelectorBBClass } from "../atoms/SelectorBBClass"
  * @interface BoxList
  */
 interface BoxListProps {
-
-  children?: React.ReactElement;
+  /** 
+   * Componente hijo que se va aclonar en cada elemento del listado.
+   * Debe aceptar como parametro el id de la caja delimitadora que le
+   * corresponde.
+   */
+  children?: React.ReactElement<{ boxId: string }>
+  /** Listado de cajas delimitadoras */
   boundingBoxes: BoundingBox[]
+  /** Funcion para modificar el listado de cajas delimitadoras */
   setBoundingBoxes: React.Dispatch<React.SetStateAction<BoundingBox[]>>
+  /** Indicador del identificador de la caja delimitadora seleccionada */
   selected: string | null
+  /** 
+   * Funcion para modificar el identificador de la caja delimitadora
+   * seleccionada.
+  */
   setSelected: React.Dispatch<React.SetStateAction<string | null>>
+  /** Listado de clases a las que pertenecen las cajas delimitadoras */
   classes: BBClassesProps[]
-  parameters: BBListParameters
-  
-}
-export enum Step {
-  Plate = 0,
-  Spectrum = 1,
-}
-interface BBListParameters {
-  step: Step
 }
 
 /** 
@@ -83,13 +85,15 @@ export function BoxList2({
       </div>
       <div className="divide-y divide-slate-100">
         {boundingBoxes.length > 0 &&
-          boundingBoxes.map((box, index) => { 
+          boundingBoxes.map((box) => { 
             return (
-              <div className={clsx(
-                "flex  p-3 transition-colors cursor-pointer",
-                (selected == box.id)
-                  ? "bg-blue-50 border-l-2 border-l-blue-500"
-                  : "bg-white hover:bg-slate-50 border-l-2 border-l-transparent",
+              <div 
+                key={'list-item:'+box.id}
+                className={clsx(
+                  "flex  p-3 transition-colors cursor-pointer",
+                  (selected == box.id)
+                    ? "bg-blue-50 border-l-2 border-l-blue-500"
+                    : "bg-white hover:bg-slate-50 border-l-2 border-l-transparent",
                 )}
                 onClick={() => handleSelect(box.id as string)}
               >

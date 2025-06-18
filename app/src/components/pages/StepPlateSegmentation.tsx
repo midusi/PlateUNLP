@@ -3,12 +3,13 @@ import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { Button } from "../atoms/button"
-import type { BoxMetadata } from "../molecules/BoxMetadataForm"
+import { BoxMetadataForm, type BoxMetadata } from "../molecules/BoxMetadataForm"
 import { StepProps } from "@/interfaces/StepProps"
 import { BoundingBox } from "@/interfaces/BoundingBox"
 import { BoundingBoxer } from "../molecules/BoundingBoxer"
 import { BoxList, Step } from "../organisms/BBList"
 import { BoxList2 } from "../organisms/BBList2"
+import { SelectedObservationForm } from "../molecules/SelectedObservationForm"
 
 export function StepPlateSegmentation({
   index,
@@ -154,6 +155,26 @@ export function StepPlateSegmentation({
       boundingBoxes.map((box) => observationsMetadata[box.id])
     )
     onComplete()
+    console.log(observationsMetadata)
+  }
+
+  /**
+   * Maneja la modificacion de un elemento concreto del diccionario de 
+   * metadatos de cajas delimitadoras.
+   * @param {satring} boxId - Identificador de la caja delimitadora de la 
+   * que se quieren modificar sus parametros.
+   * @param {BoxMetadata} newMetadata - Nuevos metadatos para la caja 
+   * indicada.
+   */
+  function handleModifiMetadataDict(boxId:string, newMetadata:BoxMetadata) {
+    const newDict = Object.fromEntries(
+      Object.entries(observationsMetadata).map(([key, metadata]) => 
+        key === boxId
+          ? [boxId, newMetadata]
+          : [boxId, metadata]
+      )
+    );
+    setObservationsMetadata(newDict)
   }
 
   return (
@@ -171,14 +192,14 @@ export function StepPlateSegmentation({
       <BoxList2 
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
-        boxMetadatas = {observationsMetadata}
-        setBoxMetadatas = {setObservationsMetadata}
         selected = {observationSelected}
         setSelected = {setObservationSelected}
         classes = {classesSpectrumDetection}
-        parameters = {{step: Step.Plate}}
       >
-        <BoxMetadataForm />
+        <SelectedObservationForm 
+          metadataDict={observationsMetadata}
+          setMetadataDict={handleModifiMetadataDict}
+        />
       </BoxList2>
       <div className="flex justify-center pt-4">
         <Button

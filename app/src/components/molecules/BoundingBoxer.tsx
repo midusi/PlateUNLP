@@ -371,6 +371,7 @@ export function BoundingBoxer({
                       />
                       {boundingBoxes.map((box) =>
                         <div 
+                          key={'bounding-box:'+box.id}
                           id={''+box.id} 
                           onMouseDown={onMouseDown}
                           className={clsx(
