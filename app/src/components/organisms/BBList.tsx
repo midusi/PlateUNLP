@@ -120,6 +120,8 @@ export function BoxList({
                         />
                       </div>
                       <div id="displayBoundingoxShape" className="flex items-center mt-1 text-xs text-slate-500 gap-2">
+                        <span> X:{Math.round(box.x)}px </span>
+                        <span> Y:{Math.round(box.y)}px </span>
                         <span> W:{Math.round(box.width)}px </span>
                         <span> H:{Math.round(box.height)}px </span>
                       </div>

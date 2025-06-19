@@ -91,7 +91,7 @@ export function BoundingBoxer({
 }: BoundingBoxerProps){
 
     const [rotation, setRotation] = useState<number>(0)
-    const [invertColor, setInvertColor] = useState<boolean>(false)
+    const [invertColor, setInvertColor] = useState<boolean>(true)
 
     /**
      * Manejador para el boton Atodetect 
@@ -219,8 +219,7 @@ export function BoundingBoxer({
         
         setBoundingBoxSelected(targetElement.id)
         setTarget(targetElement)
-        moveable.current?.dragStart(nativeEvent)
-        
+        moveable.current?.dragStart(nativeEvent)   
     }
 
     return <Card className="overflow-hidden mb-6">
@@ -350,7 +349,7 @@ export function BoundingBoxer({
                     }}
                     contentStyle={{
                       position: "relative",
-                      background: "blue"
+                      //background: "blue"
                     }}
                   >
                     <div id="imageWithBBcontainer" className="relative bg-green-600">                      
@@ -359,10 +358,18 @@ export function BoundingBoxer({
                         ref={imgRef}
                         src={file}
                         alt="Imagen de placa"
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          // forzalo a su tamaño intrínseco:
+                          img.style.width  = img.naturalWidth  + 'px';
+                          img.style.height = img.naturalHeight + 'px';
+                        }}
                         style={{
-                          maxWidth: "100%",
-                          maxHeight: "100%",
-                          objectFit: "contain",
+                          width: "auto",
+                          height: "auto", 
+                          maxWidth: 'none',
+                          maxHeight: 'none',
+                          objectFit: "none",
                           transform: `rotate(${rotation}deg)`,
                           transformOrigin: "center center",
                           filter: invertColor ? "none" : "invert(1)",
