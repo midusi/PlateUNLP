@@ -404,7 +404,6 @@ export function BoundingBoxer({
                           transform,
                           clientX, clientY,
                       }: OnDrag) => {
-                          //console.log("onDrag translate", dist);
                           target!.style.transform = transform;
                       }}
                       onDragEnd={({ target, isDrag, clientX, clientY }) => {

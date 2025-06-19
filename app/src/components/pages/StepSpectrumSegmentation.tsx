@@ -5,10 +5,9 @@ import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import type { BoundingBox } from "@/interfaces/BoundingBox"
 import type { StepProps } from "@/interfaces/StepProps"
 import { cropImages } from "@/lib/cropImage"
-import { BoxList, Step } from "../organisms/BBList"
 import { BoundingBoxer } from "../molecules/BoundingBoxer"
-import { BoxMetadata } from "../molecules/BoxMetadataForm"
 import { Button } from "../atoms/button"
+import { BoxList } from "../organisms/BBList"
 
 export function StepSpectrumSegmentation({
   index,
@@ -24,11 +23,6 @@ export function StepSpectrumSegmentation({
     "spectrum_part_segmentator.onnx",
     classesSpectrumPartSegmentation,
     true,
-  )
-
-  /** Metadatos de cada espectro */
-  const [spectrumMetadata, setSpectrumMetadata] = useState<BoxMetadata[]>(
-    processInfo.data.spectrums.map(spec => spec.metadata!)
   )
 
   /** Cajas delimitadoras de cada observación */
@@ -155,12 +149,9 @@ export function StepSpectrumSegmentation({
       <BoxList 
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
-        boxMetadatas = {spectrumMetadata}
-        setBoxMetadatas = {setSpectrumMetadata}
         selected = {bbSelected}
         setSelected = {setBBSelected}
         classes = {classesSpectrumPartSegmentation}
-        parameters = {{step: Step.Plate}}
       />
       <div className="flex justify-center pt-4">
         <Button

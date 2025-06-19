@@ -3,13 +3,11 @@ import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { Button } from "../atoms/button"
-import { BoxMetadataForm, type BoxMetadata } from "../molecules/BoxMetadataForm"
 import { StepProps } from "@/interfaces/StepProps"
 import { BoundingBox } from "@/interfaces/BoundingBox"
 import { BoundingBoxer } from "../molecules/BoundingBoxer"
-import { BoxList, Step } from "../organisms/BBList"
-import { BoxList2 } from "../organisms/BBList2"
-import { SelectedObservationForm } from "../molecules/SelectedObservationForm"
+import { BoxList} from "../organisms/BBList"
+import { BoxMetadata, SelectedObservationForm } from "../molecules/SelectedObservationForm"
 
 export function StepPlateSegmentation({
   index,
@@ -51,7 +49,7 @@ export function StepPlateSegmentation({
       if(boundingBoxes[i].id in observationsMetadata) {
         metadatas = observationsMetadata[boundingBoxes[i].id]
       } else {
-        metadatas = {OBJECT: null, DATE_OBS: null, UT: null}
+        metadatas = {OBJECT: undefined, DATE_OBS: undefined, UT: undefined}
       }
       dictForMetadata[boundingBoxes[i].id] = metadatas
     }
@@ -158,25 +156,6 @@ export function StepPlateSegmentation({
     console.log(observationsMetadata)
   }
 
-  /**
-   * Maneja la modificacion de un elemento concreto del diccionario de 
-   * metadatos de cajas delimitadoras.
-   * @param {satring} boxId - Identificador de la caja delimitadora de la 
-   * que se quieren modificar sus parametros.
-   * @param {BoxMetadata} newMetadata - Nuevos metadatos para la caja 
-   * indicada.
-   */
-  function handleModifiMetadataDict(boxId:string, newMetadata:BoxMetadata) {
-    const newDict = Object.fromEntries(
-      Object.entries(observationsMetadata).map(([key, metadata]) => 
-        key === boxId
-          ? [boxId, newMetadata]
-          : [boxId, metadata]
-      )
-    );
-    setObservationsMetadata(newDict)
-  }
-
   return (
     <div className="flex flex-col w-full">
       <BoundingBoxer
@@ -189,7 +168,7 @@ export function StepPlateSegmentation({
         detectBBFunction={determineBBFunction}
         classes={classesSpectrumDetection}
       />
-      <BoxList2 
+      <BoxList
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
         selected = {observationSelected}
@@ -198,13 +177,18 @@ export function StepPlateSegmentation({
       >
         <SelectedObservationForm 
           metadataDict={observationsMetadata}
-          setMetadataDict={handleModifiMetadataDict}
+          setMetadataDict={setObservationsMetadata}
         />
-      </BoxList2>
+      </BoxList>
       <div className="flex justify-center pt-4">
         <Button
           onClick={() => handleSave()}
-          disabled={imageSelected === null || boundingBoxes.length === 0}
+          disabled={imageSelected === null || 
+            boundingBoxes.length === 0 || 
+            Object.values(observationsMetadata).some(innerDict =>
+              Object.values(innerDict).some(value => value === undefined)
+            )
+          }
         >
           Save
         </Button>
