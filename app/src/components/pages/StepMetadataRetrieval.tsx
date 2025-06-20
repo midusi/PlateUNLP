@@ -1,20 +1,45 @@
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import type { StepProps } from "@/interfaces/StepProps"
 import { Button } from "../atoms/button"
 import { BoxMetadataReadOnly } from "../molecules/BoxMetadataReadOnly"
-import { SpectrumMetadataForm } from "../molecules/SpectrumMetadataForm"
+import { SpectrumMetadata, SpectrumMetadataForm, SpectrumMetadataIcons } from "../molecules/SpectrumMetadataForm"
 
 export function StepMetadataRetrieval({
   index,
   processInfo,
   setProcessInfo,
 }: StepProps) {
+  /** 
+   * 1. Funcion para modificar el paso actual en la barra de navegacion. 
+   * 2. Espectro de la placa que el usuario esta editando.
+   */
   const [setActualStep, selectedSpectrum] = useGlobalStore((s) => [
     s.setActualStep,
     s.selectedSpectrum,
   ])
 
+  /** 
+   * Condicion boleana y su funcion de modificación para identificar si el 
+   * formulario esta listo para ser enviado.
+  */
+  const [valid, setValid] = useState<boolean>(false)
+
+  /** Referencia al formulario donde se ingresan los metadatos metadatos */
+  const spectrumMetadataFormRef = useRef<{
+    setValues: (spectrumMetadata: SpectrumMetadata) => void
+    resetValues: () => void
+    getValues: () => SpectrumMetadata
+    validate: () => boolean
+    setIcons: (icons: SpectrumMetadataIcons) => void
+    getIcons: () => SpectrumMetadataIcons
+  }>(null)
+
+  /** 
+   * Funcion a ejecutar al completar el paso actual. 
+   * Actualiza valores de metadatos en processInfo y marca el paso actual
+   * como completado.
+   */
   function onComplete() {
     /// AGREGAR GUARDADO DE METADATOS
 
@@ -49,14 +74,6 @@ export function StepMetadataRetrieval({
     }))
     setActualStep(index + 1)
   }
-  const spectrumMetadataFormRef = useRef<{
-    setValues: (spectrumMetadata: SpectrumMetadata) => void
-    resetValues: () => void
-    getValues: () => SpectrumMetadata
-    validate: () => void
-    setIcons: (icons: SpectrumMetadataIcons) => void
-    getIcons: () => SpectrumMetadataIcons
-  }>(null)
 
   return (
     <>
@@ -72,7 +89,7 @@ export function StepMetadataRetrieval({
             UT={processInfo.data.spectrums[selectedSpectrum!].metadata.UT}
           />
           <hr className="my-4" />
-          <SpectrumMetadataForm ref={spectrumMetadataFormRef} />
+          <SpectrumMetadataForm ref={spectrumMetadataFormRef} setValidForm={setValid}/>
         </div>
         <div className="flex gap-4 justify-center">
           <Button
@@ -112,9 +129,8 @@ export function StepMetadataRetrieval({
 
           <Button
             className="w-1/4"
-            onClick={() => {
-              if (spectrumMetadataFormRef.current?.validate()) onComplete()
-            }}
+            onClick={() => {onComplete()}}
+            disabled={!valid}
           >
             Save
           </Button>
