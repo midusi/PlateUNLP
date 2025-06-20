@@ -42,7 +42,8 @@ export interface SpectrumData {
   name: string
   /** Bounding Box que delimita las dimensiones y localización del espectro. */
   spectrumBoundingBox: BoundingBox
-  metadata: BoxMetadata
+  /** Metadatos comunes a esta observación. */
+  metadata: BoxMetadata | null
   /** Informacion respecto a las partes del espectro (science, lamp1, lamp2) */
   parts: {
     /** Información relacionada a la lampara de comparación 1. */

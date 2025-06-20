@@ -1,10 +1,13 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { classesSpectrumDetection } from "@/enums/BBClasses"
 import { useGlobalStore } from "@/hooks/use-global-store"
 import { usePredictBBs } from "@/hooks/use-predict-BBs"
 import { Button } from "../atoms/button"
-import type { BoxMetadata } from "../molecules/BoxMetadataForm"
-import { BBUI } from "../organisms/BBUI"
+import { StepProps } from "@/interfaces/StepProps"
+import { BoundingBox } from "@/interfaces/BoundingBox"
+import { BoundingBoxer } from "../molecules/BoundingBoxer"
+import { BoxList} from "../organisms/BBList"
+import { BoxMetadata, SelectedObservationForm } from "../molecules/SelectedObservationForm"
 
 export function StepPlateSegmentation({
   index,
@@ -20,53 +23,64 @@ export function StepPlateSegmentation({
     0.7,
   )
 
-  const [imageSegmentator, boundingBoxes, imageSelected] = useImageSegmentator(
-    processInfo,
-    determineBBFunction,
+  /** Cajas delimitadoras de cada observación */
+  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
+    processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
+  )
+  /** 
+   * Metadatos de cada observacion, en forma de diccionario donde de cada 
+   * caja delimitadora se conocen los metadatos que le corresponden.
+   */
+  const [observationsMetadata, setObservationsMetadata] = useState<Record<string, BoxMetadata>>(
+    Object.fromEntries(
+      processInfo.data.spectrums.map((spec) => [spec.spectrumBoundingBox.id, spec.metadata!])
+    )
+  )
+  /** 
+   * Cada vez que cambia el listado de cajas delimitadoras revisar que
+   * no se haya borrado u agregado alguna. Si alguna fue borrada entonces
+   * ya no guarda sus metadatos. Si alguna fue agregada entonces agrega un
+   * item para ella.
+   */
+  useEffect(()=>{
+    const dictForMetadata: Record<string, BoxMetadata> = {}
+    for (let i = 0; i < boundingBoxes.length; i++) {
+      let metadatas:BoxMetadata
+      if(boundingBoxes[i].id in observationsMetadata) {
+        metadatas = observationsMetadata[boundingBoxes[i].id]
+      } else {
+        metadatas = {OBJECT: undefined, DATE_OBS: undefined, UT: undefined}
+      }
+      dictForMetadata[boundingBoxes[i].id] = metadatas
+    }
+    setObservationsMetadata(dictForMetadata)
+  }, [boundingBoxes])
+  /** Observacion seleccionada */
+  const [observationSelected, setObservationSelected] = useState<string | null>(null)
+
+  /** Imagen de escaneo seleccionada */
+  const [imageSelected, setImageSelected] = useState<string|null>(
+    processInfo.data.plate.scanImage
   )
 
-  useEffect(() => {
-    // Almacena información de imagenes de la placa
-    setProcessInfo((prev) => ({
+  /** Almacena información de imagen de la placa en ProcessInfo */ 
+  function saveImage(src: string) {
+    setImageSelected(src)
+    setProcessInfo(prev => ({
       ...prev,
       data: {
         ...prev.data,
         plate: {
           ...prev.data.plate,
-          scanImage: imageSelected,
+          scanImage: src,
         },
       },
     }))
-  }, [imageSelected])
+  }
 
-  // const parameters = {
-  //   rotateButton: true,
-  //   invertColorButton: true,
-  //   step: Step.Plate,
-  // }
-  // const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-  //   processInfo.data.spectrums.map(spec => spec.spectrumBoundingBox),
-  // )
-  // const [boxMetadatas, setBoxMetadatas] = useState<BoxMetadata[]>(
-  //   processInfo.data.spectrums.map(spec => spec.metadata),
-  // )
-
-  // function saveImage(src: string) {
-  //   setProcessInfo(prev => ({
-  //     ...prev,
-  //     data: {
-  //       ...prev.data,
-  //       plate: {
-  //         ...prev.data.plate,
-  //         scanImage: src,
-  //       },
-  //     },
-  //   }))
-  // }
-
+  /** Almacena BB que delimitan cada observación en processInfo */
   function saveBoundingBoxes(
-    boundingBoxes: BoundingBox[],
-    boxMetadata: BoxMetadata[],
+    boundingBoxes: BoundingBox[]
   ) {
     setProcessInfo((prev) => ({
       ...prev,
@@ -76,7 +90,7 @@ export function StepPlateSegmentation({
           id: index,
           name: `Plate${index}#Spectrum`,
           spectrumBoundingBox: bb,
-          metadata: boxMetadata[index],
+          metadata: null,
           parts: {
             lamp1: { boundingBox: null, extractedSpectrum: null },
             lamp2: { boundingBox: null, extractedSpectrum: null },
@@ -87,9 +101,27 @@ export function StepPlateSegmentation({
     }))
   }
 
+  /** Almacena metadatos de cada observación en processInfo */
+  function saveObservationsMetadata (
+    observationsMetadata: BoxMetadata[],
+  ) {
+    setProcessInfo((prev) => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        spectrums: prev.data.spectrums.map((spectrum, index) => ({
+          ...spectrum,
+          metadata: observationsMetadata[index],
+        })),
+      },
+    }))
+  }
+
+  /** 
+   * Marca el paso actual como completado y el que le sigue 
+   * como que necesita actualizaciones 
+   */
   function onComplete() {
-    /// Marca el paso actual como completado y el que le sigue como
-    /// que necesita actualizaciones
     setProcessInfo((prev) => ({
       ...prev,
       processingStatus: {
@@ -114,28 +146,49 @@ export function StepPlateSegmentation({
     setActualStep(index + 1)
   }
 
+  /** Maneja el click del boton save */
+  function handleSave(){
+    saveBoundingBoxes(boundingBoxes)
+    saveObservationsMetadata(
+      boundingBoxes.map((box) => observationsMetadata[box.id])
+    )
+    onComplete()
+    console.log(observationsMetadata)
+  }
+
   return (
     <div className="flex flex-col w-full">
-      <BBUI
-        file={processInfo.data.plate.scanImage}
+      <BoundingBoxer
+        file={imageSelected ?? undefined}
+        setFile={!imageSelected ? saveImage : undefined}
         boundingBoxes={boundingBoxes}
         setBoundingBoxes={setBoundingBoxes}
-        boxMetadatas={boxMetadatas}
-        setBoxMetadatas={setBoxMetadatas}
-        onComplete={onComplete}
-        saveBoundingBoxes={saveBoundingBoxes}
-        saveImageLoading={saveImage}
+        boundingBoxSelected={observationSelected}
+        setBoundingBoxSelected={setObservationSelected}
+        detectBBFunction={determineBBFunction}
         classes={classesSpectrumDetection}
-        determineBBFunction={determineBBFunction}
-        parameters={parameters}
       />
+      <BoxList
+        boundingBoxes={boundingBoxes}
+        setBoundingBoxes={setBoundingBoxes}
+        selected = {observationSelected}
+        setSelected = {setObservationSelected}
+        classes = {classesSpectrumDetection}
+      >
+        <SelectedObservationForm 
+          metadataDict={observationsMetadata}
+          setMetadataDict={setObservationsMetadata}
+        />
+      </BoxList>
       <div className="flex justify-center pt-4">
         <Button
-          onClick={() => {
-            saveBoundingBoxes(boundingBoxes, [])
-            onComplete()
-          }}
-          disabled={imageSelected === null || boundingBoxes.length === 0}
+          onClick={() => handleSave()}
+          disabled={imageSelected === null || 
+            boundingBoxes.length === 0 || 
+            Object.values(observationsMetadata).some(innerDict =>
+              Object.values(innerDict).some(value => value === undefined)
+            )
+          }
         >
           Save
         </Button>

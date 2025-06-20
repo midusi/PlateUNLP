@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Label } from "@radix-ui/react-label"
-import { useImperativeHandle, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useImperativeHandle, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import type { z } from "zod/v4"
 import { spectrumMetadataFormSchema } from "@/lib/spectrumMetadataFormSchema"
@@ -54,11 +54,29 @@ export interface SpectrumMetadataIcons {
 
 type FormData = z.infer<typeof spectrumMetadataFormSchema>
 
+/**
+ * Parametros que espera recibir el componente SpectrumMetadataForm.
+ * @interface SpectrumMetadataForm
+ */
 interface SpectrumMetadataFormProps {
-  ref: any
+  /** Referencia a enlazar al formulario para su uso desde mas arriba */
+  ref: RefObject<{
+    setValues: (spectrumMetadata: SpectrumMetadata) => void;
+    resetValues: () => void;
+    getValues: () => SpectrumMetadata;
+    validate: () => boolean;
+    setIcons: (icons: SpectrumMetadataIcons) => void;
+    getIcons: () => SpectrumMetadataIcons;
+  } | null>
+  /** Funcion para reportar a componente superior si el formulario es valido o no. */
+  setValidForm: Dispatch<SetStateAction<boolean>>
 }
 
-export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
+/** 
+ * Componente que muestra un formulario con entradas para todos los 
+ * metadatos que son comunes a una observación.
+ */
+export function SpectrumMetadataForm({ ref, setValidForm }: SpectrumMetadataFormProps) {
   const {
     register,
     watch,
@@ -70,6 +88,11 @@ export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
     resolver: zodResolver(spectrumMetadataFormSchema), // Conectar Zod con React Hook Form
     mode: "onChange",
   })
+
+  /** Actualiza variable de valides del padre */
+  useEffect(() => {
+    setValidForm(isValid)
+  }, [isValid])
 
   const [spectrumMetadataIcons, setSpectrumMetadataIcons] =
     useState<SpectrumMetadataIcons>({
