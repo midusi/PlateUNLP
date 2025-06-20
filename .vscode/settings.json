@@ -1,12 +1,16 @@
 {
   // Disable the default formatter, use biome instead
   "prettier.enable": false,
+  "eslint.enable": false,
   "biome.enabled": true,
   "editor.formatOnSave": true,
 
   // Set the default formatter to biome
   "editor.defaultFormatter": "biomejs.biome",
   "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[json]": {
@@ -17,5 +21,8 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
     "source.organizeImports": "never"
-  }
+  },
+
+  // Markdown docs
+  "markdown.extension.toc.updateOnSave": false
 }

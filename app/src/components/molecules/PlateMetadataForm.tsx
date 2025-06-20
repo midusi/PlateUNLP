@@ -3,7 +3,6 @@ import { Label } from "@radix-ui/react-label"
 import { Dispatch, RefObject, SetStateAction, useEffect, useImperativeHandle } from "react"
 import { Controller, useForm } from "react-hook-form"
 import type { z } from "zod/v4"
-import { observatories } from "@/lib/observatories"
 import { plateMetadataFormSchema } from "@/lib/plateMetadataFormSchema"
 import { Input } from "../atoms/input"
 import SelectForm from "../atoms/selectForm"
@@ -20,7 +19,7 @@ export interface PlateMetadata {
   INSTRUMENT: string
 }
 
-const options = observatories
+const options = []
 
 type FormData = z.infer<typeof plateMetadataFormSchema>
 
