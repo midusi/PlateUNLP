@@ -3,8 +3,6 @@
     "biomejs.biome",
     "bradlc.vscode-tailwindcss",
     "ppp-one.simple-fits-viewer",
-    "usernamehw.errorlens",
-    "vivaxy.vscode-conventional-commits",
-    "YoavBls.pretty-ts-errors",
+    "vivaxy.vscode-conventional-commits"
   ]
 }
