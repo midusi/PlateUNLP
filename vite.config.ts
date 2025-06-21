@@ -1,7 +1,6 @@
 import tailwindcss from "@tailwindcss/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import { defineConfig } from "vite"
-import { viteStaticCopy } from "vite-plugin-static-copy"
 import tsConfigPaths from "vite-tsconfig-paths"
 
 export default defineConfig({
@@ -13,12 +12,13 @@ export default defineConfig({
       projects: ["./tsconfig.json"],
     }),
     tailwindcss(),
-    viteStaticCopy({
-      targets: [{ src: "node_modules/onnxruntime-web/dist/*.wasm", dest: "./models" }],
-    }),
     tanstackStart({
       target: "bun",
       tsr: { srcDirectory: "app" },
     }),
   ],
+  assetsInclude: ["**/*.onnx"],
+  optimizeDeps: {
+    exclude: ["onnxruntime-web"],
+  },
 })

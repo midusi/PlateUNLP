@@ -1,5 +1,5 @@
-import * as ort from "onnxruntime-web"
-import { useMemo, useRef, useState } from "react"
+import { InferenceSession, Tensor } from "onnxruntime-web"
+import { useEffect, useState } from "react"
 import { iou } from "~/lib/utils"
 import type { BBClassesProps } from "~/types/BBClasses"
 import type { BoundingBox } from "~/types/BoundingBox"
@@ -20,23 +20,21 @@ export function usePredictBBs(
   const CLASSES = classes
   const CONFIDENCE_THRESHOLD = confidence_threshold
   const IOU_THRESHOLD = 0.7
-  const modelPath = `/models/${model}`
-
-  const modelRef = useRef<Promise<ort.InferenceSession> | null>(null)
+  const [onnxSession, setOnnxSession] = useState<InferenceSession | null>(null)
 
   const [lastResponse, setLastResponse] = useState<Response>({
     input: "",
     output: [],
   })
 
-  useMemo(() => {
-    ort.env.wasm.wasmPaths = "/models/"
-    modelRef.current = ort.InferenceSession.create(modelPath)
-    // .then((m) => {
-    //     console.log("Modelo cargado")
-    //     return m
-    // })
-  }, [modelPath])
+  useEffect(() => {
+    let s: InferenceSession | null = null
+    InferenceSession.create(`/models/${model}`).then((session) => {
+      s = session
+      setOnnxSession(session)
+    })
+    return () => void s?.release()
+  }, [model])
 
   function prepare_input(img_src: string) {
     const image = new Image()
@@ -63,15 +61,15 @@ export function usePredictBBs(
     }
   }
 
-  async function runInference(session: ort.InferenceSession, input: Float32Array<ArrayBuffer>) {
+  async function runInference(session: InferenceSession, input: Float32Array<ArrayBuffer>) {
     const feeds = {
-      images: new ort.Tensor("float32", input, [1, 3, SIZE_M, SIZE_M]),
+      images: new Tensor("float32", input, [1, 3, SIZE_M, SIZE_M]),
     }
     const outputs = await session.run(feeds)
     return outputs
   }
 
-  function processOutputs(outputs: ort.InferenceSession.OnnxValueMapType, image: HTMLImageElement) {
+  function processOutputs(outputs: InferenceSession.OnnxValueMapType, image: HTMLImageElement) {
     const { naturalWidth: NATURALWIDTH, naturalHeight: NATURALHEIGHT } = image
 
     // console.log("salida", outputs.output0.data)
@@ -139,8 +137,7 @@ export function usePredictBBs(
       return lastResponse.output
     }
     const { input, image } = prepare_input(img_src)
-    const session: ort.InferenceSession = await modelRef.current!
-    const outputs: ort.InferenceSession.OnnxValueMapType = await runInference(session, input)
+    const outputs: InferenceSession.OnnxValueMapType = await runInference(onnxSession!, input)
     const processed_output: BoundingBox[] = processOutputs(outputs, image)
     setLastResponse({
       input: img_src,
