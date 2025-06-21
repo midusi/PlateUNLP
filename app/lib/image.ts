@@ -2,6 +2,22 @@ import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
 /**
+ * Carga una imagen desde un src y devuelve el objeto Image con sus dimensiones reales.
+ * @param {string} src - imagen (URL o base64)
+ * @returns {Promise<Image>} - Imagen cargada
+ */
+export function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve(img);
+    }
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+/**
  * Retorna los valores (en grises) de los pixeles de una imagen que corresponden a las
  * coordenadas por las que pasa una recta.
  * @param {Uint8ClampedArray} data - Matriz de pixeles.

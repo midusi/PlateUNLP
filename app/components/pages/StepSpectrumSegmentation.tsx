@@ -5,20 +5,23 @@ import { cropImages } from "~/lib/cropImage"
 import { BBClasses, classesSpectrumPartSegmentation } from "~/types/BBClasses"
 import type { BoundingBox } from "~/types/BoundingBox"
 import type { StepProps } from "~/types/StepProps"
-import { Step } from "../organisms/BBList"
-import { BBUI } from "../organisms/BBUI"
+import { Button } from "../atoms/button"
+import { BoundingBoxer } from "../molecules/BoundingBoxer"
+import { BoxList } from "../organisms/BBList"
 
 export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }: StepProps) {
-  const parameters = {
-    rotateButton: false,
-    invertColorButton: false,
-    step: Step.Spectrum,
-  }
   const [setActualStep, selectedSpectrum] = useGlobalStore((s) => [
     s.setActualStep,
     s.selectedSpectrum!,
   ])
+  const determineBBFunction = usePredictBBs(
+    1088,
+    "spectrum_part_segmentator.onnx",
+    classesSpectrumPartSegmentation,
+    true,
+  )
 
+  /** Cajas delimitadoras de cada observación */
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     processInfo.data.spectrums[selectedSpectrum].parts.lamp1.boundingBox !== null
       ? [
@@ -29,22 +32,20 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
       : [],
   )
 
-  const determineBBFunction = usePredictBBs(
-    1088,
-    "spectrum_part_segmentator.onnx",
-    classesSpectrumPartSegmentation,
-    true,
-  )
+  /** caja delimitadora seleccionada */
+  const [bbSelected, setBBSelected] = useState<string | null>(null)
 
-  const [spectrumImage, setSpectrumImage] = useState<string | null>(null)
+  /** Imagen de espectro seleccionada */
+  const [imageSelected, setImageSelected] = useState<string | null>(null)
   useEffect(() => {
     cropImages(processInfo.data.plate.scanImage!, [
       processInfo.data.spectrums[selectedSpectrum].spectrumBoundingBox,
     ]).then((images) => {
-      setSpectrumImage(images[0])
+      setImageSelected(images[0])
     })
   }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
 
+  /** Almacena BB que delimitan cada espectro en processInfo */
   function saveBoundingBoxes(boundingBoxes: BoundingBox[]) {
     const scienceBb = boundingBoxes.filter((bb) => bb.class_info === BBClasses.Science)[0]
     const lampsBbs = boundingBoxes.filter((bb) => bb.class_info === BBClasses.Lamp)
@@ -78,9 +79,11 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
     }))
   }
 
+  /**
+   * Marca el paso actual como completado y el que le sigue
+   * como que necesita actualizaciones
+   */
   function onComplete() {
-    /// Marca el paso actual como completado y el que le sigue como
-    /// que necesita actualizaciones
     const generalTotal = processInfo.processingStatus.generalSteps.length
     setProcessInfo((prev) => ({
       ...prev,
@@ -109,20 +112,40 @@ export function StepSpectrumSegmentation({ index, processInfo, setProcessInfo }:
     setActualStep(index + 1)
   }
 
+  /** Maneja el click del boton save */
+  function handleSave() {
+    saveBoundingBoxes(boundingBoxes)
+    onComplete()
+  }
+
   return (
-    <div className="w-full p-6">
-      {spectrumImage && (
-        <BBUI
-          file={spectrumImage}
+    imageSelected && (
+      <div className="flex flex-col w-full">
+        <BoundingBoxer
+          file={imageSelected}
           boundingBoxes={boundingBoxes}
           setBoundingBoxes={setBoundingBoxes}
-          onComplete={onComplete}
-          saveBoundingBoxes={saveBoundingBoxes}
+          boundingBoxSelected={bbSelected}
+          setBoundingBoxSelected={setBBSelected}
+          detectBBFunction={determineBBFunction}
           classes={classesSpectrumPartSegmentation}
-          determineBBFunction={determineBBFunction}
-          parameters={parameters}
         />
-      )}
-    </div>
+        <BoxList
+          boundingBoxes={boundingBoxes}
+          setBoundingBoxes={setBoundingBoxes}
+          selected={bbSelected}
+          setSelected={setBBSelected}
+          classes={classesSpectrumPartSegmentation}
+        />
+        <div className="flex justify-center pt-4">
+          <Button
+            onClick={() => handleSave()}
+            disabled={imageSelected === null || boundingBoxes.length === 0}
+          >
+            Save
+          </Button>
+        </div>
+      </div>
+    )
   )
 }

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useImperativeHandle, useState } from "react"
+import { type Dispatch, type SetStateAction, useEffect, useImperativeHandle, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import type { z } from "zod/v4"
 import { Label } from "~/components/atoms/label"
@@ -54,11 +54,29 @@ export interface SpectrumMetadataIcons {
 
 type FormData = z.infer<typeof spectrumMetadataFormSchema>
 
+/**
+ * Parametros que espera recibir el componente SpectrumMetadataForm.
+ * @interface SpectrumMetadataForm
+ */
 interface SpectrumMetadataFormProps {
-  ref: any
+  /** Referencia a enlazar al formulario para su uso desde mas arriba */
+  ref: RefObject<{
+    setValues: (spectrumMetadata: SpectrumMetadata) => void
+    resetValues: () => void
+    getValues: () => SpectrumMetadata
+    validate: () => boolean
+    setIcons: (icons: SpectrumMetadataIcons) => void
+    getIcons: () => SpectrumMetadataIcons
+  } | null>
+  /** Funcion para reportar a componente superior si el formulario es valido o no. */
+  setValidForm: Dispatch<SetStateAction<boolean>>
 }
 
-export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
+/**
+ * Componente que muestra un formulario con entradas para todos los
+ * metadatos que son comunes a una observación.
+ */
+export function SpectrumMetadataForm({ ref, setValidForm }: SpectrumMetadataFormProps) {
   const {
     register,
     watch,
@@ -71,6 +89,8 @@ export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
     mode: "onChange",
   })
 
+<<<<<<< HEAD:app/
+  components / molecules / SpectrumMetadataForm.tsx
   const [spectrumMetadataIcons, setSpectrumMetadataIcons] = useState<SpectrumMetadataIcons>({
     MAIN_ID: { icon: "", className: "" },
     TIME_OBS: { icon: "", className: "" },
@@ -91,28 +111,80 @@ export function SpectrumMetadataForm({ ref }: SpectrumMetadataFormProps) {
     EQUINOX: { icon: "", className: "" },
     AIRMASS: { icon: "", className: "" },
   })
+||||||| fc5e0f5
+  :app/src/components/molecules/SpectrumMetadataForm.tsx
+  const [spectrumMetadataIcons, setSpectrumMetadataIcons] = (useState<SpectrumMetadataIcons>({
+      MAIN_ID: { icon: "", className: "" },
+      TIME_OBS: { icon: "", className: "" },
+      ST: { icon: "", className: "" },
+      HA: { icon: "", className: "" },
+      RA: { icon: "", className: "" },
+      DEC: { icon: "", className: "" },
+      GAIN: { icon: "", className: "" },
+      RA2000: { icon: "", className: "" },
+      DEC2000: { icon: "", className: "" },
+      RA1950: { icon: "", className: "" },
+      DEC1950: { icon: "", className: "" },
+      EXPTIME: { icon: "", className: "" },
+      DETECTOR: { icon: "", className: "" },
+      IMAGETYP: { icon: "", className: "" },
+      SPTYPE: { icon: "", className: "" },
+      JD: { icon: "", className: "" },
+      EQUINOX: { icon: "", className: "" },
+      AIRMASS: { icon: "", className: "" },
+    })
+====== =
+    /** Actualiza variable de valides del padre */
+    useEffect(() => {
+      setValidForm(isValid)
+    }, [isValid]))
 
-  useImperativeHandle(ref, () => ({
-    setValues: (spectrumMetadata: SpectrumMetadata) => {
-      reset(spectrumMetadata)
-    },
-    resetValues: () => {
-      reset()
-    },
-    getValues: () => {
-      return watch()
-    },
-    validate: () => {
-      trigger()
-      return isValid
-    },
-    setIcons: (icons: SpectrumMetadataIcons) => {
-      setSpectrumMetadataIcons(icons)
-    },
-    getIcons: () => {
-      return spectrumMetadataIcons
-    },
-  }))
+  const [spectrumMetadataIcons, setSpectrumMetadataIcons] =
+    useState<SpectrumMetadataIcons>({
+      MAIN_ID: { icon: "", className: "" },
+      TIME_OBS: { icon: "", className: "" },
+      ST: { icon: "", className: "" },
+      HA: { icon: "", className: "" },
+      RA: { icon: "", className: "" },
+      DEC: { icon: "", className: "" },
+      GAIN: { icon: "", className: "" },
+      RA2000: { icon: "", className: "" },
+      DEC2000: { icon: "", className: "" },
+      RA1950: { icon: "", className: "" },
+      DEC1950: { icon: "", className: "" },
+      EXPTIME: { icon: "", className: "" },
+      DETECTOR: { icon: "", className: "" },
+      IMAGETYP: { icon: "", className: "" },
+      SPTYPE: { icon: "", className: "" },
+      JD: { icon: "", className: "" },
+      EQUINOX: { icon: "", className: "" },
+      AIRMASS: { icon: "", className: "" },
+    })
+>>>>>>> main
+  :app/src/components/molecules/SpectrumMetadataForm.tsx
+
+  useImperativeHandle(ref, () => (
+  setValues: (spectrumMetadata: SpectrumMetadata) => {
+    reset(spectrumMetadata)
+  },
+    resetValues
+  : () =>
+  reset()
+  ,
+    getValues: () =>
+  return watch()
+  ,
+    validate: () =>
+  trigger()
+  return isValid
+  ,
+    setIcons: (icons: SpectrumMetadataIcons) =>
+  setSpectrumMetadataIcons(icons)
+  ,
+    getIcons: () =>
+  return spectrumMetadataIcons
+  ,
+  ))
 
   const inputContainerClassName = "w-full max-w-xs items-center gap-1.5"
   const inputClassName = "border p-2 rounded"

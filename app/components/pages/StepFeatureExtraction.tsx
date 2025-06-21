@@ -1,6 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useExtractFeatures } from "~/hooks/use-extract-features"
 import { useGlobalStore } from "~/hooks/use-global-store"
+import { cropImages } from "~/lib/cropImage"
+import type { BoundingBox } from "~/types/BoundingBox"
 import type { StepProps } from "~/types/StepProps"
 import { Button } from "../atoms/button"
 import { SimpleFunctionXY } from "../molecules/SimpleFunctionXY"
@@ -27,42 +29,39 @@ export function StepFeatureExtraction({ index, processInfo, setProcessInfo }: St
     s.selectedSpectrum,
   ])
 
-  const [urls, setUrls] = useState<{
-    science: string
-    lamp1: string
-    lamp2: string
-  } | null>({
-    science: "/forTest/Test1_Science1_v2.png",
-    lamp1: "/forTest/Test1_Lamp1_v2.png",
-    lamp2: "/forTest/Test1_Lamp2_v2.png",
-  })
-  // const [urls, setUrls] = useState<{ science: string, lamp1: string, lamp2: string } | null>(null)
-  // useEffect(() => {
-  //   const boundingBoxes: BoundingBox[] = [
-  //     processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox!,
-  //     processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox!,
-  //     processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox!,
-  //   ].map(bb => ({
-  //     ...bb,
-  //     x: bb.x + processInfo.data.spectrums[selectedSpectrum!].spectrumBoundingBox.x,
-  //     y: bb.y + processInfo.data.spectrums[selectedSpectrum!].spectrumBoundingBox.y
-  //   }))
+  // const [urls, setUrls] = useState<{
+  //   science: string
+  //   lamp1: string
+  //   lamp2: string
+  // } | null>({
+  //   science: "/forTest/Test1_Science1_v2.png",
+  //   lamp1: "/forTest/Test1_Lamp1_v2.png",
+  //   lamp2: "/forTest/Test1_Lamp2_v2.png",
+  // })
+  const [urls, setUrls] = useState<{ science: string; lamp1: string; lamp2: string } | null>(null)
+  useEffect(() => {
+    const boundingBoxes: BoundingBox[] = [
+      processInfo.data.spectrums[selectedSpectrum!].parts.science.boundingBox!,
+      processInfo.data.spectrums[selectedSpectrum!].parts.lamp1.boundingBox!,
+      processInfo.data.spectrums[selectedSpectrum!].parts.lamp2.boundingBox!,
+    ].map((bb) => ({
+      ...bb,
+      x: bb.x + processInfo.data.spectrums[selectedSpectrum!].spectrumBoundingBox.x,
+      y: bb.y + processInfo.data.spectrums[selectedSpectrum!].spectrumBoundingBox.y,
+    }))
 
-  //   cropImages(
-  //     processInfo.data.plate.scanImage!,
-  //     boundingBoxes,
-  //   ).then(([science, lamp1, lamp2]) => {
-  //     // console.log("BB: ", boundingBoxes)
-  //     // for (let i = 0; i < [science, lamp1, lamp2].length; i++) {
-  //     //   const a = document.createElement("a")
-  //     //   a.href = [science, lamp1, lamp2][i]
-  //     //   a.download = "imagen.png"
-  //     //   a.click()
-  //     // }
+    cropImages(processInfo.data.plate.scanImage!, boundingBoxes).then(([science, lamp1, lamp2]) => {
+      // console.log("BB: ", boundingBoxes)
+      // for (let i = 0; i < [science, lamp1, lamp2].length; i++) {
+      //   const a = document.createElement("a")
+      //   a.href = [science, lamp1, lamp2][i]
+      //   a.download = "imagen.png"
+      //   a.click()
+      // }
 
-  //     setUrls({ science, lamp1, lamp2 })
-  //   })
-  // }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
+      setUrls({ science, lamp1, lamp2 })
+    })
+  }, [processInfo.data.plate.scanImage, processInfo.data.spectrums, selectedSpectrum])
 
   const {
     scienceInfo,

@@ -1,8 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useImperativeHandle } from "react"
+import {
+  type Dispatch,
+  type RefObject,
+  type SetStateAction,
+  useEffect,
+  useImperativeHandle,
+} from "react"
 import { Controller, useForm } from "react-hook-form"
 import type { z } from "zod/v4"
 import { Label } from "~/components/atoms/label"
+import { observatories } from "~/lib/observatories"
 import { plateMetadataFormSchema } from "~/lib/plateMetadataFormSchema"
 import { Input } from "../atoms/input"
 import SelectForm from "../atoms/selectForm"
@@ -19,26 +26,48 @@ export interface PlateMetadata {
   INSTRUMENT: string
 }
 
-const options = []
+const options = observatories
 
 type FormData = z.infer<typeof plateMetadataFormSchema>
 
+/**
+ * Parametros que espera recibir el componente PlateMetadataForm.
+ * @interface PlateMetadataForm
+ */
 interface PlateMetadataFormProps {
-  ref: any
+  /** Referencia a enlazar al formulario para su uso desde mas arriba */
+  ref: RefObject<{
+    setValues: (spectrumMetadata: PlateMetadata) => void
+    resetValues: () => void
+    getValues: () => PlateMetadata
+    validate: () => boolean
+  } | null>
+  /** Funcion para reportar a componente superior si el formulario es valido o no. */
+  setValidForm: Dispatch<SetStateAction<boolean>>
 }
 
-export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
+/**
+ * Componente que muestra un formulario con entradas para todos los
+ * metadatos que son comunes a una placa.
+ */
+export function PlateMetadataForm({ ref, setValidForm }: PlateMetadataFormProps) {
   const {
     register,
     watch,
     trigger,
     reset,
+    getValues,
     control,
     formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(plateMetadataFormSchema), // Conectar Zod con React Hook Form
     mode: "onChange",
   })
+
+  /** Actualiza variable de valides del padre */
+  useEffect(() => {
+    setValidForm(isValid)
+  }, [isValid])
 
   useImperativeHandle(ref, () => ({
     setValues: (plateMetadata: PlateMetadata) => {
@@ -48,7 +77,7 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
       reset()
     },
     getValues: () => {
-      return watch()
+      return getValues() as PlateMetadata
     },
     validate: () => {
       trigger()
@@ -77,7 +106,7 @@ export function PlateMetadataForm({ ref }: PlateMetadataFormProps) {
               )}
             />
 
-            {errors.OBSERVER && <p className="text-red-500">{errors.OBSERVER.message}</p>}
+            {errors.OBSERVAT && <p className="text-red-500">{errors.OBSERVAT.message}</p>}
           </div>
           <div className={inputContainerClassName}>
             <Label>PLATE-N</Label>
