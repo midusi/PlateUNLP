@@ -6,6 +6,7 @@ import type { z } from "zod/v4"
 import { plateMetadataFormSchema } from "@/lib/plateMetadataFormSchema"
 import { Input } from "../atoms/input"
 import SelectForm from "../atoms/selectForm"
+import { observatories } from "@/lib/observatories"
 
 export interface PlateMetadata {
   OBSERVAT: string
@@ -19,7 +20,7 @@ export interface PlateMetadata {
   INSTRUMENT: string
 }
 
-const options = []
+const options = observatories
 
 type FormData = z.infer<typeof plateMetadataFormSchema>
 
