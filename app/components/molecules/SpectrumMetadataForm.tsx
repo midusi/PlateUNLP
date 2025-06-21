@@ -89,8 +89,11 @@ export function SpectrumMetadataForm({ ref, setValidForm }: SpectrumMetadataForm
     mode: "onChange",
   })
 
-<<<<<<< HEAD:app/
-  components / molecules / SpectrumMetadataForm.tsx
+  /** Actualiza variable de valides del padre */
+  useEffect(() => {
+    setValidForm(isValid)
+  }, [isValid])
+
   const [spectrumMetadataIcons, setSpectrumMetadataIcons] = useState<SpectrumMetadataIcons>({
     MAIN_ID: { icon: "", className: "" },
     TIME_OBS: { icon: "", className: "" },
@@ -111,80 +114,28 @@ export function SpectrumMetadataForm({ ref, setValidForm }: SpectrumMetadataForm
     EQUINOX: { icon: "", className: "" },
     AIRMASS: { icon: "", className: "" },
   })
-||||||| fc5e0f5
-  :app/src/components/molecules/SpectrumMetadataForm.tsx
-  const [spectrumMetadataIcons, setSpectrumMetadataIcons] = (useState<SpectrumMetadataIcons>({
-      MAIN_ID: { icon: "", className: "" },
-      TIME_OBS: { icon: "", className: "" },
-      ST: { icon: "", className: "" },
-      HA: { icon: "", className: "" },
-      RA: { icon: "", className: "" },
-      DEC: { icon: "", className: "" },
-      GAIN: { icon: "", className: "" },
-      RA2000: { icon: "", className: "" },
-      DEC2000: { icon: "", className: "" },
-      RA1950: { icon: "", className: "" },
-      DEC1950: { icon: "", className: "" },
-      EXPTIME: { icon: "", className: "" },
-      DETECTOR: { icon: "", className: "" },
-      IMAGETYP: { icon: "", className: "" },
-      SPTYPE: { icon: "", className: "" },
-      JD: { icon: "", className: "" },
-      EQUINOX: { icon: "", className: "" },
-      AIRMASS: { icon: "", className: "" },
-    })
-====== =
-    /** Actualiza variable de valides del padre */
-    useEffect(() => {
-      setValidForm(isValid)
-    }, [isValid]))
 
-  const [spectrumMetadataIcons, setSpectrumMetadataIcons] =
-    useState<SpectrumMetadataIcons>({
-      MAIN_ID: { icon: "", className: "" },
-      TIME_OBS: { icon: "", className: "" },
-      ST: { icon: "", className: "" },
-      HA: { icon: "", className: "" },
-      RA: { icon: "", className: "" },
-      DEC: { icon: "", className: "" },
-      GAIN: { icon: "", className: "" },
-      RA2000: { icon: "", className: "" },
-      DEC2000: { icon: "", className: "" },
-      RA1950: { icon: "", className: "" },
-      DEC1950: { icon: "", className: "" },
-      EXPTIME: { icon: "", className: "" },
-      DETECTOR: { icon: "", className: "" },
-      IMAGETYP: { icon: "", className: "" },
-      SPTYPE: { icon: "", className: "" },
-      JD: { icon: "", className: "" },
-      EQUINOX: { icon: "", className: "" },
-      AIRMASS: { icon: "", className: "" },
-    })
->>>>>>> main
-  :app/src/components/molecules/SpectrumMetadataForm.tsx
-
-  useImperativeHandle(ref, () => (
-  setValues: (spectrumMetadata: SpectrumMetadata) => {
-    reset(spectrumMetadata)
-  },
-    resetValues
-  : () =>
-  reset()
-  ,
-    getValues: () =>
-  return watch()
-  ,
-    validate: () =>
-  trigger()
-  return isValid
-  ,
-    setIcons: (icons: SpectrumMetadataIcons) =>
-  setSpectrumMetadataIcons(icons)
-  ,
-    getIcons: () =>
-  return spectrumMetadataIcons
-  ,
-  ))
+  useImperativeHandle(ref, () => ({
+    setValues: (spectrumMetadata: SpectrumMetadata) => {
+      reset(spectrumMetadata)
+    },
+    resetValues: () => {
+      reset()
+    },
+    getValues: () => {
+      return watch()
+    },
+    validate: () => {
+      trigger()
+      return isValid
+    },
+    setIcons: (icons: SpectrumMetadataIcons) => {
+      setSpectrumMetadataIcons(icons)
+    },
+    getIcons: () => {
+      return spectrumMetadataIcons
+    },
+  }))
 
   const inputContainerClassName = "w-full max-w-xs items-center gap-1.5"
   const inputClassName = "border p-2 rounded"
