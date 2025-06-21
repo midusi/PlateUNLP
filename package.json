@@ -9,7 +9,12 @@
     "start": "node .output/server/index.mjs",
     "lint:only": "biome lint .",
     "lint:fix": "biome check --write .",
-    "lint": "tsc --noEmit && pnpm lint:only"
+    "lint": "tsc --noEmit && pnpm lint:only",
+    "db:generate": "drizzle-kit generate --name",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx server/db/seed.ts",
+    "db:dev": "pnpm db:migrate && pnpm db:seed"
   },
   "engines": {
     "node": ">=22.16.0",

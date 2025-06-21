@@ -1,20 +1,15 @@
-/** biome-ignore-all lint/suspicious/noConsole: runs on the developers machine */
+import "dotenv/config"
 
 import { reset } from "drizzle-seed"
 import pc from "picocolors"
 import { z } from "zod/v4"
-import {
-  getJulianDate,
-  getModifiedJulianDate,
-} from "~/lib/astronomical/datetime"
+import { getJulianDate, getModifiedJulianDate } from "~/lib/astronomical/datetime"
 import { hashPassword } from "../auth/password"
 import { db } from "."
 import * as schema from "./schema"
 
 async function seedObservatories() {
-  const response = await fetch(
-    "https://www.astropy.org/astropy-data/coordinates/sites.json",
-  )
+  const response = await fetch("https://www.astropy.org/astropy-data/coordinates/sites.json")
   if (!response.ok) {
     throw new Error(`Failed to fetch sites.json: ${response.statusText}`)
   }
@@ -38,18 +33,16 @@ async function seedObservatories() {
     .parse(data)
 
   const res = await db.insert(schema.observatory).values(
-    Object.entries(sites).map(
-      ([key, site]): typeof schema.observatory.$inferInsert => ({
-        id: key,
-        name: site.name,
-        latitude: site.latitude,
-        longitude: site.longitude,
-        elevation: site.elevation,
-        timezone: site.timezone,
-        aliases: site.aliases,
-        source: "astropy-data",
-      }),
-    ),
+    Object.entries(sites).map(([key, site]): typeof schema.observatory.$inferInsert => ({
+      id: key,
+      name: site.name,
+      latitude: site.latitude,
+      longitude: site.longitude,
+      elevation: site.elevation,
+      timezone: site.timezone,
+      aliases: site.aliases,
+      source: "astropy-data",
+    })),
   )
 
   console.log(pc.white(`✓ Inserted ${pc.bold(res.rowsAffected)} observatories`))
@@ -82,21 +75,15 @@ async function seedIERSDeltaT() {
     }),
   )
 
-  console.log(
-    pc.white(`✓ Inserted ${pc.bold(res.rowsAffected)} ΔT (TT - UT1) records`),
-  )
+  console.log(pc.white(`✓ Inserted ${pc.bold(res.rowsAffected)} ΔT (TT - UT1) records`))
 }
 
 async function seedIERSHistoricDeltaT() {
   // Fetch historic ΔT (TT - UT1) data from IERS (1665-1984)
   // More info: https://maia.usno.navy.mil/products/deltaT
-  const response = await fetch(
-    "https://maia.usno.navy.mil/ser7/historic_deltat.data",
-  )
+  const response = await fetch("https://maia.usno.navy.mil/ser7/historic_deltat.data")
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch historic_deltat.data: ${response.statusText}`,
-    )
+    throw new Error(`Failed to fetch historic_deltat.data: ${response.statusText}`)
   }
   const data = await response.text()
   const lines = data.trimEnd().split("\n").slice(2) // Skip the first two header lines
@@ -111,10 +98,7 @@ async function seedIERSHistoricDeltaT() {
       const month = line.at(5) === "5" ? "07" : "01" // Use January and July only
       const deltaT = parseFloat(line.slice(10, 20).trim())
 
-      const jd = getJulianDate(
-        `${year.padStart(4, "0")}-${month}-01`,
-        "12:00:00",
-      )
+      const jd = getJulianDate(`${year.padStart(4, "0")}-${month}-01`, "12:00:00")
       const mdj = getModifiedJulianDate(jd)
 
       // Skip entries that are older than the oldest entry in the database
@@ -124,19 +108,13 @@ async function seedIERSHistoricDeltaT() {
     }),
   )
 
-  console.log(
-    pc.white(
-      `✓ Inserted ${pc.bold(res.rowsAffected)} ΔT (TT - UT1) historic records`,
-    ),
-  )
+  console.log(pc.white(`✓ Inserted ${pc.bold(res.rowsAffected)} ΔT (TT - UT1) historic records`))
 }
 
 async function seedIERSBulletinA() {
   // Fetch IERS Bulletin A data (polar motion, DUT1) from IERS
   // More info: https://maia.usno.navy.mil/products/bulletin-a
-  const response = await fetch(
-    "https://maia.usno.navy.mil/ser7/finals2000A.all",
-  )
+  const response = await fetch("https://maia.usno.navy.mil/ser7/finals2000A.all")
   if (!response.ok) {
     throw new Error(`Failed to fetch finals2000A.all: ${response.statusText}`)
   }
