@@ -8,35 +8,109 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createServerRootRoute } from '@tanstack/react-start/server'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects.$projectId/index'
+import { Route as PlatePlateIdIndexRouteImport } from './routes/plate.$plateId/index'
+import { Route as PlatePlateIdMetadataRouteImport } from './routes/plate.$plateId/metadata'
+import { ServerRoute as PlatePlateIdImageServerRouteImport } from './routes/plate.$plateId/image'
+
+const rootServerRouteImport = createServerRootRoute()
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
+  id: '/projects/$projectId/',
+  path: '/projects/$projectId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatePlateIdIndexRoute = PlatePlateIdIndexRouteImport.update({
+  id: '/plate/$plateId/',
+  path: '/plate/$plateId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatePlateIdMetadataRoute = PlatePlateIdMetadataRouteImport.update({
+  id: '/plate/$plateId/metadata',
+  path: '/plate/$plateId/metadata',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatePlateIdImageServerRoute = PlatePlateIdImageServerRouteImport.update({
+  id: '/plate/$plateId/image',
+  path: '/plate/$plateId/image',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/plate/$plateId/metadata': typeof PlatePlateIdMetadataRoute
+  '/plate/$plateId': typeof PlatePlateIdIndexRoute
+  '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/plate/$plateId/metadata': typeof PlatePlateIdMetadataRoute
+  '/plate/$plateId': typeof PlatePlateIdIndexRoute
+  '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/plate/$plateId/metadata': typeof PlatePlateIdMetadataRoute
+  '/plate/$plateId/': typeof PlatePlateIdIndexRoute
+  '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/plate/$plateId/metadata'
+    | '/plate/$plateId'
+    | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/plate/$plateId/metadata'
+    | '/plate/$plateId'
+    | '/projects/$projectId'
+  id:
+    | '__root__'
+    | '/'
+    | '/plate/$plateId/metadata'
+    | '/plate/$plateId/'
+    | '/projects/$projectId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PlatePlateIdMetadataRoute: typeof PlatePlateIdMetadataRoute
+  PlatePlateIdIndexRoute: typeof PlatePlateIdIndexRoute
+  ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
+}
+export interface FileServerRoutesByFullPath {
+  '/plate/$plateId/image': typeof PlatePlateIdImageServerRoute
+}
+export interface FileServerRoutesByTo {
+  '/plate/$plateId/image': typeof PlatePlateIdImageServerRoute
+}
+export interface FileServerRoutesById {
+  __root__: typeof rootServerRouteImport
+  '/plate/$plateId/image': typeof PlatePlateIdImageServerRoute
+}
+export interface FileServerRouteTypes {
+  fileServerRoutesByFullPath: FileServerRoutesByFullPath
+  fullPaths: '/plate/$plateId/image'
+  fileServerRoutesByTo: FileServerRoutesByTo
+  to: '/plate/$plateId/image'
+  id: '__root__' | '/plate/$plateId/image'
+  fileServerRoutesById: FileServerRoutesById
+}
+export interface RootServerRouteChildren {
+  PlatePlateIdImageServerRoute: typeof PlatePlateIdImageServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,12 +122,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/$projectId/': {
+      id: '/projects/$projectId/'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof ProjectsProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plate/$plateId/': {
+      id: '/plate/$plateId/'
+      path: '/plate/$plateId'
+      fullPath: '/plate/$plateId'
+      preLoaderRoute: typeof PlatePlateIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plate/$plateId/metadata': {
+      id: '/plate/$plateId/metadata'
+      path: '/plate/$plateId/metadata'
+      fullPath: '/plate/$plateId/metadata'
+      preLoaderRoute: typeof PlatePlateIdMetadataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+declare module '@tanstack/react-start/server' {
+  interface ServerFileRoutesByPath {
+    '/plate/$plateId/image': {
+      id: '/plate/$plateId/image'
+      path: '/plate/$plateId/image'
+      fullPath: '/plate/$plateId/image'
+      preLoaderRoute: typeof PlatePlateIdImageServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PlatePlateIdMetadataRoute: PlatePlateIdMetadataRoute,
+  PlatePlateIdIndexRoute: PlatePlateIdIndexRoute,
+  ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+const rootServerRouteChildren: RootServerRouteChildren = {
+  PlatePlateIdImageServerRoute: PlatePlateIdImageServerRoute,
+}
+export const serverRouteTree = rootServerRouteImport
+  ._addFileChildren(rootServerRouteChildren)
+  ._addFileTypes<FileServerRouteTypes>()

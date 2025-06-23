@@ -1,7 +1,7 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.0.4/schema.json",
-	"extends": "//",
-	"files": {
-		"includes": ["**", "!migrations/**"]
-	}
+  "$schema": "https://biomejs.dev/schemas/2.0.4/schema.json",
+  "extends": "//",
+  "files": {
+    "includes": ["**", "!migrations/**"]
+  }
 }

@@ -6,6 +6,7 @@ import { env } from "~/env"
 export default defineConfig({
   out: "./db/migrations",
   schema: "./db/schema/index.ts",
+  casing: "snake_case",
   ...(env.DATABASE_TOKEN
     ? {
         dialect: "turso",

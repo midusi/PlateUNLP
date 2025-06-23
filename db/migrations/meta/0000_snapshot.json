@@ -1,9 +1,87 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "abf7cddd-e5dc-49d0-8809-15fc3249ba4e",
+  "id": "4a9626ad-ffac-45ba-a07e-faf113d5ef66",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "iers_bulletin_a": {
+      "name": "iers_bulletin_a",
+      "columns": {
+        "mdj": {
+          "name": "mdj",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pm_x": {
+          "name": "pm_x",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pm_y": {
+          "name": "pm_y",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dut1": {
+          "name": "dut1",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "iers_bulletin_a_mdj_unique": {
+          "name": "iers_bulletin_a_mdj_unique",
+          "columns": [
+            "mdj"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "iers_delta_t": {
+      "name": "iers_delta_t",
+      "columns": {
+        "mdj": {
+          "name": "mdj",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "delta_t": {
+          "name": "delta_t",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "iers_delta_t_mdj_unique": {
+          "name": "iers_delta_t_mdj_unique",
+          "columns": [
+            "mdj"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "observation": {
       "name": "observation",
       "columns": {
@@ -14,197 +92,232 @@
           "notNull": true,
           "autoincrement": false
         },
-        "x": {
-          "name": "x",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "y": {
-          "name": "y",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "height": {
-          "name": "height",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "width": {
-          "name": "width",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "plateId": {
-          "name": "plateId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "OBJECT": {
-          "name": "OBJECT",
+        "plate_id": {
+          "name": "plate_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "DATE_OBS": {
-          "name": "DATE_OBS",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "TIME_OBS": {
-          "name": "TIME_OBS",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "MAIN_ID": {
-          "name": "MAIN_ID",
-          "type": "text",
+        "img_left": {
+          "name": "img_left",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "UT": {
-          "name": "UT",
-          "type": "real",
+        "img_top": {
+          "name": "img_top",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "ST": {
-          "name": "ST",
-          "type": "real",
+        "img_width": {
+          "name": "img_width",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "HA": {
-          "name": "HA",
-          "type": "real",
+        "img_height": {
+          "name": "img_height",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "RA": {
-          "name": "RA",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "DEC": {
-          "name": "DEC",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "GAIN": {
-          "name": "GAIN",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "RA2000": {
-          "name": "RA2000",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "DEC2000": {
-          "name": "DEC2000",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "RA1950": {
-          "name": "RA1950",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "DEC1950": {
-          "name": "DEC1950",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "EXPTIME": {
-          "name": "EXPTIME",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "DETECTOR": {
-          "name": "DETECTOR",
+        "object": {
+          "name": "object",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
-        "IMAGETYP": {
-          "name": "IMAGETYP",
+        "date_obs": {
+          "name": "date_obs",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
-        "SPTYPE": {
-          "name": "SPTYPE",
+        "ut": {
+          "name": "ut",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
-        "JD": {
-          "name": "JD",
+        "main_id": {
+          "name": "main_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "sptype": {
+          "name": "sptype",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "ra": {
+          "name": "ra",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "dec": {
+          "name": "dec",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "equinox": {
+          "name": "equinox",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "ra2000": {
+          "name": "ra2000",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "dec2000": {
+          "name": "dec2000",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "ra1950": {
+          "name": "ra1950",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "dec1950": {
+          "name": "dec1950",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "time_obs": {
+          "name": "time_obs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "jd": {
+          "name": "jd",
           "type": "real",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "EQUINOX": {
-          "name": "EQUINOX",
+        "st": {
+          "name": "st",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "ha": {
+          "name": "ha",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "airmass": {
+          "name": "airmass",
           "type": "real",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "AIRMASS": {
-          "name": "AIRMASS",
-          "type": "real",
+        "gain": {
+          "name": "gain",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "exptime": {
+          "name": "exptime",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "detector": {
+          "name": "detector",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "imagetyp": {
+          "name": "imagetyp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "observation_name_idx": {
+          "name": "observation_name_idx",
+          "columns": [
+            "plate_id",
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
-        "observation_plateId_plate_id_fk": {
-          "name": "observation_plateId_plate_id_fk",
+        "observation_plate_id_plate_id_fk": {
+          "name": "observation_plate_id_plate_id_fk",
           "tableFrom": "observation",
           "tableTo": "plate",
           "columnsFrom": [
-            "plateId"
+            "plate_id"
           ],
           "columnsTo": [
             "id"
@@ -227,36 +340,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "source": {
-          "name": "source",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "elevation": {
-          "name": "elevation",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "name": {
           "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "longitude_unit": {
-          "name": "longitude_unit",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "latitude_unit": {
-          "name": "latitude_unit",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -269,15 +354,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "elevation_unit": {
-          "name": "elevation_unit",
-          "type": "text",
+        "longitude": {
+          "name": "longitude",
+          "type": "real",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "longitude": {
-          "name": "longitude",
+        "elevation": {
+          "name": "elevation",
           "type": "real",
           "primaryKey": false,
           "notNull": true,
@@ -292,6 +377,14 @@
         },
         "aliases": {
           "name": "aliases",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "source": {
+          "name": "source",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -314,92 +407,127 @@
           "notNull": true,
           "autoincrement": false
         },
-        "projectId": {
-          "name": "projectId",
+        "project_id": {
+          "name": "project_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "image_id": {
+          "name": "image_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "observat": {
           "name": "observat",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'oalp'"
+        },
+        "plate_n": {
+          "name": "plate_n",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
         "observer": {
           "name": "observer",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
         "digitali": {
           "name": "digitali",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
         "scanner": {
           "name": "scanner",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
         "software": {
           "name": "software",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "plateN": {
-          "name": "plateN",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "scanImage": {
-          "name": "scanImage",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
         "telescope": {
           "name": "telescope",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
         "detector": {
           "name": "detector",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         },
         "instrument": {
           "name": "instrument",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "plate_projectId_project_id_fk": {
-          "name": "plate_projectId_project_id_fk",
+        "plate_project_id_project_id_fk": {
+          "name": "plate_project_id_project_id_fk",
           "tableFrom": "plate",
           "tableTo": "project",
           "columnsFrom": [
-            "projectId"
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "plate_image_id_upload_id_fk": {
+          "name": "plate_image_id_upload_id_fk",
+          "tableFrom": "plate",
+          "tableTo": "upload",
+          "columnsFrom": [
+            "image_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "plate_observat_observatory_id_fk": {
+          "name": "plate_observat_observatory_id_fk",
+          "tableFrom": "plate",
+          "tableTo": "observatory",
+          "columnsFrom": [
+            "observat"
           ],
           "columnsTo": [
             "id"
@@ -446,39 +574,11 @@
           "notNull": true,
           "autoincrement": false
         },
-        "x": {
-          "name": "x",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "y": {
-          "name": "y",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "height": {
-          "name": "height",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "width": {
-          "name": "width",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "observationId": {
-          "name": "observationId",
+        "observation_id": {
+          "name": "observation_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "type": {
@@ -487,16 +587,44 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "img_left": {
+          "name": "img_left",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "img_top": {
+          "name": "img_top",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "img_width": {
+          "name": "img_width",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "img_height": {
+          "name": "img_height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "spectrum_observationId_observation_id_fk": {
-          "name": "spectrum_observationId_observation_id_fk",
+        "spectrum_observation_id_observation_id_fk": {
+          "name": "spectrum_observation_id_observation_id_fk",
           "tableFrom": "spectrum",
           "tableTo": "observation",
           "columnsFrom": [
-            "observationId"
+            "observation_id"
           ],
           "columnsTo": [
             "id"
@@ -505,6 +633,44 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "upload": {
+      "name": "upload",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "uploaded_at": {
+          "name": "uploaded_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -533,8 +699,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "hashedPassword": {
-          "name": "hashedPassword",
+        "hashed_password": {
+          "name": "hashed_password",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -555,21 +721,21 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "userProject": {
-      "name": "userProject",
+    "user_to_project": {
+      "name": "user_to_project",
       "columns": {
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "projectId": {
-          "name": "projectId",
+        "project_id": {
+          "name": "project_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "role": {
@@ -582,12 +748,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "userProject_userId_user_id_fk": {
-          "name": "userProject_userId_user_id_fk",
-          "tableFrom": "userProject",
+        "user_to_project_user_id_user_id_fk": {
+          "name": "user_to_project_user_id_user_id_fk",
+          "tableFrom": "user_to_project",
           "tableTo": "user",
           "columnsFrom": [
-            "userId"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -595,12 +761,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "userProject_projectId_project_id_fk": {
-          "name": "userProject_projectId_project_id_fk",
-          "tableFrom": "userProject",
+        "user_to_project_project_id_project_id_fk": {
+          "name": "user_to_project_project_id_project_id_fk",
+          "tableFrom": "user_to_project",
           "tableTo": "project",
           "columnsFrom": [
-            "projectId"
+            "project_id"
           ],
           "columnsTo": [
             "id"
@@ -610,12 +776,12 @@
         }
       },
       "compositePrimaryKeys": {
-        "userProject_userId_projectId_pk": {
+        "user_to_project_user_id_project_id_pk": {
           "columns": [
-            "userId",
-            "projectId"
+            "user_id",
+            "project_id"
           ],
-          "name": "userProject_userId_projectId_pk"
+          "name": "user_to_project_user_id_project_id_pk"
         }
       },
       "uniqueConstraints": {},

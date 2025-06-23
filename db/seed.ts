@@ -4,7 +4,7 @@ import { reset } from "drizzle-seed"
 import pc from "picocolors"
 import { z } from "zod/v4"
 import { getJulianDate, getModifiedJulianDate } from "~/lib/astronomical/datetime"
-import { hashPassword } from "../auth/password"
+import { hashPassword } from "~/lib/auth/password"
 import { db } from "."
 import * as schema from "./schema"
 
@@ -161,6 +161,17 @@ async function createUser(name: string, email: string, password: string) {
   )
 }
 
+async function createProject(name: string, ownerEmail: string) {
+  const [{ id }] = await db
+    .insert(schema.project)
+    .values({ name })
+    .returning({ id: schema.project.id })
+  const user = await db.query.user.findFirst({ where: (t, { eq }) => eq(t.email, ownerEmail) })
+  await db.insert(schema.userToProject).values({ userId: user!.id, projectId: id, role: "owner" })
+
+  console.log(pc.white(`✓ Created project ${pc.cyan(name)} (${pc.cyan(id)})`))
+}
+
 async function main() {
   console.log(pc.bgBlue(" Seeding database... "))
   console.log(pc.gray("❖ Dropping existing tables..."))
@@ -176,6 +187,9 @@ async function main() {
 
   console.log(pc.gray("❖ Creating users..."))
   await createUser("prueba", "prueba@prueba.com", "12345")
+
+  console.log(pc.gray("❖ Creating projects..."))
+  await createProject("Locación Íntima De Intentos", "prueba@prueba.com")
 }
 
 main()

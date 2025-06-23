@@ -1,46 +1,56 @@
-import { relations } from "drizzle-orm"
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
-import { nanoid } from "nanoid"
-import { plate } from "./plate"
-import { spectrum } from "./spectrum"
+import { relations } from "drizzle-orm";
+import {
+	integer,
+	real,
+	sqliteTable,
+	text,
+	uniqueIndex,
+} from "drizzle-orm/sqlite-core";
+import { idType } from "../utils";
 
-export const observation = sqliteTable("observation", {
-  id: text()
-    .primaryKey()
-    .$default(() => nanoid(10)),
-  x: integer(),
-  y: integer(),
-  height: integer(),
-  width: integer(),
-  plateId: text("plateId").references(() => plate.id),
+import { plate } from "./plate";
+import { spectrum } from "./spectrum";
 
-  OBJECT: text().notNull(),
-  DATE_OBS: text().notNull(),
-  TIME_OBS: real(),
-  MAIN_ID: text().notNull(),
-  UT: real().notNull(),
-  ST: real(),
-  HA: real(),
-  RA: real(),
-  DEC: real(),
-  GAIN: real(),
-  RA2000: real(),
-  DEC2000: real(),
-  RA1950: real(),
-  DEC1950: real(),
-  EXPTIME: real(),
-  DETECTOR: text(),
-  IMAGETYP: text(),
-  SPTYPE: text(),
-  JD: real(),
-  EQUINOX: real(),
-  AIRMASS: real(),
-})
+export const observation = sqliteTable(
+	"observation",
+	{
+		id: idType(),
+		plateId: text()
+			.notNull()
+			.references(() => plate.id),
+		name: text().notNull(),
+		// image of the observation
+		imgLeft: integer().notNull(), // offset from the left of the plate image
+		imgTop: integer().notNull(), // offset from the top of the plate image
+		imgWidth: integer().notNull(), // width of the observation image
+		imgHeight: integer().notNull(), // height of the observation image
+		// metadata
+		OBJECT: text("object").notNull().default(""),
+		"DATE-OBS": text("date_obs").notNull().default(""),
+		UT: text("ut").notNull().default(""),
+		"MAIN-ID": text("main_id").notNull().default(""),
+		SPTYPE: text("sptype").notNull().default(""),
+		RA: text("ra").notNull().default(""),
+		DEC: text("dec").notNull().default(""),
+		EQUINOX: text("equinox").notNull().default(""),
+		RA2000: text("ra2000").notNull().default(""),
+		DEC2000: text("dec2000").notNull().default(""),
+		RA1950: text("ra1950").notNull().default(""),
+		DEC1950: text("dec1950").notNull().default(""),
+		"TIME-OBS": text("time_obs").notNull().default(""),
+		JD: real("jd"),
+		ST: text("st").notNull().default(""),
+		HA: text("ha").notNull().default(""),
+		AIRMASS: real("airmass"),
+		GAIN: text("gain").notNull().default(""),
+		EXPTIME: text("exptime").notNull().default(""),
+		DETECTOR: text("detector").notNull().default(""),
+		IMAGETYP: text("imagetyp").notNull().default(""),
+	},
+	(t) => [uniqueIndex("observation_name_idx").on(t.plateId, t.name)],
+);
 
 export const observationRelations = relations(observation, ({ one, many }) => ({
-  plate: one(plate, {
-    fields: [observation.plateId],
-    references: [plate.id],
-  }),
-  spectrum: many(spectrum),
-}))
+	plate: one(plate, { fields: [observation.plateId], references: [plate.id] }),
+	spectra: many(spectrum),
+}));
