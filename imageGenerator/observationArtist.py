@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 from numpy.typing import NDArray
-from typing import Callable, Tuple
+from typing import Any, Callable, Tuple
 import numpy as np
 import cv2
 from pystellibs import BaSeL, Rauch, Kurucz, Tlusty, Munari
@@ -55,15 +55,21 @@ def drawObservation(
     # Obtener puntos dentro del rectángulo
     ys, xs = np.where(mask == 255)
     # Pintar píxeles con el color según la función
-    science_color = spectral_function()
+    science_function = spectral_function()
     for xi, yi in zip(xs, ys):
-        color = science_color(xi)
-        img[yi, xi] = color
+        intensity = science_function(xi)
+        img[yi, xi] = (intensity,intensity,intensity)
 
     return img
 
 
-def spectral_function() -> Callable[[int], Tuple[int, int, int]]:
+"""Genera una funcion que representa un espectro de ciencia sintetico.
+
+Return:
+- {Callable[[int], int]}: funcion que dado un valor entero informa la intensidad
+que le corresponde
+"""
+def spectral_function() -> Callable[[int], int]:
 
     # Parámetros estelares aleatorios (puedes ajustarlos según tus necesidades)
     logT = np.random.uniform(3.5, 5.0)  # Temperatura efectiva (log K)
@@ -78,7 +84,7 @@ def spectral_function() -> Callable[[int], Tuple[int, int, int]]:
     spectrum = lib.generate_stellar_spectrum(logT, logg, logL, Z)
     #spectrum_normalized = min_max_scale(spectrum, (0, 255))
 
-    printa(spectrum)
+    print(spectrum)
 
     # Graficar el espectro
     plt.figure()
@@ -95,12 +101,21 @@ def spectral_function() -> Callable[[int], Tuple[int, int, int]]:
         return (0,255,0)
     return color
 
-def min_max_scale(arr, feature_range=(0, 1)):
+"""Normaliza un arreglo de datos numericos acorde al rango recibido.
+
+Parametros:
+- arr {NDArray[Any]}: arreglo a normalizar.
+- feature_range {Tuple[int,int]}: rango (min, max) en el que se escalan
+los valores.
+
+Return:
+- {NDArray[Any]}: arreglo normalizado.
+"""
+def min_max_scale(arr:NDArray[Any], feature_range:Tuple[int,int]=(0, 1)) -> NDArray[Any]:
     arr = np.asarray(arr, dtype=float)
     min_val = arr.min()
     max_val = arr.max()
     if max_val == min_val:
         return np.full_like(arr, feature_range[0])
     scaled = (arr - min_val) / (max_val - min_val)
-    lower, upper = feature_range
-    return scaled * (upper - lower) + lower
+    return scaled * (feature_range[1] - feature_range[0]) + feature_range[0]
