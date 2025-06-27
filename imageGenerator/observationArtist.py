@@ -1,3 +1,5 @@
+from numbers import Number
+import random
 from matplotlib import pyplot as plt
 from numpy.typing import NDArray
 from typing import Any, Callable, Tuple
@@ -24,98 +26,200 @@ imagen.
 - y {int}: coordenada vertical central donde se dibujara el espectro.
 - width {int}: ancho de la observación a dibujar.
 - height {int}: alto de la observación a dibujar.
+- openingLamp {float}: apertura porcentual de la lampara. (0, 0.5) acorde 
+al alto de la observacion.
+- distanceBetweenParts {float}: distancia porcentual entre partes de un 
+espectro. (0, 0.33) acorde al alto de la observacion.
 - angle {int}?: angulo de inclinacion de la observacion a dibujar.
 - inplace {bool}?: condicion que indica si se realizaran los cambios
 sobre la imagen recibida o sobre una copia. Default True.
+- baseGrey {int}?: nivel de gris minimo a considerar. Default 1.
 
-return {NDArray[np.uint8]}: matriz de pixeles que representa la 
+return 
+- {NDArray[np.uint8]}: matriz de pixeles que representa la 
 imagen con la observacion agregada.
+- {NDArray[np.uint8]}: mascara de locación del espectro.
 """
+
 def drawObservation(
         img: NDArray[np.uint8], 
         x:int, y:int, width:int, height:int, 
-        angle:int=0, inplace:bool = True) -> NDArray[np.uint8]:
-
+        opening:float, distanceBetweenParts:float,
+        angle:int=0, inplace:bool = True, baseGrey:int = 1) -> NDArray[np.uint8]:
+    
     if not inplace:
         img = img.copy()
 
-    # Color con el que se dibujara el rectangulo
-    color = (255, 255, 255)
+    # Crear el rectángulo de observacion rotado
+    rectObservation = ((x, y), (width, height), angle)
 
-    # Crear el rectángulo rotado
-    rect = ((x, y), (width, height), angle)
-
-    # Obtener las esquinas del rectángulo
-    box = cv2.boxPoints(rect)
-    box = np.int32(box)
+    # Crear el rectangulo de cada parte de la observacións
+    openingInPixel = round(height * opening)
+    distanceBetweenPartsInPixel = round(height * distanceBetweenParts)
+    centerLamp1 = rotate_point(x=x,y=y-(height-openingInPixel)/2,
+                               cx=x, cy=y, angle_degrees=angle)
+    centerLamp2 = rotate_point(x=x,y=y+(height-openingInPixel)/2,
+                               cx=x, cy=y, angle_degrees=angle)
+    rectParts = {
+        "lamp1": (centerLamp1, (width, openingInPixel), angle),
+        "lamp2": (centerLamp2, (width, openingInPixel), angle),
+        "science": ((x,y), (width, height-openingInPixel*2-distanceBetweenPartsInPixel*2), angle),
+    }
+    boxParts = {
+        "lamp1": np.int32(cv2.boxPoints(rectParts["lamp1"])),
+        "lamp2": np.int32(cv2.boxPoints(rectParts["lamp2"])),
+        "science": np.int32(cv2.boxPoints(rectParts["science"])),
+    }
     
+
+    # Obtener las esquinas del rectángulo de observacion
+    boxObservation = cv2.boxPoints(rectObservation)
+    boxObservation = np.int32(boxObservation)
+
+    # Preparar etiqueta de caja delimitadora
+    allBoxs = np.concatenate([boxParts["lamp1"], boxParts["lamp2"], boxParts["science"]], axis=0)
+    x_coords = allBoxs[:,0]
+    y_coords = allBoxs[:,1]
+    labelObservation = {
+        "x":x_coords.min(), 
+        "y":y_coords.min(), 
+        "width":x_coords.max() - x_coords.min(), 
+        "height":y_coords.max() - y_coords.min(), 
+    }
+
     # Crear máscara
-    mask = np.zeros(img.shape[:2], dtype=np.uint8)
-    cv2.drawContours(mask, [box], 0, 255, thickness=cv2.FILLED)
-    # Obtener puntos dentro del rectángulo
-    ys, xs = np.where(mask == 255)
-    # Pintar píxeles con el color según la función
-    science_function = spectral_function()
+    maskObservation = np.zeros(img.shape[:2], dtype=np.uint8)
+    cv2.drawContours(maskObservation, [boxObservation], 0, 255, thickness=cv2.FILLED) # Limites observacion
+    # cv2.rectangle(   # Etiqueta (Caja delimitadora)
+    #     img,
+    #     (labelObservation["x"], labelObservation["y"]),
+    #     (labelObservation["x"] + labelObservation["width"], labelObservation["y"] + labelObservation["height"]), 
+    #     (255,0,0), thickness=3
+    # )
+
+    # Mascara para cada parte del espectro.
+    maskParts = {
+        "lamp1": np.zeros(img.shape[:2], dtype=np.uint8),
+        "lamp2": np.zeros(img.shape[:2], dtype=np.uint8),
+        "science": np.zeros(img.shape[:2], dtype=np.uint8) 
+    }
+    cv2.drawContours(maskParts["lamp1"], [boxParts["lamp1"]], 0, 255, thickness=cv2.FILLED)
+    cv2.drawContours(maskParts["lamp2"], [boxParts["lamp2"]], 0, 255, thickness=cv2.FILLED)
+    cv2.drawContours(maskParts["science"], [boxParts["science"]], 0, 255, thickness=cv2.FILLED)
+
+    # Pintar espectro de ciencia
+    ys, xs = np.where(maskParts["science"] == 255)
+    science_function = spectral_function(
+        width=labelObservation["width"], 
+        noise_level=255*0.01, 
+        n_peaks=random.randint(4, 15),
+        baseline=0,
+        peak_spread=2.0,
+        )
     for xi, yi in zip(xs, ys):
-        intensity = science_function(xi)
+        intensity = science_function(xi-labelObservation["x"])
+        intensity = max(intensity,baseGrey) # Control de color de fondo
         img[yi, xi] = (intensity,intensity,intensity)
 
-    return img
+    # Pintar lampara de comparación 1
+    lamp_function = spectral_function(
+        width=labelObservation["width"], 
+        noise_level=255*0.01, 
+        n_peaks=random.randint(15, 50),
+        baseline=255 * random.uniform(0.05, 0.1),
+        peak_spread=0.04,
+        )
+    ys, xs = np.where(maskParts["lamp1"] == 255)
+    for xi, yi in zip(xs, ys):
+        intensity = lamp_function(xi-labelObservation["x"])
+        intensity = max(intensity,baseGrey) # Control de color de fondo
+        img[yi, xi] = (intensity,intensity,intensity)
+
+    # Pintar lampara de comparación 2
+    ys, xs = np.where(maskParts["lamp2"] == 255)
+    for xi, yi in zip(xs, ys):
+        intensity = lamp_function(xi-labelObservation["x"])
+        intensity = max(intensity,baseGrey) # Control de color de fondo
+        img[yi, xi] = (intensity,intensity,intensity)
+
+    return img, maskObservation
 
 
 """Genera una funcion que representa un espectro de ciencia sintetico.
 
+Parametros:
+- width {int}: ancho que tienen que cubrir los resultados.
+- noise_level {float}: Amplitud del ruido base (sobre 255).
+- n_peaks {int}: cantidad de picos a simular.
+- baseline {int}: valor minimo.
+- peak_spread {float}?: multiplicador que afecta al ancho de los picos simulados. 
+Default 1.0.
+
 Return:
 - {Callable[[int], int]}: funcion que dado un valor entero informa la intensidad
-que le corresponde
+que le corresponde.
 """
-def spectral_function() -> Callable[[int], int]:
+def spectral_function(width:int, noise_level:float, n_peaks:int, baseline:int, 
+                      peak_spread:float=1.0) -> Callable[[int], int]:
 
-    # Parámetros estelares aleatorios (puedes ajustarlos según tus necesidades)
-    logT = np.random.uniform(3.5, 5.0)  # Temperatura efectiva (log K)
-    logg = np.random.uniform(3.0, 5.5)  # Gravedad superficial (log cm/s²)
-    logL = np.random.uniform(0.0, 1.5)  # Luminosidad (log L/L☉)
-    Z = np.random.uniform(0.0001, +0.5)   # Metalicidad #-3.0
+    x = np.arange(width)
 
-    # Seleccionar la biblioteca espectral
-    lib = BaSeL()
+    # Crear fondo con ruido blanco gaussiano centrado en 0
+    noise = np.random.normal(loc=0.0, scale=noise_level, size=width)
 
-    # Generar el espectro estelar
-    spectrum = lib.generate_stellar_spectrum(logT, logg, logL, Z)
-    #spectrum_normalized = min_max_scale(spectrum, (0, 255))
+    # Espectro inicial como ruido (más ruido positivo)
+    spectrum = noise.clip(min=0)
 
-    print(spectrum)
+    # Agregar n picos gaussianos con alturas y anchos aleatorios
+    for _ in range(n_peaks):
+        peak_center = np.random.uniform(0, width)
+        peak_width = np.random.uniform(width*0.01, width*0.1) * peak_spread
+        peak_height = np.random.uniform(50, 255)
 
-    # Graficar el espectro
-    plt.figure()
-    plt.loglog(lib._wavelength, spectrum, label='BaSel')
-    plt.legend(frameon=False, loc='lower right')
-    plt.xlabel("Wavelength [{0}]".format(lib.wavelength_unit))
-    plt.ylabel("Flux [{0}]".format(lib.flux_units))
-    plt.xlim(800, 5e4)
-    plt.ylim(1e25, 5e30)
-    plt.tight_layout()
-    plt.show()
+        # Gaussiana: height * exp(- (x - center)^2 / (2*sigma^2))
+        gaussian_peak = peak_height * np.exp(- (x - peak_center)**2 / (2 * peak_width**2))
 
-    def color(x:int) -> Tuple[int, int, int]:
-        return (0,255,0)
-    return color
+        spectrum += gaussian_peak
+    
+    # Normalizar a rango [0, 1]
+    spectrum -= spectrum.min()
+    if spectrum.max() > 0:
+        spectrum /= spectrum.max()
 
-"""Normaliza un arreglo de datos numericos acorde al rango recibido.
+    # Escalar a [baseline, 255]
+    spectrum = baseline + spectrum * (255 - baseline)
+
+    spectrum = spectrum.astype(np.uint8)
+
+    def intensity(xi: int) -> int:
+        if xi < 0 or xi >= width:
+            return 0
+        return int(spectrum[xi])
+    
+    return intensity
+
+"""Rotar un punto en relacion centro segun la formula de rotacion 2D.
 
 Parametros:
-- arr {NDArray[Any]}: arreglo a normalizar.
-- feature_range {Tuple[int,int]}: rango (min, max) en el que se escalan
-los valores.
+- x {Number}: X del punto a rotar.
+- y {Number}: Y del punto a rotar.
+- cx {Number}: X del centro.
+- cy {Number}: Y del centro.
+- angle_degrees {Number}: angulo de rotación (en grados).
 
 Return:
-- {NDArray[Any]}: arreglo normalizado.
+- {Tuple[Number,Number]}: punto luego de rotar.
 """
-def min_max_scale(arr:NDArray[Any], feature_range:Tuple[int,int]=(0, 1)) -> NDArray[Any]:
-    arr = np.asarray(arr, dtype=float)
-    min_val = arr.min()
-    max_val = arr.max()
-    if max_val == min_val:
-        return np.full_like(arr, feature_range[0])
-    scaled = (arr - min_val) / (max_val - min_val)
-    return scaled * (feature_range[1] - feature_range[0]) + feature_range[0]
+def rotate_point(x:Number, y, cx, cy, angle_degrees) -> Tuple[Number,Number]:
+    theta = np.radians(angle_degrees)
+
+    # Trasladar el punto para que el centro sea el origen
+    tx = x - cx
+    ty = y - cy
+
+    # Aplicar rotación
+    rx = tx * np.cos(theta) - ty * np.sin(theta)
+    ry = tx * np.sin(theta) + ty * np.cos(theta)
+
+    # Trasladar de vuelta
+    return rx + cx, ry + cy
