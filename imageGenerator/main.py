@@ -1,11 +1,11 @@
 import numpy as np
 import random
 import cv2
-from observationArtist import drawObservation
+from observationArtist import drawObservation, add_realistic_noise
 
 # Dimensiones deseadas.
-alto = random.randint(1000, 4000)
-ancho = random.randint(1000, 4000)
+alto = random.randint(500, 2000)
+ancho = random.randint(500, 2000)
 
 # Imagen negra completa.
 gray_value = np.random.randint(0, 0.15*255)
@@ -34,6 +34,11 @@ img, mask = drawObservation(
     angle=angle,
     baseGrey=gray_value
     )
+
+# img = add_realistic_noise(
+#     img, 
+#     #gaussian_std=19,
+#     band_intensity=0)
 
 success = cv2.imwrite('negro.jpg', img)
 cv2.imwrite('mask.jpg', mask)

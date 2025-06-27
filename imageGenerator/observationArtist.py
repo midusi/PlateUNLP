@@ -5,7 +5,6 @@ from numpy.typing import NDArray
 from typing import Any, Callable, Tuple
 import numpy as np
 import cv2
-from pystellibs import BaSeL, Rauch, Kurucz, Tlusty, Munari
 import sys
 
 # Alias para evitar incompativilidades con pystellibs
@@ -181,6 +180,9 @@ def spectral_function(width:int, noise_level:float, n_peaks:int, baseline:int,
 
         spectrum += gaussian_peak
     
+    # Pequeñas lineas blancas aleatorias
+    spectrum += np.random.rand(width)*0.1
+
     # Normalizar a rango [0, 1]
     spectrum -= spectrum.min()
     if spectrum.max() > 0:
@@ -232,8 +234,8 @@ Parametros:
 - gaussian_std {float}?: ruido gaussiano. Simula imperfecciones naturales del sensor 
 o de la pelicula fotografica. Se basa en una distribucion normal o gaussiana. Default 10.0.
 - band_intensity {float}?: ruido de banda (horizontal o vertical). Default 5.0.
-- speck_count {int}?: granulado simulado. Default 10. 
-- speck_size {int}?: manchas o impurezas leves (simulan polvo/defectos de placa). Default 3.
+- speck_count {int}?: cantidad de manchas de impuresa a simular.
+- speck_size {int}?: tamaño maximo de mancha de impuresa. Default 3.
 """
 def add_realistic_noise(
     img: NDArray[np.uint8],
@@ -258,7 +260,7 @@ def add_realistic_noise(
         cy = np.random.randint(0, img.shape[0])
         radius = np.random.randint(1, speck_size)
         color = np.random.randint(150, 255)  # blanco sucio
-        cv2.circle(img_noisy, (cx, cy), radius, (color,) * 3, -1)
+        cv2.circle(img_noisy, (cx, cy), radius, (color,) * 3, cv2.FILLED)
 
     # Clip y convertir de vuelta a uint8
     img_noisy = np.clip(img_noisy, 0, 255).astype(np.uint8)
