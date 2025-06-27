@@ -114,7 +114,7 @@ def drawObservation(
         noise_level=255*0.01, 
         n_peaks=random.randint(4, 15),
         baseline=0,
-        peak_spread=2.0,
+        peak_spread=2.6,
         )
     for xi, yi in zip(xs, ys):
         intensity = science_function(xi-labelObservation["x"])
@@ -223,3 +223,43 @@ def rotate_point(x:Number, y, cx, cy, angle_degrees) -> Tuple[Number,Number]:
 
     # Trasladar de vuelta
     return rx + cx, ry + cy
+
+
+
+"""Añadir ruido realista a una imagen.
+
+Parametros:
+- gaussian_std {float}?: ruido gaussiano. Simula imperfecciones naturales del sensor 
+o de la pelicula fotografica. Se basa en una distribucion normal o gaussiana. Default 10.0.
+- band_intensity {float}?: ruido de banda (horizontal o vertical). Default 5.0.
+- speck_count {int}?: granulado simulado. Default 10. 
+- speck_size {int}?: manchas o impurezas leves (simulan polvo/defectos de placa). Default 3.
+"""
+def add_realistic_noise(
+    img: NDArray[np.uint8],
+    gaussian_std: float = 10.0,
+    band_intensity: float = 5.0,
+    speck_count: int = 10,
+    speck_size: int = 3
+) -> NDArray[np.uint8]:
+    img_noisy = img.astype(np.float32)
+
+    # 1. Ruido gaussiano (general)
+    noise = np.random.normal(0, gaussian_std, img.shape)
+    img_noisy += noise
+
+    # 2. Ruido en bandas horizontales (tiras verticales o líneas horizontales)
+    band = np.random.normal(0, band_intensity, (img.shape[0], 1, 1))
+    img_noisy += band
+
+    # 3. Puntos blancos o manchas (tipo polvo o defecto)
+    for _ in range(speck_count):
+        cx = np.random.randint(0, img.shape[1])
+        cy = np.random.randint(0, img.shape[0])
+        radius = np.random.randint(1, speck_size)
+        color = np.random.randint(150, 255)  # blanco sucio
+        cv2.circle(img_noisy, (cx, cy), radius, (color,) * 3, -1)
+
+    # Clip y convertir de vuelta a uint8
+    img_noisy = np.clip(img_noisy, 0, 255).astype(np.uint8)
+    return img_noisy
