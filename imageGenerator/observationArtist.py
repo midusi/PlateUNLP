@@ -17,6 +17,11 @@ matricial y dibuja una observacion en la misma acorde a las
 cordenadas especificadas.
 IMPORTANTE: a menos que se especifique la funcion modifica la 
 matriz recibida en vez de hacer una copia.
+IMPORTANTE: se espera que la imagen base sea oscura, para pintar
+la observacion se sigue una estrategia de pixel mas alto, si el 
+fondo en una parte que se superpone con la observacion tiene un
+color mas claro entonces se pinta el pixel del fondo. Esto es 
+para que la observacion pintada se mezcle bien con la imagen.
 
 params:
 - img {NDArray[np.uint8]}: matriz de pixeles que representa la 
@@ -33,10 +38,15 @@ espectro. (0, 0.33) acorde al alto de la observacion.
 - inplace {bool}?: condicion que indica si se realizaran los cambios
 sobre la imagen recibida o sobre una copia. Default True.
 - baseGrey {int}?: nivel de gris minimo a considerar. Default 1.
+- debug {bool}?: al activar se pinta las cajas delimitadoras de la observacion
+generada sobre la imagen. Default False.
 
 return 
 - {NDArray[np.uint8]}: matriz de pixeles que representa la 
 imagen con la observacion agregada.
+- {NDArray[np.uint8]}: matriz de pixeles que representa solo la observacion
+generada acorde a las dimensiones de la imagen recibida. Todos los pixeles que
+no corresponden a la observación son 0.
 - {NDArray[np.uint8]}: mascara de locación del espectro.
 """
 
@@ -44,10 +54,12 @@ def drawObservation(
         img: NDArray[np.uint8], 
         x:int, y:int, width:int, height:int, 
         opening:float, distanceBetweenParts:float,
-        angle:int=0, inplace:bool = True, baseGrey:int = 1) -> NDArray[np.uint8]:
+        angle:int=0, inplace:bool=True, 
+        baseGrey:int = 1, debug:bool=True) -> NDArray[np.uint8]:
     
     if not inplace:
         img = img.copy()
+
 
     # Crear el rectángulo de observacion rotado
     rectObservation = ((x, y), (width, height), angle)
@@ -55,14 +67,12 @@ def drawObservation(
     # Crear el rectangulo de cada parte de la observacións
     openingInPixel = round(height * opening)
     distanceBetweenPartsInPixel = round(height * distanceBetweenParts)
-    centerLamp1 = rotate_point(x=x,y=y-(height-openingInPixel)/2,
-                               cx=x, cy=y, angle_degrees=angle)
-    centerLamp2 = rotate_point(x=x,y=y+(height-openingInPixel)/2,
-                               cx=x, cy=y, angle_degrees=angle)
+    centerLamp1 = (x, y-(height-openingInPixel)/2) 
+    centerLamp2 = (x, y+(height-openingInPixel)/2)
     rectParts = {
-        "lamp1": (centerLamp1, (width, openingInPixel), angle),
-        "lamp2": (centerLamp2, (width, openingInPixel), angle),
-        "science": ((x,y), (width, height-openingInPixel*2-distanceBetweenPartsInPixel*2), angle),
+        "lamp1": (centerLamp1, (width, openingInPixel), 0),
+        "lamp2": (centerLamp2, (width, openingInPixel), 0),
+        "science": ((x,y), (width, height-openingInPixel*2-distanceBetweenPartsInPixel*2), 0),
     }
     boxParts = {
         "lamp1": np.int32(cv2.boxPoints(rectParts["lamp1"])),
@@ -70,13 +80,12 @@ def drawObservation(
         "science": np.int32(cv2.boxPoints(rectParts["science"])),
     }
     
-
     # Obtener las esquinas del rectángulo de observacion
     boxObservation = cv2.boxPoints(rectObservation)
     boxObservation = np.int32(boxObservation)
 
     # Preparar etiqueta de caja delimitadora
-    allBoxs = np.concatenate([boxParts["lamp1"], boxParts["lamp2"], boxParts["science"]], axis=0)
+    allBoxs = np.concatenate([boxObservation], axis=0)
     x_coords = allBoxs[:,0]
     y_coords = allBoxs[:,1]
     labelObservation = {
@@ -86,15 +95,13 @@ def drawObservation(
         "height":y_coords.max() - y_coords.min(), 
     }
 
-    # Crear máscara
-    maskObservation = np.zeros(img.shape[:2], dtype=np.uint8)
-    cv2.drawContours(maskObservation, [boxObservation], 0, 255, thickness=cv2.FILLED) # Limites observacion
-    # cv2.rectangle(   # Etiqueta (Caja delimitadora)
-    #     img,
-    #     (labelObservation["x"], labelObservation["y"]),
-    #     (labelObservation["x"] + labelObservation["width"], labelObservation["y"] + labelObservation["height"]), 
-    #     (255,0,0), thickness=3
-    # )
+    if (debug):
+        cv2.rectangle(   # Etiqueta (Caja delimitadora)
+            img,
+            (labelObservation["x"], labelObservation["y"]),
+            (labelObservation["x"] + labelObservation["width"], labelObservation["y"] + labelObservation["height"]), 
+            (255,0,0), thickness=3
+        )
 
     # Mascara para cada parte del espectro.
     maskParts = {
@@ -106,7 +113,14 @@ def drawObservation(
     cv2.drawContours(maskParts["lamp2"], [boxParts["lamp2"]], 0, 255, thickness=cv2.FILLED)
     cv2.drawContours(maskParts["science"], [boxParts["science"]], 0, 255, thickness=cv2.FILLED)
 
+    # Mascara general
+    maskObservation = np.zeros(img.shape[:2], dtype=np.uint8)
+    cv2.drawContours(maskObservation, [boxParts["lamp1"]], 0, 255, thickness=cv2.FILLED)
+    cv2.drawContours(maskObservation, [boxParts["lamp2"]], 0, 255, thickness=cv2.FILLED)
+    cv2.drawContours(maskObservation, [boxParts["science"]], 0, 255, thickness=cv2.FILLED)
+
     # Pintar espectro de ciencia
+    onlyObservation = np.zeros((*img.shape[:2], 3), dtype=np.uint8)
     ys, xs = np.where(maskParts["science"] == 255)
     science_function = spectral_function(
         width=labelObservation["width"], 
@@ -118,7 +132,7 @@ def drawObservation(
     for xi, yi in zip(xs, ys):
         intensity = science_function(xi-labelObservation["x"])
         intensity = max(intensity,baseGrey) # Control de color de fondo
-        img[yi, xi] = (intensity,intensity,intensity)
+        onlyObservation[yi, xi] = (intensity,intensity,intensity)
 
     # Pintar lampara de comparación 1
     lamp_function = spectral_function(
@@ -132,16 +146,27 @@ def drawObservation(
     for xi, yi in zip(xs, ys):
         intensity = lamp_function(xi-labelObservation["x"])
         intensity = max(intensity,baseGrey) # Control de color de fondo
-        img[yi, xi] = (intensity,intensity,intensity)
+        onlyObservation[yi, xi] = (intensity,intensity,intensity)
 
     # Pintar lampara de comparación 2
     ys, xs = np.where(maskParts["lamp2"] == 255)
     for xi, yi in zip(xs, ys):
         intensity = lamp_function(xi-labelObservation["x"])
         intensity = max(intensity,baseGrey) # Control de color de fondo
-        img[yi, xi] = (intensity,intensity,intensity)
+        onlyObservation[yi, xi] = (intensity,intensity,intensity)
 
-    return img, maskObservation
+    # Rotar espectro y mascara acorde a la cantidad de grados.
+    M = cv2.getRotationMatrix2D((x,y), angle, 1)
+    onlyObservation = cv2.warpAffine(onlyObservation, M, (img.shape[1], img.shape[0]))
+    maskObservation = cv2.warpAffine(maskObservation, M, (img.shape[1], img.shape[0]))
+
+    # Fusionar con la imagen recibida
+    # mask = maskObservation > 0  # shape: (H, W), dtype: bool
+    # mask_3ch = np.stack([mask] * 3, axis=-1)  # shape: (H, W, 3)
+    # img = np.where(mask_3ch, onlyObservation, img)    # Pintar observacion arriba
+    img = np.maximum(img, onlyObservation)  # Quedarse con los pixeles mas altos.
+
+    return img, onlyObservation, maskObservation
 
 
 """Genera una funcion que representa un espectro de ciencia sintetico.
@@ -236,13 +261,16 @@ o de la pelicula fotografica. Se basa en una distribucion normal o gaussiana. De
 - band_intensity {float}?: ruido de banda (horizontal o vertical). Default 5.0.
 - speck_count {int}?: cantidad de manchas de impuresa a simular.
 - speck_size {int}?: tamaño maximo de mancha de impuresa. Default 3.
+- blur_ksize {int}?: tamaño del kernel para desenfoque gaussiano. Debe ser impar, con 0 
+u otro valor invalido no se aplica ningun desenfoque. Default 3.
 """
 def add_realistic_noise(
     img: NDArray[np.uint8],
     gaussian_std: float = 10.0,
     band_intensity: float = 5.0,
     speck_count: int = 10,
-    speck_size: int = 3
+    speck_size: int = 3,
+    blur_ksize: int = 3,
 ) -> NDArray[np.uint8]:
     img_noisy = img.astype(np.float32)
 
@@ -258,9 +286,14 @@ def add_realistic_noise(
     for _ in range(speck_count):
         cx = np.random.randint(0, img.shape[1])
         cy = np.random.randint(0, img.shape[0])
-        radius = np.random.randint(1, speck_size)
+        radius = 1 if speck_size <= 1 else np.random.randint(1, speck_size)
         color = np.random.randint(150, 255)  # blanco sucio
         cv2.circle(img_noisy, (cx, cy), radius, (color,) * 3, cv2.FILLED)
+
+    # 4. Desenfoque suave (simula ópticas imperfectas)
+    if blur_ksize >= 3 and blur_ksize % 2 == 1:
+        img_noisy = cv2.GaussianBlur(img_noisy, (blur_ksize, blur_ksize), 0)
+
 
     # Clip y convertir de vuelta a uint8
     img_noisy = np.clip(img_noisy, 0, 255).astype(np.uint8)
