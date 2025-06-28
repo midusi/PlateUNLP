@@ -1,5 +1,6 @@
 {
   "recommendations": [
+    "antfu.iconify",
     "biomejs.biome",
     "bradlc.vscode-tailwindcss",
     "ppp-one.simple-fits-viewer",

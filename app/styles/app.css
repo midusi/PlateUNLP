@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@plugin "@iconify/tailwind4";
 @plugin "tailwindcss-animate";
 
 @import "./fonts.css";
