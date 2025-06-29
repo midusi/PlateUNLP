@@ -10,6 +10,7 @@
     },
     "rules": {
       "a11y": {
+        "noStaticElementInteractions": "off",
         "useAltText": "off"
       },
       "suspicious": {

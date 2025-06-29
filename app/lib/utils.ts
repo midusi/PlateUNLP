@@ -8,6 +8,31 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * A simple, *insecure* 32-bit hash that's short, fast, and has no dependencies.
+ * Loosely based on the Java version.
+ * @see https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
+ */
+export function simpleHash(str: string) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+  }
+  return hash >>> 0
+}
+
+/**
+ * Converts a numeric ID to a color string.
+ * This function generates a color based on the ID by using a simple hash function
+ * and then getting a color from a predefined palette.
+ */
+export function idToColor(id: string): string {
+  const colors = ["red", "blue", "green"]
+  const index = simpleHash(id) % colors.length
+  return colors[index]
+}
+
 export function generateRange(min: number, max: number, count: number): number[] {
   return Array.from({ length: count }, (_, i) => min + (i * (max - min)) / (count - 1))
 }

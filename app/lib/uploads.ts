@@ -1,5 +1,6 @@
 import fs from "node:fs/promises"
 import { err, ok, type Result } from "neverthrow"
+import sharp from "sharp"
 import { z } from "zod/v4"
 import { db } from "~/db"
 import * as s from "~/db/schema"
@@ -11,12 +12,20 @@ const MimeSchema = z.union([
   z.literal("image/tiff"),
 ])
 
-export async function uploadFile(file: File): Promise<Result<string, Error>> {
+type UploadedFile = {
+  id: string
+  mimeType: z.infer<typeof MimeSchema>
+  width: number
+  height: number
+}
+
+export async function uploadFile(file: File): Promise<Result<UploadedFile, Error>> {
   const buffer = Buffer.from(await file.arrayBuffer())
   const mimeType = MimeSchema.safeParse(file.type)
   if (!mimeType.success) {
     return err(new Error("Invalid file type"))
   }
+  const metadata = await sharp(buffer).metadata()
 
   try {
     const id = await db.transaction(async (tx) => {
@@ -27,7 +36,7 @@ export async function uploadFile(file: File): Promise<Result<string, Error>> {
       await fs.writeFile(`${env.UPLOADS_DIR}/${id}`, buffer)
       return id
     })
-    return ok(id)
+    return ok({ id, mimeType: mimeType.data, width: metadata.width, height: metadata.height })
   } catch (error) {
     return err(
       new Error(`Failed to upload file: ${error instanceof Error ? error.message : String(error)}`),

@@ -10,9 +10,9 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import type * as React from "react"
-import { Toaster } from "~/components/atoms/toaster"
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary"
 import { NotFound } from "~/components/NotFound"
+import { Toaster } from "~/components/ui/sonner"
 import { seo } from "~/lib/seo"
 
 import appCss from "~/styles/app.css?url"
@@ -65,7 +65,7 @@ function RootComponent() {
   return (
     <RootDocument>
       <Outlet />
-      <Toaster />
+      <Toaster richColors />
     </RootDocument>
   )
 }
@@ -77,20 +77,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <div className="w-full h-dvh flex flex-col justify-start">
-          <header className="mb-12 bg-[#2D3748]">
-            <h1 className="text-left text-2xl text-white font-bold tracking-tight p-4">
-              <Link to="/">🌌 PlateUNLP</Link>
-            </h1>
-          </header>
-
-          <main className="min-h-0 grow">{children}</main>
-
-          <footer className="mt-40 mb-20 text-xs italic text-center text-muted-foreground">
-            Copyright @{new Date().getFullYear()} III-LIDI, Facultad de Informática, Universidad
-            Nacional de la Plata
-          </footer>
-        </div>
+        {children}
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>

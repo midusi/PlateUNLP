@@ -1,9 +1,4 @@
-import {
-  all as allMath,
-  type BigNumber,
-  create as createMath,
-  type Matrix,
-} from "mathjs"
+import { all as allMath, type BigNumber, create as createMath, type Matrix } from "mathjs"
 
 export const math = createMath(allMath, {
   relTol: 1e-12,
@@ -73,16 +68,23 @@ export function rotationMatrix3D<T extends number | BigNumber>(
   R[a2][a1] = -s
   R[a2][a2] = c
 
-  // This extra step is necessary because inconsistet types break the type system.
+  // This extra step is necessary because inconsistent types break the type system.
   if (typeof angle === "number") {
-    return math.matrix(
-      R.map((row) => row.map((n) => math.number(n))),
-    ) as Matrix<T>
+    return math.matrix(R.map((row) => row.map((n) => math.number(n)))) as Matrix<T>
   } else {
-    return math.matrix(
-      R.map((row) => row.map((n) => math.bignumber(n))),
-    ) as Matrix<T>
+    return math.matrix(R.map((row) => row.map((n) => math.bignumber(n)))) as Matrix<T>
   }
+}
+
+/**
+ * Clamps a number between a minimum and maximum value.
+ * @param num The number to clamp.
+ * @param min The minimum value.
+ * @param max The maximum value.
+ * @returns The clamped value.
+ */
+export function clamp(num: number, min: number, max: number): number {
+  return Math.max(min, Math.min(num, max))
 }
 
 export type { BigNumber, Matrix }

@@ -1,8 +1,8 @@
 import { createServerFileRoute } from "@tanstack/react-start/server"
 import { db } from "~/db"
-import { readUploadedFile } from "~/utils/uploads"
+import { readUploadedFile } from "~/lib/uploads"
 
-export const ServerRoute = createServerFileRoute("/plate/$plateId/image").methods({
+export const ServerRoute = createServerFileRoute("/_app/plate/$plateId/image").methods({
   GET: async ({ params }) => {
     const plate = await db.query.plate.findFirst({
       where: (t, { eq }) => eq(t.id, params.plateId),

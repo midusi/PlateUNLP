@@ -3,3 +3,4 @@ onlyBuiltDependencies:
   - esbuild
   - msw
   - protobufjs
+  - sharp
