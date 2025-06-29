@@ -1,4 +1,8 @@
 {
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+
   // TanStack Router
   "files.watcherExclude": {
     "**/routeTree.gen.ts": true
@@ -15,7 +19,6 @@
   "eslint.enable": false,
   "biome.enabled": true,
   "editor.formatOnSave": true,
-
   // Set the default formatter to biome
   "editor.defaultFormatter": "biomejs.biome",
   "[javascript]": {
@@ -39,7 +42,6 @@
   "[css]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-
   // Auto fix for biome
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",

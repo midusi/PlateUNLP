@@ -186,10 +186,11 @@ async function main() {
   await seedIERSBulletinA()
 
   console.log(pc.gray("❖ Creating users..."))
-  await createUser("prueba", "prueba@prueba.com", "12345")
+  await createUser("Chidi Anagonye", "canagonye@saintjohns.edu.au", "12345")
+  await createUser("Simone Garnett", "sgarnett@saintjohns.edu.au", "67890")
 
   console.log(pc.gray("❖ Creating projects..."))
-  await createProject("Locación Íntima De Intentos", "prueba@prueba.com")
+  await createProject("St. John's University", "canagonye@saintjohns.edu.au")
 }
 
 main()

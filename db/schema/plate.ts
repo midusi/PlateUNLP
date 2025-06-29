@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { idType } from "../utils"
 import { observation } from "./observation"
 import { observatory } from "./observatory"
@@ -14,12 +14,14 @@ export const plate = sqliteTable("plate", {
   imageId: text()
     .notNull()
     .references(() => upload.id),
+  imageWidth: integer().notNull(),
+  imageHeight: integer().notNull(),
   // metadata
   OBSERVAT: text("observat")
     .notNull()
     .default("oalp")
     .references(() => observatory.id),
-  "PLATE-N": text("plate_n").notNull().default(""),
+  "PLATE-N": text("plate_n").notNull().default("New plate"),
   OBSERVER: text("observer").notNull().default(""),
   DIGITALI: text("digitali").notNull().default(""),
   SCANNER: text("scanner").notNull().default(""),

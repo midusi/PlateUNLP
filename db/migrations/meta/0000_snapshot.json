@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4a9626ad-ffac-45ba-a07e-faf113d5ef66",
+  "id": "2350a306-a83f-494c-9f18-78944f577893",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "iers_bulletin_a": {
@@ -421,6 +421,20 @@
           "notNull": true,
           "autoincrement": false
         },
+        "image_width": {
+          "name": "image_width",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "image_height": {
+          "name": "image_height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "observat": {
           "name": "observat",
           "type": "text",
@@ -435,7 +449,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "''"
+          "default": "'New plate'"
         },
         "observer": {
           "name": "observer",
