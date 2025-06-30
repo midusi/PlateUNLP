@@ -1,0 +1,21 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+  "extends": "//",
+  "files": {
+    "includes": ["**", "!routeTree.gen.ts"]
+  },
+  "linter": {
+    "domains": {
+      "react": "recommended"
+    },
+    "rules": {
+      "a11y": {
+        "noStaticElementInteractions": "off",
+        "useAltText": "off"
+      },
+      "suspicious": {
+        "noConsole": "warn"
+      }
+    }
+  }
+}
