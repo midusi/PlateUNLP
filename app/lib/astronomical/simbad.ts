@@ -38,11 +38,7 @@ async function querySimbad(script: string): Promise<Result<string[], Error>> {
     headers: { Accept: "text/plain" },
   })
   if (!response.ok) {
-    return err(
-      new Error(
-        `Error querying SIMBAD: ${response.status} ${response.statusText}`,
-      ),
-    )
+    return err(new Error(`Error querying SIMBAD: ${response.status} ${response.statusText}`))
   }
 
   const text = await response.text()

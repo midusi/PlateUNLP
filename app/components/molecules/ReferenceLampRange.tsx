@@ -1,3 +1,4 @@
+import { useMeasure } from "@uidotdev/usehooks"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -8,7 +9,6 @@ import { LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useId, useMemo } from "react"
 import { useGlobalStore } from "~/hooks/use-global-store"
-import { useMeasure } from "~/hooks/use-measure"
 import type { SpectrumPoint } from "~/lib/spectral-data"
 import { getMaterialSpectralData } from "~/lib/spectral-data"
 

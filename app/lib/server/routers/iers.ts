@@ -17,10 +17,7 @@ export const iersRouter = router({
 
     if (!left || !right) return null
     // Linear interpolation between left and right
-    return (
-      left.deltaT +
-      ((right.deltaT - left.deltaT) * (mdj - left.mdj)) / (right.mdj - left.mdj)
-    )
+    return left.deltaT + ((right.deltaT - left.deltaT) * (mdj - left.mdj)) / (right.mdj - left.mdj)
   }),
   getPolarMotion: publicProcedure
     .input(z.number())

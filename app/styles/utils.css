@@ -1,3 +1,4 @@
 @utility bg-checkered {
-  background: repeating-conic-gradient(var(--muted) 0 25%, var(--color-background) 0 50%) 50% / 50px 50px;
+  background:
+    repeating-conic-gradient(var(--muted) 0 25%, var(--color-background) 0 50%) 50% / 50px 50px;
 }

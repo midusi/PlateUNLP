@@ -1,3 +1,4 @@
+import { useMeasure } from "@uidotdev/usehooks"
 import { AxisBottom, AxisLeft, AxisTop } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -9,7 +10,6 @@ import type { NumberValue } from "@visx/vendor/d3-scale"
 import { useMemo } from "react"
 import type { JSX } from "react/jsx-runtime"
 import { useGlobalStore } from "~/hooks/use-global-store"
-import { useMeasure } from "~/hooks/use-measure"
 import { CustomError } from "~/lib/utils"
 
 export interface EmpiricalSpectrumPoint {

@@ -4,15 +4,11 @@
  * @param opts.digits - The number of decimal places to include in the seconds part of the DMS string (default: 4).
  * @param opts.sep - The separator to use between the degrees, minutes, and seconds (default: ":").
  */
-export function degToDMS(
-  deg: number,
-  opts: { digits?: number; sep?: string } = {},
-) {
+export function degToDMS(deg: number, opts: { digits?: number; sep?: string } = {}) {
   const digits = opts.digits ?? 4
   const sep = opts.sep ?? ":"
 
-  if (!Number.isFinite(deg))
-    throw new RangeError("degToDMS: `deg` must be a number")
+  if (!Number.isFinite(deg)) throw new RangeError("degToDMS: `deg` must be a number")
   if (!Number.isSafeInteger(digits) || digits < 0)
     throw new RangeError("degToDMS: `digits` must be a positive number")
 
@@ -40,15 +36,11 @@ export function degToDMS(
  * @param opts.digits - The number of decimal places to include in the seconds part of the HMS string (default: 4).
  * @param opts.sep - The separator to use between the hours, minutes, and seconds (default: ":").
  */
-export function degToHMS(
-  deg: number,
-  opts: { digits?: number; sep?: string } = {},
-) {
+export function degToHMS(deg: number, opts: { digits?: number; sep?: string } = {}) {
   const digits = opts.digits ?? 4
   const sep = opts.sep ?? ":"
 
-  if (!Number.isFinite(deg))
-    throw new RangeError("degToHMS: `deg` must be a number")
+  if (!Number.isFinite(deg)) throw new RangeError("degToHMS: `deg` must be a number")
   if (!Number.isSafeInteger(digits) || digits < 0)
     throw new RangeError("degToHMS: `digits` must be a positive number")
 
@@ -76,9 +68,6 @@ export function degToHMS(
  * @param opts.digits - The number of decimal places to include in the seconds part of the HMS string (default: 4).
  * @param opts.sep - The separator to use between the hours, minutes, and seconds (default: ":").
  */
-export function radToHMS(
-  rad: number,
-  opts?: { digits?: number; sep?: string },
-) {
+export function radToHMS(rad: number, opts?: { digits?: number; sep?: string }) {
   return degToHMS(rad * (180 / Math.PI), opts)
 }

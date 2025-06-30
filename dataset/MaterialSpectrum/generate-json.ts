@@ -12,10 +12,9 @@ const spectrums = new URL("./", import.meta.url)
 
 // NIST
 // ============================================================================
-const nistRaw = await fs.readFile(
-  new URL("./NIST/Tabla(NIST)_Int_Long_Mat_Ref.csv", spectrums),
-  { encoding: "utf-8" },
-)
+const nistRaw = await fs.readFile(new URL("./NIST/Tabla(NIST)_Int_Long_Mat_Ref.csv", spectrums), {
+  encoding: "utf-8",
+})
 const nist = parse(nistRaw, { skipFirstRow: true })
   .map(
     (row): SpectrumPoint => ({
@@ -69,11 +68,7 @@ const datasets: Spectrum[] = [
 const json = {
   date: new Date().toISOString(),
   elements: [
-    ...new Set(
-      datasets
-        .map((dataset) => dataset.points.map((point) => point.material))
-        .flat(2),
-    ),
+    ...new Set(datasets.map((dataset) => dataset.points.map((point) => point.material)).flat(2)),
   ].sort(),
   datasets,
 }

@@ -487,7 +487,6 @@ function SidebarMenuButton({
   const Comp = asChild ? Slot.Slot : "button"
   const { isMobile, state } = useSidebar()
 
-
   const button = (
     <Comp
       data-slot="sidebar-menu-button"
