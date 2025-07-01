@@ -2,6 +2,7 @@ import numpy as np
 import random
 import cv2
 from observationArtist import drawObservation, add_realistic_noise
+import math
 
 # Dimensiones deseadas.
 alto = random.randint(1000, 4000)
@@ -23,19 +24,39 @@ openingLamp = random.uniform(0.1,0.35)
 # Cuanto espacio vacio hay entre cada lampara y el espectro de ciencia.
 distanceBetweenParts = random.uniform(0.02,0.1)
 
-img, obs, mask = drawObservation(
-    img=img,
-    x=int(ancho/2), 
-    y=int(alto/2),
-    width=int(obs_width),
-    height=int(obs_heigth),
-    opening=openingLamp,
-    distanceBetweenParts=distanceBetweenParts,
-    angle=angle,
-    baseGrey=gray_value,
-    inplace=False,
-    debug=False,
-    )
+# Distancia entre distintas observaciones
+distanceBetweenObservations = random.uniform(obs_heigth*0.1, obs_heigth*0.8)
+# Cantidad de observaciones que entran en la imagen
+max_observations = math.floor(alto*0.9/(obs_heigth+distanceBetweenObservations))
+# Cuantas observaciones se dibujaran en una la imagen
+n_observations = min(max_observations, random.randint(1, 5))
+# Posiciones donde ser realizara el dibujo centradas en alto
+noise_horizontal = 0.01 # Irregularidad porcentual horizontal maxima
+noise_vertical = 0.01 # Irregularidad porcentual veartical maxima
+unit = obs_heigth + distanceBetweenObservations# Espacio a considerar por observación
+targets = []
+for i in range(n_observations):
+    pos_y = (alto/2) - (n_observations/2)*unit + unit/2 + i*unit
+    coor = {
+        "x": ancho/2 + random.uniform(-noise_horizontal, noise_horizontal), 
+        "y": pos_y + random.uniform(-noise_vertical, noise_vertical), 
+    }
+    targets.append(coor)
+
+for coor in targets:
+    img, obs, mask = drawObservation(
+        img=img,
+        x=coor["x"], 
+        y=coor["y"],
+        width=int(obs_width),
+        height=int(obs_heigth),
+        opening=openingLamp,
+        distanceBetweenParts=distanceBetweenParts,
+        angle=angle,
+        baseGrey=gray_value,
+        inplace=True,
+        debug=False,
+        )
 
 # Ruido gaussiano general para la imagen de la placa
 gaussian_std = random.uniform(4.0, 16.0)

@@ -122,12 +122,16 @@ def drawObservation(
     # Pintar espectro de ciencia
     onlyObservation = np.zeros((*img.shape[:2], 3), dtype=np.uint8)
     ys, xs = np.where(maskParts["science"] == 255)
+    vertical_noise_level = random.uniform(0,0.6)
     science_function = spectral_function(
         width=labelObservation["width"], 
         noise_level=255*0.01, 
         n_peaks=random.randint(4, 15),
         baseline=0,
+        vertical_noise_level= vertical_noise_level,
         peak_spread=2.6,
+        n_absorption_lines=random.randint(0, 5),
+        absorption_lines_spread=random.uniform(0.01, 0.5),
         )
     for xi, yi in zip(xs, ys):
         intensity = science_function(xi-labelObservation["x"])
@@ -140,7 +144,9 @@ def drawObservation(
         noise_level=255*0.01, 
         n_peaks=random.randint(15, 50),
         baseline=255 * random.uniform(0.05, 0.1),
+        vertical_noise_level=vertical_noise_level,
         peak_spread=0.04,
+        n_absorption_lines=0,
         )
     ys, xs = np.where(maskParts["lamp1"] == 255)
     for xi, yi in zip(xs, ys):
@@ -176,15 +182,22 @@ Parametros:
 - noise_level {float}: Amplitud del ruido base (sobre 255).
 - n_peaks {int}: cantidad de picos a simular.
 - baseline {int}: valor minimo.
+- vertical_noise_level {float}?: Amplitud del ruido base vertical (sobre 255).
+Default 0.2.
 - peak_spread {float}?: multiplicador que afecta al ancho de los picos simulados. 
 Default 1.0.
+- n_absorption_lines {int}?: cantidad de lineas de absorción a simular. Default 0.
+- absorption_lines_spread {float}?: multiplicador que afecta al ancho de los las 
+lineas de absorcion simuladas. Default 1.0.
 
 Return:
 - {Callable[[int], int]}: funcion que dado un valor entero informa la intensidad
 que le corresponde.
 """
 def spectral_function(width:int, noise_level:float, n_peaks:int, baseline:int, 
-                      peak_spread:float=1.0) -> Callable[[int], int]:
+                      vertical_noise_level:float=0.2, peak_spread:float=1.0, 
+                      n_absorption_lines:int=0, 
+                      absorption_lines_spread:float = 1.0) -> Callable[[int], int]:
 
     x = np.arange(width)
 
@@ -205,8 +218,20 @@ def spectral_function(width:int, noise_level:float, n_peaks:int, baseline:int,
 
         spectrum += gaussian_peak
     
+    # Agregar n líneas de absorción (gaussianas invertidas)
+    for _ in range(n_absorption_lines):
+        abs_center = np.random.uniform(0, width)
+        abs_width = np.random.uniform(width*0.01, width*0.04) * absorption_lines_spread
+        abs_depth = np.random.uniform(20, 100)  # Qué tan profundas son
+
+        gaussian_absorption = abs_depth * np.exp(- (x - abs_center)**2 / (2 * abs_width**2))
+        if random.choice([0,1]) == 0:
+            spectrum -= gaussian_absorption
+        else:
+            spectrum += gaussian_absorption # Algunas lineas las suma
+
     # Pequeñas lineas blancas aleatorias
-    spectrum += np.random.rand(width)*0.1
+    spectrum += np.random.rand(width)*vertical_noise_level
 
     # Normalizar a rango [0, 1]
     spectrum -= spectrum.min()
