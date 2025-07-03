@@ -1,10 +1,24 @@
 # Generador de imágenes
 
-## Entorno virtual 
+## Entorno virtual
 
-El entorno virtual puede encontrarse en `.\venv`.
+Se recomienda usar un entorno virtual para manejar las dependencias de la libraria de generación.
+
+🔨 Crear entorno virtual `.\venv`:
+```
+python -m venv venv
+```
+
+🚀 Activar entorno virtual `.\venv`:
 ```
 .\venv\Scripts\Activate.ps1
+```
+
+## Dependencias
+
+📦 Instala las dependencias neceasrias con:
+```
+pip install -r requirements.txt
 ```
 
 ## Generar
