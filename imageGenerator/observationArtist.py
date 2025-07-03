@@ -48,6 +48,8 @@ imagen con la observacion agregada.
 generada acorde a las dimensiones de la imagen recibida. Todos los pixeles que
 no corresponden a la observación son 0.
 - {NDArray[np.uint8]}: mascara de locación del espectro.
+- {dict[str, Number]}: informacion de caja delimitadora de la observación (formato
+yolov11).
 """
 
 def drawObservation(
@@ -84,22 +86,31 @@ def drawObservation(
     boxObservation = cv2.boxPoints(rectObservation)
     boxObservation = np.int32(boxObservation)
 
-    # Preparar etiqueta de caja delimitadora
+    # Preparar etiqueta de caja delimitadora para grafico
     allBoxs = np.concatenate([boxObservation], axis=0)
     x_coords = allBoxs[:,0]
     y_coords = allBoxs[:,1]
-    labelObservation = {
+    labelForGraph: dict[str, Number] = {
         "x":x_coords.min(), 
         "y":y_coords.min(), 
         "width":x_coords.max() - x_coords.min(), 
         "height":y_coords.max() - y_coords.min(), 
     }
 
+    # Preparar etiquetas en formato yolov11 para reportar al usuario
+    labelObservation: dict[str, Number] = {
+        "class_id": 0,
+        "x_center_norm":((x_coords.min() + x_coords.max())/2)/width,
+        "y_center_norm":((y_coords.min() + y_coords.max())/2)/height,
+        "width_norm": labelForGraph["width"] / width,
+        "height_norm": labelForGraph["height"] / height,
+    }
+
     if (debug):
         cv2.rectangle(   # Etiqueta (Caja delimitadora)
             img,
-            (labelObservation["x"], labelObservation["y"]),
-            (labelObservation["x"] + labelObservation["width"], labelObservation["y"] + labelObservation["height"]), 
+            (labelForGraph["x"], labelForGraph["y"]),
+            (labelForGraph["x"] + labelForGraph["width"], labelForGraph["y"] + labelForGraph["height"]), 
             (255,0,0), thickness=3
         )
 
@@ -124,7 +135,7 @@ def drawObservation(
     ys, xs = np.where(maskParts["science"] == 255)
     vertical_noise_level = random.uniform(0,0.6)
     science_function = spectral_function(
-        width=labelObservation["width"], 
+        width=labelForGraph["width"], 
         noise_level=255*0.01, 
         n_peaks=random.randint(4, 15),
         baseline=0,
@@ -134,13 +145,13 @@ def drawObservation(
         absorption_lines_spread=random.uniform(0.01, 0.5),
         )
     for xi, yi in zip(xs, ys):
-        intensity = science_function(xi-labelObservation["x"])
+        intensity = science_function(xi-labelForGraph["x"])
         intensity = max(intensity,baseGrey) # Control de color de fondo
         onlyObservation[yi, xi] = (intensity,intensity,intensity)
 
     # Pintar lampara de comparación 1
     lamp_function = spectral_function(
-        width=labelObservation["width"], 
+        width=labelForGraph["width"], 
         noise_level=255*0.01, 
         n_peaks=random.randint(15, 50),
         baseline=255 * random.uniform(0.05, 0.1),
@@ -150,14 +161,14 @@ def drawObservation(
         )
     ys, xs = np.where(maskParts["lamp1"] == 255)
     for xi, yi in zip(xs, ys):
-        intensity = lamp_function(xi-labelObservation["x"])
+        intensity = lamp_function(xi-labelForGraph["x"])
         intensity = max(intensity,baseGrey) # Control de color de fondo
         onlyObservation[yi, xi] = (intensity,intensity,intensity)
 
     # Pintar lampara de comparación 2
     ys, xs = np.where(maskParts["lamp2"] == 255)
     for xi, yi in zip(xs, ys):
-        intensity = lamp_function(xi-labelObservation["x"])
+        intensity = lamp_function(xi-labelForGraph["x"])
         intensity = max(intensity,baseGrey) # Control de color de fondo
         onlyObservation[yi, xi] = (intensity,intensity,intensity)
 
@@ -172,7 +183,7 @@ def drawObservation(
     # img = np.where(mask_3ch, onlyObservation, img)    # Pintar observacion arriba
     img = np.maximum(img, onlyObservation)  # Quedarse con los pixeles mas altos.
 
-    return img, onlyObservation, maskObservation
+    return img, onlyObservation, maskObservation, labelObservation
 
 
 """Genera una funcion que representa un espectro de ciencia sintetico.
@@ -323,3 +334,15 @@ def add_realistic_noise(
     # Clip y convertir de vuelta a uint8
     img_noisy = np.clip(img_noisy, 0, 255).astype(np.uint8)
     return img_noisy
+
+"""Recibe la informacion de una etiqueta en formato dict y la convierte a un 
+string en formato Yolov11.
+
+Parametros:
+- label {dict[str, Number]}: informacion de la etiqueta a parsear.
+
+Return:
+- {str}: información de la etiqueta en formato textual
+"""
+def labelDictToYolov11Format(label) -> str:
+    return f"{label['class_id']} {label['x_center_norm']:.6f} {label['y_center_norm']:.6f} {label['width_norm']:.6f} {label['height_norm']:.6f}"

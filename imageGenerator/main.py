@@ -1,8 +1,10 @@
+import os
 import numpy as np
 import random
 import cv2
-from observationArtist import drawObservation, add_realistic_noise
+from observationArtist import drawObservation, add_realistic_noise, labelDictToYolov11Format
 import math
+import PIL.Image as Image
 
 # Dimensiones deseadas.
 alto = random.randint(1000, 4000)
@@ -43,8 +45,9 @@ for i in range(n_observations):
     }
     targets.append(coor)
 
+labels = []
 for coor in targets:
-    img, obs, mask = drawObservation(
+    img, _obs, _mask, label = drawObservation(
         img=img,
         x=coor["x"], 
         y=coor["y"],
@@ -57,6 +60,7 @@ for coor in targets:
         inplace=True,
         debug=False,
         )
+    labels.append(label)
 
 # Ruido gaussiano general para la imagen de la placa
 gaussian_std = random.uniform(4.0, 16.0)
@@ -78,10 +82,23 @@ img = add_realistic_noise(
         blur_ksize=speck_size,
     )
 
+# Guardar imagen sintetica
 success = cv2.imwrite('img.jpg', img)
-success = cv2.imwrite('obs.jpg', obs)
-cv2.imwrite('mask.jpg', mask)
+# cv2.imwrite('obs.jpg', obs)
+# cv2.imwrite('mask.jpg', mask)
 if not success:
     print("¡Error al guardar la imagen! Verifica la ruta y permisos.")
 else:
     print("Imagen guardada correctamente en imageGenerator/negro.jpg")
+
+# Convertir etiquetas a texto
+lines = map(labelDictToYolov11Format, labels)
+
+# Guardar etiquetas
+if lines:
+    with open('img.txt', "w") as f:
+        f.write("\n".join(lines))
+else:
+    # Recomendado: no crear archivo si no hay objetos
+    if os.path.exists('img.txt'):
+        os.remove('img.txt')
