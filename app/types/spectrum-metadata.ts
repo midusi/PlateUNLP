@@ -42,10 +42,10 @@ export const ObservationMetadataSchema = z.object({
   RA1950: z.iso.time().or(MISSING), // HH:mm:ss.sss (any precision)
   DEC1950: sexasegimal().or(MISSING), // ±ddd:mm:ss.sss (any precision)
   "TIME-OBS": z.iso.time().or(MISSING),
-  JD: z.number().positive().or(MISSING),
+  JD: z.number().positive().or(MISSING).nullable(),
   ST: z.iso.time().or(MISSING), // HH:mm:ss.sss (any precision)
   HA: sexasegimal().or(MISSING), // ±ddd:mm:ss.sss (any precision)
-  AIRMASS: z.number().positive().or(MISSING),
+  AIRMASS: z.number().positive().or(MISSING).nullable(),
 
   GAIN: fitsString(),
   EXPTIME: fitsString(),

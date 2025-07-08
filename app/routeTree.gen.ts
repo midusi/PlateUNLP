@@ -16,8 +16,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppProjectsRouteImport } from './routes/_app/projects'
 import { Route as AppProjectProjectIdRouteImport } from './routes/_app/project.$projectId'
 import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$plateId/index'
-import { Route as AppPlatePlateIdOldRouteImport } from './routes/_app/plate.$plateId/old'
+import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
 import { ServerRoute as AppPlatePlateIdImageServerRouteImport } from './routes/_app/plate.$plateId/image'
+import { ServerRoute as AppObservationObservationIdImageServerRouteImport } from './routes/_app/observation.$observationId/image'
 
 const rootServerRouteImport = createServerRootRoute()
 
@@ -45,15 +46,22 @@ const AppPlatePlateIdIndexRoute = AppPlatePlateIdIndexRouteImport.update({
   path: '/plate/$plateId/',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppPlatePlateIdOldRoute = AppPlatePlateIdOldRouteImport.update({
-  id: '/plate/$plateId/old',
-  path: '/plate/$plateId/old',
-  getParentRoute: () => AppRouteRoute,
-} as any)
+const AppObservationObservationIdIndexRoute =
+  AppObservationObservationIdIndexRouteImport.update({
+    id: '/observation/$observationId/',
+    path: '/observation/$observationId/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppPlatePlateIdImageServerRoute =
   AppPlatePlateIdImageServerRouteImport.update({
     id: '/_app/plate/$plateId/image',
     path: '/plate/$plateId/image',
+    getParentRoute: () => rootServerRouteImport,
+  } as any)
+const AppObservationObservationIdImageServerRoute =
+  AppObservationObservationIdImageServerRouteImport.update({
+    id: '/_app/observation/$observationId/image',
+    path: '/observation/$observationId/image',
     getParentRoute: () => rootServerRouteImport,
   } as any)
 
@@ -61,14 +69,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/projects': typeof AppProjectsRoute
   '/project/$projectId': typeof AppProjectProjectIdRoute
-  '/plate/$plateId/old': typeof AppPlatePlateIdOldRoute
+  '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/projects': typeof AppProjectsRoute
   '/project/$projectId': typeof AppProjectProjectIdRoute
-  '/plate/$plateId/old': typeof AppPlatePlateIdOldRoute
+  '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
 }
 export interface FileRoutesById {
@@ -77,7 +85,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteRouteWithChildren
   '/_app/projects': typeof AppProjectsRoute
   '/_app/project/$projectId': typeof AppProjectProjectIdRoute
-  '/_app/plate/$plateId/old': typeof AppPlatePlateIdOldRoute
+  '/_app/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
   '/_app/plate/$plateId/': typeof AppPlatePlateIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -86,14 +94,14 @@ export interface FileRouteTypes {
     | '/'
     | '/projects'
     | '/project/$projectId'
-    | '/plate/$plateId/old'
+    | '/observation/$observationId'
     | '/plate/$plateId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/projects'
     | '/project/$projectId'
-    | '/plate/$plateId/old'
+    | '/observation/$observationId'
     | '/plate/$plateId'
   id:
     | '__root__'
@@ -101,7 +109,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_app/projects'
     | '/_app/project/$projectId'
-    | '/_app/plate/$plateId/old'
+    | '/_app/observation/$observationId/'
     | '/_app/plate/$plateId/'
   fileRoutesById: FileRoutesById
 }
@@ -110,24 +118,31 @@ export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
 }
 export interface FileServerRoutesByFullPath {
+  '/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
   '/plate/$plateId/image': typeof AppPlatePlateIdImageServerRoute
 }
 export interface FileServerRoutesByTo {
+  '/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
   '/plate/$plateId/image': typeof AppPlatePlateIdImageServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
+  '/_app/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
   '/_app/plate/$plateId/image': typeof AppPlatePlateIdImageServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/plate/$plateId/image'
+  fullPaths: '/observation/$observationId/image' | '/plate/$plateId/image'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/plate/$plateId/image'
-  id: '__root__' | '/_app/plate/$plateId/image'
+  to: '/observation/$observationId/image' | '/plate/$plateId/image'
+  id:
+    | '__root__'
+    | '/_app/observation/$observationId/image'
+    | '/_app/plate/$plateId/image'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
+  AppObservationObservationIdImageServerRoute: typeof AppObservationObservationIdImageServerRoute
   AppPlatePlateIdImageServerRoute: typeof AppPlatePlateIdImageServerRoute
 }
 
@@ -168,11 +183,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlatePlateIdIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/plate/$plateId/old': {
-      id: '/_app/plate/$plateId/old'
-      path: '/plate/$plateId/old'
-      fullPath: '/plate/$plateId/old'
-      preLoaderRoute: typeof AppPlatePlateIdOldRouteImport
+    '/_app/observation/$observationId/': {
+      id: '/_app/observation/$observationId/'
+      path: '/observation/$observationId'
+      fullPath: '/observation/$observationId'
+      preLoaderRoute: typeof AppObservationObservationIdIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
   }
@@ -186,20 +201,27 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof AppPlatePlateIdImageServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
+    '/_app/observation/$observationId/image': {
+      id: '/_app/observation/$observationId/image'
+      path: '/observation/$observationId/image'
+      fullPath: '/observation/$observationId/image'
+      preLoaderRoute: typeof AppObservationObservationIdImageServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
   }
 }
 
 interface AppRouteRouteChildren {
   AppProjectsRoute: typeof AppProjectsRoute
   AppProjectProjectIdRoute: typeof AppProjectProjectIdRoute
-  AppPlatePlateIdOldRoute: typeof AppPlatePlateIdOldRoute
+  AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
   AppPlatePlateIdIndexRoute: typeof AppPlatePlateIdIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProjectsRoute: AppProjectsRoute,
   AppProjectProjectIdRoute: AppProjectProjectIdRoute,
-  AppPlatePlateIdOldRoute: AppPlatePlateIdOldRoute,
+  AppObservationObservationIdIndexRoute: AppObservationObservationIdIndexRoute,
   AppPlatePlateIdIndexRoute: AppPlatePlateIdIndexRoute,
 }
 
@@ -215,6 +237,8 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
+  AppObservationObservationIdImageServerRoute:
+    AppObservationObservationIdImageServerRoute,
   AppPlatePlateIdImageServerRoute: AppPlatePlateIdImageServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport

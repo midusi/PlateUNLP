@@ -12,6 +12,7 @@ import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
 import type { getObservations } from "../-actions/get-observations"
 import { updateObservation } from "../-actions/update-observation"
+import { Link } from "@tanstack/react-router"
 
 type Observation = Awaited<ReturnType<typeof getObservations>>[number]
 
@@ -119,7 +120,11 @@ export function ObservationsList({
               {boundingBoxes.map((boundingBox) => (
                 <TableRow key={boundingBox.id}>
                   <TableCell className="font-medium"></TableCell>
-                  <TableCell>{boundingBox.name}</TableCell>
+                  <TableCell>
+                    <Link to="/observation/$observationId" params={{observationId:boundingBox.id}}>
+                      {boundingBox.name}
+                    </Link>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
