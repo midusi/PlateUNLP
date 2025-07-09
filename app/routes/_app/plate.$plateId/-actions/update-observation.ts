@@ -9,10 +9,10 @@ export const updateObservation = createServerFn()
     z.object({
       observationId: z.string(),
       name: z.string().min(1),
-      imgTop: z.number().min(0),
-      imgLeft: z.number().min(0),
-      imgWidth: z.number().min(1),
-      imgHeight: z.number().min(1),
+      imgTop: z.int().min(0),
+      imgLeft: z.int().min(0),
+      imgWidth: z.int().min(1),
+      imgHeight: z.int().min(1),
     }),
   )
   .handler(async ({ data }) => {

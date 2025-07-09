@@ -2,19 +2,16 @@ import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
 /**
- * Carga una imagen desde un src y devuelve el objeto Image con sus dimensiones reales.
- * @param {string} src - imagen (URL o base64)
- * @returns {Promise<Image>} - Imagen cargada
+ * Loads an image from a given source URL as a Promise.
+ * @param {string} src - image source URL.
  */
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      resolve(img);
-    }
-    img.onerror = reject;
-    img.src = src;
-  });
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = (reason) => reject(reason)
+    img.src = src
+  })
 }
 
 /**
@@ -125,17 +122,13 @@ export function findPlateau(
 
   const moreLargeSegmentIdx = segments
     .map((segment) => segment.values.length)
-    .reduce(
-      (maxIdx, currVal, idx, arr) => (currVal > arr[maxIdx] ? idx : maxIdx),
-      0,
-    )
+    .reduce((maxIdx, currVal, idx, arr) => (currVal > arr[maxIdx] ? idx : maxIdx), 0)
 
   // const _plateauValues = segments[moreLargeSegmentIdx].values
   const plateauIndexes = segments[moreLargeSegmentIdx].indexes
 
   const opening = plateauIndexes[plateauIndexes.length - 1] - plateauIndexes[0]
-  const medium =
-    (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
+  const medium = (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
 
   // console.log({
   //   segments,
@@ -221,11 +214,7 @@ export function promediadoHorizontal(
  * @param {number} height - Alto
  * @returns {string} Url correspondiente a la imagen.
  */
-export function matrixToUrl(
-  data: Uint8ClampedArray,
-  width: number,
-  height: number,
-): string {
+export function matrixToUrl(data: Uint8ClampedArray, width: number, height: number): string {
   const canvas = document.createElement("canvas")
   canvas.width = width
   canvas.height = height
@@ -310,11 +299,7 @@ export function obtainImageSegments(
  * @returns {Uint8ClampedArray} -
  * Matriz ordenada por columnas
  */
-function invertOrder(
-  data: Uint8ClampedArray,
-  width: number,
-  height: number,
-): Uint8ClampedArray {
+function invertOrder(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
   const colMajorData = new Uint8ClampedArray(data.length)
 
   let idx = 0
@@ -379,9 +364,7 @@ export async function obtainimageMatrix(
  * @returns {Promise<{ image:string, degrees: number }>} -
  * Una promesa que contiene la imagen procesada y la cantidad de grados rotados.
  */
-export async function align(
-  imageb64: string,
-): Promise<{ image: string; degrees: number }> {
+export async function align(imageb64: string): Promise<{ image: string; degrees: number }> {
   // Cargar imagen
   const image = new Image()
   image.src = imageb64
@@ -422,10 +405,7 @@ export async function align(
  * @returns {Promise<string>} -
  * Una promesa que contiene la imagen rotada.
  */
-export async function rotate(
-  imageb64: string,
-  degrees: 90 | 180 | 270,
-): Promise<string> {
+export async function rotate(imageb64: string, degrees: 90 | 180 | 270): Promise<string> {
   // Cargar imagen
   const image = new Image()
   image.src = imageb64
@@ -499,8 +479,7 @@ export async function bgColor(imageb64: string): Promise<"white" | "black"> {
   let brightnessSum = 0
 
   // Fórmula de luminancia (luma)
-  const getBrightness = (r: number, g: number, b: number) =>
-    0.299 * r + 0.587 * g + 0.114 * b
+  const getBrightness = (r: number, g: number, b: number) => 0.299 * r + 0.587 * g + 0.114 * b
 
   const width = canvas.width
   const height = canvas.height
@@ -562,8 +541,7 @@ export async function ensureWhite(
   let brightnessSum = 0
 
   // Fórmula de luminancia (luma)
-  const getBrightness = (r: number, g: number, b: number) =>
-    0.299 * r + 0.587 * g + 0.114 * b
+  const getBrightness = (r: number, g: number, b: number) => 0.299 * r + 0.587 * g + 0.114 * b
 
   const width = canvas.width
   const height = canvas.height
