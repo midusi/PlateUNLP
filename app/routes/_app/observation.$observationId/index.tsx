@@ -95,7 +95,7 @@ function RouteComponent() {
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={initialSpectrums} />
       <div className="h-8" />
-      <SpectrumsFeatures observationId={observationId}/>
+      <SpectrumsFeatures observationId={observationId} spectrums={initialSpectrums}/>
     </div>
   )
 }

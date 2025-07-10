@@ -8,19 +8,20 @@ import { levenbergMarquardt } from "ml-levenberg-marquardt"
  */
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    const img = new Image()
     img.onload = () => {
-      resolve(img);
+      resolve(img)
     }
-    img.onerror = reject;
-    img.src = src;
-  });
+    img.onerror = reject
+    img.src = src
+  })
 }
 
 /**
  * Retorna los valores (en grises) de los pixeles de una imagen que corresponden a las
  * coordenadas por las que pasa una recta.
- * @param {Uint8ClampedArray} data - Matriz de pixeles.
+ * @template T Tipo de dato binario: Buffer, Uint8ClampedArray, Uint8Array, etc.
+ * @param {T} data - Imagen.
  * @param {number} width - Ancho de la matriz.
  * @param {(y: number) => number} rect - Recta que dado un y indica que x le corresponde
  * @param {number} minY - Valor Y minimo.
@@ -28,8 +29,8 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
  * @returns {number[]} - Arreglo de valores que corresponden a las coordenadas por las
  * que pasa la funcion.
  */
-export function getPointsInRect(
-  data: Uint8ClampedArray,
+export function getPointsInRect<T extends Uint8Array | Uint8ClampedArray | Buffer>(
+  data: T,
   width: number,
   rect: (y: number) => number,
   minY: number,
@@ -125,17 +126,13 @@ export function findPlateau(
 
   const moreLargeSegmentIdx = segments
     .map((segment) => segment.values.length)
-    .reduce(
-      (maxIdx, currVal, idx, arr) => (currVal > arr[maxIdx] ? idx : maxIdx),
-      0,
-    )
+    .reduce((maxIdx, currVal, idx, arr) => (currVal > arr[maxIdx] ? idx : maxIdx), 0)
 
   // const _plateauValues = segments[moreLargeSegmentIdx].values
   const plateauIndexes = segments[moreLargeSegmentIdx].indexes
 
   const opening = plateauIndexes[plateauIndexes.length - 1] - plateauIndexes[0]
-  const medium =
-    (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
+  const medium = (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
 
   // console.log({
   //   segments,
@@ -184,13 +181,14 @@ export function fitGaussian(
 /**
  * Promedia los pixeles horizontales de una imagen y retorna un vector con los
  * resultados de promediar a cada altura.
- * @param {Uint8ClampedArray} image - Imagen
+ * @template T Tipo de dato binario: Buffer, Uint8ClampedArray, Uint8Array, etc.
+ * @param {T} image - Imagen.
  * @param {number} width - Ancho de la imagen
  * @param {number} height - Alto de la imagen
  * @returns {number[]} - Vector con valores promediados.
  */
-export function promediadoHorizontal(
-  image: Uint8ClampedArray,
+export function promediadoHorizontal<T extends Uint8Array | Uint8ClampedArray | Buffer>(
+  image: T,
   width: number,
   height: number,
 ): number[] {
@@ -221,11 +219,7 @@ export function promediadoHorizontal(
  * @param {number} height - Alto
  * @returns {string} Url correspondiente a la imagen.
  */
-export function matrixToUrl(
-  data: Uint8ClampedArray,
-  width: number,
-  height: number,
-): string {
+export function matrixToUrl(data: Uint8ClampedArray, width: number, height: number): string {
   const canvas = document.createElement("canvas")
   canvas.width = width
   canvas.height = height
@@ -259,30 +253,34 @@ export function findXspacedPoints(large: number, n: number): number[] {
  * Obtiene segmentos de una imagen dependiendo de como este ordenada, los segmentos
  * son tan anchos/altos como el 1er criterio de ordenacion (filas/columnas) y la
  * dimencion restante se indica por parametro.
- * @param {Uint8ClampedArray} image - Imagen a segmentar
+ * @template T Tipo de dato binario: Buffer, Uint8ClampedArray, Uint8Array, etc.
+ * @param {T} image - Imagen a segmentar (tipo binario compatible con indexado).
  * @param {number} width - Ancho de la imagen
  * @param {number} height - Alto de la imagen
  * @param {number[]} points - Arreglo de puntos respecto a la 1ra dimencion de orden
  * que indican el centro de cada segmento.
  * @param {number} segmentWidth - Que tanto se extienden los segmentos respecto la
  * dimension restante.
- * @returns {Uint8ClampedArray} -
- * Arreglo de segmentos de la imagen recibida.
+ * @returns {T[]} - Arreglo de segmentos de la imagen recibida.
  */
-export function obtainImageSegments(
-  image: Uint8ClampedArray,
+export function obtainImageSegments<T extends Uint8Array | Uint8ClampedArray | Buffer>(
+  image: T,
   width: number,
   height: number,
   points: number[],
   segmentWidth: number,
-): Uint8ClampedArray[] {
-  const segments: Uint8ClampedArray[] = []
+): T[] {
+  /** Constructor de Buffer que acorde al tipo recibido */
+  const SegmentConstructor = image.constructor as { new (length: number): T }
+
+  /** Arreglo donde se guardaron los segmentos producidos */
+  const segments: T[] = []
 
   for (const centerX of points) {
     const startX = Math.max(0, centerX - Math.floor(segmentWidth / 2))
     const endX = Math.min(width, centerX + Math.ceil(segmentWidth / 2))
 
-    const segment = new Uint8ClampedArray((endX - startX) * height * 4)
+    const segment = new SegmentConstructor((endX - startX) * height * 4)
 
     for (let y = 0; y < height; y++) {
       for (let x = startX; x < endX; x++) {
@@ -310,11 +308,7 @@ export function obtainImageSegments(
  * @returns {Uint8ClampedArray} -
  * Matriz ordenada por columnas
  */
-function invertOrder(
-  data: Uint8ClampedArray,
-  width: number,
-  height: number,
-): Uint8ClampedArray {
+function invertOrder(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
   const colMajorData = new Uint8ClampedArray(data.length)
 
   let idx = 0
@@ -379,9 +373,7 @@ export async function obtainimageMatrix(
  * @returns {Promise<{ image:string, degrees: number }>} -
  * Una promesa que contiene la imagen procesada y la cantidad de grados rotados.
  */
-export async function align(
-  imageb64: string,
-): Promise<{ image: string; degrees: number }> {
+export async function align(imageb64: string): Promise<{ image: string; degrees: number }> {
   // Cargar imagen
   const image = new Image()
   image.src = imageb64
@@ -422,10 +414,7 @@ export async function align(
  * @returns {Promise<string>} -
  * Una promesa que contiene la imagen rotada.
  */
-export async function rotate(
-  imageb64: string,
-  degrees: 90 | 180 | 270,
-): Promise<string> {
+export async function rotate(imageb64: string, degrees: 90 | 180 | 270): Promise<string> {
   // Cargar imagen
   const image = new Image()
   image.src = imageb64
@@ -499,8 +488,7 @@ export async function bgColor(imageb64: string): Promise<"white" | "black"> {
   let brightnessSum = 0
 
   // Fórmula de luminancia (luma)
-  const getBrightness = (r: number, g: number, b: number) =>
-    0.299 * r + 0.587 * g + 0.114 * b
+  const getBrightness = (r: number, g: number, b: number) => 0.299 * r + 0.587 * g + 0.114 * b
 
   const width = canvas.width
   const height = canvas.height
@@ -562,8 +550,7 @@ export async function ensureWhite(
   let brightnessSum = 0
 
   // Fórmula de luminancia (luma)
-  const getBrightness = (r: number, g: number, b: number) =>
-    0.299 * r + 0.587 * g + 0.114 * b
+  const getBrightness = (r: number, g: number, b: number) => 0.299 * r + 0.587 * g + 0.114 * b
 
   const width = canvas.width
   const height = canvas.height
