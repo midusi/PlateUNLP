@@ -1,7 +1,13 @@
 import { useMeasure } from "@uidotdev/usehooks"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { TransformComponent, TransformWrapper, useTransformEffect } from "react-zoom-pan-pinch"
+import {
+  TransformComponent,
+  TransformWrapper,
+  useControls,
+  useTransformContext,
+} from "react-zoom-pan-pinch"
 import { Button } from "~/components/ui/button"
+import { loadImage } from "~/lib/image"
 import { clamp } from "~/lib/math"
 
 /**
@@ -83,68 +89,78 @@ export function BoundingBoxer({
     height: 0,
   })
 
-  // Update the image size when the image is changed
+  // Update the image when the source is changed
   useEffect(() => {
-    const image = new Image()
-    image.onload = () => {
+    loadImage(imageSrc).then((image) => {
       setImageSize({ width: image.naturalWidth, height: image.naturalHeight })
-    }
-    image.src = imageSrc
+    })
   }, [imageSrc])
 
   // Calculate the scale of the image based on the container size
   const imageScale = useMemo(() => {
-    if (!containerSize.width || !containerSize.height || !imageSize.width || !imageSize.height) {
-      return 0
+    if (
+      !containerSize.width ||
+      !containerSize.height ||
+      imageSize.width === 0 ||
+      imageSize.height === 0
+    ) {
+      return null
     }
-    const scale = Math.min(
-      containerSize.width / imageSize.width,
-      containerSize.height / imageSize.height,
-    )
-    return scale
+    return Math.min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)
   }, [containerSize.width, containerSize.height, imageSize.width, imageSize.height])
 
   return (
-    <div ref={containerRef} className="bg-checkered w-full h-full">
-      {imageScale > 0 && (
-        <TransformWrapper initialScale={imageScale} minScale={imageScale} centerOnInit>
-          {({ zoomIn, zoomOut }) => (
-            <div className="relative w-full h-full">
-              <div className="absolute top-2 right-2 flex gap-2 z-10">
-                {showZoomActions && (
-                  <Button size="icon" variant="outline" className="size-8" onClick={() => zoomIn()}>
-                    <span className="icon-[ph--magnifying-glass-plus-bold] size-4" />
-                  </Button>
-                )}
-                {showZoomActions && (
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="size-8"
-                    onClick={() => zoomOut()}
-                  >
-                    <span className="icon-[ph--magnifying-glass-minus-bold]" />
-                  </Button>
-                )}
-              </div>
-              <TransformComponent
-                wrapperStyle={{ width: "100%", height: "100%" }}
-                contentClass="relative"
-              >
-                <img src={imageSrc} />
-                {boundingBoxes.map((boundingBox) => (
-                  <BoundingBoxComponent
-                    key={boundingBox.id}
-                    boundingBox={boundingBox}
-                    onChange={onBoundingBoxChange}
-                    onChangeEnd={onBoundingBoxChangeEnd}
-                    limits={{ x: imageSize.width, y: imageSize.height }}
-                  />
-                ))}
-              </TransformComponent>
-            </div>
-          )}
+    <div ref={containerRef} className="bg-checkered w-full h-full min-w-0 min-h-0 relative">
+      {imageScale ? (
+        <TransformWrapper
+          initialScale={imageScale}
+          minScale={imageScale}
+          centerOnInit
+          centerZoomedOut
+        >
+          <BoundingBoxControls showZoomActions={showZoomActions} />
+          <TransformComponent
+            wrapperStyle={{ width: "100%", height: "100%" }}
+            contentClass="relative"
+          >
+            <img
+              src={imageSrc}
+              width={imageSize.width}
+              height={imageSize.height}
+              style={{ maxWidth: imageSize.width, maxHeight: imageSize.height }}
+            />
+            {boundingBoxes.map((boundingBox) => (
+              <BoundingBoxComponent
+                key={boundingBox.id}
+                boundingBox={boundingBox}
+                onChange={onBoundingBoxChange}
+                onChangeEnd={onBoundingBoxChangeEnd}
+                limits={{ x: imageSize.width, y: imageSize.height }}
+              />
+            ))}
+          </TransformComponent>
         </TransformWrapper>
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
+  )
+}
+
+function BoundingBoxControls({ showZoomActions }: { showZoomActions: boolean }) {
+  const { zoomIn, zoomOut } = useControls()
+
+  return (
+    <div className="absolute top-2 right-2 flex gap-2 z-10">
+      {showZoomActions && (
+        <Button size="icon" variant="outline" className="size-8" onClick={() => zoomIn()}>
+          <span className="icon-[ph--magnifying-glass-plus-bold] size-4" />
+        </Button>
+      )}
+      {showZoomActions && (
+        <Button size="icon" variant="outline" className="size-8" onClick={() => zoomOut()}>
+          <span className="icon-[ph--magnifying-glass-minus-bold]" />
+        </Button>
       )}
     </div>
   )
@@ -167,9 +183,22 @@ function BoundingBoxComponent({
   // keep the scale. Since we are doing that, is too much overhead to use it
   // for the label as well.
   const [scale, setScale] = useState(1)
-  useTransformEffect(({ instance }) => {
-    setScale(instance.transformState.scale)
-  })
+  const context = useTransformContext()
+  useEffect(() => {
+    const unmountInit = context.onInit((ref) => {
+      setScale(ref.instance.transformState.scale)
+    })
+    const unmountChange = context.onChange((ref) => {
+      const state = ref.instance.transformState
+      if (state.previousScale !== state.scale) {
+        setScale(state.scale)
+      }
+    })
+    return () => {
+      unmountInit()
+      unmountChange()
+    }
+  }, [context])
 
   const handleWidth = `${3 / scale}px`
 
@@ -217,7 +246,14 @@ function BoundingBoxComponent({
         top = clamp(top + deltaTop, 0, limits.y - height)
       }
 
-      onChange?.({ ...boundingBox, left, top, width, height })
+      onChange?.({
+        ...boundingBox,
+        // Return integers
+        left: Math.round(left),
+        top: Math.round(top),
+        width: Math.round(width),
+        height: Math.round(height),
+      })
     }
 
     const handleMouseUp = (e: MouseEvent) => {
@@ -267,7 +303,7 @@ function BoundingBoxComponent({
         gridTemplateRows: `${handleWidth} 1fr ${handleWidth}`,
       }}
       className="absolute group grid"
-      data-resizing={!!resizing}
+      data-resizing={resizing !== null}
     >
       <p
         className="top-0 left-0 absolute origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"

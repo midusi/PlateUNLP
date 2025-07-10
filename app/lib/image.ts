@@ -2,17 +2,14 @@ import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
 /**
- * Carga una imagen desde un src y devuelve el objeto Image con sus dimensiones reales.
- * @param {string} src - imagen (URL o base64)
- * @returns {Promise<Image>} - Imagen cargada
+ * Loads an image from a given source URL as a Promise.
+ * @param {string} src - image source URL.
  */
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
-    img.onload = () => {
-      resolve(img)
-    }
-    img.onerror = reject
+    img.onload = () => resolve(img)
+    img.onerror = (reason) => reject(reason)
     img.src = src
   })
 }
