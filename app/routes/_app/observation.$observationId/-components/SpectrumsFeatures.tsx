@@ -7,8 +7,8 @@ import { readUploadedFile } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import type { getSpectrums } from "../-actions/get-spectrums";
 import {
-	useExtractFeatures,
-	type useExtractFeaturesResponse,
+	extractFeatures,
+	type extractFeaturesResponse,
 } from "../-hooks/use-extract-features";
 import { ImageWithPixelExtraction } from "./ImageWithPixelExtraction";
 import { SimpleFunctionXY } from "./SimpleFunctionXY";
@@ -25,49 +25,29 @@ export function SpectrumsFeatures({
 	const useSpline = false;
 	const reuseScienceFunction = true;
 
-	useEffect(() => {
-		/** Cargar imagen en canvas y recortar espectro */
-		const img = new Image();
-		img.src = `/observation/${observationId}/image`;
-		img.onload = async () => {
-			/** Obtener predicciones */
-			const boundingBoxes = await determineBBFunction(
-				`/observation/${observationId}/image`,
-			);
-			/** Actualizar base de datos */
-			const boundingBoxesFormated = await Promise.all(
-				boundingBoxes.map(async (bb) => {
-					console.log("dentro");
-					let spectrum = await addSpectrum({ data: { observationId } });
-					spectrum = {
-						...spectrum,
-						imgTop: bb.y,
-						imgLeft: 0,
-						imgWidth: img.naturalWidth,
-						imgHeight: bb.height,
-					};
-					await updateSpectrum({
-						data: {
-							spectrumId: spectrum.id,
-							imgTop: spectrum.imgTop,
-							imgLeft: spectrum.imgLeft,
-							imgWidth: spectrum.imgWidth,
-							imgHeight: spectrum.imgHeight,
-						},
-					});
-					return spectrumToBoundingBox(spectrum);
-				}),
-			);
-			await addSpectrum({ data: { observationId } });
-			setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev]);
-		};
-	}, [observationId, spectrums]);
-
 	const [science, setScience] = useState<Buffer<ArrayBufferLike>>();
 	const [lamp1, setLamp1] = useState<Buffer<ArrayBufferLike>>();
 	const [lamp2, setLamp2] = useState<Buffer<ArrayBufferLike>>();
-	const [specAnalysis, setSpecAnalysis] =
-		useState<useExtractFeaturesResponse<Buffer<ArrayBufferLike>>>();
+	const [specAnalysis, setSpecAnalysis] = useState<useExtractFeaturesResponse<Buffer<ArrayBufferLike>>>();
+
+	useEffect(() => { 
+		const images = crop(
+			`/observation/${observationId}/image`, 
+			spectrums.map(s => ({
+				top: s.top,
+				left: s.left,
+				width: s.width,
+				height: s.height,
+			})),
+		)
+		/** Identificar imagenes de cada espectro */
+		/** Imagen de espectro de ciencia */
+		setScience(data[0]);
+		/** Imagen de espectro de lampara de comparación 1 */
+		setLamp1(data[1]);
+		/** Imagen de espectro de lampara de comparación 2 */
+		setLamp2(data[2]);
+	}, [observationId, spectrums, setScience, setLamp1, setLamp2]);
 
 	useEffect(() => {
 		/** Si esta cargando retorna */
@@ -77,16 +57,8 @@ export function SpectrumsFeatures({
 		/** Si faltan imagenes retorna */
 		if (data.length < 3) return;
 
-		/** Separa imagenes de cada espectro */
-		/** Imagen de espectro de ciencia */
-		const science = data[0];
-		/** Imagen de espectro de lampara de comparación 1 */
-		const lamp1 = data[1];
-		/** Imagen de espectro de lampara de comparación 2 */
-		const lamp2 = data[2];
-
 		/** Extraer caracteristicas en base a las imagenes de los espectros. */
-		const spectrumAnalysis = useExtractFeatures(
+		const spectrumAnalysis = extractFeatures(
 			countCheckpoints,
 			segmentWidth,
 			science,
