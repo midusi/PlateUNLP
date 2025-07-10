@@ -17,6 +17,7 @@ import { Route as AppProjectsRouteImport } from './routes/_app/projects'
 import { Route as AppProjectProjectIdRouteImport } from './routes/_app/project.$projectId'
 import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$plateId/index'
 import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
+import { Route as AppSpectrumSpectrumIdImageRouteImport } from './routes/_app/spectrum.$spectrumId/image'
 import { ServerRoute as AppPlatePlateIdImageServerRouteImport } from './routes/_app/plate.$plateId/image'
 import { ServerRoute as AppObservationObservationIdImageServerRouteImport } from './routes/_app/observation.$observationId/image'
 
@@ -52,6 +53,12 @@ const AppObservationObservationIdIndexRoute =
     path: '/observation/$observationId/',
     getParentRoute: () => AppRouteRoute,
   } as any)
+const AppSpectrumSpectrumIdImageRoute =
+  AppSpectrumSpectrumIdImageRouteImport.update({
+    id: '/spectrum/$spectrumId/image',
+    path: '/spectrum/$spectrumId/image',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppPlatePlateIdImageServerRoute =
   AppPlatePlateIdImageServerRouteImport.update({
     id: '/_app/plate/$plateId/image',
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/projects': typeof AppProjectsRoute
   '/project/$projectId': typeof AppProjectProjectIdRoute
+  '/spectrum/$spectrumId/image': typeof AppSpectrumSpectrumIdImageRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
 }
@@ -76,6 +84,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/projects': typeof AppProjectsRoute
   '/project/$projectId': typeof AppProjectProjectIdRoute
+  '/spectrum/$spectrumId/image': typeof AppSpectrumSpectrumIdImageRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
 }
@@ -85,6 +94,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteRouteWithChildren
   '/_app/projects': typeof AppProjectsRoute
   '/_app/project/$projectId': typeof AppProjectProjectIdRoute
+  '/_app/spectrum/$spectrumId/image': typeof AppSpectrumSpectrumIdImageRoute
   '/_app/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
   '/_app/plate/$plateId/': typeof AppPlatePlateIdIndexRoute
 }
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
     | '/'
     | '/projects'
     | '/project/$projectId'
+    | '/spectrum/$spectrumId/image'
     | '/observation/$observationId'
     | '/plate/$plateId'
   fileRoutesByTo: FileRoutesByTo
@@ -101,6 +112,7 @@ export interface FileRouteTypes {
     | '/'
     | '/projects'
     | '/project/$projectId'
+    | '/spectrum/$spectrumId/image'
     | '/observation/$observationId'
     | '/plate/$plateId'
   id:
@@ -109,6 +121,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_app/projects'
     | '/_app/project/$projectId'
+    | '/_app/spectrum/$spectrumId/image'
     | '/_app/observation/$observationId/'
     | '/_app/plate/$plateId/'
   fileRoutesById: FileRoutesById
@@ -190,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppObservationObservationIdIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/spectrum/$spectrumId/image': {
+      id: '/_app/spectrum/$spectrumId/image'
+      path: '/spectrum/$spectrumId/image'
+      fullPath: '/spectrum/$spectrumId/image'
+      preLoaderRoute: typeof AppSpectrumSpectrumIdImageRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 declare module '@tanstack/react-start/server' {
@@ -214,6 +234,7 @@ declare module '@tanstack/react-start/server' {
 interface AppRouteRouteChildren {
   AppProjectsRoute: typeof AppProjectsRoute
   AppProjectProjectIdRoute: typeof AppProjectProjectIdRoute
+  AppSpectrumSpectrumIdImageRoute: typeof AppSpectrumSpectrumIdImageRoute
   AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
   AppPlatePlateIdIndexRoute: typeof AppPlatePlateIdIndexRoute
 }
@@ -221,6 +242,7 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProjectsRoute: AppProjectsRoute,
   AppProjectProjectIdRoute: AppProjectProjectIdRoute,
+  AppSpectrumSpectrumIdImageRoute: AppSpectrumSpectrumIdImageRoute,
   AppObservationObservationIdIndexRoute: AppObservationObservationIdIndexRoute,
   AppPlatePlateIdIndexRoute: AppPlatePlateIdIndexRoute,
 }

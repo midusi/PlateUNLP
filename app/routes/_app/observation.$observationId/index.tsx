@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod/v4"
-import { getObservatoriesQueryOptions } from "~/components/forms/SelectObservatory"
 import { db } from "~/db"
 import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getSpectrums } from "./-actions/get-spectrums"
-import { SpectrumsList } from "./-components/SpectrumsList"
 import { ObservationMetadataForm } from "./-components/ObservationMetadataForm"
 import { SpectrumsFeatures } from "./-components/SpectrumsFeatures"
+import { SpectrumsList } from "./-components/SpectrumsList"
 
 const getInitialValues = createServerFn()
   .validator(z.object({ observationId: z.string() }))
@@ -16,7 +15,7 @@ const getInitialValues = createServerFn()
       where: (observation, { eq }) => eq(observation.id, data.observationId),
       columns: {
         OBJECT: true,
-        "DATE-OBS":true,
+        "DATE-OBS": true,
         UT: true,
         "MAIN-ID": true,
         "TIME-OBS": true,
@@ -38,11 +37,11 @@ const getInitialValues = createServerFn()
         AIRMASS: true,
       },
       with: {
-        plate: { 
-          columns: { id: true, "PLATE-N": true }, 
+        plate: {
+          columns: { id: true, "PLATE-N": true },
           with: {
-            project: { columns: { id: true, name: true } }
-          }
+            project: { columns: { id: true, name: true } },
+          },
         },
       },
     })
@@ -95,7 +94,7 @@ function RouteComponent() {
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={initialSpectrums} />
       <div className="h-8" />
-      <SpectrumsFeatures observationId={observationId} spectrums={initialSpectrums}/>
+      <SpectrumsFeatures observationId={observationId} spectrums={initialSpectrums} />a
     </div>
   )
 }

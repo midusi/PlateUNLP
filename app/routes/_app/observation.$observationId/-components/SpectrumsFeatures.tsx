@@ -25,33 +25,43 @@ export function SpectrumsFeatures({
 	const useSpline = false;
 	const reuseScienceFunction = true;
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ["spectral-images", observationId, spectrums],
-		queryFn: async () => {
-			/** Recuperar imagen de la placa enlazada a la observación. */
-			const observation = await db.query.observation.findFirst({
-				where: (t, { eq }) => eq(t.id, observationId),
-				with: { plate: { with: { image: true } } },
-			});
-			if (!observation) throw new Error("Not found");
-			const plate = await readUploadedFile(observation.plate.image.id);
-			/** Imagenes de los espectros */
-			const images = await Promise.all(
-				spectrums.map(
-					async (s) =>
-						await sharp(plate)
-							.extract({
-								height: Math.round(s.imgHeight),
-								top: Math.round(s.imgTop),
-								left: Math.round(s.imgLeft),
-								width: Math.round(s.imgWidth),
-							})
-							.toBuffer(),
-				),
+	useEffect(() => {
+		/** Cargar imagen en canvas y recortar espectro */
+		const img = new Image();
+		img.src = `/observation/${observationId}/image`;
+		img.onload = async () => {
+			/** Obtener predicciones */
+			const boundingBoxes = await determineBBFunction(
+				`/observation/${observationId}/image`,
 			);
-			return images;
-		},
-	});
+			/** Actualizar base de datos */
+			const boundingBoxesFormated = await Promise.all(
+				boundingBoxes.map(async (bb) => {
+					console.log("dentro");
+					let spectrum = await addSpectrum({ data: { observationId } });
+					spectrum = {
+						...spectrum,
+						imgTop: bb.y,
+						imgLeft: 0,
+						imgWidth: img.naturalWidth,
+						imgHeight: bb.height,
+					};
+					await updateSpectrum({
+						data: {
+							spectrumId: spectrum.id,
+							imgTop: spectrum.imgTop,
+							imgLeft: spectrum.imgLeft,
+							imgWidth: spectrum.imgWidth,
+							imgHeight: spectrum.imgHeight,
+						},
+					});
+					return spectrumToBoundingBox(spectrum);
+				}),
+			);
+			await addSpectrum({ data: { observationId } });
+			setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev]);
+		};
+	}, [observationId, spectrums]);
 
 	const [science, setScience] = useState<Buffer<ArrayBufferLike>>();
 	const [lamp1, setLamp1] = useState<Buffer<ArrayBufferLike>>();

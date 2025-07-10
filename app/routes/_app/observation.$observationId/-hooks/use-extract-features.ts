@@ -10,7 +10,6 @@ import {
 import { extremePoints } from "~/lib/trigonometry"
 import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"
-import sizeOf from 'buffer-image-size';
 
 export interface useExtractFeaturesResponse<T extends Uint8Array | Uint8ClampedArray | Buffer> {
   scienceInfo: {
@@ -101,7 +100,7 @@ export function useExtractFeatures<T extends Uint8Array | Uint8ClampedArray | Bu
     /** Si el espectro de ciencia esta vacio retorna */
     if (science.length === 0) return
 
-    const {width:_width, height:_height} = sizeOf(Buffer.from(science))
+    const { width: _width, height: _height } = sizeOf(Buffer.from(science))
     bag.scienceInfo = {
       data: science,
       width: _width,
@@ -234,7 +233,7 @@ export function useExtractFeatures<T extends Uint8Array | Uint8ClampedArray | Bu
     bag.scienceTransversalAvgs = scienceTransversalAvgs
 
     /** Lampara de comparación 1. Datos relevantes */
-    const {width:l1_width, height:l1_height} = sizeOf(Buffer.from(lamp1))
+    const { width: l1_width, height: l1_height } = sizeOf(Buffer.from(lamp1))
     const lamp1Info = {
       data: lamp1,
       width: l1_width,
@@ -265,7 +264,7 @@ export function useExtractFeatures<T extends Uint8Array | Uint8ClampedArray | Bu
     }
 
     /** Lampara de comparación 2. Datos relevantes */
-    const {width:l2_width, height:l2_height} = sizeOf(Buffer.from(lamp2))
+    const { width: l2_width, height: l2_height } = sizeOf(Buffer.from(lamp2))
     const lamp2Info = {
       data: lamp2,
       width: l2_width,
@@ -297,8 +296,7 @@ export function useExtractFeatures<T extends Uint8Array | Uint8ClampedArray | Bu
     }
 
     setResponse(bag)
-      
-  }, [ countCheckpoints, lamp1, lamp2, reuseScienceFunction, science, segmentWidth, useSpline ])
+  }, [countCheckpoints, lamp1, lamp2, reuseScienceFunction, science, segmentWidth, useSpline])
 
   return response
 }

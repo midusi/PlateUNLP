@@ -40,7 +40,7 @@ export function SpectrumsList({
 	);
 
 	const determineBBFunction = usePredictBBs(
-		1024,
+		1088,
 		"spectrum_part_segmentator.onnx",
 		classesSpectrumDetection,
 		false,
@@ -49,38 +49,43 @@ export function SpectrumsList({
 
 	const determineBBMut = useMutation({
 		mutationFn: async () => {
-			/** Obtener predicciones */
-			const boundingBoxes = await determineBBFunction(
-				`/observation/${observationId}/image`,
-			);
-			/** Actualizar base de datos */
-			const boundingBoxesFormated = await Promise.all(
-				boundingBoxes.map(async (bb) => {
-					let spectrum = await addSpectrum({ data: { observationId } });
-					spectrum = {
-						...spectrum,
-						imgTop: bb.y,
-						imgLeft: bb.x,
-						imgWidth: bb.width,
-						imgHeight: bb.height,
-					};
-					await updateSpectrum({
-						data: {
-							spectrumId: spectrum.id,
-							imgTop: spectrum.imgTop,
-							imgLeft: spectrum.imgLeft,
-							imgWidth: spectrum.imgWidth,
-							imgHeight: spectrum.imgHeight,
-						},
-					});
-					return spectrumToBoundingBox(spectrum);
-				}),
-			);
-
-			const spectrum = await addSpectrum({ data: { observationId } });
-			setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev]);
+			/** Obtener ancho de la imagen */
+			const img = new Image();
+			img.src = `/observation/${observationId}/image`;
+			img.onload = async () => {
+				/** Obtener predicciones */
+				const boundingBoxes = await determineBBFunction(
+					`/observation/${observationId}/image`,
+				);
+				/** Actualizar base de datos */
+				const boundingBoxesFormated = await Promise.all(
+					boundingBoxes.map(async (bb) => {
+						console.log("dentro");
+						let spectrum = await addSpectrum({ data: { observationId } });
+						spectrum = {
+							...spectrum,
+							imgTop: bb.y,
+							imgLeft: 0,
+							imgWidth: img.naturalWidth,
+							imgHeight: bb.height,
+						};
+						await updateSpectrum({
+							data: {
+								spectrumId: spectrum.id,
+								imgTop: spectrum.imgTop,
+								imgLeft: spectrum.imgLeft,
+								imgWidth: spectrum.imgWidth,
+								imgHeight: spectrum.imgHeight,
+							},
+						});
+						return spectrumToBoundingBox(spectrum);
+					}),
+				);
+				await addSpectrum({ data: { observationId } });
+				setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev]);
+			};
 		},
-		onError: (error) => notifyError("Error adding spectrum", error),
+		onError: (error) => notifyError("Error determine bounding boxes", error),
 	});
 
 	const addSpectrumMut = useMutation({

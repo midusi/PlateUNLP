@@ -111,7 +111,7 @@ export function usePredictBBs(
 
       const boundingBox: BoundingBox = {
         id: id++,
-        name: label.name,
+        name: "",
         x: x1,
         y: y1,
         width: w,

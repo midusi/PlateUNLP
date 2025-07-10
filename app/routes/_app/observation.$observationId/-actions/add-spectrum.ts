@@ -7,7 +7,7 @@ import * as s from "~/db/schema"
 export const addSpectrum = createServerFn({ method: "POST" })
   .validator(z.object({ observationId: z.string() }))
   .handler(async ({ data }) => {
-    const observation = await db.query.plate.findFirst({
+    const observation = await db.query.observation.findFirst({
       where: (observation, { eq }) => eq(observation.id, data.observationId),
     })
     if (!observation) throw new Error(`Observation with id ${data.observationId} not found`)
@@ -19,8 +19,8 @@ export const addSpectrum = createServerFn({ method: "POST" })
         type: "lamp",
         imgTop: 0,
         imgLeft: 0,
-        imgWidth: observation.imageWidth / 10,
-        imgHeight: observation.imageHeight / 10,
+        imgWidth: observation.imgWidth / 10,
+        imgHeight: observation.imgHeight / 10,
       })
       .returning({
         id: s.spectrum.id,
