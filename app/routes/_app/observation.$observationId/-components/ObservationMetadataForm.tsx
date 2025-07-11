@@ -6,6 +6,7 @@ import { useAppForm } from "~/hooks/use-app-form"
 import { notifyError } from "~/lib/notifications"
 import { ObservationMetadataSchema } from "~/types/spectrum-metadata"
 import { updateObservationMetadata } from "../-actions/update-observation-metadata"
+import { useMutation } from "@tanstack/react-query"
 
 export function ObservationMetadataForm({
   observationId,
@@ -15,6 +16,18 @@ export function ObservationMetadataForm({
   defaultValues: z.output<typeof ObservationMetadataSchema>
 }) {
   const router = useRouter()
+
+  const formCalculate = useAppForm({
+    defaultValues,
+    validators: { onChange: ObservationMetadataSchema },
+    onSubmit: async ({ value }) => {
+      try {
+        await updateObservationMetadata({ data: { observationId, metadata: value } })
+      } catch (error) {
+        notifyError("Failed to update observation metadata", error)
+      }
+    },
+  })
 
   const form = useAppForm({
     defaultValues,
@@ -26,6 +39,15 @@ export function ObservationMetadataForm({
         notifyError("Failed to update observation metadata", error)
       }
     },
+  })
+
+  /** Calculo de metadatos */
+  const calcaulateMetadataMut = useMutation({
+    mutationFn: async () => {
+      /** Logica de calculo de metadatos y actualización de parametros */
+      notifyError("Not implemented yet")
+    },
+    onError: (error) => notifyError("Error calculating spectrum metadata", error),
   })
 
   return (
@@ -48,6 +70,22 @@ export function ObservationMetadataForm({
             <form.AppField name="UT">
               {(field) => <field.TextField label="UT" placeholder="Universal time (hh:mm:ss) corresponding to half of the exposure duration" />}
             </form.AppField>
+
+            <div/>
+            <div/>
+            <Button 
+              disabled={calcaulateMetadataMut.isPending} 
+              onClick={() => calcaulateMetadataMut.mutate()}
+            >
+              <span
+                className={
+                  calcaulateMetadataMut.isPending
+                    ? "icon-[ph--spinner-bold] animate-spin"
+                    : "icon-[ph--floppy-disk-bold]"
+                }
+              />
+              Update Metadata
+            </Button>
 
             <hr className="col-span-full"/>
 

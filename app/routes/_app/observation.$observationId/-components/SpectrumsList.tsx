@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Separator } from "~/components/ui/separator"
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table"
+import * as s from "~/db/schema"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
 import { cn, idToColor } from "~/lib/utils"
@@ -18,7 +19,7 @@ type Spectrum = Awaited<ReturnType<typeof getSpectrums>>[number]
 function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
   return {
     id: spectrum.id,
-    name: spectrum.name,
+    name: "",
     color: idToColor(spectrum.id),
     top: spectrum.imgTop,
     left: spectrum.imgLeft,
@@ -39,12 +40,51 @@ export function SpectrumsList({
   )
 
   const determineBBFunction = usePredictBBs(
-    1024,
+    1088,
     "spectrum_part_segmentator.onnx",
     classesSpectrumDetection,
     false,
     0.7,
   )
+
+  const determineBBMut = useMutation({
+    mutationFn: async () => {
+      /** Obtener ancho de la imagen */
+      const img = new Image()
+      img.src = `/observation/${observationId}/image`
+      img.onload = async () => {
+        /** Obtener predicciones */
+        const boundingBoxes = await determineBBFunction(`/observation/${observationId}/image`)
+        /** Actualizar base de datos */
+        const boundingBoxesFormated = await Promise.all(
+          boundingBoxes.map(async (bb) => {
+            console.log("dentro")
+            let spectrum = await addSpectrum({ data: { observationId } })
+            spectrum = {
+              ...spectrum,
+              imgTop: bb.y,
+              imgLeft: 0,
+              imgWidth: img.naturalWidth,
+              imgHeight: bb.height,
+            }
+            await updateSpectrum({
+              data: {
+                spectrumId: spectrum.id,
+                imgTop: spectrum.imgTop,
+                imgLeft: spectrum.imgLeft,
+                imgWidth: spectrum.imgWidth,
+                imgHeight: spectrum.imgHeight,
+              },
+            })
+            return spectrumToBoundingBox(spectrum)
+          }),
+        )
+        await addSpectrum({ data: { observationId } })
+        setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev])
+      }
+    },
+    onError: (error) => notifyError("Error determine bounding boxes", error),
+  })
 
   const addSpectrumMut = useMutation({
     mutationFn: async () => {
@@ -83,12 +123,12 @@ export function SpectrumsList({
             <div className="flex items-center justify-evenly">
               <Button
                 size="sm"
-                disabled={addSpectrumMut.isPending}
-                onClick={() => notifyError("Not implemented yet")} // Elazar autodetector
+                disabled={addSpectrumMut.isPending || determineBBMut.isPending}
+                onClick={() => determineBBMut.mutate()}
               >
                 <span
                   className={cn(
-                    addSpectrumMut.isPending
+                    determineBBMut.isPending
                       ? "icon-[ph--spinner-bold] animate-spin"
                       : "icon-[ph--magic-wand-bold]",
                   )}
@@ -98,7 +138,7 @@ export function SpectrumsList({
               <Button
                 size="sm"
                 variant="secondary"
-                disabled={addSpectrumMut.isPending}
+                disabled={addSpectrumMut.isPending || determineBBMut.isPending}
                 onClick={() => addSpectrumMut.mutate()}
               >
                 <span
