@@ -10,7 +10,7 @@ import { TZDate } from "@date-fns/tz"
 import { UTCDate } from "@date-fns/utc"
 import { formatDate } from "date-fns"
 import { err, ok, type Result, ResultAsync } from "neverthrow"
-import { z } from "zod/v4"
+import { z } from "zod"
 import {
   ARCSEC_TO_RAD,
   type BigNumber,

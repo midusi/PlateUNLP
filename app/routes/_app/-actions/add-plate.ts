@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
 import { uploadFile } from "~/lib/uploads"

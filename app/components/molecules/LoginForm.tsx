@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import type React from "react"
 import { useForm } from "react-hook-form"
-import type { z } from "zod/v4"
+import type { z } from "zod"
 import { loginFormSchema } from "~/lib/loginFormSchema"
 import { Button } from "../atoms/button"
 import { Input } from "../atoms/input"

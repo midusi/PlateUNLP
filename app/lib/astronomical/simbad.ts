@@ -6,7 +6,7 @@
 
 import dedent from "dedent"
 import { err, ok, type Result } from "neverthrow"
-import { z } from "zod/v4"
+import { z } from "zod"
 
 /**
  * SIMBAD service hosted by the Strasbourg Astronomical Data Center (CDS)

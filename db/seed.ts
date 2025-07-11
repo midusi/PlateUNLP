@@ -2,7 +2,7 @@ import "dotenv/config"
 
 import { reset } from "drizzle-seed"
 import pc from "picocolors"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { getJulianDate, getModifiedJulianDate } from "~/lib/astronomical/datetime"
 import { hashPassword } from "~/lib/auth/password"
 import { db } from "."

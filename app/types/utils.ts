@@ -1,4 +1,4 @@
-import { z } from "zod/v4"
+import { z } from "zod"
 
 /**
  * As per the FITS standard version 4.0 section "4.2.1.1 Single-record string

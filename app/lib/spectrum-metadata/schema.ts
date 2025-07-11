@@ -1,4 +1,4 @@
-import { z } from "zod/v4"
+import { z } from "zod"
 
 export const getSpectrumMetadataInputSchema = z.object({
   OBSERVAT: z.string().nonempty(),
@@ -7,9 +7,7 @@ export const getSpectrumMetadataInputSchema = z.object({
   UT: z.string().nonempty(),
 })
 
-export type GetSpectrumMetadataInput = z.infer<
-  typeof getSpectrumMetadataInputSchema
->
+export type GetSpectrumMetadataInput = z.infer<typeof getSpectrumMetadataInputSchema>
 
 export const spectrumMetadataSchema = z.object({
   OBJECT: z.string().nonempty(),

@@ -1,5 +1,5 @@
 import { useRouter } from "@tanstack/react-router"
-import type { z } from "zod/v4"
+import type { z } from "zod"
 import { SelectObservatory } from "~/components/forms/SelectObservatory"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter } from "~/components/ui/card"

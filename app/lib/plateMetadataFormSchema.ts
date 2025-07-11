@@ -1,5 +1,4 @@
-import { z } from "zod/v4"
-
+import { z } from "zod"
 
 export const plateMetadataFormSchema = z.object({
   OBSERVAT: z.string().nonempty("This field is required"),

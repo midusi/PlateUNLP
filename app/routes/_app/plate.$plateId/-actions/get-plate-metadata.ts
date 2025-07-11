@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query"
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { db } from "~/db"
 
 export const getPlateMetadata = createServerFn()

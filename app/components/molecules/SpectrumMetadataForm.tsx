@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { type Dispatch, type SetStateAction, useEffect, useImperativeHandle, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import type { z } from "zod/v4"
+import type { z } from "zod"
 import { Label } from "~/components/atoms/label"
 import { spectrumMetadataFormSchema } from "~/lib/spectrumMetadataFormSchema"
 import { Input } from "../atoms/input"

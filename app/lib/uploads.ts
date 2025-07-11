@@ -1,7 +1,7 @@
 import fs from "node:fs/promises"
 import { err, ok, type Result } from "neverthrow"
 import sharp from "sharp"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
 import { env } from "~/env"

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { db } from "~/db"
 import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getSpectrums } from "./-actions/get-spectrums"

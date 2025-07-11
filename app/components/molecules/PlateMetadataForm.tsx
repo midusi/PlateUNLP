@@ -7,7 +7,7 @@ import {
   useImperativeHandle,
 } from "react"
 import { Controller, useForm } from "react-hook-form"
-import type { z } from "zod/v4"
+import type { z } from "zod"
 import { Label } from "~/components/atoms/label"
 import { observatories } from "~/lib/observatories"
 import { plateMetadataFormSchema } from "~/lib/plateMetadataFormSchema"

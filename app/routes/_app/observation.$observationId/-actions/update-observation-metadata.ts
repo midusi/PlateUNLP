@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
 import { ObservationMetadataSchema } from "~/types/spectrum-metadata"
