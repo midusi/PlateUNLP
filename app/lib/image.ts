@@ -33,7 +33,6 @@ export function crop(
 ): Promise<
 	{
 		data: Uint8Array;
-		blob:,
 		width: number;
 		height: number;
 	}[]
