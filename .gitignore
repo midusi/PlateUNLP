@@ -13,19 +13,8 @@ lerna-debug.log*
 
 # TanStack
 node_modules
-.cache
-.vercel
-.output
 .nitro
-/build/
-/api/
-/server/build
-/public/build# Sentry Config File
-.env.sentry-build-plugin
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+.output
 .tanstack
 
 # Editor directories and files
