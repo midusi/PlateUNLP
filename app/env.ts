@@ -3,8 +3,8 @@ import { z } from "zod"
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.url(),
-    DATABASE_TOKEN: z.url().optional(),
+    DATABASE_URL: z.union([z.url({ protocol: /^libsql$/ }), z.string().startsWith("file:")]),
+    DATABASE_TOKEN: z.string().optional(),
     UPLOADS_DIR: z.string(),
   },
 
