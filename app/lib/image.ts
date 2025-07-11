@@ -17,19 +17,27 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
 /**
  * Dada una imagen en un src devuelve una subimagen acorde a las especificaciones de recorte.
  * @param {string} src - Source url.
- * @param {number} left - Limite izquierda.
- * @param {number} top - Limite arriba.
- * @param {number} width - Ancho.
- * @param {number} height - Alto.
- * @returns {Promise<Uint8Array>} - Subimagen codificada com matriz de pixeles.
+ * @param {{left: number, top: number, width: number, height: number}[]} regions - Regiones
+ * a recortar.
+ * @returns {Promise<{data:Uint8Array,width: number,height: number}[]>} - Subimagenes codificadas como
+ * matrices de pixeles.
  */
 export function crop(
 	src: string,
-	left: number,
-	top: number,
-	width: number,
-	height: number,
-): Promise<Uint8Array> {
+	regions: {
+		left: number;
+		top: number;
+		width: number;
+		height: number;
+	}[],
+): Promise<
+	{
+		data: Uint8Array;
+		blob:,
+		width: number;
+		height: number;
+	}[]
+> {
 	return new Promise((resolve, reject) => {
 		// Me estoy dando cuenta que esto se puede mejorar haciendo que con
 		// un solo canvas recortar multiples  subimagenes, puede ser?
@@ -38,16 +46,28 @@ export function crop(
 
 		image.onload = () => {
 			const canvas = document.createElement("canvas");
-			canvas.width = width;
-			canvas.height = height;
+			const ctx = canvas.getContext("2d", { willReadFrequently: true });
+			if (!ctx) return reject(new Error("Could not get canvas context"));
 
-			const context = canvas.getContext("2d");
-			if (!context) return reject(new Error("Could not get canvas context"));
+			const results: {
+				data: Uint8Array;
+				width: number;
+				height: number;
+			}[] = [];
+			for (const { left, top, width, height } of regions) {
+				canvas.width = width;
+				canvas.height = height;
+				ctx.clearRect(0, 0, width, height);
+				ctx.drawImage(image, left, top, width, height, 0, 0, width, height);
+				const data = ctx.getImageData(0, 0, width, height).data;
+				results.push({
+					data: new Uint8Array(data.buffer.slice(0)),
+					width,
+					height,
+				});
+			}
 
-			context.drawImage(image, left, top, width, height, 0, 0, width, height);
-
-			const imgData = context.getImageData(0, 0, width, height);
-			resolve(new Uint8Array(imgData.data.buffer));
+			resolve(results);
 		};
 
 		image.onerror = (err) => reject(err);

@@ -29,9 +29,7 @@ export function ImageWithPixelExtraction<T extends Uint8Array | Uint8ClampedArra
     <div className={clsx("relative w-full items-center flex justify-center ", "px-16", "pt-2")}>
       <div className="flex flex-col">
         {title && (
-          <h2 className="pb-2 flex justify-center text-xl font-semibold text-slate-500">
-            {title}
-          </h2>
+          <h2 className="pb-2 flex justify-center text-xl font-semibold text-slate-500">{title}</h2>
         )}
         <ImageWithDraws
           image={image}
@@ -66,7 +64,7 @@ interface ImageWithDrawsProps<T extends Uint8Array | Uint8ClampedArray | Buffer>
 }
 
 /**
- * Dibuja una imagen con funciones, puntos y líneas personalizadas sobre ella. 
+ * Dibuja una imagen con funciones, puntos y líneas personalizadas sobre ella.
  */
 function ImageWithDraws<T extends Uint8Array | Uint8ClampedArray | Buffer>({
   image,
@@ -88,7 +86,12 @@ function ImageWithDraws<T extends Uint8Array | Uint8ClampedArray | Buffer>({
     const blob = new Blob([image], { type: "image/png" }) // o "image/jpeg", según corresponda
     const objectUrl = URL.createObjectURL(blob)
 
+    /** Imagen a devolver */
     const img = new Image()
+    /** Asociar URL */
+    img.src = objectUrl
+    /** Asociar ALT */
+    if (alt) img.alt = alt
     img.onload = () => {
       canvas.width = img.width
       canvas.height = img.height
@@ -168,12 +171,7 @@ function ImageWithDraws<T extends Uint8Array | Uint8ClampedArray | Buffer>({
       URL.revokeObjectURL(objectUrl)
     }
 
-    /** Asociar URL */
-    img.src = objectUrl
-    /** Asociar ALT */
-    if (alt) img.alt = alt
-
-    /** Limpieza por si el componente se desmonta antes de cargar */ 
+    /** Limpieza por si el componente se desmonta antes de cargar */
     return () => {
       URL.revokeObjectURL(objectUrl)
     }

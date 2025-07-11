@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { useExtractFeatures } from "~/hooks/use-extract-features"
 import { useGlobalStore } from "~/hooks/use-global-store"
 import { cropImages } from "~/lib/cropImage"
+import { useExtractFeatures } from "~/lib/extract-features"
 import type { BoundingBox } from "~/types/BoundingBox"
 import type { StepProps } from "~/types/StepProps"
 import { Button } from "../atoms/button"
