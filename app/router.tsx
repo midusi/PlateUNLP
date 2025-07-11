@@ -16,6 +16,8 @@ export function createRouter() {
       defaultErrorComponent: DefaultCatchBoundary,
       defaultNotFoundComponent: () => <NotFound />,
       scrollRestoration: true,
+      // Do not cache route's data after it's unloaded
+      defaultGcTime: 0,
     }),
     queryClient,
   )
