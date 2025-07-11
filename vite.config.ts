@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
+import react from "@vitejs/plugin-react-oxc"
 import { defineConfig } from "vite"
-import tsConfigPaths from "vite-tsconfig-paths"
 
 export default defineConfig({
   server: {
@@ -9,14 +9,15 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
+    react(),
     tanstackStart({
       target: "node-server",
       tsr: { srcDirectory: "app" },
-    }),
-    tsConfigPaths({
-      projects: ["./tsconfig.json"],
+      customViteReactPlugin: true,
     }),
   ],
+  experimental: { enableNativePlugin: true },
+  resolve: { tsconfigPaths: true },
   assetsInclude: ["**/*.onnx"],
   optimizeDeps: {
     exclude: ["onnxruntime-web"],
