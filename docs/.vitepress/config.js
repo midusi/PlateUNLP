@@ -73,9 +73,7 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [
-      { icon: "github", link: "https://github.com/midusi/PlateUNLP" },
-    ],
+    socialLinks: [{ icon: "github", link: "https://github.com/midusi/PlateUNLP" }],
     footer: {
       message: `This work is licensed under <a target="_blank" rel="license noopener noreferrer" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.`,
     },

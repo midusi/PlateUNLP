@@ -1,0 +1,31 @@
+@font-face {
+  font-family: GeistVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/Geist[wght].woff2") format("woff2");
+}
+
+@font-face {
+  font-family: GeistVariable;
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/Geist-Italic[wght].woff2") format("woff2");
+}
+
+@font-face {
+  font-family: GeistMonoVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/GeistMono[wght].woff2") format("woff2");
+}
+
+@font-face {
+  font-family: GeistMonoVariable;
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/GeistMono-Italic[wght].woff2") format("woff2");
+}

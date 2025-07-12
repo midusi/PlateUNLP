@@ -1,4 +1,6 @@
-packages:
-  - "app/"
-  - "docs/"
-  - "scripts/"
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - esbuild
+  - msw
+  - protobufjs
+  - sharp
