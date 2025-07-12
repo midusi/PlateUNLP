@@ -21,6 +21,7 @@
     "pnpm": ">=10.12.1"
   },
   "dependencies": {
+    "@base-ui-components/react": "1.0.0-beta.1",
     "@date-fns/tz": "^1.2.0",
     "@date-fns/utc": "^2.1.0",
     "@heroicons/react": "^2.2.0",
