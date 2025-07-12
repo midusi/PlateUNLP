@@ -40,11 +40,7 @@ export function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
             width={width}
             margin={{ top: 0, right: 32, bottom: 20, left: 32 }}
           >
-            <Axis
-              orientation="bottom"
-              tickFormat={(d) => `${d}`}
-              numTicks={5}
-            />
+            <Axis orientation="bottom" tickFormat={(d) => `${d}`} numTicks={5} />
             <Axis orientation="left" tickFormat={(d) => `${d}`} numTicks={5} />
             <Grid numTicks={10} />
             <AreaSeries

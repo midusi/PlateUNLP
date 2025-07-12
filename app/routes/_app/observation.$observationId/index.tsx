@@ -89,7 +89,7 @@ function RouteComponent() {
   const { initialValues, initialSpectrums } = Route.useLoaderData()
 
   return (
-    <div className="max-w-6xl mx-auto px-8">
+    <div className="mx-auto max-w-6xl px-8">
       <ObservationMetadataForm observationId={observationId} defaultValues={initialValues} />
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={initialSpectrums} />

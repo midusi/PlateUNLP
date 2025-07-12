@@ -26,10 +26,10 @@ export function ImageWithPixelExtraction<T extends Uint8Array | Uint8ClampedArra
   opening,
 }: ImageWithPixelExtractionProps<T>) {
   return (
-    <div className={clsx("relative w-full items-center flex justify-center ", "px-16", "pt-2")}>
+    <div className={clsx("relative flex w-full items-center justify-center ", "px-16", "pt-2")}>
       <div className="flex flex-col">
         {title && (
-          <h2 className="pb-2 flex justify-center text-xl font-semibold text-slate-500">{title}</h2>
+          <h2 className="flex justify-center pb-2 font-semibold text-slate-500 text-xl">{title}</h2>
         )}
         <ImageWithDraws
           image={image}
@@ -180,7 +180,7 @@ function ImageWithDraws<T extends Uint8Array | Uint8ClampedArray | Buffer>({
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-full"
+      className="h-full w-full"
       style={{ width: "100%", height: "auto", display: "block" }}
     />
   )

@@ -13,6 +13,16 @@
         "noStaticElementInteractions": "off",
         "useAltText": "off"
       },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "info",
+          "options": {
+            "attributes": ["classList"],
+            "functions": ["cn", "clsx", "cva", "tw"]
+          }
+        }
+      },
       "suspicious": {
         "noConsole": "warn"
       }

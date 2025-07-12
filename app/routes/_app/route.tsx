@@ -23,8 +23,8 @@ function RouteComponent() {
         <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <Outlet />
         </main>
-        <footer className="mt-8 mb-4 text-xs italic text-center text-muted-foreground">
-          Copyright @{new Date().getFullYear()} III-LIDI, Facultad de Informática, Universidad
+        <footer className="mt-8 mb-4 text-center text-muted-foreground text-xs italic">
+          Copyright ©{new Date().getFullYear()} III-LIDI, Facultad de Informática, Universidad
           Nacional de la Plata
         </footer>
       </SidebarInset>

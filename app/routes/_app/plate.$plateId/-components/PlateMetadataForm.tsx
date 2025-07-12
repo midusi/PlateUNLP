@@ -44,7 +44,7 @@ export function PlateMetadataForm({
     >
       <Card>
         <CardContent>
-          <div className="grid grid-cols-3 justify-center content-normal gap-4">
+          <div className="grid grid-cols-3 content-normal justify-center gap-4">
             <form.Field name="OBSERVAT">
               {(field) => (
                 <div>

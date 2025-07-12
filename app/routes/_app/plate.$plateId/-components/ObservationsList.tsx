@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import { useState } from "react"
 import { type BoundingBox, BoundingBoxer } from "~/components/BoundingBoxer"
 import { Button } from "~/components/ui/button"
@@ -12,7 +13,6 @@ import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
 import type { getObservations } from "../-actions/get-observations"
 import { updateObservation } from "../-actions/update-observation"
-import { Link } from "@tanstack/react-router"
 
 type Observation = Awaited<ReturnType<typeof getObservations>>[number]
 
@@ -56,8 +56,8 @@ export function ObservationsList({
   })
 
   return (
-    <Card className="p-0 overflow-hidden">
-      <CardContent className="grid grid-cols-[1fr_300px] h-[500px] p-0">
+    <Card className="overflow-hidden p-0">
+      <CardContent className="grid h-[500px] grid-cols-[1fr_300px] p-0">
         <BoundingBoxer
           imageSrc={`/plate/${plateId}/image`}
           boundingBoxes={boundingBoxes}
@@ -121,7 +121,10 @@ export function ObservationsList({
                 <TableRow key={boundingBox.id}>
                   <TableCell className="font-medium"></TableCell>
                   <TableCell>
-                    <Link to="/observation/$observationId" params={{observationId:boundingBox.id}}>
+                    <Link
+                      to="/observation/$observationId"
+                      params={{ observationId: boundingBox.id }}
+                    >
                       {boundingBox.name}
                     </Link>
                   </TableCell>

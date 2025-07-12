@@ -28,10 +28,10 @@ function RouteComponent() {
   const { project } = Route.useLoaderData()
 
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-4">
-      <h1 className="text-xl font-medium underline">{project.name}</h1>
+    <div className="flex h-full flex-col items-center justify-center gap-4">
+      <h1 className="font-medium text-xl underline">{project.name}</h1>
       <form
-        className="border-2 border-accent rounded-lg"
+        className="rounded-lg border-2 border-accent"
         onSubmit={async (e) => {
           e.preventDefault()
           const data = new FormData(e.currentTarget)
@@ -48,7 +48,7 @@ function RouteComponent() {
       >
         <input type="hidden" name="projectId" value={project.id} />
         <input type="file" accept="image/*" className="focus:outline-none" name="plate" />
-        <button type="submit" className="bg-accent text-white px-2 rounded-w-lg">
+        <button type="submit" className="rounded-w-lg bg-accent px-2 text-white">
           Subir imagen
         </button>
       </form>

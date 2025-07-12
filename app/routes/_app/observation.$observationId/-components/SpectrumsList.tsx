@@ -95,8 +95,8 @@ export function SpectrumsList({
   })
 
   return (
-    <Card className="p-0 overflow-hidden">
-      <CardContent className="grid grid-cols-[1fr_300px] h-[500px] p-0">
+    <Card className="overflow-hidden p-0">
+      <CardContent className="grid h-[500px] grid-cols-[1fr_300px] p-0">
         <BoundingBoxer
           imageSrc={`/observation/${observationId}/image`}
           boundingBoxes={boundingBoxes}

@@ -60,7 +60,7 @@ export function ObservationMetadataForm({
     >
       <Card>
         <CardContent>
-          <div className="grid grid-cols-3 justify-center content-normal gap-4">
+          <div className="grid grid-cols-3 content-normal justify-center gap-4">
             <form.AppField name="OBJECT">
               {(field) => (
                 <field.TextField label="OBJECT" placeholder="Name of the object observed" />

@@ -14,9 +14,9 @@ function RouteComponent() {
   const { projects } = Route.useLoaderData()
 
   return (
-    <ul className="h-full flex flex-col items-center justify-center gap-4">
+    <ul className="flex h-full flex-col items-center justify-center gap-4">
       {projects.map(({ id, name }) => (
-        <li key={id} className="underline text-blue-500">
+        <li key={id} className="text-blue-500 underline">
           <Link to="/project/$projectId" params={{ projectId: id }}>
             {name}
           </Link>

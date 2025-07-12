@@ -110,7 +110,7 @@ export function BoundingBoxer({
   }, [containerSize.width, containerSize.height, imageSize.width, imageSize.height])
 
   return (
-    <div ref={containerRef} className="bg-checkered w-full h-full min-w-0 min-h-0 relative">
+    <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0 bg-checkered">
       {imageScale ? (
         <TransformWrapper
           initialScale={imageScale}
@@ -151,7 +151,7 @@ function BoundingBoxControls({ showZoomActions }: { showZoomActions: boolean }) 
   const { zoomIn, zoomOut } = useControls()
 
   return (
-    <div className="absolute top-2 right-2 flex gap-2 z-10">
+    <div className="absolute top-2 right-2 z-10 flex gap-2">
       {showZoomActions && (
         <Button size="icon" variant="outline" className="size-8" onClick={() => zoomIn()}>
           <span className="icon-[ph--magnifying-glass-plus-bold] size-4" />
@@ -302,11 +302,11 @@ function BoundingBoxComponent({
         gridTemplateColumns: `${handleWidth} 1fr ${handleWidth}`,
         gridTemplateRows: `${handleWidth} 1fr ${handleWidth}`,
       }}
-      className="absolute group grid"
+      className="group absolute grid"
       data-resizing={resizing !== null}
     >
       <p
-        className="top-0 left-0 absolute origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"
+        className="absolute top-0 left-0 origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"
         style={{
           backgroundColor: boundingBox.color,
           transform: `scale(${1 / scale})`,

@@ -12,7 +12,4 @@ export const BBClasses = {
 
 export const classesSpectrumDetection: BBClassesProps[] = [BBClasses.Spectrum]
 
-export const classesSpectrumPartSegmentation: BBClassesProps[] = [
-  BBClasses.Lamp,
-  BBClasses.Science,
-]
+export const classesSpectrumPartSegmentation: BBClassesProps[] = [BBClasses.Lamp, BBClasses.Science]

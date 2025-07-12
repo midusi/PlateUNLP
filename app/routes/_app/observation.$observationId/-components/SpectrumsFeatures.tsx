@@ -99,7 +99,7 @@ export function SpectrumsFeatures({
         {isLoading || !specAnalysis ? (
           <span className={cn("icon-[ph--spinner-bold] animate-spin")} />
         ) : (
-          <div className="flex flex-col justify-center content-center gap-4">
+          <div className="flex flex-col content-center justify-center gap-4">
             <div id="Spectrum-Extracted-Science">
               <ImageWithPixelExtraction
                 title="Science Spectrum"
