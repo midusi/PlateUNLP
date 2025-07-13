@@ -11,6 +11,7 @@ import { notifyError } from "~/lib/notifications"
 import { cn, idToColor } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addSpectrum } from "../-actions/add-spectrum"
+import { addSpectrums } from "../-actions/add-spectrums"
 import type { getSpectrums } from "../-actions/get-spectrums"
 import { updateSpectrum } from "../-actions/update-spectrum"
 
@@ -56,30 +57,30 @@ export function SpectrumsList({
         /** Obtener predicciones */
         const boundingBoxes = await determineBBFunction(`/observation/${observationId}/image`)
         /** Actualizar base de datos */
-        const boundingBoxesFormated = await Promise.all(
-          boundingBoxes.map(async (bb) => {
-            console.log("dentro")
-            let spectrum = await addSpectrum({ data: { observationId } })
-            spectrum = {
-              ...spectrum,
-              imgTop: bb.y,
-              imgLeft: 0,
-              imgWidth: img.naturalWidth,
-              imgHeight: bb.height,
-            }
-            await updateSpectrum({
-              data: {
-                spectrumId: spectrum.id,
-                imgTop: spectrum.imgTop,
-                imgLeft: spectrum.imgLeft,
-                imgWidth: spectrum.imgWidth,
-                imgHeight: spectrum.imgHeight,
-              },
-            })
-            return spectrumToBoundingBox(spectrum)
-          }),
-        )
-        await addSpectrum({ data: { observationId } })
+        const science = {
+          imgTop: boundingBoxes[0].y,
+          imgLeft: 0, // Forzar ancho maximo
+          imgWidth: img.naturalWidth, // Forzar ancho maximo
+          imgHeight: boundingBoxes[0].height,
+        }
+        const lamp1 = {
+          imgTop: boundingBoxes[1].y,
+          imgLeft: 0, // Forzar ancho maximo
+          imgWidth: img.naturalWidth, // Forzar ancho maximo
+          imgHeight: boundingBoxes[1].height,
+        }
+        const lamp2 = {
+          imgTop: boundingBoxes[2].y,
+          imgLeft: 0, // Forzar ancho maximo
+          imgWidth: img.naturalWidth, // Forzar ancho maximo
+          imgHeight: boundingBoxes[2].height,
+        }
+        const newSpectrums = await addSpectrums({ data: { observationId, science, lamp1, lamp2 } })
+        const boundingBoxesFormated = [
+          spectrumToBoundingBox(newSpectrums.science),
+          spectrumToBoundingBox(newSpectrums.lamp1),
+          spectrumToBoundingBox(newSpectrums.lamp2),
+        ]
         setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev])
       }
     },
