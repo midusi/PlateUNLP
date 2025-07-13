@@ -190,7 +190,7 @@ async function main() {
   await createUser("Simone Garnett", "sgarnett@saintjohns.edu.au", "67890")
 
   console.log(pc.gray("❖ Creating projects..."))
-  await createProject("St. John's University", "canagonye@saintjohns.edu.au")
+  await createProject("Observatorio Astronómico de La Plata", "canagonye@saintjohns.edu.au")
 }
 
 main()
