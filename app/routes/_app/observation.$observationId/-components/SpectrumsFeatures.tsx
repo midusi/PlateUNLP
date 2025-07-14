@@ -20,6 +20,8 @@ export function SpectrumsFeatures({
   const useSpline = false
   const reuseScienceFunction = true
 
+  console.log(spectrums)
+
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [science, setScience] = useState<Uint8Array<ArrayBufferLike>>()
   const [lamp1, setLamp1] = useState<Uint8Array<ArrayBufferLike>>()
