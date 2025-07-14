@@ -6,10 +6,10 @@ import { db } from "~/db"
 import { extractFeatures, type extractFeaturesResponse } from "~/lib/extract-features"
 import { crop } from "~/lib/image"
 import { cn } from "~/lib/utils"
+import { ImageWithPixelExtraction } from "../../../../components/ImageWithPixelExtraction"
+import { SimpleFunctionXY } from "../../../../components/SimpleFunctionXY"
 import { ColapsableDown } from "../../-components/ColapsableDown"
 import type { getSpectrums } from "../-actions/get-spectrums"
-import { ImageWithPixelExtraction } from "./ImageWithPixelExtraction"
-import { SimpleFunctionXY } from "./SimpleFunctionXY"
 
 export function SpectrumsFeatures({
   observationId,
