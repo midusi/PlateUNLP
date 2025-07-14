@@ -33,3 +33,95 @@
     vertical-align: middle;
   }
 }
+
+/* Toaster */
+
+@layer components {
+  .toast-item {
+    --toast-bg: var(--popover);
+    --toast-foreground: var(--popover-foreground);
+    --toast-border: var(--border);
+
+    &[data-type='error'] {
+      --toast-bg: color-mix(in oklab, var(--destructive) 5%, var(--background));
+      --toast-foreground: var(--destructive);
+      --toast-border: var(--destructive);
+    }
+
+    --gap: 0.75rem;
+    --offset-y: calc(
+      var(--toast-offset-y) * -1 + (var(--toast-index) * var(--gap) * -1) +
+        var(--toast-swipe-movement-y)
+    );
+    @apply absolute right-0 bottom-0;
+    @apply w-full m-0 p-4;
+    @apply bg-(--toast-bg) bg-clip-padding shadow-lg;
+    @apply border border-solid border-(--toast-border) rounded-md;
+    @apply select-auto cursor-default;
+    transition:
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.5s;
+    z-index: calc(1000 - var(--toast-index));
+    transform: translateX(var(--toast-swipe-movement-x))
+      translateY(calc(var(--toast-swipe-movement-y) + (min(var(--toast-index), 10) * -20%)))
+      scale(calc(max(0, 1 - (var(--toast-index) * 0.1))));
+    
+    &::after {
+      top: 100%;
+    }
+
+    &[data-expanded] {
+      transform: translateX(var(--toast-swipe-movement-x)) translateY(var(--offset-y));
+    }
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      transform: translateY(150%);
+    }
+
+    &[data-limited] {
+      opacity: 0;
+    }
+
+    &[data-ending-style] {
+      opacity: 0;
+
+      &[data-swipe-direction='up'] {
+        transform: translateY(calc(var(--toast-swipe-movement-y) - 150%));
+      }
+      &[data-swipe-direction='left'] {
+        transform: translateX(calc(var(--toast-swipe-movement-x) - 150%)) translateY(var(--offset-y));
+      }
+      &[data-swipe-direction='right'] {
+        transform: translateX(calc(var(--toast-swipe-movement-x) + 150%)) translateY(var(--offset-y));
+      }
+      &[data-swipe-direction='down'] {
+        transform: translateY(calc(var(--toast-swipe-movement-y) + 150%));
+      }
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      left: 0;
+      height: calc(var(--gap) + 1px);
+    }
+
+    /* Title */
+    & > h2 {
+      @apply text-(--toast-foreground) font-medium text-sm leading-5;
+    }
+
+    /* Description */
+    & > p {
+      @apply text-(--toast-foreground) text-sm leading-5;
+    }
+
+    /* Close */
+    & > button {
+      @apply absolute top-2 right-2 flex size-5 items-center justify-center rounded border-none;
+      @apply text-(--toast-foreground) !bg-transparent;
+    }
+  }
+}

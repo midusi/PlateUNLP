@@ -12,7 +12,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import type * as React from "react"
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary"
 import { Pending } from "~/components/Pending"
-import { Toaster } from "~/components/ui/sonner"
+import { Toaster } from "~/components/ui/toast"
 import { seo } from "~/lib/seo"
 
 import appCss from "~/styles/app.css?url"
@@ -78,7 +78,7 @@ function RootComponent() {
       <div className="root">
         <Outlet />
       </div>
-      <Toaster richColors />
+      <Toaster />
     </RootDocument>
   )
 }

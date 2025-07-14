@@ -74,7 +74,6 @@
     "react-zoom-pan-pinch": "^3.7.0",
     "resizable-panes-react": "^6.0.26",
     "sharp": "^0.34.3",
-    "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.0.5",
