@@ -3,7 +3,7 @@ import type { z } from "zod"
 import { SelectObservatory } from "~/components/forms/SelectObservatory"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter } from "~/components/ui/card"
-import { Label } from "~/components/ui/label"
+import { Field, FieldControl, FieldError, FieldLabel } from "~/components/ui/field"
 import { useAppForm } from "~/hooks/use-app-form"
 import { notifyError } from "~/lib/notifications"
 import { PlateMetadataSchema } from "~/types/spectrum-metadata"
@@ -44,16 +44,20 @@ export function PlateMetadataForm({
     >
       <Card>
         <CardContent>
-          <div className="grid grid-cols-3 content-normal justify-center gap-4">
+          <div className="grid grid-cols-3 items-start gap-4">
             <form.Field name="OBSERVAT">
               {(field) => (
-                <div>
-                  <Label>OBSERVAT</Label>
-                  <SelectObservatory value={field.state.value} setValue={field.handleChange} />
+                <Field name={field.name}>
+                  <FieldLabel>OBSERVAT</FieldLabel>
+                  <FieldControl
+                    render={
+                      <SelectObservatory value={field.state.value} setValue={field.handleChange} />
+                    }
+                  />
                   {field.state.meta.errors[0] && (
-                    <p className="text-red-500">{field.state.meta.errors[0].message}</p>
+                    <FieldError>{field.state.meta.errors[0].message}</FieldError>
                   )}
-                </div>
+                </Field>
               )}
             </form.Field>
             <form.AppField name="PLATE-N">

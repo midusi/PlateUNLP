@@ -2,3 +2,34 @@
   background:
     repeating-conic-gradient(var(--muted) 0 25%, var(--color-background) 0 50%) 50% / 50px 50px;
 }
+
+@utility scrollbar-* {
+  &::-webkit-scrollbar {
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb,
+  &::-webkit-scrollbar-corner {
+    border-radius: 9999px;
+    border-style: solid;
+    border-width: 4px;
+    border-color: transparent;
+    background-color: --value(--color- *);
+    background-clip: content-box;
+    padding: 1px;
+  }
+}
+
+/* Iconify icons */
+
+@custom-variant inner-icon {
+  :is(& > span[class*='icon-']), :is(& > svg) {
+    @slot;
+  }
+}
+
+@layer components {
+  span[class*='icon-'] {
+    display: block !important;
+    vertical-align: middle;
+  }
+}

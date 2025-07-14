@@ -4,3 +4,6 @@ onlyBuiltDependencies:
   - msw
   - protobufjs
   - sharp
+overrides:
+  '@base-ui-components/react': 'https://pkg.pr.new/@base-ui-components/react@2105'
+  '@base-ui-components/utils': 'https://pkg.pr.new/@base-ui-components/utils@2105'

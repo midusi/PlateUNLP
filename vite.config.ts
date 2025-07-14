@@ -11,9 +11,10 @@ export default defineConfig({
     tailwindcss(),
     react(),
     tanstackStart({
+      customViteReactPlugin: true,
       target: "node-server",
       tsr: { srcDirectory: "app" },
-      customViteReactPlugin: true,
+      spa: { enabled: true },
     }),
   ],
   experimental: { enableNativePlugin: true },

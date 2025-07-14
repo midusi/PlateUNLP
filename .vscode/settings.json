@@ -2,6 +2,7 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
+  "tailwindCSS.classFunctions": ["cn", "clsx", "cva", "tw"],
 
   // TanStack Router
   "files.watcherExclude": {

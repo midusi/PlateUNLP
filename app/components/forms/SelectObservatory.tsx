@@ -1,16 +1,10 @@
+import { Combobox } from "@base-ui-components/react/combobox"
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { createServerFn } from "@tanstack/react-start"
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
-import { useState } from "react"
+import { matchSorter } from "match-sorter"
+import { useMemo, useState } from "react"
 import { Button } from "~/components/ui/button"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "~/components/ui/command"
+import { Input } from "~/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover"
 import { db } from "~/db"
 import { cn } from "~/lib/utils"
@@ -18,7 +12,7 @@ import { cn } from "~/lib/utils"
 const getObservatories = createServerFn().handler(async () => {
   const observatories = await db.query.observatory.findMany({
     columns: { id: true, name: true, aliases: true },
-    orderBy: (t, { asc }) => asc(t.id),
+    orderBy: (t, { asc }) => asc(t.name),
   })
   return observatories
 })
@@ -29,9 +23,7 @@ export const getObservatoriesQueryOptions = () =>
     queryFn: () => getObservatories(),
   })
 
-function formatObservatory(observatory?: { id: string; name: string }) {
-  return observatory ? `[${observatory.id}] ${observatory.name}` : "Unknown..."
-}
+type Observatory = Awaited<ReturnType<typeof getObservatories>>[number]
 
 /**
  * Select an observatory from the list of available observatories (from the database).
@@ -40,60 +32,106 @@ function formatObservatory(observatory?: { id: string; name: string }) {
  * @param setValue - Function to set the selected observatory ID.
  */
 export function SelectObservatory({
+  id,
   value,
   setValue,
 }: {
+  id?: string
   value: string
   setValue: (value: string) => void
 }) {
+  const [popoverOpen, setPopoverOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState("")
+
   const { data: observatories } = useQuery({
     ...getObservatoriesQueryOptions(),
     initialData: [],
   })
+  const selectedValue = useMemo(
+    () => observatories.find((o) => o.id === value) || null,
+    [value, observatories],
+  )
 
-  const [open, setOpen] = useState(false)
+  const filteredItems = useMemo(() => {
+    const query = searchValue.trim()
+    if (!query) return observatories
+
+    const results = matchSorter(observatories, query, {
+      keys: [
+        { key: "id", threshold: matchSorter.rankings.STARTS_WITH },
+        { key: "name", threshold: matchSorter.rankings.CONTAINS },
+        { key: "aliases", threshold: matchSorter.rankings.CONTAINS },
+      ],
+    })
+    return results
+  }, [searchValue, observatories])
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-ful my-0.5 justify-between font-normal"
-        >
-          <span className="truncate">
-            {value
-              ? formatObservatory(observatories.find((o) => o.id === value))
-              : "Search observatory..."}
-          </span>
-          <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+    <Popover
+      open={popoverOpen}
+      onOpenChange={setPopoverOpen}
+      onOpenChangeComplete={(open) => {
+        if (!open) setSearchValue("")
+      }}
+    >
+      <PopoverTrigger
+        id={id}
+        render={
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={popoverOpen}
+            className="my-0.5 w-full justify-between bg-transparent font-normal"
+          />
+        }
+      >
+        <span className="truncate">
+          {selectedValue ? selectedValue.name : "Search observatory..."}
+        </span>
+        <span className="icon-[ph--caret-up-down-bold] ml-2 size-4 shrink-0 opacity-50" />
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Search observatory..." />
-          <CommandList>
-            <CommandEmpty>No observatory found.</CommandEmpty>
-            <CommandGroup>
-              {observatories.map((o) => (
-                <CommandItem
-                  key={o.id}
-                  value={o.id}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue)
-                    setOpen(false)
-                  }}
-                >
-                  <CheckIcon
-                    className={cn("mr-2 h-4 w-4", value === o.id ? "opacity-100" : "opacity-0")}
-                  />
-                  {formatObservatory(o)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+      <PopoverContent
+        collisionAvoidance={{ fallbackAxisSide: "none" }}
+        className="w-(--anchor-width) p-0"
+      >
+        <Combobox.Root
+          items={filteredItems}
+          selectionMode="single"
+          selectedValue={selectedValue}
+          onSelectedValueChange={(nextValue) => {
+            setValue(nextValue.id)
+            setPopoverOpen(false)
+          }}
+          inputValue={searchValue}
+          onInputValueChange={setSearchValue}
+        >
+          <div className="p-2">
+            <Combobox.Input render={<Input placeholder="e.g. La Plata" />} />
+          </div>
+          <Combobox.Empty>
+            <p className="px-2 py-4 text-center text-muted-foreground text-sm">
+              No obervatories found.
+            </p>
+          </Combobox.Empty>
+          <Combobox.List className="scrollbar-border max-h-[300px] scroll-py-2 overflow-y-auto overscroll-contain px-2 pb-2 empty:p-0">
+            {(observatory: Observatory) => (
+              <Combobox.Item
+                key={observatory.id}
+                value={observatory}
+                className={cn(
+                  "relative flex cursor-default select-none items-center gap-2 rounded-md px-2 py-1 text-sm outline-hidden",
+                  "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                  "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
+                )}
+              >
+                <span>{observatory.name}</span>
+                <Combobox.ItemIndicator>
+                  <span className="icon-[ph--check-circle-fill] pointer-events-none size-5 shrink-0 text-primary" />
+                </Combobox.ItemIndicator>
+              </Combobox.Item>
+            )}
+          </Combobox.List>
+        </Combobox.Root>
       </PopoverContent>
     </Popover>
   )
