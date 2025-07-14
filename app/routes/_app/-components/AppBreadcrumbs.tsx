@@ -28,9 +28,7 @@ export function AppBreadcrumbs() {
             ) : (
               <>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink asChild>
-                    <Link {...link}>{title}</Link>
-                  </BreadcrumbLink>
+                  <BreadcrumbLink render={<Link {...link}>{title}</Link>} />
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
               </>

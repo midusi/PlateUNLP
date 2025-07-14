@@ -1,11 +1,17 @@
+import { mergeProps } from "@base-ui-components/react/merge-props"
+import { useRender } from "@base-ui-components/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
-import type * as React from "react"
-
 import { cn } from "~/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_span[class*='icon-']:not([class*='size-'])]:size-4 [&_span[class*='icon-']]:pointer-events-none [&_span[class*='icon-']]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  `
+    inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap
+    rounded-md font-medium text-sm outline-none transition-all
+    focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50
+    disabled:pointer-events-none disabled:opacity-50
+    aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40
+    inner-icon:not-[[class*='size-']]:size-4 inner-icon:pointer-events-none inner-icon:shrink-0
+  `,
   {
     variants: {
       variant: {
@@ -19,9 +25,9 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>span[class*='icon-']]:px-3 has-[>svg]:px-3",
-        sm: "h-8 gap-1.5 rounded-md px-3 has-[>span[class*='icon-']]:px-2.5 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>span[class*='icon-']]:px-4 has-[>svg]:px-4",
+        default: "h-9 px-4 py-2 has-inner-icon:px-3",
+        sm: "h-8 gap-1.5 rounded-md px-3 has-inner-icon:px-2.5",
+        lg: "h-10 rounded-md px-6 has-inner-icon:px-4",
         icon: "size-9",
       },
     },
@@ -33,24 +39,25 @@ const buttonVariants = cva(
 )
 
 function Button({
+  // biome-ignore lint/a11y/useButtonType: `type` will be passed in `props`
+  render = <button />,
   className,
   variant,
   size,
-  asChild = false,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
-  const Comp = asChild ? Slot.Slot : "button"
+}: useRender.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
+  const element = useRender({
+    render,
+    props: mergeProps(
+      {
+        "data-slot": "button",
+        className: cn(buttonVariants({ variant, size, className })),
+      },
+      props,
+    ),
+  })
 
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  )
+  return element
 }
 
 export { Button, buttonVariants }

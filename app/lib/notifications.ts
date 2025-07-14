@@ -1,4 +1,8 @@
-import { toast } from "sonner"
+import { Toast } from "@base-ui-components/react/toast"
+
+export const toastManager = Toast.createToastManager()
+
+type ToastType = "default" | "success" | "error" | "warning" | "info"
 
 /**
  * Notify an error with a title and description.
@@ -7,8 +11,10 @@ import { toast } from "sonner"
  */
 export function notifyError(title: string, error?: unknown) {
   if (error) console.error(error)
-  toast.error(title, {
-    description: !error ? undefined : error instanceof Error ? error.message : String(error),
-    duration: 10000,
+  toastManager.add({
+    title,
+    description: error instanceof Error ? error.message : String(error),
+    timeout: 10000,
+    type: "error" satisfies ToastType,
   })
 }

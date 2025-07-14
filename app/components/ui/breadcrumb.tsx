@@ -1,7 +1,5 @@
-import { ChevronRight, MoreHorizontal } from "lucide-react"
-import { Slot } from "radix-ui"
-import type * as React from "react"
-
+import { mergeProps } from "@base-ui-components/react/merge-props"
+import { useRender } from "@base-ui-components/react/use-render"
 import { cn } from "~/lib/utils"
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
@@ -32,25 +30,29 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 function BreadcrumbLink({
-  asChild,
+  // biome-ignore lint/a11y/useAnchorContent: a children will be passed in `props`
+  // biome-ignore lint/a11y/useValidAnchor: `href` will be passed in `props`
+  render = <a />,
   className,
   ...props
-}: React.ComponentProps<"a"> & {
-  asChild?: boolean
-}) {
-  const Comp = asChild ? Slot.Slot : "a"
+}: useRender.ComponentProps<"a">) {
+  const element = useRender({
+    render,
+    props: mergeProps(
+      {
+        "data-slot": "breadcrumb-link",
+        className: cn("transition-colors hover:text-foreground", className),
+      },
+      props,
+    ),
+  })
 
-  return (
-    <Comp
-      data-slot="breadcrumb-link"
-      className={cn("transition-colors hover:text-foreground", className)}
-      {...props}
-    />
-  )
+  return element
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
   return (
+    // biome-ignore lint/a11y/useFocusableInteractive: it should not be focusable
     <span
       data-slot="breadcrumb-page"
       role="link"
@@ -68,10 +70,10 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn("[&>svg]:size-3.5", className)}
+      className={cn("inner-icon:size-3.5", className)}
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? <span className="icon-[ph--caret-right-bold]" />}
     </li>
   )
 }
@@ -85,7 +87,7 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span"
       className={cn("flex size-9 items-center justify-center", className)}
       {...props}
     >
-      <MoreHorizontal className="size-4" />
+      <span className="icon-[ph--arrows-horizontal-bold] size-4" />
       <span className="sr-only">More</span>
     </span>
   )

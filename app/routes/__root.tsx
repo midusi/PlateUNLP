@@ -4,15 +4,15 @@ import type { QueryClient } from "@tanstack/react-query"
 import {
   createRootRouteWithContext,
   HeadContent,
-  Link,
   Outlet,
   Scripts,
+  useRouter,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import type * as React from "react"
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary"
-import { NotFound } from "~/components/NotFound"
-import { Toaster } from "~/components/ui/sonner"
+import { Pending } from "~/components/Pending"
+import { Toaster } from "~/components/ui/toast"
 import { seo } from "~/lib/seo"
 
 import appCss from "~/styles/app.css?url"
@@ -57,22 +57,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       </RootDocument>
     )
   },
-  notFoundComponent: () => <NotFound />,
   component: RootComponent,
 })
 
 function RootComponent() {
+  const isShell = useRouter().isShell()
+
+  if (isShell) {
+    return (
+      <RootDocument>
+        <div className="root">
+          <Pending />
+        </div>
+      </RootDocument>
+    )
+  }
+
   return (
     <RootDocument>
-      <Outlet />
-      <Toaster richColors />
+      <div className="root">
+        <Outlet />
+      </div>
+      <Toaster />
     </RootDocument>
   )
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>

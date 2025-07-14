@@ -1,14 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
-import { db } from "~/db"
 import { extractFeatures, type extractFeaturesResponse } from "~/lib/extract-features"
 import { crop } from "~/lib/image"
 import { cn } from "~/lib/utils"
 import { ImageWithPixelExtraction } from "../../../../components/ImageWithPixelExtraction"
 import { SimpleFunctionXY } from "../../../../components/SimpleFunctionXY"
-import { ColapsableDown } from "../../-components/ColapsableDown"
 import type { getSpectrums } from "../-actions/get-spectrums"
 
 export function SpectrumsFeatures({
@@ -95,55 +92,53 @@ export function SpectrumsFeatures({
 
   return (
     <Card>
-      <ColapsableDown title="1D Spectrums">
-        <Button onClick={() => downloadImage(lamp1!, "lamp1.png")}>Descargar imagen</Button>
-        <CardContent>
-          {isLoading || !specAnalysis ? (
-            <span className={cn("icon-[ph--spinner-bold] animate-spin")} />
-          ) : (
-            <div className="flex flex-col content-center justify-center gap-4">
-              <div id="Spectrum-Extracted-Science">
-                <ImageWithPixelExtraction
-                  title="Science Spectrum"
-                  image={science!}
-                  imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
-                  pointsWMed={specAnalysis.scienceMediasPoints}
-                  drawFunction={specAnalysis.scienceFunction!}
-                  perpendicularFunctions={specAnalysis.scienceTransversalFunctions}
-                  opening={specAnalysis.scienceAvgOpening}
-                />
-                <SimpleFunctionXY data={specAnalysis.scienceTransversalAvgs} />
-              </div>
-
-              <div id="Spectrum-Extracted-Lamp1">
-                <ImageWithPixelExtraction
-                  title="Lamp 1 Spectrum"
-                  image={lamp1!}
-                  imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
-                  pointsWMed={specAnalysis.lamp1MediasPoints}
-                  drawFunction={specAnalysis.lamp1Function!}
-                  perpendicularFunctions={specAnalysis.lamp1TransversalFunctions}
-                  opening={specAnalysis.lamp1AvgOpening}
-                />
-                <SimpleFunctionXY data={specAnalysis.lamp1TransversalAvgs} />
-              </div>
-
-              <div id="Spectrum-Extracted-Lamp2">
-                <ImageWithPixelExtraction
-                  title="Lamp 2 Spectrum"
-                  image={lamp2!}
-                  imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 2."
-                  pointsWMed={specAnalysis.lamp2MediasPoints}
-                  drawFunction={specAnalysis.lamp2Function!}
-                  perpendicularFunctions={specAnalysis.lamp2TransversalFunctions}
-                  opening={specAnalysis.lamp2AvgOpening}
-                />
-                <SimpleFunctionXY data={specAnalysis.lamp2TransversalAvgs} />
-              </div>
+      <Button onClick={() => downloadImage(lamp1!, "lamp1.png")}>Descargar imagen</Button>
+      <CardContent>
+        {isLoading || !specAnalysis ? (
+          <span className={cn("icon-[ph--spinner-bold] animate-spin")} />
+        ) : (
+          <div className="flex flex-col content-center justify-center gap-4">
+            <div id="Spectrum-Extracted-Science">
+              <ImageWithPixelExtraction
+                title="Science Spectrum"
+                image={science!}
+                imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
+                pointsWMed={specAnalysis.scienceMediasPoints}
+                drawFunction={specAnalysis.scienceFunction!}
+                perpendicularFunctions={specAnalysis.scienceTransversalFunctions}
+                opening={specAnalysis.scienceAvgOpening}
+              />
+              <SimpleFunctionXY data={specAnalysis.scienceTransversalAvgs} />
             </div>
-          )}
-        </CardContent>
-      </ColapsableDown>
+
+            <div id="Spectrum-Extracted-Lamp1">
+              <ImageWithPixelExtraction
+                title="Lamp 1 Spectrum"
+                image={lamp1!}
+                imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
+                pointsWMed={specAnalysis.lamp1MediasPoints}
+                drawFunction={specAnalysis.lamp1Function!}
+                perpendicularFunctions={specAnalysis.lamp1TransversalFunctions}
+                opening={specAnalysis.lamp1AvgOpening}
+              />
+              <SimpleFunctionXY data={specAnalysis.lamp1TransversalAvgs} />
+            </div>
+
+            <div id="Spectrum-Extracted-Lamp2">
+              <ImageWithPixelExtraction
+                title="Lamp 2 Spectrum"
+                image={lamp2!}
+                imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 2."
+                pointsWMed={specAnalysis.lamp2MediasPoints}
+                drawFunction={specAnalysis.lamp2Function!}
+                perpendicularFunctions={specAnalysis.lamp2TransversalFunctions}
+                opening={specAnalysis.lamp2AvgOpening}
+              />
+              <SimpleFunctionXY data={specAnalysis.lamp2TransversalAvgs} />
+            </div>
+          </div>
+        )}
+      </CardContent>
     </Card>
   )
 }
