@@ -38,7 +38,7 @@ const getInitialValues = createServerFn()
       },
       with: {
         plate: {
-          columns: { id: true, "PLATE-N": true },
+          columns: { id: true, "PLATE-N": true, OBSERVAT: true },
           with: {
             project: { columns: { id: true, name: true } },
           },
@@ -89,8 +89,12 @@ function RouteComponent() {
   const { initialValues, initialSpectrums } = Route.useLoaderData()
 
   return (
-    <div className="mx-auto max-w-6xl px-8">
-      <ObservationMetadataForm observationId={observationId} defaultValues={initialValues} />
+    <div className="mx-auto w-full max-w-6xl px-8">
+      <ObservationMetadataForm
+        observationId={observationId}
+        defaultValues={initialValues}
+        OBSERVAT={initialValues.plate.OBSERVAT}
+      />
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={initialSpectrums} />
       <div className="h-8" />

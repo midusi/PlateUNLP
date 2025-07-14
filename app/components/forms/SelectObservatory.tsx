@@ -81,7 +81,7 @@ export function SelectObservatory({
             variant="outline"
             role="combobox"
             aria-expanded={popoverOpen}
-            className="my-0.5 w-full justify-between bg-transparent font-normal"
+            className="my-0.5 w-full min-w-0 justify-between bg-transparent font-normal"
           />
         }
       >
@@ -124,7 +124,7 @@ export function SelectObservatory({
                   "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
                 )}
               >
-                <span>{observatory.name}</span>
+                <span className="grow">{observatory.name}</span>
                 <Combobox.ItemIndicator>
                   <span className="icon-[ph--check-circle-fill] pointer-events-none size-5 shrink-0 text-primary" />
                 </Combobox.ItemIndicator>
