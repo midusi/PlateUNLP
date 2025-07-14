@@ -114,7 +114,7 @@ export function BoundingBoxer({
       {imageScale ? (
         <TransformWrapper
           initialScale={imageScale}
-          minScale={imageScale}
+          minScale={imageScale * 0.5}
           centerOnInit
           centerZoomedOut
         >
