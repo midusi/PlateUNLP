@@ -7,6 +7,7 @@ import { Field, FieldControl, FieldError, FieldLabel } from "~/components/ui/fie
 import { useAppForm } from "~/hooks/use-app-form"
 import { notifyError } from "~/lib/notifications"
 import { PlateMetadataSchema } from "~/types/spectrum-metadata"
+import { ColapsableDown } from "../../-components/ColapsableDown"
 import { updatePlateMetadata } from "../-actions/update-plate-metadata"
 
 export function PlateMetadataForm({
@@ -43,67 +44,72 @@ export function PlateMetadataForm({
       }}
     >
       <Card>
-        <CardContent>
-          <div className="grid grid-cols-3 items-start gap-4">
-            <form.Field name="OBSERVAT">
-              {(field) => (
-                <Field name={field.name}>
-                  <FieldLabel>OBSERVAT</FieldLabel>
-                  <FieldControl
-                    render={
-                      <SelectObservatory value={field.state.value} setValue={field.handleChange} />
+        <ColapsableDown title="Plate Metadata">
+          <CardContent>
+            <div className="grid grid-cols-3 items-start gap-4">
+              <form.Field name="OBSERVAT">
+                {(field) => (
+                  <Field name={field.name}>
+                    <FieldLabel>OBSERVAT</FieldLabel>
+                    <FieldControl
+                      render={
+                        <SelectObservatory
+                          value={field.state.value}
+                          setValue={field.handleChange}
+                        />
+                      }
+                    />
+                    {field.state.meta.errors[0] && (
+                      <FieldError>{field.state.meta.errors[0].message}</FieldError>
+                    )}
+                  </Field>
+                )}
+              </form.Field>
+              <form.AppField name="PLATE-N">
+                {(field) => <field.TextField label="PLATE-N" placeholder="Identification number" />}
+              </form.AppField>
+              <form.AppField name="OBSERVER">
+                {(field) => <field.TextField label="OBSERVER" placeholder="OBSERVER" />}
+              </form.AppField>
+
+              <form.AppField name="DIGITALI">
+                {(field) => <field.TextField label="DIGITALI" placeholder="DIGITALI" />}
+              </form.AppField>
+              <form.AppField name="SCANNER">
+                {(field) => <field.TextField label="SCANNER" placeholder="Scanner name" />}
+              </form.AppField>
+              <form.AppField name="SOFTWARE">
+                {(field) => <field.TextField label="SOFTWARE" placeholder="Scan software" />}
+              </form.AppField>
+
+              <form.AppField name="TELESCOPE">
+                {(field) => <field.TextField label="TELESCOPE" placeholder="Telescope name" />}
+              </form.AppField>
+              <form.AppField name="DETECTOR">
+                {(field) => <field.TextField label="DETECTOR" placeholder="Detector" />}
+              </form.AppField>
+              <form.AppField name="INSTRUMENT">
+                {(field) => <field.TextField label="INSTRUMENT" placeholder="Instrument" />}
+              </form.AppField>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            <form.Subscribe selector={(formState) => [formState.canSubmit, formState.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
+                  <span
+                    className={
+                      isSubmitting
+                        ? "icon-[ph--spinner-bold] animate-spin"
+                        : "icon-[ph--floppy-disk-bold]"
                     }
                   />
-                  {field.state.meta.errors[0] && (
-                    <FieldError>{field.state.meta.errors[0].message}</FieldError>
-                  )}
-                </Field>
+                  Save
+                </Button>
               )}
-            </form.Field>
-            <form.AppField name="PLATE-N">
-              {(field) => <field.TextField label="PLATE-N" placeholder="Identification number" />}
-            </form.AppField>
-            <form.AppField name="OBSERVER">
-              {(field) => <field.TextField label="OBSERVER" placeholder="OBSERVER" />}
-            </form.AppField>
-
-            <form.AppField name="DIGITALI">
-              {(field) => <field.TextField label="DIGITALI" placeholder="DIGITALI" />}
-            </form.AppField>
-            <form.AppField name="SCANNER">
-              {(field) => <field.TextField label="SCANNER" placeholder="Scanner name" />}
-            </form.AppField>
-            <form.AppField name="SOFTWARE">
-              {(field) => <field.TextField label="SOFTWARE" placeholder="Scan software" />}
-            </form.AppField>
-
-            <form.AppField name="TELESCOPE">
-              {(field) => <field.TextField label="TELESCOPE" placeholder="Telescope name" />}
-            </form.AppField>
-            <form.AppField name="DETECTOR">
-              {(field) => <field.TextField label="DETECTOR" placeholder="Detector" />}
-            </form.AppField>
-            <form.AppField name="INSTRUMENT">
-              {(field) => <field.TextField label="INSTRUMENT" placeholder="Instrument" />}
-            </form.AppField>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          <form.Subscribe selector={(formState) => [formState.canSubmit, formState.isSubmitting]}>
-            {([canSubmit, isSubmitting]) => (
-              <Button type="submit" disabled={!canSubmit}>
-                <span
-                  className={
-                    isSubmitting
-                      ? "icon-[ph--spinner-bold] animate-spin"
-                      : "icon-[ph--floppy-disk-bold]"
-                  }
-                />
-                Save
-              </Button>
-            )}
-          </form.Subscribe>
-        </CardFooter>
+            </form.Subscribe>
+          </CardFooter>
+        </ColapsableDown>
       </Card>
     </form>
   )
