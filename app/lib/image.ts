@@ -1,17 +1,17 @@
-import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
-import { levenbergMarquardt } from "ml-levenberg-marquardt"
+import { max as mathjsMax, min as mathjsMin, round } from "mathjs";
+import { levenbergMarquardt } from "ml-levenberg-marquardt";
 
 /**
  * Loads an image from a given source URL as a Promise.
  * @param {string} src - image source URL.
  */
 export function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => resolve(img)
-    img.onerror = (reason) => reject(reason)
-    img.src = src
-  })
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.onload = () => resolve(img);
+		img.onerror = (reason) => reject(reason);
+		img.src = src;
+	});
 }
 
 /**
@@ -23,54 +23,54 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
  * matrices de pixeles.
  */
 export function crop(
-  src: string,
-  regions: {
-    left: number
-    top: number
-    width: number
-    height: number
-  }[],
+	src: string,
+	regions: {
+		left: number;
+		top: number;
+		width: number;
+		height: number;
+	}[],
 ): Promise<
-  {
-    data: Uint8Array
-    width: number
-    height: number
-  }[]
+	{
+		data: Uint8Array;
+		width: number;
+		height: number;
+	}[]
 > {
-  return new Promise((resolve, reject) => {
-    // Me estoy dando cuenta que esto se puede mejorar haciendo que con
-    // un solo canvas recortar multiples  subimagenes, puede ser?
-    const image = new Image()
-    image.src = src
+	return new Promise((resolve, reject) => {
+		// Me estoy dando cuenta que esto se puede mejorar haciendo que con
+		// un solo canvas recortar multiples  subimagenes, puede ser?
+		const image = new Image();
+		image.src = src;
 
-    image.onload = () => {
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d", { willReadFrequently: true })
-      if (!ctx) return reject(new Error("Could not get canvas context"))
+		image.onload = () => {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d", { willReadFrequently: true });
+			if (!ctx) return reject(new Error("Could not get canvas context"));
 
-      const results: {
-        data: Uint8Array
-        width: number
-        height: number
-      }[] = []
-      for (const { left, top, width, height } of regions) {
-        canvas.width = width
-        canvas.height = height
-        ctx.clearRect(0, 0, width, height)
-        ctx.drawImage(image, left, top, width, height, 0, 0, width, height)
-        const data = ctx.getImageData(0, 0, width, height).data
-        results.push({
-          data: new Uint8Array(data.buffer.slice(0)),
-          width,
-          height,
-        })
-      }
+			const results: {
+				data: Uint8Array;
+				width: number;
+				height: number;
+			}[] = [];
+			for (const { left, top, width, height } of regions) {
+				canvas.width = width;
+				canvas.height = height;
+				ctx.clearRect(0, 0, width, height);
+				ctx.drawImage(image, left, top, width, height, 0, 0, width, height);
+				const data = ctx.getImageData(0, 0, width, height).data;
+				results.push({
+					data: new Uint8Array(data.buffer.slice(0)),
+					width,
+					height,
+				});
+			}
 
-      resolve(results)
-    }
+			resolve(results);
+		};
 
-    image.onerror = (err) => reject(err)
-  })
+		image.onerror = (err) => reject(err);
+	});
 }
 
 /**
@@ -85,29 +85,31 @@ export function crop(
  * @returns {number[]} - Arreglo de valores que corresponden a las coordenadas por las
  * que pasa la funcion.
  */
-export function getPointsInRect<T extends Uint8Array | Uint8ClampedArray | Buffer>(
-  data: T,
-  width: number,
-  rect: (y: number) => number,
-  minY: number,
-  maxY: number,
+export function getPointsInRect<
+	T extends Uint8Array | Uint8ClampedArray | Buffer,
+>(
+	data: T,
+	width: number,
+	rect: (y: number) => number,
+	minY: number,
+	maxY: number,
 ): number[] {
-  const rectPoints: number[] = []
-  for (let y = minY; y < maxY; y++) {
-    // Dada una recta, Para cada pixel vertical
-    /** Coordenada X que le corresponde a un determinado Y. */
-    const coordenadaX = round(rect(y))
-    if (coordenadaX < 0 || coordenadaX >= width) continue
-    // Valor correspondiente a imagen en pixel (coordenadaX, y)
-    const index = (y * width + coordenadaX) * 4
-    const r = data[index]
-    const g = data[index + 1]
-    const b = data[index + 2]
-    /** Promedio de valores de pixel en canales r, g, b. */
-    const avg = round((r + g + b) / 3)
-    rectPoints.push(avg)
-  }
-  return rectPoints
+	const rectPoints: number[] = [];
+	for (let y = minY; y < maxY; y++) {
+		// Dada una recta, Para cada pixel vertical
+		/** Coordenada X que le corresponde a un determinado Y. */
+		const coordenadaX = round(rect(y));
+		if (coordenadaX < 0 || coordenadaX >= width) continue;
+		// Valor correspondiente a imagen en pixel (coordenadaX, y)
+		const index = (y * width + coordenadaX) * 4;
+		const r = data[index];
+		const g = data[index + 1];
+		const b = data[index + 2];
+		/** Promedio de valores de pixel en canales r, g, b. */
+		const avg = round((r + g + b) / 3);
+		rectPoints.push(avg);
+	}
+	return rectPoints;
 }
 
 /**
@@ -119,10 +121,10 @@ export function getPointsInRect<T extends Uint8Array | Uint8ClampedArray | Buffe
  * Arreglo de datos normalizado.
  */
 function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
-  if (!min) min = mathjsMin(data)
-  if (!max) max = mathjsMax(data)
+	if (!min) min = mathjsMin(data);
+	if (!max) max = mathjsMax(data);
 
-  return data.map((x) => (x - min) / (max - min))
+	return data.map((x) => (x - min) / (max - min));
 }
 
 /**
@@ -135,69 +137,73 @@ function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
  * relacion al eje X.
  */
 export function findPlateau(
-  dataY: number[],
-  threshold: number,
+	dataY: number[],
+	threshold: number,
 ): {
-  medium: number
-  opening: number
+	medium: number;
+	opening: number;
 } {
-  const minY = 0 // mathjsMin(dataY)
-  const maxY = mathjsMax(dataY)
+	const minY = 0; // mathjsMin(dataY)
+	const maxY = mathjsMax(dataY);
 
-  const scaledThreshold = minY + (maxY - minY) * threshold
+	const scaledThreshold = minY + (maxY - minY) * threshold;
 
-  const segments: { values: number[]; indexes: number[] }[] = []
-  let currentValues: number[] = []
-  let currentIndexes: number[] = []
-  for (let i = 0; i < dataY.length; i++) {
-    const d = dataY[i]
-    if (d > scaledThreshold) {
-      currentValues.push(d)
-      currentIndexes.push(i)
-    } else {
-      // Si la lista tiene algo entonces es el primero que no cumple
-      // entonces añadimos el segmento a la lista y reiniciamos
-      // actualSegment. Si no es el primero no hacemos algo.
-      if (currentValues.length > 0) {
-        segments.push({
-          values: currentValues,
-          indexes: currentIndexes,
-        })
-        currentValues = []
-        currentIndexes = []
-      }
-    }
-  }
+	const segments: { values: number[]; indexes: number[] }[] = [];
+	let currentValues: number[] = [];
+	let currentIndexes: number[] = [];
+	for (let i = 0; i < dataY.length; i++) {
+		const d = dataY[i];
+		if (d > scaledThreshold) {
+			currentValues.push(d);
+			currentIndexes.push(i);
+		} else {
+			// Si la lista tiene algo entonces es el primero que no cumple
+			// entonces añadimos el segmento a la lista y reiniciamos
+			// actualSegment. Si no es el primero no hacemos algo.
+			if (currentValues.length > 0) {
+				segments.push({
+					values: currentValues,
+					indexes: currentIndexes,
+				});
+				currentValues = [];
+				currentIndexes = [];
+			}
+		}
+	}
 
-  // En caso de que el segmento más largo esté al final del array
-  if (currentValues.length > 0) {
-    segments.push({ values: currentValues, indexes: currentIndexes })
-  }
+	// En caso de que el segmento más largo esté al final del array
+	if (currentValues.length > 0) {
+		segments.push({ values: currentValues, indexes: currentIndexes });
+	}
 
-  // ⚠️ Chequeo de seguridad:
-  if (segments.length === 0) {
-    // No se encontró altiplano -> devolver valores por defecto
-    return { medium: 0, opening: 0 }
-  }
+	// ⚠️ Chequeo de seguridad:
+	if (segments.length === 0) {
+		// No se encontró altiplano -> devolver valores por defecto
+		return { medium: 0, opening: 0 };
+	}
 
-  const moreLargeSegmentIdx = segments
-    .map((segment) => segment.values.length)
-    .reduce((maxIdx, currVal, idx, arr) => (currVal > arr[maxIdx] ? idx : maxIdx), 0)
+	const moreLargeSegmentIdx = segments
+		.map((segment) => segment.values.length)
+		.reduce(
+			(maxIdx, currVal, idx, arr) => (currVal > arr[maxIdx] ? idx : maxIdx),
+			0,
+		);
 
-  // const _plateauValues = segments[moreLargeSegmentIdx].values
-  const plateauIndexes = segments[moreLargeSegmentIdx].indexes
+	// const _plateauValues = segments[moreLargeSegmentIdx].values
+	const plateauIndexes = segments[moreLargeSegmentIdx].indexes;
 
-  const opening = plateauIndexes[plateauIndexes.length - 1] - plateauIndexes[0]
-  const medium = (plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2
+	const opening = plateauIndexes[plateauIndexes.length - 1] - plateauIndexes[0];
+	const medium =
+		(plateauIndexes[0] + plateauIndexes[plateauIndexes.length - 1]) / 2;
 
-  // console.log({
-  //   segments,
-  //   moreLargeSegmentIdx,
-  //   opening,
-  //   medium
-  // })
+	// console.log({
+	//   segments,
+	//   moreLargeSegmentIdx,
+	//   opening,
+	//   medium
+	// })
 
-  return { medium, opening }
+	return { medium, opening };
 }
 
 /**
@@ -209,29 +215,29 @@ export function findPlateau(
  * Parametros de la funcion gaissiana ajustada.
  */
 export function fitGaussian(
-  dataY: number[],
-  maxIterations: number,
+	dataY: number[],
+	maxIterations: number,
 ): { a: number; mu: number; sigma: number } {
-  const gaussian =
-    ([a, mu, sigma]: number[]) =>
-    (x: number) =>
-      a * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2))
+	const gaussian =
+		([a, mu, sigma]: number[]) =>
+		(x: number) =>
+			a * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2));
 
-  const dataX = dataY.map((_, index) => index)
+	const dataX = dataY.map((_, index) => index);
 
-  const options = {
-    damping: 1.5,
-    initialValues: [1, Math.round(dataY.length / 2), 1], // a, mu, sigma
-    maxIterations,
-  }
+	const options = {
+		damping: 1.5,
+		initialValues: [1, Math.round(dataY.length / 2), 1], // a, mu, sigma
+		maxIterations,
+	};
 
-  const fit = levenbergMarquardt({ x: dataX, y: dataY }, gaussian, options)
+	const fit = levenbergMarquardt({ x: dataX, y: dataY }, gaussian, options);
 
-  return {
-    a: fit.parameterValues[0],
-    mu: fit.parameterValues[1],
-    sigma: fit.parameterValues[2],
-  }
+	return {
+		a: fit.parameterValues[0],
+		mu: fit.parameterValues[1],
+		sigma: fit.parameterValues[2],
+	};
 }
 
 /**
@@ -243,29 +249,27 @@ export function fitGaussian(
  * @param {number} height - Alto de la imagen
  * @returns {number[]} - Vector con valores promediados.
  */
-export function promediadoHorizontal<T extends Uint8Array | Uint8ClampedArray | Buffer>(
-  image: T,
-  width: number,
-  height: number,
-): number[] {
-  const avgArr = []
-  for (let y = 0; y < height; y++) {
-    let sum = 0
-    for (let x = 0; x < width; x++) {
-      const index = (y * width + x) * 4
-      const r = image[index]
-      const g = image[index + 1]
-      const b = image[index + 2]
+export function promediadoHorizontal<
+	T extends Uint8Array | Uint8ClampedArray | Buffer,
+>(image: T, width: number, height: number): number[] {
+	const avgArr = [];
+	for (let y = 0; y < height; y++) {
+		let sum = 0;
+		for (let x = 0; x < width; x++) {
+			const index = (y * width + x) * 4;
+			const r = image[index];
+			const g = image[index + 1];
+			const b = image[index + 2];
 
-      // Calculo de intensidad
-      // const gray = 0.299 * r + 0.587 * g + 0.114 * b // Ponderado
-      const gray = (r + g + b) / 3 // Balanceado
-      sum += gray
-    }
-    avgArr.push(sum / width)
-  }
+			// Calculo de intensidad
+			// const gray = 0.299 * r + 0.587 * g + 0.114 * b // Ponderado
+			const gray = (r + g + b) / 3; // Balanceado
+			sum += gray;
+		}
+		avgArr.push(sum / width);
+	}
 
-  return avgArr
+	return avgArr;
 }
 
 /**
@@ -275,18 +279,22 @@ export function promediadoHorizontal<T extends Uint8Array | Uint8ClampedArray | 
  * @param {number} height - Alto
  * @returns {string} Url correspondiente a la imagen.
  */
-export function matrixToUrl(data: Uint8ClampedArray, width: number, height: number): string {
-  const canvas = document.createElement("canvas")
-  canvas.width = width
-  canvas.height = height
+export function matrixToUrl(
+	data: Uint8ClampedArray,
+	width: number,
+	height: number,
+): string {
+	const canvas = document.createElement("canvas");
+	canvas.width = width;
+	canvas.height = height;
 
-  const ctx = canvas.getContext("2d")
-  if (!ctx) return ""
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return "";
 
-  const imageData = new ImageData(data, width, height)
-  ctx.putImageData(imageData, 0, 0)
+	const imageData = new ImageData(data, width, height);
+	ctx.putImageData(imageData, 0, 0);
 
-  return canvas.toDataURL("image/png")
+	return canvas.toDataURL("image/png");
 }
 
 /**
@@ -295,14 +303,15 @@ export function matrixToUrl(data: Uint8ClampedArray, width: number, height: numb
  * @param {number} n - Cantidad de puntos medios buscada
  * @returns {number[]} -
  * Puntos medios encontrados
+ * ej: [-.--.--.--.--.-] batch size=--, n=2
  */
 export function findXspacedPoints(large: number, n: number): number[] {
-  const batchSize = Math.floor(large / n)
-  const arrOfPoints = []
-  for (let i = 0; i < n; i++) {
-    arrOfPoints.push(Math.round(i * batchSize + batchSize / 2))
-  }
-  return arrOfPoints
+	const batchSize = Math.floor(large / n);
+	const arrOfPoints = [];
+	for (let i = 0; i < n; i++) {
+		arrOfPoints.push(Math.round(i * batchSize + batchSize / 2));
+	}
+	return arrOfPoints;
 }
 
 /**
@@ -319,41 +328,43 @@ export function findXspacedPoints(large: number, n: number): number[] {
  * dimension restante.
  * @returns {T[]} - Arreglo de segmentos de la imagen recibida.
  */
-export function obtainImageSegments<T extends Uint8Array | Uint8ClampedArray | Buffer>(
-  image: T,
-  width: number,
-  height: number,
-  points: number[],
-  segmentWidth: number,
+export function obtainImageSegments<
+	T extends Uint8Array | Uint8ClampedArray | Buffer,
+>(
+	image: T,
+	width: number,
+	height: number,
+	points: number[],
+	segmentWidth: number,
 ): T[] {
-  /** Constructor de Buffer que acorde al tipo recibido */
-  const SegmentConstructor = image.constructor as { new (length: number): T }
+	/** Constructor de Buffer que acorde al tipo recibido */
+	const SegmentConstructor = image.constructor as { new (length: number): T };
 
-  /** Arreglo donde se guardaron los segmentos producidos */
-  const segments: T[] = []
+	/** Arreglo donde se guardaron los segmentos producidos */
+	const segments: T[] = [];
 
-  for (const centerX of points) {
-    const startX = Math.max(0, centerX - Math.floor(segmentWidth / 2))
-    const endX = Math.min(width, centerX + Math.ceil(segmentWidth / 2))
+	for (const centerX of points) {
+		const startX = Math.max(0, centerX - Math.floor(segmentWidth / 2));
+		const endX = Math.min(width, centerX + Math.ceil(segmentWidth / 2));
 
-    const segment = new SegmentConstructor((endX - startX) * height * 4)
+		const segment = new SegmentConstructor((endX - startX) * height * 4);
 
-    for (let y = 0; y < height; y++) {
-      for (let x = startX; x < endX; x++) {
-        const srcIdX = (y * width + x) * 4
-        const destIdx = (y * (endX - startX) + (x - startX)) * 4
+		for (let y = 0; y < height; y++) {
+			for (let x = startX; x < endX; x++) {
+				const srcIdX = (y * width + x) * 4;
+				const destIdx = (y * (endX - startX) + (x - startX)) * 4;
 
-        segment[destIdx] = image[srcIdX] // R
-        segment[destIdx + 1] = image[srcIdX + 1] // G
-        segment[destIdx + 2] = image[srcIdX + 2] // B
-        segment[destIdx + 3] = image[srcIdX + 3] // A
-      }
-    }
+				segment[destIdx] = image[srcIdX]; // R
+				segment[destIdx + 1] = image[srcIdX + 1]; // G
+				segment[destIdx + 2] = image[srcIdX + 2]; // B
+				segment[destIdx + 3] = image[srcIdX + 3]; // A
+			}
+		}
 
-    segments.push(segment)
-  }
+		segments.push(segment);
+	}
 
-  return segments
+	return segments;
 }
 
 /**
@@ -364,21 +375,25 @@ export function obtainImageSegments<T extends Uint8Array | Uint8ClampedArray | B
  * @returns {Uint8ClampedArray} -
  * Matriz ordenada por columnas
  */
-function invertOrder(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
-  const colMajorData = new Uint8ClampedArray(data.length)
+function invertOrder(
+	data: Uint8ClampedArray,
+	width: number,
+	height: number,
+): Uint8ClampedArray {
+	const colMajorData = new Uint8ClampedArray(data.length);
 
-  let idx = 0
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const i = (y * width + x) * 4
-      colMajorData[idx++] = data[i] // R
-      colMajorData[idx++] = data[i + 1] // G
-      colMajorData[idx++] = data[i + 2] // B
-      colMajorData[idx++] = data[i + 3] // A
-    }
-  }
+	let idx = 0;
+	for (let x = 0; x < width; x++) {
+		for (let y = 0; y < height; y++) {
+			const i = (y * width + x) * 4;
+			colMajorData[idx++] = data[i]; // R
+			colMajorData[idx++] = data[i + 1]; // G
+			colMajorData[idx++] = data[i + 2]; // B
+			colMajorData[idx++] = data[i + 3]; // A
+		}
+	}
 
-  return colMajorData
+	return colMajorData;
 }
 
 /**
@@ -394,33 +409,33 @@ function invertOrder(data: Uint8ClampedArray, width: number, height: number): Ui
  * imagen, el alto de la imagen.
  */
 export async function obtainimageMatrix(
-  src: string,
-  colMajor: boolean,
+	src: string,
+	colMajor?: boolean,
 ): Promise<{
-  data: Uint8ClampedArray
-  width: number
-  height: number
+	data: Uint8ClampedArray;
+	width: number;
+	height: number;
 }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.src = src
-    img.crossOrigin = "Anonymous"
-    img.onload = () => {
-      const canvas = document.createElement("canvas")
-      if (!canvas) return
-      canvas.width = img.width
-      canvas.height = img.height
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-      ctx.drawImage(img, 0, 0)
-      const imageData = ctx.getImageData(0, 0, img.width, img.height)
-      let { data, width, height } = imageData
-      if (colMajor) data = invertOrder(data, width, height)
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.src = src;
+		img.crossOrigin = "Anonymous";
+		img.onload = () => {
+			const canvas = document.createElement("canvas");
+			if (!canvas) return;
+			canvas.width = img.width;
+			canvas.height = img.height;
+			const ctx = canvas.getContext("2d");
+			if (!ctx) return;
+			ctx.drawImage(img, 0, 0);
+			const imageData = ctx.getImageData(0, 0, img.width, img.height);
+			let { data, width, height } = imageData;
+			if (colMajor) data = invertOrder(data, width, height);
 
-      resolve({ data, width, height })
-    }
-    img.onerror = () => reject(new Error("No se pudo cargar la imagen"))
-  })
+			resolve({ data, width, height });
+		};
+		img.onerror = () => reject(new Error("No se pudo cargar la imagen"));
+	});
 }
 
 /**
@@ -429,38 +444,40 @@ export async function obtainimageMatrix(
  * @returns {Promise<{ image:string, degrees: number }>} -
  * Una promesa que contiene la imagen procesada y la cantidad de grados rotados.
  */
-export async function align(imageb64: string): Promise<{ image: string; degrees: number }> {
-  // Cargar imagen
-  const image = new Image()
-  image.src = imageb64
-  await new Promise((resolve) => {
-    image.onload = resolve
-  })
+export async function align(
+	imageb64: string,
+): Promise<{ image: string; degrees: number }> {
+	// Cargar imagen
+	const image = new Image();
+	image.src = imageb64;
+	await new Promise((resolve) => {
+		image.onload = resolve;
+	});
 
-  // alto & ancho
-  const { naturalWidth, naturalHeight } = image
+	// alto & ancho
+	const { naturalWidth, naturalHeight } = image;
 
-  // Si es mas alta que ancha la gira 90º
-  let imageProcessed = imageb64
-  let degrees = 0
-  if (naturalHeight > naturalWidth) {
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-    if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
+	// Si es mas alta que ancha la gira 90º
+	let imageProcessed = imageb64;
+	let degrees = 0;
+	if (naturalHeight > naturalWidth) {
+		const canvas = document.createElement("canvas");
+		const ctx = canvas.getContext("2d");
+		if (!ctx) throw new Error("No se pudo obtener el contexto del canvas");
 
-    canvas.width = naturalHeight
-    canvas.height = naturalWidth
+		canvas.width = naturalHeight;
+		canvas.height = naturalWidth;
 
-    ctx.translate(naturalHeight, 0)
-    ctx.rotate(Math.PI / 2) // 90º
+		ctx.translate(naturalHeight, 0);
+		ctx.rotate(Math.PI / 2); // 90º
 
-    ctx.drawImage(image, 0, 0)
+		ctx.drawImage(image, 0, 0);
 
-    imageProcessed = canvas.toDataURL()
-    degrees = 90
-  }
+		imageProcessed = canvas.toDataURL();
+		degrees = 90;
+	}
 
-  return { image: imageProcessed, degrees }
+	return { image: imageProcessed, degrees };
 }
 
 /**
@@ -470,48 +487,51 @@ export async function align(imageb64: string): Promise<{ image: string; degrees:
  * @returns {Promise<string>} -
  * Una promesa que contiene la imagen rotada.
  */
-export async function rotate(imageb64: string, degrees: 90 | 180 | 270): Promise<string> {
-  // Cargar imagen
-  const image = new Image()
-  image.src = imageb64
-  await new Promise((resolve) => {
-    image.onload = resolve
-  })
+export async function rotate(
+	imageb64: string,
+	degrees: 90 | 180 | 270,
+): Promise<string> {
+	// Cargar imagen
+	const image = new Image();
+	image.src = imageb64;
+	await new Promise((resolve) => {
+		image.onload = resolve;
+	});
 
-  // alto & ancho
-  const { naturalWidth, naturalHeight } = image
+	// alto & ancho
+	const { naturalWidth, naturalHeight } = image;
 
-  // Si es mas alta que ancha la gira 90º
-  let imageProcessed = imageb64
+	// Si es mas alta que ancha la gira 90º
+	let imageProcessed = imageb64;
 
-  const canvas = document.createElement("canvas")
-  const ctx = canvas.getContext("2d")
-  if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d");
+	if (!ctx) throw new Error("No se pudo obtener el contexto del canvas");
 
-  canvas.width = naturalHeight
-  canvas.height = naturalWidth
+	canvas.width = naturalHeight;
+	canvas.height = naturalWidth;
 
-  const rotateCoef = ((degrees / 90) * Math.PI) / 2
-  if (degrees === 180) {
-    canvas.width = naturalWidth
-    canvas.height = naturalHeight
-    ctx.translate(naturalWidth, naturalHeight)
-  } else if (degrees === 90) {
-    canvas.width = naturalHeight
-    canvas.height = naturalWidth
-    ctx.translate(naturalHeight, 0)
-  } else if (degrees === 270) {
-    canvas.width = naturalHeight
-    canvas.height = naturalWidth
-    ctx.translate(0, naturalWidth)
-  }
-  ctx.rotate(rotateCoef)
+	const rotateCoef = ((degrees / 90) * Math.PI) / 2;
+	if (degrees === 180) {
+		canvas.width = naturalWidth;
+		canvas.height = naturalHeight;
+		ctx.translate(naturalWidth, naturalHeight);
+	} else if (degrees === 90) {
+		canvas.width = naturalHeight;
+		canvas.height = naturalWidth;
+		ctx.translate(naturalHeight, 0);
+	} else if (degrees === 270) {
+		canvas.width = naturalHeight;
+		canvas.height = naturalWidth;
+		ctx.translate(0, naturalWidth);
+	}
+	ctx.rotate(rotateCoef);
 
-  ctx.drawImage(image, 0, 0)
+	ctx.drawImage(image, 0, 0);
 
-  imageProcessed = canvas.toDataURL()
+	imageProcessed = canvas.toDataURL();
 
-  return imageProcessed
+	return imageProcessed;
 }
 
 /**
@@ -521,55 +541,56 @@ export async function rotate(imageb64: string, degrees: 90 | 180 | 270): Promise
  * Una promesa que contiene el color del fondo.
  */
 export async function bgColor(imageb64: string): Promise<"white" | "black"> {
-  const image = new Image()
-  image.src = imageb64
-  await new Promise((resolve, reject) => {
-    image.onload = resolve
-    image.onerror = reject
-  })
+	const image = new Image();
+	image.src = imageb64;
+	await new Promise((resolve, reject) => {
+		image.onload = resolve;
+		image.onerror = reject;
+	});
 
-  // Detectar color fondo (Blanco | Negro)
-  const canvas = document.createElement("canvas")
-  const ctx = canvas.getContext("2d")
-  canvas.width = image.naturalWidth
-  canvas.height = image.naturalHeight
+	// Detectar color fondo (Blanco | Negro)
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d");
+	canvas.width = image.naturalWidth;
+	canvas.height = image.naturalHeight;
 
-  if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
+	if (!ctx) throw new Error("No se pudo obtener el contexto del canvas");
 
-  ctx.drawImage(image, 0, 0)
+	ctx.drawImage(image, 0, 0);
 
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  const data = imageData.data
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
 
-  let brightnessSum = 0
+	let brightnessSum = 0;
 
-  // Fórmula de luminancia (luma)
-  const getBrightness = (r: number, g: number, b: number) => 0.299 * r + 0.587 * g + 0.114 * b
+	// Fórmula de luminancia (luma)
+	const getBrightness = (r: number, g: number, b: number) =>
+		0.299 * r + 0.587 * g + 0.114 * b;
 
-  const width = canvas.width
-  const height = canvas.height
+	const width = canvas.width;
+	const height = canvas.height;
 
-  for (let i = 0; i < height; i++) {
-    for (let j = 0; j < width; j++) {
-      const idx = (i * width + j) * 4
-      const r = data[idx]
-      const g = data[idx + 1]
-      const b = data[idx + 2]
-      brightnessSum += getBrightness(r, g, b)
-    }
-  }
+	for (let i = 0; i < height; i++) {
+		for (let j = 0; j < width; j++) {
+			const idx = (i * width + j) * 4;
+			const r = data[idx];
+			const g = data[idx + 1];
+			const b = data[idx + 2];
+			brightnessSum += getBrightness(r, g, b);
+		}
+	}
 
-  const avgBrightness = brightnessSum / (height * width)
+	const avgBrightness = brightnessSum / (height * width);
 
-  // Variables de retorno
-  let bgColor: "white" | "black"
-  if (avgBrightness < 128) {
-    bgColor = "black"
-  } else {
-    bgColor = "white"
-  }
+	// Variables de retorno
+	let bgColor: "white" | "black";
+	if (avgBrightness < 128) {
+		bgColor = "black";
+	} else {
+		bgColor = "white";
+	}
 
-  return bgColor
+	return bgColor;
 }
 
 /**
@@ -580,74 +601,75 @@ export async function bgColor(imageb64: string): Promise<"white" | "black"> {
  * Una promesa que contiene la imagen procesada y un string indicando el color que quedo de fondo.
  */
 export async function ensureWhite(
-  imageb64: string,
-  targetColor: "white" | "black",
+	imageb64: string,
+	targetColor: "white" | "black",
 ): Promise<{ image: string; bgColor: "white" | "black" }> {
-  const image = new Image()
-  image.src = imageb64
-  await new Promise((resolve, reject) => {
-    image.onload = resolve
-    image.onerror = reject
-  })
+	const image = new Image();
+	image.src = imageb64;
+	await new Promise((resolve, reject) => {
+		image.onload = resolve;
+		image.onerror = reject;
+	});
 
-  // Detectar color fondo (Blanco | Negro)
-  const canvas = document.createElement("canvas")
-  const ctx = canvas.getContext("2d")
-  canvas.width = image.naturalWidth
-  canvas.height = image.naturalHeight
+	// Detectar color fondo (Blanco | Negro)
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d");
+	canvas.width = image.naturalWidth;
+	canvas.height = image.naturalHeight;
 
-  if (!ctx) throw new Error("No se pudo obtener el contexto del canvas")
+	if (!ctx) throw new Error("No se pudo obtener el contexto del canvas");
 
-  ctx.drawImage(image, 0, 0)
+	ctx.drawImage(image, 0, 0);
 
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  const data = imageData.data
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
 
-  let brightnessSum = 0
+	let brightnessSum = 0;
 
-  // Fórmula de luminancia (luma)
-  const getBrightness = (r: number, g: number, b: number) => 0.299 * r + 0.587 * g + 0.114 * b
+	// Fórmula de luminancia (luma)
+	const getBrightness = (r: number, g: number, b: number) =>
+		0.299 * r + 0.587 * g + 0.114 * b;
 
-  const width = canvas.width
-  const height = canvas.height
+	const width = canvas.width;
+	const height = canvas.height;
 
-  for (let i = 0; i < height; i++) {
-    for (let j = 0; j < width; j++) {
-      const idx = (i * width + j) * 4
-      const r = data[idx]
-      const g = data[idx + 1]
-      const b = data[idx + 2]
-      brightnessSum += getBrightness(r, g, b)
-    }
-  }
+	for (let i = 0; i < height; i++) {
+		for (let j = 0; j < width; j++) {
+			const idx = (i * width + j) * 4;
+			const r = data[idx];
+			const g = data[idx + 1];
+			const b = data[idx + 2];
+			brightnessSum += getBrightness(r, g, b);
+		}
+	}
 
-  const avgBrightness = brightnessSum / (height * width)
+	const avgBrightness = brightnessSum / (height * width);
 
-  // Variables de retorno
-  let imageProcessed = imageb64
+	// Variables de retorno
+	let imageProcessed = imageb64;
 
-  // Color predominante actual
-  let mainColor: "white" | "black"
-  if (avgBrightness < 128) {
-    mainColor = "black"
-  } else {
-    mainColor = "white"
-  }
+	// Color predominante actual
+	let mainColor: "white" | "black";
+	if (avgBrightness < 128) {
+		mainColor = "black";
+	} else {
+		mainColor = "white";
+	}
 
-  // Si color predominante es distinto de objetivo lo invierte
-  if (mainColor !== targetColor) {
-    for (let i = 0; i < height; i++) {
-      for (let j = 0; j < width; j++) {
-        const idx = (i * width + j) * 4
-        data[idx] = 255 - data[idx]
-        data[idx + 1] = 255 - data[idx + 1]
-        data[idx + 2] = 255 - data[idx + 2]
-      }
-    }
-    ctx.putImageData(imageData, 0, 0)
+	// Si color predominante es distinto de objetivo lo invierte
+	if (mainColor !== targetColor) {
+		for (let i = 0; i < height; i++) {
+			for (let j = 0; j < width; j++) {
+				const idx = (i * width + j) * 4;
+				data[idx] = 255 - data[idx];
+				data[idx + 1] = 255 - data[idx + 1];
+				data[idx + 2] = 255 - data[idx + 2];
+			}
+		}
+		ctx.putImageData(imageData, 0, 0);
 
-    imageProcessed = canvas.toDataURL()
-  }
+		imageProcessed = canvas.toDataURL();
+	}
 
-  return { image: imageProcessed, bgColor: targetColor }
+	return { image: imageProcessed, bgColor: targetColor };
 }

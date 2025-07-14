@@ -2,10 +2,10 @@ import clsx from "clsx"
 import { useEffect, useRef } from "react"
 import type { Point } from "~/types/Point"
 
-interface ImageWithPixelExtractionProps<T extends Uint8Array | Uint8ClampedArray | Buffer> {
+interface ImageWithPixelExtractionProps {
   title?: string
   /** Imagen */
-  image: T
+  src: string
   imageAlt?: string
   pointsWMed?: Point[]
   drawFunction: (x: number) => number
@@ -16,15 +16,15 @@ interface ImageWithPixelExtractionProps<T extends Uint8Array | Uint8ClampedArray
   opening?: number
 }
 
-export function ImageWithPixelExtraction<T extends Uint8Array | Uint8ClampedArray | Buffer>({
+export function ImageWithPixelExtraction({
   title,
-  image,
+  src,
   imageAlt,
   pointsWMed,
   drawFunction,
   perpendicularFunctions,
   opening,
-}: ImageWithPixelExtractionProps<T>) {
+}: ImageWithPixelExtractionProps) {
   return (
     <div className={clsx("relative flex w-full items-center justify-center ", "px-16", "pt-2")}>
       <div className="flex flex-col">
@@ -32,7 +32,7 @@ export function ImageWithPixelExtraction<T extends Uint8Array | Uint8ClampedArra
           <h2 className="flex justify-center pb-2 font-semibold text-slate-500 text-xl">{title}</h2>
         )}
         <ImageWithDraws
-          image={image}
+          src={src}
           alt={imageAlt}
           points={pointsWMed}
           drawFunction={drawFunction}
@@ -48,9 +48,9 @@ export function ImageWithPixelExtraction<T extends Uint8Array | Uint8ClampedArra
  * Props para el componente ImageWithDraws.
  * @interface ImageWithDraws
  */
-interface ImageWithDrawsProps<T extends Uint8Array | Uint8ClampedArray | Buffer> {
+interface ImageWithDrawsProps {
   /** Imagen */
-  image: T
+  src: string
   /** Texto alternativo opcional */
   alt?: string
   /** Puntos a dibujar sobre la imagen */
@@ -66,14 +66,14 @@ interface ImageWithDrawsProps<T extends Uint8Array | Uint8ClampedArray | Buffer>
 /**
  * Dibuja una imagen con funciones, puntos y líneas personalizadas sobre ella.
  */
-function ImageWithDraws<T extends Uint8Array | Uint8ClampedArray | Buffer>({
-  image,
+function ImageWithDraws({
+  src,
   alt,
   points,
   drawFunction,
   perpendicularFunctions,
   opening,
-}: ImageWithDrawsProps<T>) {
+}: ImageWithDrawsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -82,14 +82,10 @@ function ImageWithDraws<T extends Uint8Array | Uint8ClampedArray | Buffer>({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    /** 🔄 Convertir el buffer binario en objeto URL válido */
-    const blob = new Blob([image], { type: "image/png" }) // o "image/jpeg", según corresponda
-    const objectUrl = URL.createObjectURL(blob)
-
     /** Imagen a devolver */
     const img = new Image()
     /** Asociar URL */
-    img.src = objectUrl
+    img.src = src
     /** Asociar ALT */
     if (alt) img.alt = alt
     img.onload = () => {
@@ -166,16 +162,11 @@ function ImageWithDraws<T extends Uint8Array | Uint8ClampedArray | Buffer>({
         }
         ctx.stroke()
       }
-
-      /** La imagen ya esta dibujada librar memoria asociada al blob */
-      URL.revokeObjectURL(objectUrl)
     }
 
     /** Limpieza por si el componente se desmonta antes de cargar */
-    return () => {
-      URL.revokeObjectURL(objectUrl)
-    }
-  }, [image, points, drawFunction, perpendicularFunctions, opening, alt])
+    return () => {}
+  }, [src, points, drawFunction, perpendicularFunctions, opening, alt])
 
   return (
     <canvas

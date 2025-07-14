@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
+import { useState } from "react"
 import { z } from "zod"
 import { db } from "~/db"
 import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
     const initialValues = await getInitialValues({
       data: { observationId: params.observationId },
     })
-    const initialSpectrums = await getSpectrums({
+    const spectrums = await getSpectrums({
       data: { observationId: params.observationId },
     })
     return {
@@ -79,14 +80,14 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
         },
       ] satisfies Breadcrumbs,
       initialValues,
-      initialSpectrums,
+      spectrums,
     }
   },
 })
 
 function RouteComponent() {
   const { observationId } = Route.useParams()
-  const { initialValues, initialSpectrums } = Route.useLoaderData()
+  const { initialValues, spectrums } = Route.useLoaderData()
 
   return (
     <div className="mx-auto w-full max-w-6xl px-8">
@@ -96,9 +97,9 @@ function RouteComponent() {
         OBSERVAT={initialValues.plate.OBSERVAT}
       />
       <div className="h-8" />
-      <SpectrumsList observationId={observationId} initialSpectrums={initialSpectrums} />
+      <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
-      <SpectrumsFeatures observationId={observationId} spectrums={initialSpectrums} />
+      <SpectrumsFeatures observationId={observationId} spectrums={spectrums} />
     </div>
   )
 }

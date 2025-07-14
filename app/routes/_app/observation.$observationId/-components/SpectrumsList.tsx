@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
+import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { type BoundingBox, BoundingBoxer } from "~/components/BoundingBoxer"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Separator } from "~/components/ui/separator"
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table"
-import * as s from "~/db/schema"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
 import { cn, idToColor } from "~/lib/utils"
@@ -15,9 +15,9 @@ import { addSpectrums } from "../-actions/add-spectrums"
 import type { getSpectrums } from "../-actions/get-spectrums"
 import { updateSpectrum } from "../-actions/update-spectrum"
 
-type Spectrum = Awaited<ReturnType<typeof getSpectrums>>[number]
+export type Spectrum = Awaited<ReturnType<typeof getSpectrums>>[number]
 
-function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
+export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
   return {
     id: spectrum.id,
     name: "",
@@ -34,8 +34,10 @@ export function SpectrumsList({
   initialSpectrums,
 }: {
   observationId: string
-  initialSpectrums: Awaited<ReturnType<typeof getSpectrums>>
+  initialSpectrums: Spectrum[]
 }) {
+  const router = useRouter()
+
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     initialSpectrums.map(spectrumToBoundingBox),
   )
@@ -76,6 +78,7 @@ export function SpectrumsList({
           imgHeight: boundingBoxes[2].height,
         }
         const newSpectrums = await addSpectrums({ data: { observationId, science, lamp1, lamp2 } })
+        router.invalidate()
         const boundingBoxesFormated = [
           spectrumToBoundingBox(newSpectrums.science),
           spectrumToBoundingBox(newSpectrums.lamp1),
@@ -106,8 +109,8 @@ export function SpectrumsList({
               prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),
             )
           }}
-          onBoundingBoxChangeEnd={(boundingBox) => {
-            updateSpectrum({
+          onBoundingBoxChangeEnd={async (boundingBox) => {
+            await updateSpectrum({
               data: {
                 spectrumId: boundingBox.id,
                 imgTop: boundingBox.top,
@@ -116,6 +119,7 @@ export function SpectrumsList({
                 imgHeight: boundingBox.height,
               },
             })
+            router.invalidate()
           }}
         />
         <div className="border-l">

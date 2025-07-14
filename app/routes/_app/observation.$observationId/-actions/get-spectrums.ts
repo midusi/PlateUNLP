@@ -10,6 +10,7 @@ export const getSpectrums = createServerFn()
       where: (spectrum, { eq }) => eq(spectrum.observationId, data.observationId),
       columns: {
         id: true,
+        type: true,
         imgTop: true,
         imgLeft: true,
         imgWidth: true,
