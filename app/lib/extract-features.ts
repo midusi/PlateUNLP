@@ -155,7 +155,6 @@ export function extractScience({
 	const validPerColumn = fullMask.cast("int32").sum(0);
 	const avgPerColumn = imgMasked.sum(0).div(validPerColumn);
 
-	console.log(imgMasked.sum(0).arraySync());
 	return {
 		mediasPoints: mediasPoints,
 		opening: avgOpening,
