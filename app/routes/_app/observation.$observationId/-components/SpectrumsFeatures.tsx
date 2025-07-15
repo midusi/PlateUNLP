@@ -5,6 +5,8 @@ import { Card, CardContent } from "~/components/ui/card";
 import {
 	extractFeatures,
 	type extractFeaturesResponse,
+	extractScience,
+	type extractScienceResponse,
 } from "~/lib/extract-features";
 import { crop, loadImage, obtainimageMatrix } from "~/lib/image";
 import { notifyError } from "~/lib/notifications";
@@ -26,15 +28,16 @@ export function SpectrumsFeatures({
 	const useSpline = false;
 	const reuseScienceFunction = true;
 
-	const [science, setScience] = useState<Uint8ClampedArray>();
-	const [lamp1, setLamp1] = useState<Uint8ClampedArray>();
-	const [lamp2, setLamp2] = useState<Uint8ClampedArray>();
+	const [science, setScience] = useState<Uint8Array>();
+	const [lamp1, setLamp1] = useState<Uint8Array>();
+	const [lamp2, setLamp2] = useState<Uint8Array>();
+	const [scienceAnalysis, setScienceAnalysis] =
+		useState<extractScienceResponse>();
 	const [specAnalysis, setSpecAnalysis] =
 		useState<extractFeaturesResponse<Uint8ClampedArray<ArrayBufferLike>>>();
 	const [state, setState] = useState<"waiting" | "running" | "ready">(
 		"waiting",
 	);
-	console.log(state);
 
 	const [observationImage, setObservationImage] =
 		useState<HTMLImageElement | null>(null);
@@ -51,6 +54,7 @@ export function SpectrumsFeatures({
 			return;
 		}
 
+		let first = true;
 		for (const spectrum of spectrums) {
 			const saved = spectrumsData.find((s) => s.id === spectrum.id);
 			if (
@@ -95,6 +99,21 @@ export function SpectrumsFeatures({
 					{ ...spectrum, data },
 				].sort((a, b) => a.imgTop - b.imgTop || a.imgLeft - b.imgLeft),
 			);
+			if (first) {
+				setScience(data);
+				const result = extractScience({
+					science: data,
+					width: spectrum.imgWidth,
+					height: spectrum.imgHeight,
+					countCheckpoints,
+					segmentWidth: segmentWidth,
+					fitFunction: "linal-regression",
+				});
+				setScienceAnalysis(result);
+				setState("ready");
+				console.log(result);
+				first = false;
+			}
 		}
 	}, [observationId, observationImage, spectrums, spectrumsData]);
 
@@ -152,26 +171,27 @@ export function SpectrumsFeatures({
 	return (
 		<Card>
 			<CardContent>
-				{spectrumsData.map((spectrum) => (
-					<SpectrumExtraction key={spectrum.id} />
-				))}
 				{state === "waiting" && <span>Waiting definition of spectrums</span>}
 				{state === "running" && (
 					<span className={cn("icon-[ph--spinner-bold] animate-spin")} />
 				)}
 				{state === "ready" && (
 					<>
-						<ImageWithPixelExtraction
-							title="Science Spectrum"
-							src={`/spectrum/${spectrums[0].id}/image`}
-							imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
-							pointsWMed={specAnalysis!.scienceMediasPoints}
-							drawFunction={specAnalysis!.scienceFunction!}
-							perpendicularFunctions={specAnalysis!.scienceTransversalFunctions}
-							opening={specAnalysis!.scienceAvgOpening}
-						/>
-						<SimpleFunctionXY data={specAnalysis!.scienceTransversalAvgs} />
-						<ImageWithPixelExtraction
+						{scienceAnalysis && (
+							<>
+								<ImageWithPixelExtraction
+									title="Science Spectrum"
+									src={`/spectrum/${spectrums[0].id}/image`}
+									imageAlt="Pixel-by-pixel analysis of science spectrum to extract spectrum function."
+									pointsWMed={scienceAnalysis!.mediasPoints}
+									drawFunction={scienceAnalysis!.rectFunction}
+									opening={scienceAnalysis!.opening}
+								/>
+								<SimpleFunctionXY data={scienceAnalysis!.transversalAvgs} />
+							</>
+						)}
+
+						{/* <ImageWithPixelExtraction
 							title="Lamp 1 Spectrum"
 							src={`/spectrum/${spectrums[1].id}/image`}
 							imageAlt="Pixel-by-pixel inference of the scientific spectrum of comparison lamp 1."
@@ -190,7 +210,7 @@ export function SpectrumsFeatures({
 							perpendicularFunctions={specAnalysis!.lamp2TransversalFunctions}
 							opening={specAnalysis!.lamp2AvgOpening}
 						/>
-						<SimpleFunctionXY data={specAnalysis!.lamp2TransversalAvgs} />
+						<SimpleFunctionXY data={specAnalysis!.lamp2TransversalAvgs} /> */}
 					</>
 				)}
 				{/* {isLoading || !specAnalysis ? (

@@ -22,7 +22,6 @@ export function ImageWithPixelExtraction({
   imageAlt,
   pointsWMed,
   drawFunction,
-  perpendicularFunctions,
   opening,
 }: ImageWithPixelExtractionProps) {
   return (
@@ -36,7 +35,6 @@ export function ImageWithPixelExtraction({
           alt={imageAlt}
           points={pointsWMed}
           drawFunction={drawFunction}
-          perpendicularFunctions={perpendicularFunctions}
           opening={opening}
         />
       </div>
@@ -57,8 +55,6 @@ interface ImageWithDrawsProps {
   points?: Point[]
   /** Función para dibujar una curva */
   drawFunction?: (x: number) => number
-  /** Funciones perpendiculares a dibujar (con pendiente y función asociada) */
-  perpendicularFunctions?: { m: number; funct: (x: number) => number }[]
   /** Apertura para dibujo de perpendiculares */
   opening?: number
 }
@@ -66,14 +62,7 @@ interface ImageWithDrawsProps {
 /**
  * Dibuja una imagen con funciones, puntos y líneas personalizadas sobre ella.
  */
-function ImageWithDraws({
-  src,
-  alt,
-  points,
-  drawFunction,
-  perpendicularFunctions,
-  opening,
-}: ImageWithDrawsProps) {
+function ImageWithDraws({ src, alt, points, drawFunction, opening }: ImageWithDrawsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -125,7 +114,7 @@ function ImageWithDraws({
       }
 
       // Dibujar rectas si está definidas
-      if (perpendicularFunctions && drawFunction && opening) {
+      if (drawFunction && opening) {
         const diffToCenter = opening / 2
         function funcionUP(x: number): number {
           return drawFunction!(x) + diffToCenter
@@ -166,7 +155,7 @@ function ImageWithDraws({
 
     /** Limpieza por si el componente se desmonta antes de cargar */
     return () => {}
-  }, [src, points, drawFunction, perpendicularFunctions, opening, alt])
+  }, [src, points, drawFunction, opening, alt])
 
   return (
     <canvas
