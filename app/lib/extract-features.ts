@@ -32,7 +32,7 @@ export interface extractScienceProps {
 }
 
 /** Respuesta de metodo extractScience */
-export interface extractScienceResponse {
+export interface extractSpectrumResponse {
 	/** Puntos medios elegidos para la extracción */
 	mediasPoints: Point[];
 	/** Apertura promedio detectada */
@@ -53,11 +53,10 @@ export function extractScience({
 	countCheckpoints,
 	segmentWidth,
 	fitFunction,
-}: extractScienceProps): extractScienceResponse {
+}: extractScienceProps): extractSpectrumResponse {
 	/** Convertir el arreglo de pixeles recivido a tensor */
 	const channels = 4; // Imagen RGBA
 	const rgba = tf.tensor4d(science, [1, height, width, channels], "int32");
-
 	/** Convertir a escala de grises */
 	const [r, g, b, _] = tf.split(rgba, 4, 3);
 	const imgTensor = r
@@ -159,6 +158,124 @@ export function extractScience({
 		mediasPoints: mediasPoints,
 		opening: avgOpening,
 		rectFunction: interpolated.funct,
+		transversalAvgs: avgPerColumn.arraySync() as number[],
+	};
+}
+
+/**
+ * Parametros recibidos por extractLamp
+ * @interface extractLamp
+ */
+export interface extractLampProps {
+	/** Información de caracteristicas del espectro de ciencia */
+	science: {
+		/** Ancho de la imagen */
+		width: number;
+		/** Alto de la imagen */
+		height: number;
+		/** Puntos medios elegidos para la extracción */
+		mediasPoints: Point[];
+		/** Apertura promedio*/
+		opening: number;
+		/** Funcion de la recta media del espectro medida en pixels */
+		rectFunction: (value: number) => number;
+		/**
+		 * Promedio por columna (vertical respecto a la imagen) de los pixels pasan
+		 * por rectFunction dentro de la apertura.
+		 */
+		transversalAvgs: number[];
+	};
+	/** Matriz de pixeles */
+	lamp: Uint8Array;
+	/** Ancho de imagen */
+	width: number;
+	/** Alto de imagen */
+	height: number;
+	/** Cantidad de puntos intermedios a usar */
+	countCheckpoints: number;
+	/** Ancho a considerar para el analisis de segmentos */
+	segmentWidth: number;
+	/** Funcion de ajuste a usar */
+	fitFunction?: "linal-regression" | "spline";
+}
+
+/** Extrae las caracteristicas de un espectro de lampara de comparación. */
+export function extractLamp({
+	science,
+	lamp,
+	width,
+	height,
+}: extractLampProps): extractSpectrumResponse {
+	/** Convertir el arreglo de pixeles recivido a tensor */
+	const channels = 4; // Imagen RGBA
+	const rgba = tf.tensor4d(lamp, [1, height, width, channels], "int32");
+	/** Convertir a escala de grises */
+	const [r, g, b, _] = tf.split(rgba, 4, 3);
+	const imgTensor = r
+		.mul(0.2989)
+		.add(g.mul(0.587))
+		.add(b.mul(0.114))
+		.cast("int32") as tf.Tensor4D;
+
+	/**
+	 * Relacion de escala de lampara respecto al espectro de ciencia.
+	 * sciencePoint * scale === lampPoint
+	 */
+	const scale = {
+		x: width / science.width,
+		y: height / science.height,
+	};
+
+	/**
+	 * Puntos medios del espectro de lampara.
+	 * Reusar los puntos de ciencia escalandolos.
+	 */
+	const mediasPoints: { x: number; y: number }[] = science.mediasPoints.map(
+		({ x, y }) => ({
+			x: round(x * scale.x),
+			y: y * scale.y,
+		}),
+	);
+
+	/**
+	 * Apertura promedio de lampara. La del espectro pero escalada
+	 * en respecto a Y.
+	 */
+	const avgOpening = science.opening;
+
+	/**
+	 * Funcion media para Lampara
+	 * Se reusa la del espectro de ciencia pero escalada.
+	 * */
+	const mediaFunction: (value: number) => number = (x: number) =>
+		science.rectFunction(round(x / scale.x)) / scale.y;
+
+	/** Promedio de pixeles que verticales que pasan por mediaFunction. */
+	// imgTensor: [1, height, width, 1]  — escala de grises en 4D
+	const gray2d = imgTensor.squeeze([0, 3]); // [height, width]
+	/** Valores por pixel horizontal en eje X e Y */
+	const xValues = tf.range(0, width, 1, "int32").arraySync();
+	const yvalues = tf.tensor1d(xValues.map((x) => mediaFunction(x)));
+	/** Minimo Y por pixel */
+	const minYs = yvalues.sub(tf.scalar(avgOpening / 2));
+	/** Maximo Y por pixel */
+	const maxYs = yvalues.add(tf.scalar(avgOpening / 2));
+	/** Tensor de coordenadas verticales: shape [height, width] => [0, 1, 2, ..., height-1]*/
+	const rowIndices = tf.range(0, height, 1, "int32");
+	const rowMatrix = tf.tile(rowIndices.expandDims(1), [1, width]);
+	/** Filtrar valores por columna que no entran entre el min y max de la columna */
+	const maskLower = rowMatrix.greater(minYs);
+	const maskUpper = rowMatrix.less(maxYs);
+	const fullMask = tf.logicalAnd(maskLower, maskUpper);
+	const imgMasked = tf.where(fullMask, gray2d, tf.fill([height, width], 0));
+	/** Promediar por columna */
+	const validPerColumn = fullMask.cast("int32").sum(0);
+	const avgPerColumn = imgMasked.sum(0).div(validPerColumn);
+
+	return {
+		mediasPoints: mediasPoints,
+		opening: avgOpening,
+		rectFunction: mediaFunction,
 		transversalAvgs: avgPerColumn.arraySync() as number[],
 	};
 }
