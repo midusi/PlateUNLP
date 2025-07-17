@@ -1,6 +1,5 @@
 import * as tf from "@tensorflow/tfjs"
 import { max, mean, min, round } from "mathjs"
-import { Tensor } from "onnxruntime-web"
 import {
   findPlateau,
   findXspacedPoints,

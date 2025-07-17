@@ -36,12 +36,12 @@ export function SimpleFunctionXY({ data }: SimpleFunctionXYProps) {
             theme={lightTheme}
             xScale={{ type: "linear" }}
             yScale={{ type: "linear" }}
-            height={200}
+            height={100}
             width={width}
             margin={{ top: 0, right: 32, bottom: 20, left: 32 }}
           >
             <Axis orientation="bottom" tickFormat={(d) => `${d}`} numTicks={5} />
-            <Axis orientation="left" tickFormat={(d) => `${d}`} numTicks={5} />
+            {/* <Axis orientation="left" tickFormat={(d) => `${d}`} numTicks={5} /> */}
             <Grid numTicks={10} />
             <AreaSeries
               curve={curveStep}

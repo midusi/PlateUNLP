@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "~/components/ui/card";
 import {
 	extractLamp,
@@ -20,11 +20,18 @@ export function SpectrumsFeatures({
 	observationId: string;
 	spectrums: Awaited<ReturnType<typeof getSpectrums>>;
 }) {
-	const countCheckpoints = 5;
-	const segmentWidth = 60;
-	const useSpline = false;
 	const reuseScienceFunction = true;
 
+	const [useSpline, setUseSpline] = useState(false);
+	const [tempUseSpline, setTempUseSpline] = useState(false);
+	const prevUseSpline = useRef(false);
+
+	const [tempCheckpoints, setTempCheckpoints] = useState(5);
+	const [countCheckpoints, setCountCheckpoints] = useState(5);
+	const prevCountCheckpoints = useRef(5);
+
+	const [segmentWidth, setSegmentWidth] = useState(60);
+	const prevSegmentWidth = useRef(60);
 	const [scienceAnalysis, setScienceAnalysis] = useState<{
 		width: number;
 		height: number;
@@ -56,10 +63,7 @@ export function SpectrumsFeatures({
 
 		/** Coloca primero el espectro de ciencia */
 		const indexSpectrum = spectrums.findIndex((s) => s.type === "science");
-		console.log(spectrums);
-		console.log(indexSpectrum);
 		const specScience = spectrums[indexSpectrum];
-		console.log(indexSpectrum);
 		spectrums[indexSpectrum].type = "science";
 		const spectrumsArr = [...spectrums];
 		spectrumsArr.splice(indexSpectrum, 1);
@@ -80,7 +84,9 @@ export function SpectrumsFeatures({
 				spectrum.imgTop === saved.data.imgTop &&
 				spectrum.imgLeft === saved.data.imgLeft &&
 				spectrum.imgWidth === saved.data.imgWidth &&
-				spectrum.imgHeight === saved.data.imgHeight
+				spectrum.imgHeight === saved.data.imgHeight &&
+				prevCountCheckpoints.current === countCheckpoints &&
+				prevUseSpline.current === useSpline
 			) {
 				continue;
 			}
@@ -120,7 +126,7 @@ export function SpectrumsFeatures({
 					height: spectrum.imgHeight,
 					countCheckpoints,
 					segmentWidth: segmentWidth,
-					fitFunction: "linal-regression",
+					fitFunction: useSpline ? "spline" : "linal-regression",
 				});
 				scienceInfo = {
 					width: spectrum.imgWidth,
@@ -143,7 +149,7 @@ export function SpectrumsFeatures({
 					height: spectrum.imgHeight,
 					countCheckpoints,
 					segmentWidth: segmentWidth,
-					fitFunction: "linal-regression",
+					fitFunction: useSpline ? "spline" : "linal-regression",
 				});
 			}
 			setSpectrumsData((prev) =>
@@ -156,6 +162,8 @@ export function SpectrumsFeatures({
 				),
 			);
 		}
+		prevCountCheckpoints.current = countCheckpoints;
+		prevUseSpline.current = useSpline;
 		setState("ready");
 	}, [
 		observationId,
@@ -163,6 +171,9 @@ export function SpectrumsFeatures({
 		spectrums,
 		spectrumsData.find,
 		scienceAnalysis,
+		segmentWidth,
+		countCheckpoints,
+		useSpline,
 	]);
 
 	return (
@@ -172,21 +183,66 @@ export function SpectrumsFeatures({
 				{state === "running" && (
 					<span className={cn("icon-[ph--spinner-bold] animate-spin")} />
 				)}
-				{state === "ready" &&
-					spectrumsData &&
-					spectrumsData.map((sd, i) => (
-						<div key={`Spectrum Analysis ${sd.data.id}`}>
-							<ImageWithPixelExtraction
-								title={`Spectrum ${i}`}
-								image={`/spectrum/${sd.data.id}/image?ts=${Date.now()}`}
-								imageAlt="Pixel-by-pixel analysis of spectrum to extract spectrum function."
-								pointsWMed={sd.analysis.mediasPoints}
-								drawFunction={sd.analysis.rectFunction}
-								opening={sd.analysis.opening}
-							/>
-							<SimpleFunctionXY data={sd.analysis.transversalAvgs} />
+				{state === "ready" && (
+					<>
+						<div
+							id="spectrum-extraction-controls"
+							className="flex flex-row gap-16 ml-8 mb-4"
+						>
+							<div id="count-checkpoints-control">
+								<label className="flex flex-row gap-2">
+									<p>Count checkpoints: {tempCheckpoints}</p>
+									<input
+										type="range"
+										min={2}
+										max={20}
+										step={1}
+										value={tempCheckpoints}
+										onChange={(e) => setTempCheckpoints(Number(e.target.value))}
+										onMouseUp={() => setCountCheckpoints(tempCheckpoints)}
+										onTouchEnd={() => setCountCheckpoints(tempCheckpoints)}
+									/>
+								</label>
+							</div>
+							<div id="use-spline-control">
+								<label className="flex flex-row gap-2">
+									Use spline
+									<input
+										type="checkbox"
+										checked={tempUseSpline}
+										onChange={(e) => setTempUseSpline(e.target.checked)}
+										onPointerUp={() => setUseSpline(tempUseSpline)}
+									/>
+								</label>
+							</div>
+							{/* <div id="segment-width-control">
+								<input
+									type="range"
+									min={10}
+									max={200}
+									step={1}
+									value={segmentWidth}
+									onChange={(e) => setSegmentWidth(Number(e.target.value))}
+								/>
+								<p>Segment width: {segmentWidth}</p>
+							</div> */}
 						</div>
-					))}
+						<hr />
+						{spectrumsData.map((sd, i) => (
+							<div key={`Spectrum Analysis ${sd.data.id}`}>
+								<ImageWithPixelExtraction
+									title={`Spectrum ${i}`}
+									image={`/spectrum/${sd.data.id}/image?ts=${Date.now()}`}
+									imageAlt="Pixel-by-pixel analysis of spectrum to extract spectrum function."
+									pointsWMed={sd.analysis.mediasPoints}
+									drawFunction={sd.analysis.rectFunction}
+									opening={sd.analysis.opening}
+								/>
+								<SimpleFunctionXY data={sd.analysis.transversalAvgs} />
+							</div>
+						))}
+					</>
+				)}
 			</CardContent>
 		</Card>
 	);
