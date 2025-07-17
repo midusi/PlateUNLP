@@ -1,11 +1,11 @@
 import clsx from "clsx"
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import type { Point } from "~/types/Point"
 
 interface ImageWithPixelExtractionProps {
   title?: string
   /** Imagen */
-  src: string
+  image: string | Uint8Array
   imageAlt?: string
   pointsWMed?: Point[]
   drawFunction: (x: number) => number
@@ -18,12 +18,17 @@ interface ImageWithPixelExtractionProps {
 
 export function ImageWithPixelExtraction({
   title,
-  src,
+  image,
   imageAlt,
   pointsWMed,
   drawFunction,
   opening,
 }: ImageWithPixelExtractionProps) {
+  const src = useMemo(
+    () => (typeof image === "string" ? image : URL.createObjectURL(new Blob([image]))),
+    [image],
+  )
+
   return (
     <div className={clsx("relative flex w-full items-center justify-center ", "px-16", "pt-2")}>
       <div className="flex flex-col">
