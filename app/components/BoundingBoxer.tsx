@@ -305,7 +305,7 @@ function BoundingBoxComponent({
       className="group absolute grid"
       data-resizing={resizing !== null}
     >
-      <p
+      {/* <p
         className="absolute top-0 left-0 origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"
         style={{
           backgroundColor: boundingBox.color,
@@ -313,7 +313,7 @@ function BoundingBoxComponent({
         }}
       >
         {boundingBox.name}
-      </p>
+      </p> */}
 
       {/* Top-left */}
       <div
