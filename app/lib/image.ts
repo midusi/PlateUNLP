@@ -111,21 +111,6 @@ export function getPointsInRect<T extends Uint8Array | Uint8ClampedArray | Buffe
 }
 
 /**
- * Recibe un arreglo de datos y los normaliza.
- * @param {number[]} data - Arreglo de datos a normalizar.
- * @param {number} min - Minimo a considerar para la conversion de rango.
- * @param {number} max - Maximo a considerar para la conversion de rango.
- * @returns {number[]} -
- * Arreglo de datos normalizado.
- */
-function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
-  if (!min) min = mathjsMin(data)
-  if (!max) max = mathjsMax(data)
-
-  return data.map((x) => (x - min) / (max - min))
-}
-
-/**
  * Dada una funcion busca el altiplano mas prominente que posea.
  * @param {number[]} dataY - Datos en el eje Y de la funcion.
  * @param {number} threshold - Umbral Porcentual entre 0 y 1 de
