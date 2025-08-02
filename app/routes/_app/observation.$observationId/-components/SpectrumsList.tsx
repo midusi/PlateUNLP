@@ -23,10 +23,10 @@ export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
     id: spectrum.id,
     name: "",
     color: idToColor(spectrum.id),
-    top: spectrum.imgTop,
-    left: spectrum.imgLeft,
-    width: spectrum.imgWidth,
-    height: spectrum.imgHeight,
+    top: spectrum.imageTop,
+    left: spectrum.imageLeft,
+    width: spectrum.imageWidth,
+    height: spectrum.imageHeight,
   }
 }
 
@@ -66,7 +66,7 @@ export function SpectrumsList({
   // 		console.log("Modelo cargado:", model);
 
   // 		const img = new Image();
-  // 		img.src = `/observation/${observationId}/image`;
+  // 		img.src = `/observation/${observationId}/preview`;
   // 		await new Promise((resolve, reject) => {
   // 			img.onload = resolve;
   // 			img.onerror = reject;
@@ -137,30 +137,30 @@ export function SpectrumsList({
     mutationFn: async () => {
       /** Obtener ancho de la imagen */
       const img = new Image()
-      img.src = `/observation/${observationId}/image`
+      img.src = `/observation/${observationId}/preview`
       img.onload = async () => {
         /** Obtener predicciones */
         /** Obtener predicciones */
-        const boundingBoxes = await determineBBFunction(`/observation/${observationId}/image`)
+        const boundingBoxes = await determineBBFunction(`/observation/${observationId}/preview`)
         //const boundingBoxes = predictions;
         /** Actualizar base de datos */
         const science = {
-          imgTop: boundingBoxes[0].y, //.top
-          imgLeft: 0, // Forzar ancho maximo
-          imgWidth: img.naturalWidth, // Forzar ancho maximo
-          imgHeight: boundingBoxes[0].height,
+          imageTop: boundingBoxes[0].y, //.top
+          imageLeft: 0, // Forzar ancho maximo
+          imageWidth: img.naturalWidth, // Forzar ancho maximo
+          imageHeight: boundingBoxes[0].height,
         }
         const lamp1 = {
-          imgTop: boundingBoxes[1].y, //.top
-          imgLeft: 0, // Forzar ancho maximo
-          imgWidth: img.naturalWidth, // Forzar ancho maximo
-          imgHeight: boundingBoxes[1].height,
+          imageTop: boundingBoxes[1].y, //.top
+          imageLeft: 0, // Forzar ancho maximo
+          imageWidth: img.naturalWidth, // Forzar ancho maximo
+          imageHeight: boundingBoxes[1].height,
         }
         const lamp2 = {
-          imgTop: boundingBoxes[2].y, //.top
-          imgLeft: 0, // Forzar ancho maximo
-          imgWidth: img.naturalWidth, // Forzar ancho maximo
-          imgHeight: boundingBoxes[2].height,
+          imageTop: boundingBoxes[2].y, //.top
+          imageLeft: 0, // Forzar ancho maximo
+          imageWidth: img.naturalWidth, // Forzar ancho maximo
+          imageHeight: boundingBoxes[2].height,
         }
         const newSpectrums = await addSpectrums({
           data: { observationId, science, lamp1, lamp2 },
@@ -189,7 +189,7 @@ export function SpectrumsList({
     <Card className="overflow-hidden p-0">
       <CardContent className="grid h-[500px] grid-cols-[1fr_300px] p-0">
         <BoundingBoxer
-          imageSrc={`/observation/${observationId}/image`}
+          imageSrc={`/observation/${observationId}/preview`}
           boundingBoxes={boundingBoxes}
           onBoundingBoxChange={(boundingBox) => {
             setBoundingBoxes((prev) =>
@@ -200,10 +200,10 @@ export function SpectrumsList({
             await updateSpectrum({
               data: {
                 spectrumId: boundingBox.id,
-                imgTop: boundingBox.top,
-                imgLeft: boundingBox.left,
-                imgWidth: boundingBox.width,
-                imgHeight: boundingBox.height,
+                imageTop: boundingBox.top,
+                imageLeft: boundingBox.left,
+                imageWidth: boundingBox.width,
+                imageHeight: boundingBox.height,
               },
             })
             router.invalidate()

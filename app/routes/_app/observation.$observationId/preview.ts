@@ -14,7 +14,16 @@ export const ServerRoute = createServerFileRoute(
     if (!observation) return new Response("Not found", { status: 404 })
     // Always convert to sRGB and PNG format for consistency
     let image = await readUploadedFile(observation.plate.image.id)
-    image = await sharp(image).toColorspace("srgb").png().toBuffer()
+    image = await sharp(image)
+      .extract({
+        height: observation.imageHeight,
+        top: observation.imageTop,
+        left: observation.imageLeft,
+        width: observation.imageWidth,
+      })
+      .toColorspace("srgb")
+      .png()
+      .toBuffer()
     return new Response(image, {
       headers: {
         "Content-Type": "image/png",

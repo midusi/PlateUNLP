@@ -683,5 +683,5 @@ export async function fetchGrayscaleImage({
   }
   const buffer = await response.arrayBuffer()
   const uint16Array = new Uint16Array(buffer)
-  return tf.tensor2d(uint16Array, [height, width], "int32")
+  return tf.tensor2d(Int32Array.from(uint16Array), [height, width], "int32")
 }
