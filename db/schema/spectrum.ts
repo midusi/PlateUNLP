@@ -11,10 +11,10 @@ export const spectrum = sqliteTable("spectrum", {
     .references(() => observation.id),
   type: text({ enum: ["lamp", "science"] }).notNull(),
   // image of the spectrum
-  imgLeft: integer().notNull(), // offset from the left of the observation image
-  imgTop: integer().notNull(), // offset from the top of the observation image
-  imgWidth: integer().notNull(), // width of the spectrum image
-  imgHeight: integer().notNull(), // height of the spectrum image
+  imageLeft: integer().notNull(), // offset from the left of the observation image
+  imageTop: integer().notNull(), // offset from the top of the observation image
+  imageWidth: integer().notNull(), // width of the spectrum image
+  imageHeight: integer().notNull(), // height of the spectrum image
 })
 
 export const spectrumRelations = relations(spectrum, ({ one }) => ({

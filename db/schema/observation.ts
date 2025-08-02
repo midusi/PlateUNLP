@@ -14,10 +14,10 @@ export const observation = sqliteTable(
       .references(() => plate.id),
     name: text().notNull(),
     // image of the observation
-    imgLeft: integer().notNull(), // offset from the left of the plate image
-    imgTop: integer().notNull(), // offset from the top of the plate image
-    imgWidth: integer().notNull(), // width of the observation image
-    imgHeight: integer().notNull(), // height of the observation image
+    imageLeft: integer().notNull(), // offset from the left of the plate image
+    imageTop: integer().notNull(), // offset from the top of the plate image
+    imageWidth: integer().notNull(), // width of the observation image
+    imageHeight: integer().notNull(), // height of the observation image
     // metadata
     OBJECT: text("object").notNull().default(""),
     "DATE-OBS": text("date_obs").notNull().default(""),

@@ -6,22 +6,22 @@ import { db } from "~/db"
 export const getSpectrums = createServerFn()
   .validator(z.object({ observationId: z.string() }))
   .handler(async ({ data }) => {
-    const getSpectrums = await db.query.spectrum.findMany({
+    const spectrums = await db.query.spectrum.findMany({
       where: (spectrum, { eq }) => eq(spectrum.observationId, data.observationId),
       columns: {
         id: true,
         type: true,
-        imgTop: true,
-        imgLeft: true,
-        imgWidth: true,
-        imgHeight: true,
+        imageTop: true,
+        imageLeft: true,
+        imageWidth: true,
+        imageHeight: true,
       },
     })
-    return getSpectrums
+    return spectrums
   })
 
 export const getSpectrumsQueryOptions = (observationId: string) =>
   queryOptions({
-    queryKey: ["spectrums", observationId],
+    queryKey: ["spectrum", "list", observationId],
     queryFn: () => getSpectrums({ data: { observationId } }),
   })

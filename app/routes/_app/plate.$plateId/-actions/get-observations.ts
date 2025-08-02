@@ -3,6 +3,8 @@ import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 import { db } from "~/db"
 
+export type Observation = Awaited<ReturnType<typeof getObservations>>[number]
+
 export const getObservations = createServerFn()
   .validator(z.object({ plateId: z.string() }))
   .handler(async ({ data }) => {
@@ -11,10 +13,10 @@ export const getObservations = createServerFn()
       columns: {
         id: true,
         name: true,
-        imgTop: true,
-        imgLeft: true,
-        imgWidth: true,
-        imgHeight: true,
+        imageTop: true,
+        imageLeft: true,
+        imageWidth: true,
+        imageHeight: true,
       },
     })
     return observations
@@ -22,6 +24,6 @@ export const getObservations = createServerFn()
 
 export const getObservationsQueryOptions = (plateId: string) =>
   queryOptions({
-    queryKey: ["observations", plateId],
+    queryKey: ["observation", "list", plateId],
     queryFn: () => getObservations({ data: { plateId } }),
   })

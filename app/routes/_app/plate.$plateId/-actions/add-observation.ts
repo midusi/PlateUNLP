@@ -17,18 +17,18 @@ export const addObservation = createServerFn({ method: "POST" })
       .values({
         plateId: data.plateId,
         name: `Observation ${nanoid(4)}`,
-        imgTop: 0,
-        imgLeft: 0,
-        imgWidth: plate.imageWidth / 10,
-        imgHeight: plate.imageHeight / 10,
+        imageTop: 0,
+        imageLeft: 0,
+        imageWidth: plate.imageWidth / 10,
+        imageHeight: plate.imageHeight / 10,
       })
       .returning({
         id: s.observation.id,
         name: s.observation.name,
-        imgTop: s.observation.imgTop,
-        imgLeft: s.observation.imgLeft,
-        imgWidth: s.observation.imgWidth,
-        imgHeight: s.observation.imgHeight,
+        imageTop: s.observation.imageTop,
+        imageLeft: s.observation.imageLeft,
+        imageWidth: s.observation.imageWidth,
+        imageHeight: s.observation.imageHeight,
       })
     return observation
   })

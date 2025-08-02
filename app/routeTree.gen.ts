@@ -18,7 +18,8 @@ import { Route as AppProjectProjectIdRouteImport } from './routes/_app/project.$
 import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$plateId/index'
 import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
 import { ServerRoute as AppSpectrumSpectrumIdImageServerRouteImport } from './routes/_app/spectrum.$spectrumId/image'
-import { ServerRoute as AppPlatePlateIdImageServerRouteImport } from './routes/_app/plate.$plateId/image'
+import { ServerRoute as AppPlatePlateIdPreviewServerRouteImport } from './routes/_app/plate.$plateId/preview'
+import { ServerRoute as AppObservationObservationIdPreviewServerRouteImport } from './routes/_app/observation.$observationId/preview'
 import { ServerRoute as AppObservationObservationIdImageServerRouteImport } from './routes/_app/observation.$observationId/image'
 
 const rootServerRouteImport = createServerRootRoute()
@@ -59,10 +60,16 @@ const AppSpectrumSpectrumIdImageServerRoute =
     path: '/spectrum/$spectrumId/image',
     getParentRoute: () => rootServerRouteImport,
   } as any)
-const AppPlatePlateIdImageServerRoute =
-  AppPlatePlateIdImageServerRouteImport.update({
-    id: '/_app/plate/$plateId/image',
-    path: '/plate/$plateId/image',
+const AppPlatePlateIdPreviewServerRoute =
+  AppPlatePlateIdPreviewServerRouteImport.update({
+    id: '/_app/plate/$plateId/preview',
+    path: '/plate/$plateId/preview',
+    getParentRoute: () => rootServerRouteImport,
+  } as any)
+const AppObservationObservationIdPreviewServerRoute =
+  AppObservationObservationIdPreviewServerRouteImport.update({
+    id: '/_app/observation/$observationId/preview',
+    path: '/observation/$observationId/preview',
     getParentRoute: () => rootServerRouteImport,
   } as any)
 const AppObservationObservationIdImageServerRoute =
@@ -126,41 +133,48 @@ export interface RootRouteChildren {
 }
 export interface FileServerRoutesByFullPath {
   '/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
-  '/plate/$plateId/image': typeof AppPlatePlateIdImageServerRoute
+  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewServerRoute
+  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewServerRoute
   '/spectrum/$spectrumId/image': typeof AppSpectrumSpectrumIdImageServerRoute
 }
 export interface FileServerRoutesByTo {
   '/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
-  '/plate/$plateId/image': typeof AppPlatePlateIdImageServerRoute
+  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewServerRoute
+  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewServerRoute
   '/spectrum/$spectrumId/image': typeof AppSpectrumSpectrumIdImageServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
   '/_app/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
-  '/_app/plate/$plateId/image': typeof AppPlatePlateIdImageServerRoute
+  '/_app/observation/$observationId/preview': typeof AppObservationObservationIdPreviewServerRoute
+  '/_app/plate/$plateId/preview': typeof AppPlatePlateIdPreviewServerRoute
   '/_app/spectrum/$spectrumId/image': typeof AppSpectrumSpectrumIdImageServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
   fullPaths:
     | '/observation/$observationId/image'
-    | '/plate/$plateId/image'
+    | '/observation/$observationId/preview'
+    | '/plate/$plateId/preview'
     | '/spectrum/$spectrumId/image'
   fileServerRoutesByTo: FileServerRoutesByTo
   to:
     | '/observation/$observationId/image'
-    | '/plate/$plateId/image'
+    | '/observation/$observationId/preview'
+    | '/plate/$plateId/preview'
     | '/spectrum/$spectrumId/image'
   id:
     | '__root__'
     | '/_app/observation/$observationId/image'
-    | '/_app/plate/$plateId/image'
+    | '/_app/observation/$observationId/preview'
+    | '/_app/plate/$plateId/preview'
     | '/_app/spectrum/$spectrumId/image'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
   AppObservationObservationIdImageServerRoute: typeof AppObservationObservationIdImageServerRoute
-  AppPlatePlateIdImageServerRoute: typeof AppPlatePlateIdImageServerRoute
+  AppObservationObservationIdPreviewServerRoute: typeof AppObservationObservationIdPreviewServerRoute
+  AppPlatePlateIdPreviewServerRoute: typeof AppPlatePlateIdPreviewServerRoute
   AppSpectrumSpectrumIdImageServerRoute: typeof AppSpectrumSpectrumIdImageServerRoute
 }
 
@@ -219,11 +233,18 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof AppSpectrumSpectrumIdImageServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
-    '/_app/plate/$plateId/image': {
-      id: '/_app/plate/$plateId/image'
-      path: '/plate/$plateId/image'
-      fullPath: '/plate/$plateId/image'
-      preLoaderRoute: typeof AppPlatePlateIdImageServerRouteImport
+    '/_app/plate/$plateId/preview': {
+      id: '/_app/plate/$plateId/preview'
+      path: '/plate/$plateId/preview'
+      fullPath: '/plate/$plateId/preview'
+      preLoaderRoute: typeof AppPlatePlateIdPreviewServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/_app/observation/$observationId/preview': {
+      id: '/_app/observation/$observationId/preview'
+      path: '/observation/$observationId/preview'
+      fullPath: '/observation/$observationId/preview'
+      preLoaderRoute: typeof AppObservationObservationIdPreviewServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
     '/_app/observation/$observationId/image': {
@@ -264,7 +285,9 @@ export const routeTree = rootRouteImport
 const rootServerRouteChildren: RootServerRouteChildren = {
   AppObservationObservationIdImageServerRoute:
     AppObservationObservationIdImageServerRoute,
-  AppPlatePlateIdImageServerRoute: AppPlatePlateIdImageServerRoute,
+  AppObservationObservationIdPreviewServerRoute:
+    AppObservationObservationIdPreviewServerRoute,
+  AppPlatePlateIdPreviewServerRoute: AppPlatePlateIdPreviewServerRoute,
   AppSpectrumSpectrumIdImageServerRoute: AppSpectrumSpectrumIdImageServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport

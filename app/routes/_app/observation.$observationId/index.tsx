@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { useState } from "react"
 import { z } from "zod"
 import { db } from "~/db"
+import { fetchGrayscaleImage } from "~/lib/image"
 import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getSpectrums } from "./-actions/get-spectrums"
 import { ObservationMetadataForm } from "./-components/ObservationMetadataForm"
@@ -15,6 +16,8 @@ const getInitialValues = createServerFn()
     const observation = await db.query.observation.findFirst({
       where: (observation, { eq }) => eq(observation.id, data.observationId),
       columns: {
+        imageHeight: true,
+        imageWidth: true,
         OBJECT: true,
         "DATE-OBS": true,
         UT: true,
@@ -55,11 +58,14 @@ const getInitialValues = createServerFn()
 export const Route = createFileRoute("/_app/observation/$observationId/")({
   component: RouteComponent,
   loader: async ({ context, params }) => {
-    const initialValues = await getInitialValues({
+    const { imageWidth, imageHeight, ...initialValues } = await getInitialValues({
       data: { observationId: params.observationId },
     })
-    const spectrums = await getSpectrums({
-      data: { observationId: params.observationId },
+    const spectrums = await getSpectrums({ data: { observationId: params.observationId } })
+    const rawImage = await fetchGrayscaleImage({
+      url: `/observation/${params.observationId}/image`,
+      width: imageWidth,
+      height: imageHeight,
     })
     return {
       breadcrumbs: [
@@ -81,13 +87,14 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
       ] satisfies Breadcrumbs,
       initialValues,
       spectrums,
+      rawImage,
     }
   },
 })
 
 function RouteComponent() {
   const { observationId } = Route.useParams()
-  const { initialValues, spectrums } = Route.useLoaderData()
+  const { initialValues, spectrums, rawImage } = Route.useLoaderData()
 
   return (
     <div className="mx-auto w-full max-w-6xl px-8">
@@ -99,7 +106,7 @@ function RouteComponent() {
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
-      <SpectrumsFeatures observationId={observationId} spectrums={spectrums} />
+      <SpectrumsFeatures observationId={observationId} rawImage={rawImage} spectrums={spectrums} />
     </div>
   )
 }

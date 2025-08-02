@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start"
-import { nanoid } from "nanoid"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
@@ -17,18 +16,18 @@ export const addSpectrum = createServerFn({ method: "POST" })
       .values({
         observationId: data.observationId,
         type: "lamp",
-        imgTop: 0,
-        imgLeft: 0,
-        imgWidth: observation.imgWidth / 10,
-        imgHeight: observation.imgHeight / 10,
+        imageTop: 0,
+        imageLeft: 0,
+        imageWidth: observation.imageWidth / 10,
+        imageHeight: observation.imageHeight / 10,
       })
       .returning({
         id: s.spectrum.id,
         type: s.spectrum.type,
-        imgTop: s.spectrum.imgTop,
-        imgLeft: s.spectrum.imgLeft,
-        imgWidth: s.spectrum.imgWidth,
-        imgHeight: s.spectrum.imgHeight,
+        imageTop: s.spectrum.imageTop,
+        imageLeft: s.spectrum.imageLeft,
+        imageWidth: s.spectrum.imageWidth,
+        imageHeight: s.spectrum.imageHeight,
       })
     return spectrum
   })

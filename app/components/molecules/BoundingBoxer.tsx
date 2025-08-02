@@ -231,11 +231,11 @@ export function BoundingBoxer({
   }
 
   return (
-    <Card className="overflow-hidden mb-6">
+    <Card className="mb-6 overflow-hidden">
       {/* Listado de herramientas para la interaccion con la iamgen. */}
-      <div className="bg-slate-100 p-2 border-b">
-        <div id="Tools container" className="flex justify-between items-center">
-          <h2 className="text-lg font-medium">Tools</h2>
+      <div className="border-b bg-slate-100 p-2">
+        <div id="Tools container" className="flex items-center justify-between">
+          <h2 className="font-medium text-lg">Tools</h2>
           {file && (
             <div id="Buttons Group" className="flex gap-2">
               {enable.autodetecButton && detectBBFunction && (
@@ -245,7 +245,7 @@ export function BoundingBoxer({
                   }}
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-2 text-black bg-white hover:bg-slate-50"
+                  className="flex items-center gap-2 bg-white text-black hover:bg-slate-50"
                 >
                   <Bot className="h-4 w-4" />
                   <span>Autodetect Bounding Boxes</span>
@@ -318,9 +318,9 @@ export function BoundingBoxer({
       {/* Visor/Cargador de imagen. */}
       <div
         className={clsx(
-          "w-full h-[400px]",
+          "h-[400px] w-full",
           "flex items-center justify-center",
-          " bg-slate-50 overflow-hidden",
+          " overflow-hidden bg-slate-50",
         )}
       >
         {!file ? (

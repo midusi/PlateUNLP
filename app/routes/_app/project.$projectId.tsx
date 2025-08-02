@@ -12,10 +12,7 @@ export const Route = createFileRoute("/_app/project/$projectId")({
       breadcrumbs: [
         {
           title: project.name,
-          link: {
-            to: "/project/$projectId",
-            params: { projectId: project.id },
-          },
+          link: { to: "/project/$projectId", params: { projectId: project.id } },
         },
       ] satisfies Breadcrumbs,
       project,

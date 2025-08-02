@@ -22,10 +22,10 @@ export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
     id: spectrum.id,
     name: "",
     color: idToColor(spectrum.id),
-    top: spectrum.imgTop,
-    left: spectrum.imgLeft,
-    width: spectrum.imgWidth,
-    height: spectrum.imgHeight,
+    top: spectrum.imageTop,
+    left: spectrum.imageLeft,
+    width: spectrum.imageWidth,
+    height: spectrum.imageHeight,
   }
 }
 
@@ -60,22 +60,22 @@ export function SpectrumsList({
         const boundingBoxes = await determineBBFunction(`/observation/${observationId}/image`)
         /** Actualizar base de datos */
         const science = {
-          imgTop: boundingBoxes[0].y,
-          imgLeft: 0, // Forzar ancho maximo
-          imgWidth: img.naturalWidth, // Forzar ancho maximo
-          imgHeight: boundingBoxes[0].height,
+          imageTop: boundingBoxes[0].y,
+          imageLeft: 0, // Forzar ancho maximo
+          imageWidth: img.naturalWidth, // Forzar ancho maximo
+          imageHeight: boundingBoxes[0].height,
         }
         const lamp1 = {
-          imgTop: boundingBoxes[1].y,
-          imgLeft: 0, // Forzar ancho maximo
-          imgWidth: img.naturalWidth, // Forzar ancho maximo
-          imgHeight: boundingBoxes[1].height,
+          imageTop: boundingBoxes[1].y,
+          imageLeft: 0, // Forzar ancho maximo
+          imageWidth: img.naturalWidth, // Forzar ancho maximo
+          imageHeight: boundingBoxes[1].height,
         }
         const lamp2 = {
-          imgTop: boundingBoxes[2].y,
-          imgLeft: 0, // Forzar ancho maximo
-          imgWidth: img.naturalWidth, // Forzar ancho maximo
-          imgHeight: boundingBoxes[2].height,
+          imageTop: boundingBoxes[2].y,
+          imageLeft: 0, // Forzar ancho maximo
+          imageWidth: img.naturalWidth, // Forzar ancho maximo
+          imageHeight: boundingBoxes[2].height,
         }
         const newSpectrums = await addSpectrums({ data: { observationId, science, lamp1, lamp2 } })
         router.invalidate()
@@ -113,10 +113,10 @@ export function SpectrumsList({
             await updateSpectrum({
               data: {
                 spectrumId: boundingBox.id,
-                imgTop: boundingBox.top,
-                imgLeft: boundingBox.left,
-                imgWidth: boundingBox.width,
-                imgHeight: boundingBox.height,
+                imageTop: boundingBox.top,
+                imageLeft: boundingBox.left,
+                imageWidth: boundingBox.width,
+                imageHeight: boundingBox.height,
               },
             })
             router.invalidate()

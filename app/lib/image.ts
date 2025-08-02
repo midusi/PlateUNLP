@@ -1,3 +1,4 @@
+import * as tf from "@tensorflow/tfjs"
 import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
@@ -651,4 +652,36 @@ export async function ensureWhite(
   }
 
   return { image: imageProcessed, bgColor: targetColor }
+}
+
+/**
+ * Converts a Uint16Array
+ */
+export async function grayscaleToImage() {}
+
+/**
+ * Fetches a grayscale image from a given URL. The URL must return a 16-bit
+ * grayscale image in raw format.
+ * @param {Object} params - Parameters for the function.
+ * @param {string} params.url - The URL of the image to fetch.
+ * @param {number} params.width - The width of the image.
+ * @param {number} params.height - The height of the image.
+ * @return {Promise<tf.Tensor2D>} - A Promise that resolves to a 2D tensor
+ */
+export async function fetchGrayscaleImage({
+  url,
+  width,
+  height,
+}: {
+  url: string
+  width: number
+  height: number
+}): Promise<tf.Tensor2D> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.statusText}`)
+  }
+  const buffer = await response.arrayBuffer()
+  const uint16Array = new Uint16Array(buffer)
+  return tf.tensor2d(uint16Array, [height, width], "int32")
 }

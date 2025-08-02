@@ -9,10 +9,10 @@ export const updateObservation = createServerFn()
     z.object({
       observationId: z.string(),
       name: z.string().min(1),
-      imgTop: z.int().min(0),
-      imgLeft: z.int().min(0),
-      imgWidth: z.int().min(1),
-      imgHeight: z.int().min(1),
+      imageTop: z.int().min(0),
+      imageLeft: z.int().min(0),
+      imageWidth: z.int().min(1),
+      imageHeight: z.int().min(1),
     }),
   )
   .handler(async ({ data }) => {
@@ -24,10 +24,10 @@ export const updateObservation = createServerFn()
     })
     if (!observation) throw new Error(`Observation with id ${data.observationId} not found`)
 
-    if (data.imgLeft + data.imgWidth > observation.plate.imageWidth) {
+    if (data.imageLeft + data.imageWidth > observation.plate.imageWidth) {
       throw new Error("Bounding box exceeds plate image width")
     }
-    if (data.imgTop + data.imgHeight > observation.plate.imageHeight) {
+    if (data.imageTop + data.imageHeight > observation.plate.imageHeight) {
       throw new Error("Bounding box exceeds plate image height")
     }
 
@@ -35,10 +35,10 @@ export const updateObservation = createServerFn()
       .update(s.observation)
       .set({
         name: data.name,
-        imgTop: data.imgTop,
-        imgLeft: data.imgLeft,
-        imgWidth: data.imgWidth,
-        imgHeight: data.imgHeight,
+        imageTop: data.imageTop,
+        imageLeft: data.imageLeft,
+        imageWidth: data.imageWidth,
+        imageHeight: data.imageHeight,
       })
       .where(eq(s.observation.id, data.observationId))
   })
