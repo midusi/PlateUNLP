@@ -15,10 +15,10 @@ export const ServerRoute = createServerFileRoute("/_app/spectrum/$spectrumId/ima
     const plate = await readUploadedFile(spectrum.observation.plate.image.id)
     const result = await sharp(plate)
       .extract({
-        height: Math.round(spectrum.imgHeight),
-        top: Math.round(spectrum.observation.imgTop + spectrum.imgTop),
-        left: Math.round(spectrum.observation.imgLeft + spectrum.imgLeft),
-        width: Math.round(spectrum.imgWidth),
+        height: Math.round(spectrum.imageHeight),
+        top: Math.round(spectrum.observation.imageTop + spectrum.imageTop),
+        left: Math.round(spectrum.observation.imageLeft + spectrum.imageLeft),
+        width: Math.round(spectrum.imageWidth),
       })
       .toBuffer()
     return new Response(result, {

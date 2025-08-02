@@ -37,21 +37,15 @@ const getInitialValues = createServerFn()
 export const Route = createFileRoute("/_app/plate/$plateId/")({
   component: RouteComponent,
   loader: async ({ context, params }) => {
-    const initialValues = await getInitialValues({
-      data: { plateId: params.plateId },
-    })
-    const initialObservations = await getObservations({
-      data: { plateId: params.plateId },
-    })
-    await context.queryClient.ensureQueryData(getObservatoriesQueryOptions())
+    const initialValues = await getInitialValues({ data: { plateId: params.plateId } })
+    const initialObservations = await getObservations({ data: { plateId: params.plateId } })
+    await context.queryClient.ensureQueryData(getObservatoriesQueryOptions()) // For the PlateMetadataForm
+
     return {
       breadcrumbs: [
         {
           title: initialValues.project.name,
-          link: {
-            to: "/project/$projectId",
-            params: { projectId: initialValues.project.id },
-          },
+          link: { to: "/project/$projectId", params: { projectId: initialValues.project.id } },
         },
         {
           title: `Plate ${initialValues["PLATE-N"] || params.plateId}`,

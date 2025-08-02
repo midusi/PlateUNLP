@@ -9,9 +9,9 @@ export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
     id: spectrum.id,
     name: "",
     color: idToColor(spectrum.id),
-    top: spectrum.imgTop,
-    left: spectrum.imgLeft,
-    width: spectrum.imgWidth,
-    height: spectrum.imgHeight,
+    top: spectrum.imageTop,
+    left: spectrum.imageLeft,
+    width: spectrum.imageWidth,
+    height: spectrum.imageHeight,
   }
 }

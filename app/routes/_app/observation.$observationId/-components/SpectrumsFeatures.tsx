@@ -1,3 +1,4 @@
+import type * as tf from "@tensorflow/tfjs"
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "~/components/ui/card"
 import { extractLamp, extractScience, type extractSpectrumResponse } from "~/lib/extract-features"
@@ -11,9 +12,11 @@ import type { Spectrum } from "../-utils/spectrum-to-bounding-box"
 
 export function SpectrumsFeatures({
   observationId,
+  rawImage,
   spectrums,
 }: {
   observationId: string
+  rawImage: tf.Tensor2D
   spectrums: Awaited<ReturnType<typeof getSpectrums>>
 }) {
   const reuseScienceFunction = true
@@ -47,7 +50,7 @@ export function SpectrumsFeatures({
   >([])
   useEffect(() => {
     if (!observationImage) {
-      loadImage(`/observation/${observationId}/image`).then((image) => setObservationImage(image))
+      loadImage(`/observation/${observationId}/preview`).then((image) => setObservationImage(image))
       return
     }
     if (spectrums.length === 0) return
@@ -70,16 +73,16 @@ export function SpectrumsFeatures({
     if (
       !saved ||
       specScience.type !== saved.data.type ||
-      specScience.imgTop !== saved.data.imgTop ||
-      specScience.imgLeft !== saved.data.imgLeft ||
-      specScience.imgWidth !== saved.data.imgWidth ||
-      specScience.imgHeight !== saved.data.imgHeight ||
+      specScience.imageTop !== saved.data.imageTop ||
+      specScience.imageLeft !== saved.data.imageLeft ||
+      specScience.imageWidth !== saved.data.imageWidth ||
+      specScience.imageHeight !== saved.data.imageHeight ||
       prevCountCheckpoints.current !== countCheckpoints ||
       prevUseSpline.current !== useSpline
     ) {
       const canvas = document.createElement("canvas")
-      canvas.width = specScience.imgWidth
-      canvas.height = specScience.imgHeight
+      canvas.width = specScience.imageWidth
+      canvas.height = specScience.imageHeight
       const ctx = canvas.getContext("2d")
       if (!ctx) {
         notifyError("Failed to create canvas context for spectrum image.")
@@ -88,32 +91,32 @@ export function SpectrumsFeatures({
       ctx.filter = "grayscale(1)"
       ctx.drawImage(
         observationImage,
-        specScience.imgLeft,
-        specScience.imgTop,
-        specScience.imgWidth,
-        specScience.imgHeight,
+        specScience.imageLeft,
+        specScience.imageTop,
+        specScience.imageWidth,
+        specScience.imageHeight,
         0,
         0,
-        specScience.imgWidth,
-        specScience.imgHeight,
+        specScience.imageWidth,
+        specScience.imageHeight,
       )
       const data = new Uint8Array(
-        ctx.getImageData(0, 0, specScience.imgWidth, specScience.imgHeight, {}).data.buffer,
+        ctx.getImageData(0, 0, specScience.imageWidth, specScience.imageHeight, {}).data.buffer,
       )
       canvas.remove()
 
       /** Extraer caracteristicas */
       const result: extractSpectrumResponse = extractScience({
         science: data,
-        width: specScience.imgWidth,
-        height: specScience.imgHeight,
+        width: specScience.imageWidth,
+        height: specScience.imageHeight,
         countCheckpoints,
         segmentWidth: segmentWidth,
         fitFunction: useSpline ? "spline" : "linal-regression",
       })
       scienceInfo = {
-        width: specScience.imgWidth,
-        height: specScience.imgHeight,
+        width: specScience.imageWidth,
+        height: specScience.imageHeight,
         analysis: result,
       }
       setScienceAnalysis({ ...scienceInfo })
@@ -122,7 +125,7 @@ export function SpectrumsFeatures({
         [
           ...prev.filter((s) => s.data.id !== specScience.id),
           { data: { ...specScience }, image: data, analysis: result },
-        ].sort((a, b) => a.data.imgTop - b.data.imgTop || a.data.imgLeft - b.data.imgLeft),
+        ].sort((a, b) => a.data.imageTop - b.data.imageTop || a.data.imageLeft - b.data.imageLeft),
       )
     }
 
@@ -132,10 +135,10 @@ export function SpectrumsFeatures({
       if (
         saved &&
         spectrum.type === saved.data.type &&
-        spectrum.imgTop === saved.data.imgTop &&
-        spectrum.imgLeft === saved.data.imgLeft &&
-        spectrum.imgWidth === saved.data.imgWidth &&
-        spectrum.imgHeight === saved.data.imgHeight &&
+        spectrum.imageTop === saved.data.imageTop &&
+        spectrum.imageLeft === saved.data.imageLeft &&
+        spectrum.imageWidth === saved.data.imageWidth &&
+        spectrum.imageHeight === saved.data.imageHeight &&
         prevCountCheckpoints.current === countCheckpoints &&
         prevUseSpline.current === useSpline
       ) {
@@ -143,8 +146,8 @@ export function SpectrumsFeatures({
       }
 
       const canvas = document.createElement("canvas")
-      canvas.width = spectrum.imgWidth
-      canvas.height = spectrum.imgHeight
+      canvas.width = spectrum.imageWidth
+      canvas.height = spectrum.imageHeight
       const ctx = canvas.getContext("2d")
       if (!ctx) {
         notifyError("Failed to create canvas context for spectrum image.")
@@ -153,17 +156,17 @@ export function SpectrumsFeatures({
       ctx.filter = "grayscale(1)"
       ctx.drawImage(
         observationImage,
-        spectrum.imgLeft,
-        spectrum.imgTop,
-        spectrum.imgWidth,
-        spectrum.imgHeight,
+        spectrum.imageLeft,
+        spectrum.imageTop,
+        spectrum.imageWidth,
+        spectrum.imageHeight,
         0,
         0,
-        spectrum.imgWidth,
-        spectrum.imgHeight,
+        spectrum.imageWidth,
+        spectrum.imageHeight,
       )
       const data = new Uint8Array(
-        ctx.getImageData(0, 0, spectrum.imgWidth, spectrum.imgHeight, {}).data.buffer,
+        ctx.getImageData(0, 0, spectrum.imageWidth, spectrum.imageHeight, {}).data.buffer,
       )
       canvas.remove()
 
@@ -178,16 +181,16 @@ export function SpectrumsFeatures({
       //       transversalAvgs: scienceInfo!.analysis.transversalAvgs,
       //     },
       //     lamp: data,
-      //     width: spectrum.imgWidth,
-      //     height: spectrum.imgHeight,
+      //     width: spectrum.imageWidth,
+      //     height: spectrum.imageHeight,
       //     countCheckpoints,
       //     segmentWidth: segmentWidth,
       //     fitFunction: useSpline ? "spline" : "linal-regression",
       //   })
       const result: extractSpectrumResponse = extractScience({
         science: data,
-        width: spectrum.imgWidth,
-        height: spectrum.imgHeight,
+        width: spectrum.imageWidth,
+        height: spectrum.imageHeight,
         countCheckpoints,
         segmentWidth: segmentWidth,
         fitFunction: useSpline ? "spline" : "linal-regression",
@@ -197,7 +200,7 @@ export function SpectrumsFeatures({
         [
           ...prev.filter((s) => s.data.id !== spectrum.id),
           { data: { ...spectrum }, image: data, analysis: result },
-        ].sort((a, b) => a.data.imgTop - b.data.imgTop || a.data.imgLeft - b.data.imgLeft),
+        ].sort((a, b) => a.data.imageTop - b.data.imageTop || a.data.imageLeft - b.data.imageLeft),
       )
     }
 
@@ -266,8 +269,13 @@ export function SpectrumsFeatures({
               <div key={`Spectrum Analysis ${sd.data.id}`}>
                 <ImageWithPixelExtraction
                   title={`Spectrum ${i} (${sd.data.type})`}
-                  image={`/spectrum/${sd.data.id}/image?ts=${Date.now()}`}
-                  imageAlt="Pixel-by-pixel analysis of spectrum to extract spectrum function."
+                  image={{
+                    url: `/observation/${observationId}/preview`,
+                    width: sd.data.imageWidth,
+                    height: sd.data.imageHeight,
+                    top: sd.data.imageTop,
+                    left: sd.data.imageLeft,
+                  }}
                   pointsWMed={sd.analysis.mediasPoints}
                   drawFunction={sd.analysis.rectFunction}
                   opening={sd.analysis.opening}

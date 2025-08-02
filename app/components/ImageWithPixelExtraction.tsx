@@ -1,12 +1,10 @@
 import clsx from "clsx"
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useRef } from "react"
 import type { Point } from "~/types/Point"
 
 interface ImageWithPixelExtractionProps {
   title?: string
-  /** Imagen */
-  image: string | Uint8Array
-  imageAlt?: string
+  image: { url: string; width: number; height: number; top: number; left: number }
   pointsWMed?: Point[]
   drawFunction: (x: number) => number
   perpendicularFunctions?: {
@@ -19,16 +17,10 @@ interface ImageWithPixelExtractionProps {
 export function ImageWithPixelExtraction({
   title,
   image,
-  imageAlt,
   pointsWMed,
   drawFunction,
   opening,
 }: ImageWithPixelExtractionProps) {
-  const src = useMemo(
-    () => (typeof image === "string" ? image : URL.createObjectURL(new Blob([image]))),
-    [image],
-  )
-
   return (
     <div className={clsx("relative flex w-full items-center justify-center ", "px-8", "pt-1")}>
       <div className="flex flex-col">
@@ -36,8 +28,7 @@ export function ImageWithPixelExtraction({
           <h3 className="flex justify-center pb-1 font-semibold text-lg text-slate-500">{title}</h3>
         )}
         <ImageWithDraws
-          src={src}
-          alt={imageAlt}
+          image={image}
           points={pointsWMed}
           drawFunction={drawFunction}
           opening={opening}
@@ -52,10 +43,7 @@ export function ImageWithPixelExtraction({
  * @interface ImageWithDraws
  */
 interface ImageWithDrawsProps {
-  /** Imagen */
-  src: string
-  /** Texto alternativo opcional */
-  alt?: string
+  image: { url: string; width: number; height: number; top: number; left: number }
   /** Puntos a dibujar sobre la imagen */
   points?: Point[]
   /** Función para dibujar una curva */
@@ -67,7 +55,7 @@ interface ImageWithDrawsProps {
 /**
  * Dibuja una imagen con funciones, puntos y líneas personalizadas sobre ella.
  */
-function ImageWithDraws({ src, alt, points, drawFunction, opening }: ImageWithDrawsProps) {
+function ImageWithDraws({ image, points, drawFunction, opening }: ImageWithDrawsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -76,21 +64,29 @@ function ImageWithDraws({ src, alt, points, drawFunction, opening }: ImageWithDr
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    /** Imagen a devolver */
-    const img = new Image()
+    // Cargar imagen de la observación
+    const obsImg = new Image()
     /** Asociar URL */
-    img.src = src
-    /** Asociar ALT */
-    if (alt) img.alt = alt
-    img.onload = () => {
-      canvas.width = img.width
-      canvas.height = img.height
+    obsImg.src = image.url
+    obsImg.onload = () => {
+      canvas.width = image.width
+      canvas.height = image.height
 
-      const lineSize = img.height * 0.03
-      const pointSize = img.height * 0.06
+      const lineSize = image.height * 0.03
+      const pointSize = image.height * 0.06
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
+      ctx.drawImage(
+        obsImg,
+        image.left,
+        image.top,
+        image.width,
+        image.height,
+        0,
+        0,
+        image.width,
+        image.height,
+      )
 
       // Dibujar puntos si están definidos
       if (points) {
@@ -160,7 +156,7 @@ function ImageWithDraws({ src, alt, points, drawFunction, opening }: ImageWithDr
 
     /** Limpieza por si el componente se desmonta antes de cargar */
     return () => {}
-  }, [src, points, drawFunction, opening, alt])
+  }, [image, points, drawFunction, opening])
 
   return (
     <canvas

@@ -19,7 +19,7 @@ const getObservatories = createServerFn().handler(async () => {
 
 export const getObservatoriesQueryOptions = () =>
   queryOptions({
-    queryKey: ["select-observatory-list"],
+    queryKey: ["observatory", "list"],
     queryFn: () => getObservatories(),
   })
 

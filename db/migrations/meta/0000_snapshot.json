@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2350a306-a83f-494c-9f18-78944f577893",
+  "id": "a99a23ba-2e1e-41fa-8dbe-b37c3d300ca8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "iers_bulletin_a": {
@@ -106,29 +106,29 @@
           "notNull": true,
           "autoincrement": false
         },
-        "img_left": {
-          "name": "img_left",
+        "image_left": {
+          "name": "image_left",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "img_top": {
-          "name": "img_top",
+        "image_top": {
+          "name": "image_top",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "img_width": {
-          "name": "img_width",
+        "image_width": {
+          "name": "image_width",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "img_height": {
-          "name": "img_height",
+        "image_height": {
+          "name": "image_height",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -602,29 +602,29 @@
           "notNull": true,
           "autoincrement": false
         },
-        "img_left": {
-          "name": "img_left",
+        "image_left": {
+          "name": "image_left",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "img_top": {
-          "name": "img_top",
+        "image_top": {
+          "name": "image_top",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "img_width": {
-          "name": "img_width",
+        "image_width": {
+          "name": "image_width",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "img_height": {
-          "name": "img_height",
+        "image_height": {
+          "name": "image_height",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

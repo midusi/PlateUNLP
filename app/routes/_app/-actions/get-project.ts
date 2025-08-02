@@ -15,6 +15,6 @@ export const getProject = createServerFn()
 
 export const getProjectQueryOptions = (projectId: string) =>
   queryOptions({
-    queryKey: ["project", projectId],
+    queryKey: ["project", "detail", projectId],
     queryFn: () => getProject({ data: { projectId } }),
   })

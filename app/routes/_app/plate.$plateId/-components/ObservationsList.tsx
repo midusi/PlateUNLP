@@ -11,20 +11,18 @@ import { notifyError } from "~/lib/notifications"
 import { cn, idToColor } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
-import type { getObservations } from "../-actions/get-observations"
+import type { Observation } from "../-actions/get-observations"
 import { updateObservation } from "../-actions/update-observation"
-
-type Observation = Awaited<ReturnType<typeof getObservations>>[number]
 
 function observationToBoundingBox(observation: Observation): BoundingBox {
   return {
     id: observation.id,
     name: observation.name,
     color: idToColor(observation.id),
-    top: observation.imgTop,
-    left: observation.imgLeft,
-    width: observation.imgWidth,
-    height: observation.imgHeight,
+    top: observation.imageTop,
+    left: observation.imageLeft,
+    width: observation.imageWidth,
+    height: observation.imageHeight,
   }
 }
 
@@ -33,7 +31,7 @@ export function ObservationsList({
   initialObservations,
 }: {
   plateId: string
-  initialObservations: Awaited<ReturnType<typeof getObservations>>
+  initialObservations: Observation[]
 }) {
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     initialObservations.map(observationToBoundingBox),
@@ -59,7 +57,7 @@ export function ObservationsList({
     <Card className="overflow-hidden p-0">
       <CardContent className="grid h-[500px] grid-cols-[1fr_300px] p-0">
         <BoundingBoxer
-          imageSrc={`/plate/${plateId}/image`}
+          imageSrc={`/plate/${plateId}/preview`}
           boundingBoxes={boundingBoxes}
           onBoundingBoxChange={(boundingBox) => {
             setBoundingBoxes((prev) =>
@@ -71,10 +69,10 @@ export function ObservationsList({
               data: {
                 observationId: boundingBox.id,
                 name: boundingBox.name,
-                imgTop: boundingBox.top,
-                imgLeft: boundingBox.left,
-                imgWidth: boundingBox.width,
-                imgHeight: boundingBox.height,
+                imageTop: boundingBox.top,
+                imageLeft: boundingBox.left,
+                imageWidth: boundingBox.width,
+                imageHeight: boundingBox.height,
               },
             })
           }}
