@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a99a23ba-2e1e-41fa-8dbe-b37c3d300ca8",
+  "id": "da3d4380-9c52-406e-9738-26c2690bac8a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "iers_bulletin_a": {
@@ -322,7 +322,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -643,7 +643,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

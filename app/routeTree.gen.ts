@@ -14,7 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppProjectsRouteImport } from './routes/_app/projects'
-import { Route as AppProjectProjectIdRouteImport } from './routes/_app/project.$projectId'
+import { Route as AppProjectProjectIdRouteRouteImport } from './routes/_app/project.$projectId/route'
 import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$plateId/index'
 import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
 import { ServerRoute as AppSpectrumSpectrumIdImageServerRouteImport } from './routes/_app/spectrum.$spectrumId/image'
@@ -38,11 +38,12 @@ const AppProjectsRoute = AppProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppProjectProjectIdRoute = AppProjectProjectIdRouteImport.update({
-  id: '/project/$projectId',
-  path: '/project/$projectId',
-  getParentRoute: () => AppRouteRoute,
-} as any)
+const AppProjectProjectIdRouteRoute =
+  AppProjectProjectIdRouteRouteImport.update({
+    id: '/project/$projectId',
+    path: '/project/$projectId',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppPlatePlateIdIndexRoute = AppPlatePlateIdIndexRouteImport.update({
   id: '/plate/$plateId/',
   path: '/plate/$plateId/',
@@ -82,14 +83,14 @@ const AppObservationObservationIdImageServerRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/projects': typeof AppProjectsRoute
-  '/project/$projectId': typeof AppProjectProjectIdRoute
+  '/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/projects': typeof AppProjectsRoute
-  '/project/$projectId': typeof AppProjectProjectIdRoute
+  '/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
 }
@@ -98,7 +99,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteRouteWithChildren
   '/_app/projects': typeof AppProjectsRoute
-  '/_app/project/$projectId': typeof AppProjectProjectIdRoute
+  '/_app/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/_app/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
   '/_app/plate/$plateId/': typeof AppPlatePlateIdIndexRoute
 }
@@ -205,7 +206,7 @@ declare module '@tanstack/react-router' {
       id: '/_app/project/$projectId'
       path: '/project/$projectId'
       fullPath: '/project/$projectId'
-      preLoaderRoute: typeof AppProjectProjectIdRouteImport
+      preLoaderRoute: typeof AppProjectProjectIdRouteRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/plate/$plateId/': {
@@ -259,14 +260,14 @@ declare module '@tanstack/react-start/server' {
 
 interface AppRouteRouteChildren {
   AppProjectsRoute: typeof AppProjectsRoute
-  AppProjectProjectIdRoute: typeof AppProjectProjectIdRoute
+  AppProjectProjectIdRouteRoute: typeof AppProjectProjectIdRouteRoute
   AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
   AppPlatePlateIdIndexRoute: typeof AppPlatePlateIdIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProjectsRoute: AppProjectsRoute,
-  AppProjectProjectIdRoute: AppProjectProjectIdRoute,
+  AppProjectProjectIdRouteRoute: AppProjectProjectIdRouteRoute,
   AppObservationObservationIdIndexRoute: AppObservationObservationIdIndexRoute,
   AppPlatePlateIdIndexRoute: AppPlatePlateIdIndexRoute,
 }

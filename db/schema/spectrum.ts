@@ -8,7 +8,7 @@ export const spectrum = sqliteTable("spectrum", {
   id: idType(),
   observationId: text()
     .notNull()
-    .references(() => observation.id),
+    .references(() => observation.id, { onDelete: "cascade" }),
   type: text({ enum: ["lamp", "science"] }).notNull(),
   // image of the spectrum
   imageLeft: integer().notNull(), // offset from the left of the observation image

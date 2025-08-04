@@ -59,14 +59,6 @@
   --chart-3: var(--primary-400);
   --chart-4: var(--primary-300);
   --chart-5: var(--primary-100);
-  --sidebar: var(--base-100);
-  --sidebar-foreground: var(--base-800);
-  --sidebar-primary: var(--primary-300);
-  --sidebar-primary-foreground: var(--color-black);
-  --sidebar-accent: var(--base-200);
-  --sidebar-accent-foreground: var(--base-800);
-  --sidebar-border: var(--base-200);
-  --sidebar-ring: var(--primary-300);
 
   --font-sans: GeistVariable, sans-serif;
   --font-serif: "Lora", Georgia, serif;
@@ -107,14 +99,6 @@
   --chart-3: var(--primary-400);
   --chart-4: var(--primary-300);
   --chart-5: var(--primary-100);
-  --sidebar: var(--base-900);
-  --sidebar-foreground: var(--base-200);
-  --sidebar-primary: var(--primary-300);
-  --sidebar-primary-foreground: var(--color-black);
-  --sidebar-accent: var(--base-800);
-  --sidebar-accent-foreground: var(--base-200);
-  --sidebar-border: var(--base-800);
-  --sidebar-ring: var(--primary-300);
 }
 
 @theme inline {
@@ -167,14 +151,6 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
