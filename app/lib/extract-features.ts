@@ -1,4 +1,6 @@
 import * as tf from "@tensorflow/tfjs"
+import { Axis } from "@visx/axis"
+import { AArrowDown } from "lucide-react"
 import { max, mean, min, round } from "mathjs"
 import {
   findPlateau,
@@ -8,7 +10,17 @@ import {
   promediadoHorizontal,
 } from "~/lib/image"
 import { extremePoints } from "~/lib/trigonometry"
-import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
+import {
+  downloadGrayscaleImage,
+  guardarFuncion,
+  guardarRectaYPuntos,
+  linearRegressionWhitDerived,
+  meanSmooth,
+  pushToExtremes,
+  pushToExtremeTf,
+  splineCuadratic,
+  weightedSmooth,
+} from "~/lib/utils"
 import type { Point } from "~/types/Point"
 
 /**
@@ -53,14 +65,14 @@ export function extractScience({
   segmentWidth,
   fitFunction,
 }: extractScienceProps): extractSpectrumResponse {
-  /** Convertir el arreglo de pixeles recivido a tensor */
+  /** Convertir el arreglo de pixeles recibido a tensor */
   const channels = 4 // Imagen RGBA
   height = Math.floor(height)
   width = Math.floor(width)
   const rgba = tf.tensor4d(science, [1, height, width, channels], "int32")
   /** Convertir a escala de grises */
   const [r, g, b, _] = tf.split(rgba, 4, 3)
-  const imgTensor = r.mul(0.2989).add(g.mul(0.587)).add(b.mul(0.114)).cast("int32") as tf.Tensor4D
+  const imgTensor = r.mul(0.2989).add(g.mul(0.587)).add(b.mul(0.114)).cast("float32") as tf.Tensor4D
 
   /** Segmentar la imagen */
   /** Coordenadas X medias a lo largo de toda la imagen de SCIENCE */
@@ -74,28 +86,69 @@ export function extractScience({
     return [0 / height, start / width, height / height, end / width]
   })
   const boxes = tf.tensor2d(boxesVals, [countCheckpoints, 4], "float32")
-  const segments = tf.image.cropAndResize(imgTensor, boxes, boxIdx, cropSize, "nearest")
+  let segments = tf.image.cropAndResize(imgTensor, boxes, boxIdx, cropSize, "nearest") // [countCheckpoints, height, segmentWidth, 1]
+  segments = segments.squeeze() // Quita dimension de canal (countCheckpoints, height, segmentWidth)
 
   /**
    * Funciones de cada segmento promediado horizontalmente
    * Osea, para cada pixel vertical se hace un avg de los pixeles
    * horizontales. x=>pixelVertical, y=>avgHorizontal
    */
-  const avgTensor = segments.mean(2).squeeze([-1]) // 2 corresponde a widht, [segmentCount][height]
+  const avgTensor = segments.mean(2) // 2 corresponde a widht, (countCheckpoints, segmentCount, height)
+
+  /** Normalizar min-max por fila*/
+  const min = avgTensor.min(1, true)
+  const max = avgTensor.max(1, true)
+  const avgNormalized = avgTensor.sub(min).div(max.sub(min))
+
+  /** Pronunciar las tendencias presentes en la funcion. */
+  const umbral = 0.5
+  const greaterMask = avgNormalized.greater(tf.scalar(umbral))
+  const ones = tf.onesLike(avgTensor)
+  const zeros = tf.zerosLike(avgTensor)
+  const pushed = ones.where(greaterMask, zeros)
+
+  /** Suavizar para eliminar baches pequeños. */
+  let window = Math.round(height * 0.15)
+  window = window % 2 === 1 ? window : window + 1
+  const k = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
+  const pushed_smoothed = pushed.expandDims(2).conv1d(k, 1, "same").squeeze()
 
   /**
    * Arreglo con informacion de para cada funcion de un segmento el
    * punto vertical medio y la apartura que le corresponde.
    */
-  const avgArrs: number[][] = avgTensor.arraySync() as number[][]
+  const avgArrs: number[][] = pushed_smoothed.arraySync() as number[][]
   const plateauInfo: {
     medium: number
     opening: number
-  }[] = avgArrs.map((arr: number[]) => findPlateau(arr, 0.5))
+  }[] = avgArrs.map((arr: number[]) => findPlateau(arr, umbral))
+
+  // for (let i = 0; i < countCheckpoints; i++) {
+  // 	const filaTensor = avgTensor.slice([i, 0], [1, height]);
+  // 	const filaData = filaTensor.dataSync();
+  // 	const smoothed = weightedSmooth(Array.from(filaData), window);
+  // 	const pushedi = pushed.slice([i, 0], [1, height]).squeeze();
+  // 	const pushed_smoothedi = pushed_smoothed
+  // 		.slice([i, 0], [1, height])
+  // 		.squeeze();
+  // 	guardarFuncion(
+  // 		[
+  // 			Array.from(filaData),
+  // 			smoothed,
+  // 			pushedi.arraySync() as number[],
+  // 			pushed_smoothedi.arraySync() as number[],
+  // 		],
+  // 		`function${i}.png`,
+  // 		plateauInfo[i].medium,
+  // 		umbral,
+  // 		["blue", "green", "yellow", "orange"],
+  // 	);
+  // }
 
   /** Apertura promedio */
   const avgOpening =
-    (plateauInfo.reduce((sum, pi) => sum + pi.opening, 0) / plateauInfo.length) * 0.9 // 0.9 margen para evitar bordes
+    (plateauInfo.reduce((sum, pi) => sum + pi.opening, 0) / plateauInfo.length) * 0.99 // 0.9 margen para evitar bordes
 
   /**
    * Conjuntos de cordenadas (x,y) de los puntos que trazan la recta
@@ -121,9 +174,50 @@ export function extractScience({
           mediasPoints.map((p) => p.y),
         )
 
-  /** Promedio de pixeles que pasan por cada scienceTransversalFunction. */
+  // /** Conseguir valores perpendiculares a promediar en cada punto */
+  // function demo() {
+  // 	//
+  // 	// const xVals = tf.range(0, width, 1, "int32");
+  // 	// const yVals = tf.tensor1d(
+  // 	// 	xVals.arraySync().map((x) => interpolated.funct(x)),
+  // 	// );
+  // 	// const sourceVals = tf.stack([xVals, yVals]);
+  // 	// const mVals = tf.tensor1d(
+  // 	// 	xVals.arraySync().map((x) => interpolated.derived(x)),
+  // 	// );
+  // 	// const angles = mVals.atan();
+  // 	// const anglesDeg = angles.mul(180 / Math.PI); // HAberiguar si es con angulos o radianes
+  // 	// const cos = angles.cos();
+  // 	// const sin = angles.sin();
+  // 	// const rotationMatrices = tf.stack(
+  // 	// 	[
+  // 	// 		tf.stack([cos, sin.neg()], 1), // fila 1: [cos, -sin]
+  // 	// 		tf.stack([sin, cos], 1), // fila 2: [sin, cos]
+  // 	// 	],
+  // 	// 	1,
+  // 	// );
+  // 	// const n = Math.floor(avgOpening);
+  // 	// let points = tf.stack([tf.linspace(-n / 2, n / 2, n), tf.zeros([n])], 1);
+  // 	// points = points.expandDims(0).tile([width, 1, 1]); // [n, n, 2]
+  // 	// // const rotatedPoints = tf.matMul(points, rotationMatrices); // [N, n, 2]
+  // 	// // rotatedPoints = rotatedPoints.add(sourceVals.transpose().expandDims(1));
+  // 	const xvals = tf.tensor1d([-2, -1, 0, 1, 2]);
+  // 	const yvals = tf.tensor1d([0, 0, 0, 0, 0]);
+  // 	const sourceVals = tf.stack([xVals, yVals]);
+
+  // 	guardarRectaYPuntos(sourceVals.arraySync() as [number, number][], {
+  // 		b: 0,
+  // 		m: 0.5,
+  // 	});
+  // }
+  // demo();
+
+  /** Promedio de pixeles que pasan por cada scienceTransversalFunction. Solo funciona con regresion lineal*/
+  /** Rotar para que la pendiente quede horizontal */
+  const rad = Math.atan(interpolated.derived(0))
+  const rotated4d = tf.image.rotateWithOffset(imgTensor, -rad, 0, [0.5, 0.5])
   // imgTensor: [1, height, width, 1]  — escala de grises en 4D
-  const gray2d = imgTensor.squeeze([0, 3]) // [height, width]
+  const gray2d = rotated4d.squeeze([0, 3]) // [height, width]
   /** Valores por pixel horizontal en eje X e Y */
   const xValues = tf.range(0, width, 1, "int32").arraySync()
   const yvalues = tf.tensor1d(xValues.map((x) => interpolated.funct(x)))
@@ -138,10 +232,15 @@ export function extractScience({
   const maskLower = rowMatrix.greater(minYs)
   const maskUpper = rowMatrix.less(maxYs)
   const fullMask = tf.logicalAnd(maskLower, maskUpper)
-  const imgMasked = tf.where(fullMask, gray2d, tf.fill([height, width], 0))
+  let imgMasked = tf.where(fullMask, gray2d, tf.fill([height, width], 0))
   /** Promediar por columna */
   const validPerColumn = fullMask.cast("int32").sum(0)
   const avgPerColumn = imgMasked.sum(0).div(validPerColumn)
+
+  imgMasked = imgMasked.expandDims(0).expandDims(-1) // → [1, height, width, 1]
+  // downloadGrayscaleImage(imgMasked as tf.Tensor<tf.Rank.R4>, "roted.png");
+  imgMasked = tf.image.rotateWithOffset(imgMasked as tf.Tensor<tf.Rank.R4>, rad, 0, [0.5, 0.5])
+  // downloadGrayscaleImage(imgMasked as tf.Tensor<tf.Rank.R4>, "unroted.png");
 
   return {
     mediasPoints: mediasPoints,

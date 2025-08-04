@@ -36,25 +36,31 @@ export function usePredictBBs(
     return () => void s?.release()
   }, [model])
 
-  function prepare_input(img_src: string) {
-    const image = new Image()
-    image.src = img_src
+  async function prepare_input(img_src: string) {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+      img.onload = () => resolve(img)
+      img.onerror = (e) => reject(new Error(`No se pudo cargar "${img_src}"`))
+      img.src = img_src
+    })
 
     const canvas = document.createElement("canvas")
     canvas.width = SIZE_M
     canvas.height = SIZE_M
-    const context = canvas.getContext("2d")!
-    context.drawImage(image, 0, 0, SIZE_M, SIZE_M)
+    const ctx = canvas.getContext("2d")!
+    ctx.drawImage(image, 0, 0, SIZE_M, SIZE_M)
 
-    const data = context.getImageData(0, 0, SIZE_M, SIZE_M).data
-    const red: number[] = []
-    const green: number[] = []
-    const blue: number[] = []
-    for (let index = 0; index < data.length; index += 4) {
-      red.push(data[index] / 255)
-      green.push(data[index + 1] / 255)
-      blue.push(data[index + 2] / 255)
+    const { data } = ctx.getImageData(0, 0, SIZE_M, SIZE_M) // Uint8ClampedArray
+    const red: number[] = new Array(SIZE_M * SIZE_M)
+    const green: number[] = new Array(SIZE_M * SIZE_M)
+    const blue: number[] = new Array(SIZE_M * SIZE_M)
+    for (let i = 0; i < SIZE_M * SIZE_M; i++) {
+      red[i] = data[i * 4] / 255
+      green[i] = data[i * 4 + 1] / 255
+      blue[i] = data[i * 4 + 2] / 255
     }
+    console.log(new Float32Array([...red, ...green, ...blue]))
     return {
       input: new Float32Array([...red, ...green, ...blue]),
       image,
@@ -136,7 +142,14 @@ export function usePredictBBs(
     if (lastResponse.input === img_src) {
       return lastResponse.output
     }
-    const { input, image } = prepare_input(img_src)
+    const { input, image } = await prepare_input(img_src)
+    let ok = true
+    for (let i = 0, n = input.length; i < n; i++) {
+      if (input[i] !== 0) {
+        ok = false
+      }
+    }
+    console.log(ok)
     const outputs: InferenceSession.OnnxValueMapType = await runInference(onnxSession!, input)
     const processed_output: BoundingBox[] = processOutputs(outputs, image)
     setLastResponse({

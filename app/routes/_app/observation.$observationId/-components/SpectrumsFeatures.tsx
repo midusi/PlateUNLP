@@ -29,8 +29,8 @@ export function SpectrumsFeatures({
   const [countCheckpoints, setCountCheckpoints] = useState(5)
   const prevCountCheckpoints = useRef(5)
 
-  const [segmentWidth, setSegmentWidth] = useState(60)
-  const prevSegmentWidth = useRef(60)
+  const [segmentWidth, setSegmentWidth] = useState(100)
+  const prevSegmentWidth = useRef(100)
   const [scienceAnalysis, setScienceAnalysis] = useState<{
     width: number
     height: number
@@ -58,18 +58,78 @@ export function SpectrumsFeatures({
     /** Coloca primero el espectro de ciencia */
     const indexSpectrum = spectrums.findIndex((s) => s.type === "science")
     const specScience = spectrums[indexSpectrum]
-    spectrums[indexSpectrum].type = "science"
     const spectrumsArr = [...spectrums]
     spectrumsArr.splice(indexSpectrum, 1)
-    spectrumsArr.unshift(specScience)
     let scienceInfo:
       | {
           width: number
           height: number
           analysis: extractSpectrumResponse
         }
-      | undefined = scienceAnalysis && scienceAnalysis
+      | undefined = scienceAnalysis
 
+    /** Procesa espectro de ciencia */
+    const saved = spectrumsData.find((s) => s.data.id === specScience.id)
+    if (
+      !saved ||
+      specScience.type !== saved.data.type ||
+      specScience.imageTop !== saved.data.imageTop ||
+      specScience.imageLeft !== saved.data.imageLeft ||
+      specScience.imageWidth !== saved.data.imageWidth ||
+      specScience.imageHeight !== saved.data.imageHeight ||
+      prevCountCheckpoints.current !== countCheckpoints ||
+      prevUseSpline.current !== useSpline
+    ) {
+      const canvas = document.createElement("canvas")
+      canvas.width = specScience.imageWidth
+      canvas.height = specScience.imageHeight
+      const ctx = canvas.getContext("2d")
+      if (!ctx) {
+        notifyError("Failed to create canvas context for spectrum image.")
+        return
+      }
+      ctx.filter = "grayscale(1)"
+      ctx.drawImage(
+        observationImage,
+        specScience.imageLeft,
+        specScience.imageTop,
+        specScience.imageWidth,
+        specScience.imageHeight,
+        0,
+        0,
+        specScience.imageWidth,
+        specScience.imageHeight,
+      )
+      const data = new Uint8Array(
+        ctx.getImageData(0, 0, specScience.imageWidth, specScience.imageHeight, {}).data.buffer,
+      )
+      canvas.remove()
+
+      /** Extraer caracteristicas */
+      const result: extractSpectrumResponse = extractScience({
+        science: data,
+        width: specScience.imageWidth,
+        height: specScience.imageHeight,
+        countCheckpoints,
+        segmentWidth: segmentWidth,
+        fitFunction: useSpline ? "spline" : "linal-regression",
+      })
+      scienceInfo = {
+        width: specScience.imageWidth,
+        height: specScience.imageHeight,
+        analysis: result,
+      }
+      setScienceAnalysis({ ...scienceInfo })
+
+      setSpectrumsData((prev) =>
+        [
+          ...prev.filter((s) => s.data.id !== specScience.id),
+          { data: { ...specScience }, image: data, analysis: result },
+        ].sort((a, b) => a.data.imageTop - b.data.imageTop || a.data.imageLeft - b.data.imageLeft),
+      )
+    }
+
+    /** Procesa lamparas de comparación */
     for (const spectrum of spectrumsArr) {
       const saved = spectrumsData.find((s) => s.data.id === spectrum.id)
       if (
@@ -111,40 +171,31 @@ export function SpectrumsFeatures({
       canvas.remove()
 
       /** Extraer caracteristicas */
-      let result: extractSpectrumResponse
-      if (spectrum.type === "science") {
-        result = extractScience({
-          science: data,
-          width: spectrum.imageWidth,
-          height: spectrum.imageHeight,
-          countCheckpoints,
-          segmentWidth: segmentWidth,
-          fitFunction: useSpline ? "spline" : "linal-regression",
-        })
-        scienceInfo = {
-          width: spectrum.imageWidth,
-          height: spectrum.imageHeight,
-          analysis: result,
-        }
-        setScienceAnalysis({ ...scienceInfo })
-      } else {
-        result = extractLamp({
-          science: {
-            width: scienceInfo!.width,
-            height: scienceInfo!.height!,
-            mediasPoints: scienceInfo!.analysis.mediasPoints,
-            opening: scienceInfo!.analysis.opening,
-            rectFunction: scienceInfo!.analysis.rectFunction,
-            transversalAvgs: scienceInfo!.analysis.transversalAvgs,
-          },
-          lamp: data,
-          width: spectrum.imageWidth,
-          height: spectrum.imageHeight,
-          countCheckpoints,
-          segmentWidth: segmentWidth,
-          fitFunction: useSpline ? "spline" : "linal-regression",
-        })
-      }
+      //   const result: extractSpectrumResponse = extractLamp({
+      //     science: {
+      //       width: scienceInfo!.width,
+      //       height: scienceInfo!.height!,
+      //       mediasPoints: scienceInfo!.analysis.mediasPoints,
+      //       opening: scienceInfo!.analysis.opening,
+      //       rectFunction: scienceInfo!.analysis.rectFunction,
+      //       transversalAvgs: scienceInfo!.analysis.transversalAvgs,
+      //     },
+      //     lamp: data,
+      //     width: spectrum.imageWidth,
+      //     height: spectrum.imageHeight,
+      //     countCheckpoints,
+      //     segmentWidth: segmentWidth,
+      //     fitFunction: useSpline ? "spline" : "linal-regression",
+      //   })
+      const result: extractSpectrumResponse = extractScience({
+        science: data,
+        width: spectrum.imageWidth,
+        height: spectrum.imageHeight,
+        countCheckpoints,
+        segmentWidth: segmentWidth,
+        fitFunction: useSpline ? "spline" : "linal-regression",
+      })
+
       setSpectrumsData((prev) =>
         [
           ...prev.filter((s) => s.data.id !== spectrum.id),
@@ -152,6 +203,7 @@ export function SpectrumsFeatures({
         ].sort((a, b) => a.data.imageTop - b.data.imageTop || a.data.imageLeft - b.data.imageLeft),
       )
     }
+
     prevCountCheckpoints.current = countCheckpoints
     prevUseSpline.current = useSpline
     setState("ready")
@@ -216,7 +268,7 @@ export function SpectrumsFeatures({
             {spectrumsData.map((sd, i) => (
               <div key={`Spectrum Analysis ${sd.data.id}`}>
                 <ImageWithPixelExtraction
-                  title={`Spectrum ${i}`}
+                  title={`Spectrum ${i} (${sd.data.type})`}
                   image={{
                     url: `/observation/${observationId}/preview`,
                     width: sd.data.imageWidth,
