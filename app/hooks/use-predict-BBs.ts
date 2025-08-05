@@ -60,7 +60,7 @@ export function usePredictBBs(
       green[i] = data[i * 4 + 1] / 255
       blue[i] = data[i * 4 + 2] / 255
     }
-    console.log(new Float32Array([...red, ...green, ...blue]))
+
     return {
       input: new Float32Array([...red, ...green, ...blue]),
       image,

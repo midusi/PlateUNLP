@@ -1,10 +1,17 @@
-import type * as tf from "@tensorflow/tfjs"
+import { spec } from "node:test/reporters"
+import * as tf from "@tensorflow/tfjs"
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "~/components/ui/card"
 import { extractLamp, extractScience, type extractSpectrumResponse } from "~/lib/extract-features"
 import { loadImage } from "~/lib/image"
 import { notifyError } from "~/lib/notifications"
-import { cn } from "~/lib/utils"
+import {
+  cn,
+  downloadGrayscaleImage,
+  downloadRGBAImage,
+  fetchRawBuffer,
+  loadGrayscaleTensor,
+} from "~/lib/utils"
 import { ImageWithPixelExtraction } from "../../../../components/ImageWithPixelExtraction"
 import { SimpleFunctionXY } from "../../../../components/SimpleFunctionXY"
 import type { getSpectrums } from "../-actions/get-spectrums"
@@ -12,14 +19,14 @@ import type { Spectrum } from "../-utils/spectrum-to-bounding-box"
 
 export function SpectrumsFeatures({
   observationId,
-  rawImage,
   spectrums,
+  observationTensor,
 }: {
   observationId: string
-  rawImage: tf.Tensor2D
   spectrums: Awaited<ReturnType<typeof getSpectrums>>
+  observationTensor: tf.Tensor2D
 }) {
-  const reuseScienceFunction = true
+  const reuseScienceFunction = false
 
   const [useSpline, setUseSpline] = useState(false)
   const [tempUseSpline, setTempUseSpline] = useState(false)
@@ -31,28 +38,20 @@ export function SpectrumsFeatures({
 
   const [segmentWidth, setSegmentWidth] = useState(100)
   const prevSegmentWidth = useRef(100)
-  const [scienceAnalysis, setScienceAnalysis] = useState<{
-    width: number
-    height: number
-    analysis: extractSpectrumResponse
-  }>()
   const [state, setState] = useState<"waiting" | "running" | "ready">("waiting")
-
-  const [observationImage, setObservationImage] = useState<HTMLImageElement | null>(null)
 
   // Crop and save the spectrum image to be analyzed
   const [spectrumsData, setSpectrumsData] = useState<
     {
       data: Spectrum
-      image: Uint8Array
       analysis: extractSpectrumResponse
     }[]
   >([])
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    if (!observationImage) {
-      loadImage(`/observation/${observationId}/preview`).then((image) => setObservationImage(image))
-      return
-    }
+    if (!observationTensor) return
+
     if (spectrums.length === 0) return
 
     /** Coloca primero el espectro de ciencia */
@@ -60,77 +59,59 @@ export function SpectrumsFeatures({
     const specScience = spectrums[indexSpectrum]
     const spectrumsArr = [...spectrums]
     spectrumsArr.splice(indexSpectrum, 1)
-    let scienceInfo:
-      | {
-          width: number
-          height: number
-          analysis: extractSpectrumResponse
-        }
-      | undefined = scienceAnalysis
 
-    /** Procesa espectro de ciencia */
-    const saved = spectrumsData.find((s) => s.data.id === specScience.id)
-    if (
-      !saved ||
-      specScience.type !== saved.data.type ||
-      specScience.imageTop !== saved.data.imageTop ||
-      specScience.imageLeft !== saved.data.imageLeft ||
-      specScience.imageWidth !== saved.data.imageWidth ||
-      specScience.imageHeight !== saved.data.imageHeight ||
-      prevCountCheckpoints.current !== countCheckpoints ||
-      prevUseSpline.current !== useSpline
-    ) {
-      const canvas = document.createElement("canvas")
-      canvas.width = specScience.imageWidth
-      canvas.height = specScience.imageHeight
-      const ctx = canvas.getContext("2d")
-      if (!ctx) {
-        notifyError("Failed to create canvas context for spectrum image.")
-        return
-      }
-      ctx.filter = "grayscale(1)"
-      ctx.drawImage(
-        observationImage,
-        specScience.imageLeft,
-        specScience.imageTop,
-        specScience.imageWidth,
-        specScience.imageHeight,
-        0,
-        0,
-        specScience.imageWidth,
-        specScience.imageHeight,
-      )
-      const data = new Uint8Array(
-        ctx.getImageData(0, 0, specScience.imageWidth, specScience.imageHeight, {}).data.buffer,
-      )
-      canvas.remove()
+    /**
+     * Contador ordenado de los espectros que fueron revisados hasta ahora (util para el orden
+     * de aplicación de mascaras)
+     */
+    const specCounter: string[] = []
 
-      /** Extraer caracteristicas */
-      const result: extractSpectrumResponse = extractScience({
-        science: data,
-        width: specScience.imageWidth,
-        height: specScience.imageHeight,
-        countCheckpoints,
-        segmentWidth: segmentWidth,
-        fitFunction: useSpline ? "spline" : "linal-regression",
-      })
-      scienceInfo = {
-        width: specScience.imageWidth,
-        height: specScience.imageHeight,
-        analysis: result,
-      }
-      setScienceAnalysis({ ...scienceInfo })
+    /** Convertir imagen de observacion a Tensor4D Grey [1, H, W, 1] */
+    let obsTensor = observationTensor.expandDims(0).expandDims(-1) as tf.Tensor4D
 
-      setSpectrumsData((prev) =>
-        [
-          ...prev.filter((s) => s.data.id !== specScience.id),
-          { data: { ...specScience }, image: data, analysis: result },
-        ].sort((a, b) => a.data.imageTop - b.data.imageTop || a.data.imageLeft - b.data.imageLeft),
-      )
-    }
+    /** Tensor de zeros, para la futura aplicacion de mascaras. */
+    const zeros = tf.zerosLike(obsTensor)
 
-    /** Procesa lamparas de comparación */
+    /** Arreglo con informacion cacheada de espectros procesados hasta ahora */
+    let spectrumsDataCached = [...spectrumsData]
+
+    /** Procesar todos los espectros del listado */
+    spectrumsArr.unshift(specScience)
     for (const spectrum of spectrumsArr) {
+      /**
+       * Checkea si este es el primer espectro procesado en este bucle, si no lo es parchea el
+       * tensor de la observación completa para no considerar la información de otros espectros
+       * para el calculo de este.
+       */
+      if (specCounter.length !== 0) {
+        const previusSpectrum = spectrumsDataCached.find(
+          (s) => s.data.id === specCounter[specCounter.length - 1],
+        )
+        if (previusSpectrum) {
+          const previusMask = previusSpectrum.analysis.spectrumMask // [1, imageH, imageW, 1]
+          /** Expandir mascara a dimension de observación */
+          const obsHeight = obsTensor.shape[1]
+          const obsWidth = obsTensor.shape[2]
+          const { imageTop, imageLeft, imageHeight, imageWidth } = previusSpectrum.data
+          const top = imageTop
+          const left = imageLeft
+          const bottom = obsHeight - top - imageHeight
+          const right = obsWidth - left - imageWidth
+          const padArrays: Array<[number, number]> = [
+            [0, 0], // batch agregados
+            [top, bottom], // filas agregadas
+            [left, right], // columnas agregadas
+            [0, 0], // canales agregados
+          ]
+          const maskPadded = previusMask.pad(padArrays)
+          obsTensor = zeros.where(maskPadded, obsTensor)
+        }
+      }
+
+      /** Registrar el id del espectro que se procesa ahora. */
+      specCounter.push(spectrum.id)
+
+      /** Si no cambio ningun parametro de configuración entonces no hay que recalcular nada */
       const saved = spectrumsData.find((s) => s.data.id === spectrum.id)
       if (
         saved &&
@@ -145,50 +126,16 @@ export function SpectrumsFeatures({
         continue
       }
 
-      const canvas = document.createElement("canvas")
-      canvas.width = spectrum.imageWidth
-      canvas.height = spectrum.imageHeight
-      const ctx = canvas.getContext("2d")
-      if (!ctx) {
-        notifyError("Failed to create canvas context for spectrum image.")
-        return
-      }
-      ctx.filter = "grayscale(1)"
-      ctx.drawImage(
-        observationImage,
-        spectrum.imageLeft,
-        spectrum.imageTop,
-        spectrum.imageWidth,
-        spectrum.imageHeight,
-        0,
-        0,
-        spectrum.imageWidth,
-        spectrum.imageHeight,
+      /** Sebimagen que corresponde al espectro en forma de tensor */
+      const spectrumTensor = tf.slice(
+        obsTensor,
+        [0, spectrum.imageTop, spectrum.imageLeft, 0],
+        [1, spectrum.imageHeight, spectrum.imageWidth, obsTensor.shape[3]],
       )
-      const data = new Uint8Array(
-        ctx.getImageData(0, 0, spectrum.imageWidth, spectrum.imageHeight, {}).data.buffer,
-      )
-      canvas.remove()
 
       /** Extraer caracteristicas */
-      //   const result: extractSpectrumResponse = extractLamp({
-      //     science: {
-      //       width: scienceInfo!.width,
-      //       height: scienceInfo!.height!,
-      //       mediasPoints: scienceInfo!.analysis.mediasPoints,
-      //       opening: scienceInfo!.analysis.opening,
-      //       rectFunction: scienceInfo!.analysis.rectFunction,
-      //       transversalAvgs: scienceInfo!.analysis.transversalAvgs,
-      //     },
-      //     lamp: data,
-      //     width: spectrum.imageWidth,
-      //     height: spectrum.imageHeight,
-      //     countCheckpoints,
-      //     segmentWidth: segmentWidth,
-      //     fitFunction: useSpline ? "spline" : "linal-regression",
-      //   })
       const result: extractSpectrumResponse = extractScience({
-        science: data,
+        science: spectrumTensor,
         width: spectrum.imageWidth,
         height: spectrum.imageHeight,
         countCheckpoints,
@@ -196,26 +143,35 @@ export function SpectrumsFeatures({
         fitFunction: useSpline ? "spline" : "linal-regression",
       })
 
-      setSpectrumsData((prev) =>
-        [
-          ...prev.filter((s) => s.data.id !== spectrum.id),
-          { data: { ...spectrum }, image: data, analysis: result },
-        ].sort((a, b) => a.data.imageTop - b.data.imageTop || a.data.imageLeft - b.data.imageLeft),
-      )
+      // if (specCounter.length === 1) {
+      // 	downloadGrayscaleImage(spectrumTensor, "spectrum.png");
+      // 	downloadGrayscaleImage(
+      // 		result.spectrumMask.toFloat().mul(255),
+      // 		"mask.png",
+      // 	);
+      // }
+
+      spectrumsDataCached = [
+        ...spectrumsDataCached.filter((s) => s.data.id !== spectrum.id),
+        { data: { ...spectrum }, analysis: result },
+      ]
     }
+    spectrumsDataCached.sort(
+      (a, b) => a.data.imageTop - b.data.imageTop || a.data.imageLeft - b.data.imageLeft,
+    )
+    setSpectrumsData(spectrumsDataCached)
 
     prevCountCheckpoints.current = countCheckpoints
     prevUseSpline.current = useSpline
     setState("ready")
   }, [
     observationId,
-    observationImage,
     spectrums,
-    spectrumsData.find,
-    scienceAnalysis,
     segmentWidth,
     countCheckpoints,
     useSpline,
+    observationTensor,
+    setSpectrumsData,
   ])
 
   return (
