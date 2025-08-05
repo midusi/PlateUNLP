@@ -131,30 +131,30 @@ export function extractScience({
 		opening: number;
 	}[] = avgArrs.map((arr: number[]) => findPlateau(arr, umbral));
 
-	/** Guardar grafico de funciones */
-	const i = 0;
-	const original = avgTensor.slice([i, 0], [1, height]).dataSync();
-	const original_smoothed = weightedSmooth(Array.from(original), window);
-	const original_pushed = pushed.slice([i, 0], [1, height]).squeeze();
-	const original_pushed_smoothed = pushed_smoothed
-		.slice([i, 0], [1, height])
-		.squeeze();
-	guardarFuncion(
-		[
-			Array.from(original),
-			//original_smoothed,
-			Array.from(original_pushed.dataSync()),
-			original_pushed_smoothed.arraySync() as number[],
-		],
-		`function${i}.png`,
-		plateauInfo[i].medium,
-		umbral,
-		[
-			"blue", //"skyblue",
-			"yellow",
-			"orange",
-		],
-	);
+	// /** Guardar grafico de funciones */
+	// const i = 0;
+	// const original = avgTensor.slice([i, 0], [1, height]).dataSync();
+	// const original_smoothed = weightedSmooth(Array.from(original), window);
+	// const original_pushed = pushed.slice([i, 0], [1, height]).squeeze();
+	// const original_pushed_smoothed = pushed_smoothed
+	// 	.slice([i, 0], [1, height])
+	// 	.squeeze();
+	// guardarFuncion(
+	// 	[
+	// 		Array.from(original),
+	// 		//original_smoothed,
+	// 		Array.from(original_pushed.dataSync()),
+	// 		original_pushed_smoothed.arraySync() as number[],
+	// 	],
+	// 	`function${i}.png`,
+	// 	plateauInfo[i].medium,
+	// 	umbral,
+	// 	[
+	// 		"blue", //"skyblue",
+	// 		"yellow",
+	// 		"orange",
+	// 	],
+	// );
 
 	/** Apertura promedio */
 	const avgOpening =
