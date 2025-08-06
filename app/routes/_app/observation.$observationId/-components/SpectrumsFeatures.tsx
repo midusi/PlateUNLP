@@ -86,10 +86,10 @@ export function SpectrumsFeatures({
           const obsHeight = obsTensor.shape[1]
           const obsWidth = obsTensor.shape[2]
           const { imageTop, imageLeft, imageHeight, imageWidth } = previusSpectrum.data
-          const top = imageTop
-          const left = imageLeft
-          const bottom = obsHeight - top - imageHeight
-          const right = obsWidth - left - imageWidth
+          const top = Math.floor(imageTop)
+          const left = Math.floor(imageLeft)
+          const bottom = obsHeight - top - Math.floor(imageHeight)
+          const right = obsWidth - left - Math.floor(imageWidth)
           const padArrays: Array<[number, number]> = [
             [0, 0], // batch agregados
             [top, bottom], // filas agregadas
@@ -120,17 +120,21 @@ export function SpectrumsFeatures({
       }
 
       /** Sebimagen que corresponde al espectro en forma de tensor */
+      const top = Math.floor(spectrum.imageTop);
+      const left = Math.floor(spectrum.imageLeft);
+      const height = Math.floor(spectrum.imageHeight);
+      const width = Math.floor(spectrum.imageWidth);
       const spectrumTensor = tf.slice(
         obsTensor,
-        [0, spectrum.imageTop, spectrum.imageLeft, 0],
-        [1, spectrum.imageHeight, spectrum.imageWidth, obsTensor.shape[3]],
+        [0, top, left, 0],
+        [1, height, width, obsTensor.shape[3]],
       )
 
       /** Extraer caracteristicas */
       const result: extractSpectrumResponse = extractScience({
         science: spectrumTensor,
-        width: spectrum.imageWidth,
-        height: spectrum.imageHeight,
+        width: width,
+        height: height,
         countCheckpoints,
         segmentWidth: segmentWidth,
         fitFunction: useSpline ? "spline" : "linal-regression",

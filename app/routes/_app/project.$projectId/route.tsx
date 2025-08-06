@@ -148,7 +148,7 @@ function RouteComponent() {
       </div>
       <div className="overflow-hidden rounded-md border bg-background">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

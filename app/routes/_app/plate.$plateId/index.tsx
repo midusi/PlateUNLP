@@ -64,9 +64,9 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-8">
-      <PlateMetadataForm plateId={plateId} defaultValues={initialValues} />
+      <PlateMetadataForm key="metadata-form" plateId={plateId} defaultValues={initialValues} />
       <div className="h-8" />
-      <ObservationsList plateId={plateId} initialObservations={initialObservations} />
+      <ObservationsList key="observation-list" plateId={plateId} initialObservations={initialObservations} />
     </div>
   )
 }
