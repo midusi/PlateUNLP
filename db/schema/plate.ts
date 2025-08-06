@@ -10,7 +10,7 @@ export const plate = sqliteTable("plate", {
   id: idType(),
   projectId: text()
     .notNull()
-    .references(() => project.id),
+    .references(() => project.id, { onDelete: "no action" }),
   imageId: text()
     .notNull()
     .references(() => upload.id),

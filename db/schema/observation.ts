@@ -11,7 +11,7 @@ export const observation = sqliteTable(
     id: idType(),
     plateId: text()
       .notNull()
-      .references(() => plate.id),
+      .references(() => plate.id, { onDelete: "cascade" }),
     name: text().notNull(),
     // image of the observation
     imageLeft: integer().notNull(), // offset from the left of the plate image

@@ -8,7 +8,11 @@ export const getProject = createServerFn()
   .handler(async ({ data }) => {
     const project = await db.query.project.findFirst({
       where: (t, { eq }) => eq(t.id, data.projectId),
-      with: { plates: true },
+      with: {
+        plates: {
+          columns: { id: true, "PLATE-N": true },
+        },
+      },
     })
     return project
   })

@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router"
+import logoFCAGLP from "~/assets/fcaglp.png"
+import logoLIDI from "~/assets/logolidi.png"
 import { Separator } from "~/components/ui/separator"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
-import { AppSidebar } from "./-components/AppSidebar"
 
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
@@ -10,24 +10,48 @@ export const Route = createFileRoute("/_app")({
 
 function RouteComponent() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
+    <div className="flex h-svh w-full flex-col">
+      <header className="shrink-0 border-b text-sm">
+        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <span className="icon-[ph--shooting-star-duotone] size-5 min-w-5" />
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
             <AppBreadcrumbs />
           </div>
-        </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="flex items-center gap-2">Usuario</div>
+        </div>
+      </header>
+      <div className="flex flex-1 flex-col overflow-y-auto bg-accent">
+        <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4">
           <Outlet />
         </main>
-        <footer className="mt-8 mb-4 text-center text-muted-foreground text-xs italic">
-          Copyright ©{new Date().getFullYear()} III-LIDI, Facultad de Informática, Universidad
-          Nacional de la Plata
+        <footer className="mt-12 flex items-center justify-evenly border-t p-4">
+          <a
+            href="https://www.fcaglp.unlp.edu.ar/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-50 grayscale-100 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+          >
+            <img
+              src={logoFCAGLP}
+              alt="Logo de la Facultad de Ciencias Astronómicas y Geofísicas"
+              className="h-16"
+            />
+          </a>
+          <a
+            href="https://weblidi.info.unlp.edu.ar/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-50 grayscale-100 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+          >
+            <img
+              src={logoLIDI}
+              alt="Logo del Instituto de Investigación en Informática LIDI"
+              className="h-16"
+            />
+          </a>
         </footer>
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </div>
   )
 }

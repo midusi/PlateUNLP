@@ -41,7 +41,7 @@ CREATE TABLE `observation` (
 	`exptime` text DEFAULT '' NOT NULL,
 	`detector` text DEFAULT '' NOT NULL,
 	`imagetyp` text DEFAULT '' NOT NULL,
-	FOREIGN KEY (`plate_id`) REFERENCES `plate`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`plate_id`) REFERENCES `plate`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `observation_name_idx` ON `observation` (`plate_id`,`name`);--> statement-breakpoint
@@ -89,7 +89,7 @@ CREATE TABLE `spectrum` (
 	`image_top` integer NOT NULL,
 	`image_width` integer NOT NULL,
 	`image_height` integer NOT NULL,
-	FOREIGN KEY (`observation_id`) REFERENCES `observation`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`observation_id`) REFERENCES `observation`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `upload` (
