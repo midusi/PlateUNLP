@@ -2,16 +2,10 @@ import { spec } from "node:test/reporters"
 import * as tf from "@tensorflow/tfjs"
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "~/components/ui/card"
-import { extractLamp, extractScience, type extractSpectrumResponse } from "~/lib/extract-features"
+import { extractScience, type extractSpectrumResponse } from "~/lib/extract-features"
 import { loadImage } from "~/lib/image"
 import { notifyError } from "~/lib/notifications"
-import {
-  cn,
-  downloadGrayscaleImage,
-  downloadRGBAImage,
-  fetchRawBuffer,
-  loadGrayscaleTensor,
-} from "~/lib/utils"
+import { cn } from "~/lib/utils"
 import { ImageWithPixelExtraction } from "../../../../components/ImageWithPixelExtraction"
 import { SimpleFunctionXY } from "../../../../components/SimpleFunctionXY"
 import type { getSpectrums } from "../-actions/get-spectrums"
@@ -48,7 +42,6 @@ export function SpectrumsFeatures({
     }[]
   >([])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!observationTensor) return
 
@@ -143,14 +136,6 @@ export function SpectrumsFeatures({
         fitFunction: useSpline ? "spline" : "linal-regression",
       })
 
-      // if (specCounter.length === 1) {
-      // 	downloadGrayscaleImage(spectrumTensor, "spectrum.png");
-      // 	downloadGrayscaleImage(
-      // 		result.spectrumMask.toFloat().mul(255),
-      // 		"mask.png",
-      // 	);
-      // }
-
       spectrumsDataCached = [
         ...spectrumsDataCached.filter((s) => s.data.id !== spectrum.id),
         { data: { ...spectrum }, analysis: result },
@@ -197,7 +182,7 @@ export function SpectrumsFeatures({
                   />
                 </label>
               </div>
-              <div id="use-spline-control">
+              {/* <div id="use-spline-control">
                 <label className="flex flex-row gap-2">
                   Use spline
                   <input
@@ -207,7 +192,7 @@ export function SpectrumsFeatures({
                     onPointerUp={() => setUseSpline(tempUseSpline)}
                   />
                 </label>
-              </div>
+              </div> */}
               {/* <div id="segment-width-control">
 								<input
 									type="range"
