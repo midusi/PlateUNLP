@@ -6,7 +6,7 @@ import type { Breadcrumbs } from "../../-components/AppBreadcrumbs"
 import { getObservationMetadata } from "../-actions/get-observation-metadata"
 import { getSpectrums } from "../-actions/get-spectrums"
 
-export const Route = createFileRoute("/_app/observation/$observationId/calibrate")({
+export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
   component: RouteComponent,
   loader: async ({ params }) => {
     const [project, plate, initialMetadata, spectrums] = await Promise.all([
@@ -33,6 +33,13 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
           title: `Observation ${initialMetadata["MAIN-ID"] || params.observationId}`,
           link: {
             to: "/observation/$observationId",
+            params: { observationId: params.observationId },
+          },
+        },
+        {
+          title: `Calibrate`,
+          link: {
+            to: "/observation/$observationId/calibrate",
             params: { observationId: params.observationId },
           },
         },

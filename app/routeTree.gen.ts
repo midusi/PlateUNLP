@@ -17,6 +17,7 @@ import { Route as AppProjectsRouteImport } from './routes/_app/projects'
 import { Route as AppProjectProjectIdRouteRouteImport } from './routes/_app/project.$projectId/route'
 import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$plateId/index'
 import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
+import { Route as AppObservationObservationIdCalibrateIndexRouteImport } from './routes/_app/observation.$observationId/calibrate/index'
 import { ServerRoute as AppPlatePlateIdPreviewServerRouteImport } from './routes/_app/plate.$plateId/preview'
 import { ServerRoute as AppObservationObservationIdPreviewServerRouteImport } from './routes/_app/observation.$observationId/preview'
 import { ServerRoute as AppObservationObservationIdImageServerRouteImport } from './routes/_app/observation.$observationId/image'
@@ -54,6 +55,12 @@ const AppObservationObservationIdIndexRoute =
     path: '/observation/$observationId/',
     getParentRoute: () => AppRouteRoute,
   } as any)
+const AppObservationObservationIdCalibrateIndexRoute =
+  AppObservationObservationIdCalibrateIndexRouteImport.update({
+    id: '/observation/$observationId/calibrate/',
+    path: '/observation/$observationId/calibrate/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppPlatePlateIdPreviewServerRoute =
   AppPlatePlateIdPreviewServerRouteImport.update({
     id: '/_app/plate/$plateId/preview',
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
+  '/observation/$observationId/calibrate': typeof AppObservationObservationIdCalibrateIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +94,7 @@ export interface FileRoutesByTo {
   '/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
+  '/observation/$observationId/calibrate': typeof AppObservationObservationIdCalibrateIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/_app/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/_app/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
   '/_app/plate/$plateId/': typeof AppPlatePlateIdIndexRoute
+  '/_app/observation/$observationId/calibrate/': typeof AppObservationObservationIdCalibrateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/project/$projectId'
     | '/observation/$observationId'
     | '/plate/$plateId'
+    | '/observation/$observationId/calibrate'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +122,7 @@ export interface FileRouteTypes {
     | '/project/$projectId'
     | '/observation/$observationId'
     | '/plate/$plateId'
+    | '/observation/$observationId/calibrate'
   id:
     | '__root__'
     | '/'
@@ -119,6 +131,7 @@ export interface FileRouteTypes {
     | '/_app/project/$projectId'
     | '/_app/observation/$observationId/'
     | '/_app/plate/$plateId/'
+    | '/_app/observation/$observationId/calibrate/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -209,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppObservationObservationIdIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/observation/$observationId/calibrate/': {
+      id: '/_app/observation/$observationId/calibrate/'
+      path: '/observation/$observationId/calibrate'
+      fullPath: '/observation/$observationId/calibrate'
+      preLoaderRoute: typeof AppObservationObservationIdCalibrateIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 declare module '@tanstack/react-start/server' {
@@ -242,6 +262,7 @@ interface AppRouteRouteChildren {
   AppProjectProjectIdRouteRoute: typeof AppProjectProjectIdRouteRoute
   AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
   AppPlatePlateIdIndexRoute: typeof AppPlatePlateIdIndexRoute
+  AppObservationObservationIdCalibrateIndexRoute: typeof AppObservationObservationIdCalibrateIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
@@ -249,6 +270,8 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProjectProjectIdRouteRoute: AppProjectProjectIdRouteRoute,
   AppObservationObservationIdIndexRoute: AppObservationObservationIdIndexRoute,
   AppPlatePlateIdIndexRoute: AppPlatePlateIdIndexRoute,
+  AppObservationObservationIdCalibrateIndexRoute:
+    AppObservationObservationIdCalibrateIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
