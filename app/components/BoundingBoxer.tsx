@@ -185,6 +185,11 @@ function BoundingBoxComponent({
   const [scale, setScale] = useState(1)
   const context = useTransformContext()
   useEffect(() => {
+    // Set scale on component mount - important when appending
+    // a new bounding box after initialization of the TransformWrapper
+    setScale(context.getContext().instance.transformState.scale)
+
+    // Listen for changes in scale
     const unmountInit = context.onInit((ref) => {
       setScale(ref.instance.transformState.scale)
     })
