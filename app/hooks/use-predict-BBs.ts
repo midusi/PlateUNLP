@@ -60,7 +60,7 @@ export function usePredictBBs(
       green[i] = data[i * 4 + 1] / 255
       blue[i] = data[i * 4 + 2] / 255
     }
-    console.log(new Float32Array([...red, ...green, ...blue]))
+
     return {
       input: new Float32Array([...red, ...green, ...blue]),
       image,
@@ -78,7 +78,6 @@ export function usePredictBBs(
   function processOutputs(outputs: InferenceSession.OnnxValueMapType, image: HTMLImageElement) {
     const { naturalWidth: NATURALWIDTH, naturalHeight: NATURALHEIGHT } = image
 
-    // console.log("salida", outputs.output0.data)
     const DATA = outputs.output0.data as Float32Array
     const COLS = outputs.output0.dims[2]
     const ROWS = outputs.output0.dims[1]
@@ -143,13 +142,6 @@ export function usePredictBBs(
       return lastResponse.output
     }
     const { input, image } = await prepare_input(img_src)
-    let ok = true
-    for (let i = 0, n = input.length; i < n; i++) {
-      if (input[i] !== 0) {
-        ok = false
-      }
-    }
-    console.log(ok)
     const outputs: InferenceSession.OnnxValueMapType = await runInference(onnxSession!, input)
     const processed_output: BoundingBox[] = processOutputs(outputs, image)
     setLastResponse({

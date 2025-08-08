@@ -48,7 +48,7 @@ export function SpectrumsList({
     "spectrum_part_segmentator.onnx",
     classesSpectrumDetection,
     false,
-    0.75,
+    0.70,
   )
 
   // const [predictions, setPredictions] = useState<BoundingBox[]>([]);

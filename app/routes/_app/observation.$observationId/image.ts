@@ -26,8 +26,8 @@ export const ServerRoute = createServerFileRoute("/_app/observation/$observation
     return new Response(image, {
       headers: {
         "Content-Type": "application/octet-stream",
-        "X-Image-Width": String(observation.imageWidth),
-        "X-Image-Height": String(observation.imageHeight),
+        "X-Image-Width": observation.imageWidth.toString(),
+        "X-Image-Height": observation.imageHeight.toString(),
       },
     })
   },

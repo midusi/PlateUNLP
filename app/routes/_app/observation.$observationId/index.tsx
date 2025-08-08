@@ -61,7 +61,11 @@ function RouteComponent() {
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
-      <SpectrumsFeatures observationId={observationId} rawImage={rawImage} spectrums={spectrums} />
+      <SpectrumsFeatures
+        observationId={observationId}
+        spectrums={spectrums}
+        observationTensor={rawImage}
+      />
     </div>
   )
 }
