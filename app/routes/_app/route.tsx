@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoLIDI from "~/assets/logolidi.png"
 import { Separator } from "~/components/ui/separator"
@@ -14,7 +14,9 @@ function RouteComponent() {
       <header className="shrink-0 border-b text-sm">
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <span className="icon-[ph--shooting-star-duotone] size-5 min-w-5" />
+            <Link to="/">
+              <span className="icon-[ph--shooting-star-duotone] size-5 min-w-5" />
+            </Link>
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
             <AppBreadcrumbs />
           </div>
