@@ -5,7 +5,15 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const addSpectrum = createServerFn({ method: "POST" })
-  .validator(z.object({ observationId: z.string() }))
+  .validator(
+    z.object({
+      observationId: z.string(),
+      top: z.number().int().nonnegative(),
+      left: z.number().int().nonnegative(),
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+    }),
+  )
   .handler(async ({ data }) => {
     const observation = await db
       .select({
@@ -19,15 +27,22 @@ export const addSpectrum = createServerFn({ method: "POST" })
       .get()
     if (!observation) throw new Error(`Observation with id ${data.observationId} not found`)
 
+    if (
+      data.top + data.width > observation.imageWidth ||
+      data.left + data.height > observation.imageHeight
+    ) {
+      throw new Error("Bounding box exceeds observation dimensions")
+    }
+
     const [spectrum] = await db
       .insert(s.spectrum)
       .values({
         observationId: data.observationId,
         type: observation.spectrumCount === 0 ? "science" : "lamp",
-        imageTop: 0,
-        imageLeft: 0,
-        imageWidth: observation.imageWidth / 10,
-        imageHeight: observation.imageHeight / 10,
+        imageTop: data.top,
+        imageLeft: data.left,
+        imageWidth: data.width,
+        imageHeight: data.height,
       })
       .returning({
         id: s.spectrum.id,

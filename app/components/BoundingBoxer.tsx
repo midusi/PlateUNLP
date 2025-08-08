@@ -1,3 +1,4 @@
+import { Toggle, ToggleGroup, Toolbar } from "@base-ui-components/react"
 import { useMeasure } from "@uidotdev/usehooks"
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -7,8 +8,10 @@ import {
   useTransformContext,
 } from "react-zoom-pan-pinch"
 import { Button } from "~/components/ui/button"
+import { Separator } from "~/components/ui/separator"
 import { loadImage } from "~/lib/image"
 import { clamp } from "~/lib/math"
+import { cn } from "~/lib/utils"
 
 /**
  * `BoundingBox` type represents a rectangular area defined by its top-left corner, width, and height.
@@ -54,6 +57,11 @@ export type BoundingBoxerProps = {
    */
   onBoundingBoxChangeEnd?: (boundingBox: BoundingBox) => void
   /**
+   * Function triggered when a new bounding box is added. If not provided,
+   * the user can't draw new bounding boxes.
+   */
+  onBoundingBoxAdd?: (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => void
+  /**
    * Whether the bounding boxes can be modified by the user.
    * @default false
    */
@@ -63,7 +71,17 @@ export type BoundingBoxerProps = {
    * @default true
    */
   showZoomActions?: boolean
+  /**
+   * Aditional actions to be rendered inside the toolbar.
+   */
+  children?: React.ReactNode
 }
+
+/**
+ * `BoundingBoxerTools` type represents the tools available in the `BoundingBoxer` component.
+ * It can be either "select" for selecting and moving bounding boxes, or "draw" for drawing new bounding boxes.
+ */
+type BoundingBoxerTools = "select" | "draw"
 
 /**
  * `BoundingBoxer` component allows users to display an image with interactive bounding boxes.
@@ -79,8 +97,10 @@ export function BoundingBoxer({
   boundingBoxes,
   onBoundingBoxChange,
   onBoundingBoxChangeEnd,
+  onBoundingBoxAdd,
   disabled = false,
   showZoomActions = true,
+  children,
 }: BoundingBoxerProps) {
   // Size of the container and the image (natural size)
   const [containerRef, containerSize] = useMeasure()
@@ -109,6 +129,9 @@ export function BoundingBoxer({
     return Math.min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)
   }, [containerSize.width, containerSize.height, imageSize.width, imageSize.height])
 
+  // Control user actions
+  const [selectedTool, setSelectedTool] = useState<BoundingBoxerTools>("select")
+
   return (
     <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0 bg-checkered">
       {imageScale ? (
@@ -118,10 +141,17 @@ export function BoundingBoxer({
           centerOnInit
           centerZoomedOut
         >
-          <BoundingBoxControls showZoomActions={showZoomActions} />
+          <BoundingBoxControls
+            selectedTool={selectedTool}
+            onToolChange={setSelectedTool}
+            showDrawNew={onBoundingBoxAdd !== undefined}
+            showZoomActions={showZoomActions}
+          >
+            {children}
+          </BoundingBoxControls>
           <TransformComponent
             wrapperStyle={{ width: "100%", height: "100%" }}
-            contentClass="relative"
+            contentClass={cn("relative", selectedTool === "draw" && "cursor-crosshair")}
           >
             <img
               src={imageSrc}
@@ -138,6 +168,11 @@ export function BoundingBoxer({
                 limits={{ x: imageSize.width, y: imageSize.height }}
               />
             ))}
+            <BoundingBoxDraw
+              enabled={selectedTool === "draw"}
+              onDrawEnd={onBoundingBoxAdd}
+              limits={{ x: imageSize.width, y: imageSize.height }}
+            />
           </TransformComponent>
         </TransformWrapper>
       ) : (
@@ -147,22 +182,88 @@ export function BoundingBoxer({
   )
 }
 
-function BoundingBoxControls({ showZoomActions }: { showZoomActions: boolean }) {
+function BoundingBoxControls({
+  showDrawNew,
+  showZoomActions,
+  selectedTool,
+  onToolChange,
+  children,
+}: {
+  showDrawNew: boolean
+  showZoomActions: boolean
+  selectedTool: BoundingBoxerTools
+  onToolChange: (tool: BoundingBoxerTools) => void
+  children?: React.ReactNode
+}) {
   const { zoomIn, zoomOut } = useControls()
 
   return (
-    <div className="absolute top-2 right-2 z-10 flex gap-2">
+    <Toolbar.Root className="absolute top-2 right-2 left-2 z-10 flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs">
+      <ToggleGroup
+        value={[selectedTool]}
+        onValueChange={(values) => {
+          if (values.length > 0) onToolChange(values[0] as BoundingBoxerTools)
+        }}
+      >
+        <Toolbar.Button
+          render={
+            <Toggle
+              render={
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-8 data-[pressed]:bg-accent! data-[pressed]:text-primary!"
+                />
+              }
+            />
+          }
+          value="select"
+          title="Select/Move"
+        >
+          <span className="icon-[ph--cursor-bold] size-4" />
+        </Toolbar.Button>
+        {showDrawNew && (
+          <Toolbar.Button
+            render={
+              <Toggle
+                render={
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="size-8 data-[pressed]:bg-accent! data-[pressed]:text-primary!"
+                  />
+                }
+              />
+            }
+            value="draw"
+            title="Draw box"
+          >
+            <span className="icon-[ph--bounding-box-bold] size-4" />
+          </Toolbar.Button>
+        )}
+      </ToggleGroup>
+      <Toolbar.Separator render={<Separator orientation="vertical" />} />
       {showZoomActions && (
-        <Button size="icon" variant="outline" className="size-8" onClick={() => zoomIn()}>
+        <Toolbar.Button
+          render={<Button size="icon" variant="ghost" className="size-8" />}
+          onClick={() => zoomIn()}
+          title="Zoom in"
+        >
           <span className="icon-[ph--magnifying-glass-plus-bold] size-4" />
-        </Button>
+        </Toolbar.Button>
       )}
       {showZoomActions && (
-        <Button size="icon" variant="outline" className="size-8" onClick={() => zoomOut()}>
-          <span className="icon-[ph--magnifying-glass-minus-bold]" />
-        </Button>
+        <Toolbar.Button
+          render={<Button size="icon" variant="ghost" className="size-8" />}
+          onClick={() => zoomOut()}
+          title="Zoom out"
+        >
+          <span className="icon-[ph--magnifying-glass-minus-bold] size-4" />
+        </Toolbar.Button>
       )}
-    </div>
+      <div className="flex-1" />
+      {children}
+    </Toolbar.Root>
   )
 }
 
@@ -372,4 +473,137 @@ function BoundingBoxComponent({
       />
     </div>
   )
+}
+
+function BoundingBoxDraw({
+  enabled,
+  onDrawEnd,
+  limits,
+}: {
+  enabled: boolean
+  onDrawEnd?: (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => void
+  limits: { x: number; y: number }
+}) {
+  // We don't use `KeepScale` because we want to adjust the border width but
+  // keep the scale. Since we are doing that, is too much overhead to use it
+  // for the label as well.
+  const [scale, setScale] = useState(1)
+  const context = useTransformContext()
+  useEffect(() => {
+    // Set scale on component mount - important when appending
+    // a new bounding box after initialization of the TransformWrapper
+    setScale(context.getContext().instance.transformState.scale)
+
+    // Listen for changes in scale
+    const unmountInit = context.onInit((ref) => {
+      setScale(ref.instance.transformState.scale)
+    })
+    const unmountChange = context.onChange((ref) => {
+      const state = ref.instance.transformState
+      if (state.previousScale !== state.scale) {
+        setScale(state.scale)
+      }
+    })
+    return () => {
+      unmountInit()
+      unmountChange()
+    }
+  }, [context])
+
+  const handleWidth = `${3 / scale}px`
+
+  // Handle resize
+  const [drawing, setDrawing] = useState(false)
+  const [initialMouse, setInitialMouse] = useState({ x: 0, y: 0, top: 0, left: 0 })
+  const [boundingBox, setBoundingBox] = useState({ top: 0, left: 0, width: 0, height: 0 })
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!drawing) return
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      const deltaX = (e.clientX - initialMouse.x) / scale
+      const deltaY = (e.clientY - initialMouse.y) / scale
+      let left = 0
+      let top = 0
+      let width = 0
+      let height = 0
+
+      // Update the bounding box dimensions based on the resizing direction
+      if (deltaY < 0) {
+        top = clamp(initialMouse.top + deltaY, 0, initialMouse.top - BB_MIN_WIDTH)
+        height = clamp(-deltaY, BB_MIN_WIDTH, initialMouse.top - top)
+      } else {
+        top = initialMouse.top
+        height = clamp(deltaY, BB_MIN_WIDTH, limits.y - initialMouse.top)
+      }
+      if (deltaX < 0) {
+        left = clamp(initialMouse.left + deltaX, 0, initialMouse.left - BB_MIN_WIDTH)
+        width = clamp(-deltaX, BB_MIN_WIDTH, initialMouse.left - left)
+      } else {
+        left = initialMouse.left
+        width = clamp(deltaX, BB_MIN_WIDTH, limits.y - initialMouse.left)
+      }
+
+      setBoundingBox({
+        // Return integers
+        top: Math.round(top),
+        left: Math.round(left),
+        width: Math.round(width),
+        height: Math.round(height),
+      })
+    }
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!drawing) return
+      e.preventDefault()
+      e.stopPropagation()
+      setDrawing(false)
+      onDrawEnd?.(boundingBox)
+    }
+
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [drawing, scale, boundingBox, initialMouse, onDrawEnd, limits])
+
+  if (drawing) {
+    return (
+      <div
+        style={{
+          top: boundingBox.top,
+          left: boundingBox.left,
+          width: boundingBox.width,
+          height: boundingBox.height,
+          borderWidth: handleWidth,
+        }}
+        className="absolute box-border border-primary border-solid"
+      />
+    )
+  } else if (enabled) {
+    return (
+      <div
+        className="absolute inset-0"
+        onMouseDown={(e) => {
+          if (drawing) return
+          e.preventDefault()
+          e.stopPropagation()
+          // Get relation clientX,Y to pixel position
+          const rect = e.currentTarget.getBoundingClientRect()
+          const top = (e.clientY - rect.top) * (limits.y / rect.height)
+          const left = (e.clientX - rect.left) * (limits.x / rect.width)
+          setInitialMouse({ x: e.clientX, y: e.clientY, top, left })
+          setBoundingBox({ top, left, width: BB_MIN_WIDTH, height: BB_MIN_WIDTH })
+          setDrawing(true)
+        }}
+      />
+    )
+  }
+  return null
 }

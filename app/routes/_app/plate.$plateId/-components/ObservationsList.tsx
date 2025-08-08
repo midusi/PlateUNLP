@@ -46,8 +46,8 @@ export function ObservationsList({
   )
 
   const addObservationMut = useMutation({
-    mutationFn: async () => {
-      const observation = await addObservation({ data: { plateId } })
+    mutationFn: async (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => {
+      const observation = await addObservation({ data: { ...boundingBox, plateId } })
       setBoundingBoxes((prev) => [observationToBoundingBox(observation), ...prev])
     },
     onError: (error) => notifyError("Error adding observation", error),
@@ -76,41 +76,28 @@ export function ObservationsList({
               },
             })
           }}
-        />
+          onBoundingBoxAdd={(boundingBox) => addObservationMut.mutate(boundingBox)}
+        >
+          <Button
+            size="sm"
+            variant="default"
+            disabled={addObservationMut.isPending}
+            onClick={() => notifyError("Not implemented yet")}
+            className="h-7"
+          >
+            <span
+              className={cn(
+                addObservationMut.isPending
+                  ? "icon-[ph--spinner-bold] animate-spin"
+                  : "icon-[ph--magic-wand-bold]",
+              )}
+            />
+            Autodetect
+          </Button>
+        </BoundingBoxer>
         <div className="border-l">
           <CardHeader className="p-2">
             <CardTitle>Observations</CardTitle>
-            <div className="flex items-center justify-evenly">
-              <Button
-                size="sm"
-                disabled={addObservationMut.isPending}
-                onClick={() => notifyError("Not implemented yet")}
-              >
-                <span
-                  className={cn(
-                    addObservationMut.isPending
-                      ? "icon-[ph--spinner-bold] animate-spin"
-                      : "icon-[ph--magic-wand-bold]",
-                  )}
-                />
-                Autodetect
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={addObservationMut.isPending}
-                onClick={() => addObservationMut.mutate()}
-              >
-                <span
-                  className={cn(
-                    addObservationMut.isPending
-                      ? "icon-[ph--spinner-bold] animate-spin"
-                      : "icon-[ph--plus-bold]",
-                  )}
-                />
-                Add
-              </Button>
-            </div>
           </CardHeader>
           <Separator />
           <Table>

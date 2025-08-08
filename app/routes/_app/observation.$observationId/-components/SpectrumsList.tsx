@@ -48,7 +48,7 @@ export function SpectrumsList({
     "spectrum_part_segmentator.onnx",
     classesSpectrumDetection,
     false,
-    0.70,
+    0.7,
   )
 
   // const [predictions, setPredictions] = useState<BoundingBox[]>([]);
@@ -178,8 +178,8 @@ export function SpectrumsList({
   })
 
   const addSpectrumMut = useMutation({
-    mutationFn: async () => {
-      const spectrum = await addSpectrum({ data: { observationId } })
+    mutationFn: async (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => {
+      const spectrum = await addSpectrum({ data: { ...boundingBox, observationId } })
       setBoundingBoxes((prev) => [spectrumToBoundingBox(spectrum), ...prev])
     },
     onError: (error) => notifyError("Error adding spectrum", error),
@@ -208,41 +208,28 @@ export function SpectrumsList({
             })
             router.invalidate()
           }}
-        />
+          onBoundingBoxAdd={(boundingBox) => addSpectrumMut.mutate(boundingBox)}
+        >
+          <Button
+            size="sm"
+            variant="default"
+            disabled={addSpectrumMut.isPending || determineBBMut.isPending}
+            onClick={() => determineBBMut.mutate()}
+            className="h-7"
+          >
+            <span
+              className={cn(
+                determineBBMut.isPending
+                  ? "icon-[ph--spinner-bold] animate-spin"
+                  : "icon-[ph--magic-wand-bold]",
+              )}
+            />
+            Autodetect
+          </Button>
+        </BoundingBoxer>
         <div className="border-l">
           <CardHeader className="p-2">
             <CardTitle>Spectrums</CardTitle>
-            <div className="flex items-center justify-evenly">
-              <Button
-                size="sm"
-                disabled={addSpectrumMut.isPending || determineBBMut.isPending}
-                onClick={() => determineBBMut.mutate()}
-              >
-                <span
-                  className={cn(
-                    determineBBMut.isPending
-                      ? "icon-[ph--spinner-bold] animate-spin"
-                      : "icon-[ph--magic-wand-bold]",
-                  )}
-                />
-                Autodetect
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={addSpectrumMut.isPending || determineBBMut.isPending}
-                onClick={() => addSpectrumMut.mutate()}
-              >
-                <span
-                  className={cn(
-                    addSpectrumMut.isPending
-                      ? "icon-[ph--spinner-bold] animate-spin"
-                      : "icon-[ph--plus-bold]",
-                  )}
-                />
-                Add
-              </Button>
-            </div>
           </CardHeader>
           <Separator />
           <Table>
