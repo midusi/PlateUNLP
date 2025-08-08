@@ -104,16 +104,28 @@ export function extractScience({
 	 */
 	const avgTensor = segments.mean(2); // 2 corresponde a widht, (countCheckpoints, segmentCount, height)
 
+	// Acotar outliers
+	const mean = avgTensor.mean(1, true);  // promedio por funcion [numFunciones, 1]
+	const std = avgTensor.sub(mean).square().mean(1, true).sqrt();  // desviacion estandar por funcion [numFunciones, 1]
+	const z = avgTensor.sub(mean).div(std);  // z-score por funcion [numFunciones, numPuntos]
+	const threshold = tf.scalar(2.5) // En una distribucion normal 2.5 representa que lo que cae fuera del ~98.8% de los valores  
+	const lower_limit = mean.sub(std.mul(threshold))
+    const upper_limit = mean.add(std.mul(threshold))
+	const mask_below = avgTensor.greater(lower_limit);
+	const mask_above = avgTensor.less(upper_limit);
+	let acoted_data = avgTensor.where(mask_below, lower_limit)
+	acoted_data = avgTensor.where(mask_above, upper_limit)
+
 	/** Normalizar min-max por fila*/
-	const min = avgTensor.min(1, true);
-	const max = avgTensor.max(1, true);
-	const avgNormalized = avgTensor.sub(min).div(max.sub(min));
+	const min = acoted_data.min(1, true);
+	const max = acoted_data.max(1, true);
+	const avgNormalized = acoted_data.sub(min).div(max.sub(min));
 
 	/** Pronunciar las tendencias presentes en la funcion. */
 	const umbral = 0.5;
 	const greaterMask = avgNormalized.greater(tf.scalar(umbral));
-	const ones = tf.onesLike(avgTensor);
-	const zeros = tf.zerosLike(avgTensor);
+	const ones = tf.onesLike(acoted_data);
+	const zeros = tf.zerosLike(acoted_data);
 	const pushed = ones.where(greaterMask, zeros);
 
 	/** Suavizar para eliminar baches pequeños. */
@@ -133,8 +145,9 @@ export function extractScience({
 	}[] = avgArrs.map((arr: number[]) => findPlateau(arr, umbral));
 
 	// /** Guardar grafico de funciones */
-	// const i = 0;
+	// const i = 4;
 	// const original = avgTensor.slice([i, 0], [1, height]).dataSync();
+	// const original_acoted = acoted_data.slice([i, 0], [1, height]).dataSync();
 	// const original_smoothed = weightedSmooth(Array.from(original), window);
 	// const original_pushed = pushed.slice([i, 0], [1, height]).squeeze();
 	// const original_pushed_smoothed = pushed_smoothed
@@ -142,8 +155,8 @@ export function extractScience({
 	// 	.squeeze();
 	// guardarFuncion(
 	// 	[
-	// 		Array.from(original),
-	// 		//original_smoothed,
+	// 		//Array.from(original),
+	// 		Array.from(original_acoted),
 	// 		Array.from(original_pushed.dataSync()),
 	// 		original_pushed_smoothed.arraySync() as number[],
 	// 	],
@@ -151,7 +164,8 @@ export function extractScience({
 	// 	plateauInfo[i].medium,
 	// 	umbral,
 	// 	[
-	// 		"blue", //"skyblue",
+	// 		//"blue", 
+	// 		"skyblue",
 	// 		"yellow",
 	// 		"orange",
 	// 	],
