@@ -67,8 +67,10 @@ export const computeObservationMetadata = createServerFn()
     }),
   )
   .handler(async ({ data }) => {
+    if (!data["DATE-OBS"].isKnown) throw new Error("DATE-OBS is not known")
+    if (!data.UT.isKnown) throw new Error("UT is not known")
     // JD, EPOCH, EQUINOX
-    const JD = getJulianDate(data["DATE-OBS"], data.UT)
+    const JD = getJulianDate(data["DATE-OBS"].value, data.UT.value)
     const EPOCH = getJulianEpoch(JD)
     const EQUINOX = EPOCH.slice(1) // Remove leading "J" from the epoch string
     // MAIN-ID, SPTYPE, RA, DEC, RA2000, DEC2000, RA1950, DEC1950
@@ -82,7 +84,7 @@ export const computeObservationMetadata = createServerFn()
     if (!observatory) throw new Error(`Observatory with ID ${data.OBSERVAT} was not found`)
 
     // TIME-OBS
-    const TIME_OBS = getLocalTime(data["DATE-OBS"], data.UT, observatory.timezone)
+    const TIME_OBS = getLocalTime(data["DATE-OBS"].value, data.UT.value, observatory.timezone)
     const ST = await getSiderealTime(
       JD,
       observatory.longitude,
@@ -97,20 +99,20 @@ export const computeObservationMetadata = createServerFn()
       OBJECT: data.OBJECT,
       "DATE-OBS": data["DATE-OBS"],
       UT: data.UT,
-      "MAIN-ID": simbad.value["MAIN-ID"],
-      SPTYPE: simbad.value.SPTYPE ?? "",
-      RA: degToHMS(simbad.value.RA2000),
-      DEC: degToDMS(simbad.value.DEC2000),
-      EQUINOX,
-      RA2000: degToHMS(simbad.value.RA2000),
-      DEC2000: degToDMS(simbad.value.DEC2000),
-      RA1950: degToHMS(simbad.value.RA1950),
-      DEC1950: degToDMS(simbad.value.DEC1950),
-      "TIME-OBS": TIME_OBS,
-      JD,
-      ST: degToHMS(ST.value),
-      HA: degToDMS(HA),
-      AIRMASS,
+      "MAIN-ID": { value: simbad.value["MAIN-ID"], isKnown: true },
+      SPTYPE: { value: simbad.value.SPTYPE ?? "", isKnown: true },
+      RA: { value: degToHMS(simbad.value.RA2000), isKnown: true },
+      DEC: { value: degToDMS(simbad.value.DEC2000), isKnown: true },
+      EQUINOX: { value: EQUINOX, isKnown: true },
+      RA2000: { value: degToHMS(simbad.value.RA2000), isKnown: true },
+      DEC2000: { value: degToDMS(simbad.value.DEC2000), isKnown: true },
+      RA1950: { value: degToHMS(simbad.value.RA1950), isKnown: true },
+      DEC1950: { value: degToDMS(simbad.value.DEC1950), isKnown: true },
+      "TIME-OBS": { value: TIME_OBS, isKnown: true },
+      JD: { value: JD.toString(), isKnown: true },
+      ST: { value: degToHMS(ST.value), isKnown: true },
+      HA: { value: degToDMS(HA), isKnown: true },
+      AIRMASS: { value: AIRMASS.toString(), isKnown: true },
     } satisfies Partial<z.input<typeof ObservationMetadataSchema>>
   })
 

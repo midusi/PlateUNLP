@@ -1,7 +1,7 @@
 import { Collapsible } from "@base-ui-components/react/collapsible"
 import { useMutation } from "@tanstack/react-query"
-import { useRouter } from "@tanstack/react-router"
 import type { z } from "zod"
+import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { Progress } from "~/components/ui/progress"
@@ -9,7 +9,10 @@ import { Separator } from "~/components/ui/separator"
 import { useAppForm } from "~/hooks/use-app-form"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
-import { ObservationMetadataSchema } from "~/types/spectrum-metadata"
+import {
+  getObservationMetadataCompletion,
+  ObservationMetadataSchema,
+} from "~/types/spectrum-metadata"
 import { computeObservationMetadata } from "../-actions/compute-observation-metadata"
 import { updateObservationMetadata } from "../-actions/update-observation-metadata"
 
@@ -22,8 +25,6 @@ export function ObservationMetadataForm({
   OBSERVAT: string
   defaultValues: z.output<typeof ObservationMetadataSchema>
 }) {
-  const router = useRouter()
-
   const form = useAppForm({
     defaultValues,
     validators: { onChange: ObservationMetadataSchema },
@@ -52,9 +53,6 @@ export function ObservationMetadataForm({
         const result = await computeObservationMetadata({
           data: { ...form.state.values, OBSERVAT },
         })
-        form.setFieldValue("OBJECT", result.OBJECT)
-        form.setFieldValue("DATE-OBS", result["DATE-OBS"])
-        form.setFieldValue("UT", result.UT)
         form.setFieldValue("MAIN-ID", result["MAIN-ID"])
         form.setFieldValue("SPTYPE", result.SPTYPE)
         form.setFieldValue("RA", result.RA)
@@ -69,6 +67,7 @@ export function ObservationMetadataForm({
         form.setFieldValue("ST", result.ST)
         form.setFieldValue("HA", result.HA)
         form.setFieldValue("AIRMASS", result.AIRMASS)
+        form.handleSubmit()
       } catch (error) {
         notifyError("Failed to compute observation metadata", error)
       }
@@ -80,26 +79,13 @@ export function ObservationMetadataForm({
       <Card className="gap-0">
         <CardHeader className="flex items-center gap-4">
           <CardTitle className="grow">Observation metadata</CardTitle>
-          <form.Subscribe
-            selector={(state) => {
-              let filled = 0
-              let total = 0
-              for (const key in ObservationMetadataSchema.shape) {
-                if (key in state.values) {
-                  filled +=
-                    typeof state.values[key] === "string" && state.values[key].trim() ? 1 : 0
-                  total += 1
-                }
-              }
-              return [filled, total] as const
-            }}
-          >
-            {([filled, total]) => (
+          <form.Subscribe selector={(state) => getObservationMetadataCompletion(state.values)}>
+            {({ completed, total, percentage }) => (
               <div className="flex items-center justify-end gap-2">
                 <span className="text-muted-foreground text-sm">
-                  {filled}/{total}
+                  {completed}/{total}
                 </span>
-                <Progress value={(100 * filled) / total} className="w-16" />
+                <Progress value={percentage} className="w-16" />
               </div>
             )}
           </form.Subscribe>
@@ -129,26 +115,25 @@ export function ObservationMetadataForm({
                 <field.TextField label="OBJECT" placeholder="Name of the object observed" />
               )}
             </form.AppField>
-            <form.AppField name="DATE-OBS">
-              {(field) => (
-                <field.TextField label="DATE-OBS" placeholder="Date of observation (yyyy-mm-dd)" />
-              )}
-            </form.AppField>
-            <form.AppField name="UT">
-              {(field) => (
-                <field.TextField
-                  label="UT"
-                  placeholder="Universal time (hh:mm:ss) corresponding to half of the exposure duration"
-                />
-              )}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="DATE-OBS"
+              label="DATE-OBS"
+              placeholder="Date of observation (yyyy-mm-dd)"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="UT"
+              label="UT"
+              placeholder="Universal time (hh:mm:ss) corresponding to half of the exposure duration"
+            />
             <div className="relative col-span-full flex h-12 items-center justify-center">
               <Separator orientation="horizontal" className="absolute top-1/2" />
               <form.Subscribe
                 selector={(formState) => [
                   formState.fieldMeta.OBJECT?.isValid &&
-                    formState.fieldMeta["DATE-OBS"]?.isValid &&
-                    formState.fieldMeta.UT?.isValid,
+                    formState.fieldMeta["DATE-OBS.value"]?.isValid &&
+                    formState.fieldMeta["UT.value"]?.isValid,
                 ]}
               >
                 {([isValid]) => (
@@ -170,80 +155,99 @@ export function ObservationMetadataForm({
               </form.Subscribe>
             </div>
 
-            <form.AppField name="MAIN-ID">
-              {(field) => (
-                <field.TextField label="MAIN-ID" placeholder="Simbad main ID object name" />
-              )}
-            </form.AppField>
-            <form.AppField name="TIME-OBS">
-              {(field) => (
-                <field.TextField
-                  label="TIME-OBS"
-                  placeholder="Local time at the start of the observation"
-                />
-              )}
-            </form.AppField>
-            <form.AppField name="ST">
-              {(field) => <field.TextField label="ST" placeholder="Local mean sidereal time" />}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="MAIN-ID"
+              label="MAIN-ID"
+              placeholder="Simbad main ID object name"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="TIME-OBS"
+              label="TIME-OBS"
+              placeholder="Local time at the start of the observation"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="ST"
+              label="ST"
+              placeholder="Local mean sidereal time"
+            />
 
-            <form.AppField name="HA">
-              {(field) => <field.TextField label="HA" placeholder="Hour angle" />}
-            </form.AppField>
-            <form.AppField name="RA">
-              {(field) => <field.TextField label="RA" placeholder="Right ascension" />}
-            </form.AppField>
-            <form.AppField name="DEC">
-              {(field) => <field.TextField label="DEC" placeholder="Declination" />}
-            </form.AppField>
+            <TextFieldWithKnown form={form} fields="HA" label="HA" placeholder="Hour angle" />
+            <TextFieldWithKnown form={form} fields="RA" label="RA" placeholder="Right ascension" />
+            <TextFieldWithKnown form={form} fields="DEC" label="DEC" placeholder="Declination" />
 
-            <form.AppField name="GAIN">
-              {(field) => <field.TextField label="GAIN" placeholder="Gain, electrons per adu" />}
-            </form.AppField>
-            <form.AppField name="RA2000">
-              {(field) => (
-                <field.TextField label="RA2000" placeholder="Right ascension ICRS J2000" />
-              )}
-            </form.AppField>
-            <form.AppField name="DEC2000">
-              {(field) => <field.TextField label="DEC2000" placeholder="Declination ICRS J2000" />}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="GAIN"
+              label="GAIN"
+              placeholder="Gain, electrons per adu"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="RA2000"
+              label="RA2000"
+              placeholder="Right ascension ICRS J2000"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="DEC2000"
+              label="DEC2000"
+              placeholder="Declination ICRS J2000"
+            />
 
-            <form.AppField name="RA1950">
-              {(field) => <field.TextField label="RA1950" placeholder="Right ascension FK4" />}
-            </form.AppField>
-            <form.AppField name="DEC1950">
-              {(field) => <field.TextField label="DEC1950" placeholder="Declination ICRS FK4" />}
-            </form.AppField>
-            <form.AppField name="EXPTIME">
-              {(field) => (
-                <field.TextField label="EXPTIME" placeholder="Integration time in seconds" />
-              )}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="EXPTIME"
+              label="EXPTIME"
+              placeholder="Integration time in seconds"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="RA1950"
+              label="RA1950"
+              placeholder="Right ascension FK4"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="DEC1950"
+              label="DEC1950"
+              placeholder="Declination FK4"
+            />
 
-            <form.AppField name="DETECTOR">
-              {(field) => (
-                <field.TextField label="DETECTOR" placeholder="Instrument for detections" />
-              )}
-            </form.AppField>
-            <form.AppField name="IMAGETYP">
-              {(field) => (
-                <field.TextField label="IMAGETYP" placeholder="Object, dark, zero, etc" />
-              )}
-            </form.AppField>
-            <form.AppField name="SPTYPE">
-              {(field) => <field.TextField label="SPTYPE" placeholder="Simbad spectral type" />}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="DETECTOR"
+              label="DETECTOR"
+              placeholder="Instrument for detections"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="IMAGETYP"
+              label="IMAGETYP"
+              placeholder="Object, dark, zero, etc"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SPTYPE"
+              label="SPTYPE"
+              placeholder="Simbad spectral type"
+            />
 
-            <form.AppField name="JD">
-              {(field) => <field.TextField label="JD" placeholder="Julian date" />}
-            </form.AppField>
-            <form.AppField name="EQUINOX">
-              {(field) => <field.TextField label="EQUINOX" placeholder="Epoch of ra y dec" />}
-            </form.AppField>
-            <form.AppField name="AIRMASS">
-              {(field) => <field.TextField label="AIRMASS" placeholder="Airmass" />}
-            </form.AppField>
+            <TextFieldWithKnown form={form} fields="JD" label="JD" placeholder="Julian date" />
+            <TextFieldWithKnown
+              form={form}
+              fields="EQUINOX"
+              label="EQUINOX"
+              placeholder="Epoch of RA y DEC"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="AIRMASS"
+              label="AIRMASS"
+              placeholder="Airmass"
+            />
           </CardContent>
           <CardFooter className="flex justify-end">
             <form.Subscribe

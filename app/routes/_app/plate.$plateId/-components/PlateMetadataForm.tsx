@@ -2,6 +2,7 @@ import { Collapsible } from "@base-ui-components/react/collapsible"
 import { useRouter } from "@tanstack/react-router"
 import type { z } from "zod"
 import { SelectObservatory } from "~/components/forms/SelectObservatory"
+import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { Field, FieldControl, FieldError, FieldLabel } from "~/components/ui/field"
 import { Progress } from "~/components/ui/progress"
@@ -9,7 +10,7 @@ import { Separator } from "~/components/ui/separator"
 import { useAppForm } from "~/hooks/use-app-form"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
-import { PlateMetadataSchema } from "~/types/spectrum-metadata"
+import { getPlateMetadataCompletion, PlateMetadataSchema } from "~/types/spectrum-metadata"
 import { updatePlateMetadata } from "../-actions/update-plate-metadata"
 
 export function PlateMetadataForm({
@@ -22,7 +23,7 @@ export function PlateMetadataForm({
   const router = useRouter()
 
   const form = useAppForm({
-    defaultValues,
+    defaultValues: defaultValues,
     validators: { onChange: PlateMetadataSchema },
     onSubmit: async ({ value, formApi }) => {
       try {
@@ -52,26 +53,13 @@ export function PlateMetadataForm({
       <Card className="gap-0">
         <CardHeader className="flex items-center gap-4">
           <CardTitle className="grow">Plate metadata</CardTitle>
-          <form.Subscribe
-            selector={(state) => {
-              let filled = 0
-              let total = 0
-              for (const key in PlateMetadataSchema.shape) {
-                if (key in state.values) {
-                  filled +=
-                    typeof state.values[key] === "string" && state.values[key].trim() ? 1 : 0
-                  total += 1
-                }
-              }
-              return [filled, total] as const
-            }}
-          >
-            {([filled, total]) => (
+          <form.Subscribe selector={(state) => getPlateMetadataCompletion(state.values)}>
+            {({ completed, total, percentage }) => (
               <div className="flex items-center justify-end gap-2">
                 <span className="text-muted-foreground text-sm">
-                  {filled}/{total}
+                  {completed}/{total}
                 </span>
-                <Progress value={(100 * filled) / total} className="w-16" />
+                <Progress value={percentage} className="w-16" />
               </div>
             )}
           </form.Subscribe>
@@ -114,29 +102,50 @@ export function PlateMetadataForm({
             <form.AppField name="PLATE-N">
               {(field) => <field.TextField label="PLATE-N" placeholder="Identification number" />}
             </form.AppField>
-            <form.AppField name="OBSERVER">
-              {(field) => <field.TextField label="OBSERVER" placeholder="OBSERVER" />}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="OBSERVER"
+              label="OBSERVER"
+              placeholder="OBSERVER"
+            />
 
-            <form.AppField name="DIGITALI">
-              {(field) => <field.TextField label="DIGITALI" placeholder="DIGITALI" />}
-            </form.AppField>
-            <form.AppField name="SCANNER">
-              {(field) => <field.TextField label="SCANNER" placeholder="Scanner name" />}
-            </form.AppField>
-            <form.AppField name="SOFTWARE">
-              {(field) => <field.TextField label="SOFTWARE" placeholder="Scan software" />}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="DIGITALI"
+              label="DIGITALI"
+              placeholder="DIGITALI"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANNER"
+              label="SCANNER"
+              placeholder="SCANNER"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SOFTWARE"
+              label="SOFTWARE"
+              placeholder="SOFTWARE"
+            />
 
-            <form.AppField name="TELESCOPE">
-              {(field) => <field.TextField label="TELESCOPE" placeholder="Telescope name" />}
-            </form.AppField>
-            <form.AppField name="DETECTOR">
-              {(field) => <field.TextField label="DETECTOR" placeholder="Detector" />}
-            </form.AppField>
-            <form.AppField name="INSTRUMENT">
-              {(field) => <field.TextField label="INSTRUMENT" placeholder="Instrument" />}
-            </form.AppField>
+            <TextFieldWithKnown
+              form={form}
+              fields="TELESCOPE"
+              label="TELESCOPE"
+              placeholder="TELESCOPE"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="DETECTOR"
+              label="DETECTOR"
+              placeholder="DETECTOR"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="INSTRUMENT"
+              label="INSTRUMENT"
+              placeholder="INSTRUMENT"
+            />
           </CardContent>
           <CardFooter className="flex justify-end">
             <form.Subscribe

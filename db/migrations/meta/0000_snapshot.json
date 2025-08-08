@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "da3d4380-9c52-406e-9738-26c2690bac8a",
+  "id": "2c14b82a-3923-4086-9cd9-458acaf353d7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "iers_bulletin_a": {
@@ -134,6 +134,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "metadata_completion": {
+          "name": "metadata_completion",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "object": {
           "name": "object",
           "type": "text",
@@ -141,6 +148,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "object_known": {
+          "name": "object_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "date_obs": {
           "name": "date_obs",
@@ -150,6 +165,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "date_obs_known": {
+          "name": "date_obs_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "ut": {
           "name": "ut",
           "type": "text",
@@ -157,6 +180,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "ut_known": {
+          "name": "ut_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "main_id": {
           "name": "main_id",
@@ -166,6 +197,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "main_id_known": {
+          "name": "main_id_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "sptype": {
           "name": "sptype",
           "type": "text",
@@ -173,6 +212,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "sptype_known": {
+          "name": "sptype_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "ra": {
           "name": "ra",
@@ -182,6 +229,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "ra_known": {
+          "name": "ra_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "dec": {
           "name": "dec",
           "type": "text",
@@ -189,6 +244,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "dec_known": {
+          "name": "dec_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "equinox": {
           "name": "equinox",
@@ -198,6 +261,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "equinox_known": {
+          "name": "equinox_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "ra2000": {
           "name": "ra2000",
           "type": "text",
@@ -205,6 +276,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "ra2000_known": {
+          "name": "ra2000_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "dec2000": {
           "name": "dec2000",
@@ -214,6 +293,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "dec2000_known": {
+          "name": "dec2000_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "ra1950": {
           "name": "ra1950",
           "type": "text",
@@ -221,6 +308,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "ra1950_known": {
+          "name": "ra1950_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "dec1950": {
           "name": "dec1950",
@@ -230,6 +325,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "dec1950_known": {
+          "name": "dec1950_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "time_obs": {
           "name": "time_obs",
           "type": "text",
@@ -238,12 +341,29 @@
           "autoincrement": false,
           "default": "''"
         },
+        "time_obs_known": {
+          "name": "time_obs_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "jd": {
           "name": "jd",
-          "type": "real",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "jd_known": {
+          "name": "jd_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "st": {
           "name": "st",
@@ -253,6 +373,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "st_known": {
+          "name": "st_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "ha": {
           "name": "ha",
           "type": "text",
@@ -261,12 +389,29 @@
           "autoincrement": false,
           "default": "''"
         },
+        "ha_known": {
+          "name": "ha_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "airmass": {
           "name": "airmass",
-          "type": "real",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "airmass_known": {
+          "name": "airmass_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "gain": {
           "name": "gain",
@@ -276,6 +421,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "gain_known": {
+          "name": "gain_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "exptime": {
           "name": "exptime",
           "type": "text",
@@ -283,6 +436,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "exptime_known": {
+          "name": "exptime_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "detector": {
           "name": "detector",
@@ -292,6 +453,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "detector_known": {
+          "name": "detector_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "imagetyp": {
           "name": "imagetyp",
           "type": "text",
@@ -299,6 +468,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "imagetyp_known": {
+          "name": "imagetyp_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         }
       },
       "indexes": {
@@ -435,6 +612,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "metadata_completion": {
+          "name": "metadata_completion",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "observat": {
           "name": "observat",
           "type": "text",
@@ -448,8 +632,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "'New plate'"
+          "autoincrement": false
         },
         "observer": {
           "name": "observer",
@@ -459,6 +642,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "observer_known": {
+          "name": "observer_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "digitali": {
           "name": "digitali",
           "type": "text",
@@ -466,6 +657,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "digitali_known": {
+          "name": "digitali_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "scanner": {
           "name": "scanner",
@@ -475,6 +674,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "scanner_known": {
+          "name": "scanner_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "software": {
           "name": "software",
           "type": "text",
@@ -482,6 +689,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "software_known": {
+          "name": "software_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "telescope": {
           "name": "telescope",
@@ -491,6 +706,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "telescope_known": {
+          "name": "telescope_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "detector": {
           "name": "detector",
           "type": "text",
@@ -499,6 +722,14 @@
           "autoincrement": false,
           "default": "''"
         },
+        "detector_known": {
+          "name": "detector_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "instrument": {
           "name": "instrument",
           "type": "text",
@@ -506,6 +737,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
+        },
+        "instrument_known": {
+          "name": "instrument_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         }
       },
       "indexes": {},

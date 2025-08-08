@@ -1,58 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
 import { getObservatoriesQueryOptions } from "~/components/forms/SelectObservatory"
-import { db } from "~/db"
+import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
 import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getObservations } from "./-actions/get-observations"
+import { getPlateMetadata } from "./-actions/get-plate-metadata"
 import { ObservationsList } from "./-components/ObservationsList"
 import { PlateMetadataForm } from "./-components/PlateMetadataForm"
-
-const getInitialValues = createServerFn()
-  .validator(z.object({ plateId: z.string() }))
-  .handler(async ({ data }) => {
-    const plate = await db.query.plate.findFirst({
-      where: (plate, { eq }) => eq(plate.id, data.plateId),
-      columns: {
-        OBSERVAT: true,
-        "PLATE-N": true,
-        OBSERVER: true,
-        DIGITALI: true,
-        SCANNER: true,
-        SOFTWARE: true,
-        TELESCOPE: true,
-        DETECTOR: true,
-        INSTRUMENT: true,
-      },
-      with: {
-        project: { columns: { id: true, name: true } },
-      },
-    })
-    if (!plate) {
-      throw new Error(`Plate with ID ${data.plateId} not found`)
-    }
-    return plate
-  })
 
 export const Route = createFileRoute("/_app/plate/$plateId/")({
   component: RouteComponent,
   loader: async ({ context, params }) => {
-    const initialValues = await getInitialValues({ data: { plateId: params.plateId } })
-    const initialObservations = await getObservations({ data: { plateId: params.plateId } })
+    const [project, initialMetadata, initialObservations] = await Promise.all([
+      getProjectName({ data: { from: "plate", id: params.plateId } }),
+      getPlateMetadata({ data: { plateId: params.plateId } }),
+      getObservations({ data: { plateId: params.plateId } }),
+    ])
     await context.queryClient.ensureQueryData(getObservatoriesQueryOptions()) // For the PlateMetadataForm
 
     return {
       breadcrumbs: [
         {
-          title: initialValues.project.name,
-          link: { to: "/project/$projectId", params: { projectId: initialValues.project.id } },
+          title: project.name,
+          link: { to: "/project/$projectId", params: { projectId: project.id } },
         },
         {
-          title: `Plate ${initialValues["PLATE-N"] || params.plateId}`,
+          title: `Plate ${initialMetadata["PLATE-N"]}`,
           link: { to: "/plate/$plateId", params: { plateId: params.plateId } },
         },
       ] satisfies Breadcrumbs,
-      initialValues,
+      initialMetadata,
       initialObservations,
     }
   },
@@ -60,11 +36,11 @@ export const Route = createFileRoute("/_app/plate/$plateId/")({
 
 function RouteComponent() {
   const { plateId } = Route.useParams()
-  const { initialValues, initialObservations } = Route.useLoaderData()
+  const { initialMetadata, initialObservations } = Route.useLoaderData()
 
   return (
     <div className="mx-auto w-full max-w-6xl px-8">
-      <PlateMetadataForm plateId={plateId} defaultValues={initialValues} />
+      <PlateMetadataForm plateId={plateId} defaultValues={initialMetadata} />
       <div className="h-8" />
       <ObservationsList plateId={plateId} initialObservations={initialObservations} />
     </div>

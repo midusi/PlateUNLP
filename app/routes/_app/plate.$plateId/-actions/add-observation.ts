@@ -21,6 +21,7 @@ export const addObservation = createServerFn({ method: "POST" })
         imageLeft: 0,
         imageWidth: plate.imageWidth / 10,
         imageHeight: plate.imageHeight / 10,
+        metadataCompletion: 0,
       })
       .returning({
         id: s.observation.id,

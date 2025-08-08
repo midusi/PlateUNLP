@@ -35,6 +35,7 @@ export const uploadPlate = createServerFn({ method: "POST" })
         imageId: image.value.id,
         imageWidth: image.value.width,
         imageHeight: image.value.height,
+        metadataCompletion: 0,
       })
       .returning({ id: s.plate.id })
     return { success: true as const, plateId: result[0].id }

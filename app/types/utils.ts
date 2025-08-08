@@ -12,7 +12,7 @@ export const fitsString = () =>
     .trim()
     .regex(/^[\x20-\x7E]*$/g, {
       error: ({ input }) => {
-        const c = input.match(/[^\x20-\x7E]/g)?.[0]
+        const c = input?.match(/[^\x20-\x7E]/g)?.[0]
         return `Invalid character: '${c}'`
       },
     })
@@ -25,6 +25,6 @@ export const sexasegimal = () =>
   z
     .string()
     .regex(
-      /[+-](?:[0-2]\d|3[0-5])\d:[0-5]\d:[0-5]\d(?:\.\d+)?/g,
+      /[+-]?(?:[0-2]\d|3[0-5]|\d)?\d:[0-5]\d:[0-5]\d(?:\.\d+)?/g,
       "Invalid sexagesimal format, expected ±ddd:mm:ss.sss",
     )
