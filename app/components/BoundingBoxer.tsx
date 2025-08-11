@@ -1,4 +1,5 @@
 import { Toggle, ToggleGroup, Toolbar } from "@base-ui-components/react"
+import { Link } from "@tanstack/react-router"
 import { useMeasure } from "@uidotdev/usehooks"
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -71,6 +72,13 @@ export type BoundingBoxerProps = {
    * @default true
    */
   showZoomActions?: boolean
+
+  /**
+   * Mostrar listado de bounding boxes en la parte inferior
+   * @default false
+   */
+  showBBList?: boolean
+
   /**
    * Aditional actions to be rendered inside the toolbar.
    */
@@ -100,6 +108,7 @@ export function BoundingBoxer({
   onBoundingBoxAdd,
   disabled = false,
   showZoomActions = true,
+  showBBList = false,
   children,
 }: BoundingBoxerProps) {
   // Size of the container and the image (natural size)
@@ -149,6 +158,7 @@ export function BoundingBoxer({
           >
             {children}
           </BoundingBoxControls>
+          {showBBList && <BoundingBoxList boundingBoxes={boundingBoxes} />}
           <TransformComponent
             wrapperStyle={{ width: "100%", height: "100%" }}
             contentClass={cn("relative", selectedTool === "draw" && "cursor-crosshair")}
@@ -179,6 +189,52 @@ export function BoundingBoxer({
         <p>Loading...</p>
       )}
     </div>
+  )
+}
+
+function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
+  if (boundingBoxes.length === 0) return
+
+  return (
+    <Toolbar.Root
+      id="bounding-boxes-list"
+      className="absolute right-2 bottom-2 left-2 z-10 flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs"
+    >
+      <ToggleGroup defaultValue={[boundingBoxes[0].id]} orientation="horizontal">
+        {boundingBoxes.map((bb) => {
+          return (
+            <Toolbar.Button
+              key={bb.id}
+              render={
+                <Toggle
+                  render={
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-16 data-[pressed]:bg-accent! data-[pressed]:text-primary!"
+                    />
+                  }
+                />
+              }
+              value="draw"
+              title="Draw box"
+            >
+              <Link
+                className="flex w-full flex-row items-center justify-center gap-1"
+                to="/observation/$observationId"
+                params={{ observationId: bb.id }}
+              >
+                <span
+                  className="icon-[ph--rectangle-dashed-bold] size-4"
+                  style={{ color: bb.color }}
+                ></span>
+                {bb.id.slice(0, 2)}...
+              </Link>
+            </Toolbar.Button>
+          )
+        })}
+      </ToggleGroup>
+    </Toolbar.Root>
   )
 }
 

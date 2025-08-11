@@ -55,7 +55,7 @@ export function ObservationsList({
 
   return (
     <Card className="overflow-hidden p-0">
-      <CardContent className="grid h-[500px] grid-cols-[1fr_300px] p-0">
+      <CardContent className="h-[500px] p-0">
         <BoundingBoxer
           imageSrc={`/plate/${plateId}/preview`}
           boundingBoxes={boundingBoxes}
@@ -77,6 +77,7 @@ export function ObservationsList({
             })
           }}
           onBoundingBoxAdd={(boundingBox) => addObservationMut.mutate(boundingBox)}
+          showBBList={true}
         >
           <Button
             size="sm"
@@ -95,29 +96,6 @@ export function ObservationsList({
             Autodetect
           </Button>
         </BoundingBoxer>
-        <div className="border-l">
-          <CardHeader className="p-2">
-            <CardTitle>Observations</CardTitle>
-          </CardHeader>
-          <Separator />
-          <Table>
-            <TableBody>
-              {boundingBoxes.map((boundingBox) => (
-                <TableRow key={boundingBox.id}>
-                  <TableCell className="font-medium"></TableCell>
-                  <TableCell>
-                    <Link
-                      to="/observation/$observationId"
-                      params={{ observationId: boundingBox.id }}
-                    >
-                      {boundingBox.name}
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
       </CardContent>
     </Card>
   )

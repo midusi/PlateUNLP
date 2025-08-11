@@ -52,7 +52,7 @@ function RouteComponent() {
   const { initialMetadata, spectrums, rawImage } = Route.useLoaderData()
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-8">
+    <div className="mx-auto w-full max-w-6xl">
       <ObservationMetadataForm
         observationId={observationId}
         defaultValues={initialMetadata}
@@ -66,11 +66,11 @@ function RouteComponent() {
         spectrums={spectrums}
         observationTensor={rawImage}
       />
-      <div className="w-full flex justify-center items-center">
+      <div className="flex w-full items-center justify-center">
         <Link
           to="/observation/$observationId/calibrate"
           params={{ observationId: observationId }}
-          className="flex justify-center border border-2 rounded-2xl w-20 m-4 bg-amber-100"
+          className="m-4 flex w-20 justify-center rounded-2xl border border-2 bg-amber-100"
         >
           Calibrar
         </Link>

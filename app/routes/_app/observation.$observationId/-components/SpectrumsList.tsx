@@ -187,10 +187,11 @@ export function SpectrumsList({
 
   return (
     <Card className="overflow-hidden p-0">
-      <CardContent className="grid h-[500px] grid-cols-[1fr_300px] p-0">
+      <CardContent className="h-[500px] p-0">
         <BoundingBoxer
           imageSrc={`/observation/${observationId}/preview`}
           boundingBoxes={boundingBoxes}
+          showBBList={false}
           onBoundingBoxChange={(boundingBox) => {
             setBoundingBoxes((prev) =>
               prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),
@@ -227,22 +228,6 @@ export function SpectrumsList({
             Autodetect
           </Button>
         </BoundingBoxer>
-        <div className="border-l">
-          <CardHeader className="p-2">
-            <CardTitle>Spectrums</CardTitle>
-          </CardHeader>
-          <Separator />
-          <Table>
-            <TableBody>
-              {boundingBoxes.map((boundingBox) => (
-                <TableRow key={boundingBox.id}>
-                  <TableCell className="font-medium"></TableCell>
-                  <TableCell>{boundingBox.name}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
       </CardContent>
     </Card>
   )
