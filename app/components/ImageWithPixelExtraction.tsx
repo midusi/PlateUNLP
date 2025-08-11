@@ -15,7 +15,6 @@ interface ImageWithPixelExtractionProps {
 }
 
 export function ImageWithPixelExtraction({
-  title,
   image,
   pointsWMed,
   drawFunction,
@@ -23,17 +22,12 @@ export function ImageWithPixelExtraction({
 }: ImageWithPixelExtractionProps) {
   return (
     <div className={clsx("relative flex w-full items-center justify-center ", "px-8", "pt-1")}>
-      <div className="flex flex-col">
-        {title && (
-          <h3 className="flex justify-center pb-1 font-semibold text-lg text-slate-500">{title}</h3>
-        )}
-        <ImageWithDraws
-          image={image}
-          points={pointsWMed}
-          drawFunction={drawFunction}
-          opening={opening}
-        />
-      </div>
+      <ImageWithDraws
+        image={image}
+        points={pointsWMed}
+        drawFunction={drawFunction}
+        opening={opening}
+      />
     </div>
   )
 }

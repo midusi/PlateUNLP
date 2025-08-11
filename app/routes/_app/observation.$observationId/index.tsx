@@ -63,7 +63,7 @@ function RouteComponent() {
       <div className="h-8" />
       <SpectrumsFeatures
         observationId={observationId}
-        spectrums={spectrums}
+        initialSpectrums={spectrums}
         observationTensor={rawImage}
       />
       <div className="flex w-full items-center justify-center">
