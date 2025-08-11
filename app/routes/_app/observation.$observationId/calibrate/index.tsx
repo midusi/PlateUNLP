@@ -9,13 +9,11 @@ import { getSpectrums } from "../-actions/get-spectrums"
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
   component: RouteComponent,
   loader: async ({ params }) => {
-    const [project, plate, initialMetadata, spectrums] = await Promise.all([
+    const [project, plate, initialMetadata] = await Promise.all([
       getProjectName({ data: { from: "observation", id: params.observationId } }),
       getPlateName({ data: { from: "observation", id: params.observationId } }),
       getObservationMetadata({ data: { observationId: params.observationId } }),
-      getSpectrums({ data: { observationId: params.observationId } }),
     ])
-    const rawImage = await fetchGrayscaleImage(`/observation/${params.observationId}/image`)
     return {
       breadcrumbs: [
         {
@@ -45,19 +43,13 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
         },
       ] satisfies Breadcrumbs,
       initialMetadata,
-      spectrums,
-      rawImage,
     }
   },
 })
 
 function RouteComponent() {
   const { observationId } = Route.useParams()
-  const { initialMetadata, spectrums, rawImage } = Route.useLoaderData()
+  const { initialMetadata } = Route.useLoaderData()
 
-  return (
-    <div className="mx-auto w-full max-w-6xl px-8">
-      A calibrar...
-    </div>
-  )
+  return <div className="mx-auto w-full max-w-6xl px-8">A calibrar...</div>
 }

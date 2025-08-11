@@ -1,6 +1,8 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
 import logoFCAGLP from "~/assets/fcaglp.png"
+import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
+import logoReTrOH from "~/assets/logoretroh.png"
 import { Separator } from "~/components/ui/separator"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
 
@@ -29,6 +31,18 @@ function RouteComponent() {
         </main>
         <footer className="mt-12 flex items-center justify-evenly border-t p-4">
           <a
+            href="https://weblidi.info.unlp.edu.ar/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-50 grayscale-100 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+          >
+            <img
+              src={logoLIDI}
+              alt="Logo del Instituto de Investigación en Informática LIDI"
+              className="h-16"
+            />
+          </a>
+          <a
             href="https://www.fcaglp.unlp.edu.ar/"
             target="_blank"
             rel="noopener noreferrer"
@@ -41,14 +55,26 @@ function RouteComponent() {
             />
           </a>
           <a
-            href="https://weblidi.info.unlp.edu.ar/"
+            href="https://retroh.fcaglp.unlp.edu.ar/"
             target="_blank"
             rel="noopener noreferrer"
             className="opacity-50 grayscale-100 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
           >
             <img
-              src={logoLIDI}
-              alt="Logo del Instituto de Investigación en Informática LIDI"
+              src={logoReTrOH}
+              alt="Logo del proyecto de Recuperación del Trabajo Observacional Histórico"
+              className="h-16"
+            />
+          </a>
+          <a
+            href="https://ialp.fcaglp.unlp.edu.ar/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-50 grayscale-100 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+          >
+            <img
+              src={logoIALP}
+              alt="Logo del Instituto de Astrofisica de La Plata (CONICET-UNLP)"
               className="h-16"
             />
           </a>
