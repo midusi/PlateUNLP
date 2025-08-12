@@ -194,7 +194,7 @@ function RouteComponent() {
                   ) : (
                     <>
                       <TableCell colSpan={1} className="text-right font-semibold">
-                        <span className="icon-[ph--arrow-bend-down-right] text-right" />
+                        <span className="icon-[ph--arrow-bend-down-right] h-5 w-5 text-right" />
                       </TableCell>
                       <TableCell colSpan={columns.length - 1} className="italic">
                         <Link
