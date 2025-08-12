@@ -2,8 +2,10 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router"
 import {
   type ColumnFiltersState,
   createColumnHelper,
+  type ExpandedState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -73,22 +75,21 @@ const columns = [
   columnHelper.accessor("PLATE-N", {
     size: Number.MAX_SAFE_INTEGER, // Grow to fill available space
     header: "Plate",
-    cell: (info) => info.getValue() || <span className="italic">sin nombre</span>,
+    cell: (info) => (
+      <Link to="/plate/$plateId" params={{ plateId: info.row.original.id }}>
+        {info.getValue()}
+      </Link>
+    ),
   }),
   columnHelper.display({
-    id: "link",
-    enableHiding: false,
-    enableSorting: false,
-    cell: (info) => (
-      <Button
-        variant="ghost"
-        className="h-8 w-8 p-0"
-        render={<Link to="/plate/$plateId" params={{ plateId: info.row.original.id }} />}
-      >
-        <span className="sr-only">Go to plate</span>
-        <span className="icon-[ph--arrow-right-bold]" />
-      </Button>
-    ),
+    id: "expander",
+    header: () => null,
+    cell: ({ row }) =>
+      row.getCanExpand() ? (
+        <Button variant="ghost" size="sm" onClick={row.getToggleExpandedHandler()}>
+          <span className="inline-block w-3 text-right">{row.getIsExpanded() ? "▼" : "▶"}</span>
+        </Button>
+      ) : null,
   }),
 ]
 
@@ -99,11 +100,19 @@ function RouteComponent() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
+  const [expanded, setExpanded] = useState<ExpandedState>({})
 
   const table = useReactTable({
     data: project.plates,
     columns,
     getRowId: (row) => row.id,
+    getSubRows: (row) =>
+      row.observations.map((obs) => ({
+        id: obs.id,
+        "PLATE-N": obs.id,
+        observations: [],
+        object: obs.OBJECT,
+      })) as Plate[],
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -112,6 +121,7 @@ function RouteComponent() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    getExpandedRowModel: getExpandedRowModel(),
     defaultColumn: {
       minSize: 0,
       size: 0,
@@ -122,7 +132,9 @@ function RouteComponent() {
       columnFilters,
       columnVisibility,
       rowSelection,
+      expanded: expanded,
     },
+    onExpandedChange: setExpanded,
   })
 
   const selectedIds = Object.entries(rowSelection)
@@ -166,12 +178,34 @@ function RouteComponent() {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className={row.depth > 0 ? "bg-muted/50" : ""}
+                >
+                  {row.depth === 0 ? (
+                    row
+                      .getVisibleCells()
+                      .map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))
+                  ) : (
+                    <>
+                      <TableCell colSpan={1} className="text-right font-semibold">
+                        <span className="icon-[ph--arrow-bend-down-right] text-right" />
+                      </TableCell>
+                      <TableCell colSpan={columns.length - 1} className="italic">
+                        <Link
+                          to="/observation/$observationId"
+                          params={{ observationId: row.original.id }}
+                        >
+                          {`${row.original["PLATE-N"]}`}
+                        </Link>
+                      </TableCell>
+                    </>
+                  )}
                 </TableRow>
               ))
             ) : (

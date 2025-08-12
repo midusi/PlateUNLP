@@ -11,6 +11,11 @@ export const getProject = createServerFn()
       with: {
         plates: {
           columns: { id: true, "PLATE-N": true },
+          with: {
+            observations: {
+              columns: { id: true, OBJECT: true },
+            },
+          },
         },
       },
     })
