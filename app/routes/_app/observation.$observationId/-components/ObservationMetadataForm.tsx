@@ -112,7 +112,11 @@ export function ObservationMetadataForm({
           <CardContent className="grid grid-cols-3 items-start gap-4">
             <form.AppField name="OBJECT">
               {(field) => (
-                <field.TextField label="OBJECT" placeholder="Name of the object observed" />
+                <field.TextField
+                  label="OBJECT"
+                  placeholder="Name of the object observed"
+                  description="* required to compute"
+                />
               )}
             </form.AppField>
             <TextFieldWithKnown
@@ -120,13 +124,29 @@ export function ObservationMetadataForm({
               fields="DATE-OBS"
               label="DATE-OBS"
               placeholder="Date of observation (yyyy-mm-dd)"
+              description="* required to compute"
             />
             <TextFieldWithKnown
               form={form}
               fields="UT"
               label="UT"
               placeholder="Universal time (hh:mm:ss) corresponding to half of the exposure duration"
+              description="* required to compute"
             />
+
+            <TextFieldWithKnown
+              form={form}
+              fields="EXPTIME"
+              label="EXPTIME"
+              placeholder="Integration time in seconds"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="IMAGETYP"
+              label="IMAGETYP"
+              placeholder="Object, dark, zero, etc"
+            />
+
             <div className="relative col-span-full flex h-12 items-center justify-center">
               <Separator orientation="horizontal" className="absolute top-1/2" />
               <form.Subscribe
@@ -163,6 +183,19 @@ export function ObservationMetadataForm({
             />
             <TextFieldWithKnown
               form={form}
+              fields="SPTYPE"
+              label="SPTYPE"
+              placeholder="Simbad spectral type"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="AIRMASS"
+              label="AIRMASS"
+              placeholder="Airmass"
+            />
+
+            <TextFieldWithKnown
+              form={form}
               fields="TIME-OBS"
               label="TIME-OBS"
               placeholder="Local time at the start of the observation"
@@ -173,17 +206,17 @@ export function ObservationMetadataForm({
               label="ST"
               placeholder="Local mean sidereal time"
             />
-
             <TextFieldWithKnown form={form} fields="HA" label="HA" placeholder="Hour angle" />
+
             <TextFieldWithKnown form={form} fields="RA" label="RA" placeholder="Right ascension" />
             <TextFieldWithKnown form={form} fields="DEC" label="DEC" placeholder="Declination" />
-
             <TextFieldWithKnown
               form={form}
-              fields="GAIN"
-              label="GAIN"
-              placeholder="Gain, electrons per adu"
+              fields="EQUINOX"
+              label="EQUINOX"
+              placeholder="Epoch of RA y DEC"
             />
+
             <TextFieldWithKnown
               form={form}
               fields="RA2000"
@@ -196,13 +229,8 @@ export function ObservationMetadataForm({
               label="DEC2000"
               placeholder="Declination ICRS J2000"
             />
+            <TextFieldWithKnown form={form} fields="JD" label="JD" placeholder="Julian date" />
 
-            <TextFieldWithKnown
-              form={form}
-              fields="EXPTIME"
-              label="EXPTIME"
-              placeholder="Integration time in seconds"
-            />
             <TextFieldWithKnown
               form={form}
               fields="RA1950"
@@ -214,39 +242,6 @@ export function ObservationMetadataForm({
               fields="DEC1950"
               label="DEC1950"
               placeholder="Declination FK4"
-            />
-
-            <TextFieldWithKnown
-              form={form}
-              fields="DETECTOR"
-              label="DETECTOR"
-              placeholder="Instrument for detections"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="IMAGETYP"
-              label="IMAGETYP"
-              placeholder="Object, dark, zero, etc"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="SPTYPE"
-              label="SPTYPE"
-              placeholder="Simbad spectral type"
-            />
-
-            <TextFieldWithKnown form={form} fields="JD" label="JD" placeholder="Julian date" />
-            <TextFieldWithKnown
-              form={form}
-              fields="EQUINOX"
-              label="EQUINOX"
-              placeholder="Epoch of RA y DEC"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="AIRMASS"
-              label="AIRMASS"
-              placeholder="Airmass"
             />
           </CardContent>
           <CardFooter className="flex justify-end">

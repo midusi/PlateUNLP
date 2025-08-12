@@ -109,7 +109,7 @@ export const computeObservationMetadata = createServerFn()
       RA1950: { value: degToHMS(simbad.value.RA1950), isKnown: true },
       DEC1950: { value: degToDMS(simbad.value.DEC1950), isKnown: true },
       "TIME-OBS": { value: TIME_OBS, isKnown: true },
-      JD: { value: JD.toString(), isKnown: true },
+      JD: { value: JD.toFixed(4), isKnown: true },
       ST: { value: degToHMS(ST.value), isKnown: true },
       HA: { value: degToDMS(HA), isKnown: true },
       AIRMASS: { value: AIRMASS.toString(), isKnown: true },

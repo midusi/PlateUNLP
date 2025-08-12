@@ -27,6 +27,10 @@ CREATE TABLE `observation` (
 	`date_obs_known` integer DEFAULT true NOT NULL,
 	`ut` text DEFAULT '' NOT NULL,
 	`ut_known` integer DEFAULT true NOT NULL,
+	`exptime` text DEFAULT '' NOT NULL,
+	`exptime_known` integer DEFAULT true NOT NULL,
+	`imagetyp` text DEFAULT '' NOT NULL,
+	`imagetyp_known` integer DEFAULT true NOT NULL,
 	`main_id` text DEFAULT '' NOT NULL,
 	`main_id_known` integer DEFAULT true NOT NULL,
 	`sptype` text DEFAULT '' NOT NULL,
@@ -55,14 +59,6 @@ CREATE TABLE `observation` (
 	`ha_known` integer DEFAULT true NOT NULL,
 	`airmass` text DEFAULT '' NOT NULL,
 	`airmass_known` integer DEFAULT true NOT NULL,
-	`gain` text DEFAULT '' NOT NULL,
-	`gain_known` integer DEFAULT true NOT NULL,
-	`exptime` text DEFAULT '' NOT NULL,
-	`exptime_known` integer DEFAULT true NOT NULL,
-	`detector` text DEFAULT '' NOT NULL,
-	`detector_known` integer DEFAULT true NOT NULL,
-	`imagetyp` text DEFAULT '' NOT NULL,
-	`imagetyp_known` integer DEFAULT true NOT NULL,
 	FOREIGN KEY (`plate_id`) REFERENCES `plate`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint

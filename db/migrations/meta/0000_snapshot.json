@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2c14b82a-3923-4086-9cd9-458acaf353d7",
+  "id": "ee394ccf-1912-4f6c-8670-9bb83622a435",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "iers_bulletin_a": {
@@ -183,6 +183,38 @@
         },
         "ut_known": {
           "name": "ut_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "exptime": {
+          "name": "exptime",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "exptime_known": {
+          "name": "exptime_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "imagetyp": {
+          "name": "imagetyp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "imagetyp_known": {
+          "name": "imagetyp_known",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -407,70 +439,6 @@
         },
         "airmass_known": {
           "name": "airmass_known",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "gain": {
-          "name": "gain",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
-        "gain_known": {
-          "name": "gain_known",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "exptime": {
-          "name": "exptime",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
-        "exptime_known": {
-          "name": "exptime_known",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "detector": {
-          "name": "detector",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
-        "detector_known": {
-          "name": "detector_known",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "imagetyp": {
-          "name": "imagetyp",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
-        "imagetyp_known": {
-          "name": "imagetyp_known",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

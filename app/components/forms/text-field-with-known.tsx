@@ -36,22 +36,25 @@ export const TextFieldWithKnown = withFieldGroup<Fields, unknown, TextFieldWithK
                 placeholder={isKnown ? placeholder : "Unknown"}
                 className={cn(!isKnown && "placeholder:font-medium placeholder:italic")}
               />
-              {description && <FieldDescription>{description}</FieldDescription>}
+              <div className="flex items-start justify-between gap-2">
+                {description ? <FieldDescription>{description}</FieldDescription> : <span />}
+                <group.AppField name="isKnown">
+                  {(field) => (
+                    <Button
+                      className="ml-auto h-min px-1 py-0 font-normal text-muted-foreground text-xs italic underline"
+                      variant="ghost"
+                      onClick={() => field.handleChange((prev) => !prev)}
+                    >
+                      {field.state.value ? "unknown?" : "known!"}
+                    </Button>
+                  )}
+                </group.AppField>
+              </div>
+
               {field.state.meta.errors.length > 0 && (
                 <FieldError>{field.state.meta.errors[0]!.message}</FieldError>
               )}
             </>
-          )}
-        </group.AppField>
-        <group.AppField name="isKnown">
-          {(field) => (
-            <Button
-              className="ml-auto h-min px-1 py-0 font-normal text-muted-foreground text-xs italic underline"
-              variant="ghost"
-              onClick={() => field.handleChange((prev) => !prev)}
-            >
-              {field.state.value ? "unknown?" : "known!"}
-            </Button>
           )}
         </group.AppField>
       </Field>
