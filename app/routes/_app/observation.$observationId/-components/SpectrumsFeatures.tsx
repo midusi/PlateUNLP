@@ -1,5 +1,6 @@
 import { spec } from "node:test/reporters";
 import * as tf from "@tensorflow/tfjs";
+import clsx from "clsx";
 import {
 	type Dispatch,
 	type SetStateAction,
@@ -195,7 +196,7 @@ export function SpectrumsFeatures({
 					<>
 						<div
 							id="spectrum-extraction-controls"
-							className="mb-4 ml-8 flex flex-row gap-16"
+							className="mb-4 ml-8 flex flex-row gap-20"
 						>
 							<div id="count-checkpoints-control">
 								<label className="flex flex-row gap-2">
@@ -236,55 +237,68 @@ export function SpectrumsFeatures({
 							</div> */}
 						</div>
 						<hr />
-						{spectrumsData.map((sd, i) => (
-							<div key={`Spectrum Analysis ${sd.data.id}`}>
-								<div className="flex w-full flex-row items-center justify-center gap-2 font-semibold text-lg text-slate-500">
-									<h3 className="flex justify-center ">{`Spectrum ${i} [`}</h3>
-									<select
-										value={sd.data.type}
-										name="type-of-spectrums"
-										id="type-of-spectrums"
-										className="bg-gray-100 rounded-lg"
-										style={{
-											textAlign: "center",
-											textAlignLast: "center",
-										}}
-										onChange={(e) => {
-											const selectedValue = e.target.value;
-											if (sd.data.type === selectedValue) return;
-											setSpectrums((prev) => {
-												return prev.map((s) =>
-													s.id !== sd.data.id
-														? s
-														: {
-																...s,
-																type: selectedValue as "science" | "lamp",
-															},
-												);
-											});
-										}}
-									>
-										<option value={"lamp"}>Comparison Lamp</option>
-										<option value={"science"}>Science</option>
-									</select>
-									<h3 className="flex justify-center ">{`]`}</h3>
-								</div>
+						{spectrumsData.map((sd, i) => {
+							const scienceCount = spectrumsData.filter(
+								(s) => s.data.type === "science",
+							).length;
+							return (
+								<div key={`Spectrum Analysis ${sd.data.id}`}>
+									<div className="flex w-full flex-row items-center justify-center gap-2 font-semibold text-lg text-slate-500">
+										<h3 className="flex justify-center ">{`Spectrum ${i} [`}</h3>
+										<select
+											value={sd.data.type}
+											name="type-of-spectrums"
+											id="type-of-spectrums"
+											className="bg-gray-100 rounded-lg"
+											style={{
+												textAlign: "center",
+												textAlignLast: "center",
+											}}
+											onChange={(e) => {
+												const selectedValue = e.target.value;
+												if (sd.data.type === selectedValue) return;
+												setSpectrums((prev) => {
+													return prev.map((s) =>
+														s.id !== sd.data.id
+															? s
+															: {
+																	...s,
+																	type: selectedValue as "science" | "lamp",
+																},
+													);
+												});
+											}}
+										>
+											<option value={"science"}>Science</option>
+											<option
+												value={"lamp"}
+												disabled={
+													scienceCount === 1 && sd.data.type === "science"
+												}
+												className="disabled:cursor-not-allowed disabled:text-gray-400"
+											>
+												Comparison Lamp
+											</option>
+										</select>
+										<h3 className="flex justify-center ">{`]`}</h3>
+									</div>
 
-								<ImageWithPixelExtraction
-									image={{
-										url: `/observation/${observationId}/preview`,
-										width: sd.data.imageWidth,
-										height: sd.data.imageHeight,
-										top: sd.data.imageTop,
-										left: sd.data.imageLeft,
-									}}
-									pointsWMed={sd.analysis.mediasPoints}
-									drawFunction={sd.analysis.rectFunction}
-									opening={sd.analysis.opening}
-								/>
-								<SimpleFunctionXY data={sd.analysis.transversalAvgs} />
-							</div>
-						))}
+									<ImageWithPixelExtraction
+										image={{
+											url: `/observation/${observationId}/preview`,
+											width: sd.data.imageWidth,
+											height: sd.data.imageHeight,
+											top: sd.data.imageTop,
+											left: sd.data.imageLeft,
+										}}
+										pointsWMed={sd.analysis.mediasPoints}
+										drawFunction={sd.analysis.rectFunction}
+										opening={sd.analysis.opening}
+									/>
+									<SimpleFunctionXY data={sd.analysis.transversalAvgs} />
+								</div>
+							);
+						})}
 					</>
 				)}
 			</CardContent>
