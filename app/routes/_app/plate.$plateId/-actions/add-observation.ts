@@ -20,8 +20,11 @@ export const addObservation = createServerFn({ method: "POST" })
     })
     if (!plate) throw new Error(`Plate with id ${data.plateId} not found`)
 
-    if (data.top + data.width > plate.imageWidth || data.left + data.height > plate.imageHeight) {
-      throw new Error("Bounding box exceeds plate dimensions")
+    if (data.left + data.width > plate.imageWidth) {
+      throw new Error("Bounding box exceeds plate image width")
+    }
+    if (data.top + data.height > plate.imageHeight) {
+      throw new Error("Bounding box exceeds plate image height")
     }
 
     const [observation] = await db

@@ -57,6 +57,8 @@ export const ObservationMetadataSchema = z.object({
   OBJECT: fitsString(),
   "DATE-OBS": knowable(z.iso.date().or(z.literal(""))), // yyyy-MM-dd
   UT: knowable(z.iso.time().or(z.literal(""))), // HH:mm:ss.sss (any precision)
+  EXPTIME: knowable(z.iso.duration().or(z.literal(""))), // HH:mm:ss.sss (any precision)
+  IMAGETYP: knowable(fitsString()),
 
   "MAIN-ID": knowable(fitsString()),
   SPTYPE: knowable(fitsString()),
@@ -72,11 +74,6 @@ export const ObservationMetadataSchema = z.object({
   ST: knowable(z.iso.time().or(z.literal(""))), // HH:mm:ss.sss (any precision)
   HA: knowable(sexasegimal().or(z.literal(""))), // ±ddd:mm:ss.sss (any precision)
   AIRMASS: knowable(z.string().regex(z.regexes.number).or(z.literal(""))),
-
-  GAIN: knowable(fitsString()),
-  EXPTIME: knowable(fitsString()),
-  DETECTOR: knowable(fitsString()),
-  IMAGETYP: knowable(fitsString()),
 })
 /**
  * Compute the completion percentage of the observation metadata.

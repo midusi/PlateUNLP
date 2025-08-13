@@ -27,11 +27,11 @@ export const addSpectrum = createServerFn({ method: "POST" })
       .get()
     if (!observation) throw new Error(`Observation with id ${data.observationId} not found`)
 
-    if (
-      data.top + data.width > observation.imageWidth ||
-      data.left + data.height > observation.imageHeight
-    ) {
-      throw new Error("Bounding box exceeds observation dimensions")
+    if (data.left + data.width > observation.imageWidth) {
+      throw new Error("Bounding box exceeds observation image width")
+    }
+    if (data.top + data.height > observation.imageHeight) {
+      throw new Error("Bounding box exceeds observation image height")
     }
 
     const [spectrum] = await db
