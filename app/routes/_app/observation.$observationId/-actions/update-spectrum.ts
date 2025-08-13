@@ -12,6 +12,7 @@ export const updateSpectrum = createServerFn()
       imageLeft: z.number().min(0),
       imageWidth: z.number().min(1),
       imageHeight: z.number().min(1),
+      type: z.enum(["lamp", "science"]).optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -29,7 +30,6 @@ export const updateSpectrum = createServerFn()
     if (data.imageTop + data.imageHeight > spectrum.observation.imageHeight) {
       throw new Error("Bounding box exceeds plate image height")
     }
-
     await db
       .update(s.spectrum)
       .set({
@@ -37,6 +37,7 @@ export const updateSpectrum = createServerFn()
         imageLeft: data.imageLeft,
         imageWidth: data.imageWidth,
         imageHeight: data.imageHeight,
+        ...(data.type !== undefined && { type: data.type }),
       })
       .where(eq(s.spectrum.id, data.spectrumId))
   })
