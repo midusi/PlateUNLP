@@ -43,6 +43,8 @@ export const addSpectrum = createServerFn({ method: "POST" })
         imageLeft: data.left,
         imageWidth: data.width,
         imageHeight: data.height,
+        apertureCoefficient: 1.0,
+        countMediasPoints: 5,
       })
       .returning({
         id: s.spectrum.id,
@@ -51,6 +53,8 @@ export const addSpectrum = createServerFn({ method: "POST" })
         imageLeft: s.spectrum.imageLeft,
         imageWidth: s.spectrum.imageWidth,
         imageHeight: s.spectrum.imageHeight,
+        apertureCoefficient: s.spectrum.apertureCoefficient,
+        countMediasPoints: s.spectrum.countMediasPoints,
       })
     return spectrum
   })

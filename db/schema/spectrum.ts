@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm"
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { idType } from "../utils"
-
 import { observation } from "./observation"
 
 export const spectrum = sqliteTable("spectrum", {
@@ -15,6 +14,9 @@ export const spectrum = sqliteTable("spectrum", {
   imageTop: integer().notNull(), // offset from the top of the observation image
   imageWidth: integer().notNull(), // width of the spectrum image
   imageHeight: integer().notNull(), // height of the spectrum image
+  // params for extraction
+  countMediasPoints: integer().notNull().default(5), // cantidad de puntos intermedios
+  apertureCoefficient: real().notNull().default(1.0), // coeficiente de tamaño de apertura
 })
 
 export const spectrumRelations = relations(spectrum, ({ one }) => ({

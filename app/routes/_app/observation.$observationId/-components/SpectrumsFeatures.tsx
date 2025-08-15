@@ -1,19 +1,12 @@
-import { spec } from "node:test/reporters";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import * as tf from "@tensorflow/tfjs";
-import clsx from "clsx";
-import {
-	type Dispatch,
-	type SetStateAction,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "~/components/ui/card";
 import {
 	extractScience,
 	type extractSpectrumResponse,
 } from "~/lib/extract-features";
-import { loadImage } from "~/lib/image";
 import { notifyError } from "~/lib/notifications";
 import { cn } from "~/lib/utils";
 import { ImageWithPixelExtraction } from "../../../../components/ImageWithPixelExtraction";
@@ -21,7 +14,6 @@ import { SimpleFunctionXY } from "../../../../components/SimpleFunctionXY";
 import type { getSpectrums } from "../-actions/get-spectrums";
 import { updateSpectrum } from "../-actions/update-spectrum";
 import type { Spectrum } from "../-utils/spectrum-to-bounding-box";
-
 export function SpectrumsFeatures({
 	observationId,
 	initialSpectrums,
@@ -31,8 +23,6 @@ export function SpectrumsFeatures({
 	initialSpectrums: Awaited<ReturnType<typeof getSpectrums>>;
 	observationTensor: tf.Tensor2D;
 }) {
-	const reuseScienceFunction = false;
-
 	const [useSpline, setUseSpline] = useState(false);
 	const [tempUseSpline, setTempUseSpline] = useState(false);
 	const prevUseSpline = useRef(false);
@@ -51,11 +41,6 @@ export function SpectrumsFeatures({
 		"waiting",
 	);
 
-	/** Copia local de espectros */
-	const [spectrums, setSpectrums] = useState<
-		Awaited<ReturnType<typeof getSpectrums>>
-	>([...initialSpectrums]);
-
 	// Crop and save the spectrum image to be analyzed
 	const [spectrumsData, setSpectrumsData] = useState<
 		{
@@ -64,16 +49,54 @@ export function SpectrumsFeatures({
 		}[]
 	>([]);
 
+	/** Mutacion para actualizar tipos en la DB */
+	const router = useRouter();
+	const changeTypeMut = useMutation({
+		mutationFn: async (params: {
+			spectrum: Spectrum;
+			type: "lamp" | "science";
+		}) => {
+			/** Si el espectro se cambia a 'science' entonces los demas 'science' se cambian a 'lamp' */
+			if (params.type === "science") {
+				for (const spec of initialSpectrums) {
+					if (spec.type === "science") {
+						await updateSpectrum({
+							data: {
+								spectrumId: spec.id,
+								...spec,
+								type: "lamp",
+							},
+						});
+					}
+				}
+			}
+			/** Actualizar espectro objetivo */
+			await updateSpectrum({
+				data: {
+					spectrumId: params.spectrum.id,
+					...params.spectrum,
+					type: params.type,
+				},
+			});
+			router.invalidate();
+			setState("running");
+		},
+		onError: (error) => notifyError("Error adding spectrum", error),
+	});
+
 	useEffect(() => {
 		if (!observationTensor) return;
 
-		if (spectrums.length === 0) return;
+		if (initialSpectrums.length === 0) return;
 
 		/** Coloca primero el espectro de ciencia */
-		const indexSpectrum = spectrums.findIndex((s) => s.type === "science");
-		const specScience = spectrums[indexSpectrum];
-		const spectrumsArr = [...spectrums];
+		const indexSpectrum = initialSpectrums.findIndex(
+			(s) => s.type === "science",
+		);
+		const specScience = initialSpectrums[indexSpectrum];
+		const spectrumsArr = [...initialSpectrums];
 		spectrumsArr.splice(indexSpectrum, 1);
+		spectrumsArr.unshift(specScience);
 
 		/**
 		 * Contador ordenado de los espectros que fueron revisados hasta ahora (util para el orden
@@ -106,8 +129,10 @@ export function SpectrumsFeatures({
 		 */
 		let spectrumDerivedFunction: ((value: number) => number) | undefined;
 
+		/** Variable para saber si spectrum science cambio */
+		let scienceChanged = false;
+
 		/** Procesar todos los espectros del listado */
-		spectrumsArr.unshift(specScience);
 		for (const spectrum of spectrumsArr) {
 			/**
 			 * Checkea si este es el primer espectro procesado en este bucle, si no lo es parchea el
@@ -145,8 +170,10 @@ export function SpectrumsFeatures({
 
 			/** Si no cambio ningun parametro de configuración entonces no hay que recalcular nada */
 			const saved = spectrumsData.find((s) => s.data.id === spectrum.id);
+			console.log(scienceChanged);
 			if (
 				saved &&
+				!scienceChanged &&
 				spectrum.type === saved.data.type &&
 				spectrum.imageTop === saved.data.imageTop &&
 				spectrum.imageLeft === saved.data.imageLeft &&
@@ -157,6 +184,10 @@ export function SpectrumsFeatures({
 				prevPercentAperture.current === percentAperture
 			) {
 				continue;
+			}
+
+			if (spectrum.type === "science") {
+				scienceChanged = true;
 			}
 
 			/** Subimagen que corresponde al espectro en forma de tensor */
@@ -207,7 +238,7 @@ export function SpectrumsFeatures({
 		prevPercentAperture.current = percentAperture;
 		setState("ready");
 	}, [
-		spectrums,
+		initialSpectrums,
 		segmentWidth,
 		countCheckpoints,
 		percentAperture,
@@ -216,98 +247,75 @@ export function SpectrumsFeatures({
 		spectrumsData,
 	]);
 
-	/** Actualizar tipo de spectro en base de datos y en local */
-	async function saveTypeChange(act: Spectrum, new_type: "science" | "lamp") {
-		/** Actualizar registro en base de datos */
-		await updateSpectrum({
-			data: {
-				spectrumId: act.id,
-				...act,
-				type: new_type,
-			},
-		});
-		/** Actualizar registro en state */
-		setSpectrums((prev) => {
-			return prev.map((s) =>
-				s.id !== act.id
-					? s
-					: {
-							...act,
-							type: new_type,
-						},
-			);
-		});
-	}
-
 	return (
 		<Card>
 			<CardContent>
-				{state === "waiting" && <span>Waiting definition of spectrums</span>}
-				{state === "running" && (
-					<span className={cn("icon-[ph--spinner-bold] animate-spin")} />
-				)}
-				{state === "ready" && (
-					<>
-						<div id="spectrum-extraction-controls" className="mb-4 flex gap-10">
-							<div id="count-checkpoints-control">
-								<label className="flex flex-row gap-2">
-									<p className="w-42">Count checkpoints: {tempCheckpoints}</p>
-									<input
-										type="range"
-										min={2}
-										max={20}
-										step={1}
-										value={tempCheckpoints}
-										onChange={(e) => setTempCheckpoints(Number(e.target.value))}
-										onMouseUp={() => setCountCheckpoints(tempCheckpoints)}
-										onTouchEnd={() => setCountCheckpoints(tempCheckpoints)}
-									/>
-								</label>
-							</div>
-							<div id="count-checkpoints-control">
-								<label className="flex flex-row gap-2">
-									<p className="w-48">
-										Aperture Percentage: {tempPercentAperture}
-									</p>
-									<input
-										type="range"
-										min={0.7}
-										max={1.3}
-										step={0.1}
-										value={tempPercentAperture}
-										onChange={(e) =>
-											setTempPercentAperture(Number(e.target.value))
-										}
-										onMouseUp={() => setPercentAperture(tempPercentAperture)}
-										onTouchEnd={() => setPercentAperture(tempPercentAperture)}
-									/>
-								</label>
-							</div>
-							{/* <div id="use-spline-control">
-                <label className="flex flex-row gap-2">
-                  Use spline
-                  <input
-                    type="checkbox"
-                    checked={tempUseSpline}
-                    onChange={(e) => setTempUseSpline(e.target.checked)}
-                    onPointerUp={() => setUseSpline(tempUseSpline)}
-                  />
-                </label>
-              </div> */}
-							{/* <div id="segment-width-control">
-								<input
-									type="range"
-									min={10}
-									max={200}
-									step={1}
-									value={segmentWidth}
-									onChange={(e) => setSegmentWidth(Number(e.target.value))}
-								/>
-								<p>Segment width: {segmentWidth}</p>
-							</div> */}
-						</div>
-						<hr />
-						{spectrumsData.map((sd, i) => {
+				<div id="spectrum-extraction-controls" className="mb-4 flex gap-10">
+					<div id="count-checkpoints-control">
+						<label className="flex flex-row gap-2">
+							<p className="w-42">Count checkpoints: {tempCheckpoints}</p>
+							<input
+								type="range"
+								min={2}
+								max={20}
+								step={1}
+								value={tempCheckpoints}
+								onChange={(e) => {
+									setState("running");
+									setTempCheckpoints(Number(e.target.value));
+								}}
+								onMouseUp={() => {
+									setState("running");
+									setCountCheckpoints(tempCheckpoints);
+								}}
+								onTouchEnd={() => {
+									setState("running");
+									setCountCheckpoints(tempCheckpoints);
+								}}
+							/>
+						</label>
+					</div>
+					<div id="count-checkpoints-control">
+						<label className="flex flex-row gap-2">
+							<p className="w-48">Aperture Percentage: {tempPercentAperture}</p>
+							<input
+								type="range"
+								min={0.7}
+								max={1.3}
+								step={0.1}
+								value={tempPercentAperture}
+								onChange={(e) => {
+									setState("running");
+									setTempPercentAperture(Number(e.target.value));
+								}}
+								onMouseUp={() => {
+									setState("running");
+									setPercentAperture(tempPercentAperture);
+								}}
+								onTouchEnd={() => {
+									setState("running");
+									setPercentAperture(tempPercentAperture);
+								}}
+							/>
+						</label>
+					</div>
+				</div>
+				<hr />
+				<div
+					style={{ minHeight: "300px" }}
+					className="flex justify-center items-center flex-col "
+				>
+					{state === "waiting" && <span>Waiting definition of spectrums</span>}
+					{state === "running" && (
+						<span
+							className={cn(
+								"flex justify-center items-center mx-10 my-4 p-4",
+								"icon-[ph--spinner-bold] animate-spin",
+							)}
+						/>
+					)}
+					{state === "ready" &&
+						spectrumsData.map((sd, i) => {
 							const scienceCount = spectrumsData.filter(
 								(s) => s.data.type === "science",
 							).length;
@@ -324,48 +332,16 @@ export function SpectrumsFeatures({
 												textAlign: "center",
 												textAlignLast: "center",
 											}}
-											onChange={async (e) => {
+											onChange={(e) => {
 												const selectedValue = e.target.value as
 													| "lamp"
 													| "science";
 												if (sd.data.type === selectedValue) return;
 
-												let spectrumsCopy = [...spectrums];
-
-												/** Si el espectro se cambia a 'science' entonces los demas 'science' se cambian a 'lamp' */
-												if (selectedValue === "science") {
-													console.log("dentro");
-													for (const spectrum of spectrumsCopy) {
-														if (spectrum.type === "science") {
-															await updateSpectrum({
-																data: {
-																	spectrumId: spectrum.id,
-																	...spectrum,
-																	type: "lamp",
-																},
-															});
-															spectrumsCopy = spectrumsCopy.map((s) =>
-																s.id !== spectrum.id
-																	? s
-																	: { ...spectrum, type: "lamp" },
-															);
-														}
-													}
-												}
-												/** Actualizar espectro objetivo */
-												await updateSpectrum({
-													data: {
-														spectrumId: sd.data.id,
-														...sd.data,
-														type: selectedValue,
-													},
+												changeTypeMut.mutate({
+													spectrum: sd.data,
+													type: selectedValue,
 												});
-												spectrumsCopy = spectrumsCopy.map((s) =>
-													s.id !== sd.data.id
-														? s
-														: { ...sd.data, type: selectedValue },
-												);
-												setSpectrums(spectrumsCopy);
 											}}
 										>
 											<option value={"science"}>Science</option>
@@ -398,8 +374,7 @@ export function SpectrumsFeatures({
 								</div>
 							);
 						})}
-					</>
-				)}
+				</div>
 			</CardContent>
 		</Card>
 	);

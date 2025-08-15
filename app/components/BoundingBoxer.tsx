@@ -600,7 +600,7 @@ function BoundingBoxDraw({
         width = clamp(-deltaX, BB_MIN_WIDTH, initialMouse.left - left)
       } else {
         left = initialMouse.left
-        width = clamp(deltaX, BB_MIN_WIDTH, limits.y - initialMouse.left)
+        width = clamp(deltaX, BB_MIN_WIDTH, limits.x - initialMouse.left)
       }
 
       setBoundingBox({
