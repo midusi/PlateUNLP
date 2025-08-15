@@ -15,6 +15,9 @@ export const getSpectrums = createServerFn()
         imageLeft: true,
         imageWidth: true,
         imageHeight: true,
+        // Extraction configuration
+        countMediasPoints: true,
+        apertureCoefficient: true,
       },
     })
     return spectrums

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { spectrum } from "db/schema/spectrum"
 import { fetchGrayscaleImage } from "~/lib/image"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"

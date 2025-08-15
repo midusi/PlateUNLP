@@ -95,3 +95,11 @@ export function getObservationMetadataCompletion(
     percentage: (completed / total) * 100,
   }
 }
+
+/**
+ * This schema defines the metadata for a extraction configuration of a single spectrum.
+ */
+export const ExtractionConfigurationSchema = z.object({
+  countMediasPoints: z.number().int().min(1, "Must be at least 1."),
+  apertureCoefficient: z.number().min(0.01, "Must be positive"),
+})
