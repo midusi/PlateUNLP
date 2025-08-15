@@ -289,8 +289,8 @@ export function SpectrumsFeatures({
                     max={20}
                     step={1}
                     value={tempCheckpoints}
+                    disabled={state !== "ready"}
                     onChange={(e) => {
-                      setState("running")
                       setTempCheckpoints(Number(e.target.value))
                     }}
                     onMouseUp={() => {
@@ -319,8 +319,8 @@ export function SpectrumsFeatures({
                     max={1.3}
                     step={0.1}
                     value={tempPercentAperture}
+                    disabled={state !== "ready"}
                     onChange={(e) => {
-                      setState("running")
                       setTempPercentAperture(Number(e.target.value))
                     }}
                     onMouseUp={() => {
