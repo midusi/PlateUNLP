@@ -147,16 +147,15 @@ async function seedIERSBulletinA() {
   console.log(pc.white(`✓ Inserted ${pc.bold(total)} Bulletin A records`))
 }
 
-async function createUser(name: string, email: string, password: string) {
+async function createUser(name: string, email: string) {
   await db.insert(schema.user).values({
     name,
     email,
-    hashedPassword: await hashPassword(password),
   })
 
   console.log(
     pc.white(
-      `✓ Created user ${pc.cyan(name)} (${pc.cyan(email)}) with password ${pc.cyan(password)}`,
+      `✓ Created user ${pc.cyan(name)} (${pc.cyan(email)})}`,
     ),
   )
 }
@@ -186,8 +185,8 @@ async function main() {
   await seedIERSBulletinA()
 
   console.log(pc.gray("❖ Creating users..."))
-  await createUser("Chidi Anagonye", "canagonye@saintjohns.edu.au", "12345")
-  await createUser("Simone Garnett", "sgarnett@saintjohns.edu.au", "67890")
+  await createUser("Chidi Anagonye", "canagonye@saintjohns.edu.au")
+  await createUser("Simone Garnett", "sgarnett@saintjohns.edu.au")
 
   console.log(pc.gray("❖ Creating projects..."))
   await createProject("Observatorio Astronómico de La Plata", "canagonye@saintjohns.edu.au")

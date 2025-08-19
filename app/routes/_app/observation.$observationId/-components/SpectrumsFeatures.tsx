@@ -35,7 +35,6 @@ export function SpectrumsFeatures({
     validators: { onChange: ExtractionConfigurationSchema },
     onSubmit: async ({ value, formApi }) => {
       if (initialSpectrums.length <= 0) return
-      console.log(value)
       try {
         for (const spec of initialSpectrums) {
           await updateSpectrum({

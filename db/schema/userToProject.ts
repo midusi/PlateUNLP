@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm"
 import { primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { user } from "./auth"
 import { project } from "./project"
-import { user } from "./user"
 
 export const userToProject = sqliteTable(
   "user_to_project",

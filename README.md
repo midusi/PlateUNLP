@@ -23,3 +23,16 @@ pnpm dev      # To start the development server
 docker build . -t plateunlp:latest
 docker run --rm -it -p 3000:3000 plateunlp:latest
 ```
+
+## DB manegement
+
+```bash
+pnpm db:generate ['migration-name']
+pnpm db:migrate 
+```
+
+Delete DB
+
+```bash
+
+```
