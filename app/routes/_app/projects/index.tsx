@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import clsx from "clsx"
+import { Plus } from "lucide-react"
 import { Card, CardContent, CardHeader } from "~/components/ui/card"
 import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getProjectsWithMetrics } from "./-actions/get-projects-with-metrics"
@@ -43,6 +45,23 @@ function RouteComponent() {
             </Link>
           </li>
         ))}
+        <li key="new-project">
+          <Link to="/projects/add" className="flex items-center justify-center">
+            <Card
+              className={clsx(
+                "h-[220px] w-full rounded-2xl border-1 border-dashed",
+                "border-gray-300 hover:bg-white",
+                "bg-gray-50 hover:border-gray-500 ",
+                "shadow-md transition-shadow hover:shadow-lg",
+              )}
+            >
+              <CardContent className="flex h-full w-full flex-col items-center justify-center text-gray-300 hover:text-gray-600 ">
+                <Plus className="h-12 w-12" />
+                <span className="mt-2 font-medium text-sm">New Project</span>
+              </CardContent>
+            </Card>
+          </Link>
+        </li>
       </ul>
     </div>
   )
