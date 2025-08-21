@@ -4,7 +4,7 @@ import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
 import logoReTrOH from "~/assets/logoretroh.png"
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/(auth)")({
   component: RouteComponent,
 })
 
@@ -15,7 +15,7 @@ function RouteComponent() {
         <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4">
           <Outlet />
         </main>
-        <footer className="mt-12 flex items-center justify-evenly border-t p-4">
+        <footer className="mt-10 flex items-center justify-evenly border-t p-4">
           <a
             href="https://weblidi.info.unlp.edu.ar/"
             target="_blank"
