@@ -14,9 +14,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as authSettingsRouteRouteImport } from './routes/(auth)/settings/route'
+import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
 import { Route as AppProjectsIndexRouteImport } from './routes/_app/projects/index'
-import { Route as authSettingsIndexRouteImport } from './routes/(auth)/settings/index'
 import { Route as authRegisterIndexRouteImport } from './routes/(auth)/register/index'
 import { Route as authLoginIndexRouteImport } from './routes/(auth)/login/index'
 import { Route as AppProjectProjectIdRouteRouteImport } from './routes/_app/project.$projectId/route'
@@ -43,20 +42,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authSettingsRouteRoute = authSettingsRouteRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => authRouteRoute,
+const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppProjectsIndexRoute = AppProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
   getParentRoute: () => AppRouteRoute,
-} as any)
-const authSettingsIndexRoute = authSettingsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => authSettingsRouteRoute,
 } as any)
 const authRegisterIndexRoute = authRegisterIndexRouteImport.update({
   id: '/register/',
@@ -117,12 +111,11 @@ const authApiAuthSplatServerRoute = authApiAuthSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof authRouteRouteWithChildren
-  '/settings': typeof authSettingsRouteRouteWithChildren
   '/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
-  '/settings/': typeof authSettingsIndexRoute
   '/projects': typeof AppProjectsIndexRoute
+  '/settings': typeof AppSettingsIndexRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
   '/observation/$observationId/calibrate': typeof AppObservationObservationIdCalibrateIndexRoute
@@ -132,8 +125,8 @@ export interface FileRoutesByTo {
   '/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
-  '/settings': typeof authSettingsIndexRoute
   '/projects': typeof AppProjectsIndexRoute
+  '/settings': typeof AppSettingsIndexRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
   '/observation/$observationId/calibrate': typeof AppObservationObservationIdCalibrateIndexRoute
@@ -143,12 +136,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/_app': typeof AppRouteRouteWithChildren
-  '/(auth)/settings': typeof authSettingsRouteRouteWithChildren
   '/_app/project/$projectId': typeof AppProjectProjectIdRouteRoute
   '/(auth)/login/': typeof authLoginIndexRoute
   '/(auth)/register/': typeof authRegisterIndexRoute
-  '/(auth)/settings/': typeof authSettingsIndexRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
+  '/_app/settings/': typeof AppSettingsIndexRoute
   '/_app/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
   '/_app/plate/$plateId/': typeof AppPlatePlateIdIndexRoute
   '/_app/observation/$observationId/calibrate/': typeof AppObservationObservationIdCalibrateIndexRoute
@@ -157,12 +149,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/settings'
     | '/project/$projectId'
     | '/login'
     | '/register'
-    | '/settings/'
     | '/projects'
+    | '/settings'
     | '/observation/$observationId'
     | '/plate/$plateId'
     | '/observation/$observationId/calibrate'
@@ -172,8 +163,8 @@ export interface FileRouteTypes {
     | '/project/$projectId'
     | '/login'
     | '/register'
-    | '/settings'
     | '/projects'
+    | '/settings'
     | '/observation/$observationId'
     | '/plate/$plateId'
     | '/observation/$observationId/calibrate'
@@ -182,12 +173,11 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/_app'
-    | '/(auth)/settings'
     | '/_app/project/$projectId'
     | '/(auth)/login/'
     | '/(auth)/register/'
-    | '/(auth)/settings/'
     | '/_app/projects/'
+    | '/_app/settings/'
     | '/_app/observation/$observationId/'
     | '/_app/plate/$plateId/'
     | '/_app/observation/$observationId/calibrate/'
@@ -268,12 +258,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/settings': {
-      id: '/(auth)/settings'
+    '/_app/settings/': {
+      id: '/_app/settings/'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof authSettingsRouteRouteImport
-      parentRoute: typeof authRouteRoute
+      preLoaderRoute: typeof AppSettingsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/projects/': {
       id: '/_app/projects/'
@@ -281,13 +271,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/projects'
       preLoaderRoute: typeof AppProjectsIndexRouteImport
       parentRoute: typeof AppRouteRoute
-    }
-    '/(auth)/settings/': {
-      id: '/(auth)/settings/'
-      path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof authSettingsIndexRouteImport
-      parentRoute: typeof authSettingsRouteRoute
     }
     '/(auth)/register/': {
       id: '/(auth)/register/'
@@ -366,25 +349,12 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
-interface authSettingsRouteRouteChildren {
-  authSettingsIndexRoute: typeof authSettingsIndexRoute
-}
-
-const authSettingsRouteRouteChildren: authSettingsRouteRouteChildren = {
-  authSettingsIndexRoute: authSettingsIndexRoute,
-}
-
-const authSettingsRouteRouteWithChildren =
-  authSettingsRouteRoute._addFileChildren(authSettingsRouteRouteChildren)
-
 interface authRouteRouteChildren {
-  authSettingsRouteRoute: typeof authSettingsRouteRouteWithChildren
   authLoginIndexRoute: typeof authLoginIndexRoute
   authRegisterIndexRoute: typeof authRegisterIndexRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
-  authSettingsRouteRoute: authSettingsRouteRouteWithChildren,
   authLoginIndexRoute: authLoginIndexRoute,
   authRegisterIndexRoute: authRegisterIndexRoute,
 }
@@ -396,6 +366,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface AppRouteRouteChildren {
   AppProjectProjectIdRouteRoute: typeof AppProjectProjectIdRouteRoute
   AppProjectsIndexRoute: typeof AppProjectsIndexRoute
+  AppSettingsIndexRoute: typeof AppSettingsIndexRoute
   AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
   AppPlatePlateIdIndexRoute: typeof AppPlatePlateIdIndexRoute
   AppObservationObservationIdCalibrateIndexRoute: typeof AppObservationObservationIdCalibrateIndexRoute
@@ -404,6 +375,7 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProjectProjectIdRouteRoute: AppProjectProjectIdRouteRoute,
   AppProjectsIndexRoute: AppProjectsIndexRoute,
+  AppSettingsIndexRoute: AppSettingsIndexRoute,
   AppObservationObservationIdIndexRoute: AppObservationObservationIdIndexRoute,
   AppPlatePlateIdIndexRoute: AppPlatePlateIdIndexRoute,
   AppObservationObservationIdCalibrateIndexRoute:

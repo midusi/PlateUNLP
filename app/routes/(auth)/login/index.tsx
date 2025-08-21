@@ -44,7 +44,7 @@ function RouteComponent() {
             //callbacks
           },
         )
-        error && notifyError("Failed to log in", error)
+        error && notifyError("Failed to log in", error.message)
         formApi.reset(value)
       } catch (error) {
         notifyError("Failed to log in", error)

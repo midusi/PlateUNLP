@@ -1,18 +1,27 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
 import logoReTrOH from "~/assets/logoretroh.png"
 import { Separator } from "~/components/ui/separator"
+import { authClient } from "~/lib/auth-client"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
-import {authClient} from "~/lib/auth-client"
 
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
+  loader: async () => {
+    const session = await authClient.getSession()
+
+    if (!session.data) {
+      throw redirect({ to: "/login" })
+    }
+    return session
+  },
 })
 
 function RouteComponent() {
-  const userSession = authClient.useSession()
+  const session = authClient.useSession()
+
   return (
     <div className="flex h-svh w-full flex-col">
       <header className="shrink-0 border-b text-sm">
@@ -25,10 +34,10 @@ function RouteComponent() {
             <AppBreadcrumbs />
           </div>
           <Link to="/settings">
-            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
-              {userSession.data?.user.name?.slice(0, 2).toUpperCase()}
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 font-semibold text-white">
+              {session.data?.user.name?.slice(0, 2).toUpperCase()}
             </div>
-          </Link>  
+          </Link>
         </div>
       </header>
       <div className="flex flex-1 flex-col overflow-y-auto bg-accent">
