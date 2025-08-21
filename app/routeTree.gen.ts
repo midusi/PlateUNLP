@@ -22,6 +22,7 @@ import { Route as AppProjectProjectIdRouteRouteImport } from './routes/_app/proj
 import { Route as AppProjectsAddIndexRouteImport } from './routes/_app/projects/add/index'
 import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$plateId/index'
 import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
+import { Route as AppProjectProjectIdSettingsIndexRouteImport } from './routes/_app/project.$projectId/settings/index'
 import { Route as AppObservationObservationIdCalibrateIndexRouteImport } from './routes/_app/observation.$observationId/calibrate/index'
 import { ServerRoute as AppPlatePlateIdPreviewServerRouteImport } from './routes/_app/plate.$plateId/preview'
 import { ServerRoute as AppObservationObservationIdPreviewServerRouteImport } from './routes/_app/observation.$observationId/preview'
@@ -85,6 +86,12 @@ const AppObservationObservationIdIndexRoute =
     path: '/observation/$observationId/',
     getParentRoute: () => AppRouteRoute,
   } as any)
+const AppProjectProjectIdSettingsIndexRoute =
+  AppProjectProjectIdSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => AppProjectProjectIdRouteRoute,
+  } as any)
 const AppObservationObservationIdCalibrateIndexRoute =
   AppObservationObservationIdCalibrateIndexRouteImport.update({
     id: '/observation/$observationId/calibrate/',
@@ -117,7 +124,7 @@ const authApiAuthSplatServerRoute = authApiAuthSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof authRouteRouteWithChildren
-  '/project/$projectId': typeof AppProjectProjectIdRouteRoute
+  '/project/$projectId': typeof AppProjectProjectIdRouteRouteWithChildren
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/projects': typeof AppProjectsIndexRoute
@@ -126,10 +133,11 @@ export interface FileRoutesByFullPath {
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
   '/projects/add': typeof AppProjectsAddIndexRoute
   '/observation/$observationId/calibrate': typeof AppObservationObservationIdCalibrateIndexRoute
+  '/project/$projectId/settings': typeof AppProjectProjectIdSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof authRouteRouteWithChildren
-  '/project/$projectId': typeof AppProjectProjectIdRouteRoute
+  '/project/$projectId': typeof AppProjectProjectIdRouteRouteWithChildren
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/projects': typeof AppProjectsIndexRoute
@@ -138,13 +146,14 @@ export interface FileRoutesByTo {
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
   '/projects/add': typeof AppProjectsAddIndexRoute
   '/observation/$observationId/calibrate': typeof AppObservationObservationIdCalibrateIndexRoute
+  '/project/$projectId/settings': typeof AppProjectProjectIdSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/_app': typeof AppRouteRouteWithChildren
-  '/_app/project/$projectId': typeof AppProjectProjectIdRouteRoute
+  '/_app/project/$projectId': typeof AppProjectProjectIdRouteRouteWithChildren
   '/(auth)/login/': typeof authLoginIndexRoute
   '/(auth)/register/': typeof authRegisterIndexRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/_app/plate/$plateId/': typeof AppPlatePlateIdIndexRoute
   '/_app/projects/add/': typeof AppProjectsAddIndexRoute
   '/_app/observation/$observationId/calibrate/': typeof AppObservationObservationIdCalibrateIndexRoute
+  '/_app/project/$projectId/settings/': typeof AppProjectProjectIdSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/plate/$plateId'
     | '/projects/add'
     | '/observation/$observationId/calibrate'
+    | '/project/$projectId/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/plate/$plateId'
     | '/projects/add'
     | '/observation/$observationId/calibrate'
+    | '/project/$projectId/settings'
   id:
     | '__root__'
     | '/'
@@ -193,6 +205,7 @@ export interface FileRouteTypes {
     | '/_app/plate/$plateId/'
     | '/_app/projects/add/'
     | '/_app/observation/$observationId/calibrate/'
+    | '/_app/project/$projectId/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppObservationObservationIdIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/project/$projectId/settings/': {
+      id: '/_app/project/$projectId/settings/'
+      path: '/settings'
+      fullPath: '/project/$projectId/settings'
+      preLoaderRoute: typeof AppProjectProjectIdSettingsIndexRouteImport
+      parentRoute: typeof AppProjectProjectIdRouteRoute
+    }
     '/_app/observation/$observationId/calibrate/': {
       id: '/_app/observation/$observationId/calibrate/'
       path: '/observation/$observationId/calibrate'
@@ -382,8 +402,23 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
 
+interface AppProjectProjectIdRouteRouteChildren {
+  AppProjectProjectIdSettingsIndexRoute: typeof AppProjectProjectIdSettingsIndexRoute
+}
+
+const AppProjectProjectIdRouteRouteChildren: AppProjectProjectIdRouteRouteChildren =
+  {
+    AppProjectProjectIdSettingsIndexRoute:
+      AppProjectProjectIdSettingsIndexRoute,
+  }
+
+const AppProjectProjectIdRouteRouteWithChildren =
+  AppProjectProjectIdRouteRoute._addFileChildren(
+    AppProjectProjectIdRouteRouteChildren,
+  )
+
 interface AppRouteRouteChildren {
-  AppProjectProjectIdRouteRoute: typeof AppProjectProjectIdRouteRoute
+  AppProjectProjectIdRouteRoute: typeof AppProjectProjectIdRouteRouteWithChildren
   AppProjectsIndexRoute: typeof AppProjectsIndexRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
   AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
@@ -393,7 +428,7 @@ interface AppRouteRouteChildren {
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppProjectProjectIdRouteRoute: AppProjectProjectIdRouteRoute,
+  AppProjectProjectIdRouteRoute: AppProjectProjectIdRouteRouteWithChildren,
   AppProjectsIndexRoute: AppProjectsIndexRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
   AppObservationObservationIdIndexRoute: AppObservationObservationIdIndexRoute,

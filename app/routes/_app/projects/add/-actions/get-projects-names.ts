@@ -1,19 +1,26 @@
 import { queryOptions } from "@tanstack/react-query"
 import { createServerFn } from "@tanstack/react-start"
+import { sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
-import { project } from "~/db/schema"
+import { project, userToProject } from "~/db/schema"
 
 export const getProjectsNames = createServerFn()
   .validator(z.object({ userId: z.string() }))
   .handler(async ({ data }) => {
-    const projectsWithMetrics = await db
+    const { userId } = data
+    const projectsNames = await db
       .select({
         id: project.id,
         name: project.name,
       })
       .from(project)
-    return projectsWithMetrics
+      .innerJoin(
+        userToProject,
+        sql`${userToProject.projectId} = ${project.id} AND ${userToProject.userId} = ${userId}`,
+      )
+
+    return projectsNames
   })
 
 export const getProjectsNamesQueryOptions = (userId: string) =>
