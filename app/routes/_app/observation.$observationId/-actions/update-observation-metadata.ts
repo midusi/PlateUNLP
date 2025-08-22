@@ -53,12 +53,8 @@ export const updateObservationMetadata = createServerFn({ method: "POST" })
         "HA?": data.metadata.HA.isKnown,
         AIRMASS: data.metadata.AIRMASS.value,
         "AIRMASS?": data.metadata.AIRMASS.isKnown,
-        GAIN: data.metadata.GAIN.value,
-        "GAIN?": data.metadata.GAIN.isKnown,
         EXPTIME: data.metadata.EXPTIME.value,
         "EXPTIME?": data.metadata.EXPTIME.isKnown,
-        DETECTOR: data.metadata.DETECTOR.value,
-        "DETECTOR?": data.metadata.DETECTOR.isKnown,
         IMAGETYP: data.metadata.IMAGETYP.value,
         "IMAGETYP?": data.metadata.IMAGETYP.isKnown,
       })

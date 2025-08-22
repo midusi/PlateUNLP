@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
@@ -12,6 +12,9 @@ export const Route = createFileRoute("/(auth)/register/")({
 })
 
 function RouteComponent() {
+
+  const navigate = useNavigate()
+
   const defaultValues: z.output<typeof LogUpFieldsSchema> = {
     email: "",
     password: "",
@@ -38,6 +41,8 @@ function RouteComponent() {
               //show loading
             },
             onSuccess: (ctx) => {
+              navigate({ to: "/login" })
+              //notifyError("Succes Sign Up")
               //redirect to the dashboard or sign in page
             },
             onError: (ctx) => {
@@ -46,9 +51,9 @@ function RouteComponent() {
             },
           },
         )
-        formApi.reset(value)
+        //formApi.reset(value)
       } catch (error) {
-        notifyError("Failed to log in", error)
+        notifyError("Failed to Sign Up", error)
       }
     },
   })
@@ -61,10 +66,10 @@ function RouteComponent() {
         </CardHeader>
         <CardContent className="m-4 flex flex-col gap-4">
           <form.AppField name="email">
-            {(field) => <field.SettingsField label="Email" placeholder="" />}
+            {(field) => <field.TextField label="Email" placeholder="" />}
           </form.AppField>
           <form.AppField name="name">
-            {(field) => <field.SettingsField label="Username" placeholder="" />}
+            {(field) => <field.TextField label="Username" placeholder="" />}
           </form.AppField>
           <form.AppField name="password">
             {(field) => <field.PasswordField label="Password" placeholder="" />}
