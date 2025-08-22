@@ -6,6 +6,7 @@ import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
 import { notifyError } from "~/lib/notifications"
 import { LogUpFieldsSchema } from "~/types/auth"
+import defaultUserImage from "~/assets/avatar.png"
 
 export const Route = createFileRoute("/(auth)/register/")({
   component: RouteComponent,
@@ -33,6 +34,7 @@ function RouteComponent() {
           {
             email, // user email address
             password, // user password -> min 8 characters by default
+            image: defaultUserImage,
             name, // user display name
             callbackURL: "/login", // A URL to redirect to after the user verifies their email (optional)
           },

@@ -8,6 +8,9 @@ import { notifyError } from "~/lib/notifications"
 import { NewProyectSchema } from "~/types/proyect"
 import { addProject } from "./-actions/add-project"
 import { getProjectsNames } from "./-actions/get-projects-names"
+import { RoleList } from "./-components/RoleList"
+import { Suspense } from "react"
+import { getUsers } from "./-actions/get-users"
 
 export const Route = createFileRoute("/_app/projects/add/")({
   component: RouteComponent,
@@ -15,15 +18,17 @@ export const Route = createFileRoute("/_app/projects/add/")({
     const session = await authClient.getSession()!
     const userId = session.data?.user.id!
     const projects = await getProjectsNames({ data: { userId: userId } })
+    const other_users = (await getUsers({data:{}})).filter(user => user.id !== userId)
     return {
       session: session,
       projects: projects,
+      other_users: other_users,
     }
   },
 })
 
 function RouteComponent() {
-  const { session, projects } = Route.useLoaderData()
+  const { session, projects, other_users } = Route.useLoaderData()
   const navigate = useNavigate()
 
   const defaultValues: z.output<typeof NewProyectSchema> = {
@@ -49,9 +54,15 @@ function RouteComponent() {
   return (
     <div className="flex w-full flex-col">
       <h1 className="mb-6 font-bold text-2xl">New Project</h1>
-      <form.AppField name="name">
-        {(field) => <field.TextField label="Project name" placeholder="New proyect" />}
-      </form.AppField>
+      <div className="flex flex-col gap-4">
+        <form.AppField name="name">
+          {(field) => <field.TextField label="Project name" placeholder="New proyect" />}
+        </form.AppField>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <RoleList title="Editors" role="editor" users={other_users}/>
+          <RoleList title="Viewers" role="viewer" users={other_users}/>          
+        </div>
+      </div>
       <form.Subscribe
         selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
       >
