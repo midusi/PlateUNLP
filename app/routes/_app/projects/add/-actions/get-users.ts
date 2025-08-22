@@ -7,8 +7,7 @@ import { user } from "~/db/schema"
 
 export const getUsers = createServerFn()
   .validator(z.object({}))
-  .handler(async ({ data:_ }) => {   
-    console.log(1) 
+  .handler(async ({ data: _ }) => {
     const users = await db
       .select({
         id: user.id,
@@ -17,12 +16,11 @@ export const getUsers = createServerFn()
         email: user.email,
       })
       .from(user)
-console.log(2) 
     return users
   })
 
 export const getUsersQueryOptions = (userId: string) =>
   queryOptions({
     queryKey: ["get", "users"],
-    queryFn: () => getUsers({ data: { userId } }),
+    queryFn: () => getUsers({ data: {} }),
   })
