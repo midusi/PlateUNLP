@@ -1,4 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router"
+import { Settings } from "lucide-react"
+import defaultImage from "~/assets/avatar.png"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
@@ -11,7 +13,6 @@ export const Route = createFileRoute("/_app")({
   component: RouteComponent,
   loader: async () => {
     const session = await authClient.getSession()
-
     if (!session.data) {
       throw redirect({ to: "/login" })
     }
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_app")({
 
 function RouteComponent() {
   const { session } = Route.useLoaderData()
+  const userInfo = session.data?.user!
   const logos = [
     {
       href: "https://weblidi.info.unlp.edu.ar/",
@@ -55,11 +57,23 @@ function RouteComponent() {
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
             <AppBreadcrumbs />
           </div>
-          <Link to="/settings">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 font-semibold text-white">
-              {session.data?.user.name?.slice(0, 2).toUpperCase()}
+
+          <div className="flex flex-row items-center gap-4">
+            {/* <img
+              src={userInfo.image ? userInfo.image : defaultImage}
+              alt={userInfo.name}
+              className="h-8 w-8 rounded-full border border-gray-500 bg-blue-100 object-cover"
+            /> */}
+            <div className="flex w-full flex-col ">
+              <div className="flex flex-row justify-between">
+                <label className="flex w-full justify-start text-gray-500">{userInfo.name}</label>
+              </div>
+              <label className="flex justify-start text-gray-400">{userInfo.email}</label>
             </div>
-          </Link>
+            <Link to="/settings">
+              <Settings className="baorder flex h-full items-center" size={22} strokeWidth={1} />
+            </Link>
+          </div>
         </div>
       </header>
       <div className="flex flex-1 flex-col overflow-y-auto bg-accent">
