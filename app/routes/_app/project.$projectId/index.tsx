@@ -1,52 +1,36 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router"
-import {
-  type ColumnFiltersState,
-  createColumnHelper,
-  type ExpandedState,
-  flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  type SortingState,
-  useReactTable,
-  type VisibilityState,
-} from "@tanstack/react-table"
-import { useState } from "react"
-import { Button } from "~/components/ui/button"
-import { Checkbox } from "~/components/ui/checkbox"
-import { Input } from "~/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table"
+import clsx from "clsx"
+import { Plus, Settings } from "lucide-react"
+import { Card, CardContent, CardHeader } from "~/components/ui/card"
+import { authClient } from "~/lib/auth-client"
 import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getProject } from "./-actions/get-project"
+import { Checkbox } from "~/components/ui/checkbox"
+import { ColumnFiltersState, createColumnHelper, ExpandedState, flexRender, getCoreRowModel, getExpandedRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState } from "@tanstack/react-table"
+import { Button } from "~/components/ui/button"
+import { useState } from "react"
 import { DeletePlates } from "./-components/DeletePlates"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table"
 import { UploadPlate } from "./-components/UploadPlate"
+import { Input } from "~/components/ui/input"
 
-export const Route = createFileRoute("/_app/project/$projectId")({
+export const Route = createFileRoute("/_app/project/$projectId/")({
   component: RouteComponent,
   loader: async ({ params }) => {
-    const project = await getProject({ data: { projectId: params.projectId } })
-    if (!project) throw notFound()
-
-    return {
-      breadcrumbs: [
-        { title: "Projects", link: { to: "/projects" } },
-        {
-          title: project.name,
-          link: { to: "/project/$projectId", params: { projectId: project.id } },
-        },
-      ] satisfies Breadcrumbs,
-      project,
-    }
-  },
+      const project = await getProject({ data: { projectId: params.projectId } })
+      if (!project) throw notFound()
+  
+      return {
+        breadcrumbs: [
+          { title: "Projects", link: { to: "/projects" } },
+          {
+            title: project.name,
+            link: { to: "/project/$projectId", params: { projectId: project.id } },
+          },
+        ] satisfies Breadcrumbs,
+        project,
+      }
+    },
 })
 
 type Plate = NonNullable<Awaited<ReturnType<typeof getProject>>>["plates"][number]
@@ -144,8 +128,13 @@ function RouteComponent() {
 
   return (
     <div className="w-full">
-      <h1 className="font-medium text-xl">{project.name}</h1>
-      <div className="flex items-center py-4">
+      <div className="flex flex-row gap-4">
+        <h1 className="font-medium text-xl">{project.name}</h1>
+        <Link to="/project/$projectId/settings" params={{projectId:project.id}}>
+          <Settings className="baorder flex h-full items-center" size={22} strokeWidth={1} />
+        </Link>
+      </div>
+      <div className="flex items-center py-4 flex-row">
         <Input
           placeholder="Find plate..."
           value={(table.getColumn("PLATE-N")?.getFilterValue() as string) ?? ""}

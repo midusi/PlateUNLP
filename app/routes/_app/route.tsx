@@ -1,6 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router"
 import { Settings } from "lucide-react"
-import defaultImage from "~/assets/avatar.png"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
