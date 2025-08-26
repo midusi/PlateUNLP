@@ -17,6 +17,9 @@ export const user = sqliteTable("user", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
+  role: text("role", { enum: ["admin", "user"] })
+    .default("user")
+    .notNull(),
 })
 
 export const userRelations = relations(user, ({ many }) => ({

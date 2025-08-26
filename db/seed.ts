@@ -1,10 +1,11 @@
 import "dotenv/config"
 
+import { eq } from "drizzle-orm"
 import { reset } from "drizzle-seed"
 import pc from "picocolors"
 import { z } from "zod"
 import { getJulianDate, getModifiedJulianDate } from "~/lib/astronomical/datetime"
-import { hashPassword } from "~/lib/auth/password"
+import { auth } from "~/lib/auth"
 import { db } from "."
 import * as schema from "./schema"
 
@@ -147,17 +148,18 @@ async function seedIERSBulletinA() {
   console.log(pc.white(`✓ Inserted ${pc.bold(total)} Bulletin A records`))
 }
 
-async function createUser(name: string, email: string) {
-  await db.insert(schema.user).values({
-    name,
-    email,
-  })
+async function createUser(name: string, email: string, password: string, role: string = "user") {
+  /** 1. Sign up the user via the auth client */
+  await auth.api.signUpEmail({ body: { email, password, name } })
 
-  console.log(
-    pc.white(
-      `✓ Created user ${pc.cyan(name)} (${pc.cyan(email)})}`,
-    ),
-  )
+  /** 2. Find the newly created user and update their admin flag */
+  if (role === "admin") {
+    await db
+      .update(schema.user)
+      .set({ role: "admin" as const })
+      .where(eq(schema.user.email, email))
+  }
+  console.log(pc.white(`✓ Created user ${pc.cyan(name)} (${pc.cyan(email)})}`))
 }
 
 async function createProject(name: string, ownerEmail: string) {
@@ -165,7 +167,9 @@ async function createProject(name: string, ownerEmail: string) {
     .insert(schema.project)
     .values({ name })
     .returning({ id: schema.project.id })
+
   const user = await db.query.user.findFirst({ where: (t, { eq }) => eq(t.email, ownerEmail) })
+
   await db.insert(schema.userToProject).values({ userId: user!.id, projectId: id, role: "owner" })
 
   console.log(pc.white(`✓ Created project ${pc.cyan(name)} (${pc.cyan(id)})`))
@@ -185,11 +189,12 @@ async function main() {
   await seedIERSBulletinA()
 
   console.log(pc.gray("❖ Creating users..."))
-  await createUser("Chidi Anagonye", "canagonye@saintjohns.edu.au")
-  await createUser("Simone Garnett", "sgarnett@saintjohns.edu.au")
+  await createUser("Admin", "admin@admin.com", "adminadmin", "admin")
+  // await createUser("Chidi Anagonye", "canagonye@saintjohns.edu.au", "chidi", false)
+  // await createUser("Simone Garnett", "sgarnett@saintjohns.edu.au", "simone", false)
 
   console.log(pc.gray("❖ Creating projects..."))
-  await createProject("Observatorio Astronómico de La Plata", "canagonye@saintjohns.edu.au")
+  await createProject("Observatorio Astronómico de La Plata", "admin@admin.com")
 }
 
 main()

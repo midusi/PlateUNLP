@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1755025800735,
+      "when": 1756242947612,
       "tag": "0000_initial",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1755217281455,
-      "tag": "0001_burly_microbe",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1755624145639,
-      "tag": "0002_auth",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1755633765744,
-      "tag": "0003_auth",
       "breakpoints": true
     }
   ]
