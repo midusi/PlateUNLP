@@ -1,19 +1,18 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
+import defaultUserImage from "~/assets/avatar.png"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
 import { notifyError } from "~/lib/notifications"
 import { LogUpFieldsSchema } from "~/types/auth"
-import defaultUserImage from "~/assets/avatar.png"
 
 export const Route = createFileRoute("/(auth)/register/")({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-
   const navigate = useNavigate()
 
   const defaultValues: z.output<typeof LogUpFieldsSchema> = {

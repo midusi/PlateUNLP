@@ -1,9 +1,4 @@
-import {
-	createFileRoute,
-	notFound,
-	useNavigate,
-	useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import type z from "zod";
 import { Button } from "~/components/ui/button";
 import { useAppForm } from "~/hooks/use-app-form";
@@ -79,7 +74,6 @@ function RouteComponent() {
 		viewers: project.viewers as string[],
 	};
 
-	const router = useRouter();
 	const form = useAppForm({
 		defaultValues,
 		validators: { onChange: EditProyectSchema },

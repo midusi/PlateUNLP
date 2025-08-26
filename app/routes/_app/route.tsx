@@ -1,11 +1,14 @@
-import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router"
-import { Settings } from "lucide-react"
+import { useMutation } from "@tanstack/react-query"
+import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router"
+import { LogOut, Settings } from "lucide-react"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
 import logoReTrOH from "~/assets/logoretroh.png"
+import { Button } from "~/components/ui/button"
 import { Separator } from "~/components/ui/separator"
 import { authClient } from "~/lib/auth-client"
+import { notifyError } from "~/lib/notifications"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
 
 export const Route = createFileRoute("/_app")({
@@ -21,6 +24,7 @@ export const Route = createFileRoute("/_app")({
 
 function RouteComponent() {
   const { session } = Route.useLoaderData()
+  const navigate = useNavigate()
   const userInfo = session.data?.user!
   const logos = [
     {
@@ -44,6 +48,22 @@ function RouteComponent() {
       alt: "Logo del Instituto de Astrofisica de La Plata (CONICET-UNLP)",
     },
   ]
+
+  const { mutate: signOut, isPending: _isSignOuting } = useMutation({
+    mutationFn: async () => {
+      try {
+        const _ = await authClient.signOut({
+          fetchOptions: {
+            onSuccess: () => {
+              navigate({ to: "/login" })
+            },
+          },
+        })
+      } catch (error) {
+        notifyError("Failed to sign out", error)
+      }
+    },
+  })
 
   return (
     <div className="flex h-svh w-full flex-col">
@@ -70,8 +90,20 @@ function RouteComponent() {
               <label className="flex justify-start text-gray-400">{userInfo.email}</label>
             </div>
             <Link to="/settings">
-              <Settings className="baorder flex h-full items-center" size={22} strokeWidth={1} />
+              <Button
+                variant="outline"
+                className="m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none"
+              >
+                <Settings className="flex h-full items-center" size={22} strokeWidth={1.5} />
+              </Button>
             </Link>
+            <Button
+              onClick={() => signOut()}
+              variant="outline"
+              className="m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none"
+            >
+              <LogOut size={22} strokeWidth={1.5} />
+            </Button>
           </div>
         </div>
       </header>
