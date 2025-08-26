@@ -10,22 +10,22 @@ export const getProjectWithAuthLists = createServerFn()
       where: (t, { eq }) => eq(t.id, data.projectId),
       with: {
         projectToUsers: {
-            columns: {
-                userId: true,
-                role: true
-            }
-        }
+          columns: {
+            userId: true,
+            role: true,
+          },
+        },
       },
     })
 
-    const editors = project?.projectToUsers.filter(u => u.role === "editor").map(u => u.userId)
-    const viewers = project?.projectToUsers.filter(u => u.role === "viewer").map(u => u.userId)
+    const editors = project?.projectToUsers.filter((u) => u.role === "editor").map((u) => u.userId)
+    const viewers = project?.projectToUsers.filter((u) => u.role === "viewer").map((u) => u.userId)
 
     return {
-        id: project?.id,
-        name: project?.name,
-        editors,
-        viewers,
+      id: project?.id,
+      name: project?.name,
+      editors,
+      viewers,
     }
   })
 

@@ -18,6 +18,7 @@ type SelectUsersFieldProps = {
     email: string
     image: string
   }[]
+  initialsIds?: string[]
 } & Pick<React.ComponentProps<typeof Input>, "placeholder">
 
 export function SelectUsersField({ className, label, description, users }: SelectUsersFieldProps) {

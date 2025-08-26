@@ -15,7 +15,7 @@ export const NewProyectSchema = z
     path: ["name"],
   })
 
- /**
+/**
  * This schema defines the fields for edit proyect form.
  */
 export const EditProyectSchema = z
@@ -23,12 +23,12 @@ export const EditProyectSchema = z
     oldName: z.string().min(1),
     oldEditors: z.array(z.string()),
     oldViewers: z.array(z.string()),
-    existingProjectsNames: z.array(z.string()),
+    otherProjectsNames: z.array(z.string()),
     name: z.string().min(1),
     editors: z.array(z.string()),
     viewers: z.array(z.string()),
   })
-  .refine((data) => !data.existingProjectsNames.includes(data.name), {
+  .refine((data) => !data.otherProjectsNames.includes(data.name), {
     message: "Project name already exists",
     path: ["name"],
   })
@@ -40,5 +40,5 @@ export const EditProyectSchema = z
     {
       message: "No changes detected",
       path: ["name"], // Puedes asociar el mensaje de error a un campo específico
-    }
-  );
+    },
+  )

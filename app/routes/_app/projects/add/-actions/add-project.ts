@@ -20,11 +20,18 @@ export const addProject = createServerFn({ method: "POST" })
       name: project.name,
     })
 
+    /** Asegurar que las de viewers no repita los usuarios editors */
+    const sanitizedViewers = viewers.filter((userId) => !editors.includes(userId))
+
     /** Listado de relaciones con usuarios a agregar */
     const roles: { userId: string; projectId: string; role: "owner" | "editor" | "viewer" }[] = [
       { userId, projectId: newProject.id, role: "owner" },
       ...editors.map((id) => ({ userId: id, projectId: newProject.id, role: "editor" as const })),
-      ...viewers.map((id) => ({ userId: id, projectId: newProject.id, role: "viewer" as const })),
+      ...sanitizedViewers.map((id) => ({
+        userId: id,
+        projectId: newProject.id,
+        role: "viewer" as const,
+      })),
     ]
 
     await db.insert(userToProject).values(roles)
