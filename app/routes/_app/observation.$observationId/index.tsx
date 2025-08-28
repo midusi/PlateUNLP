@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { spectrum } from "db/schema/spectrum"
+import { Button } from "~/components/ui/button"
 import { fetchGrayscaleImage } from "~/lib/image"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
@@ -68,13 +69,14 @@ function RouteComponent() {
         initialSpectrums={spectrums}
         observationTensor={rawImage}
       />
-      <div className="flex w-full items-center justify-center">
+
+      <div className="flex w-full justify-center">
         <Link
           to="/observation/$observationId/calibrate"
           params={{ observationId: observationId }}
-          className="m-4 flex w-20 justify-center rounded-2xl border border-2 bg-amber-100"
+          className="m-4 flex w-20 justify-center "
         >
-          Calibrar
+          <Button className="flex justify-center">Calibrate</Button>
         </Link>
       </div>
     </div>

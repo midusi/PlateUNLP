@@ -18,14 +18,12 @@ export const getProjectWithAuthLists = createServerFn()
       },
     })
 
-    const editors = project?.projectToUsers.filter((u) => u.role === "editor").map((u) => u.userId)
-    const viewers = project?.projectToUsers.filter((u) => u.role === "viewer").map((u) => u.userId)
+    const usersRoles = project?.projectToUsers.map((u) => ({ id: u.userId, role: u.role }))
 
     return {
       id: project?.id,
       name: project?.name,
-      editors,
-      viewers,
+      permissions: usersRoles,
     }
   })
 

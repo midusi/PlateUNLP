@@ -7,8 +7,9 @@ export const NewProyectSchema = z
   .object({
     name: z.string().min(1),
     existingProjectsNames: z.array(z.string()),
-    editors: z.array(z.string()),
-    viewers: z.array(z.string()),
+    usersRoles: z.array(
+      z.object({ id: z.string().min(1), role: z.enum(["owner", "editor", "viewer"]) }),
+    ),
   })
   .refine((data) => !data.existingProjectsNames.includes(data.name), {
     message: "Project name already exists",
@@ -21,12 +22,14 @@ export const NewProyectSchema = z
 export const EditProyectSchema = z
   .object({
     oldName: z.string().min(1),
-    oldEditors: z.array(z.string()),
-    oldViewers: z.array(z.string()),
+    oldUsersRoles: z.array(
+      z.object({ id: z.string().min(1), role: z.enum(["owner", "editor", "viewer"]) }),
+    ),
     otherProjectsNames: z.array(z.string()),
     name: z.string().min(1),
-    editors: z.array(z.string()),
-    viewers: z.array(z.string()),
+    usersRoles: z.array(
+      z.object({ id: z.string().min(1), role: z.enum(["owner", "editor", "viewer"]) }),
+    ),
   })
   .refine((data) => !data.otherProjectsNames.includes(data.name), {
     message: "Project name already exists",
@@ -35,8 +38,7 @@ export const EditProyectSchema = z
   .refine(
     (data) =>
       data.name !== data.oldName ||
-      JSON.stringify(data.editors.sort()) !== JSON.stringify(data.oldEditors.sort()) ||
-      JSON.stringify(data.viewers.sort()) !== JSON.stringify(data.oldViewers.sort()),
+      JSON.stringify(data.usersRoles.sort()) !== JSON.stringify(data.oldUsersRoles.sort()),
     {
       message: "No changes detected",
       path: ["name"], // Puedes asociar el mensaje de error a un campo específico

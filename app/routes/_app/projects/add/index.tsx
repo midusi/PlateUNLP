@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_app/projects/add/")({
     const session = await authClient.getSession()
     const userId = session.data?.user.id as string
     const projects = await getProjectsNames({ data: { userId: userId } })
-    const other_users = (await getUsers({ data: {} })).filter((user) => user.id !== userId) as {
+    const users = (await getUsers({ data: {} })) as {
       id: string
       name: string
       email: string
@@ -32,20 +32,20 @@ export const Route = createFileRoute("/_app/projects/add/")({
       ] satisfies Breadcrumbs,
       session: session,
       projects: projects,
-      other_users: other_users,
+      users: users,
     }
   },
 })
 
 function RouteComponent() {
-  const { session, projects, other_users } = Route.useLoaderData()
+  const { session, projects, users } = Route.useLoaderData()
   const navigate = useNavigate()
 
+  const userId = session.data?.user.id!
   const defaultValues: z.output<typeof NewProyectSchema> = {
     name: "",
     existingProjectsNames: projects.map((p) => p.name),
-    editors: [],
-    viewers: [],
+    usersRoles: [{ id: userId, role: "owner" }],
   }
 
   const form = useAppForm({
@@ -55,12 +55,12 @@ function RouteComponent() {
       try {
         const userId = session.data?.user.id as string
         const name = value.name
-        const editors = value.editors
-        const viewers = value.viewers
+        const editors = value.usersRoles.filter((u) => u.role === "editor").map((u) => u.id)
+        const viewers = value.usersRoles.filter((u) => u.role === "viewer").map((u) => u.id)
         const _project = await addProject({
           data: { userId, name, editors, viewers },
         })
-        navigate({ to: "/projects" })
+        //navigate({ to: "/projects" })
       } catch (error) {
         notifyError("Failed to create new project", error)
       }
@@ -75,11 +75,14 @@ function RouteComponent() {
           {(field) => <field.TextField label="Project name" placeholder="New proyect" />}
         </form.AppField>
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-          <form.AppField name="editors">
-            {(field) => <field.SelectUsersField label="Editors" users={other_users} />}
-          </form.AppField>
-          <form.AppField name="viewers">
-            {(field) => <field.SelectUsersField label="Viewers" users={other_users} />}
+          <form.AppField name="usersRoles">
+            {(field) => (
+              <field.SelectUsersField
+                ownerId={userId as string}
+                label="Permissions"
+                users={users}
+              />
+            )}
           </form.AppField>
         </div>
       </div>
