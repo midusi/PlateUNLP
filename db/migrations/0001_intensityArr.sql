@@ -1,0 +1,1 @@
+ALTER TABLE `spectrum` ADD `intensity_arr` text DEFAULT '[]' NOT NULL;

@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { idType } from "../utils"
 import { observation } from "./observation"
@@ -17,6 +17,11 @@ export const spectrum = sqliteTable("spectrum", {
   // params for extraction
   countMediasPoints: integer().notNull().default(5), // cantidad de puntos intermedios
   apertureCoefficient: real().notNull().default(1.0), // coeficiente de tamaño de apertura
+  // extracted
+  intensityArr: text("intensityArr", { mode: "json" })
+    .notNull()
+    .$type<number[]>()
+    .default(sql`'[]'`),
 })
 
 export const spectrumRelations = relations(spectrum, ({ one }) => ({
