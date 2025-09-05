@@ -32,7 +32,6 @@ function RouteComponent() {
           {
             email,
             password,
-            /** A URL to redirect to after the user verifies their email (optional) */
             callbackURL: "/projects",
             /**
              * remember the user session after the browser is closed.
@@ -45,7 +44,6 @@ function RouteComponent() {
           },
         )
         error && notifyError("Failed to log in", error.message)
-        formApi.reset(value)
       } catch (error) {
         notifyError("Failed to log in", error)
       }
@@ -81,7 +79,10 @@ function RouteComponent() {
   return (
     <div className="flex h-full w-full max-w-6xl items-center justify-center">
       <Card className="w-[400px] overflow-hidden">
-        <form onSubmit={form.handleSubmit}>
+        <form onSubmit={(e)=> {
+          e.preventDefault()  
+          form.handleSubmit(e)
+        }} >
           <CardHeader className="m-4 flex justify-center">
             <h1 className="text-2xl">Sign In</h1>
           </CardHeader>
@@ -100,9 +101,9 @@ function RouteComponent() {
               >
                 {([isValid, isSubmitting, isDirty]) => (
                   <Button
+                    type="submit"
                     disabled={!isValid}
                     className="w-48 border "
-                    onClick={form.handleSubmit}
                   >
                     {isSubmitting ? (
                       <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />

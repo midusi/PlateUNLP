@@ -50,7 +50,7 @@ function RouteComponent() {
             name,
           })
         }
-        formApi.reset(value)
+        notifyError("Succes to update user information")
         //session.refetch()
       } catch (error) {
         notifyError("Failed to update user information", error)
@@ -61,56 +61,60 @@ function RouteComponent() {
   return (
     <div className="mt-10 flex h-full w-full max-w-6xl items-center justify-center">
       <Card className="w-[400px] overflow-hidden">
-        <CardHeader className="m-4 flex flex-col items-center justify-center">
-          <h1 className="text-2xl">Your Profile</h1>
-          <p className="text-gray-600 text-sm">Manage your profile information</p>
-        </CardHeader>
-        <CardContent className="m-4 flex flex-col gap-4">
-          <form.AppField name="email">
-            {(field) => (
-              <Field>
-                <FieldLabel>Email</FieldLabel>
-                <Input name={field.name} value={field.state.value} disabled />
-              </Field>
-            )}
-          </form.AppField>
-          <form.AppField name="name">
-            {(field) => <field.SettingsField label="Username" />}
-          </form.AppField>
-          <Field>
-            <FieldLabel>Password</FieldLabel>
-            <Button
-              className="w-full border bg-gray-300 hover:bg-gray-400"
-              onClick={() => setChangePasswordOpen(true)}
-            >
-              Change Password
-            </Button>
-          </Field>
-          {isChangePasswordOpen && (
-            <ChangePasswordModal onClose={() => setChangePasswordOpen(false)} />
-          )}
-        </CardContent>
-        <CardFooter className="m-4 flex flex-col justify-center">
-          {/* <Button onClick={()=>logUp("santiagoandresponteahon@hotmail.com", "12345678", "santiago")}>Registrar Usuario</Button> */}
-          <form.Subscribe
-            selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
-          >
-            {([isValid, isSubmitting, isDirty]) => (
+        <form onSubmit={(e)=> {
+          e.preventDefault()  
+          form.handleSubmit(e)
+        }} >
+          <CardHeader className="m-4 flex flex-col items-center justify-center">
+            <h1 className="text-2xl">Your Profile</h1>
+            <p className="text-gray-600 text-sm">Manage your profile information</p>
+          </CardHeader>
+          <CardContent className="m-4 flex flex-col gap-4">
+            <form.AppField name="email">
+              {(field) => (
+                <Field>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input name={field.name} value={field.state.value} disabled />
+                </Field>
+              )}
+            </form.AppField>
+            <form.AppField name="name">
+              {(field) => <field.SettingsField label="Username" />}
+            </form.AppField>
+            <Field>
+              <FieldLabel>Password</FieldLabel>
               <Button
-                //logIn("santiagoandresponteahon@hotmail.com", "12345678")
-                disabled={!isValid}
-                className="w-full border"
-                onClick={form.handleSubmit}
+                type="button"
+                className="w-full border bg-gray-300 hover:bg-gray-400"
+                onClick={() => setChangePasswordOpen(true)}
               >
-                {isSubmitting ? (
-                  <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
-                ) : (
-                  <span>Save Changes</span>
-                )}
+                Change Password
               </Button>
+            </Field>
+            {isChangePasswordOpen && (
+              <ChangePasswordModal onClose={() => setChangePasswordOpen(false)} />
             )}
-          </form.Subscribe>
-        </CardFooter>
+          </CardContent>
+          <CardFooter className="pt-4 flex flex-col justify-center">
+            <form.Subscribe
+              selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+            >
+              {([isValid, isSubmitting, isDirty]) => (
+                <Button
+                  type="submit"
+                  disabled={!isValid}
+                  className="w-48 border"
+                >
+                  {isSubmitting ? (
+                    <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
+                  ) : (
+                    <span>Save Changes</span>
+                  )}
+                </Button>
+              )}
+            </form.Subscribe>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   )

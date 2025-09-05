@@ -62,48 +62,53 @@ function RouteComponent() {
   return (
     <div className="flex h-full w-full max-w-6xl items-center justify-center">
       <Card className="w-[400px] overflow-hidden">
-        <CardHeader className="m-4 flex justify-center">
-          <h1 className="text-2xl">Sign Up</h1>
-        </CardHeader>
-        <CardContent className="m-4 flex flex-col gap-4">
-          <form.AppField name="email">
-            {(field) => <field.TextField label="Email" placeholder="" />}
-          </form.AppField>
-          <form.AppField name="name">
-            {(field) => <field.TextField label="Username" placeholder="" />}
-          </form.AppField>
-          <form.AppField name="password">
-            {(field) => <field.PasswordField label="Password" placeholder="" />}
-          </form.AppField>
-        </CardContent>
-        <CardFooter className="m-4 flex flex-col justify-center">
-          {/* <Button onClick={()=>logUp("santiagoandresponteahon@hotmail.com", "12345678", "santiago")}>Registrar Usuario</Button> */}
-          <form.Subscribe
-            selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
-          >
-            {([isValid, isSubmitting, isDirty]) => (
-              <Button
-                //logIn("santiagoandresponteahon@hotmail.com", "12345678")
-                disabled={!isValid}
-                className="w-full border"
-                onClick={form.handleSubmit}
-              >
-                {isSubmitting ? (
-                  <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
-                ) : (
-                  <span>Sign Up</span>
-                )}
-              </Button>
-            )}
-          </form.Subscribe>
+        <form onSubmit={(e)=> {
+          e.preventDefault()  
+          form.handleSubmit(e)
+        }} >
+          <CardHeader className="m-4 flex justify-center">
+            <h1 className="text-2xl">Sign Up</h1>
+          </CardHeader>
+          <CardContent className="m-4 flex flex-col gap-4">
+            <form.AppField name="email">
+              {(field) => <field.TextField label="Email" placeholder="" />}
+            </form.AppField>
+            <form.AppField name="name">
+              {(field) => <field.TextField label="Username" placeholder="" />}
+            </form.AppField>
+            <form.AppField name="password">
+              {(field) => <field.PasswordField label="Password" placeholder="" />}
+            </form.AppField>
+          </CardContent>
+          <CardFooter className="m-4 flex flex-col justify-center">
+            {/* <Button onClick={()=>logUp("santiagoandresponteahon@hotmail.com", "12345678", "santiago")}>Registrar Usuario</Button> */}
+            <form.Subscribe
+              selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+            >
+              {([isValid, isSubmitting, isDirty]) => (
+                <Button
+                  //logIn("santiagoandresponteahon@hotmail.com", "12345678")
+                  disabled={!isValid}
+                  className="mt-4 w-48 border"
+                  type="submit"
+                >
+                  {isSubmitting ? (
+                    <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
+                  ) : (
+                    <span>Sign Up</span>
+                  )}
+                </Button>
+              )}
+            </form.Subscribe>
 
-          <div className="p-2 text-gray-600 text-sm">
-            Already have an account?{" "}
-            <a href="/login" className="font-medium hover:underline">
-              Sign in
-            </a>
-          </div>
-        </CardFooter>
+            <div className="p-2 text-gray-600 text-sm">
+              Already have an account?{" "}
+              <a href="/login" className="font-medium hover:underline">
+                Sign in
+              </a>
+            </div>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   )
