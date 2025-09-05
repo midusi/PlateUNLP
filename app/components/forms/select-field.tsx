@@ -72,9 +72,9 @@ export function SelectField({ className, label, description, options }: SelectFi
         >
           <Combobox.Root
             items={filteredItems}
-            selectionMode="single"
-            selectedValue={selectedValue}
-            onSelectedValueChange={(nextValue) => {
+            value={selectedValue}
+            onValueChange={(nextValue) => {
+              if(!nextValue) return
               field.handleChange(nextValue.value)
               setPopoverOpen(false)
             }}

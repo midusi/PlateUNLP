@@ -96,9 +96,9 @@ export function SelectObservatory({
       >
         <Combobox.Root
           items={filteredItems}
-          selectionMode="single"
-          selectedValue={selectedValue}
-          onSelectedValueChange={(nextValue) => {
+          value={selectedValue}
+          onValueChange={(nextValue) => {
+            if(!nextValue) return
             setValue(nextValue.id)
             setPopoverOpen(false)
           }}
