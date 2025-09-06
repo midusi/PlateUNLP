@@ -18,6 +18,9 @@ export const observation = sqliteTable(
     imageTop: integer().notNull(), // offset from the top of the plate image
     imageWidth: integer().notNull(), // width of the observation image
     imageHeight: integer().notNull(), // height of the observation image
+    // params for spectrums extraction
+    countMediasPoints: integer().notNull().default(5), // cantidad de puntos intermedios
+    apertureCoefficient: real().notNull().default(1.0), // coeficiente de tamaño de apertura
     // metadata, with a flag indicating if the value is known
     metadataCompletion: real().notNull(), // percentage of metadata completed [0, 100]
     OBJECT: text("object").notNull().default(""),

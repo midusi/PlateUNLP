@@ -22,6 +22,13 @@
       "when": 1756862421785,
       "tag": "0002_jsonarray",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1757178814619,
+      "tag": "0003_´spectrums-config-in-observation´",
+      "breakpoints": true
     }
   ]
 }

@@ -14,9 +14,6 @@ export const spectrum = sqliteTable("spectrum", {
   imageTop: integer().notNull(), // offset from the top of the observation image
   imageWidth: integer().notNull(), // width of the spectrum image
   imageHeight: integer().notNull(), // height of the spectrum image
-  // params for extraction
-  countMediasPoints: integer().notNull().default(5), // cantidad de puntos intermedios
-  apertureCoefficient: real().notNull().default(1.0), // coeficiente de tamaño de apertura
   // extracted
   intensityArr: text("intensityArr", { mode: "json" })
     .notNull()
