@@ -11,10 +11,7 @@ export const getSpectrums = createServerFn()
       columns: {
         id: true,
         type: true,
-        imageTop: true,
-        imageLeft: true,
-        imageWidth: true,
-        imageHeight: true,
+        intensityArr: true,
       },
     })
     return spectrums
@@ -22,6 +19,6 @@ export const getSpectrums = createServerFn()
 
 export const getSpectrumsQueryOptions = (observationId: string) =>
   queryOptions({
-    queryKey: ["spectrum", "list", observationId],
+    queryKey: ["spectrum", "list", "intensityArr", observationId],
     queryFn: () => getSpectrums({ data: { observationId } }),
   })

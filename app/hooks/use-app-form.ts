@@ -5,7 +5,6 @@ import { RangeField } from "~/components/forms/range-field"
 import { SelectField } from "~/components/forms/select-field"
 import { SelectUsersField } from "~/components/forms/select-users-field"
 import { SettingsField } from "~/components/forms/settings-field"
-import { SpectrumsVisorField } from "~/components/forms/spectrums-visor-field"
 import { TextField } from "~/components/forms/text-field"
 import { fieldContext, formContext } from "~/hooks/use-app-form-context"
 
@@ -18,7 +17,6 @@ export const { useAppForm, withFieldGroup } = createFormHook({
     SelectField,
     CheckboxField,
     RangeField,
-    SpectrumsVisorField,
   },
   formComponents: {},
   fieldContext,

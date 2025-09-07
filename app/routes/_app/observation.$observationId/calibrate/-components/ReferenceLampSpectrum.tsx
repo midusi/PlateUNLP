@@ -158,6 +158,7 @@ export function ReferenceLampSpectrum() {
   return (
     <div ref={measureRef} style={{ height: `${height}px` }}>
       <svg width={width} height={height} onClick={onClick}>
+        <title id="graphTitle">Lamp Spectrum</title>
         {spotsInGraph}
         <Group top={margin.top} left={margin.left}>
           <GridColumns scale={xScale} width={xMax} height={yMax} className="stroke-neutral-100" />
