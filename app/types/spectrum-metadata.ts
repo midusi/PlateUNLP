@@ -1,4 +1,3 @@
-import * as tf from "@tensorflow/tfjs"
 import { z } from "zod"
 import { fitsString, sexasegimal } from "./utils"
 
@@ -97,48 +96,20 @@ export function getObservationMetadataCompletion(
   }
 }
 
-export const SpectrumSchema = z.object({
-  id: z.string(),
-  type: z.enum(["lamp", "science"]),
-  imageTop: z.number(),
-  imageLeft: z.number(),
-  imageWidth: z.number(),
-  imageHeight: z.number(),
-})
-
-export const AnalysisSchema = z.object({
-  spectrumId: z.string(),
-  type: z.enum(["lamp", "science"]),
-  imageTop: z.number(),
-  imageLeft: z.number(),
-  imageWidth: z.number(),
-  imageHeight: z.number(),
-  analysis: z.object({
-    intensityArr: z.array(z.number()),
-    mediasPoints: z.array(
-      z.object({
-        x: z.number(),
-        y: z.number(),
-      }),
-    ),
-    rectFunction: z.function({
-      input: [z.number()],
-      output: z.number(),
-    }),
-    derivedFunction: z.function({
-      input: [z.number()],
-      output: z.number(),
-    }),
-    opening: z.number(),
-  }),
-})
-
 /**
- * This schema defines the metadata for a extraction configuration of a single spectrum.
+ * This schema defines the metadata for a extraction configuration of spectrums of a observation.
  */
 export const ExtractionConfigurationSchema = z.object({
-  spectrums: z.array(SpectrumSchema),
-  cachedData: z.array(AnalysisSchema),
   countMediasPoints: z.number().int().min(1, "Must be at least 1."),
   apertureCoefficient: z.number().min(0.001, "Must be positive"),
+  spectrums: z.array(
+    z.object({
+      id: z.string(),
+      type: z.enum(["lamp", "science"]),
+      imageWidth: z.number(),
+      imageHeight: z.number(),
+      imageLeft: z.number(),
+      imageTop: z.number(),
+    }),
+  ),
 })

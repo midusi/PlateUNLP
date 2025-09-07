@@ -1,4 +1,4 @@
-import type * as tf from "@tensorflow/tfjs"
+import * as tf from "@tensorflow/tfjs"
 
 /**
  * Dada un tensor de observacion parchea las regiones
@@ -35,7 +35,9 @@ export function maskingObservation(
     [left, right], // columnas agregadas
     [0, 0], // canales agregados
   ]
-  const maskPadded = spectrumMask.pad(padArrays)
   /** Aplicar mascara */
-  return bgTensor.where(maskPadded, obsTensor)
+  return tf.tidy(() => {
+    const maskPadded = spectrumMask.pad(padArrays)
+    return bgTensor.where(maskPadded, obsTensor)
+  })
 }

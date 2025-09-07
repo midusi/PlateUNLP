@@ -1,5 +1,4 @@
 import * as tf from "@tensorflow/tfjs"
-import type { Spectrum } from "./spectrum-to-bounding-box"
 
 /**
  * Recibe la imagen de una observacion, la especificacion de un

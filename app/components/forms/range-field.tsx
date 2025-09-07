@@ -44,13 +44,12 @@ export function RangeField({
             field.handleChange(Number(e.target.value))
           }}
           onMouseUp={() => {
-            onOk?.()
             field.handleChange(field.state.value)
           }}
           onTouchEnd={() => {
-            onOk?.()
             field.handleChange(field.state.value)
           }}
+          onBlur={field.handleBlur}
         />
       </label>
       {description && <FieldDescription>{description}</FieldDescription>}

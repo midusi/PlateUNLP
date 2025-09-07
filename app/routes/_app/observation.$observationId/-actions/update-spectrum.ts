@@ -13,8 +13,6 @@ export const updateSpectrum = createServerFn()
       imageWidth: z.number().min(1),
       imageHeight: z.number().min(1),
       type: z.enum(["lamp", "science"]).optional(),
-      countMediasPoints: z.number().int().min(1, "Must be at least 1.").optional(),
-      apertureCoefficient: z.number().min(0.01, "Must be positive").optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -40,10 +38,6 @@ export const updateSpectrum = createServerFn()
         imageWidth: data.imageWidth,
         imageHeight: data.imageHeight,
         ...(data.type !== undefined && { type: data.type }),
-        ...(data.countMediasPoints !== undefined && { countMediasPoints: data.countMediasPoints }),
-        ...(data.apertureCoefficient !== undefined && {
-          apertureCoefficient: data.apertureCoefficient,
-        }),
       })
       .where(eq(s.spectrum.id, data.spectrumId))
   })
