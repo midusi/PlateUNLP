@@ -104,12 +104,20 @@ export function ReferenceLampRangeUI() {
           const selectedFuntionOption = inferenceOptions.find(
             (f) => f.name === formApi.state.values.inferenceFunction,
           )!
-          const inferenceFunction = selectedFuntionOption.funct(
-            matches.map((val) => val.lamp.x),
-            matches.map((val) => val.material.x),
-            selectedFuntionOption.needDegree ? formApi.state.values.deegre : undefined,
-          )
-          setPixelToWavelengthFunction(inferenceFunction)
+          try {
+            const inferenceFunction = selectedFuntionOption.funct(
+              matches.map((val) => val.lamp.x),
+              matches.map((val) => val.material.x),
+              selectedFuntionOption.needDegree ? formApi.state.values.deegre : undefined,
+            )
+            setPixelToWavelengthFunction(inferenceFunction)
+          } catch (error) {
+            if (error instanceof CustomError) {
+              setPixelToWavelengthFunction(error)
+            } else {
+              throw error
+            }
+          }
           //formApi.handleSubmit(); // Autosave, ejjecuta onSubmit
         }
       },

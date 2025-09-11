@@ -5,7 +5,7 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Circle, LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
-import { useMemo } from "react"
+import { type JSX, useMemo } from "react"
 import { GraphInErrorCase } from "~/components/molecules/GraphInErrorCase"
 import { useGlobalStore } from "~/hooks/use-global-store"
 import { CustomError, generateRange } from "~/lib/utils"
@@ -121,7 +121,7 @@ function InferenceBoxComponents({ pixelToWavelengthFunction }: InferenceBoxCompo
 export function InferenceBoxGraph() {
   const [pixelToWavelengthFunction] = useGlobalStore((s) => [s.pixelToWavelengthFunction])
 
-  let content
+  let content: JSX.Element
   if (pixelToWavelengthFunction instanceof CustomError) {
     content = (
       <GraphInErrorCase

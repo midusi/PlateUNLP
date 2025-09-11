@@ -133,7 +133,9 @@ export function EmpiricalSpectrum({
 
   return (
     <div ref={measureRef}>
+      {/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
       <svg width={width} height={height} onClick={interactable ? onClick : undefined}>
+        <title id="graphTitle">Empirical Spectrum</title>
         {interactable && spotsInGraph}
         <Group top={margin.top} left={margin.left}>
           <GridColumns

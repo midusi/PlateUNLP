@@ -77,7 +77,6 @@ function RouteComponent() {
         intensity: n,
       })),
     )
-
   const lamp2Spectrum = lamps[0]
   const lamp1Spectrum = lamps[1]
 
