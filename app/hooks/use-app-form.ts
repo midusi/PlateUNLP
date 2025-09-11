@@ -3,6 +3,7 @@ import { CheckboxField } from "~/components/forms/checkbox-field"
 import { PasswordField } from "~/components/forms/password-field"
 import { RangeField } from "~/components/forms/range-field"
 import { SelectField } from "~/components/forms/select-field"
+import { SelectFieldSimple } from "~/components/forms/select-field-simple"
 import { SelectUsersField } from "~/components/forms/select-users-field"
 import { SettingsField } from "~/components/forms/settings-field"
 import { TextField } from "~/components/forms/text-field"
@@ -15,6 +16,7 @@ export const { useAppForm, withFieldGroup } = createFormHook({
     SettingsField,
     SelectUsersField,
     SelectField,
+    SelectFieldSimple,
     CheckboxField,
     RangeField,
   },

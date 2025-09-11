@@ -14,14 +14,11 @@ import {
   piecewiseLinearRegression,
 } from "~/lib/utils"
 import { TeoricalSpectrumConfigSchema } from "~/types/calibrate"
-
-type FindFitFunction = (x: number[], y: number[], degree?: number) => (value: number) => number
-interface InferenceOption {
-  id: number
-  name: string
-  funct: FindFitFunction
-  needDegree: boolean
-}
+import type { Point } from "~/types/Point"
+import {
+  type InferenceOption,
+  updateInferenceFuntionInStore,
+} from "../-utils/updateInferenceFunctionInStore"
 
 const inferenceOptions: InferenceOption[] = [
   {
@@ -90,6 +87,17 @@ export function ReferenceLampRangeUI() {
           setMaterial(formApi.state.values.material as "He-Ne-Ar" | "Fe-Ne-Ar" | "Fe-Ne")
           setOneTeoricalSpectrum(formApi.state.values.onlyOneLine)
 
+          const inferenceFunction = formApi.state.values.inferenceFunction
+          const deegre = formApi.state.values.deegre
+          const selectedFuntionOption = inferenceOptions.find((f) => f.name === inferenceFunction)!
+          updateInferenceFuntionInStore(
+            selectedFuntionOption,
+            deegre,
+            lampPoints,
+            materialPoints,
+            setPixelToWavelengthFunction,
+          )
+
           //formApi.handleSubmit(); // Autosave, ejjecuta onSubmit
         }
       },
@@ -104,31 +112,19 @@ export function ReferenceLampRangeUI() {
   }, [rangeMin, rangeMax, form.setFieldValue])
 
   /** Temporal hasta refactorizar toda la seccion de calibracion */
-  useEffect(() => {
-    const matches = []
-    const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
-    for (let i = 0; i < smallArr.length; i++) {
-      matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
-    }
 
-    /** Actualiza la funcion que se usa para inferir las longitudes de onda de los espectros */
+  useEffect(() => {
     const inferenceFunction = form.getFieldValue("inferenceFunction")
     const deegre = form.getFieldValue("deegre")
     const selectedFuntionOption = inferenceOptions.find((f) => f.name === inferenceFunction)!
-    try {
-      const inferenceFunction = selectedFuntionOption.funct(
-        matches.map((val) => val.lamp.x),
-        matches.map((val) => val.material.x),
-        selectedFuntionOption.needDegree ? deegre : undefined,
-      )
-      setPixelToWavelengthFunction(inferenceFunction)
-    } catch (error) {
-      if (error instanceof CustomError) {
-        setPixelToWavelengthFunction(error)
-      } else {
-        throw error
-      }
-    }
+
+    updateInferenceFuntionInStore(
+      selectedFuntionOption,
+      deegre,
+      lampPoints,
+      materialPoints,
+      setPixelToWavelengthFunction,
+    )
   }, [lampPoints, materialPoints, form.getFieldValue, setPixelToWavelengthFunction])
 
   return (
@@ -150,10 +146,10 @@ export function ReferenceLampRangeUI() {
         <div className="order-3 md:order-none">
           <form.AppField name="inferenceFunction">
             {(field) => (
-              <field.SelectField
+              <field.SelectFieldSimple
                 label="Inference Function For Fit"
                 options={inferenceOptions.map((v) => ({
-                  name: v.name,
+                  label: v.name,
                   value: v.name,
                 }))}
               />
