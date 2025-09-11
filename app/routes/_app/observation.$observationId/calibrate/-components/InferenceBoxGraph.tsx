@@ -36,7 +36,6 @@ interface InferenceBoxComponentsProps {
 
 function InferenceBoxComponents({ pixelToWavelengthFunction }: InferenceBoxComponentsProps) {
   const [lampPoints, materialPoints] = useGlobalStore((s) => [s.lampPoints, s.materialPoints])
-  console.log(lampPoints, materialPoints)
 
   const matches: Point[] = useMemo((): Point[] => {
     const matches: Point[] = []

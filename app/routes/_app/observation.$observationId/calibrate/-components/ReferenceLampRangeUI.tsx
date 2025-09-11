@@ -71,16 +71,6 @@ export function ReferenceLampRangeUI() {
     s.materialPoints,
   ])
 
-  const [matches] = useMemo(() => {
-    const matches = []
-    const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
-    for (let i = 0; i < smallArr.length; i++) {
-      matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
-    }
-
-    return [matches]
-  }, [lampPoints, materialPoints])
-
   const defaultValues: z.output<typeof TeoricalSpectrumConfigSchema> = {
     minWavelength: rangeMin,
     maxWavelength: rangeMax,
@@ -100,24 +90,6 @@ export function ReferenceLampRangeUI() {
           setMaterial(formApi.state.values.material as "He-Ne-Ar" | "Fe-Ne-Ar" | "Fe-Ne")
           setOneTeoricalSpectrum(formApi.state.values.onlyOneLine)
 
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
-          const selectedFuntionOption = inferenceOptions.find(
-            (f) => f.name === formApi.state.values.inferenceFunction,
-          )!
-          try {
-            const inferenceFunction = selectedFuntionOption.funct(
-              matches.map((val) => val.lamp.x),
-              matches.map((val) => val.material.x),
-              selectedFuntionOption.needDegree ? formApi.state.values.deegre : undefined,
-            )
-            setPixelToWavelengthFunction(inferenceFunction)
-          } catch (error) {
-            if (error instanceof CustomError) {
-              setPixelToWavelengthFunction(error)
-            } else {
-              throw error
-            }
-          }
           //formApi.handleSubmit(); // Autosave, ejjecuta onSubmit
         }
       },
@@ -130,6 +102,34 @@ export function ReferenceLampRangeUI() {
     form.setFieldValue("minWavelength", rangeMin)
     form.setFieldValue("maxWavelength", rangeMax)
   }, [rangeMin, rangeMax, form.setFieldValue])
+
+  /** Temporal hasta refactorizar toda la seccion de calibracion */
+  useEffect(() => {
+    const matches = []
+    const smallArr = lampPoints.length >= materialPoints.length ? materialPoints : lampPoints
+    for (let i = 0; i < smallArr.length; i++) {
+      matches.push({ lamp: lampPoints[i], material: materialPoints[i] })
+    }
+
+    /** Actualiza la funcion que se usa para inferir las longitudes de onda de los espectros */
+    const inferenceFunction = form.getFieldValue("inferenceFunction")
+    const deegre = form.getFieldValue("deegre")
+    const selectedFuntionOption = inferenceOptions.find((f) => f.name === inferenceFunction)!
+    try {
+      const inferenceFunction = selectedFuntionOption.funct(
+        matches.map((val) => val.lamp.x),
+        matches.map((val) => val.material.x),
+        selectedFuntionOption.needDegree ? deegre : undefined,
+      )
+      setPixelToWavelengthFunction(inferenceFunction)
+    } catch (error) {
+      if (error instanceof CustomError) {
+        setPixelToWavelengthFunction(error)
+      } else {
+        throw error
+      }
+    }
+  }, [lampPoints, materialPoints, form.getFieldValue, setPixelToWavelengthFunction])
 
   return (
     <>
