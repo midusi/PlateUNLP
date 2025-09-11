@@ -39,7 +39,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
           link: { to: "/plate/$plateId", params: { plateId: plate.id } },
         },
         {
-          title: `Observation ${initialMetadata["MAIN-ID"] || params.observationId}`,
+          title: `${initialMetadata.OBJECT}/${initialMetadata["DATE-OBS"].value}/${initialMetadata.UT.value}`,
           link: {
             to: "/observation/$observationId",
             params: { observationId: params.observationId },
