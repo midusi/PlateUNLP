@@ -15,6 +15,7 @@ import {
 } from "~/types/spectrum-metadata"
 import { computeObservationMetadata } from "../-actions/compute-observation-metadata"
 import { updateObservationMetadata } from "../-actions/update-observation-metadata"
+import { useRouter } from "@tanstack/react-router"
 
 export function ObservationMetadataForm({
   observationId,
@@ -25,12 +26,17 @@ export function ObservationMetadataForm({
   OBSERVAT: string
   defaultValues: z.output<typeof ObservationMetadataSchema>
 }) {
+  const router = useRouter()
   const form = useAppForm({
     defaultValues,
     validators: { onChange: ObservationMetadataSchema },
     onSubmit: async ({ value, formApi }) => {
       try {
         await updateObservationMetadata({ data: { observationId, metadata: value } })
+        if (value.OBJECT !== defaultValues.OBJECT || value["DATE-OBS"] !== defaultValues["DATE-OBS"] || value.UT !== defaultValuesvalue.UT) {
+          // If the observation id has changed, we need to update the route title
+          router.invalidate()
+        }
         formApi.reset(value)
       } catch (error) {
         notifyError("Failed to update observation metadata", error)

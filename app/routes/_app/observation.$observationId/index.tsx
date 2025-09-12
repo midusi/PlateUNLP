@@ -37,7 +37,13 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
           link: { to: "/plate/$plateId", params: { plateId: plate.id } },
         },
         {
-          title: `${initialMetadata.OBJECT}/${initialMetadata["DATE-OBS"].value}/${initialMetadata.UT.value}`,
+          title: `${
+            initialMetadata.OBJECT == "" ? "-" : initialMetadata.OBJECT
+          }/${
+            initialMetadata["DATE-OBS"].value  == "" ? "-" : initialMetadata["DATE-OBS"].value
+          }/${
+            initialMetadata.UT.value  == "" ? "-" : initialMetadata.UT.value
+          }`,
           link: {
             to: "/observation/$observationId",
             params: { observationId: params.observationId },
