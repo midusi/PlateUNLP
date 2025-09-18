@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7977e3bb-da33-4386-98cd-09c74d102da4",
+  "id": "8739e587-4c96-4f8a-aac8-4ed50be89f96",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -335,6 +335,100 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "calibration": {
+      "name": "calibration",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "observation_id": {
+          "name": "observation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "min_wavelength": {
+          "name": "min_wavelength",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "max_wavelength": {
+          "name": "max_wavelength",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 2000
+        },
+        "material": {
+          "name": "material",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'He-Ne-Ar'"
+        },
+        "only_one_line": {
+          "name": "only_one_line",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "inference_function": {
+          "name": "inference_function",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Linear regresion'"
+        },
+        "deegre": {
+          "name": "deegre",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        }
+      },
+      "indexes": {
+        "calibration_observation_idx": {
+          "name": "calibration_observation_idx",
+          "columns": [
+            "observation_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "calibration_observation_id_observation_id_fk": {
+          "name": "calibration_observation_id_observation_id_fk",
+          "tableFrom": "calibration",
+          "tableTo": "observation",
+          "columnsFrom": [
+            "observation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "iers_bulletin_a": {
       "name": "iers_bulletin_a",
       "columns": {
@@ -464,6 +558,22 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "count_medias_points": {
+          "name": "count_medias_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 5
+        },
+        "aperture_coefficient": {
+          "name": "aperture_coefficient",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
         },
         "metadata_completion": {
           "name": "metadata_completion",
@@ -1168,21 +1278,13 @@
           "notNull": true,
           "autoincrement": false
         },
-        "count_medias_points": {
-          "name": "count_medias_points",
-          "type": "integer",
+        "intensityArr": {
+          "name": "intensityArr",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 5
-        },
-        "aperture_coefficient": {
-          "name": "aperture_coefficient",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
+          "default": "'[]'"
         }
       },
       "indexes": {},

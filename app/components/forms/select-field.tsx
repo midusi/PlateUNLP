@@ -74,7 +74,7 @@ export function SelectField({ className, label, description, options }: SelectFi
             items={filteredItems}
             value={selectedValue}
             onValueChange={(nextValue) => {
-              if(!nextValue) return
+              if (!nextValue) return
               field.handleChange(nextValue.value)
               setPopoverOpen(false)
             }}

@@ -5,29 +5,15 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1756242947612,
+      "when": 1758146604829,
       "tag": "0000_initial",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "6",
-      "when": 1756508267918,
-      "tag": "0001_intensityArr",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1756862421785,
-      "tag": "0002_jsonarray",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1757178814619,
-      "tag": "0003_´spectrums-config-in-observation´",
+      "when": 1758156193423,
+      "tag": "0001_arrOfMatchs",
       "breakpoints": true
     }
   ]

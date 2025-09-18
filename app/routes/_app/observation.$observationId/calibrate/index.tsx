@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { fetchGrayscaleImage } from "~/lib/image"
-import { linearRegression } from "~/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
 import type { Breadcrumbs } from "../../-components/AppBreadcrumbs"
 import { getObservationMetadata } from "../-actions/get-observation-metadata"
+import { getOrAddCalibration } from "./-actions/get-or-add-calibration"
 import { getSpectrums } from "./-actions/get-spectrums"
 import { EmpiricalSpectrum } from "./-components/EmpiricalSpectrum"
 import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
@@ -16,13 +15,18 @@ import { ReferenceLampSpectrum } from "./-components/ReferenceLampSpectrum"
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
   component: RouteComponent,
   loader: async ({ params }) => {
-    const [project, plate, initialMetadata, spectrums] = await Promise.all([
+    const [project, plate, initialMetadata, spectrums, calibration] = await Promise.all([
       getProjectName({
         data: { from: "observation", id: params.observationId },
       }),
-      getPlateName({ data: { from: "observation", id: params.observationId } }),
-      getObservationMetadata({ data: { observationId: params.observationId } }),
+      getPlateName({
+        data: { from: "observation", id: params.observationId },
+      }),
+      getObservationMetadata({
+        data: { observationId: params.observationId },
+      }),
       getSpectrums({ data: { observationId: params.observationId } }),
+      getOrAddCalibration({ data: { observationId: params.observationId } }),
     ])
     return {
       breadcrumbs: [
@@ -54,12 +58,13 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
         },
       ] satisfies Breadcrumbs,
       spectrums: spectrums as typeof spectrums,
+      calibration: calibration,
     }
   },
 })
 
 function RouteComponent() {
-  const { spectrums } = Route.useLoaderData()
+  const { spectrums, calibration } = Route.useLoaderData()
 
   const scienceSpectrum =
     spectrums
@@ -85,14 +90,13 @@ function RouteComponent() {
       <Card className="mx-auto w-full max-w-6xl px-8">
         <CardContent>
           <CardTitle className="mb-4">Teorical Comparison Lamp</CardTitle>
-          <ReferenceLampRangeUI />
+          <ReferenceLampRangeUI calibrationSettings={calibration} />
         </CardContent>
-        <ReferenceLampSpectrum />
       </Card>
       <Card>
         <CardContent>
           {/* Grafico de interacción para calibrar respecto a lampara teorica */}
-          <div className="flex flex-col ">
+          <div className="flex flex-col px-8">
             {/* Grafico espectro calibrado lampara 1 */}
             <div>
               <CardTitle className="mb-4">Empirical Comparison Lamp 1</CardTitle>
@@ -115,10 +119,10 @@ function RouteComponent() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Match Beetwen Teorical And Empiricals Spectrums</CardTitle>
+          <CardTitle className="px-8">Match Beetwen Teorical And Empiricals Spectrums</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 items-center justify-center gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 items-center justify-center gap-4 px-8 md:grid-cols-2">
             <InferenceBoxGraph />
             <ErrorScatterGraph />
           </div>
