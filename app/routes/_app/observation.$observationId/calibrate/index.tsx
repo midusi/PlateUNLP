@@ -204,28 +204,92 @@ function RouteComponent() {
       <Card>
         <CardContent>
           {/* Grafico de interacción para calibrar respecto a lampara teorica */}
-          <div className="flex flex-col px-8">
-            {/* Grafico espectro calibrado lampara 1 */}
-            <div>
-              <CardTitle className="mb-4">Empirical Comparison Lamp 1</CardTitle>
-              <EmpiricalSpectrum data={lamp1Spectrum} color="#0ea5e9" interactable preview />
-            </div>
+          <form.Field name="lampPoints">
+            {(fieldLP) => (
+              <form.Field name="materialPoints">
+                {(fieldMP) => (
+                  <div className="flex flex-col px-8">
+                    {/* Grafico espectro calibrado lampara 1 */}
+                    <div>
+                      <CardTitle className="mb-4">Empirical Comparison Lamp 1</CardTitle>
+                      <EmpiricalSpectrum
+                        data={lamp1Spectrum}
+                        color="#0ea5e9"
+                        interactable
+                        preview
+                        lampPoints={fieldLP.state.value}
+                        setLampPoints={(arr: { x: number; y: number }[]) =>
+                          fieldLP.handleChange(arr)
+                        }
+                        materialPoints={fieldMP.state.value}
+                      />
+                    </div>
 
-            {/* Grafico espectro calibrado lampara 2 */}
-            <div>
-              <CardTitle className="mb-4">Empirical Comparison Lamp 2</CardTitle>
-              <EmpiricalSpectrum data={lamp2Spectrum} color="#0ea5e9" interactable preview />
-            </div>
+                    {/* Grafico espectro calibrado lampara 2 */}
+                    <div>
+                      <CardTitle className="mb-4">Empirical Comparison Lamp 2</CardTitle>
+                      <EmpiricalSpectrum
+                        data={lamp2Spectrum}
+                        color="#0ea5e9"
+                        interactable
+                        preview
+                        lampPoints={fieldLP.state.value}
+                        setLampPoints={(arr: { x: number; y: number }[]) =>
+                          fieldLP.handleChange(arr)
+                        }
+                        materialPoints={fieldMP.state.value}
+                      />
+                    </div>
 
-            {/* Grafico espectro calibrado ciencia */}
-            <div>
-              <CardTitle className="mb-4">Empirical Science Spectrum</CardTitle>
-              <EmpiricalSpectrum data={scienceSpectrum} color="#0ea5e9" interactable preview />
-            </div>
-          </div>
+                    {/* Grafico espectro calibrado ciencia */}
+                    <div>
+                      <CardTitle className="mb-4">Empirical Science Spectrum</CardTitle>
+                      <EmpiricalSpectrum
+                        data={scienceSpectrum}
+                        color="#0ea5e9"
+                        interactable
+                        preview
+                        lampPoints={fieldLP.state.value}
+                        setLampPoints={(arr: { x: number; y: number }[]) =>
+                          fieldLP.handleChange(arr)
+                        }
+                        materialPoints={fieldMP.state.value}
+                      />
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+            )}
+          </form.Field>
         </CardContent>
+        <CardFooter className="flex justify-end">
+          <form.Subscribe
+            selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+          >
+            {([isValid, isSubmitting, isDirty]) => (
+              <p className="flex items-center text-muted-foreground text-xs italic">
+                {!isValid ? (
+                  <>
+                    <span>Changes aren't beign saved! Please fix the errors above</span>
+                    <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
+                  </>
+                ) : isSubmitting || isDirty ? (
+                  <>
+                    <span>Saving changes...</span>
+                    <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    <span>Settings saved on database</span>
+                    <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
+                  </>
+                )}
+              </p>
+            )}
+          </form.Subscribe>
+        </CardFooter>
       </Card>
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="px-8">Match Beetwen Teorical And Empiricals Spectrums</CardTitle>
         </CardHeader>
@@ -235,7 +299,7 @@ function RouteComponent() {
             <ErrorScatterGraph />
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </>
   )
 }
