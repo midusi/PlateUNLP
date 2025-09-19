@@ -1,9 +1,10 @@
 import { useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
+import type { AppFieldExtendedReactFormApi } from "node_modules/@tanstack/react-form/dist/esm/createFormHook";
 import { useEffect } from "react";
 import type z from "zod";
 import { ReferenceLampRange } from "~/components/molecules/ReferenceLampRange";
-import { useAppForm } from "~/hooks/use-app-form";
+import type { useAppForm } from "~/hooks/use-app-form";
 import { useGlobalStore } from "~/hooks/use-global-store";
 import { LAMP_MATERIALS } from "~/lib/spectral-data";
 import {
@@ -11,7 +12,7 @@ import {
 	linearRegression,
 	piecewiseLinearRegression,
 } from "~/lib/utils";
-import { TeoricalSpectrumConfigSchema } from "~/types/calibrate";
+import type { TeoricalSpectrumConfigSchema } from "~/types/calibrate";
 import { updateCalibration } from "../-actions/update-calibration";
 import {
 	type InferenceOption,
@@ -19,7 +20,7 @@ import {
 } from "../-utils/updateInferenceFunctionInStore";
 import { ReferenceLampSpectrum } from "./ReferenceLampSpectrum";
 
-const inferenceOptions: InferenceOption[] = [
+export const inferenceOptions: InferenceOption[] = [
 	{
 		id: 0,
 		name: "Linear regresion",
@@ -41,119 +42,15 @@ const inferenceOptions: InferenceOption[] = [
 ];
 
 type ReferenceLampRangeUIProps = {
-	calibrationSettings: {
-		material: string;
-		minWavelength: number;
-		maxWavelength: number;
-		onlyOneLine: boolean;
-		inferenceFunction:
-			| "Linear regresion"
-			| "Piece wise linear regression"
-			| "Legendre";
-		deegre: number;
-		id: string;
-		observationId: string;
-		lampPoints: {
-			x: number;
-			y: number;
-		}[];
-		materialPoints: {
-			x: number;
-			y: number;
-		}[];
-	};
+	form: typeof form;
 };
 
-export function ReferenceLampRangeUI({
-	calibrationSettings,
-}: ReferenceLampRangeUIProps) {
-	const [setPixelToWavelengthFunction] = useGlobalStore((s) => [
-		s.setPixelToWavelengthFunction,
-	]);
-
-	console.log(calibrationSettings.material);
-	const defaultValues: z.output<typeof TeoricalSpectrumConfigSchema> = {
-		minWavelength: calibrationSettings.minWavelength,
-		maxWavelength: calibrationSettings.maxWavelength,
-		material: calibrationSettings.material,
-		onlyOneLine: calibrationSettings.onlyOneLine,
-		inferenceFunction: calibrationSettings.inferenceFunction,
-		deegre: calibrationSettings.deegre,
-		materialPoints: calibrationSettings.materialPoints,
-		lampPoints: calibrationSettings.lampPoints,
-	};
-	const router = useRouter();
-	const form = useAppForm({
-		defaultValues,
-		validators: { onChange: TeoricalSpectrumConfigSchema },
-		listeners: {
-			onChange: async ({ formApi }) => {
-				if (formApi.state.isValid) {
-					await updateCalibration({
-						data: {
-							id: calibrationSettings.id,
-							minWavelength: formApi.state.values.minWavelength,
-							maxWavelength: formApi.state.values.maxWavelength,
-							material: formApi.state.values.material,
-							inferenceFunction: formApi.state.values.inferenceFunction as
-								| "Linear regresion"
-								| "Piece wise linear regression"
-								| "Legendre",
-							onlyOneLine: formApi.state.values.onlyOneLine,
-							deegre: formApi.state.values.deegre,
-							materialPoints: formApi.state.values.materialPoints,
-							lampPoints: formApi.state.values.lampPoints,
-						},
-					});
-
-					const inferenceFunction = formApi.state.values.inferenceFunction;
-					const deegre = formApi.state.values.deegre;
-					const materialPoints = formApi.state.values.materialPoints;
-					const lampPoints = formApi.state.values.lampPoints;
-					const selectedFuntionOption = inferenceOptions.find(
-						(f) => f.name === inferenceFunction,
-					)!;
-					updateInferenceFuntionInStore(
-						selectedFuntionOption,
-						deegre,
-						lampPoints,
-						materialPoints,
-						setPixelToWavelengthFunction,
-					);
-
-					router.invalidate();
-					//formApi.handleSubmit(); // Autosave, ejjecuta onSubmit
-				}
-			},
-			onChangeDebounceMs: 500,
-		},
-	});
-
+export function ReferenceLampRangeUI({ form }: ReferenceLampRangeUIProps) {
 	/** Temporal hasta refactorizar toda la seccion de calibracion */
 	// useEffect(() => {
 	// 	form.setFieldValue("minWavelength", rangeMin);
 	// 	form.setFieldValue("maxWavelength", rangeMax);
 	// }, [rangeMin, rangeMax, form.setFieldValue]);
-
-	/** Temporal hasta refactorizar toda la seccion de calibracion */
-
-	useEffect(() => {
-		const inferenceFunction = form.getFieldValue("inferenceFunction");
-		const deegre = form.getFieldValue("deegre");
-		const materialPoints = form.getFieldValue("materialPoints");
-		const lampPoints = form.getFieldValue("lampPoints");
-		const selectedFuntionOption = inferenceOptions.find(
-			(f) => f.name === inferenceFunction,
-		)!;
-
-		updateInferenceFuntionInStore(
-			selectedFuntionOption,
-			deegre,
-			lampPoints,
-			materialPoints,
-			setPixelToWavelengthFunction,
-		);
-	}, [form.getFieldValue, setPixelToWavelengthFunction]);
 
 	return (
 		<>

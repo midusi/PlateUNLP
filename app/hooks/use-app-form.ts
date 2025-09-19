@@ -10,7 +10,7 @@ import { SettingsField } from "~/components/forms/settings-field"
 import { TextField } from "~/components/forms/text-field"
 import { fieldContext, formContext } from "~/hooks/use-app-form-context"
 
-export const { useAppForm, withFieldGroup } = createFormHook({
+export const { useAppForm, withForm, withFieldGroup } = createFormHook({
   fieldComponents: {
     TextField,
     NumberField,
