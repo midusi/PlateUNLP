@@ -65,6 +65,9 @@ importers:
       '@visx/curve':
         specifier: ^3.12.0
         version: 3.12.0
+      '@visx/event':
+        specifier: ^3.12.0
+        version: 3.12.0
       '@visx/grid':
         specifier: ^3.12.0
         version: 3.12.0(react@19.1.1)
@@ -83,6 +86,9 @@ importers:
       '@visx/shape':
         specifier: ^3.12.0
         version: 3.12.0(react@19.1.1)
+      '@visx/tooltip':
+        specifier: ^3.12.0
+        version: 3.12.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@visx/vendor':
         specifier: ^3.12.0
         version: 3.12.0

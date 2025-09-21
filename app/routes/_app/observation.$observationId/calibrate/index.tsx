@@ -12,11 +12,10 @@ import { getObservationMetadata } from "../-actions/get-observation-metadata"
 import { getOrAddCalibration } from "./-actions/get-or-add-calibration"
 import { getSpectrums } from "./-actions/get-spectrums"
 import { updateCalibration } from "./-actions/update-calibration"
-import { CalibrationSettingsUI } from "./-child-forms/ReferenceLampRangeUI"
+import { CalibrationSettingsUI, inferenceOptions } from "./-child-forms/CalibrationSettingsUI"
 import { EmpiricalSpectrum } from "./-components/EmpiricalSpectrum"
 import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
 import { InferenceBoxGraph } from "./-components/InferenceBoxGraph"
-import { inferenceOptions } from "./-components/ReferenceLampRangeUI"
 import { updateInferenceFuntionInStore } from "./-utils/updateInferenceFunctionInStore"
 
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
@@ -73,7 +72,10 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
 function RouteComponent() {
   const { spectrums, calibration } = Route.useLoaderData()
 
-  const [setPixelToWavelengthFunction] = useGlobalStore((s) => [s.setPixelToWavelengthFunction])
+  const [pixelToWavelengthFunction, setPixelToWavelengthFunction] = useGlobalStore((s) => [
+    s.pixelToWavelengthFunction,
+    s.setPixelToWavelengthFunction,
+  ])
 
   const scienceSpectrum =
     spectrums
@@ -289,17 +291,29 @@ function RouteComponent() {
           </form.Subscribe>
         </CardFooter>
       </Card>
-      {/* <Card>
+      <Card>
         <CardHeader>
           <CardTitle className="px-8">Match Beetwen Teorical And Empiricals Spectrums</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 items-center justify-center gap-4 px-8 md:grid-cols-2">
-            <InferenceBoxGraph />
-            <ErrorScatterGraph />
-          </div>
+          <form.Field name="lampPoints">
+            {(fieldLP) => (
+              <form.Field name="materialPoints">
+                {(fieldMP) => (
+                  <div className="grid grid-cols-1 items-center justify-center gap-4 px-8 md:grid-cols-2">
+                    {/* <InferenceBoxGraph /> */}
+                    <ErrorScatterGraph
+                      pixelToWavelengthFunction={pixelToWavelengthFunction}
+                      lampPoints={fieldLP.state.value}
+                      materialPoints={fieldMP.state.value}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            )}
+          </form.Field>
         </CardContent>
-      </Card> */}
+      </Card>
     </>
   )
 }
