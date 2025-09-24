@@ -300,7 +300,7 @@ function RouteComponent() {
               <form.Field name="materialPoints">
                 {(fieldMP) => (
                   <div className="grid grid-cols-1 items-center justify-center gap-4 px-8 md:grid-cols-2">
-                    {/* <InferenceBoxGraph /> */}
+                    <InferenceBoxGraph />
                     <ErrorScatterGraph
                       pixelToWavelengthFunction={pixelToWavelengthFunction}
                       lampPoints={fieldLP.state.value}
