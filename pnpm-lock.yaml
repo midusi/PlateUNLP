@@ -176,6 +176,9 @@ importers:
       react-tooltip:
         specifier: ^5.29.1
         version: 5.29.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react-use-measure:
+        specifier: ^2.1.7
+        version: 2.1.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-zoom-pan-pinch:
         specifier: ^3.7.0
         version: 3.7.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
