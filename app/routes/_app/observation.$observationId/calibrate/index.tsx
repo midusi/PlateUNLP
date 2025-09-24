@@ -327,9 +327,7 @@ function RouteComponent() {
 			</Card>
 			<Card>
 				<CardHeader>
-					<CardTitle className="px-8">
-						Match Beetwen Teorical And Empiricals Spectrums
-					</CardTitle>
+					<CardTitle className="px-8">Inference analysis</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<form.Field name="lampPoints">

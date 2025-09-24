@@ -104,8 +104,8 @@ export function ErrorScatterGraph({
 		/** Escalas min y max para valores a mostrar en el grafico*/
 		const xMin = d3.min(dispersionErrors, getX) ?? 0;
 		const xMax = d3.max(dispersionErrors, getX) ?? 1000;
-		const yMin = d3.min(dispersionErrors, getY) ?? -1;
-		const yMax = d3.max(dispersionErrors, getY) ?? 1;
+		const yMin = Math.min(d3.min(dispersionErrors, getY) ?? -1, -0.01);
+		const yMax = Math.max(d3.max(dispersionErrors, getY) ?? 1, 0.01);
 		const yLim = Math.max(Math.abs(yMin), Math.abs(yMax));
 		const mX = 0.2 * (xMax - xMin);
 		const mY = 0.2 * yLim;
@@ -140,8 +140,8 @@ export function ErrorScatterGraph({
 						<rect
 							x={margin.right}
 							y={0}
-							width={width - margin.right - margin.left}
-							height={height - margin.bottom - margin.top}
+							width={Math.max(width - margin.right - margin.left, 0)}
+							height={Math.max(height - margin.bottom - margin.top, 0)}
 							fill="#374151"
 							rx={1}
 						/>

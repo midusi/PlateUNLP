@@ -67,7 +67,7 @@ export function InferenceBoxGraph({
    * Arreglo de pares x (Å indicado) e y (Å inferido), y arreglo de funccion de
    * inferencia discretizada.
    */
-  const { matches, discretizedFunction, xScale, yScale, mX, mY } = useMemo((): {
+  const { matches, discretizedFunction, xScale, yScale } = useMemo((): {
     matches: { idxMatch: number; P: number; Å: number }[]
     discretizedFunction: { P: number; Å: number }[]
     xScale: ScaleLinear<number, number, never>
@@ -104,7 +104,7 @@ export function InferenceBoxGraph({
     const mY = 0.2 * (yMax - yMin)
 
     /** Discretizacion de funcion de inferencia para graficado */
-    const resolution = 100
+    const resolution = width - margin.right - margin.left
     const discretizedFunction = generateRange(xMin - mX, xMax + mX, resolution)
       .map((value) => ({
         P: value,
@@ -120,7 +120,7 @@ export function InferenceBoxGraph({
       mX: mX,
       mY: mY,
     }
-  }, [lampPoints, materialPoints, pixelToWavelengthFunction])
+  }, [lampPoints, materialPoints, pixelToWavelengthFunction, width])
 
   /** Pone al dia rangos numericos con resolucion de pantalla */
   xScale.range([margin.right, width - margin.left])
@@ -147,8 +147,8 @@ export function InferenceBoxGraph({
             <rect
               x={margin.right}
               y={0}
-              width={width - margin.right - margin.left}
-              height={height - margin.bottom - margin.top}
+              width={Math.max(width - margin.right - margin.left, 0)}
+              height={Math.max(height - margin.bottom - margin.top, 0)}
               fill="#374151"
               rx={1}
             />
