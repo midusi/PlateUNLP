@@ -24,7 +24,6 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
     const rawImage = await fetchGrayscaleImage(`/observation/${params.observationId}/image`)
     return {
       breadcrumbs: [
-        { title: "Projects", link: { to: "/projects" } },
         {
           title: project.name,
           link: {

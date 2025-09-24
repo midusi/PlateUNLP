@@ -36,7 +36,6 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
     ])
     return {
       breadcrumbs: [
-        { title: "Projects", link: { to: "/projects" } },
         {
           title: project.name,
           link: {

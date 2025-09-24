@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_app/projects/")({
 
     return {
       user: user,
-      breadcrumbs: [{ title: "Projects", link: { to: "/projects" } }] satisfies Breadcrumbs,
+      breadcrumbs: [] satisfies Breadcrumbs,
       projects: await getProjectsWithMetrics({ data: { userId: userId } }),
     }
   },
