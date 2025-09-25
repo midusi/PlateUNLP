@@ -16,13 +16,20 @@ import { addSpectrums } from "../-actions/add-spectrums"
 import type { getSpectrums } from "../-actions/get-spectrums"
 import { updateSpectrum } from "../-actions/update-spectrum"
 
-export type Spectrum = Awaited<ReturnType<typeof getSpectrums>>[number]
+export type Spectrum = {
+  type: "lamp" | "science"
+  id: string
+  imageWidth: number
+  imageHeight: number
+  imageLeft: number
+  imageTop: number
+}
 
 export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
   return {
     id: spectrum.id,
     name: "",
-    color: idToColor(spectrum.id),
+    color: spectrum.type === "science" ? "red" : "green",
     top: spectrum.imageTop,
     left: spectrum.imageLeft,
     width: spectrum.imageWidth,
@@ -179,7 +186,9 @@ export function SpectrumsList({
 
   const addSpectrumMut = useMutation({
     mutationFn: async (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => {
-      const spectrum = await addSpectrum({ data: { ...boundingBox, observationId } })
+      const spectrum = await addSpectrum({
+        data: { ...boundingBox, observationId },
+      })
       setBoundingBoxes((prev) => [spectrumToBoundingBox(spectrum), ...prev])
     },
     onError: (error) => notifyError("Error adding spectrum", error),

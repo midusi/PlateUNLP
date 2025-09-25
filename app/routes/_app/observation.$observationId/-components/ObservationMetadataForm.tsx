@@ -1,5 +1,6 @@
 import { Collapsible } from "@base-ui-components/react/collapsible"
 import { useMutation } from "@tanstack/react-query"
+import { useRouter } from "@tanstack/react-router"
 import type { z } from "zod"
 import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
 import { Button } from "~/components/ui/button"
@@ -25,12 +26,21 @@ export function ObservationMetadataForm({
   OBSERVAT: string
   defaultValues: z.output<typeof ObservationMetadataSchema>
 }) {
+  const router = useRouter()
   const form = useAppForm({
     defaultValues,
     validators: { onChange: ObservationMetadataSchema },
     onSubmit: async ({ value, formApi }) => {
       try {
         await updateObservationMetadata({ data: { observationId, metadata: value } })
+        if (
+          value.OBJECT !== defaultValues.OBJECT ||
+          value["DATE-OBS"] !== defaultValues["DATE-OBS"] ||
+          value.UT !== defaultValues.UT
+        ) {
+          // If the observation id has changed, we need to update the route title
+          router.invalidate()
+        }
         formApi.reset(value)
       } catch (error) {
         notifyError("Failed to update observation metadata", error)

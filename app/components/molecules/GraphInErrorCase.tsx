@@ -5,14 +5,14 @@ import { scaleLinear } from "@visx/scale"
 interface GraphInErrorCaseProps {
   message: string
   dimensions: { width: number; height: number }
-  margin: { top: number; right: number; bottom: number; left: number }
+  margin?: { top: number; right: number; bottom: number; left: number }
   labels: { x: string; y: string }
 }
 
 export function GraphInErrorCase({
   message,
   dimensions,
-  margin,
+  margin = { top: 0, right: 0, bottom: 0, left: 0 },
   labels,
 }: GraphInErrorCaseProps) {
   const { width, height } = dimensions

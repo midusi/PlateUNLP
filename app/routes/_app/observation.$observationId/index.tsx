@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { spectrum } from "db/schema/spectrum"
 import { Button } from "~/components/ui/button"
 import { fetchGrayscaleImage } from "~/lib/image"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
@@ -8,14 +7,16 @@ import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getObservationMetadata } from "./-actions/get-observation-metadata"
 import { getSpectrums } from "./-actions/get-spectrums"
 import { ObservationMetadataForm } from "./-components/ObservationMetadataForm"
-import { SpectrumsFeatures } from "./-components/SpectrumsFeatures"
+import { SpectrumsExtractor } from "./-components/SpectrumsExtractor"
 import { SpectrumsList } from "./-components/SpectrumsList"
 
 export const Route = createFileRoute("/_app/observation/$observationId/")({
   component: RouteComponent,
   loader: async ({ params }) => {
     const [project, plate, initialMetadata, spectrums] = await Promise.all([
-      getProjectName({ data: { from: "observation", id: params.observationId } }),
+      getProjectName({
+        data: { from: "observation", id: params.observationId },
+      }),
       getPlateName({ data: { from: "observation", id: params.observationId } }),
       getObservationMetadata({ data: { observationId: params.observationId } }),
       getSpectrums({ data: { observationId: params.observationId } }),
@@ -23,7 +24,6 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
     const rawImage = await fetchGrayscaleImage(`/observation/${params.observationId}/image`)
     return {
       breadcrumbs: [
-        { title: "Projects", link: { to: "/projects" } },
         {
           title: project.name,
           link: {
@@ -32,11 +32,13 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
           },
         },
         {
-          title: `Plate ${plate["PLATE-N"]}`,
+          title: `${plate["PLATE-N"]}`,
           link: { to: "/plate/$plateId", params: { plateId: plate.id } },
         },
         {
-          title: `Observation ${initialMetadata["MAIN-ID"] || params.observationId}`,
+          title: `${initialMetadata.OBJECT === "" ? "-" : initialMetadata.OBJECT}/${
+            initialMetadata["DATE-OBS"].value === "" ? "-" : initialMetadata["DATE-OBS"].value
+          }/${initialMetadata.UT.value === "" ? "-" : initialMetadata.UT.value}`,
           link: {
             to: "/observation/$observationId",
             params: { observationId: params.observationId },
@@ -64,9 +66,9 @@ function RouteComponent() {
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
-      <SpectrumsFeatures
+      <SpectrumsExtractor
         observationId={observationId}
-        initialSpectrums={spectrums}
+        spectrums={spectrums}
         observationTensor={rawImage}
       />
 

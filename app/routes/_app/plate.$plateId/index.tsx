@@ -19,13 +19,12 @@ export const Route = createFileRoute("/_app/plate/$plateId/")({
 
     return {
       breadcrumbs: [
-        { title: "Projects", link: { to: "/projects" } },
         {
           title: project.name,
           link: { to: "/project/$projectId", params: { projectId: project.id } },
         },
         {
-          title: `Plate ${initialMetadata["PLATE-N"]}`,
+          title: `${initialMetadata["PLATE-N"]}`,
           link: { to: "/plate/$plateId", params: { plateId: params.plateId } },
         },
       ] satisfies Breadcrumbs,

@@ -1,26 +1,7 @@
 import * as tf from "@tensorflow/tfjs"
-import { Axis } from "@visx/axis"
-import { AArrowDown } from "lucide-react"
-import { max, mean, min, round } from "mathjs"
-import {
-  findPlateau,
-  findXspacedPoints,
-  getPointsInRect,
-  obtainImageSegments,
-  promediadoHorizontal,
-} from "~/lib/image"
-import { extremePoints } from "~/lib/trigonometry"
-import {
-  downloadGrayscaleImage,
-  guardarFuncion,
-  guardarRectaYPuntos,
-  linearRegressionWhitDerived,
-  meanSmooth,
-  pushToExtremes,
-  pushToExtremeTf,
-  splineCuadratic,
-  weightedSmooth,
-} from "~/lib/utils"
+import { avg } from "drizzle-orm"
+import { findPlateau, findXspacedPoints } from "~/lib/image"
+import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"
 
 /**
@@ -95,61 +76,70 @@ export function extractScience({
   /** Segmentar la imagen */
   /** Coordenadas X medias a lo largo de toda la imagen de SCIENCE */
   const xpoints = findXspacedPoints(width, countCheckpoints)
-  /** Segmentos medios de imagen de SCIENCE */
-  const boxIdx = tf.tensor1d(new Array(countCheckpoints).fill(0), "int32")
-  const cropSize: [number, number] = [height, segmentWidth]
-  const boxesVals = xpoints.map((x) => {
-    const start = Math.max(0, x - Math.floor(segmentWidth / 2))
-    const end = Math.min(width, x + Math.ceil(segmentWidth / 2))
-    return [0 / height, start / width, height / height, end / width]
-  })
-  const boxes = tf.tensor2d(boxesVals, [countCheckpoints, 4], "float32")
-
-  let segments = tf.image.cropAndResize(imgTensor, boxes, boxIdx, cropSize, "nearest") // [countCheckpoints, height, segmentWidth, 1]
-  segments = segments.squeeze() // Quita dimension de canal (countCheckpoints, height, segmentWidth)
 
   /**
    * Funciones de cada segmento promediado horizontalmente
    * Osea, para cada pixel vertical se hace un avg de los pixeles
    * horizontales. x=>pixelVertical, y=>avgHorizontal
    */
-  const avgTensor = segments.mean(2) // 2 corresponde a widht, (countCheckpoints, segmentCount, height)
+  const avgTensor = tf.tidy(() => {
+    /** Segmentos medios de imagen de SCIENCE */
+    const boxIdx = tf.tensor1d(new Array(countCheckpoints).fill(0), "int32")
+    const cropSize: [number, number] = [height, segmentWidth]
+    const boxesVals = xpoints.map((x) => {
+      const start = Math.max(0, x - Math.floor(segmentWidth / 2))
+      const end = Math.min(width, x + Math.ceil(segmentWidth / 2))
+      return [0 / height, start / width, height / height, end / width]
+    })
+    const boxes = tf.tensor2d(boxesVals, [countCheckpoints, 4], "float32")
+
+    let segments = tf.image.cropAndResize(imgTensor, boxes, boxIdx, cropSize, "nearest") // [countCheckpoints, height, segmentWidth, 1]
+    segments = segments.squeeze() // Quita dimension de canal (countCheckpoints, height, segmentWidth)
+
+    return segments.mean(2) // promediado horizontalmente, queda (segmentCount, height)
+  })
 
   // Acotar outliers
-  const mean = avgTensor.mean(1, true) // promedio por funcion [numFunciones, 1]
-  const std = avgTensor.sub(mean).square().mean(1, true).sqrt() // desviacion estandar por funcion [numFunciones, 1]
-  const z = avgTensor.sub(mean).div(std) // z-score por funcion [numFunciones, numPuntos]
-  const threshold = tf.scalar(1.96) // En una distribucion normal 2.5 representa que lo que cae fuera del ~98.8% de los valores, 1.96 ~95.0%
-  const lower_limit = mean.sub(std.mul(threshold))
-  const upper_limit = mean.add(std.mul(threshold))
-  const mask_below = avgTensor.greater(lower_limit)
-  const mask_above = avgTensor.less(upper_limit)
-  let acoted_data = avgTensor.where(mask_below, lower_limit)
-  acoted_data = avgTensor.where(mask_above, upper_limit)
+  const acoted_data = tf.tidy(() => {
+    const mean = avgTensor.mean(1, true) // promedio por funcion [numFunciones, 1]
+    const std = avgTensor.sub(mean).square().mean(1, true).sqrt() // desviacion estandar por funcion [numFunciones, 1]
+    //const z = avgTensor.sub(mean).div(std) // z-score por funcion [numFunciones, numPuntos]
+    const threshold = tf.scalar(1.96) // En una distribucion normal 2.5 representa que lo que cae fuera del ~98.8% de los valores, 1.96 ~95.0%
+    const lower_limit = mean.sub(std.mul(threshold))
+    const upper_limit = mean.add(std.mul(threshold))
+    const mask_below = avgTensor.greater(lower_limit)
+    const mask_above = avgTensor.less(upper_limit)
+    let acoted_data = avgTensor.where(mask_below, lower_limit)
+    acoted_data = avgTensor.where(mask_above, upper_limit)
+    return acoted_data
+  })
 
-  /** Normalizar min-max por fila*/
-  const min = acoted_data.min(1, true)
-  const max = acoted_data.max(1, true)
-  const avgNormalized = acoted_data.sub(min).div(max.sub(min))
-
-  /** Pronunciar las tendencias presentes en la funcion. */
   const umbral = 0.5
-  const greaterMask = avgNormalized.greater(tf.scalar(umbral))
-  const ones = tf.onesLike(acoted_data)
-  const zeros = tf.zerosLike(acoted_data)
-  const pushed = ones.where(greaterMask, zeros)
+  const avg_smoothed = tf.tidy(() => {
+    /** Normalizar min-max por fila*/
+    const min = acoted_data.min(1, true)
+    const max = acoted_data.max(1, true)
+    const avgNormalized = acoted_data.sub(min).div(max.sub(min))
 
-  /** Suavizar para eliminar baches pequeños. */
-  let window = Math.round(height * 0.15)
-  window = window % 2 === 1 ? window : window + 1
-  const k = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
-  const pushed_smoothed = pushed.expandDims(2).conv1d(k, 1, "same").squeeze()
+    /** Pronunciar las tendencias presentes en la funcion. */
+    const greaterMask = avgNormalized.greater(tf.scalar(umbral))
+    const ones = tf.onesLike(acoted_data)
+    const zeros = tf.zerosLike(acoted_data)
+    const pushed = ones.where(greaterMask, zeros)
+
+    /** Suavizar para eliminar baches pequeños. */
+    let window = Math.round(height * 0.15)
+    window = window % 2 === 1 ? window : window + 1
+    const k = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
+    const pushed_smoothed = pushed.expandDims(2).conv1d(k, 1, "same").squeeze()
+    return pushed_smoothed
+  })
 
   /**
    * Arreglo con informacion de para cada funcion de un segmento el
-   * punto vertical medio y la apartura que le corresponde.
+   * punto vertical medio y la apertura que le corresponde.
    */
-  const avgArrs: number[][] = pushed_smoothed.arraySync() as number[][]
+  const avgArrs: number[][] = avg_smoothed.arraySync() as number[][]
   const plateauInfo: {
     medium: number
     opening: number
@@ -259,42 +249,53 @@ export function extractScience({
   // demo();
 
   /** Promedio de pixeles que pasan por cada scienceTransversalFunction. Solo funciona con regresion lineal*/
-  // imgTensor: [1, height, width, 1]  — escala de grises en 4D
   const gray2d = imgTensor.squeeze([0, 3]) // [height, width]
-  /** Valores por pixel horizontal en eje X e Y */
-  const xValues = tf.range(0, width, 1, "int32").arraySync()
-  const yvalues = tf.tensor1d(xValues.map((x) => interpolated.funct(x)))
-  /** Minimo Y por pixel */
-  const minYs = yvalues.sub(tf.scalar(avgOpening / 2))
-  /** Maximo Y por pixel */
-  const maxYs = yvalues.add(tf.scalar(avgOpening / 2))
-  /** Tensor de coordenadas verticales: shape [height, width] => [0, 1, 2, ..., height-1]*/
-  const rowIndices = tf.range(0, height, 1, "int32")
-  const rowMatrix = tf.tile(rowIndices.expandDims(1), [1, width])
-  /** Filtrar valores por columna que no entran entre el min y max de la columna */
-  const maskLower = rowMatrix.greater(minYs)
-  const maskUpper = rowMatrix.less(maxYs)
-  const fullMask = tf.logicalAnd(maskLower, maskUpper)
-  const imgMasked = tf.where(fullMask, gray2d, tf.fill([height, width], 0))
-  /** Rotar para que la pendiente quede horizontal */
-  const rad = Math.atan(interpolated.derived(0))
-  const imgMaskedRotated = tf.image
-    .rotateWithOffset(imgMasked.expandDims(0).expandDims(-1) as tf.Tensor4D, rad, 0, [0.5, 0.5])
-    .squeeze([0, 3])
-  const fullMaskRotated = tf.image
-    .rotateWithOffset(
-      fullMask.toFloat().expandDims(0).expandDims(-1) as tf.Tensor4D,
-      rad,
-      0,
-      [0.5, 0.5],
-    )
-    .toInt()
-    .squeeze([0, 3])
+  /** Mascara donde se halla el espectro */
+  const fullMask = tf.tidy(() => {
+    /** Valores por pixel horizontal en eje X e Y */
+    const xValues = tf.range(0, width, 1, "int32").arraySync()
+    const yvalues = tf.tensor1d(xValues.map((x) => interpolated.funct(x)))
+    /** Minimo Y por pixel */
+    const minYs = yvalues.sub(tf.scalar(avgOpening / 2))
+    /** Maximo Y por pixel */
+    const maxYs = yvalues.add(tf.scalar(avgOpening / 2))
+    /** Tensor de coordenadas verticales: shape [height, width] => [0, 1, 2, ..., height-1]*/
+    const rowIndices = tf.range(0, height, 1, "int32")
+    const rowMatrix = tf.tile(rowIndices.expandDims(1), [1, width])
+    /** Filtrar valores por columna que no entran entre el min y max de la columna */
+    const maskLower = rowMatrix.greater(minYs)
+    const maskUpper = rowMatrix.less(maxYs)
+    const fullMask = tf.logicalAnd(maskLower, maskUpper)
+    return fullMask
+  })
+  /** Promedio transversal */
+  const avgPerColumn = tf.tidy(() => {
+    const imgMasked = tf.where(fullMask, gray2d, tf.fill([height, width], 0))
+    /** Rotar para que la pendiente quede horizontal */
+    const rad = Math.atan(interpolated.derived(0))
+    const imgMaskedRotated = tf.image
+      .rotateWithOffset(imgMasked.expandDims(0).expandDims(-1) as tf.Tensor4D, rad, 0, [0.5, 0.5])
+      .squeeze([0, 3])
+    const fullMaskRotated = tf.image
+      .rotateWithOffset(
+        fullMask.toFloat().expandDims(0).expandDims(-1) as tf.Tensor4D,
+        rad,
+        0,
+        [0.5, 0.5],
+      )
+      .toInt()
+      .squeeze([0, 3])
 
-  /** Promediar por columna */
-  const validPerColumn = fullMaskRotated.cast("int32").sum(0)
-  const avgPerColumn = imgMaskedRotated.sum(0).div(validPerColumn)
+    /** Promediar por columna */
+    const validPerColumn = fullMaskRotated.cast("int32").sum(0)
+    const avgPerColumn = imgMaskedRotated.sum(0).div(validPerColumn)
+    return avgPerColumn
+  })
 
+  avgTensor.dispose()
+  acoted_data.dispose()
+  avg_smoothed.dispose()
+  gray2d.dispose()
   return {
     mediasPoints: mediasPoints,
     opening: avgOpening,

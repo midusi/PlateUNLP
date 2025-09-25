@@ -49,6 +49,19 @@ CREATE TABLE `verification` (
 	`updated_at` integer
 );
 --> statement-breakpoint
+CREATE TABLE `calibration` (
+	`id` text PRIMARY KEY NOT NULL,
+	`observation_id` text NOT NULL,
+	`min_wavelength` integer DEFAULT 0 NOT NULL,
+	`max_wavelength` integer DEFAULT 2000 NOT NULL,
+	`material` text DEFAULT 'He-Ne-Ar' NOT NULL,
+	`only_one_line` integer DEFAULT false NOT NULL,
+	`inference_function` text DEFAULT 'Linear regresion' NOT NULL,
+	`deegre` integer DEFAULT 1 NOT NULL,
+	FOREIGN KEY (`observation_id`) REFERENCES `observation`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `calibration_observation_idx` ON `calibration` (`observation_id`);--> statement-breakpoint
 CREATE TABLE `iers_bulletin_a` (
 	`mdj` integer NOT NULL,
 	`pm_x` real NOT NULL,
@@ -71,6 +84,8 @@ CREATE TABLE `observation` (
 	`image_top` integer NOT NULL,
 	`image_width` integer NOT NULL,
 	`image_height` integer NOT NULL,
+	`count_medias_points` integer DEFAULT 5 NOT NULL,
+	`aperture_coefficient` real DEFAULT 1 NOT NULL,
 	`metadata_completion` real NOT NULL,
 	`object` text DEFAULT '' NOT NULL,
 	`object_known` integer DEFAULT true NOT NULL,
@@ -166,8 +181,7 @@ CREATE TABLE `spectrum` (
 	`image_top` integer NOT NULL,
 	`image_width` integer NOT NULL,
 	`image_height` integer NOT NULL,
-	`count_medias_points` integer DEFAULT 5 NOT NULL,
-	`aperture_coefficient` real DEFAULT 1 NOT NULL,
+	`intensityArr` text DEFAULT '[]' NOT NULL,
 	FOREIGN KEY (`observation_id`) REFERENCES `observation`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
