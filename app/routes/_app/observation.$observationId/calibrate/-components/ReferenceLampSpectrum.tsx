@@ -44,48 +44,43 @@ export function ReferenceLampSpectrum({
   lampPoints,
   setMaterialPoints,
 }: ReferenceLampSpectrumProps) {
-  const { filteredData, xScale, yScale } = useMemo(() => {
+
+  const { materialArrInRange, materialArrForLabel, xScale, yScale } = useMemo(() => {
     let min = 0
     while (getX(materialArr[min]) < minWavelength) min++
     let max = materialArr.length - 1
     while (getX(materialArr[max]) > maxWavelength) max--
 
-    const filteredData = materialArr.slice(min, max + 1)
-    return {
-      filteredData,
-      xScale: scaleLinear<number>({
-        domain: d3.extent(filteredData, getX) as [number, number],
-      }),
-      yScale: scaleLinear<number>({ domain: [0, d3.max(filteredData, getY)!] }),
-    }
-  }, [materialArr, minWavelength, maxWavelength])
+    /** Arreglo de todos los registros que encajan en el rango seleccionado */
+    const materialArrInRange = materialArr.slice(min, max + 1)
 
-  // Material division
-  const [filteredDatas, materials] = useMemo(() => {
-    const materials: string[] = []
-    let filteredDatas: SpectrumPoint[][]
-    if (onlyOneLine) {
-      materials.push(`${material}`)
-      filteredDatas = [filteredData]
+    /** Arreglo de intensidades de materiales separados por etiquetas */
+    let materialArrForLabel
+    if(onlyOneLine) {
+      materialArrForLabel = [{
+        label: material,
+        arr: materialArrInRange
+      }]
     } else {
-      /** No hay que regirse por el nombre, en filteredData
-       * tenemos el registro de los materiales, sacar la info de ahi */
-      for (const fd of filteredData) { 
-        if(!materials.includes(fd.material)){
-          materials.push(fd.material)
-        }
-      }
-      
-      filteredDatas = []
-      for (const m of materials) {
-        const nameList = [m, `${m} I`, `${m} II`]
-        const d = filteredData.filter((d) => nameList.includes(d.material))
-        filteredDatas.push(d)
-      }
-      console.log(filteredDatas)
+      /** Listado de etiquetas encontradas en el arreglo de materiales */
+      const labels = new Set(materialArr.map(ma => ma.material))
+      /** Separar arreglo por etiqueta */
+      materialArrForLabel = Array.from(labels)
+        .map(label => ({
+          label:label,
+          arr: materialArrInRange.filter(p => p.material === label)
+        }))
     }
-    return [filteredDatas, materials]
-  }, [filteredData, material, onlyOneLine])
+
+    return {
+      materialArrInRange,
+      materialArrForLabel,
+      xScale: scaleLinear<number>({
+        domain: d3.extent(materialArrInRange, getX) as [number, number],
+      }),
+      yScale: scaleLinear<number>({ domain: [0, d3.max(materialArrInRange, getY)!] }),
+    }
+  }, [materialArr, minWavelength, maxWavelength, onlyOneLine, material])
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
@@ -101,9 +96,9 @@ export function ReferenceLampSpectrum({
   const spotsInGraph: JSX.Element[] = []
   for (const [index, point] of materialPoints.entries()) {
     if (
-      filteredData.length > 0 &&
-      filteredData[0].wavelength <= point.x &&
-      point.x <= filteredData[filteredData.length - 1].wavelength
+      materialArrInRange.length > 0 &&
+      materialArrInRange[0].wavelength <= point.x &&
+      point.x <= materialArrInRange[materialArrInRange.length - 1].wavelength
     ) {
       const xClick = xScale(point.x)
       // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
@@ -137,8 +132,8 @@ export function ReferenceLampSpectrum({
     const xVal = xScale.invert(xClick)
 
     if (
-      filteredData[0].wavelength <= xVal &&
-      xVal <= filteredData[filteredData.length - 1].wavelength
+      materialArrInRange[0].wavelength <= xVal &&
+      xVal <= materialArrInRange[materialArrInRange.length - 1].wavelength
     ) {
       const yMatch = materialArr.reduce((prev, curr) => {
         return Math.abs(curr.wavelength - xVal) < Math.abs(prev.wavelength - xVal) ? curr : prev
@@ -169,19 +164,19 @@ export function ReferenceLampSpectrum({
   return (
     <div ref={measureRef} style={{ height: `${height}px` }}>
       {/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-      <svg width={width} height={height} onClick={onClick}>
-        <title id="graphTitle">Lamp Spectrum</title>
+      <svg width={width} height={height} onClick={onClick} role="img"
+        aria-label="Lamp Spectrum">
         {spotsInGraph}
         <Group top={margin.top} left={margin.left}>
           <GridColumns scale={xScale} width={xMax} height={yMax} className="stroke-neutral-100" />
           <GridRows scale={yScale} width={xMax} height={yMax} className="stroke-neutral-100" />
-          {filteredDatas.map((fd, index) => (
+          {materialArrForLabel.map((item, index) => (
             <LinePath<SpectrumPoint>
-              key={`material_line-${fd[0].material}`}
+              key={`material_line-${item.label}`}
               curve={curveLinear}
-              data={fd}
-              x={(p) => xScale(getX(p)) ?? 0}
-              y={(p) => yScale(getY(p)) ?? 0}
+              data={item.arr}
+              x={(p) => xScale(getX(p))}
+              y={(p) => yScale(getY(p))}
               shapeRendering="geometricPrecision"
               className="stroke-1"
               stroke={materialsPalette[index % materialsPalette.length]}
@@ -197,15 +192,15 @@ export function ReferenceLampSpectrum({
         </Group>
 
         <Group top={margin.top} left={width - margin.right - 100}>
-          {materials.map((m: string, index: number) => (
-            <Group top={index * 20} key={`legend-item-${m}`}>
+          {materialArrForLabel.map((item, index) => (
+            <Group top={index * 20} key={`legend-item-${item.label}`}>
               <rect
                 width={15}
                 height={15}
                 fill={materialsPalette[index % materialsPalette.length]}
               />
               <text x={20} y={12} fontSize={12} fill="black">
-                {m}
+                {item.label}
               </text>
             </Group>
           ))}
