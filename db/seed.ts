@@ -6,6 +6,7 @@ import pc from "picocolors"
 import { z } from "zod"
 import { getJulianDate, getModifiedJulianDate } from "~/lib/astronomical/datetime"
 import { auth } from "~/lib/auth"
+import { getMaterialSpectralData } from "~/lib/spectral-data"
 import { db } from "."
 import * as schema from "./schema"
 
@@ -179,6 +180,15 @@ async function main() {
   console.log(pc.bgBlue(" Seeding database... "))
   console.log(pc.gray("❖ Dropping existing tables..."))
   await reset(db, schema)
+
+  console.log(pc.gray("❖ Getting materials..."))
+  const materials = [
+    { name: "Fe-Ne", arr: getMaterialSpectralData("Fe-Ne") },
+    { name: "Fe-Ne-Ar", arr: getMaterialSpectralData("Fe-Ne-Ar") },
+    { name: "He-Ne-Ar", arr: getMaterialSpectralData("He-Ne-Ar") },
+  ]
+  const res = await db.insert(schema.material).values(materials)
+  console.log(pc.white(`✓ Inserted ${pc.bold(res.rowsAffected)} materials`))
 
   console.log(pc.gray("❖ Getting observatories..."))
   await seedObservatories()

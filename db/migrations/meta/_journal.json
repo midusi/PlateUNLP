@@ -15,6 +15,13 @@
       "when": 1758156193423,
       "tag": "0001_arrOfMatchs",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1758767808565,
+      "tag": "0002_material-table",
+      "breakpoints": true
     }
   ]
 }

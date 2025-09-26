@@ -9,7 +9,7 @@ import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
 import { notifyError } from "~/lib/notifications"
 import type { Breadcrumbs } from "~/routes/_app/-components/AppBreadcrumbs"
-import { BasicUserFieldsSchema, LogUpFieldsSchema } from "~/types/auth"
+import { BasicUserFieldsSchema } from "~/types/auth"
 import { ChangePasswordModal } from "./-components/ChangePasswordModal"
 
 export const Route = createFileRoute("/_app/settings/")({
@@ -61,10 +61,12 @@ function RouteComponent() {
   return (
     <div className="mt-10 flex h-full w-full max-w-6xl items-center justify-center">
       <Card className="w-[400px] overflow-hidden">
-        <form onSubmit={(e)=> {
-          e.preventDefault()  
-          form.handleSubmit(e)
-        }} >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            form.handleSubmit(e)
+          }}
+        >
           <CardHeader className="m-4 flex flex-col items-center justify-center">
             <h1 className="text-2xl">Your Profile</h1>
             <p className="text-gray-600 text-sm">Manage your profile information</p>
@@ -95,16 +97,16 @@ function RouteComponent() {
               <ChangePasswordModal onClose={() => setChangePasswordOpen(false)} />
             )}
           </CardContent>
-          <CardFooter className="pt-4 flex flex-col justify-center">
+          <CardFooter className="flex flex-col justify-center pt-4">
             <form.Subscribe
-              selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+              selector={(formState) => [
+                formState.isValid,
+                formState.isSubmitting,
+                formState.isDirty,
+              ]}
             >
               {([isValid, isSubmitting, isDirty]) => (
-                <Button
-                  type="submit"
-                  disabled={!isValid}
-                  className="w-48 border"
-                >
+                <Button type="submit" disabled={!isValid} className="w-48 border">
                   {isSubmitting ? (
                     <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
                   ) : (

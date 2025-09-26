@@ -8,19 +8,23 @@ import { scaleLinear } from "@visx/scale"
 import { LinePath } from "@visx/shape"
 import * as d3 from "@visx/vendor/d3-array"
 import { useId, useMemo } from "react"
-import { useGlobalStore } from "~/hooks/use-global-store"
+import { materialsPalette } from "~/lib/materials-palette"
 import type { SpectrumPoint } from "~/lib/spectral-data"
-import { getMaterialSpectralData } from "~/lib/spectral-data"
 
 // data accessors
-const getX = (p: SpectrumPoint) => p?.wavelength ?? 0
-const getY = (p: SpectrumPoint) => p?.intensity ?? 0
+const getX = (p: SpectrumPoint) => p.wavelength
+const getY = (p: SpectrumPoint) => p.intensity
 
 const height = 150
 const margin = { top: 20, right: 8, bottom: 40, left: 50 }
 
 type ReferenceLampRangeProps = {
   material: string
+  materialArr: {
+    wavelength: number
+    material: string
+    intensity: number
+  }[]
   minWavelength: number
   setMinWavelength: (min: number) => void
   maxWavelength: number
@@ -29,26 +33,22 @@ type ReferenceLampRangeProps = {
 
 export function ReferenceLampRange({
   material,
+  materialArr,
   minWavelength,
   setMinWavelength,
   maxWavelength,
   setMaxWavelength,
 }: ReferenceLampRangeProps) {
   const patternId = useId()
-  const materialsPalette = useGlobalStore((s) => s.materialsPalette)
 
-  const { data, xScale, yScale } = useMemo(() => {
-    const data = getMaterialSpectralData(material as "He-Ne-Ar" | "Fe-Ne-Ar" | "Fe-Ne")
-    return {
-      data,
-      xScale: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
-      yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
-    }
-  }, [material])
-
-  const rangeMin = Math.max(minWavelength, d3.min(data, getX)!)
-
-  const rangeMax = Math.min(maxWavelength, d3.max(data, getX)!)
+  /** Minimos y maximos totales y especificos al range */
+  const materialArrXMax = d3.max(materialArr, getX)!
+  const materialArrXMin = d3.min(materialArr, getX)!
+  const materialArrYMax = d3.max(materialArr, getY)!
+  const xScale = scaleLinear<number>({ domain: [0, materialArrXMax] })
+  const yScale = scaleLinear<number>({ domain: [0, materialArrYMax] })
+  const rangeMin = Math.max(minWavelength, materialArrXMin)
+  const rangeMax = Math.min(maxWavelength, materialArrXMax)
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
@@ -60,16 +60,17 @@ export function ReferenceLampRange({
   xScale.range([0, xMax])
   yScale.range([yMax, 0])
 
+  /** Aislar datos de materiales */
   const [datas, materials] = useMemo(() => {
     const materials = material.split("-")
     const datas: SpectrumPoint[][] = []
     for (const m of materials) {
       const nameList = [m].flatMap((m) => [m, `${m} I`, `${m} II`])
-      const d = data.filter((d) => nameList.includes(d.material))
+      const d = materialArr.filter((d) => nameList.includes(d.material))
       datas.push(d)
     }
     return [datas, materials]
-  }, [data, material])
+  }, [materialArr, material])
 
   return (
     <div ref={measureRef} className="flex justify-center">
