@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Button } from "~/components/ui/button"
+import { formatObservation } from "~/lib/format"
 import { fetchGrayscaleImage } from "~/lib/image"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
@@ -36,9 +37,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
           link: { to: "/plate/$plateId", params: { plateId: plate.id } },
         },
         {
-          title: `${initialMetadata.OBJECT === "" ? "-" : initialMetadata.OBJECT}/${
-            initialMetadata["DATE-OBS"].value === "" ? "-" : initialMetadata["DATE-OBS"].value
-          }/${initialMetadata.UT.value === "" ? "-" : initialMetadata.UT.value}`,
+          title: formatObservation({ ...initialMetadata, id: params.observationId }),
           link: {
             to: "/observation/$observationId",
             params: { observationId: params.observationId },

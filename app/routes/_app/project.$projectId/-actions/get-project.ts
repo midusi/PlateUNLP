@@ -13,7 +13,14 @@ export const getProject = createServerFn()
           columns: { id: true, "PLATE-N": true },
           with: {
             observations: {
-              columns: { id: true, OBJECT: true },
+              columns: {
+                id: true,
+                OBJECT: true,
+                "DATE-OBS": true,
+                "DATE-OBS?": true,
+                UT: true,
+                "UT?": true,
+              },
             },
           },
         },

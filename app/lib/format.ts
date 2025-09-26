@@ -1,3 +1,5 @@
+import { formatDate } from "date-fns"
+
 /**
  * Converts a decimal degree value to a string representation in degrees, minutes, and seconds (DMS).
  * @param deg - The decimal degree value to convert.
@@ -70,4 +72,27 @@ export function degToHMS(deg: number, opts: { digits?: number; sep?: string } = 
  */
 export function radToHMS(rad: number, opts?: { digits?: number; sep?: string }) {
   return degToHMS(rad * (180 / Math.PI), opts)
+}
+
+export function formatObservation({
+  id,
+  OBJECT,
+  "DATE-OBS": DATE_OBS,
+  UT,
+}: {
+  id: string
+  OBJECT: string
+  "DATE-OBS": { value: string; isKnown: boolean }
+  UT: { value: string; isKnown: boolean }
+}) {
+  if (!OBJECT) return `Obs-${id.slice(0, 8)}`
+  return [
+    OBJECT,
+    DATE_OBS.isKnown && DATE_OBS.value.length > 0
+      ? formatDate(new Date(`${DATE_OBS.value}T00:00:00`), "d/M/yyyy")
+      : null,
+    UT.isKnown && UT.value.length > 0 ? UT.value : null,
+  ]
+    .filter(Boolean)
+    .join(" ")
 }
