@@ -30,7 +30,7 @@ export const updateCalibration = createServerFn()
     })
     if (!calibration) throw new Error(`Calibration with id ${data.id} not found`)
 
-    await db
+    const updatedCalibration = await db
       .update(s.calibration)
       .set({
         minWavelength: data.minWavelength,
@@ -43,4 +43,16 @@ export const updateCalibration = createServerFn()
         lampPoints: data.lampPoints,
       })
       .where(eq(s.calibration.id, data.id))
+      .returning({
+        id: s.calibration.id,
+        minWavelength: s.calibration.minWavelength,
+        maxWavelength: s.calibration.maxWavelength,
+        material: s.calibration.material,
+        onlyOneLine: s.calibration.onlyOneLine,
+        inferenceFunction: s.calibration.inferenceFunction,
+        deegre: s.calibration.deegre,
+        materialPoints: s.calibration.materialPoints,
+        lampPoints: s.calibration.lampPoints,
+      })
+      return updatedCalibration[0]
   })

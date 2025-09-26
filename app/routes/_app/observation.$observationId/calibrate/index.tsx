@@ -21,6 +21,7 @@ import { EmpiricalSpectrum } from "./-components/EmpiricalSpectrum"
 import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
 import { InferenceBoxGraph } from "./-components/InferenceBoxGraph"
 import { updateInferenceFuntionInStore } from "./-utils/updateInferenceFunctionInStore"
+import { notifyError } from "~/lib/notifications"
 
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
   component: RouteComponent,
@@ -126,72 +127,71 @@ function RouteComponent() {
   const router = useRouter()
   const form = useAppForm({
     defaultValues,
-    validators: { onChange: TeoricalSpectrumConfigSchema },
+    validators: { onChange: TeoricalSpectrumConfigSchema, onMount: TeoricalSpectrumConfigSchema },
+    onSubmit: async ({ value, formApi }) => {
+          try {
+            if (formApi.state.isValid) {
+              const updatedCalibration = await updateCalibration({
+                data: {
+                  id: calibration.id,
+                  minWavelength: value.minWavelength,
+                  maxWavelength: value.maxWavelength,
+                  material: value.material,
+                  inferenceFunction: value.inferenceFunction as
+                    | "Linear regresion"
+                    | "Piece wise linear regression"
+                    | "Legendre",
+                  onlyOneLine: value.onlyOneLine,
+                  deegre: value.deegre,
+                  materialPoints: value.materialPoints,
+                  lampPoints: value.lampPoints,
+                },
+              })
+
+              /** Si el material cambio entonces hay que pedir los datos del nuevo material */
+              if (lastMaterial.current !== value.material) {
+                const materialData = await getMaterialData({
+                  data: { materialName: value.material },
+                })
+                setMaterialArr(materialData?.arr ?? [])
+                lastMaterial.current = value.material
+              }
+
+              const selectedFuntionOption = inferenceOptions.find((f) => f.name === value.inferenceFunction)!
+              updateInferenceFuntionInStore(
+                selectedFuntionOption,
+                value.deegre,
+                value.lampPoints,
+                value.materialPoints,
+                setPixelToWavelengthFunction,
+              )
+            }
+
+            /** 
+             * Activar esto proboca que los formularios se reseteen continuamient
+             * con valores incorrectos por mas de que la db este ok
+             */
+            //formApi.reset(value)
+          } catch (error) {
+            notifyError("Failed to update calibration settings", error)
+          }
+        },
     listeners: {
       onChange: async ({ formApi }) => {
+        // autosave logic
         if (formApi.state.isValid) {
-          await updateCalibration({
-            data: {
-              id: calibration.id,
-              minWavelength: formApi.state.values.minWavelength,
-              maxWavelength: formApi.state.values.maxWavelength,
-              material: formApi.state.values.material,
-              inferenceFunction: formApi.state.values.inferenceFunction as
-                | "Linear regresion"
-                | "Piece wise linear regression"
-                | "Legendre",
-              onlyOneLine: formApi.state.values.onlyOneLine,
-              deegre: formApi.state.values.deegre,
-              materialPoints: formApi.state.values.materialPoints,
-              lampPoints: formApi.state.values.lampPoints,
-            },
-          })
-
-          /** Si el material cambio entonces hay que pedir los datos del nuevo material */
-          if (lastMaterial.current !== formApi.state.values.material) {
-            const materialData = await getMaterialData({
-              data: { materialName: formApi.state.values.material },
-            })
-            setMaterialArr(materialData?.arr ?? [])
-            lastMaterial.current = formApi.state.values.material
-          }
-
-          const inferenceFunction = formApi.state.values.inferenceFunction
-          const deegre = formApi.state.values.deegre
-          const materialPoints = formApi.state.values.materialPoints
-          const lampPoints = formApi.state.values.lampPoints
-          const selectedFuntionOption = inferenceOptions.find((f) => f.name === inferenceFunction)!
-          updateInferenceFuntionInStore(
-            selectedFuntionOption,
-            deegre,
-            lampPoints,
-            materialPoints,
-            setPixelToWavelengthFunction,
-          )
-
-          //formApi.handleSubmit(); // Autosave, ejjecuta onSubmit
+          formApi.handleSubmit()
+        }
+      },
+      onMount: async ({ formApi }) => {
+        // autosave logic
+        if (formApi.state.isValid) {
+          formApi.handleSubmit()
         }
       },
       onChangeDebounceMs: 500,
     },
   })
-
-  /** Temporal hasta refactorizar toda la seccion de calibracion */
-  useEffect(() => {
-    const inferenceFunction = form.getFieldValue("inferenceFunction")
-    const deegre = form.getFieldValue("deegre")
-    const materialPoints = form.getFieldValue("materialPoints")
-    const lampPoints = form.getFieldValue("lampPoints")
-    const selectedFuntionOption = inferenceOptions.find((f) => f.name === inferenceFunction)!
-
-    updateInferenceFuntionInStore(
-      selectedFuntionOption,
-      deegre,
-      lampPoints,
-      materialPoints,
-      setPixelToWavelengthFunction,
-    )
-  }, [form.getFieldValue, setPixelToWavelengthFunction])
 
   return (
     <>
@@ -215,7 +215,7 @@ function RouteComponent() {
                     <span>Changes aren't beign saved! Please fix the errors above</span>
                     <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
                   </>
-                ) : isSubmitting || isDirty ? (
+                ) : isSubmitting  ? (
                   <>
                     <span>Saving changes...</span>
                     <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
