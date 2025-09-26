@@ -62,22 +62,27 @@ export function ReferenceLampSpectrum({
 
   // Material division
   const [filteredDatas, materials] = useMemo(() => {
-    let materials = material.split("-")
+    const materials: string[] = []
     let filteredDatas: SpectrumPoint[][]
     if (onlyOneLine) {
-      materials = [`${material}`]
+      materials.push(`${material}`)
       filteredDatas = [filteredData]
     } else {
-      materials = material.split("-")
       /** No hay que regirse por el nombre, en filteredData
        * tenemos el registro de los materiales, sacar la info de ahi */
-      console.log(materials)
+      for (const fd of filteredData) { 
+        if(!materials.includes(fd.material)){
+          materials.push(fd.material)
+        }
+      }
+      
       filteredDatas = []
       for (const m of materials) {
-        const nameList = [m].flatMap((m) => [m, `${m} I`, `${m} II`])
+        const nameList = [m, `${m} I`, `${m} II`]
         const d = filteredData.filter((d) => nameList.includes(d.material))
         filteredDatas.push(d)
       }
+      console.log(filteredDatas)
     }
     return [filteredDatas, materials]
   }, [filteredData, material, onlyOneLine])
@@ -172,14 +177,14 @@ export function ReferenceLampSpectrum({
           <GridRows scale={yScale} width={xMax} height={yMax} className="stroke-neutral-100" />
           {filteredDatas.map((fd, index) => (
             <LinePath<SpectrumPoint>
-              key={`material_line-${materials[index]}`}
+              key={`material_line-${fd[0].material}`}
               curve={curveLinear}
               data={fd}
               x={(p) => xScale(getX(p)) ?? 0}
               y={(p) => yScale(getY(p)) ?? 0}
               shapeRendering="geometricPrecision"
               className="stroke-1"
-              stroke={"#d62728"}
+              stroke={materialsPalette[index % materialsPalette.length]}
             />
           ))}
           <AxisBottom
