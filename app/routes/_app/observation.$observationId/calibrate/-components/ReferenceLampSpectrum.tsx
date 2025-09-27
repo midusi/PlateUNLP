@@ -41,7 +41,6 @@ type ReferenceLampSpectrumProps = {
 		intensity: number;
 	}[];
 	onlyOneLine: boolean;
-	lampPoints: { x: number; y: number }[];
 	materialPoints: { x: number; y: number }[];
 	setMaterialPoints: (arr: { x: number; y: number }[]) => void;
 };
@@ -53,17 +52,13 @@ export function ReferenceLampSpectrum({
 	materialArr,
 	onlyOneLine,
 	materialPoints,
-	lampPoints,
 	setMaterialPoints,
 }: ReferenceLampSpectrumProps) {
 	const { materialArrInRange, materialArrForLabel } = useMemo(() => {
-		let min = 0;
-		while (getX(materialArr[min]) < minWavelength) min++;
-		let max = materialArr.length - 1;
-		while (getX(materialArr[max]) > maxWavelength) max--;
-
 		/** Arreglo de todos los registros que encajan en el rango seleccionado */
-		const materialArrInRange = materialArr.slice(min, max + 1);
+		const materialArrInRange = materialArr.filter(
+			(mp) => getX(mp) >= minWavelength && getX(mp) <= maxWavelength,
+		);
 
 		/** Arreglo de intensidades de materiales separados por etiquetas */
 		let materialArrForLabel: {
