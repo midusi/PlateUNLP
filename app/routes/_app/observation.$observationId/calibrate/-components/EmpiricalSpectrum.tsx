@@ -27,7 +27,7 @@ interface EmpiricalSpectrumProps {
 }
 const height = 150
 /** Problema al agregar margenes a izquierda y derecha */
-const margin = { top: 0, right: 12, bottom: 40, left: 0 }
+const margin = { top: 0, right: 12, bottom: 40, left: 12 }
 
 const tooltipStyles = {
   ...defaultStyles,

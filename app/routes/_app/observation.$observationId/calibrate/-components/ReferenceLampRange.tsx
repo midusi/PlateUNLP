@@ -1,5 +1,5 @@
 import { useMeasure } from "@uidotdev/usehooks"
-import { AxisBottom, AxisLeft } from "@visx/axis"
+import { AxisBottom } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { GridColumns, GridRows } from "@visx/grid"
 import { Group } from "@visx/group"

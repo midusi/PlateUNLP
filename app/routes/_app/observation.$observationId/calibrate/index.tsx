@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 import type z from "zod"
+import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
+import { formatObservation } from "~/lib/format"
 import { notifyError } from "~/lib/notifications"
+import { CustomError } from "~/lib/utils"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
 import { TeoricalSpectrumConfigSchema } from "~/types/calibrate"
@@ -19,6 +22,7 @@ import { CalibrationSettingsUI, inferenceOptions } from "./-child-forms/Calibrat
 import { EmpiricalSpectrum } from "./-components/EmpiricalSpectrum"
 import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
 import { InferenceBoxGraph } from "./-components/InferenceBoxGraph"
+import { downloadJSON } from "./-utils/download-json"
 import { updateInferenceFuntionInStore } from "./-utils/updateInferenceFunctionInStore"
 
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
@@ -44,6 +48,8 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
       data: { materialName: calibration.material },
     })
 
+    const observationIdentifier = `${initialMetadata.OBJECT}.${initialMetadata["DATE-OBS"].value}.${initialMetadata.UT.value}`
+
     return {
       breadcrumbs: [
         {
@@ -58,7 +64,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
           link: { to: "/plate/$plateId", params: { plateId: plate.id } },
         },
         {
-          title: `${initialMetadata.OBJECT}/${initialMetadata["DATE-OBS"].value}/${initialMetadata.UT.value}`,
+          title: formatObservation({ ...initialMetadata, id: params.observationId }),
           link: {
             to: "/observation/$observationId",
             params: { observationId: params.observationId },
@@ -72,6 +78,8 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
           },
         },
       ] satisfies Breadcrumbs,
+      plateN: plate["PLATE-N"],
+      observationIdentifier: observationIdentifier,
       spectrums: spectrums as typeof spectrums,
       calibration: calibration,
       materialData: materialData,
@@ -81,7 +89,8 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
 })
 
 function RouteComponent() {
-  const { spectrums, calibration, materialData, listOfMaterials } = Route.useLoaderData()
+  const { spectrums, calibration, materialData, listOfMaterials, plateN, observationIdentifier } =
+    Route.useLoaderData()
 
   const lastMaterial = useRef<string>(calibration.material)
   const [materialArr, setMaterialArr] = useState<
@@ -324,6 +333,33 @@ function RouteComponent() {
           </form.Field>
         </CardContent>
       </Card>
+
+      <form.Subscribe
+        selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+      >
+        {([isValid, isSubmitting, isDirty]) => (
+          <div className="flex w-full justify-center">
+            <Button
+              onClick={() => {
+                if (pixelToWavelengthFunction instanceof CustomError) return
+                const jsonToDownload = {
+                  science: scienceSpectrum.map((item) => ({
+                    wavelength: pixelToWavelengthFunction(item.pixel),
+                    intensity: item.intensity,
+                  })),
+                }
+                downloadJSON(jsonToDownload, `${plateN}.${observationIdentifier}.science.json`)
+              }}
+              disabled={
+                !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
+              }
+              className="m-4 flex w-20 justify-center"
+            >
+              Export
+            </Button>
+          </div>
+        )}
+      </form.Subscribe>
     </>
   )
 }
