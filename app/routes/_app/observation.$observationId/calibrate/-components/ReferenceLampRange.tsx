@@ -44,13 +44,13 @@ export function ReferenceLampRange({
   const patternId = useId()
 
   /** Minimos y maximos totales y especificos al range */
-  const materialArrXMax = d3.max(materialArr, getX)!
+  const materialArrXMax = Math.max(d3.max(materialArr, getX)!, 41000)
   const materialArrXMin = d3.min(materialArr, getX)!
   const materialArrYMax = d3.max(materialArr, getY)!
   const xScale = scaleLinear<number>({ domain: [0, materialArrXMax] })
   const yScale = scaleLinear<number>({ domain: [0, materialArrYMax] })
-  const rangeMin = Math.max(minWavelength, materialArrXMin)
-  const rangeMax = Math.min(maxWavelength, materialArrXMax)
+  const rangeMin = minWavelength
+  const rangeMax = Math.max(maxWavelength, materialArrXMin)
 
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
