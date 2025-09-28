@@ -267,11 +267,7 @@ export function ReferenceLampSpectrum({
 
           {/* Longitudes de onda marcadas por el usuario */}
           {materialPoints.map((mp, idx) => {
-            if (
-              materialArrInRange.length > 0 &&
-              materialArrInRange[0].wavelength <= mp.x &&
-              mp.x <= materialArrInRange[materialArrInRange.length - 1].wavelength
-            ) {
+            if (materialArrInRange.length > 0 && minWavelength <= mp.x && mp.x <= maxWavelength) {
               const xClick = wavelengthScale(mp.x)
 
               return (
