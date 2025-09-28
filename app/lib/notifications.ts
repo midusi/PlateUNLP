@@ -18,3 +18,15 @@ export function notifyError(title: string, error?: unknown) {
     type: "error" satisfies ToastType,
   })
 }
+
+/**
+ * Notify an succes with a title.
+ * @param title The title of the error notification, like "Error logging in".
+ */
+export function notifySucces(title: string) {
+  toastManager.add({
+    title,
+    timeout: 10000,
+    type: "success" satisfies ToastType,
+  })
+}

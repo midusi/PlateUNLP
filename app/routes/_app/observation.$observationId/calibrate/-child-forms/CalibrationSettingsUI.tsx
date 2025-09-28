@@ -1,3 +1,4 @@
+import { useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
 import { FilePlus } from "lucide-react"
 import { useState } from "react"
@@ -54,6 +55,7 @@ export const CalibrationSettingsUI = withForm({
   },
   render: function Render({ form, materialArr, materialsNamesList }) {
     const [isLoadLampModalOpen, setIsLoadLampModalOpen] = useState(false)
+    const router = useRouter()
 
     return (
       <>
@@ -80,10 +82,18 @@ export const CalibrationSettingsUI = withForm({
                 <FilePlus className="h-4 w-4" />
               </Button>
               {isLoadLampModalOpen && (
-                <LoadLampFileModal
-                  onClose={() => setIsLoadLampModalOpen(false)}
-                  actualLampsNamesList={materialsNamesList}
-                />
+                <form.AppField name="material">
+                  {(field) => (
+                    <LoadLampFileModal
+                      onClose={async (newMaterial: string) => {
+                        setIsLoadLampModalOpen(false)
+                        field.handleChange(newMaterial)
+                        await router.invalidate()
+                      }}
+                      actualLampsNamesList={materialsNamesList}
+                    />
+                  )}
+                </form.AppField>
               )}
             </div>
           </div>

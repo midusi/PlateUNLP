@@ -5,13 +5,13 @@ import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { Field, FieldControl, FieldError, FieldLabel } from "~/components/ui/field"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
-import { notifyError } from "~/lib/notifications"
+import { notifyError, notifySucces } from "~/lib/notifications"
 import { createLoadLampFormSchema } from "~/types/load-lamp-form-schema"
 import { addMaterial } from "../-actions/add-material"
 import { parseLampFile } from "../-utils/parse-lamp-file"
 
 interface LoadLampFileModalProps {
-  onClose: () => void
+  onClose: (newMaterial: string) => void
   actualLampsNamesList: string[]
 }
 
@@ -31,7 +31,8 @@ export function LoadLampFileModal({ onClose, actualLampsNamesList }: LoadLampFil
 
         const material = await addMaterial({ data: { name: name, arr: arr } })
 
-        onClose() // cerrar modal
+        notifySucces("Lamp file loaded")
+        onClose(material.name) // cerrar modal
       } catch (error) {
         notifyError("Failed to load new lamp file", error)
       }
