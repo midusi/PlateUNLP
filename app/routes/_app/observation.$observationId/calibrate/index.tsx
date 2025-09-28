@@ -1,11 +1,10 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router"
-import { ca } from "date-fns/locale"
-import { material } from "db/schema/material"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import type z from "zod"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
+import { notifyError } from "~/lib/notifications"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
 import { TeoricalSpectrumConfigSchema } from "~/types/calibrate"
@@ -21,7 +20,6 @@ import { EmpiricalSpectrum } from "./-components/EmpiricalSpectrum"
 import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
 import { InferenceBoxGraph } from "./-components/InferenceBoxGraph"
 import { updateInferenceFuntionInStore } from "./-utils/updateInferenceFunctionInStore"
-import { notifyError } from "~/lib/notifications"
 
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
   component: RouteComponent,
@@ -105,14 +103,13 @@ function RouteComponent() {
 
   const lamps = spectrums
     .filter((s) => s.type !== "science")
-    .map((s) =>
-      s.intensityArr.map((n, idx) => ({
+    .map((s, idx) => ({
+      id: idx,
+      data: s.intensityArr.map((n, idx) => ({
         pixel: idx,
         intensity: n,
       })),
-    )
-  const lamp2Spectrum = lamps[0]
-  const lamp1Spectrum = lamps[1]
+    }))
 
   const defaultValues: z.output<typeof TeoricalSpectrumConfigSchema> = {
     minWavelength: calibration.minWavelength,
@@ -124,58 +121,60 @@ function RouteComponent() {
     materialPoints: calibration.materialPoints,
     lampPoints: calibration.lampPoints,
   }
-  const router = useRouter()
+
   const form = useAppForm({
     defaultValues,
     validators: { onChange: TeoricalSpectrumConfigSchema, onMount: TeoricalSpectrumConfigSchema },
     onSubmit: async ({ value, formApi }) => {
-          try {
-            if (formApi.state.isValid) {
-              const updatedCalibration = await updateCalibration({
-                data: {
-                  id: calibration.id,
-                  minWavelength: value.minWavelength,
-                  maxWavelength: value.maxWavelength,
-                  material: value.material,
-                  inferenceFunction: value.inferenceFunction as
-                    | "Linear regresion"
-                    | "Piece wise linear regression"
-                    | "Legendre",
-                  onlyOneLine: value.onlyOneLine,
-                  deegre: value.deegre,
-                  materialPoints: value.materialPoints,
-                  lampPoints: value.lampPoints,
-                },
-              })
+      try {
+        if (formApi.state.isValid) {
+          await updateCalibration({
+            data: {
+              id: calibration.id,
+              minWavelength: value.minWavelength,
+              maxWavelength: value.maxWavelength,
+              material: value.material,
+              inferenceFunction: value.inferenceFunction as
+                | "Linear regresion"
+                | "Piece wise linear regression"
+                | "Legendre",
+              onlyOneLine: value.onlyOneLine,
+              deegre: value.deegre,
+              materialPoints: value.materialPoints,
+              lampPoints: value.lampPoints,
+            },
+          })
 
-              /** Si el material cambio entonces hay que pedir los datos del nuevo material */
-              if (lastMaterial.current !== value.material) {
-                const materialData = await getMaterialData({
-                  data: { materialName: value.material },
-                })
-                setMaterialArr(materialData?.arr ?? [])
-                lastMaterial.current = value.material
-              }
-
-              const selectedFuntionOption = inferenceOptions.find((f) => f.name === value.inferenceFunction)!
-              updateInferenceFuntionInStore(
-                selectedFuntionOption,
-                value.deegre,
-                value.lampPoints,
-                value.materialPoints,
-                setPixelToWavelengthFunction,
-              )
-            }
-
-            /** 
-             * Activar esto proboca que los formularios se reseteen continuamient
-             * con valores incorrectos por mas de que la db este ok
-             */
-            //formApi.reset(value)
-          } catch (error) {
-            notifyError("Failed to update calibration settings", error)
+          /** Si el material cambio entonces hay que pedir los datos del nuevo material */
+          if (lastMaterial.current !== value.material) {
+            const materialData = await getMaterialData({
+              data: { materialName: value.material },
+            })
+            setMaterialArr(materialData?.arr ?? [])
+            lastMaterial.current = value.material
           }
-        },
+
+          const selectedFuntionOption = inferenceOptions.find(
+            (f) => f.name === value.inferenceFunction,
+          )!
+          updateInferenceFuntionInStore(
+            selectedFuntionOption,
+            value.deegre,
+            value.lampPoints,
+            value.materialPoints,
+            setPixelToWavelengthFunction,
+          )
+        }
+
+        /**
+         * Activar esto proboca que los formularios se reseteen continuamient
+         * con valores incorrectos por mas de que la db este ok
+         */
+        //formApi.reset(value)
+      } catch (error) {
+        notifyError("Failed to update calibration settings", error)
+      }
+    },
     listeners: {
       onChange: async ({ formApi }) => {
         // autosave logic
@@ -208,14 +207,14 @@ function RouteComponent() {
           <form.Subscribe
             selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
           >
-            {([isValid, isSubmitting, isDirty]) => (
+            {([isValid, isSubmitting, _isDirty]) => (
               <p className="flex items-center text-muted-foreground text-xs italic">
                 {!isValid ? (
                   <>
                     <span>Changes aren't beign saved! Please fix the errors above</span>
                     <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
                   </>
-                ) : isSubmitting  ? (
+                ) : isSubmitting ? (
                   <>
                     <span>Saving changes...</span>
                     <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
@@ -236,59 +235,31 @@ function RouteComponent() {
           {/* Grafico de interacción para calibrar respecto a lampara teorica */}
           <form.Field name="lampPoints">
             {(fieldLP) => (
-              <form.Field name="materialPoints">
-                {(fieldMP) => (
-                  <div className="flex flex-col px-8">
-                    {/* Grafico espectro calibrado lampara 1 */}
-                    <div>
-                      <CardTitle className="mb-4">Empirical Comparison Lamp 1</CardTitle>
-                      <EmpiricalSpectrum
-                        data={lamp1Spectrum}
-                        color="#0ea5e9"
-                        interactable
-                        preview
-                        lampPoints={fieldLP.state.value}
-                        setLampPoints={(arr: { x: number; y: number }[]) =>
-                          fieldLP.handleChange(arr)
-                        }
-                        materialPoints={fieldMP.state.value}
-                      />
-                    </div>
-
-                    {/* Grafico espectro calibrado lampara 2 */}
-                    <div>
-                      <CardTitle className="mb-4">Empirical Comparison Lamp 2</CardTitle>
-                      <EmpiricalSpectrum
-                        data={lamp2Spectrum}
-                        color="#0ea5e9"
-                        interactable
-                        preview
-                        lampPoints={fieldLP.state.value}
-                        setLampPoints={(arr: { x: number; y: number }[]) =>
-                          fieldLP.handleChange(arr)
-                        }
-                        materialPoints={fieldMP.state.value}
-                      />
-                    </div>
-
-                    {/* Grafico espectro calibrado ciencia */}
-                    <div>
-                      <CardTitle className="mb-4">Empirical Science Spectrum</CardTitle>
-                      <EmpiricalSpectrum
-                        data={scienceSpectrum}
-                        color="#0ea5e9"
-                        interactable
-                        preview
-                        lampPoints={fieldLP.state.value}
-                        setLampPoints={(arr: { x: number; y: number }[]) =>
-                          fieldLP.handleChange(arr)
-                        }
-                        materialPoints={fieldMP.state.value}
-                      />
-                    </div>
+              <div className="flex flex-col px-8">
+                {/* Grafico espectro calibrado para cada lampara */}
+                {lamps.map((lamp, idx) => (
+                  <div key={`TeoricalSpectrumLamp-${lamp.id}`}>
+                    <CardTitle className="mb-4">Empirical Comparison Lamp {idx}</CardTitle>
+                    <EmpiricalSpectrum
+                      data={lamp.data}
+                      lampPoints={fieldLP.state.value}
+                      setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                      pixelToWavelengthFunction={pixelToWavelengthFunction}
+                    />
                   </div>
-                )}
-              </form.Field>
+                ))}
+
+                {/* Grafico espectro calibrado ciencia */}
+                <div>
+                  <CardTitle className="mb-4">Empirical Science Spectrum</CardTitle>
+                  <EmpiricalSpectrum
+                    data={scienceSpectrum}
+                    lampPoints={fieldLP.state.value}
+                    setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                    pixelToWavelengthFunction={pixelToWavelengthFunction}
+                  />
+                </div>
+              </div>
             )}
           </form.Field>
         </CardContent>

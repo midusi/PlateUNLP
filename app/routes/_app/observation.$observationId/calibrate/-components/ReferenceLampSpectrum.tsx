@@ -6,12 +6,7 @@ import { GridColumns, GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
 import { scaleLinear } from "@visx/scale";
 import { Bar, Line, LinePath } from "@visx/shape";
-import {
-	defaultStyles,
-	Tooltip,
-	TooltipWithBounds,
-	useTooltip,
-} from "@visx/tooltip";
+import { defaultStyles, TooltipWithBounds, useTooltip } from "@visx/tooltip";
 import * as d3 from "@visx/vendor/d3-array";
 import { useCallback, useMemo } from "react";
 import { materialsPalette } from "~/lib/materials-palette";
@@ -21,7 +16,7 @@ import type { SpectrumPoint } from "~/lib/spectral-data";
 const getX = (p: SpectrumPoint) => p.wavelength ?? 0;
 const getY = (p: SpectrumPoint) => p.intensity ?? 0;
 
-const height = 200;
+const height = 150;
 const margin = { top: 6, right: 0, bottom: 40, left: 0 };
 
 const tooltipStyles = {
@@ -266,6 +261,7 @@ export function ReferenceLampSpectrum({
 						onMouseMove={handleTooltip}
 						onMouseLeave={() => hideTooltip()}
 					/>
+					{/* Referencia visual de lo que se va a seleccionar */}
 					{tooltipData && (
 						<g>
 							<Line
@@ -311,7 +307,7 @@ export function ReferenceLampSpectrum({
 										y2={height - margin.bottom - margin.top} // Altura del gráfico
 										stroke="#FFFFFF"
 										strokeWidth={2}
-										strokeDasharray="4 4" // Define el patrón de punteado
+										strokeDasharray="5,2" // Define el patrón de punteado
 									/>
 									{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
 									<rect // Area cliqueable

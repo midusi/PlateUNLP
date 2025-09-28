@@ -1,59 +1,52 @@
 import { useMeasure } from "@uidotdev/usehooks";
 import { AxisBottom, AxisLeft, AxisTop } from "@visx/axis";
 import { curveLinear } from "@visx/curve";
+import { localPoint } from "@visx/event";
 import { GridColumns, GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
 import { scaleLinear } from "@visx/scale";
-import { Line, LinePath } from "@visx/shape";
+import { Bar, Line, LinePath } from "@visx/shape";
+import { defaultStyles, TooltipWithBounds, useTooltip } from "@visx/tooltip";
 import * as d3 from "@visx/vendor/d3-array";
 import type { NumberValue } from "@visx/vendor/d3-scale";
-import { useMemo } from "react";
-import type { JSX } from "react/jsx-runtime";
-import { useGlobalStore } from "~/hooks/use-global-store";
-import { linesPalette } from "~/lib/lines-palette";
+import { useCallback, useMemo } from "react";
 import { CustomError } from "~/lib/utils";
 
-export interface EmpiricalSpectrumPoint {
-	pixel: number;
-	intensity: number;
-}
-
 // data accessors
-const getX = (p: EmpiricalSpectrumPoint) => p?.pixel ?? 0;
-const getY = (p: EmpiricalSpectrumPoint) => p?.intensity ?? 0;
+const getX = (p: { pixel: number; intensity: number }) => p?.pixel ?? 0;
+const getY = (p: { pixel: number; intensity: number }) => p?.intensity ?? 0;
 
 interface EmpiricalSpectrumProps {
-	data: EmpiricalSpectrumPoint[];
-	color: string;
-	interactable: boolean;
-	preview: boolean;
-	showPixel?: boolean;
+	data: {
+		pixel: number;
+		intensity: number;
+	}[];
 	lampPoints: { x: number; y: number }[];
 	setLampPoints: (arr: { x: number; y: number }[]) => void;
-	materialPoints: { x: number; y: number }[];
+	pixelToWavelengthFunction: CustomError | ((value: number) => number);
 }
+const height = 150;
+/** Problema al agregar margenes a izquierda y derecha */
+const margin = {
+	top: 0,
+	right: 0,
+	bottom: 40,
+	left: 0,
+};
+
+const tooltipStyles = {
+	...defaultStyles,
+	background: "#3b6978",
+	border: "1px solid white",
+	color: "white",
+};
 
 export function EmpiricalSpectrum({
 	data,
-	color,
-	interactable = true,
-	preview = true,
-	showPixel = false,
 	lampPoints,
 	setLampPoints,
-	materialPoints,
+	pixelToWavelengthFunction,
 }: EmpiricalSpectrumProps) {
-	const height = 200;
-	const margin = {
-		top: showPixel ? 40 : 0,
-		right: 0,
-		bottom: 40,
-		left: 50,
-	};
-	const [pixelToWavelengthFunction] = useGlobalStore((s) => [
-		s.pixelToWavelengthFunction,
-	]);
-
 	const isPixelToWavelengthValid = !(
 		pixelToWavelengthFunction instanceof CustomError
 	);
@@ -64,155 +57,267 @@ export function EmpiricalSpectrum({
 	const xMax = Math.max(width - margin.left - margin.right, 0);
 	const yMax = Math.max(height - margin.top - margin.bottom, 0);
 
-	const { xScalePixel, xScaleWavelength, yScale } = useMemo(() => {
-		return {
-			data,
-			xScalePixel: scaleLinear<number>({ domain: [0, d3.max(data, getX)!] }),
-			xScaleWavelength: scaleLinear<number>({
-				domain: [0, d3.max(data, getX)!],
+	const { tooltipData, tooltipLeft, tooltipTop, showTooltip, hideTooltip } =
+		useTooltip<{
+			pixel: number;
+			intensity: number;
+		}>();
+
+	const wavelengthScale = useMemo(
+		() =>
+			scaleLinear({
+				range: [0, width - margin.right - margin.left],
+				domain: [0, data.length - 1],
 			}),
-			yScale: scaleLinear<number>({ domain: [0, d3.max(data, getY)!] }),
-		};
-	}, [data]);
+		[width, data.length],
+	);
 
-	// update scale output ranges
-	xScalePixel.range([0, xMax]);
-	xScaleWavelength.range([0, xMax]);
-	yScale.range([yMax, 0]);
+	const wavelengthBisector = d3.bisector<
+		{
+			pixel: number;
+			intensity: number;
+		},
+		number
+	>((d) => d.pixel).right;
 
-	const spotsInGraph: JSX.Element[] = [];
-	if (interactable) {
-		for (const [index, point] of lampPoints.entries()) {
-			const xClick = xScalePixel(point.x);
-			// const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
-			spotsInGraph.push(
-				<g key={`EmpiricalLine-${index}`}>
-					<Line
-						x1={xClick + margin.left}
-						y1={0 + margin.top}
-						x2={xClick + margin.left}
-						y2={height - margin.bottom}
-						stroke={linesPalette[index % linesPalette.length]}
-						strokeWidth={2}
-						strokeDasharray="4 4"
-					/>
-					<text
-						x={xClick + margin.left + 5}
-						y={margin.top + 20}
-						fill={linesPalette[index % linesPalette.length]}
-						fontSize="12"
-						fontFamily="Arial, sans-serif"
-					>
-						#{`${index}`}
-					</text>
-				</g>,
-			);
-		}
+	const intensityScale = useMemo(
+		() =>
+			scaleLinear({
+				range: [height - margin.bottom - margin.top, 0],
+				domain: [0, (d3.max(data, getY) || 1) * 1.1],
+				nice: true,
+			}),
+		[data],
+	);
+
+	const handleTooltip = useCallback(
+		(
+			event:
+				| React.TouchEvent<SVGRectElement>
+				| React.MouseEvent<SVGRectElement>,
+		) => {
+			let { x } = localPoint(event) || { x: 0 };
+			x = x - margin.right - margin.left;
+			const x0 = wavelengthScale.invert(x);
+			const index = wavelengthBisector(data, x0);
+			const d0 = data[index - 1];
+			const d1 = data[index];
+			/** Elegir el elemento mas cercano */
+			let d = d0;
+			if (d1 && getX(d1)) {
+				const x0v = x0.valueOf();
+				const x0d = getX(d0).valueOf();
+				const x1d = getX(d1).valueOf();
+
+				d = x0v - x0d > x1d - x0v ? d1 : d0;
+			}
+
+			showTooltip({
+				tooltipData: {
+					pixel: d.pixel,
+					/* Da problemas con mas de un elemento */
+					intensity: d.intensity,
+				},
+				tooltipLeft: x,
+				/* Da problemas con mas de un elemento */
+				tooltipTop: intensityScale(getY(d)),
+			});
+		},
+		[data, showTooltip, intensityScale, wavelengthScale, wavelengthBisector],
+	);
+
+	/** Manejar click en el grafico */
+	function onClick(event: React.MouseEvent<Element>) {
+		const svgRect = event.currentTarget.getBoundingClientRect();
+		const xClick = event.clientX - svgRect.left;
+		const xVal = wavelengthScale.invert(xClick);
+		console.log(xClick, xVal);
+
+		setLampPoints([
+			...lampPoints,
+			{
+				x: xVal,
+				y: 0, // El registro de intensidad se esta desperdiciando
+			},
+		]);
 	}
 
-	function onClick(event: React.MouseEvent<SVGSVGElement>) {
-		const svgRect = event.currentTarget.getBoundingClientRect();
-		const xClick = event.clientX - svgRect.left - margin.left;
-		const xVal = xScalePixel.invert(xClick);
-		const yMatch = data[Math.round(xVal) - 1];
-		if (yMatch) {
-			const newVal = {
-				x: yMatch.pixel, // Redefino xVal a la posicion mas cercana
-				y: yMatch.intensity,
-			};
-			// Si el punto cliquieado esta ocupado se borra la linea que lo ocupa
-			if (lampPoints.some((p) => p.x === newVal.x && p.y === newVal.y)) {
-				setLampPoints(
-					lampPoints.filter(
-						(point) => !(point.x === newVal.x && point.y === newVal.y),
-					),
-				);
-				return;
-			}
-
-			const newLampPoints = [...lampPoints];
-			// Si no hay punto homologo borramos el punto de su ultima posicion antes de graficar
-			if (lampPoints.length > materialPoints.length) {
-				newLampPoints.pop();
-			}
-			setLampPoints([...newLampPoints, newVal]);
-		}
+	/** Permite al usuario borrar las longitudes de onda que marco */
+	function handleUserMarkDelete(x: number) {
+		setLampPoints(lampPoints.filter((mp) => mp.x !== x));
 	}
 
 	return (
-		<div ref={measureRef}>
-			{/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+		<div
+			ref={measureRef}
+			className="relative"
+			style={{ height: `${height}px` }}
+		>
 			<svg
 				width={width}
 				height={height}
-				onClick={interactable ? onClick : undefined}
+				role="img"
+				aria-label="Empirical Spectrum"
 			>
-				<title id="graphTitle">Empirical Spectrum</title>
-				{interactable && spotsInGraph}
 				<Group top={margin.top} left={margin.left}>
+					<rect
+						x={margin.right}
+						y={0}
+						width={Math.max(width - margin.right - margin.left, 0)}
+						height={Math.max(height - margin.bottom - margin.top, 0)}
+						fill="#374151"
+						rx={1}
+					/>
 					<GridColumns
-						scale={xScalePixel}
+						scale={wavelengthScale}
 						width={xMax}
 						height={yMax}
-						className="stroke-neutral-100"
+						stroke="rgba(255,255,255,0.15)"
 					/>
 					<GridRows
-						scale={yScale}
+						scale={intensityScale}
 						width={xMax}
 						height={yMax}
-						className="stroke-neutral-100"
+						stroke="rgba(255,255,255,0.15)"
 					/>
-					<LinePath<EmpiricalSpectrumPoint>
-						curve={curveLinear}
+					{/* Espectro */}
+					<LinePath<{ pixel: number; intensity: number }>
 						data={data}
-						x={(p) => xScalePixel(getX(p)) ?? 0}
-						y={(p) => yScale(getY(p)) ?? 0}
+						curve={curveLinear}
+						x={(p) => wavelengthScale(getX(p)) ?? 0}
+						y={(p) => intensityScale(getY(p)) ?? 0}
 						shapeRendering="geometricPrecision"
 						className="stroke-1"
-						style={{ stroke: color }}
+						style={{ stroke: "#0ea5e9" }}
 					/>
-					{showPixel && (
-						<AxisTop
-							scale={xScalePixel}
-							label="Pixel"
-							numTicks={Math.floor(xMax / 80)}
-						/>
-					)}
-					{preview && (
-						<>
-							<AxisBottom
-								scale={xScaleWavelength}
-								top={yMax}
-								label="Wavelength (Å)"
-								numTicks={Math.floor(xMax / 80)}
-								tickFormat={
-									isPixelToWavelengthValid
-										? (value: NumberValue) => {
-												const numericValue = Number(value);
-												return Number.isNaN(numericValue)
-													? "-"
-													: pixelToWavelengthFunction(numericValue).toFixed(2);
-											}
-										: (_value: NumberValue) => "-"
-								}
+					{/** Capturar eventos del mouse */}
+					<Bar
+						x={0}
+						y={0}
+						width={width - margin.right - margin.left}
+						height={height - margin.bottom - margin.top}
+						fill="transparent"
+						rx={14}
+						onClick={onClick}
+						onTouchStart={handleTooltip}
+						onTouchMove={handleTooltip}
+						onMouseMove={handleTooltip}
+						onMouseLeave={() => hideTooltip()}
+					/>
+					{/* Referencia visual de lo que se va a seleccionar */}
+					{tooltipData && (
+						<g>
+							<Line
+								from={{ x: tooltipLeft ?? -1, y: 0 }}
+								to={{
+									x: tooltipLeft ?? -1,
+									y: height - margin.bottom - margin.top,
+								}}
+								stroke="#3B82F6"
+								strokeWidth={2}
+								pointerEvents="none"
+								strokeDasharray="5,2"
 							/>
-							{!isPixelToWavelengthValid && (
+							{/* Punto señalador de intensidad, da problemas con mas de un elemento */}
+							<circle
+								cx={tooltipLeft ?? -1}
+								cy={(tooltipTop ?? -1) - margin.top}
+								r={3}
+								fill="#75daad"
+								stroke="white"
+								strokeWidth={1}
+								pointerEvents="none"
+							/>
+						</g>
+					)}
+					{/* Referencias marcadas por el usuario */}
+					{lampPoints.map((lp, idx) => {
+						const xClick = wavelengthScale(lp.x);
+						// const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
+
+						return (
+							<g key={`EmpiricalLine-${lp.x}`}>
+								<Line
+									x1={xClick}
+									y1={0}
+									x2={xClick}
+									y2={height - margin.bottom - margin.top}
+									stroke="#FFFFFF"
+									strokeWidth={2}
+									strokeDasharray="5,2"
+								/>
+								{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
+								<rect // Area cliqueable
+									x={xClick - 2}
+									y={0}
+									width={4}
+									height={height - margin.bottom - margin.top}
+									fill="transparent"
+									onClick={(e) => {
+										e.stopPropagation();
+										handleUserMarkDelete(lp.x);
+									}}
+									style={{
+										cursor:
+											"url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
+									}}
+								/>
 								<text
-									x={width / 2}
-									y={yMax + 20}
-									fill="red"
+									x={xClick + 5}
+									y={10}
+									fill="#FFFFFF"
 									fontSize="12"
 									fontFamily="Arial, sans-serif"
-									textAnchor="middle"
 								>
-									{`${pixelToWavelengthFunction.message}`}
+									#{`${idx}`}
 								</text>
-							)}
-						</>
+							</g>
+						);
+					})}
+
+					<AxisBottom
+						scale={wavelengthScale}
+						top={yMax}
+						label="Wavelength (Å)"
+						numTicks={Math.floor(xMax / 80)}
+						tickFormat={
+							isPixelToWavelengthValid
+								? (value: NumberValue) => {
+										const numericValue = Number(value);
+										return Number.isNaN(numericValue)
+											? "-"
+											: pixelToWavelengthFunction(numericValue).toFixed(0);
+									}
+								: (_value: NumberValue) => "-"
+						}
+					/>
+					{/** En caso de que falten requisitos para la inferencia los informa */}
+					{!isPixelToWavelengthValid && (
+						<text
+							x={width / 2}
+							y={yMax + 20}
+							fill="red"
+							fontSize="12"
+							fontFamily="Arial, sans-serif"
+							textAnchor="middle"
+						>
+							{`${pixelToWavelengthFunction.message}`}
+						</text>
 					)}
-					<AxisLeft scale={yScale} label="Intensity" />
 				</Group>
 			</svg>
+			{/* {tooltipData && (
+				<div>
+					<TooltipWithBounds
+						key={Math.random()}
+						top={(height - margin.top - margin.bottom) / 10}
+						left={(tooltipLeft ?? 0) + margin.left + margin.top}
+						style={tooltipStyles}
+					>
+						{`px ${tooltipData.pixel}`}
+					</TooltipWithBounds>
+				</div>
+			)} */}
 		</div>
 	);
 }
