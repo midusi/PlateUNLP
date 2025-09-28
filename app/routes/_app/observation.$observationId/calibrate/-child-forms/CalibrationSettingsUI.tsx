@@ -125,24 +125,29 @@ export const CalibrationSettingsUI = withForm({
             </form.Subscribe>
           </div>
         </div>
-        <div className="grid w-full grid-cols-1 gap-4 overflow-hidden md:grid-cols-[1fr_200px] ">
-          <div className="col-span-1">
+        <div className="grid w-full grid-cols-1 gap-4 overflow-hidden md:grid-cols-[1fr_130px] ">
+          <div className="col-span-1 mt-10 py-2">
             <form.Field name="minWavelength">
               {(fieldMnW) => (
                 <form.Field name="maxWavelength">
                   {(fieldMxW) => (
-                    <ReferenceLampRange
-                      material={form.getFieldValue("material")}
-                      materialArr={materialArr}
-                      minWavelength={fieldMnW.state.value}
-                      setMinWavelength={(min) => {
-                        fieldMnW.handleChange(min)
-                      }}
-                      maxWavelength={fieldMxW.state.value}
-                      setMaxWavelength={(max) => {
-                        fieldMxW.handleChange(max)
-                      }}
-                    />
+                    <form.Field name="onlyOneLine">
+                      {(fieldOOL) => (
+                        <ReferenceLampRange
+                          material={form.getFieldValue("material")}
+                          materialArr={materialArr}
+                          onlyOneLine={fieldOOL.state.value}
+                          minWavelength={fieldMnW.state.value}
+                          setMinWavelength={(min) => {
+                            fieldMnW.handleChange(min)
+                          }}
+                          maxWavelength={fieldMxW.state.value}
+                          setMaxWavelength={(max) => {
+                            fieldMxW.handleChange(max)
+                          }}
+                        />
+                      )}
+                    </form.Field>
                   )}
                 </form.Field>
               )}
@@ -152,11 +157,12 @@ export const CalibrationSettingsUI = withForm({
             <div className="flex flex-col gap-2">
               <form.AppField name="minWavelength">
                 {(field) => (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-end gap-1">
                     {" "}
                     <field.NumberField
                       label="Min. wavelength"
                       hight_modifier="h-6"
+                      decimals={2}
                       className={clsx(
                         "text-sm tabular-nums",
                         "disabled:cursor-default disabled:opacity-100",
@@ -170,11 +176,12 @@ export const CalibrationSettingsUI = withForm({
             <div className="flex flex-col gap-2">
               <form.AppField name="maxWavelength">
                 {(field) => (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-end gap-1">
                     {" "}
                     <field.NumberField
                       label="Max. wavelength"
                       hight_modifier="h-6"
+                      decimals={2}
                       className={clsx(
                         "text-sm tabular-nums",
                         "disabled:cursor-default disabled:opacity-100",

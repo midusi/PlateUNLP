@@ -15,8 +15,8 @@ import type { SpectrumPoint } from "~/lib/spectral-data"
 const getX = (p: SpectrumPoint) => p.wavelength
 const getY = (p: SpectrumPoint) => p.intensity
 
-const height = 150
-const margin = { top: 20, right: 8, bottom: 40, left: 50 }
+const height = 100
+const margin = { top: 0, right: 12, bottom: 22, left: 12 }
 
 type ReferenceLampRangeProps = {
   material: string
@@ -25,6 +25,7 @@ type ReferenceLampRangeProps = {
     material: string
     intensity: number
   }[]
+  onlyOneLine: boolean
   minWavelength: number
   setMinWavelength: (min: number) => void
   maxWavelength: number
@@ -34,6 +35,7 @@ type ReferenceLampRangeProps = {
 export function ReferenceLampRange({
   material,
   materialArr,
+  onlyOneLine,
   minWavelength,
   setMinWavelength,
   maxWavelength,
@@ -60,44 +62,79 @@ export function ReferenceLampRange({
   xScale.range([0, xMax])
   yScale.range([yMax, 0])
 
-  /** Aislar datos de materiales */
-  const [datas, materials] = useMemo(() => {
-    const materials = material.split("-")
-    const datas: SpectrumPoint[][] = []
-    for (const m of materials) {
-      const nameList = [m].flatMap((m) => [m, `${m} I`, `${m} II`])
-      const d = materialArr.filter((d) => nameList.includes(d.material))
-      datas.push(d)
+  /** Arreglo de intensidades de materiales separados por etiquetas */
+  const [materialArrForLabel] = useMemo(() => {
+    let materialArrForLabel: {
+      label: string
+      arr: {
+        wavelength: number
+        material: string
+        intensity: number
+      }[]
+    }[]
+
+    if (onlyOneLine) {
+      materialArrForLabel = [
+        {
+          label: material,
+          arr: materialArr,
+        },
+      ]
+    } else {
+      /** Listado de etiquetas encontradas en el arreglo de materiales */
+      const labels = new Set(materialArr.map((ma) => ma.material))
+      /** Separar arreglo por etiqueta */
+      materialArrForLabel = Array.from(labels).map((label) => ({
+        label: label,
+        arr: materialArr.filter((p) => p.material === label),
+      }))
     }
-    return [datas, materials]
-  }, [materialArr, material])
+
+    return [materialArrForLabel]
+  }, [materialArr, material, onlyOneLine])
 
   return (
     <div ref={measureRef} className="flex justify-center">
-      <svg width={width} height={height}>
-        <title>Visual selector of min and max Wavelenght</title>
+      <svg
+        width={width}
+        height={height}
+        role="img"
+        aria-label="Visual selector of min and max Wavelenght"
+      >
         <Group top={margin.top} left={margin.left}>
-          <GridColumns scale={xScale} width={xMax} height={yMax} className="stroke-neutral-100" />
-          <GridRows scale={yScale} width={xMax} height={yMax} className="stroke-neutral-100" />
-          {datas.map((d, index) => (
+          <rect x={0} y={0} width={xMax} height={yMax} fill="#374151" rx={1} />
+          <GridColumns
+            scale={xScale}
+            width={xMax}
+            height={yMax}
+            strokeWidth={0.1}
+            stroke="rgba(255,255,255,0.15)"
+          />
+          <GridRows
+            scale={yScale}
+            width={xMax}
+            height={yMax}
+            strokeWidth={0.1}
+            stroke="rgba(255,255,255,0.15)"
+          />
+          {materialArrForLabel.map((item, idx) => (
             <LinePath<SpectrumPoint>
-              key={`material_range_line-${materials[index]}`}
+              key={`material_range_line-${item.label}`}
               curve={curveLinear}
-              data={d}
-              x={(p) => xScale(getX(p)) ?? 0}
-              y={(p) => yScale(getY(p)) ?? 0}
+              data={item.arr}
+              x={(p) => xScale(getX(p))}
+              y={(p) => yScale(getY(p))}
               shapeRendering="geometricPrecision"
               className="stroke-1"
-              stroke={materialsPalette[index % materialsPalette.length]}
+              stroke={materialsPalette[idx % materialsPalette.length]}
             />
           ))}
           <AxisBottom
             scale={xScale}
             top={yMax}
-            label="Wavelength (Å)"
+            //label="Wavelength (Å)"
             numTicks={Math.floor(xMax / 80)}
           />
-          <AxisLeft scale={yScale} label="Intensity" numTicks={4} />
 
           <PatternLines
             id={patternId}
