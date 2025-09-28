@@ -85,10 +85,13 @@ export const CalibrationSettingsUI = withForm({
                 <form.AppField name="material">
                   {(field) => (
                     <LoadLampFileModal
-                      onClose={async (newMaterial: string) => {
+                      onSucces={async (newMaterial: string) => {
                         setIsLoadLampModalOpen(false)
                         field.handleChange(newMaterial)
                         await router.invalidate()
+                      }}
+                      onClose={() => {
+                        setIsLoadLampModalOpen(false)
                       }}
                       actualLampsNamesList={materialsNamesList}
                     />

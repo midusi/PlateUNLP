@@ -11,11 +11,16 @@ import { addMaterial } from "../-actions/add-material"
 import { parseLampFile } from "../-utils/parse-lamp-file"
 
 interface LoadLampFileModalProps {
-  onClose: (newMaterial: string) => void
+  onSucces: (newMaterial: string) => void
+  onClose: () => void
   actualLampsNamesList: string[]
 }
 
-export function LoadLampFileModal({ onClose, actualLampsNamesList }: LoadLampFileModalProps) {
+export function LoadLampFileModal({
+  onClose,
+  onSucces,
+  actualLampsNamesList,
+}: LoadLampFileModalProps) {
   const LoadLampFormSchema = createLoadLampFormSchema(actualLampsNamesList)
   const form = useAppForm({
     defaultValues: {
@@ -32,7 +37,7 @@ export function LoadLampFileModal({ onClose, actualLampsNamesList }: LoadLampFil
         const material = await addMaterial({ data: { name: name, arr: arr } })
 
         notifySucces("Lamp file loaded")
-        onClose(material.name) // cerrar modal
+        onSucces(material.name) // cerrar modal
       } catch (error) {
         notifyError("Failed to load new lamp file", error)
       }
