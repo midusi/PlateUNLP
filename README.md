@@ -119,6 +119,7 @@ python -m venv venv
 source venv/Scripts/activate # gitbash
 pip install -r requirements.txt
 pm2 start cmd --name backend -- /c "python gateway.wsgi"
+pm2 start /home/miannuzzi/.conda/envs/venv-plate/bin/python  --name backend -- gateway.wsgi
 
 cd frontend
 npm install
