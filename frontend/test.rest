@@ -1,0 +1,2 @@
+# Test api all paths
+GET localhost:20500/api/allPaths
