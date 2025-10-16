@@ -109,6 +109,11 @@ Se dispone de los siguientes scripts: `pm2-start`, `pm2-stop`, `pm2-restart`,`pm
 Accediendo desde el navegador a `localhost:5000` se podrá ver la interfaz gráfica del software.
 
 ```
+eval "$(/home/user/miniconda3/bin/conda shell.bash hook)"
+conda create -n py38 python=3.8.17
+conda activate py38
+python --version
+
 cd backend
 python -m venv venv
 source venv/Scripts/activate # gitbash
@@ -119,7 +124,6 @@ cd frontend
 npm install
 npm run build
 pm2 start cmd --name frontend -- /c "npm run start"
-
 ```
 
 ## Links de interés
