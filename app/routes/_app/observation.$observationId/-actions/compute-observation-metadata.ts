@@ -93,8 +93,8 @@ export const computeObservationMetadata = createServerFn()
     )
     if (ST.isErr()) throw new Error(ST.error.message)
     const HA = getHourAngle(simbad.value.RA2000, ST.value)
-    const { altitude } = equatorialToHorizontal(HA, simbad.value.DEC2000, observatory.latitude)
-    const AIRMASS = getAirmass(altitude)
+    const { azimuth } = equatorialToHorizontal(HA, simbad.value.DEC2000, observatory.latitude)
+    const AIRMASS = getAirmass(azimuth)
     return {
       OBJECT: data.OBJECT,
       "DATE-OBS": data["DATE-OBS"],
