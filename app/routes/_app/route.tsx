@@ -5,10 +5,11 @@ import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
 import logoReTrOH from "~/assets/logoretroh.png"
-import { Button } from "~/components/ui/button"
+import { Button, buttonVariants } from "~/components/ui/button"
 import { Separator } from "~/components/ui/separator"
 import { authClient } from "~/lib/auth-client"
 import { notifyError } from "~/lib/notifications"
+import { cn } from "~/lib/utils"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
 
 export const Route = createFileRoute("/_app")({
@@ -89,13 +90,18 @@ function RouteComponent() {
               </div>
               <label className="flex justify-start text-gray-400">{userInfo.email}</label>
             </div>
-            <Link to="/settings">
-              <Button
-                variant="outline"
-                className="m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none"
-              >
-                <Settings className="flex h-full items-center" size={22} strokeWidth={1.5} />
-              </Button>
+            <Link
+              to="/settings"
+              className={cn(
+                buttonVariants({
+                  variant: "outline",
+                  size: "default",
+                  className:
+                    "m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none",
+                }),
+              )}
+            >
+              <Settings className="flex h-full items-center" size={20} strokeWidth={1.5} />
             </Link>
             <Button
               onClick={() => signOut()}
