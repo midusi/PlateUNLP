@@ -77,7 +77,7 @@ function RouteComponent() {
   })
 
   return (
-    <div className="flex h-full w-full max-w-6xl items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center">
       <Card className="w-[400px] overflow-hidden">
         <form onSubmit={(e)=> {
           e.preventDefault()  

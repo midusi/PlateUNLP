@@ -56,7 +56,7 @@ function RouteComponent() {
   const { initialMetadata, spectrums, rawImage } = Route.useLoaderData()
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="mx-auto w-full">
       <ObservationMetadataForm
         observationId={observationId}
         defaultValues={initialMetadata}

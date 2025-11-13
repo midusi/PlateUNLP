@@ -203,7 +203,7 @@ function RouteComponent() {
 
   return (
     <>
-      <Card className="mx-auto w-full max-w-6xl px-8">
+      <Card className="mx-auto w-full px-8">
         <CardContent>
           <CardTitle className="mb-4">Teorical Comparison Lamp</CardTitle>
           <CalibrationSettingsUI

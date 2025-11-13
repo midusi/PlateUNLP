@@ -113,8 +113,11 @@ function RouteComponent() {
           </div>
         </div>
       </header>
-      <div className="flex flex-1 flex-col overflow-y-auto bg-accent">
-        <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4">
+      <div className="w-full flex flex-1 flex-col overflow-y-auto bg-accent ">
+        <main className={cn(
+          "w-full mx-auto flex flex-1 flex-col gap-4 p-4",
+          "max-w-9/12"
+        )}>
           <Outlet />
         </main>
         <footer className="mt-12 flex items-center justify-evenly border-t p-4">

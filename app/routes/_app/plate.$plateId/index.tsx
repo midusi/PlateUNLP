@@ -39,7 +39,7 @@ function RouteComponent() {
   const { initialMetadata, initialObservations } = Route.useLoaderData()
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="mx-auto w-full">
       <PlateMetadataForm plateId={plateId} defaultValues={initialMetadata} />
       <div className="h-8" />
       <ObservationsList plateId={plateId} initialObservations={initialObservations} />
