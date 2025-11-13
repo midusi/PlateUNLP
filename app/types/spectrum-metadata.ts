@@ -58,7 +58,7 @@ export const ObservationMetadataSchema = z.object({
   "DATE-OBS": knowable(z.iso.date().or(z.literal(""))), // yyyy-MM-dd
   UT: knowable(z.iso.time().or(z.literal(""))), // HH:mm:ss.sss (any precision)
   EXPTIME: knowable(z.iso.duration().or(z.literal(""))), // HH:mm:ss.sss (any precision)
-  IMAGETYP: knowable(fitsString()),
+  IMAGETYP: knowable(z.enum(["object", "dark", "zero", "flat", "arc"])),
 
   "MAIN-ID": knowable(fitsString()),
   SPTYPE: knowable(fitsString()),

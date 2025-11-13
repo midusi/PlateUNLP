@@ -10,12 +10,15 @@ import {
 } from "~/components/ui/field";
 import { useFieldContext } from "~/hooks/use-app-form-context";
 import type { Input } from "../ui/input";
+import { cn } from "~/lib/utils";
 
 type SelectFieldSimpleProps = {
 	className?: string;
 	label?: React.ReactNode;
 	description?: React.ReactNode;
 	options: OptionFormat[];
+	disabled?: boolean;
+	hideComments?: boolean;
 } & Pick<React.ComponentProps<typeof Input>, "placeholder">;
 
 type ValueType = string;
@@ -28,6 +31,9 @@ export function SelectFieldSimple({
 	label,
 	description,
 	options,
+	disabled,
+	placeholder,
+	hideComments,
 }: SelectFieldSimpleProps) {
 	const field = useFieldContext<ValueType>();
 	const errors = useStore(field.store, (state) => state.meta.errors);
@@ -36,16 +42,31 @@ export function SelectFieldSimple({
 		() => options.find((o) => o.value === field.state.value) || null,
 		[options, field.state.value],
 	);
+
 	return (
 		<Field className={className}>
 			{label && <FieldLabel>{label}</FieldLabel>}
 			<Select.Root
 				items={options}
-				value={field.state.value ?? ""}
+				value={disabled ? placeholder : field.state.value}
 				onValueChange={(val) => field.handleChange(val)}
 			>
-				<Select.Trigger className="flex h-10 min-w-36 items-center justify-between gap-3 rounded-md border border-gray-200 pr-3 pl-3.5 text-base text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800 data-[popup-open]:bg-gray-100 cursor-default">
-					<Select.Value />
+				<Select.Trigger 
+					className={cn(
+						"px-3 py-1 flex h-9 w-full min-w-0 items-center justify-between select-none data-[popup-open]:bg-gray-100",
+						"rounded-md border border-input bg-transparent shadow-xs",
+						"outline-none transition-[color,box-shadow] selection:bg-primary selection:text-primary-foreground",
+						"focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+						"aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+						"file:inline-flex file:h-7 file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm",
+						"disabled:cursor-not-allowed disabled:pointer-events-none ",
+						"text-sm file:font-medium font-sans text-foreground",
+						disabled && "font-medium italic opacity-50 "
+					)}
+					disabled={disabled}
+				>
+					{selectedValue && !disabled ? <Select.Value /> : placeholder}
+
 					<Select.Icon className="flex">
 						<ChevronUpDownIcon />
 					</Select.Icon>
@@ -78,7 +99,7 @@ export function SelectFieldSimple({
 			</Select.Root>
 
 			{description && <FieldDescription>{description}</FieldDescription>}
-			{errors.length > 0 && <FieldError>{errors[0].message}</FieldError>}
+			{!hideComments && errors.length > 0 && <FieldError>{errors[0].message}</FieldError>}
 		</Field>
 	);
 }
