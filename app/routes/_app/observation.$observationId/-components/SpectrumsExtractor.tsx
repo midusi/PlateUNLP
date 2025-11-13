@@ -182,7 +182,6 @@ export function SpectrumsExtractor({
 				setState("ready");
 				//router.invalidate();
 				// formApi.reset(value);
-				console.log(5);
 			} catch (error) {
 				if (
 					error instanceof Error &&
