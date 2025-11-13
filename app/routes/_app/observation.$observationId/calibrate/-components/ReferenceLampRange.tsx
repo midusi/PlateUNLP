@@ -15,7 +15,6 @@ import type { SpectrumPoint } from "~/lib/spectral-data"
 const getX = (p: SpectrumPoint) => p.wavelength
 const getY = (p: SpectrumPoint) => p.intensity
 
-const height = 100
 const margin = { top: 0, right: 12, bottom: 22, left: 12 }
 
 type ReferenceLampRangeProps = {
@@ -30,6 +29,9 @@ type ReferenceLampRangeProps = {
   setMinWavelength: (min: number) => void
   maxWavelength: number
   setMaxWavelength: (max: number) => void
+  hideX?:boolean
+  height?: number
+  backgroundColor?:string
 }
 
 export function ReferenceLampRange({
@@ -40,8 +42,14 @@ export function ReferenceLampRange({
   setMinWavelength,
   maxWavelength,
   setMaxWavelength,
+  hideX,
+  height=100,
+  backgroundColor="#374151"
 }: ReferenceLampRangeProps) {
   const patternId = useId()
+
+  /** Margin a usar de forma local */
+  const localMargin = { ...margin, bottom: hideX ? 0 : margin.bottom}
 
   /** Minimos y maximos totales y especificos al range */
   const materialArrXMax = Math.max(d3.max(materialArr, getX)!, 41000)
@@ -55,8 +63,8 @@ export function ReferenceLampRange({
   // bounds
   const [measureRef, measured] = useMeasure<HTMLDivElement>()
   const width = measured.width ?? 0
-  const xMax = Math.max(width - margin.left - margin.right, 0)
-  const yMax = Math.max(height - margin.top - margin.bottom, 0)
+  const xMax = Math.max(width - localMargin.left - localMargin.right, 0)
+  const yMax = Math.max(height - localMargin.top - localMargin.bottom, 0)
 
   // update scale output ranges
   xScale.range([0, xMax])
@@ -101,8 +109,8 @@ export function ReferenceLampRange({
         role="img"
         aria-label="Visual selector of min and max Wavelenght"
       >
-        <Group top={margin.top} left={margin.left}>
-          <rect x={0} y={0} width={xMax} height={yMax} fill="#374151" rx={1} />
+        <Group top={localMargin.top} left={localMargin.left}>
+          <rect x={0} y={0} width={xMax} height={yMax} fill={backgroundColor} rx={1} />
           <GridColumns
             scale={xScale}
             width={xMax}
@@ -129,20 +137,22 @@ export function ReferenceLampRange({
               stroke={materialsPalette[idx % materialsPalette.length]}
             />
           ))}
-          <AxisBottom
+          {!hideX && <AxisBottom
             scale={xScale}
             top={yMax}
             //label="Wavelength (Å)"
             numTicks={Math.floor(xMax / 80)}
-          />
+          />}
 
           <PatternLines
             id={patternId}
-            height={8}
-            width={8}
+            height={1}
+            width={1}
             orientation={["diagonal"]}
             className="stroke-1 stroke-neutral-500/60"
+            //background="rgba(55,65,81,0.15)"
           />
+          
 
           <Group left={0}>
             <rect
@@ -224,7 +234,7 @@ function ResizeHandler({
         }
       }}
     >
-      <line x1={0} x2={0} y1={0} y2={height} className="stroke-1 stroke-neutral-700" />
+      <line x1={0} x2={0} y1={0} y2={height} className="stroke-1 stroke-neutral-500" />
       <Group left={0} top={(height - pathHeight) / 2}>
         <path
           d="M -4.5 0.5 L 3.5 0.5 L 3.5 15.5 L -4.5 15.5 L -4.5 0.5 M -1.5 4 L -1.5 12 M 0.5 4 L 0.5 12"

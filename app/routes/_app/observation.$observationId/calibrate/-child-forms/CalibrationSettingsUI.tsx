@@ -4,7 +4,7 @@ import { FilePlus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import { withForm } from "~/hooks/use-app-form"
-import { legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "~/lib/utils"
+import { cn, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "~/lib/utils"
 import { LoadLampFileModal } from "../-components/LoadLampFileModal"
 import { ReferenceLampRange } from "../-components/ReferenceLampRange"
 import { ReferenceLampSpectrum } from "../-components/ReferenceLampSpectrum"
@@ -138,75 +138,93 @@ export const CalibrationSettingsUI = withForm({
             </form.Subscribe>
           </div>
         </div>
-        <div className="grid w-full grid-cols-1 gap-4 overflow-hidden md:grid-cols-[1fr_130px] ">
-          <div className="col-span-1 mt-10 py-2">
-            <form.Field name="minWavelength">
-              {(fieldMnW) => (
-                <form.Field name="maxWavelength">
-                  {(fieldMxW) => (
-                    <form.Field name="onlyOneLine">
-                      {(fieldOOL) => (
-                        <ReferenceLampRange
-                          material={form.getFieldValue("material")}
-                          materialArr={materialArr}
-                          onlyOneLine={fieldOOL.state.value}
-                          minWavelength={fieldMnW.state.value}
-                          setMinWavelength={(min) => {
-                            fieldMnW.handleChange(min)
-                          }}
-                          maxWavelength={fieldMxW.state.value}
-                          setMaxWavelength={(max) => {
-                            fieldMxW.handleChange(max)
-                          }}
-                        />
-                      )}
-                    </form.Field>
-                  )}
-                </form.Field>
+        <hr className="my-8"></hr>
+        <div className="hidden md:flex md:flex-row md:justify-between md:gap-2 md:mx-4">
+          <div className="flex flex-col gap-2">
+            <form.AppField name="minWavelength">
+              {(field) => (
+                <div className="flex items-end gap-1">
+                  {" "}
+                  <field.NumberField
+                    label="Min. wavelength"
+                    hight_modifier="h-6"
+                    decimals={2}
+                    className={clsx(
+                      "text-sm tabular-nums",
+                      "disabled:cursor-default disabled:opacity-100",
+                    )}
+                  />
+                  <span className="text-gray-500">Å</span>
+                </div>
               )}
-            </form.Field>
+            </form.AppField>
           </div>
-          <div className="hidden md:flex md:flex-col md:justify-center md:gap-2">
-            <div className="flex flex-col gap-2">
-              <form.AppField name="minWavelength">
-                {(field) => (
-                  <div className="flex items-end gap-1">
-                    {" "}
-                    <field.NumberField
-                      label="Min. wavelength"
-                      hight_modifier="h-6"
-                      decimals={2}
-                      className={clsx(
-                        "text-sm tabular-nums",
-                        "disabled:cursor-default disabled:opacity-100",
-                      )}
-                    />
-                    <span className="text-gray-500">Å</span>
-                  </div>
-                )}
-              </form.AppField>
-            </div>
-            <div className="flex flex-col gap-2">
-              <form.AppField name="maxWavelength">
-                {(field) => (
-                  <div className="flex items-end gap-1">
-                    {" "}
-                    <field.NumberField
-                      label="Max. wavelength"
-                      hight_modifier="h-6"
-                      decimals={2}
-                      className={clsx(
-                        "text-sm tabular-nums",
-                        "disabled:cursor-default disabled:opacity-100",
-                      )}
-                    />
-                    <span className="text-gray-500">Å</span>
-                  </div>
-                )}
-              </form.AppField>
-            </div>
+          <div className="flex flex-col gap-2">
+            <form.AppField name="maxWavelength">
+              {(field) => (
+                <div className="flex items-end gap-1">
+                  {" "}
+                  <field.NumberField
+                    label="Max. wavelength"
+                    hight_modifier="h-6"
+                    decimals={2}
+                    className={clsx(
+                      "text-sm tabular-nums",
+                      "disabled:cursor-default disabled:opacity-100",
+                    )}
+                  />
+                  <span className="text-gray-500">Å</span>
+                </div>
+              )}
+            </form.AppField>
+          </div>
+          <div className="flex items-center">
+            <Button
+              size="sm"
+              variant="default"
+              disabled={true}
+              onClick={() => {}}
+              className="h-7"
+            >
+              <span
+                className={cn("icon-[ph--magic-wand-bold]")}
+              />
+              Autodetect
+            </Button>
           </div>
         </div>
+        
+        <div className="col-span-1 mt-4 mb-1">
+          <form.Field name="minWavelength">
+            {(fieldMnW) => (
+              <form.Field name="maxWavelength">
+                {(fieldMxW) => (
+                  <form.Field name="onlyOneLine">
+                    {(fieldOOL) => (
+                      <ReferenceLampRange
+                        material={form.getFieldValue("material")}
+                        materialArr={materialArr}
+                        onlyOneLine={fieldOOL.state.value}
+                        minWavelength={fieldMnW.state.value}
+                        setMinWavelength={(min) => {
+                          fieldMnW.handleChange(min)
+                        }}
+                        maxWavelength={fieldMxW.state.value}
+                        setMaxWavelength={(max) => {
+                          fieldMxW.handleChange(max)
+                        }}
+                        hideX={true}
+                        height={30}
+                        backgroundColor = {"#D1D5DB"}
+                      />
+                    )}
+                  </form.Field>
+                )}
+              </form.Field>
+            )}
+          </form.Field>
+        </div>
+        
         <form.Field name="material">
           {(fieldMat) => (
             <form.Field name="onlyOneLine">
