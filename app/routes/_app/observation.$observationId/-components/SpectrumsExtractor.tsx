@@ -255,8 +255,8 @@ export function SpectrumsExtractor({
 							<field.RangeField
 								label="Aperture Percentage"
 								//disabled={state !== "ready"}
-								min={0.7}
-								max={1.3}
+								min={0.5}
+								max={1.5}
 								step={0.1}
 							/>
 						)}
