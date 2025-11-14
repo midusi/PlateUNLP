@@ -11,6 +11,7 @@ import * as d3 from "@visx/vendor/d3-array"
 import { useCallback, useMemo } from "react"
 import { materialsPalette } from "~/lib/materials-palette"
 import type { SpectrumPoint } from "~/lib/spectral-data"
+import { peakFinder } from "../../-utils/peak-finder"
 
 // data accessors
 const getX = (p: SpectrumPoint) => p.wavelength ?? 0
@@ -178,12 +179,16 @@ export function ReferenceLampSpectrum({
   function onClick(event: React.MouseEvent<Element>) {
     const svgRect = event.currentTarget.getBoundingClientRect()
     const xClick = event.clientX - svgRect.left
+    const yClick = event.clientY - svgRect.top
     const xVal = wavelengthScale.invert(xClick)
+    const yVal = intensityScale.invert(yClick)
 
+    const peak = peakFinder( materialArrInRange, xVal, 0.01)
+  
     setMaterialPoints([
       ...materialPoints,
       {
-        x: xVal,
+        x: peak.wavelength,
         y: 0, // El registro de intensidad se esta desperdiciando
       },
     ])
