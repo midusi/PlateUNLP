@@ -1,4 +1,4 @@
-import { createFileRoute, useLoaderData } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
@@ -14,7 +14,7 @@ import { ChangePasswordModal } from "./-components/ChangePasswordModal"
 
 export const Route = createFileRoute("/_app/settings/")({
   component: RouteComponent,
-  loader: async ({ context, params }) => {
+  loader: async () => {
     const session = await authClient.getSession()
     return {
       breadcrumbs: [
@@ -41,9 +41,8 @@ function RouteComponent() {
   const form = useAppForm({
     defaultValues,
     validators: { onChange: BasicUserFieldsSchema },
-    onSubmit: async ({ value, formApi }) => {
+    onSubmit: async ({ value }) => {
       try {
-        const email = value.email
         const name = value.name
         if (name !== session.data?.user.name) {
           await authClient.updateUser({
@@ -105,7 +104,7 @@ function RouteComponent() {
                 formState.isDirty,
               ]}
             >
-              {([isValid, isSubmitting, isDirty]) => (
+              {([isValid, isSubmitting, _isDirty]) => (
                 <Button type="submit" disabled={!isValid} className="w-48 border">
                   {isSubmitting ? (
                     <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />

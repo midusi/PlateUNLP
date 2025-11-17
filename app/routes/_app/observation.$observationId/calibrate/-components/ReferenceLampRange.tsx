@@ -29,9 +29,9 @@ type ReferenceLampRangeProps = {
   setMinWavelength: (min: number) => void
   maxWavelength: number
   setMaxWavelength: (max: number) => void
-  hideX?:boolean
+  hideX?: boolean
   height?: number
-  backgroundColor?:string
+  backgroundColor?: string
 }
 
 export function ReferenceLampRange({
@@ -43,13 +43,13 @@ export function ReferenceLampRange({
   maxWavelength,
   setMaxWavelength,
   hideX,
-  height=100,
-  backgroundColor="#374151"
+  height = 100,
+  backgroundColor = "#374151",
 }: ReferenceLampRangeProps) {
   const patternId = useId()
 
   /** Margin a usar de forma local */
-  const localMargin = { ...margin, bottom: hideX ? 0 : margin.bottom}
+  const localMargin = { ...margin, bottom: hideX ? 0 : margin.bottom }
 
   /** Minimos y maximos totales y especificos al range */
   const materialArrXMax = Math.max(d3.max(materialArr, getX)!, 41000)
@@ -137,12 +137,14 @@ export function ReferenceLampRange({
               stroke={materialsPalette[idx % materialsPalette.length]}
             />
           ))}
-          {!hideX && <AxisBottom
-            scale={xScale}
-            top={yMax}
-            //label="Wavelength (Å)"
-            numTicks={Math.floor(xMax / 80)}
-          />}
+          {!hideX && (
+            <AxisBottom
+              scale={xScale}
+              top={yMax}
+              //label="Wavelength (Å)"
+              numTicks={Math.floor(xMax / 80)}
+            />
+          )}
 
           <PatternLines
             id={patternId}
@@ -152,7 +154,6 @@ export function ReferenceLampRange({
             className="stroke-1 stroke-neutral-500/60"
             //background="rgba(55,65,81,0.15)"
           />
-          
 
           <Group left={0}>
             <rect

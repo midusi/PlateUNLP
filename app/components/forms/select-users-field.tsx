@@ -6,7 +6,6 @@ import defaultImage from "~/assets/avatar.png"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useFieldContext } from "~/hooks/use-app-form-context"
-import { Checkbox } from "../ui/checkbox"
 
 type UserRole = { id: string; role: "owner" | "editor" | "viewer" }
 
@@ -19,7 +18,7 @@ type SelectUsersFieldProps = {
     id: string
     name: string
     email: string
-    image: string
+    image: string | null
   }[]
   initialsUsersRoles?: UserRole[]
 } & Pick<React.ComponentProps<typeof Input>, "placeholder">

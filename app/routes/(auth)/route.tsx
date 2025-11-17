@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet } from "@tanstack/react-router"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"

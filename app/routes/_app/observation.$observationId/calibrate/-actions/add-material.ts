@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
@@ -31,8 +30,8 @@ export const addMaterial = createServerFn({ method: "POST" })
           arr: s.material.arr,
         })
       return material
-    } catch (err: any) {
-      if (err.message.includes("UNIQUE constraint failed")) {
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("UNIQUE constraint failed")) {
         throw new Error(`Material with name "${data.name}" already exists`)
       }
       throw err

@@ -1,5 +1,4 @@
 import * as tf from "@tensorflow/tfjs"
-import { avg } from "drizzle-orm"
 import { findPlateau, findXspacedPoints } from "~/lib/image"
 import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"

@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
 import defaultUserImage from "~/assets/avatar.png"
 import { Button } from "~/components/ui/button"
@@ -24,12 +24,12 @@ function RouteComponent() {
   const form = useAppForm({
     defaultValues,
     validators: { onChange: LogUpFieldsSchema },
-    onSubmit: async ({ value, formApi }) => {
+    onSubmit: async ({ value }) => {
       try {
         const email = value.email
         const password = value.password
         const name = value.name
-        const { data, error } = await authClient.signUp.email(
+        await authClient.signUp.email(
           {
             email, // user email address
             password, // user password -> min 8 characters by default
@@ -38,18 +38,8 @@ function RouteComponent() {
             callbackURL: "/login", // A URL to redirect to after the user verifies their email (optional)
           },
           {
-            onRequest: (ctx) => {
-              //show loading
-            },
-            onSuccess: (ctx) => {
-              navigate({ to: "/login" })
-              //notifyError("Succes Sign Up")
-              //redirect to the dashboard or sign in page
-            },
-            onError: (ctx) => {
-              // display the error message
-              notifyError(ctx.error.message)
-            },
+            onSuccess: () => navigate({ to: "/login" }),
+            onError: (ctx) => notifyError(ctx.error.message),
           },
         )
         //formApi.reset(value)
@@ -62,10 +52,12 @@ function RouteComponent() {
   return (
     <div className="flex h-full w-full items-center justify-center">
       <Card className="w-[400px] overflow-hidden">
-        <form onSubmit={(e)=> {
-          e.preventDefault()  
-          form.handleSubmit(e)
-        }} >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            form.handleSubmit(e)
+          }}
+        >
           <CardHeader className="m-4 flex justify-center">
             <h1 className="text-2xl">Sign Up</h1>
           </CardHeader>
@@ -83,9 +75,13 @@ function RouteComponent() {
           <CardFooter className="m-4 flex flex-col justify-center">
             {/* <Button onClick={()=>logUp("santiagoandresponteahon@hotmail.com", "12345678", "santiago")}>Registrar Usuario</Button> */}
             <form.Subscribe
-              selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+              selector={(formState) => [
+                formState.isValid,
+                formState.isSubmitting,
+                formState.isDirty,
+              ]}
             >
-              {([isValid, isSubmitting, isDirty]) => (
+              {([isValid, isSubmitting, _isDirty]) => (
                 <Button
                   //logIn("santiagoandresponteahon@hotmail.com", "12345678")
                   disabled={!isValid}

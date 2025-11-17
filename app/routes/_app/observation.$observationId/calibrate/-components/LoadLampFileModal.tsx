@@ -25,7 +25,7 @@ export function LoadLampFileModal({
       file: new File([], ""),
     },
     validators: { onChange: LoadLampFormSchema, onMount: LoadLampFormSchema },
-    onSubmit: async ({ value, formApi }) => {
+    onSubmit: async ({ value }) => {
       try {
         const { name, file } = value
 
@@ -87,7 +87,7 @@ export function LoadLampFileModal({
           <form.Subscribe
             selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
           >
-            {([isValid, isSubmitting, isDirty]) => (
+            {([isValid, isSubmitting, _isDirty]) => (
               <>
                 <Button onClick={onClose} variant="outline" disabled={isSubmitting}>
                   Cancel

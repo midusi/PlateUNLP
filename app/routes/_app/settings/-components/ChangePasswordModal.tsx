@@ -16,7 +16,7 @@ export function ChangePasswordModal({ onClose }: { onClose: () => void }) {
     onSubmit: async ({ value, formApi }) => {
       try {
         const { currentPassword, newPassword } = value
-        const { data, error } = await authClient.changePassword({
+        const { error } = await authClient.changePassword({
           newPassword,
           currentPassword,
           revokeOtherSessions: true,
@@ -54,7 +54,7 @@ export function ChangePasswordModal({ onClose }: { onClose: () => void }) {
           <form.Subscribe
             selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
           >
-            {([isValid, isSubmitting, isDirty]) => (
+            {([isValid, isSubmitting, _isDirty]) => (
               <>
                 <Button onClick={onClose} variant="outline">
                   Cancel

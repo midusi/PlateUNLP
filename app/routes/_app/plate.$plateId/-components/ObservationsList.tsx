@@ -1,15 +1,10 @@
 import { useMutation } from "@tanstack/react-query"
-import { Link } from "@tanstack/react-router"
 import { useState } from "react"
 import { type BoundingBox, BoundingBoxer } from "~/components/BoundingBoxer"
 import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-import { Separator } from "~/components/ui/separator"
-import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table"
-import { usePredictBBs } from "~/hooks/use-predict-BBs"
+import { Card, CardContent } from "~/components/ui/card"
 import { notifyError } from "~/lib/notifications"
 import { cn, idToColor } from "~/lib/utils"
-import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
 import type { Observation } from "../-actions/get-observations"
 import { updateObservation } from "../-actions/update-observation"
@@ -35,14 +30,6 @@ export function ObservationsList({
 }) {
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     initialObservations.map(observationToBoundingBox),
-  )
-
-  const determineBBFunction = usePredictBBs(
-    1024,
-    "spectrum_detector.onnx",
-    classesSpectrumDetection,
-    false,
-    0.7,
   )
 
   const addObservationMut = useMutation({

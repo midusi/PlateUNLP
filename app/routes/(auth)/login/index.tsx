@@ -1,11 +1,8 @@
 import { useMutation } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { createAuthClient } from "better-auth/react"
-import { getMaxListeners } from "events"
+import { createFileRoute } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
-import { env } from "~/env"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
 import { notifyError } from "~/lib/notifications"
@@ -24,11 +21,11 @@ function RouteComponent() {
   const form = useAppForm({
     defaultValues,
     validators: { onChange: LogInFieldsSchema },
-    onSubmit: async ({ value, formApi }) => {
+    onSubmit: async ({ value }) => {
       try {
         const email = value.email
         const password = value.password
-        const { data, error } = await authClient.signIn.email(
+        const { error } = await authClient.signIn.email(
           {
             email,
             password,
@@ -57,6 +54,7 @@ function RouteComponent() {
           provider: "google",
           callbackURL: "/projects",
         })
+        return data
       } catch (error) {
         notifyError("Failed to log in with Google account", error)
       }
@@ -70,6 +68,7 @@ function RouteComponent() {
           provider: "github",
           callbackURL: "/projects",
         })
+        return data
       } catch (error) {
         notifyError("Failed to log in with GitHub account", error)
       }
@@ -79,10 +78,12 @@ function RouteComponent() {
   return (
     <div className="flex h-full w-full items-center justify-center">
       <Card className="w-[400px] overflow-hidden">
-        <form onSubmit={(e)=> {
-          e.preventDefault()  
-          form.handleSubmit(e)
-        }} >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            form.handleSubmit(e)
+          }}
+        >
           <CardHeader className="m-4 flex justify-center">
             <h1 className="text-2xl">Sign In</h1>
           </CardHeader>
@@ -97,14 +98,14 @@ function RouteComponent() {
           <CardFooter className="my-4 flex flex-col justify-center gap-4">
             <div className="w-full text-center">
               <form.Subscribe
-                selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+                selector={(formState) => [
+                  formState.isValid,
+                  formState.isSubmitting,
+                  formState.isDirty,
+                ]}
               >
-                {([isValid, isSubmitting, isDirty]) => (
-                  <Button
-                    type="submit"
-                    disabled={!isValid}
-                    className="w-48 border "
-                  >
+                {([isValid, isSubmitting, _isDirty]) => (
+                  <Button type="submit" disabled={!isValid} className="w-48 border ">
                     {isSubmitting ? (
                       <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
                     ) : (
@@ -121,9 +122,9 @@ function RouteComponent() {
                 </a>
               </div>
             </div>
-            <hr className="w-full "/>
-            
-            <div className="w-full px-4 pt-2 space-y-4">
+            <hr className="w-full " />
+
+            <div className="w-full space-y-4 px-4 pt-2">
               <Button
                 variant="outline"
                 className="flex w-full items-center justify-center gap-2 rounded-none border border-gray-300 bg-white hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"

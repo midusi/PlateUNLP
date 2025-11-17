@@ -1,12 +1,12 @@
 import { useMeasure } from "@uidotdev/usehooks"
-import { AxisBottom, AxisLeft, AxisTop } from "@visx/axis"
+import { AxisBottom } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { localPoint } from "@visx/event"
 import { GridColumns, GridRows } from "@visx/grid"
 import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Bar, Line, LinePath } from "@visx/shape"
-import { defaultStyles, TooltipWithBounds, useTooltip } from "@visx/tooltip"
+import { useTooltip } from "@visx/tooltip"
 import * as d3 from "@visx/vendor/d3-array"
 import type { NumberValue } from "@visx/vendor/d3-scale"
 import { useCallback, useMemo } from "react"
@@ -30,13 +30,6 @@ const height = 150
 /** Problema al agregar margenes a izquierda y derecha */
 const margin = { top: 0, right: 12, bottom: 40, left: 12 }
 
-const tooltipStyles = {
-  ...defaultStyles,
-  background: "#3b6978",
-  border: "1px solid white",
-  color: "white",
-}
-
 export function EmpiricalSpectrum({
   data,
   lampPoints,
@@ -51,7 +44,7 @@ export function EmpiricalSpectrum({
   const xMax = Math.max(width - margin.left - margin.right, 0)
   const yMax = Math.max(height - margin.top - margin.bottom, 0)
 
-  const { tooltipData, tooltipLeft, tooltipTop, showTooltip, hideTooltip } = useTooltip<{
+  const { tooltipData, tooltipLeft, showTooltip, hideTooltip } = useTooltip<{
     pixel: number
     intensity: number
   }>()
@@ -119,11 +112,15 @@ export function EmpiricalSpectrum({
   function onClick(event: React.MouseEvent<Element>) {
     const svgRect = event.currentTarget.getBoundingClientRect()
     const xClick = event.clientX - svgRect.left
-    const yClick = event.clientY - svgRect.top
+    // const yClick = event.clientY - svgRect.top
     const xVal = wavelengthScale.invert(xClick)
-    const yVal = intensityScale.invert(yClick)
+    // const yVal = intensityScale.invert(yClick)
 
-    const peak = peakFinder( data.map(d=> ({wavelength:d.pixel, intensity:d.intensity})), xVal, 0.002)
+    const peak = peakFinder(
+      data.map((d) => ({ wavelength: d.pixel, intensity: d.intensity })),
+      xVal,
+      0.002,
+    )
 
     setLampPoints([
       ...lampPoints,
@@ -222,7 +219,6 @@ export function EmpiricalSpectrum({
                   strokeWidth={2}
                   strokeDasharray="5,2"
                 />
-                {/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
                 <rect // Area cliqueable
                   x={xClick - 2}
                   y={0}
@@ -288,7 +284,12 @@ export function EmpiricalSpectrum({
 						key={Math.random()}
 						top={(height - margin.top - margin.bottom) / 10}
 						left={(tooltipLeft ?? 0) + margin.left + margin.top}
-						style={tooltipStyles}
+						style={{
+              ...defaultStyles,
+              background: "#3b6978",
+              border: "1px solid white",
+              color: "white",
+            }}
 					>
 						{`px ${tooltipData.pixel}`}
 					</TooltipWithBounds>

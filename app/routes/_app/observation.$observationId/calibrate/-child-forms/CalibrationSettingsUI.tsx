@@ -139,7 +139,7 @@ export const CalibrationSettingsUI = withForm({
           </div>
         </div>
         <hr className="my-8"></hr>
-        <div className="hidden md:flex md:flex-row md:justify-between md:gap-2 md:mx-4">
+        <div className="hidden md:mx-4 md:flex md:flex-row md:justify-between md:gap-2">
           <div className="flex flex-col gap-2">
             <form.AppField name="minWavelength">
               {(field) => (
@@ -179,21 +179,13 @@ export const CalibrationSettingsUI = withForm({
             </form.AppField>
           </div>
           <div className="flex items-center">
-            <Button
-              size="sm"
-              variant="default"
-              disabled={true}
-              onClick={() => {}}
-              className="h-7"
-            >
-              <span
-                className={cn("icon-[ph--magic-wand-bold]")}
-              />
+            <Button size="sm" variant="default" disabled={true} onClick={() => {}} className="h-7">
+              <span className={cn("icon-[ph--magic-wand-bold]")} />
               Autodetect
             </Button>
           </div>
         </div>
-        
+
         <div className="col-span-1 mt-4 mb-1">
           <form.Field name="minWavelength">
             {(fieldMnW) => (
@@ -215,7 +207,7 @@ export const CalibrationSettingsUI = withForm({
                         }}
                         hideX={true}
                         height={30}
-                        backgroundColor = {"#D1D5DB"}
+                        backgroundColor={"#D1D5DB"}
                       />
                     )}
                   </form.Field>
@@ -224,7 +216,7 @@ export const CalibrationSettingsUI = withForm({
             )}
           </form.Field>
         </div>
-        
+
         <form.Field name="material">
           {(fieldMat) => (
             <form.Field name="onlyOneLine">

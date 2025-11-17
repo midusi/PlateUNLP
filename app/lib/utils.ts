@@ -1,6 +1,5 @@
-import * as tf from "@tensorflow/tfjs"
+import type * as tf from "@tensorflow/tfjs"
 import { type ClassValue, clsx } from "clsx"
-import { Shapes } from "lucide-react"
 import { inv, lusolve, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 import type { BoundingBox } from "~/types/BoundingBox"
@@ -524,7 +523,7 @@ export function weightedSmooth(data: number[], windowSize = 3): number[] {
   for (let i = -half; i <= half; i++) {
     weights.push(half + 1 - Math.abs(i))
   }
-  const totalWeight = weights.reduce((a, b) => a + b, 0)
+  // const totalWeight = weights.reduce((a, b) => a + b, 0)
 
   for (let i = 0; i < data.length; i++) {
     let weightedSum = 0
@@ -566,13 +565,13 @@ export function pushToExtremes(data: number[], umbral: number): number[] {
  * @param {number} umbral Umbral de decicion
  * @returns {tf.TensorLike} Arreglo transformado
  */
-export function pushToExtremeTf(data: tf.TensorLike, umbral: number): number[] {
-  const b = tf.zeros(data.shape.toArray())
-  const normalized = normalizeMinMax(data)
-  return normalized.map((v) => {
-    return v > umbral ? 1 : 0
-  })
-}
+// export function pushToExtremeTf(data: tf.TensorLike, umbral: number): number[] {
+//   const b = tf.zeros(data.shape.toArray())
+//   const normalized = normalizeMinMax(data)
+//   return normalized.map((v) => {
+//     return v > umbral ? 1 : 0
+//   })
+// }
 
 /**
  * Recibe un arreglo de datos y los normaliza.

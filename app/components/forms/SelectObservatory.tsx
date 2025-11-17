@@ -98,7 +98,7 @@ export function SelectObservatory({
           items={filteredItems}
           value={selectedValue}
           onValueChange={(nextValue) => {
-            if(!nextValue) return
+            if (!nextValue) return
             setValue(nextValue.id)
             setPopoverOpen(false)
           }}

@@ -1,9 +1,8 @@
 import { queryOptions } from "@tanstack/react-query"
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
 import { db } from "~/db"
 
-export const getMaterialsNames = createServerFn().handler(async ({ data }) => {
+export const getMaterialsNames = createServerFn().handler(async () => {
   const materials = await db.query.material.findMany({
     columns: {
       name: true,

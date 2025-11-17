@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
@@ -16,12 +16,7 @@ export const Route = createFileRoute("/_app/projects/add/")({
     const session = await authClient.getSession()
     const userId = session.data?.user.id as string
     const projects = await getProjectsNames({ data: { userId: userId } })
-    const users = (await getUsers({ data: {} })) as {
-      id: string
-      name: string
-      email: string
-      image: string
-    }[]
+    const users = await getUsers()
     return {
       breadcrumbs: [
         { title: "Projects", link: { to: "/projects" } },
@@ -39,7 +34,6 @@ export const Route = createFileRoute("/_app/projects/add/")({
 
 function RouteComponent() {
   const { session, projects, users } = Route.useLoaderData()
-  const navigate = useNavigate()
 
   const userId = session.data?.user.id!
   const defaultValues: z.output<typeof NewProyectSchema> = {

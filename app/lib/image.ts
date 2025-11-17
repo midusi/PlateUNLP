@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs"
-import { max as mathjsMax, min as mathjsMin, round } from "mathjs"
+import { max as mathjsMax, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
 /**

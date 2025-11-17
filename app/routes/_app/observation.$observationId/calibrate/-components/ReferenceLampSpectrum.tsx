@@ -1,5 +1,5 @@
 import { useMeasure } from "@uidotdev/usehooks"
-import { AxisBottom, AxisLeft } from "@visx/axis"
+import { AxisBottom } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { localPoint } from "@visx/event"
 import { GridColumns, GridRows } from "@visx/grid"
@@ -179,12 +179,12 @@ export function ReferenceLampSpectrum({
   function onClick(event: React.MouseEvent<Element>) {
     const svgRect = event.currentTarget.getBoundingClientRect()
     const xClick = event.clientX - svgRect.left
-    const yClick = event.clientY - svgRect.top
+    // const yClick = event.clientY - svgRect.top
     const xVal = wavelengthScale.invert(xClick)
-    const yVal = intensityScale.invert(yClick)
+    // const yVal = intensityScale.invert(yClick)
 
-    const peak = peakFinder( materialArrInRange, xVal, 0.01)
-  
+    const peak = peakFinder(materialArrInRange, xVal, 0.01)
+
     setMaterialPoints([
       ...materialPoints,
       {
@@ -286,7 +286,6 @@ export function ReferenceLampSpectrum({
                     strokeWidth={2}
                     strokeDasharray="5,2" // Define el patrón de punteado
                   />
-                  {/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
                   <rect // Area cliqueable
                     x={xClick - 2}
                     y={0}

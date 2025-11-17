@@ -41,7 +41,7 @@ export function usePredictBBs(
       const img = new Image()
       img.crossOrigin = "anonymous"
       img.onload = () => resolve(img)
-      img.onerror = (e) => reject(new Error(`No se pudo cargar "${img_src}"`))
+      img.onerror = () => reject(new Error(`No se pudo cargar "${img_src}"`))
       img.src = img_src
     })
 
@@ -93,7 +93,7 @@ export function usePredictBBs(
         continue
       }
 
-      const label = CLASSES[class_id]
+      // const label = CLASSES[class_id]
       const xc: number = DATA[COLS * 0 + column]
       const yc: number = DATA[COLS * 1 + column]
       let w: number = DATA[COLS * 2 + column]

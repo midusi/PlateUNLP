@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start"
-import { milliseconds } from "date-fns"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
@@ -54,5 +53,5 @@ export const updateCalibration = createServerFn()
         materialPoints: s.calibration.materialPoints,
         lampPoints: s.calibration.lampPoints,
       })
-      return updatedCalibration[0]
+    return updatedCalibration[0]
   })

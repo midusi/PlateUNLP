@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm"
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { idType } from "../utils"
 import { observation } from "./observation"
 

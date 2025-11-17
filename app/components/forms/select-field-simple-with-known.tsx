@@ -1,15 +1,14 @@
 import { useStore } from "@tanstack/react-form"
 import { Button } from "~/components/ui/button"
-import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
-import { Input } from "~/components/ui/input"
+import { Field, FieldDescription, FieldError } from "~/components/ui/field"
+import type { Input } from "~/components/ui/input"
 import { withFieldGroup } from "~/hooks/use-app-form"
-import { cn } from "~/lib/utils"
 
 type SelectFieldSimpleWithKnownProps = {
   className?: string
   label?: React.ReactNode
   description?: React.ReactNode
-  options: OptionFormat[];
+  options: OptionFormat[]
 } & Pick<React.ComponentProps<typeof Input>, "placeholder">
 
 type Fields = {
@@ -17,14 +16,18 @@ type Fields = {
   isKnown: boolean
 }
 
-type ValueType = string;
+type ValueType = string
 type OptionFormat = {
-	label: string;
-	value: ValueType;
-};
+  label: string
+  value: ValueType
+}
 
-export const SelectFieldSimpleWithKnown = withFieldGroup<Fields, unknown, SelectFieldSimpleWithKnownProps>({
-  render: function Render({ group, className, label, description, placeholder, options, ...props }) {
+export const SelectFieldSimpleWithKnown = withFieldGroup<
+  Fields,
+  unknown,
+  SelectFieldSimpleWithKnownProps
+>({
+  render: function Render({ group, className, label, description, placeholder, options }) {
     const isKnown = useStore(group.store, (state) => state.values.isKnown)
 
     return (
@@ -39,7 +42,7 @@ export const SelectFieldSimpleWithKnown = withFieldGroup<Fields, unknown, Select
                 placeholder={isKnown ? placeholder : "Unknown"}
                 hideComments={true}
               />
-              
+
               <div className="flex items-start justify-between gap-2">
                 {description ? <FieldDescription>{description}</FieldDescription> : <span />}
                 <group.AppField name="isKnown">

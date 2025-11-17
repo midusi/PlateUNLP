@@ -176,10 +176,11 @@ export function BoundingBoxer({
                 onChange={onBoundingBoxChange}
                 onChangeEnd={onBoundingBoxChangeEnd}
                 limits={{ x: imageSize.width, y: imageSize.height }}
+                disabled={disabled}
               />
             ))}
             <BoundingBoxDraw
-              enabled={selectedTool === "draw"}
+              enabled={selectedTool === "draw" && !disabled}
               onDrawEnd={onBoundingBoxAdd}
               limits={{ x: imageSize.width, y: imageSize.height }}
             />
@@ -330,11 +331,13 @@ function BoundingBoxComponent({
   onChange,
   onChangeEnd,
   limits,
+  disabled = false,
 }: {
   boundingBox: BoundingBox
   onChange?: (boundingBox: BoundingBox) => void
   onChangeEnd?: (boundingBox: BoundingBox) => void
   limits: { x: number; y: number }
+  disabled?: boolean
 }) {
   // We don't use `KeepScale` because we want to adjust the border width but
   // keep the scale. Since we are doing that, is too much overhead to use it
@@ -440,6 +443,7 @@ function BoundingBoxComponent({
     e.preventDefault()
     e.stopPropagation()
     if (boundingBox.canChange === false) return
+    if (disabled) return
     setResizing({
       dir,
       initialMouse: { x: e.clientX, y: e.clientY },
