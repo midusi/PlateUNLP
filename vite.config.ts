@@ -1,6 +1,7 @@
 import tailwindcss from "@tailwindcss/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
-import react from "@vitejs/plugin-react-oxc"
+import react from "@vitejs/plugin-react"
+import { nitro } from "nitro/vite"
 import { defineConfig } from "vite"
 
 export default defineConfig({
@@ -9,15 +10,14 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
-    react(),
     tanstackStart({
-      customViteReactPlugin: true,
-      target: "node-server",
-      tsr: { srcDirectory: "app" },
+      srcDirectory: "app",
       spa: { enabled: true },
     }),
+    nitro(),
+    react(),
   ],
-  experimental: { enableNativePlugin: true },
+  experimental: { enableNativePlugin: "v1" },
   resolve: { tsconfigPaths: true },
   assetsInclude: ["**/*.onnx"],
   optimizeDeps: {

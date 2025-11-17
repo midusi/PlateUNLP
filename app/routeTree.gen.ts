@@ -8,8 +8,6 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createServerRootRoute } from '@tanstack/react-start/server'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
@@ -22,14 +20,12 @@ import { Route as AppProjectsAddIndexRouteImport } from './routes/_app/projects/
 import { Route as AppProjectProjectIdIndexRouteImport } from './routes/_app/project.$projectId/index'
 import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$plateId/index'
 import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
+import { Route as AppPlatePlateIdPreviewRouteImport } from './routes/_app/plate.$plateId/preview'
+import { Route as AppObservationObservationIdPreviewRouteImport } from './routes/_app/observation.$observationId/preview'
+import { Route as AppObservationObservationIdImageRouteImport } from './routes/_app/observation.$observationId/image'
+import { Route as authApiAuthSplatRouteImport } from './routes/(auth)/api.auth.$'
 import { Route as AppProjectProjectIdSettingsIndexRouteImport } from './routes/_app/project.$projectId/settings/index'
 import { Route as AppObservationObservationIdCalibrateIndexRouteImport } from './routes/_app/observation.$observationId/calibrate/index'
-import { ServerRoute as AppPlatePlateIdPreviewServerRouteImport } from './routes/_app/plate.$plateId/preview'
-import { ServerRoute as AppObservationObservationIdPreviewServerRouteImport } from './routes/_app/observation.$observationId/preview'
-import { ServerRoute as AppObservationObservationIdImageServerRouteImport } from './routes/_app/observation.$observationId/image'
-import { ServerRoute as authApiAuthSplatServerRouteImport } from './routes/(auth)/api.auth.$'
-
-const rootServerRouteImport = createServerRootRoute()
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -86,6 +82,28 @@ const AppObservationObservationIdIndexRoute =
     path: '/observation/$observationId/',
     getParentRoute: () => AppRouteRoute,
   } as any)
+const AppPlatePlateIdPreviewRoute = AppPlatePlateIdPreviewRouteImport.update({
+  id: '/plate/$plateId/preview',
+  path: '/plate/$plateId/preview',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppObservationObservationIdPreviewRoute =
+  AppObservationObservationIdPreviewRouteImport.update({
+    id: '/observation/$observationId/preview',
+    path: '/observation/$observationId/preview',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppObservationObservationIdImageRoute =
+  AppObservationObservationIdImageRouteImport.update({
+    id: '/observation/$observationId/image',
+    path: '/observation/$observationId/image',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const authApiAuthSplatRoute = authApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => authRouteRoute,
+} as any)
 const AppProjectProjectIdSettingsIndexRoute =
   AppProjectProjectIdSettingsIndexRouteImport.update({
     id: '/project/$projectId/settings/',
@@ -98,36 +116,17 @@ const AppObservationObservationIdCalibrateIndexRoute =
     path: '/observation/$observationId/calibrate/',
     getParentRoute: () => AppRouteRoute,
   } as any)
-const AppPlatePlateIdPreviewServerRoute =
-  AppPlatePlateIdPreviewServerRouteImport.update({
-    id: '/_app/plate/$plateId/preview',
-    path: '/plate/$plateId/preview',
-    getParentRoute: () => rootServerRouteImport,
-  } as any)
-const AppObservationObservationIdPreviewServerRoute =
-  AppObservationObservationIdPreviewServerRouteImport.update({
-    id: '/_app/observation/$observationId/preview',
-    path: '/observation/$observationId/preview',
-    getParentRoute: () => rootServerRouteImport,
-  } as any)
-const AppObservationObservationIdImageServerRoute =
-  AppObservationObservationIdImageServerRouteImport.update({
-    id: '/_app/observation/$observationId/image',
-    path: '/observation/$observationId/image',
-    getParentRoute: () => rootServerRouteImport,
-  } as any)
-const authApiAuthSplatServerRoute = authApiAuthSplatServerRouteImport.update({
-  id: '/(auth)/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof authRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/projects': typeof AppProjectsIndexRoute
   '/settings': typeof AppSettingsIndexRoute
+  '/api/auth/$': typeof authApiAuthSplatRoute
+  '/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
+  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
+  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
   '/project/$projectId': typeof AppProjectProjectIdIndexRoute
@@ -136,11 +135,15 @@ export interface FileRoutesByFullPath {
   '/project/$projectId/settings': typeof AppProjectProjectIdSettingsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof authRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/projects': typeof AppProjectsIndexRoute
   '/settings': typeof AppSettingsIndexRoute
+  '/api/auth/$': typeof authApiAuthSplatRoute
+  '/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
+  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
+  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
   '/plate/$plateId': typeof AppPlatePlateIdIndexRoute
   '/project/$projectId': typeof AppProjectProjectIdIndexRoute
@@ -157,6 +160,10 @@ export interface FileRoutesById {
   '/(auth)/register/': typeof authRegisterIndexRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
+  '/(auth)/api/auth/$': typeof authApiAuthSplatRoute
+  '/_app/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
+  '/_app/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
+  '/_app/plate/$plateId/preview': typeof AppPlatePlateIdPreviewRoute
   '/_app/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
   '/_app/plate/$plateId/': typeof AppPlatePlateIdIndexRoute
   '/_app/project/$projectId/': typeof AppProjectProjectIdIndexRoute
@@ -172,6 +179,10 @@ export interface FileRouteTypes {
     | '/register'
     | '/projects'
     | '/settings'
+    | '/api/auth/$'
+    | '/observation/$observationId/image'
+    | '/observation/$observationId/preview'
+    | '/plate/$plateId/preview'
     | '/observation/$observationId'
     | '/plate/$plateId'
     | '/project/$projectId'
@@ -185,6 +196,10 @@ export interface FileRouteTypes {
     | '/register'
     | '/projects'
     | '/settings'
+    | '/api/auth/$'
+    | '/observation/$observationId/image'
+    | '/observation/$observationId/preview'
+    | '/plate/$plateId/preview'
     | '/observation/$observationId'
     | '/plate/$plateId'
     | '/project/$projectId'
@@ -200,6 +215,10 @@ export interface FileRouteTypes {
     | '/(auth)/register/'
     | '/_app/projects/'
     | '/_app/settings/'
+    | '/(auth)/api/auth/$'
+    | '/_app/observation/$observationId/image'
+    | '/_app/observation/$observationId/preview'
+    | '/_app/plate/$plateId/preview'
     | '/_app/observation/$observationId/'
     | '/_app/plate/$plateId/'
     | '/_app/project/$projectId/'
@@ -213,52 +232,6 @@ export interface RootRouteChildren {
   authRouteRoute: typeof authRouteRouteWithChildren
   AppRouteRoute: typeof AppRouteRouteWithChildren
 }
-export interface FileServerRoutesByFullPath {
-  '/api/auth/$': typeof authApiAuthSplatServerRoute
-  '/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
-  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewServerRoute
-  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewServerRoute
-}
-export interface FileServerRoutesByTo {
-  '/api/auth/$': typeof authApiAuthSplatServerRoute
-  '/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
-  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewServerRoute
-  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewServerRoute
-}
-export interface FileServerRoutesById {
-  __root__: typeof rootServerRouteImport
-  '/(auth)/api/auth/$': typeof authApiAuthSplatServerRoute
-  '/_app/observation/$observationId/image': typeof AppObservationObservationIdImageServerRoute
-  '/_app/observation/$observationId/preview': typeof AppObservationObservationIdPreviewServerRoute
-  '/_app/plate/$plateId/preview': typeof AppPlatePlateIdPreviewServerRoute
-}
-export interface FileServerRouteTypes {
-  fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths:
-    | '/api/auth/$'
-    | '/observation/$observationId/image'
-    | '/observation/$observationId/preview'
-    | '/plate/$plateId/preview'
-  fileServerRoutesByTo: FileServerRoutesByTo
-  to:
-    | '/api/auth/$'
-    | '/observation/$observationId/image'
-    | '/observation/$observationId/preview'
-    | '/plate/$plateId/preview'
-  id:
-    | '__root__'
-    | '/(auth)/api/auth/$'
-    | '/_app/observation/$observationId/image'
-    | '/_app/observation/$observationId/preview'
-    | '/_app/plate/$plateId/preview'
-  fileServerRoutesById: FileServerRoutesById
-}
-export interface RootServerRouteChildren {
-  authApiAuthSplatServerRoute: typeof authApiAuthSplatServerRoute
-  AppObservationObservationIdImageServerRoute: typeof AppObservationObservationIdImageServerRoute
-  AppObservationObservationIdPreviewServerRoute: typeof AppObservationObservationIdPreviewServerRoute
-  AppPlatePlateIdPreviewServerRoute: typeof AppPlatePlateIdPreviewServerRoute
-}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
@@ -271,8 +244,8 @@ declare module '@tanstack/react-router' {
     }
     '/(auth)': {
       id: '/(auth)'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof authRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -339,6 +312,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppObservationObservationIdIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/plate/$plateId/preview': {
+      id: '/_app/plate/$plateId/preview'
+      path: '/plate/$plateId/preview'
+      fullPath: '/plate/$plateId/preview'
+      preLoaderRoute: typeof AppPlatePlateIdPreviewRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/observation/$observationId/preview': {
+      id: '/_app/observation/$observationId/preview'
+      path: '/observation/$observationId/preview'
+      fullPath: '/observation/$observationId/preview'
+      preLoaderRoute: typeof AppObservationObservationIdPreviewRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/observation/$observationId/image': {
+      id: '/_app/observation/$observationId/image'
+      path: '/observation/$observationId/image'
+      fullPath: '/observation/$observationId/image'
+      preLoaderRoute: typeof AppObservationObservationIdImageRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/(auth)/api/auth/$': {
+      id: '/(auth)/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof authApiAuthSplatRouteImport
+      parentRoute: typeof authRouteRoute
+    }
     '/_app/project/$projectId/settings/': {
       id: '/_app/project/$projectId/settings/'
       path: '/project/$projectId/settings'
@@ -355,47 +356,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-declare module '@tanstack/react-start/server' {
-  interface ServerFileRoutesByPath {
-    '/_app/plate/$plateId/preview': {
-      id: '/_app/plate/$plateId/preview'
-      path: '/plate/$plateId/preview'
-      fullPath: '/plate/$plateId/preview'
-      preLoaderRoute: typeof AppPlatePlateIdPreviewServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/_app/observation/$observationId/preview': {
-      id: '/_app/observation/$observationId/preview'
-      path: '/observation/$observationId/preview'
-      fullPath: '/observation/$observationId/preview'
-      preLoaderRoute: typeof AppObservationObservationIdPreviewServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/_app/observation/$observationId/image': {
-      id: '/_app/observation/$observationId/image'
-      path: '/observation/$observationId/image'
-      fullPath: '/observation/$observationId/image'
-      preLoaderRoute: typeof AppObservationObservationIdImageServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/(auth)/api/auth/$': {
-      id: '/(auth)/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof authApiAuthSplatServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-  }
-}
 
 interface authRouteRouteChildren {
   authLoginIndexRoute: typeof authLoginIndexRoute
   authRegisterIndexRoute: typeof authRegisterIndexRoute
+  authApiAuthSplatRoute: typeof authApiAuthSplatRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
   authLoginIndexRoute: authLoginIndexRoute,
   authRegisterIndexRoute: authRegisterIndexRoute,
+  authApiAuthSplatRoute: authApiAuthSplatRoute,
 }
 
 const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
@@ -405,6 +376,9 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface AppRouteRouteChildren {
   AppProjectsIndexRoute: typeof AppProjectsIndexRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+  AppObservationObservationIdImageRoute: typeof AppObservationObservationIdImageRoute
+  AppObservationObservationIdPreviewRoute: typeof AppObservationObservationIdPreviewRoute
+  AppPlatePlateIdPreviewRoute: typeof AppPlatePlateIdPreviewRoute
   AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
   AppPlatePlateIdIndexRoute: typeof AppPlatePlateIdIndexRoute
   AppProjectProjectIdIndexRoute: typeof AppProjectProjectIdIndexRoute
@@ -416,6 +390,10 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProjectsIndexRoute: AppProjectsIndexRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
+  AppObservationObservationIdImageRoute: AppObservationObservationIdImageRoute,
+  AppObservationObservationIdPreviewRoute:
+    AppObservationObservationIdPreviewRoute,
+  AppPlatePlateIdPreviewRoute: AppPlatePlateIdPreviewRoute,
   AppObservationObservationIdIndexRoute: AppObservationObservationIdIndexRoute,
   AppPlatePlateIdIndexRoute: AppPlatePlateIdIndexRoute,
   AppProjectProjectIdIndexRoute: AppProjectProjectIdIndexRoute,
@@ -437,14 +415,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-const rootServerRouteChildren: RootServerRouteChildren = {
-  authApiAuthSplatServerRoute: authApiAuthSplatServerRoute,
-  AppObservationObservationIdImageServerRoute:
-    AppObservationObservationIdImageServerRoute,
-  AppObservationObservationIdPreviewServerRoute:
-    AppObservationObservationIdPreviewServerRoute,
-  AppPlatePlateIdPreviewServerRoute: AppPlatePlateIdPreviewServerRoute,
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
 }
-export const serverRouteTree = rootServerRouteImport
-  ._addFileChildren(rootServerRouteChildren)
-  ._addFileTypes<FileServerRouteTypes>()
