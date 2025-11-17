@@ -1,0 +1,32 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
+  "extends": "//",
+  "files": {
+    "includes": ["**", "!routeTree.gen.ts"]
+  },
+  "linter": {
+    "domains": {
+      "react": "recommended"
+    },
+    "rules": {
+      "a11y": {
+        "noStaticElementInteractions": "off",
+        "useAltText": "off",
+        "noLabelWithoutControl": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "info",
+          "options": {
+            "attributes": ["classList"],
+            "functions": ["cn", "clsx", "cva", "tw"]
+          }
+        }
+      },
+      "suspicious": {
+        "noConsole": "warn"
+      }
+    }
+  }
+}

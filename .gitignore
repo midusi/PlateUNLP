@@ -7,12 +7,15 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Local
+.env.local
+/.local/
 
-.turbo
+# TanStack
+node_modules
+.nitro
+.output
+.tanstack
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +28,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.env
