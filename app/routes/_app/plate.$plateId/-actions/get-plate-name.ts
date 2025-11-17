@@ -9,7 +9,7 @@ const InputSchema = z.object({
 })
 
 export const getPlateName = createServerFn()
-  .validator(InputSchema)
+  .inputValidator(InputSchema)
   .handler(async ({ data }) => {
     if (data.from === "plate") {
       const plate = await db.query.plate.findFirst({

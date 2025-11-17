@@ -4,7 +4,7 @@ import { z } from "zod"
 import { db } from "~/db"
 
 export const getSpectrums = createServerFn()
-  .validator(z.object({ observationId: z.string() }))
+  .inputValidator(z.object({ observationId: z.string() }))
   .handler(async ({ data }) => {
     const spectrums = await db.query.spectrum.findMany({
       where: (spectrum, { eq }) => eq(spectrum.observationId, data.observationId),

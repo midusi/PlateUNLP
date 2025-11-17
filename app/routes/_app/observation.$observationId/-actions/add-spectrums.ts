@@ -8,7 +8,7 @@ import * as s from "~/db/schema"
  * base de datos.
  */
 export const addSpectrums = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       observationId: z.string(),
       science: z.object({

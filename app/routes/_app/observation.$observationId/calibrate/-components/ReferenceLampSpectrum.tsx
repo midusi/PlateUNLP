@@ -272,47 +272,48 @@ export function ReferenceLampSpectrum({
 
           {/* Longitudes de onda marcadas por el usuario */}
           {materialPoints.map((mp, idx) => {
-            if (materialArrInRange.length > 0 && minWavelength <= mp.x && mp.x <= maxWavelength) {
-              const xClick = wavelengthScale(mp.x)
+            if (materialArrInRange.length === 0) return null
+            if (minWavelength > mp.x && mp.x > maxWavelength) return null
 
-              return (
-                <g key={`ReferenceLampSpectrumLine-${mp.x}`}>
-                  <Line
-                    x1={xClick}
-                    y1={0} // Valor inicial en el eje y
-                    x2={xClick}
-                    y2={height - margin.bottom - margin.top} // Altura del gráfico
-                    stroke="#FFFFFF"
-                    strokeWidth={2}
-                    strokeDasharray="5,2" // Define el patrón de punteado
-                  />
-                  <rect // Area cliqueable
-                    x={xClick - 2}
-                    y={0}
-                    width={4}
-                    height={height - margin.bottom - margin.top}
-                    fill="transparent"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleUserMarkDelete(mp.x)
-                    }}
-                    style={{
-                      cursor:
-                        "url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
-                    }}
-                  />
-                  <text
-                    x={xClick + 5}
-                    y={10}
-                    fill="#FFFFFF"
-                    fontSize="12"
-                    fontFamily="Arial, sans-serif"
-                  >
-                    #{`${idx}`}
-                  </text>
-                </g>
-              )
-            }
+            const xClick = wavelengthScale(mp.x)
+
+            return (
+              <g key={`ReferenceLampSpectrumLine-${mp.x}`}>
+                <Line
+                  x1={xClick}
+                  y1={0} // Valor inicial en el eje y
+                  x2={xClick}
+                  y2={height - margin.bottom - margin.top} // Altura del gráfico
+                  stroke="#FFFFFF"
+                  strokeWidth={2}
+                  strokeDasharray="5,2" // Define el patrón de punteado
+                />
+                <rect // Area cliqueable
+                  x={xClick - 2}
+                  y={0}
+                  width={4}
+                  height={height - margin.bottom - margin.top}
+                  fill="transparent"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleUserMarkDelete(mp.x)
+                  }}
+                  style={{
+                    cursor:
+                      "url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
+                  }}
+                />
+                <text
+                  x={xClick + 5}
+                  y={10}
+                  fill="#FFFFFF"
+                  fontSize="12"
+                  fontFamily="Arial, sans-serif"
+                >
+                  #{`${idx}`}
+                </text>
+              </g>
+            )
           })}
 
           <AxisBottom

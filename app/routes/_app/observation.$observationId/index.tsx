@@ -75,7 +75,7 @@ function RouteComponent() {
         <Link
           to="/observation/$observationId/calibrate"
           params={{ observationId: observationId }}
-          className="m-4 flex w-20 justify-center "
+          className="m-4 flex w-20 justify-center"
         >
           <Button className="flex justify-center">Calibrate</Button>
         </Link>

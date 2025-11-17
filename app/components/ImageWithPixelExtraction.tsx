@@ -21,7 +21,7 @@ export function ImageWithPixelExtraction({
   opening,
 }: ImageWithPixelExtractionProps) {
   return (
-    <div className={clsx("relative flex w-full items-center justify-center ", "px-8", "pt-1")}>
+    <div className={clsx("relative flex w-full items-center justify-center", "px-8", "pt-1")}>
       <ImageWithDraws
         image={image}
         points={pointsWMed}

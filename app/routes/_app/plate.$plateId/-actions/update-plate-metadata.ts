@@ -6,7 +6,7 @@ import * as s from "~/db/schema"
 import { getPlateMetadataCompletion, PlateMetadataSchema } from "~/types/spectrum-metadata"
 
 export const updatePlateMetadata = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       plateId: z.string().min(1),
       metadata: PlateMetadataSchema.strip(),

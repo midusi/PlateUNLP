@@ -6,7 +6,7 @@ import * as s from "~/db/schema"
 import { uploadFile } from "~/lib/uploads"
 
 export const uploadPlate = createServerFn({ method: "POST" })
-  .validator(z.instanceof(FormData))
+  .inputValidator(z.instanceof(FormData))
   .handler(async ({ data }) => {
     const projectId = data.get("projectId")
     if (typeof projectId !== "string") return { success: false as const, error: "Malformed input" }

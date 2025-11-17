@@ -6,7 +6,7 @@ import { db } from "~/db"
 export type Observation = Awaited<ReturnType<typeof getObservations>>[number]
 
 export const getObservations = createServerFn()
-  .validator(z.object({ plateId: z.string() }))
+  .inputValidator(z.object({ plateId: z.string() }))
   .handler(async ({ data }) => {
     const observations = await db.query.observation.findMany({
       where: (observation, { eq }) => eq(observation.plateId, data.plateId),

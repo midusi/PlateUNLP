@@ -5,7 +5,7 @@ import { db } from "~/db"
 import type { ObservationMetadataSchema } from "~/types/spectrum-metadata"
 
 export const getObservationMetadata = createServerFn()
-  .validator(z.object({ observationId: z.string() }))
+  .inputValidator(z.object({ observationId: z.string() }))
   .handler(
     async ({ data }): Promise<z.infer<typeof ObservationMetadataSchema> & { OBSERVAT: string }> => {
       const observation = await db.query.observation.findFirst({

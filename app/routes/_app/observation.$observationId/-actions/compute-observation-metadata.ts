@@ -60,7 +60,7 @@ async function getPolarMotion(mdj: number): Promise<{ status: -1 | 0 | 1; x: num
 }
 
 export const computeObservationMetadata = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       ...PlateMetadataSchema.pick({ OBSERVAT: true }).shape,
       ...ObservationMetadataSchema.pick({ OBJECT: true, "DATE-OBS": true, UT: true }).shape,

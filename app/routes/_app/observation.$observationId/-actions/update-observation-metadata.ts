@@ -9,7 +9,7 @@ import {
 } from "~/types/spectrum-metadata"
 
 export const updateObservationMetadata = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       observationId: z.string().min(1),
       metadata: ObservationMetadataSchema.strip(),

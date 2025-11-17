@@ -59,7 +59,7 @@ export const CalibrationSettingsUI = withForm({
 
     return (
       <>
-        <div className="grid grid-cols-1 items-center justify-center gap-4 md:grid-cols-2 ">
+        <div className="grid grid-cols-1 items-center justify-center gap-4 md:grid-cols-2">
           <div className="order-1 flex items-end md:order-none">
             <form.AppField name="material">
               {(field) => (
@@ -128,7 +128,7 @@ export const CalibrationSettingsUI = withForm({
                     {(field) => (
                       <field.NumberField
                         label="Deegre"
-                        className={clsx("text-sm tabular-nums", "disabled:cursor-default ")}
+                        className={clsx("text-sm tabular-nums", "disabled:cursor-default")}
                         disabled={!showDegre}
                       />
                     )}

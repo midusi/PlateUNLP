@@ -6,7 +6,7 @@ import * as s from "~/db/schema"
 import { deleteUploadedFile } from "~/lib/uploads"
 
 export const deletePlates = createServerFn({ method: "POST" })
-  .validator(z.object({ plateIds: z.string().array() }))
+  .inputValidator(z.object({ plateIds: z.string().array() }))
   .handler(async ({ data }) => {
     for (const plateId of data.plateIds) {
       const result = await db

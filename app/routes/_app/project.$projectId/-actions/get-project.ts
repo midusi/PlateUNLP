@@ -4,7 +4,7 @@ import { z } from "zod"
 import { db } from "~/db"
 
 export const getProject = createServerFn()
-  .validator(z.object({ projectId: z.string() }))
+  .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     const project = await db.query.project.findFirst({
       where: (t, { eq }) => eq(t.id, data.projectId),

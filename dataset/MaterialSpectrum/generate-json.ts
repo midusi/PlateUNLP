@@ -20,7 +20,7 @@ const nist = parse(nistRaw, { skipFirstRow: true })
     (row): SpectrumPoint => ({
       wavelength: Number.parseFloat(row["Wavelength(Ams)"]),
       material: row.Spectrum,
-      intensity: Number.parseInt(row.Intensity.replace(/\D/g, "")) ?? -1,
+      intensity: Number.parseInt(row.Intensity.replace(/\D/g, ""), 10) ?? -1,
     }),
   )
   .filter((point) => point.intensity > 0)
@@ -38,7 +38,7 @@ async function parseLibs(resolution: number) {
   const parsed = parse(raw, { skipFirstRow: true })
   return parsed.map(
     (row): SpectrumPoint => ({
-      wavelength: Number.parseInt(row["Wavelength (Å)"]),
+      wavelength: Number.parseInt(row["Wavelength (Å)"], 10),
       material: "HeArNe",
       intensity: Number.parseFloat(row.Sum),
     }),

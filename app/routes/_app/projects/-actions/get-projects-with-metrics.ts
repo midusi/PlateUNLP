@@ -6,7 +6,7 @@ import { db } from "~/db"
 import { observation, plate, project, userToProject } from "~/db/schema"
 
 export const getProjectsWithMetrics = createServerFn()
-  .validator(z.object({ userId: z.string() }))
+  .inputValidator(z.object({ userId: z.string() }))
   .handler(async ({ data }) => {
     const { userId } = data
     const projectsWithMetrics = await db

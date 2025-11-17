@@ -105,7 +105,7 @@ export function SelectUsersField({
                 alt={user.name}
                 className="h-8 w-8 rounded-full border border-black bg-blue-100 object-cover"
               />
-              <div className="flex w-full flex-col ">
+              <div className="flex w-full flex-col">
                 <span className="flex w-full cursor-pointer justify-start">{user.name}</span>
                 <span className="flex cursor-pointer justify-start text-gray-700">
                   {user.email}

@@ -4,7 +4,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const addMaterial = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       name: z.string(),
       arr: z.array(

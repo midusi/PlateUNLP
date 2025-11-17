@@ -61,11 +61,11 @@ function RouteComponent() {
                 className={clsx(
                   "h-[220px] w-full rounded-2xl border-1 border-dashed",
                   "border-gray-300 hover:bg-white",
-                  "bg-gray-50 hover:border-gray-500 ",
+                  "bg-gray-50 hover:border-gray-500",
                   "shadow-md transition-shadow hover:shadow-lg",
                 )}
               >
-                <CardContent className="flex h-full w-full flex-col items-center justify-center text-gray-300 hover:text-gray-600 ">
+                <CardContent className="flex h-full w-full flex-col items-center justify-center text-gray-300 hover:text-gray-600">
                   <Plus className="h-12 w-12" />
                   <span className="mt-2 font-medium text-sm">New Project</span>
                 </CardContent>

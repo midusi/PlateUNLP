@@ -201,8 +201,8 @@ export function ErrorScatterGraph({
       </svg>
       {tooltipOpen && tooltipData && tooltipTop && tooltipLeft && (
         <Tooltip className="w-30" left={tooltipLeft + 10} top={tooltipTop + 10}>
-          <div className="w-full " style={{ display: "inline-block" }}>
-            <span className="flex justify-center pb-2 font-bold ">#{tooltipData.idxMatch}</span>
+          <div className="w-full" style={{ display: "inline-block" }}>
+            <span className="flex justify-center pb-2 font-bold">#{tooltipData.idxMatch}</span>
             <div className="flex justify-between">
               <span className="font-bold">Å:</span>
               <span className="text-right font-mono">{formatNumber(getX(tooltipData))}</span>

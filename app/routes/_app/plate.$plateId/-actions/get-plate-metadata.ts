@@ -5,7 +5,7 @@ import { db } from "~/db"
 import type { PlateMetadataSchema } from "~/types/spectrum-metadata"
 
 export const getPlateMetadata = createServerFn()
-  .validator(z.object({ plateId: z.string() }))
+  .inputValidator(z.object({ plateId: z.string() }))
   .handler(async ({ data }): Promise<z.infer<typeof PlateMetadataSchema>> => {
     const plate = await db.query.plate.findFirst({
       where: (plate, { eq }) => eq(plate.id, data.plateId),

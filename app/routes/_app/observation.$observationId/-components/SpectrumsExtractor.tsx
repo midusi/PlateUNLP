@@ -113,7 +113,7 @@ export function SpectrumsExtractor({
             .concat(newAnalysis)
           analysisArr /** Olvidar tensores de espectros que ya no se usan */
             .filter((a) => value.spectrums.every((s) => a.id !== s.id))
-            .forEach((s) => s.analysis.spectrumMask.dispose())
+            .forEach((s) => void s.analysis.spectrumMask.dispose())
           setAnalysisArr(newAnalysisArr)
         }
 
@@ -273,7 +273,7 @@ export function SpectrumsExtractor({
                             return (
                               <div>
                                 <div className="flex w-full flex-row items-center justify-center gap-2 font-semibold text-lg text-slate-500">
-                                  <h3 className="flex justify-center ">{`Spectrum ${idx} [`}</h3>
+                                  <h3 className="flex justify-center">{`Spectrum ${idx} [`}</h3>
                                   <select
                                     value={st.type}
                                     className="rounded-lg bg-gray-100"
@@ -315,7 +315,7 @@ export function SpectrumsExtractor({
                                       Comparison Lamp
                                     </option>
                                   </select>
-                                  <h3 className="flex justify-center ">{`]`}</h3>
+                                  <h3 className="flex justify-center">{`]`}</h3>
                                 </div>
                                 <ImageWithPixelExtraction
                                   image={{

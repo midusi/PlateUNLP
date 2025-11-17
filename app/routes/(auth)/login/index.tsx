@@ -105,7 +105,7 @@ function RouteComponent() {
                 ]}
               >
                 {([isValid, isSubmitting, _isDirty]) => (
-                  <Button type="submit" disabled={!isValid} className="w-48 border ">
+                  <Button type="submit" disabled={!isValid} className="w-48 border">
                     {isSubmitting ? (
                       <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
                     ) : (
@@ -122,7 +122,7 @@ function RouteComponent() {
                 </a>
               </div>
             </div>
-            <hr className="w-full " />
+            <hr className="w-full" />
 
             <div className="w-full space-y-4 px-4 pt-2">
               <Button

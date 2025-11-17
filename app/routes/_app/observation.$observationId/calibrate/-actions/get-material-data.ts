@@ -4,7 +4,7 @@ import { z } from "zod"
 import { db } from "~/db"
 
 export const getMaterialData = createServerFn()
-  .validator(z.object({ materialName: z.string() }))
+  .inputValidator(z.object({ materialName: z.string() }))
   .handler(async ({ data }) => {
     const material = await db.query.material.findFirst({
       where: (material, { eq }) => eq(material.name, data.materialName),

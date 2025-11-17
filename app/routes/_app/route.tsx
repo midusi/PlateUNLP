@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_app")({
 function RouteComponent() {
   const { session } = Route.useLoaderData()
   const navigate = useNavigate()
-  const userInfo = session.data?.user!
+  const userInfo = session.data!.user
   const logos = [
     {
       href: "https://weblidi.info.unlp.edu.ar/",
@@ -84,7 +84,7 @@ function RouteComponent() {
               alt={userInfo.name}
               className="h-8 w-8 rounded-full border border-gray-500 bg-blue-100 object-cover"
             /> */}
-            <div className="flex w-full flex-col ">
+            <div className="flex w-full flex-col">
               <div className="flex flex-row justify-between">
                 <label className="flex w-full justify-start text-gray-500">{userInfo.name}</label>
               </div>
@@ -113,7 +113,7 @@ function RouteComponent() {
           </div>
         </div>
       </header>
-      <div className="flex w-full flex-1 flex-col overflow-y-auto bg-accent ">
+      <div className="flex w-full flex-1 flex-col overflow-y-auto bg-accent">
         <main className={cn("mx-auto flex w-full flex-1 flex-col gap-4 p-4", "max-w-9/12")}>
           <Outlet />
         </main>

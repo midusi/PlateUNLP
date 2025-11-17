@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_app/projects/add/")({
 function RouteComponent() {
   const { session, projects, users } = Route.useLoaderData()
 
-  const userId = session.data?.user.id!
+  const userId = session.data!.user.id
   const defaultValues: z.output<typeof NewProyectSchema> = {
     name: "",
     existingProjectsNames: projects.map((p) => p.name),

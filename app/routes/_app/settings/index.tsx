@@ -34,8 +34,8 @@ function RouteComponent() {
   const { session } = Route.useLoaderData()
 
   const defaultValues: z.output<typeof BasicUserFieldsSchema> = {
-    email: session.data?.user.email!,
-    name: session.data?.user.name!,
+    email: session.data!.user.email,
+    name: session.data!.user.name,
   }
 
   const form = useAppForm({

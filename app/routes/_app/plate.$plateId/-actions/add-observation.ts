@@ -5,7 +5,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const addObservation = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       plateId: z.string(),
       top: z.number().int().nonnegative(),

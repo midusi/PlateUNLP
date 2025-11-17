@@ -5,7 +5,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const updateObservation = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       observationId: z.string(),
       name: z.string().min(1),

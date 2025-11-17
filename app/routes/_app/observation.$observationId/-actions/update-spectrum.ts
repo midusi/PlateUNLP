@@ -5,7 +5,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const updateSpectrum = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       spectrumId: z.string(),
       imageTop: z.number().min(0),

@@ -5,7 +5,7 @@ import { db } from "~/db"
 import { project, userToProject } from "~/db/schema"
 
 export const addProject = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       userId: z.string().min(1),
       name: z.string().min(1),

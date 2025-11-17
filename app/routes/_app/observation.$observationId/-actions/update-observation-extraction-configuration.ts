@@ -5,7 +5,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const updateObservationExtractionConfiguration = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       observationId: z.string().min(1),
       countMediasPoints: z.number().min(2).optional(),

@@ -5,7 +5,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const updateCalibration = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       id: z.string(),
       minWavelength: z.number().min(0, "Min wavelength must be positive").optional(),
