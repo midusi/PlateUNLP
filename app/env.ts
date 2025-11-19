@@ -6,6 +6,7 @@ export const env = createEnv({
     DATABASE_URL: z.union([z.url({ protocol: /^libsql$/ }), z.string().startsWith("file:")]),
     DATABASE_TOKEN: z.string().optional(),
     UPLOADS_DIR: z.string(),
+    RAILPACK_BUILDING: z.literal("true").optional(),
   },
 
   clientPrefix: "PUBLIC_",
