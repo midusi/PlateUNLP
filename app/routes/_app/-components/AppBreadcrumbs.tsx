@@ -17,7 +17,7 @@ export function AppBreadcrumbs() {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {breadcrumbs.map(({ title, link }, i, arr) => (
+        {breadcrumbs.map(({ title, ...link }, i, arr) => (
           <Fragment key={link.to}>
             {i === arr.length - 1 ? (
               <BreadcrumbItem className="hidden md:block">

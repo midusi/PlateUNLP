@@ -10,6 +10,6 @@ export type Crumb<TOptions = unknown> = {
   params?: Record<string, string>
 }
 
-export function breadcrumb<TOptions = unknown>(obj: Crumb<TOptions>): any {
+export function breadcrumb<TOptions = unknown>(obj: Crumb<TOptions>): Crumb<TOptions> {
   return obj
 }
