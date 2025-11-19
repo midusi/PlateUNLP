@@ -1,4 +1,4 @@
-import { Link, type LinkProps, useRouterState } from "@tanstack/react-router"
+import { Link, useRouterState } from "@tanstack/react-router"
 import { Fragment } from "react"
 import {
   Breadcrumb,
@@ -8,8 +8,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb"
-
-export type Breadcrumbs = { title: string; link: LinkProps }[]
 
 export function AppBreadcrumbs() {
   const match = useRouterState({ select: (s) => s.matches.at(-1) })

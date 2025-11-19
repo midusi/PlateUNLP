@@ -52,6 +52,7 @@ export const TextFieldWithKnown = withFieldGroup<Fields, unknown, TextFieldWithK
               </div>
 
               {field.state.meta.errors.length > 0 && (
+                // @ts-expect-error https://github.com/TanStack/form/issues/1652
                 <FieldError>{field.state.meta.errors[0]!.message}</FieldError>
               )}
             </>

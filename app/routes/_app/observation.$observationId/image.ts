@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
+import { bufferToArrayBuffer } from "~/lib/node"
 import { readUploadedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/observation/$observationId/image")({
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/image")({
           .extractChannel(0)
           .raw({ depth: "ushort" }) // ushort for 16-bit
           .toBuffer()
-        return new Response(image, {
+        return new Response(bufferToArrayBuffer(image), {
           headers: {
             "Content-Type": "application/octet-stream",
             "X-Image-Width": observation.imageWidth.toString(),

@@ -18,11 +18,12 @@ export const getProjectWithAuthLists = createServerFn()
       },
     })
 
-    const usersRoles = project?.projectToUsers.map((u) => ({ id: u.userId, role: u.role }))
+    if (!project) return null
 
+    const usersRoles = project.projectToUsers.map((u) => ({ id: u.userId, role: u.role }))
     return {
-      id: project?.id,
-      name: project?.name,
+      id: project.id,
+      name: project.name,
       permissions: usersRoles,
     }
   })

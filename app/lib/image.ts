@@ -261,7 +261,11 @@ export function promediadoHorizontal<T extends Uint8Array | Uint8ClampedArray | 
  * @param {number} height - Alto
  * @returns {string} Url correspondiente a la imagen.
  */
-export function matrixToUrl(data: Uint8ClampedArray, width: number, height: number): string {
+export function matrixToUrl(
+  data: Uint8ClampedArray<ArrayBuffer>,
+  width: number,
+  height: number,
+): string {
   const canvas = document.createElement("canvas")
   canvas.width = width
   canvas.height = height
@@ -351,7 +355,11 @@ export function obtainImageSegments<T extends Uint8Array | Uint8ClampedArray | B
  * @returns {Uint8ClampedArray} -
  * Matriz ordenada por columnas
  */
-function invertOrder(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
+function invertOrder(
+  data: Uint8ClampedArray<ArrayBuffer>,
+  width: number,
+  height: number,
+): Uint8ClampedArray<ArrayBuffer> {
   const colMajorData = new Uint8ClampedArray(data.length)
 
   let idx = 0
@@ -384,7 +392,7 @@ export async function obtainimageMatrix(
   src: string,
   colMajor?: boolean,
 ): Promise<{
-  data: Uint8ClampedArray
+  data: Uint8ClampedArray<ArrayBuffer>
   width: number
   height: number
 }> {

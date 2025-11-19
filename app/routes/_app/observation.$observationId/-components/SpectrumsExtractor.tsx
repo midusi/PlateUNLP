@@ -1,4 +1,4 @@
-import type * as tf from "@tensorflow/tfjs"
+import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import type z from "zod"
 import { ImageWithPixelExtraction } from "~/components/ImageWithPixelExtraction"
@@ -6,6 +6,7 @@ import { SimpleFunctionXY } from "~/components/SimpleFunctionXY"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import type { extractSpectrumResponse } from "~/lib/extract-features"
+import { fetchGrayscaleImage } from "~/lib/image"
 import { notifyError } from "~/lib/notifications"
 import { ExtractionConfigurationSchema } from "~/types/spectrum-metadata"
 import { getObservationExtractionConfiguration } from "../-actions/get-observation-extraction-configuration"
@@ -30,15 +31,17 @@ type SpectrumsExtractorProps = {
   observationId: string
   /** Arreglo con especificaciones de espectros de la observacion */
   spectrums: Awaited<ReturnType<typeof getSpectrums>>
-  /** Tensor 2D que representa la imagen recibida en escala de grises */
-  observationTensor: tf.Tensor2D
 }
 
-export function SpectrumsExtractor({
-  observationId,
-  spectrums = [],
-  observationTensor,
-}: SpectrumsExtractorProps) {
+export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsExtractorProps) {
+  const { data: observationTensor } = useQuery({
+    queryKey: ["observationImage", observationId],
+    queryFn: async () => {
+      const image = await fetchGrayscaleImage(`/observation/${observationId}/image`)
+      return image
+    },
+  })
+
   const orderedSpectrums = spectrums.sort(
     (a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft,
   )
@@ -76,7 +79,8 @@ export function SpectrumsExtractor({
       onMount: ExtractionConfigurationSchema,
       onChange: ExtractionConfigurationSchema,
     },
-    onSubmit: async ({ value, formApi: _formApi }) => {
+    onSubmit: async ({ value }) => {
+      if (!observationTensor) return
       try {
         setState("running")
         /** Averiguar que espectros del listado deben ser recalculados */

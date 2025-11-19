@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Button } from "~/components/ui/button"
+import { breadcrumb } from "~/lib/breadcrumbs"
 import { formatObservation } from "~/lib/format"
-import { fetchGrayscaleImage } from "~/lib/image"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
-import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getObservationMetadata } from "./-actions/get-observation-metadata"
 import { getSpectrums } from "./-actions/get-spectrums"
 import { ObservationMetadataForm } from "./-components/ObservationMetadataForm"
@@ -22,38 +21,33 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
       getObservationMetadata({ data: { observationId: params.observationId } }),
       getSpectrums({ data: { observationId: params.observationId } }),
     ])
-    const rawImage = await fetchGrayscaleImage(`/observation/${params.observationId}/image`)
     return {
       breadcrumbs: [
-        {
+        breadcrumb({
           title: project.name,
-          link: {
-            to: "/project/$projectId",
-            params: { projectId: project.id },
-          },
-        },
-        {
+          to: "/project/$projectId",
+          params: { projectId: project.id },
+        }),
+        breadcrumb({
           title: `${plate["PLATE-N"]}`,
-          link: { to: "/plate/$plateId", params: { plateId: plate.id } },
-        },
-        {
+          to: "/plate/$plateId",
+          params: { plateId: plate.id },
+        }),
+        breadcrumb({
           title: formatObservation({ ...initialMetadata, id: params.observationId }),
-          link: {
-            to: "/observation/$observationId",
-            params: { observationId: params.observationId },
-          },
-        },
-      ] satisfies Breadcrumbs,
+          to: "/observation/$observationId",
+          params: { observationId: params.observationId },
+        }),
+      ],
       initialMetadata,
       spectrums,
-      rawImage,
     }
   },
 })
 
-function RouteComponent() {
+async function RouteComponent() {
   const { observationId } = Route.useParams()
-  const { initialMetadata, spectrums, rawImage } = Route.useLoaderData()
+  const { initialMetadata, spectrums } = Route.useLoaderData()
 
   return (
     <div className="mx-auto w-full">
@@ -65,11 +59,7 @@ function RouteComponent() {
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
-      <SpectrumsExtractor
-        observationId={observationId}
-        spectrums={spectrums}
-        observationTensor={rawImage}
-      />
+      <SpectrumsExtractor observationId={observationId} spectrums={spectrums} />
 
       <div className="flex w-full justify-center">
         <Link

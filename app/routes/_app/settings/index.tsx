@@ -7,8 +7,8 @@ import { Field, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
+import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
-import type { Breadcrumbs } from "~/routes/_app/-components/AppBreadcrumbs"
 import { BasicUserFieldsSchema } from "~/types/auth"
 import { ChangePasswordModal } from "./-components/ChangePasswordModal"
 
@@ -18,12 +18,11 @@ export const Route = createFileRoute("/_app/settings/")({
     const session = await authClient.getSession()
     return {
       breadcrumbs: [
-        { title: "Home", link: { to: "/projects" } },
-        {
+        breadcrumb({
           title: "Account settings",
-          link: { to: "/settings" },
-        },
-      ] satisfies Breadcrumbs,
+          to: "/settings",
+        }),
+      ],
       session: session,
     }
   },

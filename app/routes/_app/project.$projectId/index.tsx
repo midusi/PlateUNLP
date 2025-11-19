@@ -27,8 +27,8 @@ import {
   TableRow,
 } from "~/components/ui/table"
 import { authClient } from "~/lib/auth-client"
+import { breadcrumb } from "~/lib/breadcrumbs"
 import { formatObservation } from "~/lib/format"
-import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getProject } from "./-actions/get-project"
 import { DeletePlates } from "./-components/DeletePlates"
 import { UploadPlate } from "./-components/UploadPlate"
@@ -44,11 +44,12 @@ export const Route = createFileRoute("/_app/project/$projectId/")({
 
     return {
       breadcrumbs: [
-        {
+        breadcrumb({
           title: project.name,
-          link: { to: "/project/$projectId", params: { projectId: project.id } },
-        },
-      ] satisfies Breadcrumbs,
+          to: "/project/$projectId",
+          params: { projectId: project.id },
+        }),
+      ],
       project,
       user,
     }

@@ -3,7 +3,6 @@ import { type ClassValue, clsx } from "clsx"
 import { inv, lusolve, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
 import type { BoundingBox } from "~/types/BoundingBox"
-import type { StepSpecificInfoForm } from "~/types/ProcessInfoForm"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -461,23 +460,6 @@ export function iou(box1: BoundingBox, box2: BoundingBox) {
   return intersection(box1, box2) / union(box1, box2)
 }
 
-export function getNextId(boundingBoxes: BoundingBox[]) {
-  const maxId = boundingBoxes.reduce((max, box) => Math.max(max, box.id), 0)
-  return maxId + 1
-}
-
-export function totalStepsCompleted(spectrumId: number, steps: StepSpecificInfoForm[]): number {
-  let stepsCompleted = 0
-  // Recorrer etapas por las que tiene que pasar un espectro
-  for (let stepId = 0; stepId < steps.length; stepId++) {
-    // Revisa valor del espectro en etapa i y suma si esta completado
-    if (steps[stepId].states![spectrumId] === "COMPLETE") {
-      stepsCompleted += 1
-    }
-  }
-  return stepsCompleted
-}
-
 /**
  * Realiza un suavizado por promedio.
  * @param {number[]} data Datos a promediar
@@ -542,50 +524,6 @@ export function weightedSmooth(data: number[], windowSize = 3): number[] {
   }
 
   return smoothed
-}
-
-/**
- * Aumenta el contraste empujando los valores hacia los extremos (0 o 1),
- * desde la mitad.
- * @param {number[]} data Arreglo de valores entre 0 y 1
- * @param {number} umbral Umbral de decicion
- * @returns {number[]} Arreglo transformado
- */
-export function pushToExtremes(data: number[], umbral: number): number[] {
-  const normalized = normalizeMinMax(data)
-  return normalized.map((v) => {
-    return v > umbral ? 1 : 0
-  })
-}
-
-/**
- * Aumenta el contraste empujando los valores hacia los extremos (0 o 1),
- * desde la mitad, emplea tensorflow.
- * @param {tf.TensorLike} data Tensor de valores entre 0 y 1
- * @param {number} umbral Umbral de decicion
- * @returns {tf.TensorLike} Arreglo transformado
- */
-// export function pushToExtremeTf(data: tf.TensorLike, umbral: number): number[] {
-//   const b = tf.zeros(data.shape.toArray())
-//   const normalized = normalizeMinMax(data)
-//   return normalized.map((v) => {
-//     return v > umbral ? 1 : 0
-//   })
-// }
-
-/**
- * Recibe un arreglo de datos y los normaliza.
- * @param {number[]} data - Arreglo de datos a normalizar.
- * @param {number} min - Minimo a considerar para la conversion de rango.
- * @param {number} max - Maximo a considerar para la conversion de rango.
- * @returns {number[]} -
- * Arreglo de datos normalizado.
- */
-export function normalizeMinMax(data: number[], min?: number, max?: number): number[] {
-  if (!min) min = Math.min(...data)
-  if (!max) max = Math.max(...data)
-
-  return data.map((x) => (x - min) / (max - min))
 }
 
 /**

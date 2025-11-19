@@ -4,7 +4,7 @@ import { authClient } from "~/lib/auth-client"
 export const Route = createFileRoute("/")({
   component: RouteComponent,
   loader: () => {
-    return redirect({ to: "/projects" })
+    throw redirect({ to: "/projects" })
   },
 })
 

@@ -5,13 +5,13 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
+import { breadcrumb } from "~/lib/breadcrumbs"
 import { formatObservation } from "~/lib/format"
 import { notifyError } from "~/lib/notifications"
 import { CustomError } from "~/lib/utils"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
 import { TeoricalSpectrumConfigSchema } from "~/types/calibrate"
-import type { Breadcrumbs } from "../../-components/AppBreadcrumbs"
 import { getObservationMetadata } from "../-actions/get-observation-metadata"
 import { getMaterialData } from "./-actions/get-material-data"
 import { getMaterialsNames } from "./-actions/get-materials-names"
@@ -52,35 +52,30 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
 
     return {
       breadcrumbs: [
-        {
+        breadcrumb({
           title: project.name,
-          link: {
-            to: "/project/$projectId",
-            params: { projectId: project.id },
-          },
-        },
-        {
+          to: "/project/$projectId",
+          params: { projectId: project.id },
+        }),
+        breadcrumb({
           title: `Plate ${plate["PLATE-N"]}`,
-          link: { to: "/plate/$plateId", params: { plateId: plate.id } },
-        },
-        {
+          to: "/plate/$plateId",
+          params: { plateId: plate.id },
+        }),
+        breadcrumb({
           title: formatObservation({ ...initialMetadata, id: params.observationId }),
-          link: {
-            to: "/observation/$observationId",
-            params: { observationId: params.observationId },
-          },
-        },
-        {
+          to: "/observation/$observationId",
+          params: { observationId: params.observationId },
+        }),
+        breadcrumb({
           title: `Calibrate`,
-          link: {
-            to: "/observation/$observationId/calibrate",
-            params: { observationId: params.observationId },
-          },
-        },
-      ] satisfies Breadcrumbs,
+          to: "/observation/$observationId/calibrate",
+          params: { observationId: params.observationId },
+        }),
+      ],
       plateN: plate["PLATE-N"],
       observationIdentifier: observationIdentifier,
-      spectrums: spectrums as typeof spectrums,
+      spectrums: spectrums,
       calibration: calibration,
       materialData: materialData,
       listOfMaterials: listOfMaterials,

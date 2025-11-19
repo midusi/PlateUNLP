@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { getObservatoriesQueryOptions } from "~/components/forms/SelectObservatory"
+import { breadcrumb } from "~/lib/breadcrumbs"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
-import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getObservations } from "./-actions/get-observations"
 import { getPlateMetadata } from "./-actions/get-plate-metadata"
 import { ObservationsList } from "./-components/ObservationsList"
@@ -19,15 +19,17 @@ export const Route = createFileRoute("/_app/plate/$plateId/")({
 
     return {
       breadcrumbs: [
-        {
+        breadcrumb({
           title: project.name,
-          link: { to: "/project/$projectId", params: { projectId: project.id } },
-        },
-        {
+          to: "/project/$projectId",
+          params: { projectId: project.id },
+        }),
+        breadcrumb({
           title: `${initialMetadata["PLATE-N"]}`,
-          link: { to: "/plate/$plateId", params: { plateId: params.plateId } },
-        },
-      ] satisfies Breadcrumbs,
+          to: "/plate/$plateId",
+          params: { plateId: params.plateId },
+        }),
+      ],
       initialMetadata,
       initialObservations,
     }

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
+import { bufferToArrayBuffer } from "~/lib/node"
 import { readUploadedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/observation/$observationId/preview")({
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/preview")
           .toColorspace("srgb")
           .png()
           .toBuffer()
-        return new Response(image, {
+        return new Response(bufferToArrayBuffer(image), {
           headers: {
             "Content-Type": "image/png",
             "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

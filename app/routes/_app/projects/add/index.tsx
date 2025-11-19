@@ -3,9 +3,9 @@ import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
+import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { NewProyectSchema } from "~/types/proyect"
-import type { Breadcrumbs } from "../../-components/AppBreadcrumbs"
 import { addProject } from "./-actions/add-project"
 import { getProjectsNames } from "./-actions/get-projects-names"
 import { getUsers } from "./-actions/get-users"
@@ -19,12 +19,11 @@ export const Route = createFileRoute("/_app/projects/add/")({
     const users = await getUsers()
     return {
       breadcrumbs: [
-        { title: "Projects", link: { to: "/projects" } },
-        {
+        breadcrumb({
           title: "New Project",
-          link: { to: "/projects/add" },
-        },
-      ] satisfies Breadcrumbs,
+          to: "/projects/add",
+        }),
+      ],
       session: session,
       projects: projects,
       users: users,

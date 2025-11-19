@@ -3,9 +3,9 @@ import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
+import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { EditProyectSchema } from "~/types/proyect"
-import type { Breadcrumbs } from "../../-components/AppBreadcrumbs"
 import { getProjectWithAuthLists } from "./-actions/get-project-with-auth-lists"
 import { getProjectsNames } from "./-actions/get-projects-names"
 import { getUsers } from "./-actions/get-users"
@@ -19,12 +19,7 @@ export const Route = createFileRoute("/_app/project/$projectId/settings/")({
     const session = await authClient.getSession()
     const userId = session.data?.user.id as string
     const projects_names = await getProjectsNames({ data: { userId: userId } })
-    const users = (await getUsers({ data: {} })) as {
-      id: string
-      name: string
-      email: string
-      image: string
-    }[]
+    const users = await getUsers()
 
     const project = await getProjectWithAuthLists({
       data: { projectId: projectId },
@@ -38,22 +33,21 @@ export const Route = createFileRoute("/_app/project/$projectId/settings/")({
       projects_names,
       users,
       breadcrumbs: [
-        { title: "Projects", link: { to: "/projects" } },
-        {
-          title: project.name as string,
-          link: {
-            to: "/project/$projectId",
-            params: { projectId: project.id },
-          },
-        },
-        {
+        breadcrumb({
+          title: "Projects",
+          to: "/projects",
+        }),
+        breadcrumb({
+          title: project.name,
+          to: "/project/$projectId",
+          params: { projectId: project.id },
+        }),
+        breadcrumb({
           title: "Settings",
-          link: {
-            to: "/project/$projectId/settings",
-            params: { projectId: project.id },
-          },
-        },
-      ] satisfies Breadcrumbs,
+          to: "/project/$projectId/settings",
+          params: { projectId: project.id },
+        }),
+      ],
     }
   },
 })

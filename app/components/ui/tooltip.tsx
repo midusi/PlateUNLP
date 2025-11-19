@@ -31,7 +31,7 @@ type TooltipContentProps = TooltipPrimitive.Popup.Props &
     | "collisionPadding"
     | "sticky"
     | "positionMethod"
-    | "trackAnchor"
+    | "disableAnchorTracking"
   >
 
 function TooltipContent({
@@ -47,7 +47,7 @@ function TooltipContent({
   collisionPadding = 5,
   sticky = false,
   positionMethod = "absolute",
-  trackAnchor = true,
+  disableAnchorTracking = false,
   // Popup props
   className,
   children,
@@ -67,7 +67,7 @@ function TooltipContent({
         collisionPadding={collisionPadding}
         sticky={sticky}
         positionMethod={positionMethod}
-        trackAnchor={trackAnchor}
+        disableAnchorTracking={disableAnchorTracking}
       >
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"

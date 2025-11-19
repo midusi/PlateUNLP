@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
+import { bufferToArrayBuffer } from "~/lib/node"
 import { readUploadedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/plate/$plateId/preview")({
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/_app/plate/$plateId/preview")({
         // Always convert to sRGB and PNG format for consistency
         let image = await readUploadedFile(plate.image.id)
         image = await sharp(image).toColorspace("srgb").png().toBuffer()
-        return new Response(image, {
+        return new Response(bufferToArrayBuffer(image), {
           headers: {
             "Content-Type": "image/png",
             "Cache-Control": "public, max-age=31536000", // Cache for 1 year

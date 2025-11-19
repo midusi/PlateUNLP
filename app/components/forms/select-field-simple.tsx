@@ -43,8 +43,9 @@ export function SelectFieldSimple({
       {label && <FieldLabel>{label}</FieldLabel>}
       <Select.Root
         items={options}
-        value={disabled ? placeholder : field.state.value}
+        value={field.state.value}
         onValueChange={(val) => field.handleChange(val)}
+        disabled={disabled}
       >
         <Select.Trigger
           className={cn(

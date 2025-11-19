@@ -27,7 +27,7 @@ type DropdownMenuContentProps = DropdownMenuPrimitive.Popup.Props &
     | "collisionPadding"
     | "sticky"
     | "positionMethod"
-    | "trackAnchor"
+    | "disableAnchorTracking"
   >
 
 function DropdownMenuContent({
@@ -43,7 +43,7 @@ function DropdownMenuContent({
   collisionPadding = 5,
   sticky = false,
   positionMethod = "absolute",
-  trackAnchor = true,
+  disableAnchorTracking = false,
   // DropdownMenu props
   className,
   ...props
@@ -62,7 +62,7 @@ function DropdownMenuContent({
         collisionPadding={collisionPadding}
         sticky={sticky}
         positionMethod={positionMethod}
-        trackAnchor={trackAnchor}
+        disableAnchorTracking={disableAnchorTracking}
       >
         <DropdownMenuPrimitive.Popup
           data-slot="dropdown-menu-content"

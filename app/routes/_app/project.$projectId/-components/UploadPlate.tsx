@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { Image } from "image-js"
+import { decode, encodeDataURL, type Image } from "image-js"
 import { useMemo, useRef, useState } from "react"
 import { Button } from "~/components/ui/button"
 import {
@@ -26,7 +26,7 @@ export function UploadPlate({ projectId }: { projectId: string }) {
 
   const formRef = useRef<HTMLFormElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const imageUrl = useMemo(() => image?.toDataURL(), [image])
+  const imageUrl = useMemo(() => (image ? encodeDataURL(image) : undefined), [image])
 
   return (
     <form
@@ -67,7 +67,7 @@ export function UploadPlate({ projectId }: { projectId: string }) {
           setState("reading")
 
           const data = await file.arrayBuffer()
-          let img = await Image.load(data)
+          let img = decode(new Uint8Array(data))
           img = img.resize({ width: 400 })
 
           setRotate(0)

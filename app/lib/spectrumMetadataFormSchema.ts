@@ -7,7 +7,6 @@ export const spectrumMetadataFormSchema = z.object({
   HA: z.union([z.undefined(), z.number()]),
   RA: z.union([z.undefined(), z.number()]),
   DEC: z.union([z.undefined(), z.number()]),
-  GAIN: z.union([z.undefined(), z.number()]),
   RA2000: z.union([z.undefined(), z.number()]),
   DEC2000: z.union([z.undefined(), z.number()]),
   RA1950: z.union([z.undefined(), z.number()]),

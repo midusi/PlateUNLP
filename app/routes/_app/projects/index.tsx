@@ -3,7 +3,6 @@ import clsx from "clsx"
 import { Plus } from "lucide-react"
 import { Card, CardContent, CardHeader } from "~/components/ui/card"
 import { authClient } from "~/lib/auth-client"
-import type { Breadcrumbs } from "../-components/AppBreadcrumbs"
 import { getProjectsWithMetrics } from "./-actions/get-projects-with-metrics"
 
 export const Route = createFileRoute("/_app/projects/")({
@@ -16,7 +15,6 @@ export const Route = createFileRoute("/_app/projects/")({
 
     return {
       user: user,
-      breadcrumbs: [] satisfies Breadcrumbs,
       projects: await getProjectsWithMetrics({ data: { userId: userId } }),
     }
   },

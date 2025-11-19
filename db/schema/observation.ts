@@ -31,7 +31,9 @@ export const observation = sqliteTable(
     "UT?": integer("ut_known", { mode: "boolean" }).notNull().default(true),
     EXPTIME: text("exptime").notNull().default(""),
     "EXPTIME?": integer("exptime_known", { mode: "boolean" }).notNull().default(true),
-    IMAGETYP: text("imagetyp").notNull().default(""),
+    IMAGETYP: text("imagetyp", { enum: ["object", "dark", "zero", "flat", "arc"] })
+      .notNull()
+      .default("object"),
     "IMAGETYP?": integer("imagetyp_known", { mode: "boolean" }).notNull().default(true),
     "MAIN-ID": text("main_id").notNull().default(""),
     "MAIN-ID?": integer("main_id_known", { mode: "boolean" }).notNull().default(true),

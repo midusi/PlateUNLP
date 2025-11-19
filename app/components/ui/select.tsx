@@ -1,16 +1,11 @@
 import { Select as SelectPrimitive } from "@base-ui-components/react/select"
 import { cn } from "~/lib/utils"
 
-function Select<Value>(props: SelectPrimitive.Root.SingleProps<Value>): React.JSX.Element
-function Select<Value>(props: SelectPrimitive.Root.MultipleProps<Value>): React.JSX.Element
-function Select<Value>(
-  props: SelectPrimitive.Root.SingleProps<Value> | SelectPrimitive.Root.MultipleProps<Value>,
+function Select<Value, Multiple extends boolean | undefined = false>(
+  props: SelectPrimitive.Root.Props<Value, Multiple>,
 ): React.JSX.Element {
-  if (props.multiple) {
-    return <SelectPrimitive.Root<Value> {...props} multiple={true} data-slot="select" />
-  } else {
-    return <SelectPrimitive.Root<Value> {...props} multiple={false} data-slot="select" />
-  }
+  // @ts-expect-error Forwarding is broken
+  return <SelectPrimitive.Root<Value, Multiple> {...props} data-slot="select" />
 }
 
 function SelectGroup({ ...props }: SelectPrimitive.Group.Props) {
@@ -66,7 +61,7 @@ type SelectContentProps = SelectPrimitive.Popup.Props &
     | "collisionPadding"
     | "sticky"
     | "positionMethod"
-    | "trackAnchor"
+    | "disableAnchorTracking"
   >
 
 function SelectContent({
@@ -82,7 +77,7 @@ function SelectContent({
   collisionPadding = 5,
   sticky = false,
   positionMethod = "absolute",
-  trackAnchor = true,
+  disableAnchorTracking = false,
   // Popup props
   className,
   ...props
@@ -101,7 +96,7 @@ function SelectContent({
         collisionPadding={collisionPadding}
         sticky={sticky}
         positionMethod={positionMethod}
-        trackAnchor={trackAnchor}
+        disableAnchorTracking={disableAnchorTracking}
       >
         <SelectScrollUpArrow />
         <SelectPrimitive.Popup

@@ -179,6 +179,7 @@ async function createProject(name: string, ownerEmail: string) {
 async function main() {
   console.log(pc.bgBlue(" Seeding database... "))
   console.log(pc.gray("❖ Dropping existing tables..."))
+  // @ts-expect-error wrong types in drizzle-seed
   await reset(db, schema)
 
   console.log(pc.gray("❖ Getting materials..."))

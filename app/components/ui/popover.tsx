@@ -23,7 +23,7 @@ type PopoverContentProps = PopoverPrimitive.Popup.Props &
     | "collisionPadding"
     | "sticky"
     | "positionMethod"
-    | "trackAnchor"
+    | "disableAnchorTracking"
   >
 
 function PopoverContent({
@@ -39,7 +39,7 @@ function PopoverContent({
   collisionPadding = 5,
   sticky = false,
   positionMethod = "absolute",
-  trackAnchor = true,
+  disableAnchorTracking = false,
   // Popup props
   className,
   ...props
@@ -58,7 +58,7 @@ function PopoverContent({
         collisionPadding={collisionPadding}
         sticky={sticky}
         positionMethod={positionMethod}
-        trackAnchor={trackAnchor}
+        disableAnchorTracking={disableAnchorTracking}
       >
         <PopoverPrimitive.Popup
           data-slot="popover-content"
