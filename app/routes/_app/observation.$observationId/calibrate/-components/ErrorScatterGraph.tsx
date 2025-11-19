@@ -10,8 +10,8 @@ import * as d3 from "@visx/vendor/d3-array"
 import type { NumberValue, ScaleLinear } from "@visx/vendor/d3-scale"
 import { useMemo } from "react"
 import useMeasure from "react-use-measure"
-import { GraphInErrorCase } from "~/components/molecules/GraphInErrorCase"
 import { CustomError } from "~/lib/utils"
+import { GraphInErrorCase } from "./GraphInErrorCase"
 
 const formatNumber = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
