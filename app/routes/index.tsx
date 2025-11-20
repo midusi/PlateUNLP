@@ -1,5 +1,4 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { authClient } from "~/lib/auth-client"
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -9,6 +8,5 @@ export const Route = createFileRoute("/")({
 })
 
 function RouteComponent() {
-  console.log(authClient.useSession())
   return <p>nothing here</p>
 }
