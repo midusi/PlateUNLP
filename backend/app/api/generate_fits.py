@@ -4,6 +4,8 @@ import os
 import cv2
 import shutil
 from app.helpers.DictPersistJSON import DictPersistJSON
+from app.helpers.split_text_smart import split_text_smart
+
 from app.helpers.generate_txt import generate_txt
 from app.api.config import get_workspace_path
 
@@ -92,7 +94,8 @@ def api_generate_fits():
         os.mkdir(image_output_dir)
 
     # Copy the original image file to the output directory
-    shutil.copy2(image_path, os.path.join(image_output_dir, img_name + "." + img_ext))
+    shutil.copy2(image_path, os.path.join(
+        image_output_dir, img_name + "." + img_ext))
 
     # Borrado de archivos viejos de la placa en caso de que los haya
     if os.path.exists(image_output_dir):
@@ -143,22 +146,34 @@ def api_generate_fits():
         if invert_image:
             crop_img = 255 - crop_img
 
-        pre_file_output_name = f'{img_name}_{data["MAIN-ID"]}' + (f'_{data["SUFFIX"]}' if data["SUFFIX"] else '')
+        pre_file_output_name = f'{img_name}_{data["MAIN-ID"]}' + (
+            f'_{data["SUFFIX"]}' if data["SUFFIX"] else '')
         file_output_name = pre_file_output_name.replace(" ", "")
         # saved image crop
         cv2.imwrite(os.path.join(
             image_output_dir, f'{file_output_name}.png'), crop_img)
 
+        chunk_size = 55  # Tamaño máximo de cada trozo de cadena
         # generated fit
         prihdr = fits.Header()
         for key in fields.keys():
-            comment = ''
-            if 'info' in fields[key].keys():
-                comment = fields[key]["info"]
-            if fields[key]["global"]:
-                prihdr[key] = (plate_data[key], comment)
+            comment = fields[key].get("info", "")
+
+            # Obtener valor
+            value = plate_data[key] if fields[key]["global"] else data[key]
+
+            if isinstance(value, str) and len(value) > chunk_size:
+                # Cortamos la cadena en trozos
+                chunks = split_text_smart(value, max_length=chunk_size)
+
+                # Agregamos el primer trozo con set()
+                prihdr[f"{key}-1"] = (chunks[0], comment)
+
+                # Trozos restantes
+                for idx, chunk in enumerate(chunks[1:], start=2):
+                    prihdr[f"{key}-{idx}"] = chunk
             else:
-                prihdr[key] = (data[key], comment)
+                prihdr[key] = (value, comment)
 
         prihdr["GAIN"] = ("", "Gain, electrons per adu")
         prihdr["NOISE"] = ("", "Read noise")
@@ -185,4 +200,3 @@ def api_generate_fits():
     }
 
     return json.jsonify(**data)
-

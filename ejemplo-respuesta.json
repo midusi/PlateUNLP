@@ -1,0 +1,407 @@
+{
+    "path_dir": "/usr/src/app/db",
+    "data_arr": [
+        {
+            "AIRMASS": "",
+            "COMMENTS": "",
+            "DATE-OBS": "1925-05-27",
+            "DEC": "-62:35:50.2001",
+            "DEC1950": "-62:35:50.2164",
+            "DEC2000": "-62:38:24.291",
+            "DETECTOR": "",
+            "EQUINOX": "1925.4",
+            "EXPTIME": "",
+            "HA": "",
+            "JD": "",
+            "MAIN-ID": "VRR Pic",
+            "OBJECT": "RR Pic",
+            "RA": "06:35:09.8433",
+            "RA1950": "06:35:09.8258",
+            "RA2000": "06:35:36.0630",
+            "SPTYPE": "",
+            "ST": "",
+            "SUFFIX": "",
+            "TIME-OBS": "",
+            "UT": "MISSING",
+            "color": "",
+            "id": "",
+            "loaded": [
+                "DATE-OBS",
+                "DEC",
+                "DEC1950",
+                "DEC2000",
+                "EPOCH",
+                "EQUINOX",
+                "OBJECT",
+                "RA",
+                "RA1950",
+                "RA2000",
+                "SPTYPE",
+                "SUFFIX"
+            ],
+            "EPOCH": "1925.4",
+            "OBSERVER": "Observer 1",
+            "IMAGETYP": "Image type 2"
+        }
+    ],
+    "bbox_arr": [
+        {
+            "x": 724.9550701094395,
+            "y": 2150.884733362662,
+            "h": 1326.30078125,
+            "w": 8064.765625
+        }
+    ],
+    "img_name": "I3.tif",
+    "plate_data": {
+        "DIGITALI": "Digitali test",
+        "IMAGETYP": "Image type 1",
+        "OBSERVAT": "oalp: Observatorio Astronomico de La Plata",
+        "OBSERVER": "Observer 1",
+        "PLATE-COMMENTS": "It is not entirely certain that the observatory is OALP",
+        "PLATE-N": "I3",
+        "SCAN-COL": "",
+        "SCAN-RES": "",
+        "SCANNER": "bbbbbbb",
+        "SOFTWARE": "aaaa"
+    },
+    "fields": {
+        "OBJECT": {
+            "label": "OBJECT",
+            "type": "text",
+            "info": "Name of the object observed",
+            "required": true,
+            "pre_fetch": true,
+            "global": false
+        },
+        "OBSERVAT": {
+            "label": "OBSERVAT",
+            "type": "text",
+            "info": "Organization or institution",
+            "required": true,
+            "options": [
+                "aao: Anglo-Australian Observatory",
+                "apo: Apache Point Observatory",
+                "aries: Aryabhatta Research Institute of Observational Sciences",
+                "baker: Baker Observatory",
+                "BAO: Beijing XingLong Observatory",
+                "bgsuo: Bowling Green State Univ Observatory",
+                "bmo: Black Moshannon Observatory",
+                "bosque: Estacion Astrofisica Bosque Alegre, Cordoba",
+                "boyden: Boyden",
+                "ca: Calar Alto Observatory",
+                "casleo: Complejo Astronomico El Leoncito, San Juan",
+                "cfht: Canada-France-Hawaii Telescope",
+                "ctio: Cerro Tololo Interamerican Observatory",
+                "dao: Dominion Astrophysical Observatory",
+                "DSAZ: Deutsch-Spanisches Observatorium Calar Alto - Spain",
+                "ekar: Mt. Ekar 182 cm. Telescope",
+                "eso36m: European Southern Observatory, 3.6m Telescope, La Silla",
+                "esontt: European Southern Observatory, NTT, La Silla",
+                "esovlt: European Southern Observatory, VLT, Paranal",
+                "euo: Ege University Observatory",
+                "flwo: Whipple Observatory",
+                "flwo1: Whipple Observatory",
+                "fmo: Fan Mountain Observatory",
+                "gemini-north: Gemini North Observatory",
+                "gemini-south: Gemini South Observatory",
+                "het: McDonald Observatory - Hobby-Eberly Telescope",
+                "holi: Observatorium Hoher List (Universitaet Bonn) - Germany",
+                "iao: Indian Astronomical Observatory, Hanle",
+                "irtf: NASA Infrared Telescope Facility",
+                "jcdo: Jack C. Davis Observatory, Western Nevada College",
+                "keck: W. M. Keck Observatory",
+                "kpno: Kitt Peak National Observatory",
+                "lapalma: Roque de los Muchachos, La Palma",
+                "lasilla: European Southern Observatory: La Silla",
+                "lasilla: European Southern Observatory: La Silla",
+                "lco: Las Campanas Observatory",
+                "lick: Lick Observatory",
+                "lmo: Leander McCormick Observatory",
+                "lna: Laboratorio Nacional de Astrofisica - Brazil",
+                "lno: Langkawi National Observatory",
+                "lowell: Lowell Observatory",
+                "lulin: Lulin Observatory",
+                "mcdonald: McDonald Observatory",
+                "mdm: Michigan-Dartmouth-MIT Observatory",
+                "mgo: Mount Graham Observatory",
+                "MISSING",
+                "mmto: MMT Observatory",
+                "mso: Mt. Stromlo Observatory",
+                "mtbigelow: Catalina Observatory: 61 inch telescope",
+                "NOV: National Observatory of Venezuela",
+                "oalp: Observatorio Astronomico de La Plata",
+                "olin: Connecticut",
+                "oro: Oak Ridge Observatory",
+                "osn: Observatorio de Sierra Nevada",
+                "Palomar: The Hale Telescope",
+                "paranal: European Southern Observatory: Paranal",
+                "paranal: European Southern Observatory: Paranal",
+                "rozhen: National Astronomical Observatory Rozhen - Bulgaria",
+                "saao: South African Astronomical Observatory",
+                "sln: SLN - Catania Astrophysical Observatory",
+                "soar: Southern Astrophysical Research Telescope",
+                "spm: Observatorio Astronomico Nacional, San Pedro Martir",
+                "sso: Siding Spring Observatory",
+                "tona: Observatorio Astronomico Nacional, Tonantzintla",
+                "tug: TUBITAK National Observatory, Turkey",
+                "vbo: Vainu Bappu Observatory",
+                "whitin: Whitin Observatory, Wellesley College",
+                "wiyn: WIYN Observatory"
+            ],
+            "global": true
+        },
+        "DATE-OBS": {
+            "label": "DATE-OBS",
+            "type": "text",
+            "info": "Date of observation (yyyy-mm-dd)",
+            "required": true,
+            "pre_fetch": true,
+            "global": false
+        },
+        "UT": {
+            "label": "UT",
+            "type": "text",
+            "info": "Universal time (hh:mm:ss)",
+            "required": true,
+            "pre_fetch": true,
+            "global": false
+        },
+        "SUFFIX": {
+            "label": "SUFFIX",
+            "type": "text",
+            "info": "Suffix for filename",
+            "required": false,
+            "pre_fetch": true,
+            "global": false
+        },
+        "PLATE-COMMENTS": {
+            "label": "PLATE-COMMENTS",
+            "type": "text",
+            "info": "plate comments",
+            "required": false,
+            "global": true
+        },
+        "COMMENTS": {
+            "label": "COMMENTS",
+            "type": "text",
+            "info": "comments",
+            "required": false,
+            "pre_fetch": true,
+            "global": false
+        },
+        "MAIN-ID": {
+            "label": "MAIN-ID",
+            "type": "text",
+            "info": "Simbad main ID object name",
+            "required": true,
+            "remote": true,
+            "global": false
+        },
+        "RA2000": {
+            "label": "RA2000",
+            "type": "text",
+            "info": "Right ascension J2000",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "DEC2000": {
+            "label": "DEC2000",
+            "type": "text",
+            "info": "Declination J2000",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "SPTYPE": {
+            "label": "SPTYPE",
+            "type": "text",
+            "info": "Simbad spectral type",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "EQUINOX": {
+            "label": "EQUINOX",
+            "type": "text",
+            "info": "Equinox of ra y dec",
+            "required": false,
+            "remote": true,
+            "numeric": true,
+            "global": false
+        },
+        "RA": {
+            "label": "RA",
+            "type": "text",
+            "info": "Right ascension",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "DEC": {
+            "label": "DEC",
+            "type": "text",
+            "info": "Declination",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "RA1950": {
+            "label": "RA1950",
+            "type": "text",
+            "info": "RA2000 precessed to ep.1950 eq.1950",
+            "required": false,
+            "remote": true,
+            "numeric": true,
+            "global": false
+        },
+        "DEC1950": {
+            "label": "DEC1950",
+            "type": "text",
+            "info": "DEC2000 precessed to ep.1950 eq.1950",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "TIME-OBS": {
+            "label": "TIME-OBS",
+            "type": "text",
+            "info": "Local time at the start of the observation",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "ST": {
+            "label": "ST",
+            "type": "text",
+            "info": "Local mean sidereal time",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "HA": {
+            "label": "HA",
+            "type": "text",
+            "info": "Hour angle",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "AIRMASS": {
+            "label": "AIRMASS",
+            "type": "text",
+            "info": "Air mass measure",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "JD": {
+            "label": "JD",
+            "type": "text",
+            "info": "Geocentric Julian day (Greenwich)",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "EXPTIME": {
+            "label": "EXPTIME",
+            "type": "text",
+            "info": "Integration time in seconds",
+            "required": false,
+            "remote": true,
+            "global": false
+        },
+        "PLATE-N": {
+            "label": "PLATE-N",
+            "type": "text",
+            "info": "Identification number",
+            "required": true,
+            "global": true
+        },
+        "OBSERVER": {
+            "label": "OBSERVER",
+            "type": "text",
+            "info": "Observer name",
+            "required": true,
+            "options": [
+                "Observer 1"
+            ],
+            "default": "Observer 1",
+            "global": true
+        },
+        "IMAGETYP": {
+            "label": "IMAGETYP",
+            "type": "text",
+            "info": "Object, dark, zero, etc",
+            "required": true,
+            "options": [
+                "Image type 1",
+                "Image type 2"
+            ],
+            "default": "Image type 2",
+            "global": true
+        },
+        "DIGITALI": {
+            "label": "DIGITALI",
+            "type": "text",
+            "info": "Digitalizer name",
+            "required": false,
+            "options": [
+                "Digitali test"
+            ],
+            "default": "Digitali test",
+            "global": true
+        },
+        "SCANNER": {
+            "label": "SCANNER",
+            "type": "text",
+            "info": "Scanner name",
+            "required": false,
+            "options": [
+                "aaaaa",
+                "bbbbbbb",
+                "ccccccccccc"
+            ],
+            "default": "bbbbbbb",
+            "global": true
+        },
+        "SCAN-RES": {
+            "label": "SCAN-RES",
+            "type": "text",
+            "info": "Scanner dpi resolution",
+            "required": false,
+            "options": [],
+            "default": "",
+            "global": true
+        },
+        "SCAN-COL": {
+            "label": "SCAN-COL",
+            "type": "text",
+            "info": "Scanner color resolution",
+            "required": false,
+            "options": [],
+            "default": "",
+            "global": true
+        },
+        "SOFTWARE": {
+            "label": "SOFTWARE",
+            "type": "text",
+            "info": "Scan software",
+            "required": false,
+            "options": [
+                "aaaa"
+            ],
+            "default": "aaaa",
+            "global": true
+        },
+        "DETECTOR": {
+            "label": "DETECTOR",
+            "type": "text",
+            "info": "Detector",
+            "required": false,
+            "global": false
+        }
+    },
+    "invert_image": true
+}

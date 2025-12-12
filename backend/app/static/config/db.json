@@ -1,7 +1,8 @@
 {
     "config": {
         "global": {
-            "workspace_path": "/home/miannuzzi/PlateUNLP/workspace"
+            "workspace_path": "/home/miannuzzi/PlateUNLP/workspace",
+            "workspace_path_aux": "/usr/src/app/db"
         },
         "fields": {
             "OBSERVAT": {

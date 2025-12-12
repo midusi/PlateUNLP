@@ -577,7 +577,8 @@
     const config = await workspaceStore.loadConfig();
     if (Object.keys(config).length !== 0) {
       pathDir = config.global.workspace_path;
-      metadataStore.setOption("OBSERVAT", config.fields["OBSERVAT"].options);
+      const sortObservat = config.fields["OBSERVAT"].options.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
+      metadataStore.setOption("OBSERVAT", sortObservat);
       getPaths();
     }
   }

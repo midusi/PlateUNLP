@@ -50,6 +50,7 @@
         bind:value={value}
         on:change={() => remoteDataChange($metadataStore.fields[name].label)}
         placeholder={$metadataStore.fields[name].info}
+        pattern="^[\x20-\x7E]*$"
       />
     {:else}
       <input
@@ -59,6 +60,7 @@
         bind:value={value}
         on:change={setChangeFlag}
         placeholder={$metadataStore.fields[name].info}
+        pattern="^[\x20-\x7E]*$"
       />
     {/if}
   {:else if !!$metadataStore.fields[name].options  }
@@ -79,6 +81,7 @@
       name="input_generico"
       list={`${name}Options`}
       class="form-control"
+      pattern="^[\x20-\x7E]*$"
       use:setType
       bind:value={value}
       on:change={setChangeFlag}

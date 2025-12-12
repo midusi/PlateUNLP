@@ -175,7 +175,7 @@ function getMetadataFields() {
       type: 'text',
       info: 'Organization or institution',
       required: true,
-      options: getObservat(),
+      options: [], // no se utiliza
       global: true
     },
     dateObs: {
@@ -203,14 +203,14 @@ function getMetadataFields() {
       global: false
     },
     plateComment: {
-      label: 'PLATE-COMMENTS',
+      label: 'P-COMM',
       type: 'text',
       info: 'plate comments',
       required: false,
       global: true
     },
     comment: {
-      label: 'COMMENTS',
+      label: 'COMM',
       type: 'text',
       info: 'comments',
       required: false,
