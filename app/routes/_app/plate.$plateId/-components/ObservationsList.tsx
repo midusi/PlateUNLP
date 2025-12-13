@@ -8,7 +8,7 @@ import { Separator } from "~/components/ui/separator"
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
-import { cn, idToColor } from "~/lib/utils"
+import { cn, idxToColor } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
 import type { Observation } from "../-actions/get-observations"
@@ -18,7 +18,7 @@ function observationToBoundingBox(observation: Observation): BoundingBox {
   return {
     id: observation.id,
     name: observation.name,
-    color: idToColor(observation.id),
+    color: "red",
     top: observation.imageTop,
     left: observation.imageLeft,
     width: observation.imageWidth,
@@ -34,7 +34,12 @@ export function ObservationsList({
   initialObservations: Observation[]
 }) {
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    initialObservations.map(observationToBoundingBox),
+    initialObservations.map((obs, idx) => {
+      return {
+        ...observationToBoundingBox(obs),
+        color: idxToColor(idx),
+      }
+    }),
   )
 
   const determineBBFunction = usePredictBBs(

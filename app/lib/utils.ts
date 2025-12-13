@@ -35,6 +35,25 @@ export function idToColor(id: string): string {
   return colors[index]
 }
 
+/**
+ * Set color according to an index.
+ */
+export function idxToColor(idx: number): string {
+  const colors = [
+    "#e6194b",
+    "#3cb44b",
+    "#4363d8",
+    "#911eb4",
+    "#46f0f0",
+    "#f032e6",
+    "#f58231",
+    "#bcf60c",
+    "#fabebe",
+    "#008080",
+  ]
+  return colors[idx % colors.length]
+}
+
 export function generateRange(min: number, max: number, count: number): number[] {
   return Array.from({ length: count }, (_, i) => min + (i * (max - min)) / (count - 1))
 }
