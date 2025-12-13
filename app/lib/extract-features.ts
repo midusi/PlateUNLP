@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs"
 import { avg } from "drizzle-orm"
 import { findPlateau, findXspacedPoints } from "~/lib/image"
-import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
+import { guardarFuncion, linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"
 
 /**
@@ -115,6 +115,7 @@ export function extractScience({
   })
 
   const umbral = 0.5
+
   const avg_smoothed = tf.tidy(() => {
     /** Normalizar min-max por fila*/
     const min = acoted_data.min(1, true)
@@ -145,30 +146,29 @@ export function extractScience({
     opening: number
   }[] = avgArrs.map((arr: number[]) => findPlateau(arr, umbral))
 
-  // /** Guardar grafico de funciones */
-  // const i = 4;
+  /** Guardar grafico de funciones */
+  // const i = 18;
   // const original = avgTensor.slice([i, 0], [1, height]).dataSync();
   // const original_acoted = acoted_data.slice([i, 0], [1, height]).dataSync();
-  // const original_smoothed = weightedSmooth(Array.from(original), window);
   // const original_pushed = pushed.slice([i, 0], [1, height]).squeeze();
-  // const original_pushed_smoothed = pushed_smoothed
+  // const original_pushed_smoothed = avg_smoothed
   // 	.slice([i, 0], [1, height])
   // 	.squeeze();
   // guardarFuncion(
   // 	[
-  // 		//Array.from(original),
-  // 		Array.from(original_acoted),
-  // 		Array.from(original_pushed.dataSync()),
-  // 		original_pushed_smoothed.arraySync() as number[],
+  // 		Array.from(original),
+  // 		//Array.from(original_acoted),
+  // 		//Array.from(original_pushed.dataSync()),
+  // 		//original_pushed_smoothed.arraySync() as number[],
   // 	],
   // 	`function${i}.png`,
   // 	plateauInfo[i].medium,
   // 	umbral,
   // 	[
-  // 		//"blue",
-  // 		"skyblue",
-  // 		"yellow",
-  // 		"orange",
+  // 		"blue",
+  // 		//"skyblue",
+  // 		//"yellow",
+  // 		//"orange",
   // 	],
   // );
 
