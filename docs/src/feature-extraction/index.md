@@ -163,9 +163,9 @@ El siguiente gráfico proporciona una visión general de todo el procedimiento n
 
 ![alt text](./TotalProcessScience1D.png)
 
-## Lamparas de comparación
+## Lámparas de comparación
 
-Para realizar la extraccion de los espectros de los espectros 1D de las lamparas de comparación se parte de la funciones $u(x)$ y $d(x)$ halladas para el espectro de ciencia. No obstante, hay que tener en cuenta que la lampara del espectro de lampara puede llegar a tener una altura mayor o menor que la de la imagen del espectro de ciencia por lo que se calcula la escala $\text{Scale}_Y$ necesaria para mapear una altura del espectro de ciencia a una altura para un espectro de lampara de comparación.
+Para realizar la extracción de los espectros de los espectros 1D de las lamparas de comparación se parte de la funciones $u(x)$ y $d(x)$ halladas para el espectro de ciencia. No obstante, hay que tener en cuenta que la lampara del espectro de lampara puede llegar a tener una altura mayor o menor que la de la imagen del espectro de ciencia por lo que se calcula la escala $\text{Scale}_Y$ necesaria para mapear una altura del espectro de ciencia a una altura para un espectro de lampara de comparación.
 
 $$
 \begin{equation}
