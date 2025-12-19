@@ -76,7 +76,7 @@ function RouteComponent() {
               {(field) => <field.TextField label="Username" placeholder="" />}
             </form.AppField>
             <form.AppField name="image">
-              {(field) => <field.ImageField label="Imagen"/>}
+              {(field) => <field.ImageField label="Imagen" maxHeight={512} maxWidth={512}/>}
             </form.AppField>
             <form.AppField name="email">
               {(field) => <field.TextField label="Email" placeholder="" />}

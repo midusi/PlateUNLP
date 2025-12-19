@@ -7,10 +7,11 @@ import { Field, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
-import { notifyError } from "~/lib/notifications"
+import { notifyError, notifySucces } from "~/lib/notifications"
 import type { Breadcrumbs } from "~/routes/_app/-components/AppBreadcrumbs"
 import { BasicUserFieldsSchema } from "~/types/auth"
 import { ChangePasswordModal } from "./-components/ChangePasswordModal"
+import defaultUserImage from "~/assets/avatar.png"
 
 export const Route = createFileRoute("/_app/settings/")({
   component: RouteComponent,
@@ -36,6 +37,7 @@ function RouteComponent() {
   const defaultValues: z.output<typeof BasicUserFieldsSchema> = {
     email: session.data?.user.email!,
     name: session.data?.user.name!,
+    image: session.data?.user.image || null,
   }
 
   const form = useAppForm({
@@ -45,12 +47,18 @@ function RouteComponent() {
       try {
         const email = value.email
         const name = value.name
+        const image = value.image || defaultUserImage
         if (name !== session.data?.user.name) {
           await authClient.updateUser({
             name,
           })
         }
-        notifyError("Succes to update user information")
+        if (image !== session.data?.user.image) {
+          console.log(image, session.data?.user.image)
+          await authClient.updateUser({
+            image,
+          })
+        }
         //session.refetch()
       } catch (error) {
         notifyError("Failed to update user information", error)
@@ -72,6 +80,12 @@ function RouteComponent() {
             <p className="text-gray-600 text-sm">Manage your profile information</p>
           </CardHeader>
           <CardContent className="m-4 flex flex-col gap-4">
+            <form.AppField name="name">
+              {(field) => <field.SettingsField label="Username" />}
+            </form.AppField>
+            <form.AppField name="image">
+              {(field) => <field.ImageField label="Imagen" value={field.state.value} maxHeight={512} maxWidth={512}/>}
+            </form.AppField>
             <form.AppField name="email">
               {(field) => (
                 <Field>
@@ -79,9 +93,6 @@ function RouteComponent() {
                   <Input name={field.name} value={field.state.value} disabled />
                 </Field>
               )}
-            </form.AppField>
-            <form.AppField name="name">
-              {(field) => <field.SettingsField label="Username" />}
             </form.AppField>
             <Field>
               <FieldLabel>Password</FieldLabel>
@@ -106,7 +117,7 @@ function RouteComponent() {
               ]}
             >
               {([isValid, isSubmitting, isDirty]) => (
-                <Button type="submit" disabled={!isValid} className="w-48 border">
+                <Button type="submit" disabled={!isValid || !isDirty} className="w-48 border">
                   {isSubmitting ? (
                     <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
                   ) : (

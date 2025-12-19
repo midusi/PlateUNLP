@@ -24,6 +24,7 @@ export const LogUpFieldsSchema = z.object({
 export const BasicUserFieldsSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string(),
+  image: z.string().nullable(),
 })
 
 /**
