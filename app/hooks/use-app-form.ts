@@ -1,5 +1,6 @@
 import { createFormHook } from "@tanstack/react-form"
 import { CheckboxField } from "~/components/forms/checkbox-field"
+import { ImageField } from "~/components/forms/image-field"
 import { NumberField } from "~/components/forms/number-field"
 import { PasswordField } from "~/components/forms/password-field"
 import { RangeField } from "~/components/forms/range-field"
@@ -22,6 +23,7 @@ export const { useAppForm, withForm, withFieldGroup } = createFormHook({
     SelectFieldSimple,
     CheckboxField,
     RangeField,
+    ImageField,
   },
   formComponents: {},
   fieldContext,
