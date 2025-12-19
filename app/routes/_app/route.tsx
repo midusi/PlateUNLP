@@ -11,6 +11,7 @@ import { authClient } from "~/lib/auth-client"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
+import defaultUserImage from "~/assets/avatar.png"
 
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
@@ -79,11 +80,11 @@ function RouteComponent() {
           </div>
 
           <div className="flex flex-row items-center gap-4">
-            {/* <img
-              src={userInfo.image ? userInfo.image : defaultImage}
+            <img
+              src={userInfo.image ? userInfo.image : defaultUserImage}
               alt={userInfo.name}
               className="h-8 w-8 rounded-full border border-gray-500 bg-blue-100 object-cover"
-            /> */}
+            />
             <div className="flex w-full flex-col ">
               <div className="flex flex-row justify-between">
                 <label className="flex w-full justify-start text-gray-500">{userInfo.name}</label>
