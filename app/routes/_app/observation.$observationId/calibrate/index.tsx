@@ -212,43 +212,15 @@ function RouteComponent() {
             materialsNamesList={listOfMaterials}
           />
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <form.Subscribe
-            selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
-          >
-            {([isValid, isSubmitting, _isDirty]) => (
-              <p className="flex items-center text-muted-foreground text-xs italic">
-                {!isValid ? (
-                  <>
-                    <span>Changes aren't beign saved! Please fix the errors above</span>
-                    <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
-                  </>
-                ) : isSubmitting ? (
-                  <>
-                    <span>Saving changes...</span>
-                    <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
-                  </>
-                ) : (
-                  <>
-                    <span>Settings saved on database</span>
-                    <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
-                  </>
-                )}
-              </p>
-            )}
-          </form.Subscribe>
-        </CardFooter>
-      </Card>
-      <Card>
         <CardContent>
           {/* Grafico de interacción para calibrar respecto a lampara teorica */}
           <form.Field name="lampPoints">
             {(fieldLP) => (
-              <div className="flex flex-col px-8">
+              <div className="flex flex-col gap-0">
                 {/* Grafico espectro calibrado para cada lampara */}
                 {lamps.map((lamp, idx) => (
                   <div key={`TeoricalSpectrumLamp-${lamp.id}`}>
-                    <CardTitle className="mb-4">Empirical Comparison Lamp {idx}</CardTitle>
+                    <CardTitle className="mb-1">Empirical Comparison Lamp {idx}</CardTitle>
                     <EmpiricalSpectrum
                       data={lamp.data}
                       lampPoints={fieldLP.state.value}
@@ -258,9 +230,11 @@ function RouteComponent() {
                   </div>
                 ))}
 
+                <hr className="my-8"/>
+
                 {/* Grafico espectro calibrado ciencia */}
                 <div>
-                  <CardTitle className="mb-4">Empirical Science Spectrum</CardTitle>
+                  <CardTitle className="mb-1">Empirical Science Spectrum</CardTitle>
                   <EmpiricalSpectrum
                     data={scienceSpectrum}
                     lampPoints={fieldLP.state.value}
