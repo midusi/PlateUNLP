@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsSearchRouteImport } from './routes/docs/search'
+import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
 import { Route as AppProjectsIndexRouteImport } from './routes/_app/projects/index'
 import { Route as authRegisterIndexRouteImport } from './routes/(auth)/register/index'
@@ -38,6 +40,16 @@ const authRouteRoute = authRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsSearchRoute = DocsSearchRouteImport.update({
+  id: '/docs/search',
+  path: '/docs/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/docs/$',
+  path: '/docs/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
@@ -119,6 +131,8 @@ const AppObservationObservationIdCalibrateIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/docs/$': typeof DocsSplatRoute
+  '/docs/search': typeof DocsSearchRoute
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/projects': typeof AppProjectsIndexRoute
@@ -136,6 +150,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/docs/$': typeof DocsSplatRoute
+  '/docs/search': typeof DocsSearchRoute
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/projects': typeof AppProjectsIndexRoute
@@ -156,6 +172,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/_app': typeof AppRouteRouteWithChildren
+  '/docs/$': typeof DocsSplatRoute
+  '/docs/search': typeof DocsSearchRoute
   '/(auth)/login/': typeof authLoginIndexRoute
   '/(auth)/register/': typeof authRegisterIndexRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
@@ -175,6 +193,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/docs/$'
+    | '/docs/search'
     | '/login'
     | '/register'
     | '/projects'
@@ -192,6 +212,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/docs/$'
+    | '/docs/search'
     | '/login'
     | '/register'
     | '/projects'
@@ -211,6 +233,8 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/_app'
+    | '/docs/$'
+    | '/docs/search'
     | '/(auth)/login/'
     | '/(auth)/register/'
     | '/_app/projects/'
@@ -231,6 +255,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   AppRouteRoute: typeof AppRouteRouteWithChildren
+  DocsSplatRoute: typeof DocsSplatRoute
+  DocsSearchRoute: typeof DocsSearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -254,6 +280,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/search': {
+      id: '/docs/search'
+      path: '/docs/search'
+      fullPath: '/docs/search'
+      preLoaderRoute: typeof DocsSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/docs/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/settings/': {
@@ -411,6 +451,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   AppRouteRoute: AppRouteRouteWithChildren,
+  DocsSplatRoute: DocsSplatRoute,
+  DocsSearchRoute: DocsSearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

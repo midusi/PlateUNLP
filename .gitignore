@@ -17,6 +17,9 @@ node_modules
 .output
 .tanstack
 
+# Fumadocs
+.source
+
 # Editor directories and files
 .vscode/*
 !.vscode/settings.json

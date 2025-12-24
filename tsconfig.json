@@ -18,7 +18,8 @@
       "~/*": ["./app/*"],
       "~/dataset/*": ["./dataset/*"],
       "~/db": ["./db/index.ts"],
-      "~/db/schema": ["./db/schema/index.ts"]
+      "~/db/schema": ["./db/schema/index.ts"],
+      "fumadocs-mdx:collections/*": [".source/*"]
     },
     "noEmit": true
   }

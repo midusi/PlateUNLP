@@ -1,3 +1,0 @@
-# Metodos de obtención de Funcion de Ajuste
-
-File in progress...

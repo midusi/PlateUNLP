@@ -1,3 +1,0 @@
-# Funciones de Interpolación
-
-File In Progress...

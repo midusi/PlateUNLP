@@ -1,9 +1,12 @@
-# `astronomical` module
+---
+title: astronomical module
+---
 
 This _internal_ module contains a set of astronomical algorithms that are used in the calculations of the `PlateUNLP` package. It's found in the [`app/common/astronomical`](https://github.com/midusi/PlateUNLP/tree/main/app/common/astronomical) directory.
 
-> [!CAUTION]
-> These functions are **NOT** intended to be used directly by the user.
+<Callout type="warning" title="Warning">
+  These functions are **NOT** intended to be used directly by the user.
+</Callout>
 
 Most of these functions follow the algorithms used by [SOFA](https://www.iausofa.org) and, subsequently, other big libraries like [ERFA](https://github.com/liberfa/erfa) or [Astropy](https://www.astropy.org/), ensuring the results are as consistent as possible even when working with a different programming language altogether.
 
@@ -32,9 +35,9 @@ Gets the Julian date from a given Gregorian date (`date`) and time (`ut`)[^ut-no
 
 The method described only takes `date` into account, so the time is added as
 
-$$
-  \text{JD} \leftarrow \text{JD} + \frac{\text{UT} - 12\text{~hs}}{24\text{~hs}}.
-$$
+```math
+\text{JD} \leftarrow \text{JD} + \frac{\text{UT} - 12\text{~hs}}{24\text{~hs}}.
+```
 
 Note that _true_ Julian date don't consider leap seconds, but this is negligible for the aplications of this software.
 
@@ -44,9 +47,9 @@ To compute the sidereal time (specifically, the Greenwich mean sidereal time), t
   
 First, the Earth Rotation Angle (ERA), also known as stellar angle, is computed using the algorithm described by Capitaine et al. (2003)[^capitaine2003]:
 
-$$
-  \theta = 2\pi(0.7790572732640 + 1.00273781191135448 T_u),
-$$
+```math
+\theta = 2\pi(0.7790572732640 + 1.00273781191135448 T_u),
+```
 
 where $T_u$ is defined as the Julian days (in UT[^ut-note]) since the epoch J2000.0.
 
@@ -68,9 +71,9 @@ Converts a point in equatorial coordinates (local hour angle and declination in 
 
 Computes the airmass of a celestial object given its altitude. The airmass is computed considering a plane-parallel atmosphere:
 
-$$
-  \text{airmass} = \frac{1}{\cos(\text{zenith angle})} = \frac{1}{\sin(\text{altitude angle})}.
-$$
+```math
+\text{airmass} = \frac{1}{\cos(\text{zenith angle})} = \frac{1}{\sin(\text{altitude angle})}.
+```
 
 [^almanac]: S. E. Urban and P. K. Seidelmann, Eds. _Explanatory Supplement to the Astronomical Almanac_, 3rd ed. University Science Books, 2013, ch. 15, sec. 11, pp. 617-621.
 [^capitaine2003]: N. Capitaine, P. T. Wallace, and D. D. McCarthy, "Expressions to implement the IAU 2000 definition of UT1," _Astronomy & Astrophysics_, vol. 406, no. 3, pp. 1135–1149, Aug. 2003, doi: 10.1051/0004-6361:20030817.
