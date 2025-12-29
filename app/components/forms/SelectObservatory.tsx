@@ -1,28 +1,28 @@
-import { Combobox } from "@base-ui/react/combobox";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { createServerFn } from "@tanstack/react-start";
-import { matchSorter } from "match-sorter";
-import { useMemo, useState } from "react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { db } from "~/db";
-import { cn } from "~/lib/utils";
+import { Combobox } from "@base-ui/react/combobox"
+import { queryOptions, useQuery } from "@tanstack/react-query"
+import { createServerFn } from "@tanstack/react-start"
+import { matchSorter } from "match-sorter"
+import { useMemo, useState } from "react"
+import { Button } from "~/components/ui/button"
+import { Input } from "~/components/ui/input"
+import { db } from "~/db"
+import { cn } from "~/lib/utils"
 
 const getObservatories = createServerFn().handler(async () => {
   const observatories = await db.query.observatory.findMany({
     columns: { id: true, name: true, aliases: true },
     orderBy: (t, { asc }) => asc(t.name),
-  });
-  return observatories;
-});
+  })
+  return observatories
+})
 
 export const getObservatoriesQueryOptions = () =>
   queryOptions({
     queryKey: ["observatory", "list"],
     queryFn: () => getObservatories(),
-  });
+  })
 
-type Observatory = Awaited<ReturnType<typeof getObservatories>>[number];
+type Observatory = Awaited<ReturnType<typeof getObservatories>>[number]
 
 /**
  * Select an observatory from the list of available observatories (from the database).
@@ -35,24 +35,24 @@ export function SelectObservatory({
   value,
   setValue,
 }: {
-  id?: string;
-  value: string;
-  setValue: (value: string) => void;
+  id?: string
+  value: string
+  setValue: (value: string) => void
 }) {
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState("")
 
   const { data: observatories } = useQuery({
     ...getObservatoriesQueryOptions(),
     initialData: [],
-  });
+  })
   const selectedValue = useMemo(
     () => observatories.find((o) => o.id === value) || null,
     [value, observatories],
-  );
+  )
 
   const filteredItems = useMemo(() => {
-    const query = searchValue.trim();
-    if (!query) return observatories;
+    const query = searchValue.trim()
+    if (!query) return observatories
 
     const results = matchSorter(observatories, query, {
       keys: [
@@ -60,17 +60,17 @@ export function SelectObservatory({
         { key: "name", threshold: matchSorter.rankings.CONTAINS },
         { key: "aliases", threshold: matchSorter.rankings.CONTAINS },
       ],
-    });
-    return results;
-  }, [searchValue, observatories]);
+    })
+    return results
+  }, [searchValue, observatories])
 
   return (
     <Combobox.Root
       filteredItems={filteredItems}
       value={selectedValue}
       onValueChange={(nextValue) => {
-        if (!nextValue) return;
-        setValue(nextValue.id);
+        if (!nextValue) return
+        setValue(nextValue.id)
       }}
       inputValue={searchValue}
       onInputValueChange={setSearchValue}
@@ -86,16 +86,14 @@ export function SelectObservatory({
       >
         <span className="truncate">
           <Combobox.Value>
-            {(selectedValue) =>
-              selectedValue ? selectedValue.name : "Search observatory..."
-            }
+            {(selectedValue) => (selectedValue ? selectedValue.name : "Search observatory...")}
           </Combobox.Value>
         </span>
         <Combobox.Icon className="icon-[ph--caret-up-down-bold] ml-2 size-4 shrink-0 opacity-50" />
       </Combobox.Trigger>
       <Combobox.Portal>
         <Combobox.Positioner align="start" sideOffset={4}>
-          <Combobox.Popup className="data-[closed]:fade-out-0 data-[open]:fade-in-0 data-[closed]:zoom-out-95 data-[open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 origin-(--transform-origin) rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden data-[closed]:animate-out data-[open]:animate-in w-(--anchor-width) p-0">
+          <Combobox.Popup className="data-[closed]:fade-out-0 data-[open]:fade-in-0 data-[closed]:zoom-out-95 data-[open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-(--anchor-width) origin-(--transform-origin) rounded-md border bg-popover p-0 text-popover-foreground shadow-md outline-hidden data-[closed]:animate-out data-[open]:animate-in">
             <div className="p-2">
               <Combobox.Input render={<Input placeholder="e.g. La Plata" />} />
             </div>
@@ -126,5 +124,5 @@ export function SelectObservatory({
         </Combobox.Positioner>
       </Combobox.Portal>
     </Combobox.Root>
-  );
+  )
 }

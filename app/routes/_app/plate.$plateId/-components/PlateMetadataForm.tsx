@@ -64,7 +64,7 @@ export function PlateMetadataForm({
             )}
           </form.Subscribe>
           <Collapsible.Trigger className="group">
-            <span className="icon-[ph--caret-left-bold] group-data-[panel-open]:-rotate-90 size-5 transition-all ease-out" />
+            <span className="icon-[ph--caret-left-bold] size-5 transition-all ease-out group-data-[panel-open]:-rotate-90" />
           </Collapsible.Trigger>
         </CardHeader>
         <Collapsible.Panel
