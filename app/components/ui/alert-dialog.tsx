@@ -1,4 +1,4 @@
-import { AlertDialog as AlertDialogPrimitive } from "@base-ui-components/react"
+import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react"
 import { buttonVariants } from "~/components/ui/button"
 import { cn } from "~/lib/utils"
 

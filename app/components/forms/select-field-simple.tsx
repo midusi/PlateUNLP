@@ -1,4 +1,4 @@
-import { Select } from "@base-ui-components/react/select"
+import { Select } from "@base-ui/react/select"
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline"
 import { useStore } from "@tanstack/react-form"
 import { useMemo } from "react"

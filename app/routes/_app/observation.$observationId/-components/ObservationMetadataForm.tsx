@@ -1,4 +1,4 @@
-import { Collapsible } from "@base-ui-components/react/collapsible"
+import { Collapsible } from "@base-ui/react/collapsible"
 import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "@tanstack/react-router"
 import type { z } from "zod"

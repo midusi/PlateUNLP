@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth"
-import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { reactStartCookies } from "better-auth/react-start"
-import { db } from "~/db"
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
+import { db } from "~/db";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -17,7 +17,7 @@ export const auth = betterAuth({
     },
   },
   emailAndPassword: { enabled: true, autoSignIn: false },
-  plugins: [reactStartCookies()],
+  plugins: [tanstackStartCookies()],
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -28,4 +28,4 @@ export const auth = betterAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     },
   },
-})
+});

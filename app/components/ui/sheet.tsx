@@ -1,4 +1,4 @@
-import { Dialog as SheetPrimitive } from "@base-ui-components/react/dialog"
+import { Dialog as SheetPrimitive } from "@base-ui/react/dialog"
 import { cn } from "~/lib/utils"
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {

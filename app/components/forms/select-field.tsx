@@ -1,4 +1,4 @@
-import { Combobox } from "@base-ui-components/react/combobox"
+import { Combobox } from "@base-ui/react/combobox"
 import { useStore } from "@tanstack/react-form"
 import { matchSorter } from "match-sorter"
 import { useMemo, useState } from "react"

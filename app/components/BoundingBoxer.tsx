@@ -1,4 +1,4 @@
-import { Toggle, ToggleGroup, Toolbar } from "@base-ui-components/react"
+import { Toggle, ToggleGroup, Toolbar } from "@base-ui/react"
 import { Link } from "@tanstack/react-router"
 import { useMeasure } from "@uidotdev/usehooks"
 import { useEffect, useMemo, useRef, useState } from "react"

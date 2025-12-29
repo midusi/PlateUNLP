@@ -1,10 +1,14 @@
-import { Field as FieldPrimitive } from "@base-ui-components/react/field"
-import { cn } from "~/lib/utils"
+import { Field as FieldPrimitive } from "@base-ui/react/field";
+import { cn } from "~/lib/utils";
 
 function Field({ className, ...props }: FieldPrimitive.Root.Props) {
   return (
-    <FieldPrimitive.Root data-slot="field" className={cn("grid gap-2", className)} {...props} />
-  )
+    <FieldPrimitive.Root
+      data-slot="field"
+      className={cn("grid gap-2", className)}
+      {...props}
+    />
+  );
 }
 
 function FieldLabel({ className, ...props }: FieldPrimitive.Label.Props) {
@@ -17,24 +21,31 @@ function FieldLabel({ className, ...props }: FieldPrimitive.Label.Props) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 function FieldControl(props: FieldPrimitive.Control.Props) {
-  return <FieldPrimitive.Control data-slot="field-control" {...props} />
+  return <FieldPrimitive.Control data-slot="field-control" {...props} />;
 }
 
-function FieldDescription({ className, ...props }: FieldPrimitive.Description.Props) {
+function FieldDescription({
+  className,
+  ...props
+}: FieldPrimitive.Description.Props) {
   return (
     <FieldPrimitive.Description
       data-slot="field-description"
       className={cn("text-muted-foreground text-sm", className)}
       {...props}
     />
-  )
+  );
 }
 
-function FieldError({ className, match, ...props }: FieldPrimitive.Error.Props) {
+function FieldError({
+  className,
+  match,
+  ...props
+}: FieldPrimitive.Error.Props) {
   return (
     <FieldPrimitive.Error
       data-slot="field-error"
@@ -42,7 +53,7 @@ function FieldError({ className, match, ...props }: FieldPrimitive.Error.Props) 
       match={match ?? true}
       {...props}
     />
-  )
+  );
 }
 
-export { Field, FieldLabel, FieldControl, FieldDescription, FieldError }
+export { Field, FieldLabel, FieldControl, FieldDescription, FieldError };

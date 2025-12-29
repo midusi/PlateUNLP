@@ -1,4 +1,4 @@
-import { Select as SelectPrimitive } from "@base-ui-components/react/select"
+import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "~/lib/utils"
 
 function Select<Value, Multiple extends boolean | undefined = false>(
