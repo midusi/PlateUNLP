@@ -1,5 +1,5 @@
 import { useStore } from "@tanstack/react-form"
-import { Pencil, PencilOff } from "lucide-react"
+import clsx from "clsx"
 import { useState } from "react"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
@@ -25,11 +25,14 @@ export function SettingsField({ className, label, description, ...props }: Setti
           onClick={() => setEditable((prev) => !prev)}
           className="p-1 text-gray-500 hover:text-gray-700"
         >
-          {editable ? (
-            <PencilOff size={16} className="text-red-500" />
-          ) : (
-            <Pencil size={16} className="text-muted-foreground" />
-          )}
+          <span
+            className={clsx(
+              "size-4",
+              editable
+                ? "icon-[ph--pencil-simple-slash-bold] text-red-500"
+                : "icon-[ph--pencil-simple-bold] text-muted-foreground",
+            )}
+          />
         </button>
       </div>
       <Input

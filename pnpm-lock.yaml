@@ -140,9 +140,6 @@ importers:
       katex:
         specifier: ^0.16.27
         version: 0.16.27
-      lucide-react:
-        specifier: ^0.554.0
-        version: 0.554.0(react@19.2.3)
       match-sorter:
         specifier: ^8.2.0
         version: 8.2.0
@@ -9640,6 +9637,7 @@ snapshots:
   lucide-react@0.554.0(react@19.2.3):
     dependencies:
       react: 19.2.3
+    optional: true
 
   magic-string@0.30.21:
     dependencies:

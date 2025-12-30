@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router"
-import { LogOut, Settings } from "lucide-react"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
@@ -101,14 +100,14 @@ function RouteComponent() {
                 }),
               )}
             >
-              <Settings className="flex h-full items-center" size={20} strokeWidth={1.5} />
+              <span className="icon-[ph--gear] size-5" />
             </Link>
             <Button
               onClick={() => signOut()}
               variant="outline"
               className="m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none"
             >
-              <LogOut size={22} strokeWidth={1.5} />
+              <span className="icon-[ph--sign-out] size-5" />
             </Button>
           </div>
         </div>

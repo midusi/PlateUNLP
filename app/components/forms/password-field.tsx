@@ -1,5 +1,5 @@
 import { useStore } from "@tanstack/react-form"
-import { Eye, EyeOff } from "lucide-react"
+import clsx from "clsx"
 import { useState } from "react"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
@@ -34,7 +34,9 @@ export function PasswordField({ className, label, description, ...props }: Passw
           className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
           tabIndex={-1} // evita que se pueda tabular al ojito
         >
-          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          <span
+            className={clsx("size-4", showPassword ? "icon-[ph--eye-slash]" : "icon-[ph--eye]")}
+          />
         </button>
       </div>
       {description && <FieldDescription>{description}</FieldDescription>}

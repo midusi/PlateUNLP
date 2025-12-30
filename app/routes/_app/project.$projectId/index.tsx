@@ -13,7 +13,6 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table"
 import clsx from "clsx"
-import { Settings } from "lucide-react"
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -166,11 +165,11 @@ function RouteComponent() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-row gap-4">
+      <div className="flex flex-row items-center gap-4">
         <h1 className="font-medium text-xl">{project.name}</h1>
         {user.role === "admin" && (
           <Link to="/project/$projectId/settings" params={{ projectId: project.id }}>
-            <Settings className="baorder flex h-full items-center" size={22} strokeWidth={1} />
+            <span className="icon-[ph--gear] size-5" />
           </Link>
         )}
       </div>

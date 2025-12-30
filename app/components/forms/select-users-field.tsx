@@ -1,6 +1,5 @@
 import { useStore } from "@tanstack/react-form"
 import clsx from "clsx"
-import { Search } from "lucide-react"
 import { useState } from "react"
 import defaultImage from "~/assets/avatar.png"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
@@ -81,7 +80,7 @@ export function SelectUsersField({
       {label && <FieldLabel>{label}</FieldLabel>}
 
       <div className="relative flex flex-row">
-        <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-gray-500" />
+        <span className="icon-[ph--magnifying-glass-bold] absolute top-2.5 left-2.5 size-4 text-gray-500" />
         <Input
           placeholder="Search by email..."
           value={emailSearchTerm}

@@ -1,6 +1,5 @@
 import { useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
-import { FilePlus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import { withForm } from "~/hooks/use-app-form"
@@ -79,7 +78,7 @@ export const CalibrationSettingsUI = withForm({
                 className="w-full border-r-0 bg-white shadow-none hover:cursor-pointer hover:bg-white"
                 onClick={() => setIsLoadLampModalOpen(true)}
               >
-                <FilePlus className="h-4 w-4" />
+                <span className="icon-[ph--file-plus] size-5" />
               </Button>
               {isLoadLampModalOpen && (
                 <form.AppField name="material">

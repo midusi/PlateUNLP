@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import clsx from "clsx"
-import { Plus } from "lucide-react"
 import { Card, CardContent, CardHeader } from "~/components/ui/card"
 import { authClient } from "~/lib/auth-client"
 import { getProjectsWithMetrics } from "./-actions/get-projects-with-metrics"
@@ -64,7 +63,7 @@ function RouteComponent() {
                 )}
               >
                 <CardContent className="flex h-full w-full flex-col items-center justify-center text-gray-300 hover:text-gray-600">
-                  <Plus className="h-12 w-12" />
+                  <span className="icon-[ph--plus-bold] size-12" />
                   <span className="mt-2 font-medium text-sm">New Project</span>
                 </CardContent>
               </Card>
