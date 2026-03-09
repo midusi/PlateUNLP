@@ -61,12 +61,8 @@ async function RouteComponent() {
       <div className="h-8" />
       <SpectrumsExtractor observationId={observationId} spectrums={spectrums} />
 
-      <div className="flex w-full justify-center">
-        <Link
-          to="/observation/$observationId/calibrate"
-          params={{ observationId: observationId }}
-          className="m-4 flex w-20 justify-center"
-        >
+      <div className="m-4 flex w-full justify-center gap-4">
+        <Link to="/observation/$observationId/calibrate" params={{ observationId: observationId }}>
           <Button className="flex justify-center">Calibrate</Button>
         </Link>
       </div>

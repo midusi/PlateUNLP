@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs"
-import { extractScience, type extractSpectrumResponse } from "~/lib/extract-features"
+import { type ExtractSpectrumResponse, extractScience } from "~/lib/extract-features"
 import { cropSpectrum } from "./crop-spectrum-from-observation"
 import { maskingObservation } from "./mask-observation"
 
@@ -31,8 +31,8 @@ export function recalculateSpectrums1D(
   /** Porcentaje de apertura */
   percentAperture: number,
   /** Analisis conocidos */
-  prevAnalysis: { id: string; analysis: extractSpectrumResponse }[],
-): { id: string; analysis: extractSpectrumResponse }[] {
+  prevAnalysis: { id: string; analysis: ExtractSpectrumResponse }[],
+): { id: string; analysis: ExtractSpectrumResponse }[] {
   /** Si no hay espectros que recalcular no es necesario hacer nada */
   if (spectrums.length === 0) return []
 
@@ -55,7 +55,7 @@ export function recalculateSpectrums1D(
   }
 
   /** Arreglo para guardar los analisis nuevos */
-  const analysisArr: { id: string; analysis: extractSpectrumResponse }[] = []
+  const analysisArr: { id: string; analysis: ExtractSpectrumResponse }[] = []
   /** Para guardar la funcion de ajuste del espectro de ciencia */
   let spectrumRectFunction: (value: number) => number
   /** Para guardar la funcion de derivacion del espectro de ciencia */
@@ -71,7 +71,7 @@ export function recalculateSpectrums1D(
     const useSpline = false
     const segmentWidth = 100
     const [_batch, height, width, _channels] = spectrumTensor.shape
-    const result: extractSpectrumResponse = extractScience({
+    const result: ExtractSpectrumResponse = extractScience({
       science: spectrumTensor,
       width: width,
       height: height,
@@ -112,7 +112,7 @@ export function recalculateSpectrums1D(
     const useSpline = false
     const segmentWidth = 100
     const [_batch, height, width, _channels] = spectrumTensor.shape
-    const result: extractSpectrumResponse = extractScience({
+    const result: ExtractSpectrumResponse = extractScience({
       science: spectrumTensor,
       width: width,
       height: height,

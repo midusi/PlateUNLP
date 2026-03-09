@@ -7,7 +7,7 @@ import type { Point } from "~/types/Point"
  * Parametros recibidos por extractScience
  * @interface extractScience
  */
-export interface extractScienceProps {
+export interface ExtractScienceProps {
   /** Tensor de pixeles 4D Grey [1, height, width, 1]*/
   science: tf.Tensor4D
   /** Ancho de ciencia */
@@ -35,7 +35,7 @@ export interface extractScienceProps {
 }
 
 /** Respuesta de metodo extractScience */
-export interface extractSpectrumResponse {
+export interface ExtractSpectrumResponse {
   /** Puntos medios elegidos para la extracción */
   mediasPoints: Point[]
   /** Apertura promedio detectada */
@@ -66,7 +66,7 @@ export function extractScience({
   fitFunction,
   baseRectFunction,
   baseDerivedFunction,
-}: extractScienceProps): extractSpectrumResponse {
+}: ExtractScienceProps): ExtractSpectrumResponse {
   //   /** Convertir a escala de grises */
   //   const [r, g, b, _] = tf.split(science, 4, 3)
   //   const imgTensor = r.mul(0.2989).add(g.mul(0.587)).add(b.mul(0.114)).cast("float32") as tf.Tensor4D

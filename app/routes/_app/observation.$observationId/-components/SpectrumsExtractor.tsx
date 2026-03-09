@@ -3,9 +3,10 @@ import { useEffect, useRef, useState } from "react"
 import type z from "zod"
 import { ImageWithPixelExtraction } from "~/components/ImageWithPixelExtraction"
 import { SimpleFunctionXY } from "~/components/SimpleFunctionXY"
+import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
-import type { extractSpectrumResponse } from "~/lib/extract-features"
+import type { ExtractSpectrumResponse } from "~/lib/extract-features"
 import { fetchGrayscaleImage } from "~/lib/image"
 import { notifyError } from "~/lib/notifications"
 import { ExtractionConfigurationSchema } from "~/types/spectrum-metadata"
@@ -14,6 +15,7 @@ import type { getSpectrums } from "../-actions/get-spectrums"
 import { updateObservationExtractionConfiguration } from "../-actions/update-observation-extraction-configuration"
 import { updateSpectrumsIntensityArr } from "../-actions/update-spectrums-intensity-arr"
 import { updateSpectrumsTypes } from "../-actions/update-spectrums-types"
+import { downloadRawFITS } from "../-utils/download-raw-fits"
 import { recalculateSpectrums1D } from "../-utils/recalculate-spectrums-1d"
 import { toRecalculate } from "../-utils/to-recalculate"
 
@@ -56,7 +58,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
   const [state, setState] = useState<"ready" | "running">("running")
   /** Almacenar informacion de si las variables estan listas */
   const [analysisArr, setAnalysisArr] = useState<
-    { id: string; analysis: extractSpectrumResponse }[]
+    { id: string; analysis: ExtractSpectrumResponse }[]
   >([])
 
   /** Registro temporal de valores previos */
@@ -95,7 +97,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
         /** Realizar analisis */
         let newAnalysis: {
           id: string
-          analysis: extractSpectrumResponse
+          analysis: ExtractSpectrumResponse
         }[] = []
         if (recalculateArr.length > 0) {
           newAnalysis = recalculateSpectrums1D(
@@ -276,50 +278,59 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                               return "Principal spectrum analysis data not found"
                             return (
                               <div>
-                                <div className="flex w-full flex-row items-center justify-center gap-2 font-semibold text-lg text-slate-500">
-                                  <h3 className="flex justify-center">{`Spectrum ${idx} [`}</h3>
-                                  <select
-                                    value={st.type}
-                                    className="rounded-lg bg-gray-100"
-                                    style={{
-                                      textAlign: "center",
-                                      textAlignLast: "center",
-                                    }}
-                                    onChange={(e) => {
-                                      const selectedValue = e.target.value as "lamp" | "science"
-                                      if (st.type === selectedValue) return
+                                <div className="flex w-full flex-row items-center justify-center gap-2">
+                                  <h3 className="flex flex-row items-center justify-center gap-2 font-semibold text-lg text-slate-500">
+                                    Spectrum {idx} [
+                                    <select
+                                      value={st.type}
+                                      className="rounded-lg bg-gray-100"
+                                      style={{
+                                        textAlign: "center",
+                                        textAlignLast: "center",
+                                      }}
+                                      onChange={(e) => {
+                                        const selectedValue = e.target.value as "lamp" | "science"
+                                        if (st.type === selectedValue) return
 
-                                      if (selectedValue === "lamp") {
-                                        field.handleChange({
-                                          ...st,
-                                          id: st.id,
-                                          type: "lamp",
-                                        })
-                                      } else {
-                                        const delOtherScience = [...spectrumsArr].map((sty) => ({
-                                          ...sty,
-                                          id: sty.id,
-                                          type:
-                                            sty.id === st.id
-                                              ? ("science" as const)
-                                              : ("lamp" as const),
-                                        }))
+                                        if (selectedValue === "lamp") {
+                                          field.handleChange({
+                                            ...st,
+                                            id: st.id,
+                                            type: "lamp",
+                                          })
+                                        } else {
+                                          const delOtherScience = [...spectrumsArr].map((sty) => ({
+                                            ...sty,
+                                            id: sty.id,
+                                            type:
+                                              sty.id === st.id
+                                                ? ("science" as const)
+                                                : ("lamp" as const),
+                                          }))
 
-                                        spectrumsField.handleChange(delOtherScience)
-                                      }
-                                    }}
-                                    onBlur={field.handleBlur}
-                                  >
-                                    <option value={"science"}>Science</option>
-                                    <option
-                                      value={"lamp"}
-                                      disabled={scienceCount >= 1 && st.type === "science"}
-                                      className="disabled:cursor-not-allowed disabled:text-gray-400"
+                                          spectrumsField.handleChange(delOtherScience)
+                                        }
+                                      }}
+                                      onBlur={field.handleBlur}
                                     >
-                                      Comparison Lamp
-                                    </option>
-                                  </select>
-                                  <h3 className="flex justify-center">{`]`}</h3>
+                                      <option value={"science"}>Science</option>
+                                      <option
+                                        value={"lamp"}
+                                        disabled={scienceCount >= 1 && st.type === "science"}
+                                        className="disabled:cursor-not-allowed disabled:text-gray-400"
+                                      >
+                                        Comparison Lamp
+                                      </option>
+                                    </select>
+                                    ]
+                                  </h3>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => downloadRawFITS("spectrum", analysis)}
+                                  >
+                                    <span className="icon-[ph--file-arrow-down]" />
+                                  </Button>
                                 </div>
                                 <ImageWithPixelExtraction
                                   image={{
