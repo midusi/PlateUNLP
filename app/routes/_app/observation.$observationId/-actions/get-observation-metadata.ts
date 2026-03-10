@@ -28,7 +28,7 @@ export const getObservationMetadata = createServerFn()
         DEC2000: { value: observation.DEC2000, isKnown: observation["DEC2000?"] },
         RA1950: { value: observation.RA1950, isKnown: observation["RA1950?"] },
         DEC1950: { value: observation.DEC1950, isKnown: observation["DEC1950?"] },
-        "TIME-OBS": { value: observation["TIME-OBS"], isKnown: observation["TIME-OBS?"] },
+        "DATE-ORG": { value: observation["DATE-ORG"], isKnown: observation["DATE-ORG?"] },
         JD: { value: observation.JD, isKnown: observation["JD?"] },
         ST: { value: observation.ST, isKnown: observation["ST?"] },
         HA: { value: observation.HA, isKnown: observation["HA?"] },

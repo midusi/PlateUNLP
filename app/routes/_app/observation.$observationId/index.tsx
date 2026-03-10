@@ -48,7 +48,6 @@ export const Route = createFileRoute("/_app/observation/$observationId/")({
 async function RouteComponent() {
   const { observationId } = Route.useParams()
   const { initialMetadata, spectrums } = Route.useLoaderData()
-  const scienceSpectrum = spectrums.find((s) => s.type === "science")
 
   return (
     <div className="mx-auto w-full">
@@ -65,13 +64,11 @@ async function RouteComponent() {
       <div className="m-4 flex w-full justify-center gap-4">
         <Button
           variant="outline"
-          disabled={!scienceSpectrum}
           onClick={() => {
-            if (!scienceSpectrum) return
-            window.location.href = `/spectrum/${scienceSpectrum.id}/fits`
+            window.location.href = `/observation/${observationId}/fits`
           }}
         >
-          Download FITS
+          Download observation image as FITS
         </Button>
         <Link to="/observation/$observationId/calibrate" params={{ observationId: observationId }}>
           <Button className="flex justify-center">Calibrate</Button>

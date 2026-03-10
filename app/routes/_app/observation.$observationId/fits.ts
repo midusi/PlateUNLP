@@ -4,37 +4,35 @@ import { db } from "~/db"
 import { observationToFITSFilename, spectrumCropToFITS } from "~/lib/fits"
 import { readUploadedFile } from "~/lib/uploads"
 
-export const Route = createFileRoute("/_app/spectrum/$spectrumId/fits")({
+export const Route = createFileRoute("/_app/observation/$observationId/fits")({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const spectrum = await db.query.spectrum.findFirst({
-          where: (t, { eq }) => eq(t.id, params.spectrumId),
+        const observation = await db.query.observation.findFirst({
+          where: (t, { eq }) => eq(t.id, params.observationId),
           with: {
-            observation: {
-              with: {
-                plate: {
-                  with: { image: true, observatory: true, project: true },
-                },
-              },
+            plate: {
+              with: { image: true, observatory: true, project: true },
             },
           },
         })
-        if (!spectrum) return new Response("Not found", { status: 404 })
+        if (!observation) return new Response("Not found", { status: 404 })
 
-        const { observation } = spectrum
         const { plate } = observation
-        const left = observation.imageLeft + spectrum.imageLeft
-        const top = observation.imageTop + spectrum.imageTop
+        const fileName = observationToFITSFilename(
+          plate["PLATE-N"],
+          observation.OBJECT,
+          "observation",
+        )
 
         let image = await readUploadedFile(plate.image.id)
         image = await sharp(image)
           .rotate(plate.imageRotation)
           .extract({
-            left,
-            top,
-            width: spectrum.imageWidth,
-            height: spectrum.imageHeight,
+            height: observation.imageHeight,
+            top: observation.imageTop,
+            left: observation.imageLeft,
+            width: observation.imageWidth,
           })
           .toColorspace("b-w")
           .extractChannel(0)
@@ -46,15 +44,10 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/fits")({
           image.byteOffset,
           image.byteLength / Uint16Array.BYTES_PER_ELEMENT,
         )
-        const fileName = observationToFITSFilename(
-          plate["PLATE-N"],
-          observation.OBJECT,
-          `${spectrum.type}.crop`,
-        )
 
         const fits = spectrumCropToFITS(pixels, {
-          width: spectrum.imageWidth,
-          height: spectrum.imageHeight,
+          width: observation.imageWidth,
+          height: observation.imageHeight,
           metadata: {
             fileName,
             origin: plate.project.name,

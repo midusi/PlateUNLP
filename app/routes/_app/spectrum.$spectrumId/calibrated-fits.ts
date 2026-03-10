@@ -69,7 +69,7 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
           plateNumber: observation.plate["PLATE-N"],
           observatory: observation.plate.OBSERVAT,
           observer: observation.plate["OBSERVER?"] ? observation.plate.OBSERVER : undefined,
-          instrument: observation.plate["INSTRUMENT?"] ? observation.plate.INSTRUMENT : undefined,
+          instrument: observation.plate["INSTRUME?"] ? observation.plate.INSTRUME : undefined,
           object: observation["OBJECT?"] ? observation.OBJECT : undefined,
           dateObs: observation["DATE-OBS?"] ? observation["DATE-OBS"] : undefined,
           exptime: observation["EXPTIME?"] ? observation.EXPTIME : undefined,

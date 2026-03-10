@@ -28,6 +28,7 @@ import { Route as AppPlatePlateIdPreviewRouteImport } from './routes/_app/plate.
 import { Route as AppPlatePlateIdFitsRouteImport } from './routes/_app/plate.$plateId/fits'
 import { Route as AppObservationObservationIdPreviewRouteImport } from './routes/_app/observation.$observationId/preview'
 import { Route as AppObservationObservationIdImageRouteImport } from './routes/_app/observation.$observationId/image'
+import { Route as AppObservationObservationIdFitsRouteImport } from './routes/_app/observation.$observationId/fits'
 import { Route as authApiAuthSplatRouteImport } from './routes/(auth)/api.auth.$'
 import { Route as AppProjectProjectIdSettingsIndexRouteImport } from './routes/_app/project.$projectId/settings/index'
 import { Route as AppObservationObservationIdCalibrateIndexRouteImport } from './routes/_app/observation.$observationId/calibrate/index'
@@ -131,6 +132,12 @@ const AppObservationObservationIdImageRoute =
     path: '/observation/$observationId/image',
     getParentRoute: () => AppRouteRoute,
   } as any)
+const AppObservationObservationIdFitsRoute =
+  AppObservationObservationIdFitsRouteImport.update({
+    id: '/observation/$observationId/fits',
+    path: '/observation/$observationId/fits',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const authApiAuthSplatRoute = authApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -158,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/projects': typeof AppProjectsIndexRoute
   '/settings': typeof AppSettingsIndexRoute
   '/api/auth/$': typeof authApiAuthSplatRoute
+  '/observation/$observationId/fits': typeof AppObservationObservationIdFitsRoute
   '/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
   '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
   '/plate/$plateId/fits': typeof AppPlatePlateIdFitsRoute
@@ -180,6 +188,7 @@ export interface FileRoutesByTo {
   '/projects': typeof AppProjectsIndexRoute
   '/settings': typeof AppSettingsIndexRoute
   '/api/auth/$': typeof authApiAuthSplatRoute
+  '/observation/$observationId/fits': typeof AppObservationObservationIdFitsRoute
   '/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
   '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
   '/plate/$plateId/fits': typeof AppPlatePlateIdFitsRoute
@@ -205,6 +214,7 @@ export interface FileRoutesById {
   '/_app/projects/': typeof AppProjectsIndexRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
   '/(auth)/api/auth/$': typeof authApiAuthSplatRoute
+  '/_app/observation/$observationId/fits': typeof AppObservationObservationIdFitsRoute
   '/_app/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
   '/_app/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
   '/_app/plate/$plateId/fits': typeof AppPlatePlateIdFitsRoute
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/settings'
     | '/api/auth/$'
+    | '/observation/$observationId/fits'
     | '/observation/$observationId/image'
     | '/observation/$observationId/preview'
     | '/plate/$plateId/fits'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/settings'
     | '/api/auth/$'
+    | '/observation/$observationId/fits'
     | '/observation/$observationId/image'
     | '/observation/$observationId/preview'
     | '/plate/$plateId/fits'
@@ -275,6 +287,7 @@ export interface FileRouteTypes {
     | '/_app/projects/'
     | '/_app/settings/'
     | '/(auth)/api/auth/$'
+    | '/_app/observation/$observationId/fits'
     | '/_app/observation/$observationId/image'
     | '/_app/observation/$observationId/preview'
     | '/_app/plate/$plateId/fits'
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppObservationObservationIdImageRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/observation/$observationId/fits': {
+      id: '/_app/observation/$observationId/fits'
+      path: '/observation/$observationId/fits'
+      fullPath: '/observation/$observationId/fits'
+      preLoaderRoute: typeof AppObservationObservationIdFitsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/(auth)/api/auth/$': {
       id: '/(auth)/api/auth/$'
       path: '/api/auth/$'
@@ -475,6 +495,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface AppRouteRouteChildren {
   AppProjectsIndexRoute: typeof AppProjectsIndexRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+  AppObservationObservationIdFitsRoute: typeof AppObservationObservationIdFitsRoute
   AppObservationObservationIdImageRoute: typeof AppObservationObservationIdImageRoute
   AppObservationObservationIdPreviewRoute: typeof AppObservationObservationIdPreviewRoute
   AppPlatePlateIdFitsRoute: typeof AppPlatePlateIdFitsRoute
@@ -492,6 +513,7 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProjectsIndexRoute: AppProjectsIndexRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
+  AppObservationObservationIdFitsRoute: AppObservationObservationIdFitsRoute,
   AppObservationObservationIdImageRoute: AppObservationObservationIdImageRoute,
   AppObservationObservationIdPreviewRoute:
     AppObservationObservationIdPreviewRoute,

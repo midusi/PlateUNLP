@@ -17,7 +17,6 @@ type PlateScanMetadata = CommonMetadata & {
   notes?: string
   scanner?: string
   scanResolution?: string
-  pixelSize?: string
   scanGain?: string
   scanSoftware?: string
   dateScan?: string
@@ -32,6 +31,7 @@ export type PlateFITSMetadata = PlateScanMetadata & {
 export type SpectrumCropFITSMetadata = PlateScanMetadata & {
   object?: string
   dateObs?: string
+  dateOrg?: string
   observatoryTimezone?: string
   exptime?: string
   imageType?: string
@@ -128,7 +128,7 @@ export function spectrumCropToFITS(
   setTextCard(
     fits,
     "DATE-ORG",
-    toLocalObservationDateTime(metadata.dateObs, metadata.observatoryTimezone),
+    metadata.dateOrg ?? toLocalObservationDateTime(metadata.dateObs, metadata.observatoryTimezone),
     "Local mean datetime of the observation",
   )
   setTextCard(fits, "OBJECT", metadata.object, "name of the observed object")
@@ -243,7 +243,12 @@ function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata) {
   )
   setTextCard(fits, "SCANNER", metadata.scanner, "scanner name")
   setNumericIfPresent(fits, "SCANRES", metadata.scanResolution, "[dpi] scan resolution")
-  setNumericIfPresent(fits, "PIXSIZE", metadata.pixelSize, "[um] pixel size")
+  setNumericIfPresent(
+    fits,
+    "PIXSIZE",
+    derivePixelSizeFromScanResolution(metadata.scanResolution),
+    "[um] pixel size",
+  )
   setNumericIfPresent(fits, "SCANGAIN", metadata.scanGain, "gain, electrons per adu")
   setTextCard(fits, "SCANSOFT", metadata.scanSoftware, "name of the scanning software")
   setTextCard(fits, "DATESCAN", normalizeOptionalDateTime(metadata.dateScan), "scan date and time")
@@ -346,6 +351,13 @@ function parseExposureTimeSeconds(value: string): number | undefined {
     Number.parseFloat(minutes) * 60 +
     Number.parseFloat(seconds)
   )
+}
+
+function derivePixelSizeFromScanResolution(value: string | undefined) {
+  if (!value) return undefined
+  const dpi = Number.parseFloat(value)
+  if (!Number.isFinite(dpi) || dpi <= 0) return undefined
+  return (25400 / dpi).toString()
 }
 
 function toLocalObservationDateTime(value: string | undefined, timezone: string | undefined) {

@@ -1,6 +1,5 @@
 import { Collapsible } from "@base-ui/react/collapsible"
 import { useMutation } from "@tanstack/react-query"
-import { useRouter } from "@tanstack/react-router"
 import type { z } from "zod"
 import { SelectFieldSimpleWithKnown } from "~/components/forms/select-field-simple-with-known"
 import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
@@ -27,7 +26,6 @@ export function ObservationMetadataForm({
   OBSERVAT: string
   defaultValues: z.output<typeof ObservationMetadataSchema>
 }) {
-  const router = useRouter()
   const form = useAppForm({
     defaultValues,
     validators: { onChange: ObservationMetadataSchema },
@@ -36,13 +34,6 @@ export function ObservationMetadataForm({
         await updateObservationMetadata({
           data: { observationId, metadata: value },
         })
-        if (
-          value.OBJECT !== defaultValues.OBJECT ||
-          value["DATE-OBS"] !== defaultValues["DATE-OBS"]
-        ) {
-          // If the observation id has changed, we need to update the route title
-          router.invalidate()
-        }
         formApi.reset(value)
       } catch (error) {
         notifyError("Failed to update observation metadata", error)
@@ -74,7 +65,7 @@ export function ObservationMetadataForm({
         form.setFieldValue("DEC2000", result.DEC2000)
         form.setFieldValue("RA1950", result.RA1950)
         form.setFieldValue("DEC1950", result.DEC1950)
-        form.setFieldValue("TIME-OBS", result["TIME-OBS"])
+        form.setFieldValue("DATE-ORG", result["DATE-ORG"])
         form.setFieldValue("JD", result.JD)
         form.setFieldValue("ST", result.ST)
         form.setFieldValue("HA", result.HA)
@@ -121,13 +112,18 @@ export function ObservationMetadataForm({
           }
         >
           <Separator orientation="horizontal" />
-          <CardContent className="grid grid-cols-4 items-start gap-4">
+          <CardContent className="grid grid-cols-3 items-start gap-4">
             <form.AppField name="OBJECT">
               {(field) => (
                 <field.TextField
                   label="OBJECT"
-                  placeholder="Name of the object observed"
-                  description="* required to compute"
+                  placeholder="e.g. Zet Vir"
+                  description={
+                    <>
+                      Name of the observed object.{" "}
+                      <span className="font-medium">Required to compute the derived metadata</span>.
+                    </>
+                  }
                 />
               )}
             </form.AppField>
@@ -135,24 +131,31 @@ export function ObservationMetadataForm({
               form={form}
               fields="DATE-OBS"
               label="DATE-OBS"
-              placeholder="Observation datetime (yyyy-mm-ddThh:mm:ss)"
+              placeholder="e.g. 1910-08-02T22:21:01"
               type="datetime-local"
               step="1"
-              description="* required to compute"
+              description={
+                <>
+                  Observation datetime in Universal Time.{" "}
+                  <span className="font-medium">Required to compute the derived metadata</span>
+                </>
+              }
             />
 
             <TextFieldWithKnown
               form={form}
               fields="EXPTIME"
               label="EXPTIME"
-              placeholder="Integration time in seconds"
+              placeholder="e.g. 60.0"
+              description="Integration time in seconds."
             />
 
             <SelectFieldSimpleWithKnown
               form={form}
               fields="IMAGETYP"
               label="IMAGETYP"
-              placeholder=""
+              placeholder="e.g. object"
+              description="Observation type: object, dark, zero, flat, or arc."
               options={["object", "dark", "zero", "flat", "arc"].map((v) => ({
                 label: v,
                 value: v,
@@ -190,69 +193,105 @@ export function ObservationMetadataForm({
               form={form}
               fields="MAIN-ID"
               label="MAIN-ID"
-              placeholder="Simbad main ID object name"
+              placeholder="e.g. * zet Vir"
+              description="Main identifier returned by SIMBAD."
             />
             <TextFieldWithKnown
               form={form}
               fields="SPTYPE"
               label="SPTYPE"
-              placeholder="Simbad spectral type"
+              placeholder="e.g. A2Van"
+              description="Spectral type returned by SIMBAD."
             />
             <TextFieldWithKnown
               form={form}
               fields="AIRMASS"
               label="AIRMASS"
-              placeholder="Airmass"
+              placeholder="e.g. 1.152887"
+              description="Airmass of the object at the time of observation."
             />
 
             <TextFieldWithKnown
               form={form}
-              fields="TIME-OBS"
-              label="TIME-OBS"
-              placeholder="Local time at the start of the observation"
+              fields="DATE-ORG"
+              label="DATE-ORG"
+              placeholder="e.g. 1910-08-02T19:21:01"
+              type="datetime-local"
+              step="1"
+              description="Local mean datetime of the observation."
             />
             <TextFieldWithKnown
               form={form}
               fields="ST"
               label="ST"
-              placeholder="Local mean sidereal time"
+              placeholder="e.g. 13:38:09.8101"
+              description="Local mean sidereal time."
             />
-            <TextFieldWithKnown form={form} fields="HA" label="HA" placeholder="Hour angle" />
+            <TextFieldWithKnown
+              form={form}
+              fields="HA"
+              label="HA"
+              placeholder="e.g. 00:06:02.2010"
+              description="Local hour angle."
+            />
 
-            <TextFieldWithKnown form={form} fields="RA" label="RA" placeholder="Right ascension" />
-            <TextFieldWithKnown form={form} fields="DEC" label="DEC" placeholder="Declination" />
+            <TextFieldWithKnown
+              form={form}
+              fields="RA"
+              label="RA"
+              placeholder="e.g. 13:32:07.6091"
+              description='Right ascension in FK4 format ("h:m:s").'
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="DEC"
+              label="DEC"
+              placeholder="e.g. -00:20:24.9813"
+              description='Declination in FK4 format ("d:m:s").'
+            />
             <TextFieldWithKnown
               form={form}
               fields="EQUINOX"
               label="EQUINOX"
-              placeholder="Epoch of RA y DEC"
+              placeholder="e.g. 1976.1"
+              description="Equinox of RA and DEC."
             />
 
             <TextFieldWithKnown
               form={form}
               fields="RA2000"
               label="RA2000"
-              placeholder="Right ascension ICRS J2000"
+              placeholder="e.g. 13:34:41.5933"
+              description="Right ascension in ICRS J2000."
             />
             <TextFieldWithKnown
               form={form}
               fields="DEC2000"
               label="DEC2000"
-              placeholder="Declination ICRS J2000"
+              placeholder="e.g. -00:35:45.009"
+              description="Declination in ICRS J2000."
             />
-            <TextFieldWithKnown form={form} fields="JD" label="JD" placeholder="Julian date" />
+            <TextFieldWithKnown
+              form={form}
+              fields="JD"
+              label="JD"
+              placeholder="e.g. 2442824.86111111"
+              description="Julian date in Universal Time."
+            />
 
             <TextFieldWithKnown
               form={form}
               fields="RA1950"
               label="RA1950"
-              placeholder="Right ascension FK4"
+              placeholder="e.g. 13:32:07.6132"
+              description="Right ascension in FK4 J1950.0."
             />
             <TextFieldWithKnown
               form={form}
               fields="DEC1950"
               label="DEC1950"
-              placeholder="Declination FK4"
+              placeholder="e.g. -00:20:24.8767"
+              description="Declination in FK4 J1950.0."
             />
           </CardContent>
           <CardFooter className="flex justify-end">
