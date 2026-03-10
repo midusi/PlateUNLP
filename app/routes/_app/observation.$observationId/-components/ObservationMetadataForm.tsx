@@ -38,8 +38,7 @@ export function ObservationMetadataForm({
         })
         if (
           value.OBJECT !== defaultValues.OBJECT ||
-          value["DATE-OBS"] !== defaultValues["DATE-OBS"] ||
-          value.UT !== defaultValues.UT
+          value["DATE-OBS"] !== defaultValues["DATE-OBS"]
         ) {
           // If the observation id has changed, we need to update the route title
           router.invalidate()
@@ -122,7 +121,7 @@ export function ObservationMetadataForm({
           }
         >
           <Separator orientation="horizontal" />
-          <CardContent className="grid grid-cols-3 items-start gap-4">
+          <CardContent className="grid grid-cols-4 items-start gap-4">
             <form.AppField name="OBJECT">
               {(field) => (
                 <field.TextField
@@ -136,14 +135,9 @@ export function ObservationMetadataForm({
               form={form}
               fields="DATE-OBS"
               label="DATE-OBS"
-              placeholder="Date of observation (yyyy-mm-dd)"
-              description="* required to compute"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="UT"
-              label="UT"
-              placeholder="Universal time (hh:mm:ss) corresponding to half of the exposure duration"
+              placeholder="Observation datetime (yyyy-mm-ddThh:mm:ss)"
+              type="datetime-local"
+              step="1"
               description="* required to compute"
             />
 
@@ -170,8 +164,7 @@ export function ObservationMetadataForm({
               <form.Subscribe
                 selector={(formState) => [
                   formState.fieldMeta.OBJECT?.isValid &&
-                    formState.fieldMeta["DATE-OBS.value"]?.isValid &&
-                    formState.fieldMeta["UT.value"]?.isValid,
+                    formState.fieldMeta["DATE-OBS.value"]?.isValid,
                 ]}
               >
                 {([isValid]) => (

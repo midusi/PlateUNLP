@@ -123,8 +123,8 @@ importers:
         specifier: ^0.45.1
         version: 0.45.1(@libsql/client@0.15.15)(@types/better-sqlite3@7.6.13)(better-sqlite3@12.2.0)(kysely@0.28.9)
       fits2js:
-        specifier: ^0.0.5
-        version: 0.0.5
+        specifier: ^0.0.6
+        version: 0.0.6
       fumadocs-core:
         specifier: ^16.4.1
         version: 16.4.1(@tanstack/react-router@1.144.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.7)(lucide-react@0.554.0(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.2.1)
@@ -3918,8 +3918,8 @@ packages:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
 
-  fits2js@0.0.5:
-    resolution: {integrity: sha512-E8KftEhnrP6vzRE5PkuvuaKlpxM+9RKoxS+F/5t2tWMwblTiH+rs9/cRLdo2WF379NJBa9ib7APIJPU8ytu/dQ==}
+  fits2js@0.0.6:
+    resolution: {integrity: sha512-DR0f0Z6h6sRzd75/AC3lvExEenSIdl/7/I+aDG1UOnoOV8sLlKtbjXgGxsET5kM6ee4qUdL0Dm5+ObhKAoJAIw==}
 
   flatbuffers@25.9.23:
     resolution: {integrity: sha512-MI1qs7Lo4Syw0EOzUl0xjs2lsoeqFku44KpngfIduHBYvzm8h2+7K8YMQh1JtVVVrUvhLpNwqVi4DERegUJhPQ==}
@@ -4840,6 +4840,7 @@ packages:
   prebuild-install@7.1.3:
     resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
     engines: {node: '>=10'}
+    deprecated: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
     hasBin: true
 
   prettier@3.7.4:
@@ -9108,7 +9109,7 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  fits2js@0.0.5: {}
+  fits2js@0.0.6: {}
 
   flatbuffers@25.9.23: {}
 

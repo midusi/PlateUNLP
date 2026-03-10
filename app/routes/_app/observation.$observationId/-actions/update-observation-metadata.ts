@@ -23,8 +23,6 @@ export const updateObservationMetadata = createServerFn({ method: "POST" })
         OBJECT: data.metadata.OBJECT,
         "DATE-OBS": data.metadata["DATE-OBS"].value,
         "DATE-OBS?": data.metadata["DATE-OBS"].isKnown,
-        UT: data.metadata.UT.value,
-        "UT?": data.metadata.UT.isKnown,
         "MAIN-ID": data.metadata["MAIN-ID"].value,
         "MAIN-ID?": data.metadata["MAIN-ID"].isKnown,
         SPTYPE: data.metadata.SPTYPE.value,

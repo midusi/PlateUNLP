@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { fitsString, sexasegimal } from "./utils"
+import { fitsString, localDateTime, numericText, sexasegimal } from "./utils"
 
 /**
  * Describes a value that the user declared as "missing" or "lost".
@@ -19,13 +19,18 @@ const knowable = <T extends z.ZodType>(field: T) =>
 export const PlateMetadataSchema = z.object({
   OBSERVAT: fitsString().min(1),
   "PLATE-N": fitsString().min(1),
-  OBSERVER: knowable(fitsString()),
-  DIGITALI: knowable(fitsString()),
-  SCANNER: knowable(fitsString()),
-  SOFTWARE: knowable(fitsString()),
   TELESCOPE: knowable(fitsString()),
-  DETECTOR: knowable(fitsString()),
   INSTRUMENT: knowable(fitsString()),
+  OBSERVER: knowable(fitsString()),
+  OBSNOTES: knowable(fitsString()),
+  NOTES: knowable(fitsString()),
+  SCANNER: knowable(fitsString()),
+  SCANRES: knowable(numericText()),
+  PIXSIZE: knowable(numericText()),
+  SCANGAIN: knowable(numericText()),
+  SCANSOFT: knowable(fitsString()),
+  DATESCAN: knowable(localDateTime().or(z.literal(""))),
+  SCANAUTH: knowable(fitsString()),
 })
 /**
  * Compute the completion percentage of the plate metadata.
@@ -55,9 +60,8 @@ export function getPlateMetadataCompletion(metadata: z.infer<typeof PlateMetadat
  */
 export const ObservationMetadataSchema = z.object({
   OBJECT: fitsString(),
-  "DATE-OBS": knowable(z.iso.date().or(z.literal(""))), // yyyy-MM-dd
-  UT: knowable(z.iso.time().or(z.literal(""))), // HH:mm:ss.sss (any precision)
-  EXPTIME: knowable(z.iso.duration().or(z.literal(""))), // HH:mm:ss.sss (any precision)
+  "DATE-OBS": knowable(localDateTime().or(z.literal(""))), // yyyy-MM-ddTHH:mm[:ss[.sss]]
+  EXPTIME: knowable(numericText()),
   IMAGETYP: knowable(z.enum(["object", "dark", "zero", "flat", "arc"])),
 
   "MAIN-ID": knowable(fitsString()),

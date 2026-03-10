@@ -19,7 +19,6 @@ export const getObservationMetadata = createServerFn()
         OBSERVAT: observation.plate.OBSERVAT,
         OBJECT: observation.OBJECT,
         "DATE-OBS": { value: observation["DATE-OBS"], isKnown: observation["DATE-OBS?"] },
-        UT: { value: observation.UT, isKnown: observation["UT?"] },
         "MAIN-ID": { value: observation["MAIN-ID"], isKnown: observation["MAIN-ID?"] },
         SPTYPE: { value: observation.SPTYPE, isKnown: observation["SPTYPE?"] },
         RA: { value: observation.RA, isKnown: observation["RA?"] },

@@ -104,47 +104,78 @@ export function PlateMetadataForm({
             </form.AppField>
             <TextFieldWithKnown
               form={form}
-              fields="OBSERVER"
-              label="OBSERVER"
-              placeholder="OBSERVER"
-            />
-
-            <TextFieldWithKnown
-              form={form}
-              fields="DIGITALI"
-              label="DIGITALI"
-              placeholder="DIGITALI"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="SCANNER"
-              label="SCANNER"
-              placeholder="SCANNER"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="SOFTWARE"
-              label="SOFTWARE"
-              placeholder="SOFTWARE"
-            />
-
-            <TextFieldWithKnown
-              form={form}
               fields="TELESCOPE"
               label="TELESCOPE"
-              placeholder="TELESCOPE"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="DETECTOR"
-              label="DETECTOR"
-              placeholder="DETECTOR"
+              placeholder="Telescope"
             />
             <TextFieldWithKnown
               form={form}
               fields="INSTRUMENT"
               label="INSTRUMENT"
-              placeholder="INSTRUMENT"
+              placeholder="Instrument"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="OBSERVER"
+              label="OBSERVER"
+              placeholder="Observer name"
+            />
+
+            <TextFieldWithKnown
+              form={form}
+              fields="OBSNOTES"
+              label="OBSNOTES"
+              placeholder="Observer notes"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="NOTES"
+              label="NOTES"
+              placeholder="Miscellaneous notes"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANNER"
+              label="SCANNER"
+              placeholder="Scanner name"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANRES"
+              label="SCANRES"
+              placeholder="Scan resolution in dpi"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="PIXSIZE"
+              label="PIXSIZE"
+              placeholder="Pixel size in um"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANGAIN"
+              label="SCANGAIN"
+              placeholder="Gain in e-/ADU"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANSOFT"
+              label="SCANSOFT"
+              placeholder="Scanning software"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="DATESCAN"
+              label="DATESCAN"
+              placeholder="YYYY-MM-DDTHH:mm:ss"
+              type="datetime-local"
+              step="1"
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANAUTH"
+              label="SCANAUTH"
+              placeholder="Author of scan"
             />
           </CardContent>
           <CardFooter className="flex justify-end">

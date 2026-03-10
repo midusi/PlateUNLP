@@ -60,7 +60,7 @@
     "decimal.js": "^10.6.0",
     "dedent": "^1.7.1",
     "drizzle-orm": "^0.45.1",
-    "fits2js": "^0.0.5",
+    "fits2js": "^0.0.6",
     "fumadocs-core": "^16.4.1",
     "fumadocs-mdx": "^14.2.3",
     "fumadocs-ui": "^16.4.1",

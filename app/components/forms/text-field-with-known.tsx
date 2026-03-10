@@ -9,7 +9,7 @@ type TextFieldWithKnownProps = {
   className?: string
   label?: React.ReactNode
   description?: React.ReactNode
-} & Pick<React.ComponentProps<typeof Input>, "placeholder">
+} & Pick<React.ComponentProps<typeof Input>, "placeholder" | "type" | "step">
 
 type Fields = {
   value: string

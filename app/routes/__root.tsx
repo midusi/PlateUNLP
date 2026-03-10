@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+declare const __APP_VERSION__: string
 
 import type { QueryClient } from "@tanstack/react-query"
 import {

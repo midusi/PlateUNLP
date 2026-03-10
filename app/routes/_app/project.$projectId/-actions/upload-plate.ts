@@ -35,6 +35,7 @@ export const uploadPlate = createServerFn({ method: "POST" })
         imageId: image.value.id,
         imageWidth: image.value.width,
         imageHeight: image.value.height,
+        imageRotation: ((rotate.data % 360) + 360) % 360,
         metadataCompletion: 0,
       })
       .returning({ id: s.plate.id })

@@ -1,0 +1,377 @@
+import { TZDate } from "@date-fns/tz"
+import { UTCDate } from "@date-fns/utc"
+import { formatDate } from "date-fns"
+import { FITS } from "fits2js"
+import { normalizeLocalDateTime } from "./local-datetime"
+
+type CommonMetadata = {
+  plateNumber?: string
+  observatory?: string
+  observer?: string
+  telescope?: string
+  instrument?: string
+}
+
+type PlateScanMetadata = CommonMetadata & {
+  observerNotes?: string
+  notes?: string
+  scanner?: string
+  scanResolution?: string
+  pixelSize?: string
+  scanGain?: string
+  scanSoftware?: string
+  dateScan?: string
+  scanAuthor?: string
+  origin?: string
+}
+
+export type PlateFITSMetadata = PlateScanMetadata & {
+  fileName: string
+}
+
+export type SpectrumCropFITSMetadata = PlateScanMetadata & {
+  object?: string
+  dateObs?: string
+  observatoryTimezone?: string
+  exptime?: string
+  imageType?: string
+  mainId?: string
+  spectralType?: string
+  epoch?: string
+  radesys?: string
+  ra?: string
+  dec?: string
+  equinox?: string
+  ra2000?: string
+  dec2000?: string
+  ra1950?: string
+  dec1950?: string
+  jd?: string
+  siderealTime?: string
+  hourAngle?: string
+  airmass?: string
+  fileName: string
+}
+
+export type CalibratedSpectrumFITSMetadata = CommonMetadata & {
+  object?: string
+  dateObs?: string
+  exptime?: string
+  imageType?: string
+  mainId?: string
+  spectralType?: string
+  calibrationMaterial?: string
+  calibrationFunction?: string
+  wavelengthStart: number
+  wavelengthStep: number
+  wavelengthUnit?: string
+  intensityUnit?: string
+}
+
+export function plateToFITS(
+  pixels: Uint16Array,
+  {
+    width,
+    height,
+    metadata,
+  }: {
+    width: number
+    height: number
+    metadata: PlateFITSMetadata
+  },
+): FITS {
+  assertPixelCount(pixels.length, width, height)
+
+  const fits = fromUint16Array(pixels, [width, height])
+
+  fits.header.appendBlank(
+    "--------------------------------------- Original data of the observation",
+  )
+  setTextCard(fits, "OBSERVAT", metadata.observatory, "observatory name")
+  setTextCard(fits, "TELESCOP", metadata.telescope, "telescope")
+  setTextCard(fits, "INSTRUME", metadata.instrument, "instrument")
+  setTextCard(fits, "OBSERVER", metadata.observer, "observer name")
+  setTextCard(fits, "OBSNOTES", metadata.observerNotes, "observer notes")
+  setTextCard(fits, "NOTES", metadata.notes, "miscellaneous notes")
+  addScannedPlateMetadata(fits, metadata)
+  addDataFileMetadata(fits, metadata.fileName, metadata.origin)
+  addHistoryMetadata(fits)
+
+  return fits
+}
+
+export function spectrumCropToFITS(
+  pixels: Uint16Array,
+  {
+    width,
+    height,
+    metadata,
+  }: {
+    width: number
+    height: number
+    metadata: SpectrumCropFITSMetadata
+  },
+): FITS {
+  assertPixelCount(pixels.length, width, height)
+
+  const fits = fromUint16Array(pixels, [width, height])
+
+  fits.header.appendBlank(
+    "--------------------------------------- Original data of the observation",
+  )
+  setTextCard(
+    fits,
+    "DATE-OBS",
+    normalizeOptionalDateTime(metadata.dateObs),
+    "UT mean datetime of the observation",
+  )
+  setTextCard(
+    fits,
+    "DATE-ORG",
+    toLocalObservationDateTime(metadata.dateObs, metadata.observatoryTimezone),
+    "Local mean datetime of the observation",
+  )
+  setTextCard(fits, "OBJECT", metadata.object, "name of the observed object")
+  setTextCard(fits, "IMAGETYP", metadata.imageType, "object, dark, zero, etc.")
+  setExposureTimeIfPresent(fits, metadata.exptime)
+  setTextCard(fits, "OBSERVAT", metadata.observatory, "observatory name")
+  setTextCard(fits, "TELESCOP", metadata.telescope, "telescope name")
+  setTextCard(fits, "INSTRUME", metadata.instrument, "instrument")
+  setTextCard(fits, "OBSERVER", metadata.observer, "observer name")
+  setTextCard(fits, "OBSNOTES", metadata.observerNotes, "observer notes")
+  setTextCard(fits, "NOTES", metadata.notes, "miscellaneous notes")
+
+  fits.header.appendBlank(
+    "--------------------------------------- Computed data of the observation",
+  )
+  setTextCard(fits, "MAIN-ID", metadata.mainId, "Simbad main ID object name")
+  setTextCard(fits, "SPTYPE", metadata.spectralType, "Simbad spectral type")
+  setTextCard(fits, "ST", metadata.siderealTime, "local mean sidereal time")
+  setTextCard(fits, "HA", metadata.hourAngle, "local mean hour angle")
+  setNumericIfPresent(fits, "JD", metadata.jd, "Julian mean date of the observation")
+  setTextCard(fits, "EPOCH", metadata.epoch ?? metadata.equinox, "epoch of RA and DEC")
+  setTextCard(fits, "EQUINOX", metadata.equinox, "epoch of RA and DEC")
+  setTextCard(
+    fits,
+    "RADESYS",
+    metadata.radesys ?? inferRadesys(metadata),
+    "reference frame of RA and DEC",
+  )
+  setTextCard(fits, "RA", metadata.ra, 'right ascension FK4 ("h:m:s")')
+  setTextCard(fits, "DEC", metadata.dec, 'declination FK4 ("d:m:s")')
+  setTextCard(fits, "RA2000", metadata.ra2000, 'right ascension J2000 ("h:m:s")')
+  setTextCard(fits, "DEC2000", metadata.dec2000, 'declination J2000 ("d:m:s")')
+  setTextCard(fits, "RA1950", metadata.ra1950, 'RA2000 precessed to ep.1950 eq.1950 ("h:m:s")')
+  setTextCard(fits, "DEC1950", metadata.dec1950, 'DEC2000 precessed to ep.1950 eq.1950 ("d:m:s")')
+  setNumericIfPresent(fits, "AIRMASS", metadata.airmass, "estimated airmass at observation time")
+
+  addScannedPlateMetadata(fits, metadata)
+  addDataFileMetadata(fits, metadata.fileName, metadata.origin)
+  addHistoryMetadata(fits)
+
+  return fits
+}
+
+export function calibratedSpectrumToFITS(
+  intensity: number[],
+  metadata: CalibratedSpectrumFITSMetadata,
+): FITS {
+  const fits = FITS.fromTypedArray(Float64Array.from(intensity), -64, [intensity.length])
+  addCommonMetadata(fits, metadata)
+
+  fits.header.appendBlank("Observation metadata")
+  setIfPresent(fits, "OBJECT", metadata.object, "Observed object")
+  setIfPresent(
+    fits,
+    "DATE-OBS",
+    normalizeOptionalDateTime(metadata.dateObs),
+    "Observation datetime",
+  )
+  setIfPresent(fits, "EXPTIME", metadata.exptime, "Exposure time")
+  setIfPresent(fits, "IMAGETYP", metadata.imageType, "Observation type")
+  setIfPresent(fits, "MAIN-ID", metadata.mainId, "SIMBAD main identifier")
+  setIfPresent(fits, "SPTYPE", metadata.spectralType, "Spectral type")
+
+  fits.header.appendBlank("Calibration metadata")
+  setIfPresent(fits, "CALMATER", metadata.calibrationMaterial, "Calibration material")
+  setIfPresent(fits, "CALFUNC", metadata.calibrationFunction, "Calibration function")
+  fits.header.set("BUNIT", metadata.intensityUnit ?? "relative intensity", {
+    comment: "Intensity units",
+  })
+  fits.header.addAxis(1, {
+    ctype: "WAVE",
+    cunit: metadata.wavelengthUnit ?? "Angstrom",
+    crpix: 1,
+    crval: metadata.wavelengthStart,
+    cdelt: metadata.wavelengthStep,
+  })
+
+  return fits
+}
+
+export function plateToFITSFilename(plateNumber: string): string {
+  return `${sanitizeFilename(plateNumber) || "plate"}.fits`
+}
+
+export function observationToFITSFilename(
+  plateNumber: string | undefined,
+  objectName: string | undefined,
+  suffix: string,
+): string {
+  const name = [plateNumber, objectName, suffix].filter(Boolean).join(".")
+  return `${sanitizeFilename(name) || suffix}.fits`
+}
+
+function addCommonMetadata(fits: FITS, metadata: CommonMetadata) {
+  fits.header.appendBlank("Plate metadata")
+  setIfPresent(fits, "PLATE-N", metadata.plateNumber, "Plate identifier")
+  setIfPresent(fits, "OBSERVAT", metadata.observatory, "Observatory")
+  setIfPresent(fits, "TELESCOP", metadata.telescope, "Telescope")
+  setIfPresent(fits, "INSTRUME", metadata.instrument, "Instrument")
+  setIfPresent(fits, "OBSERVER", metadata.observer, "Observer")
+}
+
+function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata) {
+  fits.header.appendBlank(
+    "---------------------------------------------------------- Scanned plate",
+  )
+  setTextCard(
+    fits,
+    "PLATE-N",
+    metadata.plateNumber,
+    "plate number in original observation catalogue",
+  )
+  setTextCard(fits, "SCANNER", metadata.scanner, "scanner name")
+  setNumericIfPresent(fits, "SCANRES", metadata.scanResolution, "[dpi] scan resolution")
+  setNumericIfPresent(fits, "PIXSIZE", metadata.pixelSize, "[um] pixel size")
+  setNumericIfPresent(fits, "SCANGAIN", metadata.scanGain, "gain, electrons per adu")
+  setTextCard(fits, "SCANSOFT", metadata.scanSoftware, "name of the scanning software")
+  setTextCard(fits, "DATESCAN", normalizeOptionalDateTime(metadata.dateScan), "scan date and time")
+  setTextCard(fits, "SCANAUTH", metadata.scanAuthor, "author of scan")
+}
+
+function addDataFileMetadata(fits: FITS, fileName: string, origin?: string) {
+  fits.header.appendBlank(
+    "------------------------------------------------------------- Data files",
+  )
+  fits.header.set("FILENAME", fileName, { comment: "filename of this file" })
+  fits.header.set("ORIGIN", origin ?? "", { comment: "origin of this file" })
+  fits.header.set("DATE", toFITSDateTimeString(new Date()), {
+    comment: "last change of this file",
+  })
+}
+
+function addHistoryMetadata(fits: FITS) {
+  fits.header.appendBlank(
+    "--------------------------------------------------- Modification history",
+  )
+  fits.header.appendHistory(`Header written with PlateUNLP at ${toFITSDateTimeString(new Date())}`)
+}
+
+function setIfPresent(fits: FITS, keyword: string, value: string | undefined, comment: string) {
+  if (!value) return
+  fits.header.set(keyword, value, { comment })
+}
+
+function setTextCard(fits: FITS, keyword: string, value: string | undefined, comment: string) {
+  fits.header.set(keyword, value ?? "", { comment })
+}
+
+function setNumericIfPresent(
+  fits: FITS,
+  keyword: string,
+  value: string | undefined,
+  comment: string,
+) {
+  if (!value) return
+  const numeric = Number.parseFloat(value)
+  if (!Number.isFinite(numeric)) return
+  fits.header.set(keyword, numeric, { comment })
+}
+
+function setExposureTimeIfPresent(fits: FITS, value: string | undefined) {
+  if (!value) return
+  const seconds = parseExposureTimeSeconds(value)
+  if (seconds === undefined) return
+  fits.header.set("EXPTIME", seconds, { comment: "[s] exposure time" })
+}
+
+function fromUint16Array(points: Uint16Array, axes: number[]): FITS {
+  const signedPoints = new Int16Array(points.length)
+  for (let i = 0; i < points.length; i++) {
+    signedPoints[i] = points[i]! - 32768
+  }
+
+  const fits = FITS.fromTypedArray(signedPoints, 16, axes)
+  fits.header.set("BSCALE", 1, {
+    comment: "physical_value = BZERO + BSCALE * array_value",
+  })
+  fits.header.set("BZERO", 32768, {
+    comment: "physical_value = BZERO + BSCALE * array_value",
+  })
+  return fits
+}
+
+function assertPixelCount(length: number, width: number, height: number) {
+  if (length !== width * height) {
+    throw new RangeError(`Expected ${width * height} pixels, but got ${length}`)
+  }
+}
+
+function sanitizeFilename(value: string): string {
+  return value
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+}
+
+function normalizeOptionalDateTime(value: string | undefined) {
+  return value ? normalizeLocalDateTime(value) : undefined
+}
+
+function parseExposureTimeSeconds(value: string): number | undefined {
+  const numeric = Number.parseFloat(value)
+  if (Number.isFinite(numeric)) return numeric
+
+  const match =
+    /^P(?:(\d+(?:\.\d+)?)D)?(?:T(?:(\d+(?:\.\d+)?)H)?(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)S)?)?$/i.exec(
+      value,
+    )
+  if (!match) return undefined
+
+  const [, days = "0", hours = "0", minutes = "0", seconds = "0"] = match
+  return (
+    Number.parseFloat(days) * 86400 +
+    Number.parseFloat(hours) * 3600 +
+    Number.parseFloat(minutes) * 60 +
+    Number.parseFloat(seconds)
+  )
+}
+
+function toLocalObservationDateTime(value: string | undefined, timezone: string | undefined) {
+  if (!value || !timezone) return undefined
+
+  try {
+    const utcDate = new UTCDate(`${normalizeLocalDateTime(value)}Z`)
+    return formatDate(new TZDate(utcDate, timezone), "yyyy-MM-dd'T'HH:mm:ss")
+  } catch {
+    return undefined
+  }
+}
+
+function inferRadesys(metadata: {
+  ra?: string
+  dec?: string
+  equinox?: string
+  ra2000?: string
+  dec2000?: string
+}) {
+  if (metadata.ra || metadata.dec || metadata.equinox || metadata.ra2000 || metadata.dec2000) {
+    return "FK4"
+  }
+  return undefined
+}
+
+function toFITSDateTimeString(value: Date): string {
+  return value.toISOString().replace(/\.\d{3}Z$/, "")
+}

@@ -16,6 +16,7 @@ export const plate = sqliteTable("plate", {
     .references(() => upload.id),
   imageWidth: integer().notNull(),
   imageHeight: integer().notNull(),
+  imageRotation: integer().notNull().default(0),
   // metadata, with a flag indicating if the value is known
   metadataCompletion: real().notNull(), // percentage of metadata completed [0, 100]
   OBSERVAT: text("observat")
@@ -23,20 +24,30 @@ export const plate = sqliteTable("plate", {
     .default("oalp")
     .references(() => observatory.id),
   "PLATE-N": text("plate_n").notNull(),
-  OBSERVER: text("observer").notNull().default(""),
-  "OBSERVER?": integer("observer_known", { mode: "boolean" }).notNull().default(true),
-  DIGITALI: text("digitali").notNull().default(""),
-  "DIGITALI?": integer("digitali_known", { mode: "boolean" }).notNull().default(true),
-  SCANNER: text("scanner").notNull().default(""),
-  "SCANNER?": integer("scanner_known", { mode: "boolean" }).notNull().default(true),
-  SOFTWARE: text("software").notNull().default(""),
-  "SOFTWARE?": integer("software_known", { mode: "boolean" }).notNull().default(true),
   TELESCOPE: text("telescope").notNull().default(""),
   "TELESCOPE?": integer("telescope_known", { mode: "boolean" }).notNull().default(true),
-  DETECTOR: text("detector").notNull().default(""),
-  "DETECTOR?": integer("detector_known", { mode: "boolean" }).notNull().default(true),
   INSTRUMENT: text("instrument").notNull().default(""),
   "INSTRUMENT?": integer("instrument_known", { mode: "boolean" }).notNull().default(true),
+  OBSERVER: text("observer").notNull().default(""),
+  "OBSERVER?": integer("observer_known", { mode: "boolean" }).notNull().default(true),
+  OBSNOTES: text("obsnotes").notNull().default(""),
+  "OBSNOTES?": integer("obsnotes_known", { mode: "boolean" }).notNull().default(true),
+  NOTES: text("notes").notNull().default(""),
+  "NOTES?": integer("notes_known", { mode: "boolean" }).notNull().default(true),
+  SCANNER: text("scanner").notNull().default(""),
+  "SCANNER?": integer("scanner_known", { mode: "boolean" }).notNull().default(true),
+  SCANRES: text("scanres").notNull().default(""),
+  "SCANRES?": integer("scanres_known", { mode: "boolean" }).notNull().default(true),
+  PIXSIZE: text("pixsize").notNull().default(""),
+  "PIXSIZE?": integer("pixsize_known", { mode: "boolean" }).notNull().default(true),
+  SCANGAIN: text("scangain").notNull().default(""),
+  "SCANGAIN?": integer("scangain_known", { mode: "boolean" }).notNull().default(true),
+  SCANSOFT: text("scansoft").notNull().default(""),
+  "SCANSOFT?": integer("scansoft_known", { mode: "boolean" }).notNull().default(true),
+  DATESCAN: text("datescan").notNull().default(""),
+  "DATESCAN?": integer("datescan_known", { mode: "boolean" }).notNull().default(true),
+  SCANAUTH: text("scanauth").notNull().default(""),
+  "SCANAUTH?": integer("scanauth_known", { mode: "boolean" }).notNull().default(true),
 })
 
 export const plateRelations = relations(plate, ({ one, many }) => ({

@@ -7,6 +7,7 @@ import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { formatObservation } from "~/lib/format"
+import { splitLocalDateTime } from "~/lib/local-datetime"
 import { notifyError } from "~/lib/notifications"
 import { CustomError } from "~/lib/utils"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
@@ -48,7 +49,16 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
       data: { materialName: calibration.material },
     })
 
-    const observationIdentifier = `${initialMetadata.OBJECT}.${initialMetadata["DATE-OBS"].value}.${initialMetadata.UT.value}`
+    const observationTimestamp = initialMetadata["DATE-OBS"].value
+      ? splitLocalDateTime(initialMetadata["DATE-OBS"].value)
+      : null
+    const observationIdentifier = [
+      initialMetadata.OBJECT,
+      observationTimestamp?.date,
+      observationTimestamp?.time,
+    ]
+      .filter(Boolean)
+      .join(".")
 
     return {
       breadcrumbs: [
@@ -104,6 +114,8 @@ function RouteComponent() {
         pixel: idx,
         intensity: n,
       })) ?? []
+  const scienceSpectrumId = spectrums.find((s) => s.type === "science")?.id
+  const lampSpectrumIds = spectrums.filter((s) => s.type === "lamp").map((s) => s.id)
 
   const lamps = spectrums
     .filter((s) => s.type !== "science")
@@ -333,7 +345,7 @@ function RouteComponent() {
         selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
       >
         {([isValid, isSubmitting, _isDirty]) => (
-          <div className="flex w-full justify-center">
+          <div className="flex w-full flex-wrap justify-center gap-3">
             <Button
               onClick={() => {
                 if (pixelToWavelengthFunction instanceof CustomError) return
@@ -348,10 +360,37 @@ function RouteComponent() {
               disabled={
                 !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
               }
-              className="m-4 flex w-20 justify-center"
+              className="m-4 flex w-28 justify-center"
             >
-              Export
+              Export JSON
             </Button>
+            {scienceSpectrumId && (
+              <Button
+                onClick={() => {
+                  window.location.href = `/spectrum/${scienceSpectrumId}/calibrated-fits`
+                }}
+                disabled={
+                  !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
+                }
+                className="m-4 flex justify-center"
+              >
+                Export Science FITS
+              </Button>
+            )}
+            {lampSpectrumIds.map((lampId, idx) => (
+              <Button
+                key={lampId}
+                onClick={() => {
+                  window.location.href = `/spectrum/${lampId}/calibrated-fits`
+                }}
+                disabled={
+                  !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
+                }
+                className="m-4 flex justify-center"
+              >
+                {`Export Lamp ${idx + 1} FITS`}
+              </Button>
+            ))}
           </div>
         )}
       </form.Subscribe>
