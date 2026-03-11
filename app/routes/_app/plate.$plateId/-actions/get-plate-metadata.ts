@@ -18,6 +18,7 @@ export const getPlateMetadata = createServerFn()
       "PLATE-N": plate["PLATE-N"],
       TELESCOPE: { value: plate.TELESCOPE, isKnown: plate["TELESCOPE?"] },
       INSTRUME: { value: plate.INSTRUME, isKnown: plate["INSTRUME?"] },
+      DETECTOR: { value: plate.DETECTOR, isKnown: plate["DETECTOR?"] },
       OBSERVER: { value: plate.OBSERVER, isKnown: plate["OBSERVER?"] },
       OBSNOTES: { value: plate.OBSNOTES, isKnown: plate["OBSNOTES?"] },
       NOTES: { value: plate.NOTES, isKnown: plate["NOTES?"] },

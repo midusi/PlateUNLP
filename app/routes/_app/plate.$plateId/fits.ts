@@ -38,6 +38,7 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
             observatory: plate.OBSERVAT,
             telescope: plate["TELESCOPE?"] ? plate.TELESCOPE : undefined,
             instrument: plate["INSTRUME?"] ? plate.INSTRUME : undefined,
+            detector: plate["DETECTOR?"] ? plate.DETECTOR : undefined,
             observer: plate["OBSERVER?"] ? plate.OBSERVER : undefined,
             observerNotes: plate["OBSNOTES?"] ? plate.OBSNOTES : undefined,
             notes: plate["NOTES?"] ? plate.NOTES : undefined,

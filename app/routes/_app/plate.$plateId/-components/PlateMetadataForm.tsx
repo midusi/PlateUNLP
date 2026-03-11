@@ -133,6 +133,13 @@ export function PlateMetadataForm({
             />
             <TextFieldWithKnown
               form={form}
+              fields="DETECTOR"
+              label="DETECTOR"
+              placeholder="e.g. Photographic plate"
+              description="Detector that recorded the observation."
+            />
+            <TextFieldWithKnown
+              form={form}
               fields="OBSERVER"
               label="OBSERVER"
               placeholder="e.g. W. Muench"

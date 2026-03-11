@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "d37b4a2f-9bd5-477a-9059-69f7a0303ddd",
+  "id": "a9d72b73-f9c9-4024-8e5e-6cf65243e30a",
   "prevId": "15eb5bdd-bd95-4535-a493-be5ea131a70b",
   "tables": {
     "account": {
@@ -845,16 +845,16 @@
           "autoincrement": false,
           "default": true
         },
-        "time_obs": {
-          "name": "time_obs",
+        "date_org": {
+          "name": "date_org",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": "''"
         },
-        "time_obs_known": {
-          "name": "time_obs_known",
+        "date_org_known": {
+          "name": "date_org_known",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -1122,6 +1122,22 @@
           "autoincrement": false,
           "default": true
         },
+        "detector": {
+          "name": "detector",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "detector_known": {
+          "name": "detector_known",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "observer": {
           "name": "observer",
           "type": "text",
@@ -1196,22 +1212,6 @@
         },
         "scanres_known": {
           "name": "scanres_known",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "pixsize": {
-          "name": "pixsize",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
-        "pixsize_known": {
-          "name": "pixsize_known",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -1545,6 +1545,8 @@
     "schemas": {},
     "tables": {},
     "columns": {
+      "\"observation\".\"time_obs\"": "\"observation\".\"date_org\"",
+      "\"observation\".\"time_obs_known\"": "\"observation\".\"date_org_known\"",
       "\"plate\".\"software\"": "\"plate\".\"scansoft\"",
       "\"plate\".\"software_known\"": "\"plate\".\"scansoft_known\"",
       "\"plate\".\"digitali\"": "\"plate\".\"scanauth\"",

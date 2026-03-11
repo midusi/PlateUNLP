@@ -23,6 +23,8 @@ export const updatePlateMetadata = createServerFn({ method: "POST" })
         "TELESCOPE?": data.metadata.TELESCOPE.isKnown,
         INSTRUME: data.metadata.INSTRUME.value,
         "INSTRUME?": data.metadata.INSTRUME.isKnown,
+        DETECTOR: data.metadata.DETECTOR.value,
+        "DETECTOR?": data.metadata.DETECTOR.isKnown,
         OBSERVER: data.metadata.OBSERVER.value,
         "OBSERVER?": data.metadata.OBSERVER.isKnown,
         OBSNOTES: data.metadata.OBSNOTES.value,

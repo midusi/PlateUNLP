@@ -28,6 +28,8 @@ export const plate = sqliteTable("plate", {
   "TELESCOPE?": integer("telescope_known", { mode: "boolean" }).notNull().default(true),
   INSTRUME: text("instrument").notNull().default(""),
   "INSTRUME?": integer("instrument_known", { mode: "boolean" }).notNull().default(true),
+  DETECTOR: text("detector").notNull().default(""),
+  "DETECTOR?": integer("detector_known", { mode: "boolean" }).notNull().default(true),
   OBSERVER: text("observer").notNull().default(""),
   "OBSERVER?": integer("observer_known", { mode: "boolean" }).notNull().default(true),
   OBSNOTES: text("obsnotes").notNull().default(""),

@@ -10,6 +10,7 @@ type CommonMetadata = {
   observer?: string
   telescope?: string
   instrument?: string
+  detector?: string
 }
 
 type PlateScanMetadata = CommonMetadata & {
@@ -92,6 +93,7 @@ export function plateToFITS(
   setTextCard(fits, "OBSERVAT", metadata.observatory, "observatory name")
   setTextCard(fits, "TELESCOP", metadata.telescope, "telescope")
   setTextCard(fits, "INSTRUME", metadata.instrument, "instrument")
+  setTextCard(fits, "DETECTOR", metadata.detector, "detector")
   setTextCard(fits, "OBSERVER", metadata.observer, "observer name")
   setTextCard(fits, "OBSNOTES", metadata.observerNotes, "observer notes")
   setTextCard(fits, "NOTES", metadata.notes, "miscellaneous notes")
@@ -236,6 +238,7 @@ function addCommonMetadata(fits: FITS, metadata: CommonMetadata) {
   setIfPresent(fits, "OBSERVAT", metadata.observatory, "Observatory")
   setIfPresent(fits, "TELESCOP", metadata.telescope, "Telescope")
   setIfPresent(fits, "INSTRUME", metadata.instrument, "Instrument")
+  setIfPresent(fits, "DETECTOR", metadata.detector, "Detector")
   setIfPresent(fits, "OBSERVER", metadata.observer, "Observer")
 }
 
@@ -285,6 +288,7 @@ function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMetadata) 
   setTextCard(fits, "OBSERVAT", metadata.observatory, "observatory name")
   setTextCard(fits, "TELESCOP", metadata.telescope, "telescope name")
   setTextCard(fits, "INSTRUME", metadata.instrument, "instrument")
+  setTextCard(fits, "DETECTOR", metadata.detector, "detector")
   setTextCard(fits, "OBSERVER", metadata.observer, "observer name")
   setTextCard(fits, "OBSNOTES", metadata.observerNotes, "observer notes")
   setTextCard(fits, "NOTES", metadata.notes, "miscellaneous notes")

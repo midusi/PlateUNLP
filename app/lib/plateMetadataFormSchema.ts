@@ -5,6 +5,7 @@ export const plateMetadataFormSchema = z.object({
   PLATE_N: z.string().nonempty("This field is required"),
   TELESCOPE: z.string().optional(),
   INSTRUME: z.string().optional(),
+  DETECTOR: z.string().optional(),
   OBSERVER: z.string().optional(),
   OBSNOTES: z.string().optional(),
   NOTES: z.string().optional(),

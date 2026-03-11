@@ -56,6 +56,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/extracted
             scanAuthor: plate["SCANAUTH?"] ? plate.SCANAUTH : undefined,
             observer: plate["OBSERVER?"] ? plate.OBSERVER : undefined,
             instrument: plate["INSTRUME?"] ? plate.INSTRUME : undefined,
+            detector: plate["DETECTOR?"] ? plate.DETECTOR : undefined,
             object: observation["OBJECT?"] ? observation.OBJECT : undefined,
             dateObs: observation["DATE-OBS?"] ? observation["DATE-OBS"] : undefined,
             dateOrg: observation["DATE-ORG?"] ? observation["DATE-ORG"] : undefined,

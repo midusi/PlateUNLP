@@ -21,6 +21,7 @@ export const PlateMetadataSchema = z.object({
   "PLATE-N": fitsString().min(1),
   TELESCOPE: knowable(fitsString()),
   INSTRUME: knowable(fitsString()),
+  DETECTOR: knowable(fitsString()),
   OBSERVER: knowable(fitsString()),
   OBSNOTES: knowable(fitsString()),
   NOTES: knowable(fitsString()),
