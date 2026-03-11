@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/fits")({
             fileName,
             origin: plate.project.name,
             plateNumber: plate["PLATE-N"],
-            observatory: plate.observatory.name,
+            observatory: plate.OBSERVAT,
             observatoryTimezone: plate.observatory.timezone,
             telescope: plate["TELESCOPE?"] ? plate.TELESCOPE : undefined,
             observerNotes: plate["OBSNOTES?"] ? plate.OBSNOTES : undefined,

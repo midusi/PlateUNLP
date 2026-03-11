@@ -68,7 +68,8 @@ async function RouteComponent() {
             window.location.href = `/observation/${observationId}/fits`
           }}
         >
-          Download observation image as FITS
+          <span className="icon-[ph--image]" />
+          Download FITS (image)
         </Button>
         <Link to="/observation/$observationId/calibrate" params={{ observationId: observationId }}>
           <Button className="flex justify-center">Calibrate</Button>

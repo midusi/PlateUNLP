@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
             fileName,
             origin: plate.project.name,
             plateNumber: plate["PLATE-N"],
-            observatory: plate.observatory.name,
+            observatory: plate.OBSERVAT,
             telescope: plate["TELESCOPE?"] ? plate.TELESCOPE : undefined,
             instrument: plate["INSTRUME?"] ? plate.INSTRUME : undefined,
             observer: plate["OBSERVER?"] ? plate.OBSERVER : undefined,

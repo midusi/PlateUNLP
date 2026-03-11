@@ -53,6 +53,8 @@ export type SpectrumCropFITSMetadata = PlateScanMetadata & {
   fileName: string
 }
 
+export type ExtractedSpectrumFITSMetadata = SpectrumCropFITSMetadata
+
 export type CalibratedSpectrumFITSMetadata = CommonMetadata & {
   object?: string
   dateObs?: string
@@ -116,58 +118,61 @@ export function spectrumCropToFITS(
 
   const fits = fromUint16Array(pixels, [width, height])
 
-  fits.header.appendBlank(
-    "--------------------------------------- Original data of the observation",
-  )
-  setTextCard(
-    fits,
-    "DATE-OBS",
-    normalizeOptionalDateTime(metadata.dateObs),
-    "UT mean datetime of the observation",
-  )
-  setTextCard(
-    fits,
-    "DATE-ORG",
-    metadata.dateOrg ?? toLocalObservationDateTime(metadata.dateObs, metadata.observatoryTimezone),
-    "Local mean datetime of the observation",
-  )
-  setTextCard(fits, "OBJECT", metadata.object, "name of the observed object")
-  setTextCard(fits, "IMAGETYP", metadata.imageType, "object, dark, zero, etc.")
-  setExposureTimeIfPresent(fits, metadata.exptime)
-  setTextCard(fits, "OBSERVAT", metadata.observatory, "observatory name")
-  setTextCard(fits, "TELESCOP", metadata.telescope, "telescope name")
-  setTextCard(fits, "INSTRUME", metadata.instrument, "instrument")
-  setTextCard(fits, "OBSERVER", metadata.observer, "observer name")
-  setTextCard(fits, "OBSNOTES", metadata.observerNotes, "observer notes")
-  setTextCard(fits, "NOTES", metadata.notes, "miscellaneous notes")
-
-  fits.header.appendBlank(
-    "--------------------------------------- Computed data of the observation",
-  )
-  setTextCard(fits, "MAIN-ID", metadata.mainId, "Simbad main ID object name")
-  setTextCard(fits, "SPTYPE", metadata.spectralType, "Simbad spectral type")
-  setTextCard(fits, "ST", metadata.siderealTime, "local mean sidereal time")
-  setTextCard(fits, "HA", metadata.hourAngle, "local mean hour angle")
-  setNumericIfPresent(fits, "JD", metadata.jd, "Julian mean date of the observation")
-  setTextCard(fits, "EPOCH", metadata.epoch ?? metadata.equinox, "epoch of RA and DEC")
-  setTextCard(fits, "EQUINOX", metadata.equinox, "epoch of RA and DEC")
-  setTextCard(
-    fits,
-    "RADESYS",
-    metadata.radesys ?? inferRadesys(metadata),
-    "reference frame of RA and DEC",
-  )
-  setTextCard(fits, "RA", metadata.ra, 'right ascension FK4 ("h:m:s")')
-  setTextCard(fits, "DEC", metadata.dec, 'declination FK4 ("d:m:s")')
-  setTextCard(fits, "RA2000", metadata.ra2000, 'right ascension J2000 ("h:m:s")')
-  setTextCard(fits, "DEC2000", metadata.dec2000, 'declination J2000 ("d:m:s")')
-  setTextCard(fits, "RA1950", metadata.ra1950, 'RA2000 precessed to ep.1950 eq.1950 ("h:m:s")')
-  setTextCard(fits, "DEC1950", metadata.dec1950, 'DEC2000 precessed to ep.1950 eq.1950 ("d:m:s")')
-  setNumericIfPresent(fits, "AIRMASS", metadata.airmass, "estimated airmass at observation time")
-
+  addObservationMetadata(fits, metadata)
   addScannedPlateMetadata(fits, metadata)
   addDataFileMetadata(fits, metadata.fileName, metadata.origin)
   addHistoryMetadata(fits)
+
+  return fits
+}
+
+export function extractedSpectrumToFITS(
+  intensity: number[],
+  metadata: ExtractedSpectrumFITSMetadata,
+): FITS {
+  const fits = FITS.fromTypedArray(Float64Array.from(intensity), -64, [intensity.length])
+
+  addObservationMetadata(fits, metadata)
+  addScannedPlateMetadata(fits, metadata)
+  addDataFileMetadata(fits, metadata.fileName, metadata.origin)
+  addHistoryMetadata(fits)
+
+  return fits
+}
+
+export function extractedObservationToFITS(
+  intensities: number[][],
+  metadata: ExtractedSpectrumFITSMetadata,
+): FITS {
+  if (intensities.length === 0) {
+    throw new RangeError("Expected at least one extracted spectrum")
+  }
+
+  const maxLength = Math.max(...intensities.map((intensity) => intensity.length))
+  if (maxLength === 0) {
+    throw new RangeError("Expected at least one extracted sample")
+  }
+
+  const flattened = new Float64Array(maxLength * intensities.length)
+  flattened.fill(Number.NaN)
+
+  intensities.forEach((intensity, spectrumIndex) => {
+    intensity.forEach((value, sampleIndex) => {
+      flattened[spectrumIndex * maxLength + sampleIndex] = value
+    })
+  })
+
+  const fits = FITS.fromTypedArray(flattened, -64, [maxLength, 1, intensities.length])
+
+  addObservationMetadata(fits, metadata)
+  addScannedPlateMetadata(fits, metadata)
+  addDataFileMetadata(fits, metadata.fileName, metadata.origin)
+  addHistoryMetadata(fits)
+
+  fits.header.appendHistory("Axis 3 stores spectra ordered by imageTop then imageLeft")
+  if (intensities.some((intensity) => intensity.length !== maxLength)) {
+    fits.header.appendHistory("Shorter extracted spectra were padded with NaN values")
+  }
 
   return fits
 }
@@ -255,12 +260,63 @@ function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata) {
   setTextCard(fits, "SCANAUTH", metadata.scanAuthor, "author of scan")
 }
 
+function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMetadata) {
+  fits.header.appendBlank(
+    "--------------------------------------- Original data of the observation",
+  )
+  setTextCard(
+    fits,
+    "DATE-OBS",
+    normalizeOptionalDateTime(metadata.dateObs),
+    "UT mean datetime of the observation",
+  )
+  setTextCard(
+    fits,
+    "DATE-ORG",
+    metadata.dateOrg ?? toLocalObservationDateTime(metadata.dateObs, metadata.observatoryTimezone),
+    "Local mean datetime of the observation",
+  )
+  setTextCard(fits, "OBJECT", metadata.object, "name of the observed object")
+  setTextCard(fits, "IMAGETYP", metadata.imageType, "object, dark, zero, etc.")
+  setExposureTimeIfPresent(fits, metadata.exptime)
+  setTextCard(fits, "OBSERVAT", metadata.observatory, "observatory name")
+  setTextCard(fits, "TELESCOP", metadata.telescope, "telescope name")
+  setTextCard(fits, "INSTRUME", metadata.instrument, "instrument")
+  setTextCard(fits, "OBSERVER", metadata.observer, "observer name")
+  setTextCard(fits, "OBSNOTES", metadata.observerNotes, "observer notes")
+  setTextCard(fits, "NOTES", metadata.notes, "miscellaneous notes")
+
+  fits.header.appendBlank(
+    "--------------------------------------- Computed data of the observation",
+  )
+  setTextCard(fits, "MAIN-ID", metadata.mainId, "Simbad main ID object name")
+  setTextCard(fits, "SPTYPE", metadata.spectralType, "Simbad spectral type")
+  setTextCard(fits, "ST", metadata.siderealTime, "local mean sidereal time")
+  setTextCard(fits, "HA", metadata.hourAngle, "local mean hour angle")
+  setNumericIfPresent(fits, "JD", metadata.jd, "Julian mean date of the observation")
+  setNumericIfPresent(fits, "EPOCH", metadata.epoch ?? metadata.equinox, "epoch of RA and DEC")
+  setNumericIfPresent(fits, "EQUINOX", metadata.equinox, "epoch of RA and DEC")
+  setTextCard(
+    fits,
+    "RADESYS",
+    metadata.radesys ?? inferRadesys(metadata),
+    "reference frame of RA and DEC",
+  )
+  setTextCard(fits, "RA", metadata.ra, 'right ascension FK4 ("h:m:s")')
+  setTextCard(fits, "DEC", metadata.dec, 'declination FK4 ("d:m:s")')
+  setTextCard(fits, "RA2000", metadata.ra2000, 'right ascension J2000 ("h:m:s")')
+  setTextCard(fits, "DEC2000", metadata.dec2000, 'declination J2000 ("d:m:s")')
+  setTextCard(fits, "RA1950", metadata.ra1950, 'RA2000 precessed to ep.1950 eq.1950 ("h:m:s")')
+  setTextCard(fits, "DEC1950", metadata.dec1950, 'DEC2000 precessed to ep.1950 eq.1950 ("d:m:s")')
+  setNumericIfPresent(fits, "AIRMASS", metadata.airmass, "estimated airmass at observation time")
+}
+
 function addDataFileMetadata(fits: FITS, fileName: string, origin?: string) {
   fits.header.appendBlank(
     "------------------------------------------------------------- Data files",
   )
   fits.header.set("FILENAME", fileName, { comment: "filename of this file" })
-  fits.header.set("ORIGIN", origin ?? "", { comment: "origin of this file" })
+  fits.header.set("ORIGIN", toASCIIHeaderString(origin), { comment: "origin of this file" })
   fits.header.set("DATE", toFITSDateTimeString(new Date()), {
     comment: "last change of this file",
   })
@@ -386,4 +442,12 @@ function inferRadesys(metadata: {
 
 function toFITSDateTimeString(value: Date): string {
   return value.toISOString().replace(/\.\d{3}Z$/, "")
+}
+
+function toASCIIHeaderString(value: string | undefined) {
+  if (!value) return ""
+  return value
+    .normalize("NFD") // Split accented letters into base letter + combining mark, e.g. "á" -> "a" + accent.
+    .replace(/[\u0300-\u036f]/g, "") // Remove the combining marks so accented Latin letters become plain ASCII letters.
+    .replace(/[^\x20-\x7E]/g, "") // Drop any remaining character outside printable ASCII, which FITS headers require.
 }

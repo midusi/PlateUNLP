@@ -148,22 +148,22 @@ export function SpectrumsList({
         //const boundingBoxes = predictions;
         /** Actualizar base de datos */
         const science = {
-          imageTop: boundingBoxes[0].y, //.top
+          imageTop: Math.round(boundingBoxes[0].y), //.top
           imageLeft: 0, // Forzar ancho maximo
           imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: boundingBoxes[0].height,
+          imageHeight: Math.round(boundingBoxes[0].height),
         }
         const lamp1 = {
-          imageTop: boundingBoxes[1].y, //.top
+          imageTop: Math.round(boundingBoxes[1].y), //.top
           imageLeft: 0, // Forzar ancho maximo
           imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: boundingBoxes[1].height,
+          imageHeight: Math.round(boundingBoxes[1].height),
         }
         const lamp2 = {
-          imageTop: boundingBoxes[2].y, //.top
+          imageTop: Math.round(boundingBoxes[2].y), //.top
           imageLeft: 0, // Forzar ancho maximo
           imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: boundingBoxes[2].height,
+          imageHeight: Math.round(boundingBoxes[2].height),
         }
         const newSpectrums = await addSpectrums({
           data: { observationId, science, lamp1, lamp2 },
