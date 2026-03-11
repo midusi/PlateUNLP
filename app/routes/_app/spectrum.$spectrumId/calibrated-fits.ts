@@ -80,6 +80,7 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
           calibrationFunction: calibration.inferenceFunction,
           wavelengthStart,
           wavelengthStep,
+          wavelengthUnit: "Angstrom",
         })
 
         if (calibration.inferenceFunction !== "Linear regresion") {

@@ -135,6 +135,7 @@ export function extractedSpectrumToFITS(
   addObservationMetadata(fits, metadata)
   addScannedPlateMetadata(fits, metadata)
   addDataFileMetadata(fits, metadata.fileName, metadata.origin)
+  addExtractedSpectrumWCS(fits)
   addHistoryMetadata(fits)
 
   return fits
@@ -162,14 +163,15 @@ export function extractedObservationToFITS(
     })
   })
 
-  const fits = FITS.fromTypedArray(flattened, -64, [maxLength, 1, intensities.length])
+  const fits = FITS.fromTypedArray(flattened, -64, [maxLength, intensities.length])
 
   addObservationMetadata(fits, metadata)
   addScannedPlateMetadata(fits, metadata)
   addDataFileMetadata(fits, metadata.fileName, metadata.origin)
+  addExtractedObservationWCS(fits)
   addHistoryMetadata(fits)
 
-  fits.header.appendHistory("Axis 3 stores spectra ordered by imageTop then imageLeft")
+  fits.header.appendHistory("Axis 2 stores spectra ordered by imageTop then imageLeft")
   if (intensities.some((intensity) => intensity.length !== maxLength)) {
     fits.header.appendHistory("Shorter extracted spectra were padded with NaN values")
   }
@@ -210,6 +212,7 @@ export function calibratedSpectrumToFITS(
     crval: metadata.wavelengthStart,
     cdelt: metadata.wavelengthStep,
   })
+  fits.header.set("CNAME1", "Wavelength", { comment: "axis name" })
 
   return fits
 }
@@ -320,6 +323,38 @@ function addDataFileMetadata(fits: FITS, fileName: string, origin?: string) {
   fits.header.set("DATE", toFITSDateTimeString(new Date()), {
     comment: "last change of this file",
   })
+}
+
+function addExtractedSpectrumWCS(fits: FITS) {
+  fits.header.appendBlank(
+    "------------------------------------------ World Coordinate System (WCS)",
+  )
+  fits.header.set("WCSAXES", 1, { comment: "number of axes in the WCS description" })
+  fits.header.set("BUNIT", "adu", { comment: "physical units of the array values" })
+  fits.header.set("CTYPE1", "LINEAR", { comment: "linear coordinate type" })
+  fits.header.set("CNAME1", "Scanned pixel", { comment: "axis name" })
+  fits.header.set("CUNIT1", "pixel", { comment: "axis units" })
+  fits.header.set("CRPIX1", 1.0, { comment: "reference pixel" })
+  fits.header.set("CRVAL1", 1.0, { comment: "coordinate at reference pixel" })
+  fits.header.set("CDELT1", 1.0, { comment: "coordinate increment per pixel" })
+}
+
+function addExtractedObservationWCS(fits: FITS) {
+  fits.header.appendBlank(
+    "------------------------------------------ World Coordinate System (WCS)",
+  )
+  fits.header.set("WCSAXES", 2, { comment: "number of axes in the WCS description" })
+  fits.header.set("BUNIT", "adu", { comment: "physical units of the array values" })
+  fits.header.set("CTYPE1", "LINEAR", { comment: "linear coordinate type" })
+  fits.header.set("CNAME1", "Scanned pixel", { comment: "axis name" })
+  fits.header.set("CUNIT1", "pixel", { comment: "axis units" })
+  fits.header.set("CRPIX1", 1.0, { comment: "reference pixel" })
+  fits.header.set("CRVAL1", 1.0, { comment: "coordinate at reference pixel" })
+  fits.header.set("CDELT1", 1.0, { comment: "coordinate increment per pixel" })
+  fits.header.set("CNAME2", "Spectrum index", { comment: "axis name" })
+  fits.header.set("CRPIX2", 1.0, { comment: "reference pixel" })
+  fits.header.set("CRVAL2", 1.0, { comment: "coordinate at reference pixel" })
+  fits.header.set("CDELT2", 1.0, { comment: "coordinate increment per index" })
 }
 
 function addHistoryMetadata(fits: FITS) {
