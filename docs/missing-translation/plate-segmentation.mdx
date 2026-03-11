@@ -29,10 +29,11 @@ Para saber mas leer [Detector de Espectros](../spectrum-detector/index.md)
 ![alt text](./boundingBoxList.png)
 De cada caja se muestra su identificador (izquierda), el tipo de objeto que hay dentro (centro-derecha), un botón para eliminar la caja (derecha). Cuando una caja delimitadora está seleccionada también se muestra un conjunto de inputs con información que se tiene que especificar sobre cada caja:
     - OBJECT: Nombre del objeto observado.
-    - DATE-OBS: Fecha de observación.
+    - DATE-OBS: Fecha y hora de observación en tiempo universal.
     - MAIN-ID: ID principal en la base de datos astronómica Simbad.
-    -UT: tiempo universal.
+    - EXPTIME: tiempo de exposición en segundos.
+    - IMAGETYP: tipo de observación (`object`, `dark`, `zero`, `flat` o `arc`).
 
-    Se usarán más adelante para obtener el valor de un listado más grande de metadatos.
+    Estos campos se usarán más adelante para calcular y completar el resto de los metadatos de la observación.
 
 Una vez especificada la ubicación de todos los espectros y sus valores especificados se habilita el botón _Save_ con el que se podrá pasar a la siguiente etapa.
