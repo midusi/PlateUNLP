@@ -7,8 +7,9 @@ import { defineConfig } from "vite"
 import * as MdxConfig from "./source.config"
 
 export default defineConfig({
-  server: {
-    port: 3000,
+  server: { port: 3000 },
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
   },
   plugins: [
     tailwindcss(),

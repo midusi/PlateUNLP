@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/image")({
         // Always convert to 16-bit grayscale for consistency
         let image = await readUploadedFile(observation.plate.image.id)
         image = await sharp(image)
+          .rotate(observation.plate.imageRotation)
           .extract({
             height: observation.imageHeight,
             top: observation.imageTop,

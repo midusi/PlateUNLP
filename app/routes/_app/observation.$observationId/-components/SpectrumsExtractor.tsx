@@ -15,7 +15,6 @@ import type { getSpectrums } from "../-actions/get-spectrums"
 import { updateObservationExtractionConfiguration } from "../-actions/update-observation-extraction-configuration"
 import { updateSpectrumsIntensityArr } from "../-actions/update-spectrums-intensity-arr"
 import { updateSpectrumsTypes } from "../-actions/update-spectrums-types"
-import { downloadRawFITS } from "../-utils/download-raw-fits"
 import { recalculateSpectrums1D } from "../-utils/recalculate-spectrums-1d"
 import { toRecalculate } from "../-utils/to-recalculate"
 
@@ -327,7 +326,9 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => downloadRawFITS("spectrum", analysis)}
+                                    onClick={() => {
+                                      window.location.href = `/spectrum/${spec.id}/fits`
+                                    }}
                                   >
                                     <span className="icon-[ph--file-arrow-down]" />
                                   </Button>

@@ -18,8 +18,6 @@ export const getProject = createServerFn()
                 OBJECT: true,
                 "DATE-OBS": true,
                 "DATE-OBS?": true,
-                UT: true,
-                "UT?": true,
               },
             },
           },

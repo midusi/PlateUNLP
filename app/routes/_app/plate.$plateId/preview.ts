@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_app/plate/$plateId/preview")({
         if (!plate) return new Response("Not found", { status: 404 })
         // Always convert to sRGB and PNG format for consistency
         let image = await readUploadedFile(plate.image.id)
-        image = await sharp(image).toColorspace("srgb").png().toBuffer()
+        image = await sharp(image).rotate(plate.imageRotation).toColorspace("srgb").png().toBuffer()
         return new Response(bufferToArrayBuffer(image), {
           headers: {
             "Content-Type": "image/png",

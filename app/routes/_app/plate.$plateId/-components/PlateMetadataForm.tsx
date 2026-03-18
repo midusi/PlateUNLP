@@ -3,8 +3,15 @@ import { useRouter } from "@tanstack/react-router"
 import type { z } from "zod"
 import { SelectObservatory } from "~/components/forms/SelectObservatory"
 import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
+import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
-import { Field, FieldControl, FieldError, FieldLabel } from "~/components/ui/field"
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "~/components/ui/field"
 import { Progress } from "~/components/ui/progress"
 import { Separator } from "~/components/ui/separator"
 import { useAppForm } from "~/hooks/use-app-form"
@@ -93,6 +100,7 @@ export function PlateMetadataForm({
                       <SelectObservatory value={field.state.value} setValue={field.handleChange} />
                     }
                   />
+                  <FieldDescription>Observatory where the plate was captured.</FieldDescription>
                   {field.state.meta.errors[0] && (
                     <FieldError>{field.state.meta.errors[0].message}</FieldError>
                   )}
@@ -100,51 +108,108 @@ export function PlateMetadataForm({
               )}
             </form.Field>
             <form.AppField name="PLATE-N">
-              {(field) => <field.TextField label="PLATE-N" placeholder="Identification number" />}
+              {(field) => (
+                <field.TextField
+                  label="PLATE-N"
+                  placeholder="e.g. 317"
+                  description="Plate identifier in the original observation catalogue."
+                />
+              )}
             </form.AppField>
-            <TextFieldWithKnown
-              form={form}
-              fields="OBSERVER"
-              label="OBSERVER"
-              placeholder="OBSERVER"
-            />
-
-            <TextFieldWithKnown
-              form={form}
-              fields="DIGITALI"
-              label="DIGITALI"
-              placeholder="DIGITALI"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="SCANNER"
-              label="SCANNER"
-              placeholder="SCANNER"
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="SOFTWARE"
-              label="SOFTWARE"
-              placeholder="SOFTWARE"
-            />
-
             <TextFieldWithKnown
               form={form}
               fields="TELESCOPE"
               label="TELESCOPE"
-              placeholder="TELESCOPE"
+              placeholder="e.g. Zeiss Triplet 15 cm"
+              description="Telescope used to capture the plate."
+            />
+
+            <TextFieldWithKnown
+              form={form}
+              fields="INSTRUME"
+              label="INSTRUME"
+              placeholder="e.g. Objective prism spectrograph"
+              description="Instrument used during the observation, for example a spectrograph."
             />
             <TextFieldWithKnown
               form={form}
               fields="DETECTOR"
               label="DETECTOR"
-              placeholder="DETECTOR"
+              placeholder="e.g. Photographic plate"
+              description="Detector that recorded the observation."
             />
             <TextFieldWithKnown
               form={form}
-              fields="INSTRUMENT"
-              label="INSTRUMENT"
-              placeholder="INSTRUMENT"
+              fields="OBSERVER"
+              label="OBSERVER"
+              placeholder="e.g. W. Muench"
+              description="Person who made the observation."
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="OBSNOTES"
+              label="OBSNOTES"
+              placeholder="e.g. bad guiding"
+              description="Observer notes about the acquisition conditions."
+            />
+
+            <Separator orientation="horizontal" className="col-span-full" />
+
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANNER"
+              label="SCANNER"
+              placeholder="e.g. Epson Expression 10000XL"
+              description="Technical specification or model of the scanner used."
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANRES"
+              label="SCANRES"
+              placeholder="e.g. 2400"
+              description="Scan resolution in dpi. PIXSIZE is derived automatically from this value."
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANGAIN"
+              label="SCANGAIN"
+              placeholder="e.g. 1.0"
+              description="Scanner gain in electrons per ADU, if known."
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANSOFT"
+              label="SCANSOFT"
+              placeholder="e.g. VueScan"
+              description="Software used to digitize the plate."
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="DATESCAN"
+              label="DATESCAN"
+              placeholder="e.g. 2011-05-17T10:33:26"
+              type="datetime-local"
+              step="1"
+              description="Scan date and time in local datetime format."
+            />
+            <TextFieldWithKnown
+              form={form}
+              fields="SCANAUTH"
+              label="SCANAUTH"
+              placeholder="e.g. K. Tsvetkova"
+              description="Person who digitized the plate."
+            />
+
+            <Separator orientation="horizontal" className="col-span-full" />
+
+            <TextAreaFieldWithKnown
+              form={form}
+              fields="NOTES"
+              label="NOTES"
+              placeholder="e.g. SA 87 = Kapteyn Selected Area 87"
+              description="Miscellaneous notes about the plate or target."
+              rows={4}
+              className="col-span-full"
             />
           </CardContent>
           <CardFooter className="flex justify-end">

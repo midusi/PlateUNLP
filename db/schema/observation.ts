@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm"
 import { integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 import { idType } from "../utils"
 
+import { calibration } from "./calibration"
 import { plate } from "./plate"
 import { spectrum } from "./spectrum"
 
@@ -27,8 +28,6 @@ export const observation = sqliteTable(
     "OBJECT?": integer("object_known", { mode: "boolean" }).notNull().default(true),
     "DATE-OBS": text("date_obs").notNull().default(""),
     "DATE-OBS?": integer("date_obs_known", { mode: "boolean" }).notNull().default(true),
-    UT: text("ut").notNull().default(""),
-    "UT?": integer("ut_known", { mode: "boolean" }).notNull().default(true),
     EXPTIME: text("exptime").notNull().default(""),
     "EXPTIME?": integer("exptime_known", { mode: "boolean" }).notNull().default(true),
     IMAGETYP: text("imagetyp", { enum: ["object", "dark", "zero", "flat", "arc"] })
@@ -53,8 +52,8 @@ export const observation = sqliteTable(
     "RA1950?": integer("ra1950_known", { mode: "boolean" }).notNull().default(true),
     DEC1950: text("dec1950").notNull().default(""),
     "DEC1950?": integer("dec1950_known", { mode: "boolean" }).notNull().default(true),
-    "TIME-OBS": text("time_obs").notNull().default(""),
-    "TIME-OBS?": integer("time_obs_known", { mode: "boolean" }).notNull().default(true),
+    "DATE-ORG": text("date_org").notNull().default(""),
+    "DATE-ORG?": integer("date_org_known", { mode: "boolean" }).notNull().default(true),
     JD: text("jd").notNull().default(""),
     "JD?": integer("jd_known", { mode: "boolean" }).notNull().default(true),
     ST: text("st").notNull().default(""),
@@ -69,5 +68,9 @@ export const observation = sqliteTable(
 
 export const observationRelations = relations(observation, ({ one, many }) => ({
   plate: one(plate, { fields: [observation.plateId], references: [plate.id] }),
+  calibration: one(calibration, {
+    fields: [observation.id],
+    references: [calibration.observationId],
+  }),
   spectra: many(spectrum),
 }))

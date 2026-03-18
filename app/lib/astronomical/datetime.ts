@@ -50,6 +50,19 @@ export function getLocalTime(date: string, ut: string, tz: string) {
 }
 
 /**
+ * Gets the local datetime of the observation, according to the timezone.
+ * @param date The Gregorian calendar date, in the format YYYY-MM-DD.
+ * @param ut The UT (≈UTC) time of day, in the format HH:MM:SS.
+ * @param tz The timezone of the observation, in the IANA TZ format.
+ * @returns the local datetime, in the format YYYY-MM-DDTHH:MM:SS.
+ */
+export function getLocalDateTime(date: string, ut: string, tz: string) {
+  const utcDate = getFullDate(date, ut)
+  const localDate = new TZDate(utcDate, tz)
+  return formatDate(localDate, "yyyy-MM-dd'T'HH:mm:ss")
+}
+
+/**
  * Gets the Julian date.
  * @param date The Gregorian calendar date, in the format YYYY-MM-DD.
  * @param ut The UT (≈UTC) time of day, in the format HH:MM:SS.

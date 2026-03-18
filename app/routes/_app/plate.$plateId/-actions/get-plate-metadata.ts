@@ -16,13 +16,18 @@ export const getPlateMetadata = createServerFn()
     return {
       OBSERVAT: plate.OBSERVAT,
       "PLATE-N": plate["PLATE-N"],
-      OBSERVER: { value: plate.OBSERVER, isKnown: plate["OBSERVER?"] },
-      DIGITALI: { value: plate.DIGITALI, isKnown: plate["DIGITALI?"] },
-      SCANNER: { value: plate.SCANNER, isKnown: plate["SCANNER?"] },
-      SOFTWARE: { value: plate.SOFTWARE, isKnown: plate["SOFTWARE?"] },
       TELESCOPE: { value: plate.TELESCOPE, isKnown: plate["TELESCOPE?"] },
+      INSTRUME: { value: plate.INSTRUME, isKnown: plate["INSTRUME?"] },
       DETECTOR: { value: plate.DETECTOR, isKnown: plate["DETECTOR?"] },
-      INSTRUMENT: { value: plate.INSTRUMENT, isKnown: plate["INSTRUMENT?"] },
+      OBSERVER: { value: plate.OBSERVER, isKnown: plate["OBSERVER?"] },
+      OBSNOTES: { value: plate.OBSNOTES, isKnown: plate["OBSNOTES?"] },
+      NOTES: { value: plate.NOTES, isKnown: plate["NOTES?"] },
+      SCANNER: { value: plate.SCANNER, isKnown: plate["SCANNER?"] },
+      SCANRES: { value: plate.SCANRES, isKnown: plate["SCANRES?"] },
+      SCANGAIN: { value: plate.SCANGAIN, isKnown: plate["SCANGAIN?"] },
+      SCANSOFT: { value: plate.SCANSOFT, isKnown: plate["SCANSOFT?"] },
+      DATESCAN: { value: plate.DATESCAN, isKnown: plate["DATESCAN?"] },
+      SCANAUTH: { value: plate.SCANAUTH, isKnown: plate["SCANAUTH?"] },
     }
   })
 

@@ -1,4 +1,5 @@
 import { formatDate } from "date-fns"
+import { splitLocalDateTime } from "./local-datetime"
 
 /**
  * Converts a decimal degree value to a string representation in degrees, minutes, and seconds (DMS).
@@ -78,20 +79,18 @@ export function formatObservation({
   id,
   OBJECT,
   "DATE-OBS": DATE_OBS,
-  UT,
 }: {
   id: string
   OBJECT: string
   "DATE-OBS": { value: string; isKnown: boolean }
-  UT: { value: string; isKnown: boolean }
 }) {
   if (!OBJECT) return `Obs-${id.slice(0, 8)}`
+  const dateObs =
+    DATE_OBS.isKnown && DATE_OBS.value.length > 0 ? splitLocalDateTime(DATE_OBS.value) : null
   return [
     OBJECT,
-    DATE_OBS.isKnown && DATE_OBS.value.length > 0
-      ? formatDate(new Date(`${DATE_OBS.value}T00:00:00`), "d/M/yyyy")
-      : null,
-    UT.isKnown && UT.value.length > 0 ? UT.value : null,
+    dateObs ? formatDate(new Date(`${dateObs.date}T00:00:00`), "d/M/yyyy") : null,
+    dateObs ? dateObs.time : null,
   ]
     .filter(Boolean)
     .join(" ")

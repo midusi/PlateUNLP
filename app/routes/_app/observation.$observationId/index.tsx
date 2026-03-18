@@ -62,6 +62,24 @@ async function RouteComponent() {
       <SpectrumsExtractor observationId={observationId} spectrums={spectrums} />
 
       <div className="m-4 flex w-full justify-center gap-4">
+        <Button
+          variant="outline"
+          onClick={() => {
+            window.location.href = `/observation/${observationId}/fits`
+          }}
+        >
+          <span className="icon-[ph--image]" />
+          Download FITS (image)
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            window.location.href = `/observation/${observationId}/extracted-fits`
+          }}
+        >
+          <span className="icon-[ph--chart-line]" />
+          Download FITS (extracted)
+        </Button>
         <Link to="/observation/$observationId/calibrate" params={{ observationId: observationId }}>
           <Button className="flex justify-center">Calibrate</Button>
         </Link>

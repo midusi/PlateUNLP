@@ -1,23 +1,23 @@
 import { useStore } from "@tanstack/react-form"
 import { Button } from "~/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
-import { Input } from "~/components/ui/input"
+import { inputClassname } from "~/components/ui/input"
 import { withFieldGroup } from "~/hooks/use-app-form"
 import { cn } from "~/lib/utils"
 
-type TextFieldWithKnownProps = {
+type TextAreaFieldWithKnownProps = {
   className?: string
   label?: React.ReactNode
   description?: React.ReactNode
-} & Pick<React.ComponentProps<typeof Input>, "placeholder" | "type" | "step">
+} & Pick<React.ComponentProps<"textarea">, "placeholder" | "rows">
 
 type Fields = {
   value: string
   isKnown: boolean
 }
 
-export const TextFieldWithKnown = withFieldGroup<Fields, unknown, TextFieldWithKnownProps>({
-  render: function Render({ group, className, label, description, placeholder, ...props }) {
+export const TextAreaFieldWithKnown = withFieldGroup<Fields, unknown, TextAreaFieldWithKnownProps>({
+  render: function Render({ group, className, label, description, placeholder, rows = 4 }) {
     const isKnown = useStore(group.store, (state) => state.values.isKnown)
 
     return (
@@ -26,15 +26,19 @@ export const TextFieldWithKnown = withFieldGroup<Fields, unknown, TextFieldWithK
           {(field) => (
             <>
               {label && <FieldLabel>{label}</FieldLabel>}
-              <Input
-                {...props}
+              <textarea
                 name={field.name}
                 value={isKnown ? field.state.value : ""}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 disabled={!isKnown}
                 placeholder={isKnown ? placeholder : "Unknown"}
-                className={cn(!isKnown && "placeholder:font-medium placeholder:italic")}
+                rows={rows}
+                className={cn(
+                  inputClassname,
+                  "min-h-24 py-2",
+                  !isKnown && "placeholder:font-medium placeholder:italic",
+                )}
               />
               <div className="flex items-start justify-between gap-2">
                 {description ? <FieldDescription>{description}</FieldDescription> : <span />}

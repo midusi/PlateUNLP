@@ -1,5 +1,4 @@
 import { Select } from "@base-ui/react/select"
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline"
 import { useStore } from "@tanstack/react-form"
 import { useMemo } from "react"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
@@ -44,7 +43,10 @@ export function SelectFieldSimple({
       <Select.Root
         items={options}
         value={field.state.value}
-        onValueChange={(val) => field.handleChange(val)}
+        onValueChange={(val) => {
+          if (val === null) return
+          field.handleChange(val)
+        }}
         disabled={disabled}
       >
         <Select.Trigger
@@ -64,7 +66,7 @@ export function SelectFieldSimple({
           {selectedValue && !disabled ? <Select.Value /> : placeholder}
 
           <Select.Icon className="flex">
-            <ChevronUpDownIcon />
+            <span className="icon-[ph--caret-up-down-bold] size-4 opacity-50" />
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
@@ -78,7 +80,7 @@ export function SelectFieldSimple({
                   className="grid min-w-[var(--anchor-width)] cursor-default select-none grid-cols-[0.75rem_1fr] items-center gap-2 pointer-coarse:py-2.5 py-2 pr-4 pl-2.5 pointer-coarse:text-[0.925rem] text-sm leading-4 outline-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-1 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-sm data-[highlighted]:before:bg-gray-900 group-data-[side=none]:min-w-[calc(var(--anchor-width)+1rem)] group-data-[side=none]:scroll-my-1 group-data-[side=none]:pr-12 group-data-[side=none]:text-base group-data-[side=none]:leading-4"
                 >
                   <Select.ItemIndicator className="col-start-1">
-                    <CheckIcon className="size-3" />
+                    <span className="icon-[ph--check-bold] size-3 text-primary" />
                   </Select.ItemIndicator>
                   <Select.ItemText className="col-start-2">{label}</Select.ItemText>
                 </Select.Item>

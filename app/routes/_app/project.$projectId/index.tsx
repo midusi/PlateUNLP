@@ -113,7 +113,6 @@ const columns = [
                   id: obs.id,
                   OBJECT: obs.OBJECT,
                   "DATE-OBS": { value: obs["DATE-OBS"], isKnown: obs["DATE-OBS?"] },
-                  UT: { value: obs.UT, isKnown: obs["UT?"] },
                 })}
               </span>
               <div className="table-cell w-full" />

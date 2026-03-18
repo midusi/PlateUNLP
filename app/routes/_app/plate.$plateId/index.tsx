@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { getObservatoriesQueryOptions } from "~/components/forms/SelectObservatory"
+import { buttonVariants } from "~/components/ui/button"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
 import { getObservations } from "./-actions/get-observations"
@@ -43,7 +44,15 @@ function RouteComponent() {
   return (
     <div className="mx-auto w-full">
       <PlateMetadataForm plateId={plateId} defaultValues={initialMetadata} />
-      <div className="h-8" />
+      <div className="my-8 flex justify-end">
+        <a
+          href={`/plate/${plateId}/fits`}
+          className={buttonVariants({ size: "sm", variant: "outline" })}
+        >
+          <span className="icon-[ph--download-simple-bold]" />
+          Download FITS
+        </a>
+      </div>
       <ObservationsList plateId={plateId} initialObservations={initialObservations} />
     </div>
   )

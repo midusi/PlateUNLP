@@ -22,7 +22,6 @@ import { CalibrationSettingsUI, inferenceOptions } from "./-child-forms/Calibrat
 import { EmpiricalSpectrum } from "./-components/EmpiricalSpectrum"
 import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
 import { InferenceBoxGraph } from "./-components/InferenceBoxGraph"
-import { downloadJSON } from "./-utils/download-json"
 import { updateInferenceFuntionInStore } from "./-utils/updateInferenceFunctionInStore"
 
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
@@ -48,8 +47,6 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
       data: { materialName: calibration.material },
     })
 
-    const observationIdentifier = `${initialMetadata.OBJECT}.${initialMetadata["DATE-OBS"].value}.${initialMetadata.UT.value}`
-
     return {
       breadcrumbs: [
         breadcrumb({
@@ -73,8 +70,6 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
           params: { observationId: params.observationId },
         }),
       ],
-      plateN: plate["PLATE-N"],
-      observationIdentifier: observationIdentifier,
       spectrums: spectrums,
       calibration: calibration,
       materialData: materialData,
@@ -84,8 +79,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
 })
 
 function RouteComponent() {
-  const { spectrums, calibration, materialData, listOfMaterials, plateN, observationIdentifier } =
-    Route.useLoaderData()
+  const { spectrums, calibration, materialData, listOfMaterials } = Route.useLoaderData()
 
   const lastMaterial = useRef<string>(calibration.material)
   const [materialArr, setMaterialArr] = useState<
@@ -104,6 +98,8 @@ function RouteComponent() {
         pixel: idx,
         intensity: n,
       })) ?? []
+  const scienceSpectrumId = spectrums.find((s) => s.type === "science")?.id
+  const lampSpectrumIds = spectrums.filter((s) => s.type === "lamp").map((s) => s.id)
 
   const lamps = spectrums
     .filter((s) => s.type !== "science")
@@ -333,25 +329,35 @@ function RouteComponent() {
         selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
       >
         {([isValid, isSubmitting, _isDirty]) => (
-          <div className="flex w-full justify-center">
-            <Button
-              onClick={() => {
-                if (pixelToWavelengthFunction instanceof CustomError) return
-                const jsonToDownload = {
-                  science: scienceSpectrum.map((item) => ({
-                    wavelength: pixelToWavelengthFunction(item.pixel),
-                    intensity: item.intensity,
-                  })),
+          <div className="my-4 flex w-full flex-wrap justify-center gap-4">
+            {lampSpectrumIds.map((lampId, idx) => (
+              <Button
+                key={lampId}
+                onClick={() => {
+                  window.location.href = `/spectrum/${lampId}/calibrated-fits`
+                }}
+                disabled={
+                  !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
                 }
-                downloadJSON(jsonToDownload, `${plateN}.${observationIdentifier}.science.json`)
-              }}
-              disabled={
-                !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
-              }
-              className="m-4 flex w-20 justify-center"
-            >
-              Export
-            </Button>
+                variant="outline"
+              >
+                <span className="icon-[ph--lightbulb]" />
+                {`Download lamp (${idx + 1})`}
+              </Button>
+            ))}
+            {scienceSpectrumId && (
+              <Button
+                onClick={() => {
+                  window.location.href = `/spectrum/${scienceSpectrumId}/calibrated-fits`
+                }}
+                disabled={
+                  !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
+                }
+              >
+                <span className="icon-[ph--planet]" />
+                Download science
+              </Button>
+            )}
           </div>
         )}
       </form.Subscribe>

@@ -1,3 +1,4 @@
+import { useMeasure } from "@uidotdev/usehooks"
 import { AxisBottom, AxisLeft } from "@visx/axis"
 import { curveLinear } from "@visx/curve"
 import { localPoint } from "@visx/event"
@@ -9,7 +10,6 @@ import { Tooltip, useTooltip, useTooltipInPortal } from "@visx/tooltip"
 import * as d3 from "@visx/vendor/d3-array"
 import type { NumberValue, ScaleLinear } from "@visx/vendor/d3-scale"
 import { useMemo } from "react"
-import useMeasure from "react-use-measure"
 import { CustomError, generateRange } from "~/lib/utils"
 import { GraphInErrorCase } from "./GraphInErrorCase"
 
@@ -35,8 +35,8 @@ export function InferenceBoxGraph({
   materialPoints,
 }: InferenceBoxGraphProps) {
   const [ref, bounds] = useMeasure()
-  const width = bounds.width
-  const height = bounds.height
+  const width = bounds.width ?? 0
+  const height = bounds.height ?? 0
 
   const { tooltipData, tooltipLeft, tooltipTop, tooltipOpen, showTooltip, hideTooltip } =
     useTooltip<{ idxMatch: number; P: number; Å: number }>()

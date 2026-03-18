@@ -34,7 +34,7 @@ export async function uploadFile(
         .insert(s.upload)
         .values({ name: file.name, mimeType: mimeType.data })
         .returning({ id: s.plate.id })
-      await fs.writeFile(`${env.UPLOADS_DIR}/${id}`, await image.toBuffer())
+      await fs.writeFile(`${env.UPLOADS_DIR}/${id}`, Buffer.from(arrayBuffer))
       return id
     })
     const metadata = await image.metadata()

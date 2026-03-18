@@ -18,6 +18,24 @@ export const fitsString = () =>
     })
 
 /**
+ * Validates a local ISO 8601 datetime string without timezone information.
+ * Accepts `YYYY-MM-DDTHH:mm`, optionally with seconds and fractional seconds.
+ */
+export const localDateTime = () =>
+  z
+    .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/g,
+      "Invalid datetime format, expected YYYY-MM-DDTHH:mm[:ss[.sss]]",
+    )
+
+/**
+ * Validates a numeric string that should be preserved as plain text in forms.
+ */
+export const numericText = () =>
+  z.string().regex(/^(?:|[+-]?(?:\.\d+|\d+(?:\.\d*)?))$/g, "Invalid numeric value")
+
+/**
  * Validates a sexagesimal string in the format as
  * ±ddd:mm:ss.sss, of any precision as long as it's less than 360 deg.
  */

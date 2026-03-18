@@ -4,12 +4,13 @@ import { db } from "~/db"
 import {
   getJulianDate,
   getJulianEpoch,
-  getLocalTime,
+  getLocalDateTime,
   getSiderealTime,
 } from "~/lib/astronomical/datetime"
 import { equatorialToHorizontal, getAirmass, getHourAngle } from "~/lib/astronomical/misc"
 import { queryObjectById } from "~/lib/astronomical/simbad"
 import { degToDMS, degToHMS } from "~/lib/format"
+import { splitLocalDateTime } from "~/lib/local-datetime"
 import { ObservationMetadataSchema, PlateMetadataSchema } from "~/types/spectrum-metadata"
 
 async function getDeltaT(mdj: number): Promise<number | null> {
@@ -63,14 +64,14 @@ export const computeObservationMetadata = createServerFn()
   .inputValidator(
     z.object({
       ...PlateMetadataSchema.pick({ OBSERVAT: true }).shape,
-      ...ObservationMetadataSchema.pick({ OBJECT: true, "DATE-OBS": true, UT: true }).shape,
+      ...ObservationMetadataSchema.pick({ OBJECT: true, "DATE-OBS": true }).shape,
     }),
   )
   .handler(async ({ data }) => {
     if (!data["DATE-OBS"].isKnown) throw new Error("DATE-OBS is not known")
-    if (!data.UT.isKnown) throw new Error("UT is not known")
+    const { date, time } = splitLocalDateTime(data["DATE-OBS"].value)
     // JD, EPOCH, EQUINOX
-    const JD = getJulianDate(data["DATE-OBS"].value, data.UT.value)
+    const JD = getJulianDate(date, time)
     const EPOCH = getJulianEpoch(JD)
     const EQUINOX = EPOCH.slice(1) // Remove leading "J" from the epoch string
     // MAIN-ID, SPTYPE, RA, DEC, RA2000, DEC2000, RA1950, DEC1950
@@ -83,8 +84,8 @@ export const computeObservationMetadata = createServerFn()
     })
     if (!observatory) throw new Error(`Observatory with ID ${data.OBSERVAT} was not found`)
 
-    // TIME-OBS
-    const TIME_OBS = getLocalTime(data["DATE-OBS"].value, data.UT.value, observatory.timezone)
+    // DATE-ORG
+    const DATE_ORG = getLocalDateTime(date, time, observatory.timezone)
     const ST = await getSiderealTime(
       JD,
       observatory.longitude,
@@ -98,7 +99,6 @@ export const computeObservationMetadata = createServerFn()
     return {
       OBJECT: data.OBJECT,
       "DATE-OBS": data["DATE-OBS"],
-      UT: data.UT,
       "MAIN-ID": { value: simbad.value["MAIN-ID"], isKnown: true },
       SPTYPE: { value: simbad.value.SPTYPE ?? "", isKnown: true },
       RA: { value: degToHMS(simbad.value.RA2000), isKnown: true },
@@ -108,7 +108,7 @@ export const computeObservationMetadata = createServerFn()
       DEC2000: { value: degToDMS(simbad.value.DEC2000), isKnown: true },
       RA1950: { value: degToHMS(simbad.value.RA1950), isKnown: true },
       DEC1950: { value: degToDMS(simbad.value.DEC1950), isKnown: true },
-      "TIME-OBS": { value: TIME_OBS, isKnown: true },
+      "DATE-ORG": { value: DATE_ORG, isKnown: true },
       JD: { value: JD.toFixed(4), isKnown: true },
       ST: { value: degToHMS(ST.value), isKnown: true },
       HA: { value: degToDMS(HA), isKnown: true },

@@ -8,10 +8,10 @@ export const updateSpectrum = createServerFn()
   .inputValidator(
     z.object({
       spectrumId: z.string(),
-      imageTop: z.number().min(0),
-      imageLeft: z.number().min(0),
-      imageWidth: z.number().min(1),
-      imageHeight: z.number().min(1),
+      imageTop: z.number().int().min(0),
+      imageLeft: z.number().int().min(0),
+      imageWidth: z.number().int().min(1),
+      imageHeight: z.number().int().min(1),
       type: z.enum(["lamp", "science"]).optional(),
     }),
   )

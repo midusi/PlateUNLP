@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/preview")
         // Always convert to sRGB and PNG format for consistency
         let image = await readUploadedFile(observation.plate.image.id)
         image = await sharp(image)
+          .rotate(observation.plate.imageRotation)
           .extract({
             height: observation.imageHeight,
             top: observation.imageTop,
