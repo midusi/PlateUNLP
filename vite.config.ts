@@ -22,7 +22,10 @@ export default defineConfig({
     react(),
     mdx(MdxConfig),
   ],
-  resolve: { tsconfigPaths: true },
+  resolve: {
+    alias: { tslib: "tslib/tslib.es6.js" },
+    tsconfigPaths: true,
+  },
   assetsInclude: ["**/*.onnx"],
   optimizeDeps: {
     exclude: ["onnxruntime-web"],
