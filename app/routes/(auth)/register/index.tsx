@@ -19,6 +19,7 @@ function RouteComponent() {
     email: "",
     password: "",
     name: "",
+    image: null,
   }
 
   const form = useAppForm({
@@ -29,17 +30,28 @@ function RouteComponent() {
         const email = value.email
         const password = value.password
         const name = value.name
-        await authClient.signUp.email(
+        const image = value.image || defaultUserImage
+        console.log(image)
+        const { data, error } = await authClient.signUp.email(
           {
             email, // user email address
             password, // user password -> min 8 characters by default
-            image: defaultUserImage,
+            image: image,
             name, // user display name
             callbackURL: "/login", // A URL to redirect to after the user verifies their email (optional)
           },
           {
-            onSuccess: () => navigate({ to: "/login" }),
-            onError: (ctx) => notifyError(ctx.error.message),
+            onRequest: (ctx) => {
+              //show loading
+            },
+            onSuccess: (ctx) => {
+              console.log("User signed up successfully:", ctx.data)
+              //navigate({ to: "/login" })
+            },
+            onError: (ctx) => {
+              // display the error message
+              notifyError(ctx.error.message)
+            },
           },
         )
         //formApi.reset(value)
@@ -62,11 +74,14 @@ function RouteComponent() {
             <h1 className="text-2xl">Sign Up</h1>
           </CardHeader>
           <CardContent className="m-4 flex flex-col gap-4">
-            <form.AppField name="email">
-              {(field) => <field.TextField label="Email" placeholder="" />}
-            </form.AppField>
             <form.AppField name="name">
               {(field) => <field.TextField label="Username" placeholder="" />}
+            </form.AppField>
+            <form.AppField name="image">
+              {(field) => <field.ImageField label="Imagen" maxHeight={512} maxWidth={512}/>}
+            </form.AppField>
+            <form.AppField name="email">
+              {(field) => <field.TextField label="Email" placeholder="" />}
             </form.AppField>
             <form.AppField name="password">
               {(field) => <field.PasswordField label="Password" placeholder="" />}

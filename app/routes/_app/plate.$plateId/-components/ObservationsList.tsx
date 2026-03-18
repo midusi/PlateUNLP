@@ -4,7 +4,8 @@ import { type BoundingBox, BoundingBoxer } from "~/components/BoundingBoxer"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { notifyError } from "~/lib/notifications"
-import { cn, idToColor } from "~/lib/utils"
+import { cn, idxToColor } from "~/lib/utils"
+import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
 import type { Observation } from "../-actions/get-observations"
 import { updateObservation } from "../-actions/update-observation"
@@ -13,7 +14,7 @@ function observationToBoundingBox(observation: Observation): BoundingBox {
   return {
     id: observation.id,
     name: observation.name,
-    color: idToColor(observation.id),
+    color: "red",
     top: observation.imageTop,
     left: observation.imageLeft,
     width: observation.imageWidth,
@@ -29,7 +30,12 @@ export function ObservationsList({
   initialObservations: Observation[]
 }) {
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    initialObservations.map(observationToBoundingBox),
+    initialObservations.map((obs, idx) => {
+      return {
+        ...observationToBoundingBox(obs),
+        color: idxToColor(idx),
+      }
+    }),
   )
 
   const addObservationMut = useMutation({

@@ -14,7 +14,7 @@ export const calibration = sqliteTable(
     minWavelength: integer().notNull().default(0),
     maxWavelength: integer().notNull().default(2000),
     material: text().notNull().default("He-Ne-Ar"),
-    onlyOneLine: integer("only_one_line", { mode: "boolean" }).notNull().default(false),
+    onlyOneLine: integer("only_one_line", { mode: "boolean" }).notNull().default(true),
     inferenceFunction: text({
       enum: ["Linear regresion", "Piece wise linear regression", "Legendre"],
     })
