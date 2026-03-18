@@ -4,7 +4,11 @@ import { env } from "~/env"
 import * as schema from "./schema"
 
 export const db = drizzle({
-  connection: { url: env.DATABASE_URL, authToken: env.DATABASE_TOKEN },
+  connection: {
+    url: env.DATABASE_URL,
+    authToken: env.DATABASE_TOKEN,
+    tls: env.DATABASE_TLS,
+  },
   schema,
   casing: "snake_case",
 })

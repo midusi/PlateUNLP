@@ -5,6 +5,7 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.union([z.url({ protocol: /^libsql$/ }), z.string().startsWith("file:")]),
     DATABASE_TOKEN: z.string().optional(),
+    DATABASE_TLS: z.coerce.boolean().default(true),
     UPLOADS_DIR: z.string(),
   },
 
