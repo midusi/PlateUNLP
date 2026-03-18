@@ -16,12 +16,12 @@ export default defineConfig({
     tanstackStart({
       srcDirectory: "app",
       spa: { enabled: true },
+      prerender: { enabled: false },
     }),
     nitro(),
     react(),
     mdx(MdxConfig),
   ],
-  experimental: { enableNativePlugin: "v1" },
   resolve: { tsconfigPaths: true },
   assetsInclude: ["**/*.onnx"],
   optimizeDeps: {

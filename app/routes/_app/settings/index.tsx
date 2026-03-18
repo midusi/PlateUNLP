@@ -1,23 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useState } from "react"
 import type z from "zod"
+import defaultUserImage from "~/assets/avatar.png"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { Field, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
-import { notifyError, notifySucces } from "~/lib/notifications"
 import { breadcrumb } from "~/lib/breadcrumbs"
-import type { Breadcrumbs } from "~/routes/_app/-components/AppBreadcrumbs"
+import { notifyError } from "~/lib/notifications"
 import { BasicUserFieldsSchema } from "~/types/auth"
 import { ChangePasswordModal } from "./-components/ChangePasswordModal"
-import defaultUserImage from "~/assets/avatar.png"
 
 export const Route = createFileRoute("/_app/settings/")({
   component: RouteComponent,
   loader: async () => {
     const session = await authClient.getSession()
+    if (!session.data) {
+      throw redirect({ to: "/login" })
+    }
     return {
       breadcrumbs: [
         breadcrumb({
@@ -25,19 +27,19 @@ export const Route = createFileRoute("/_app/settings/")({
           to: "/settings",
         }),
       ],
-      session: session,
+      user: session.data.user,
     }
   },
 })
 
 function RouteComponent() {
   const [isChangePasswordOpen, setChangePasswordOpen] = useState(false)
-  const { session } = Route.useLoaderData()
+  const { user } = Route.useLoaderData()
 
   const defaultValues: z.output<typeof BasicUserFieldsSchema> = {
-    email: session.data?.user.email!,
-    name: session.data?.user.name!,
-    image: session.data?.user.image || null,
+    email: user.email,
+    name: user.name,
+    image: user.image || null,
   }
 
   const form = useAppForm({
@@ -47,13 +49,13 @@ function RouteComponent() {
       try {
         const name = value.name
         const image = value.image || defaultUserImage
-        if (name !== session.data?.user.name) {
+        if (name !== user.name) {
           await authClient.updateUser({
             name,
           })
         }
-        if (image !== session.data?.user.image) {
-          console.log(image, session.data?.user.image)
+        if (image !== user.image) {
+          console.log(image, user.image)
           await authClient.updateUser({
             image,
           })
@@ -83,7 +85,14 @@ function RouteComponent() {
               {(field) => <field.SettingsField label="Username" />}
             </form.AppField>
             <form.AppField name="image">
-              {(field) => <field.ImageField label="Imagen" value={field.state.value} maxHeight={512} maxWidth={512}/>}
+              {(field) => (
+                <field.ImageField
+                  label="Imagen"
+                  value={field.state.value}
+                  maxHeight={512}
+                  maxWidth={512}
+                />
+              )}
             </form.AppField>
             <form.AppField name="email">
               {(field) => (

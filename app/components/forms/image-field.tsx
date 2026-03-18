@@ -1,11 +1,10 @@
 import { useStore } from "@tanstack/react-form"
-import { X } from "lucide-react"
-import { MouseEventHandler, useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
+import defaultUserImage from "~/assets/avatar.png"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useFieldContext } from "~/hooks/use-app-form-context"
 import { notifyError } from "~/lib/notifications"
-import defaultUserImage from "~/assets/avatar.png"
 
 type TextFieldProps = {
   className?: string
@@ -14,9 +13,9 @@ type TextFieldProps = {
   value?: string | null
   type?: string
   hight_modifier?: string
-  disabled?: boolean,
-  accept?: string,
-  showPreview?: boolean,
+  disabled?: boolean
+  accept?: string
+  showPreview?: boolean
   maxWidth?: number
   maxHeight?: number
 } & Pick<React.ComponentProps<typeof Input>, "placeholder">
@@ -39,11 +38,11 @@ export function ImageField({
   const errors = useStore(field.store, (state) => state.meta.errors)
 
   const [preview, setPreview] = useState<string | null>(value)
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file)  {
+    if (!file) {
       notifyError("Failed to load file")
       return
     }
@@ -54,7 +53,7 @@ export function ImageField({
 
       const img = new Image()
       img.onload = () => {
-        if (maxWidth && img.width > maxWidth || maxHeight && img.height > maxHeight) {
+        if ((maxWidth && img.width > maxWidth) || (maxHeight && img.height > maxHeight)) {
           notifyError(`Image shape exceeds the maximum of ${maxWidth}pxX${maxHeight}px`)
           return
         }
@@ -64,7 +63,7 @@ export function ImageField({
       }
       img.src = base64
     }
-    
+
     reader.readAsDataURL(file)
   }
 
@@ -81,7 +80,7 @@ export function ImageField({
     <Field className={className}>
       {label && <FieldLabel>{label}</FieldLabel>}
       <Input
-        {...props} 
+        {...props}
         ref={inputRef}
         accept={accept}
         className={`disabled:bg-gray-200 ${hight_modifier}`}
@@ -92,20 +91,16 @@ export function ImageField({
         onChange={handleFileChange}
       />
 
-      {showPreview && preview && preview != defaultUserImage && (
-        <div className="relative rounded-lg border border-border overflow-hidden w-fit">
-          <img 
-            src={preview}
-            alt="Preview"
-            className="h-32 object-cover"
-          />
-           <button
+      {showPreview && preview && preview !== defaultUserImage && (
+        <div className="relative w-fit overflow-hidden rounded-lg border border-border">
+          <img src={preview} alt="Preview" className="h-32 object-cover" />
+          <button
             type="button"
             onClick={handleClear}
-            className="absolute top-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors disabled:opacity:90"
+            className="disabled:opacity:90 absolute top-2 right-2 rounded-full bg-destructive p-1.5 text-destructive-foreground transition-colors hover:bg-destructive/90"
             aria-label="Delete image"
           >
-            <X className="w-4 h-4"/>
+            <span className="icon-[ph--x-bold] h-4 w-4" />
           </button>
         </div>
       )}

@@ -7,8 +7,8 @@ import { DocsLayout } from "fumadocs-ui/layouts/docs"
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page"
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared"
 import defaultMdxComponents from "fumadocs-ui/mdx"
+import { Suspense } from "react"
 import { source } from "~/lib/source"
-
 import docsCss from "~/styles/docs.css?url"
 
 export function baseOptions(): BaseLayoutProps {
@@ -21,7 +21,7 @@ export function baseOptions(): BaseLayoutProps {
   }
 }
 
-export const Route = createFileRoute("/docs/$")({
+export const Route = createFileRoute("/_docs/docs/$")({
   head: () => ({
     links: [{ rel: "stylesheet", href: docsCss }],
   }),
@@ -91,12 +91,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 function Page() {
   const data = Route.useLoaderData()
-  const { pageTree } = useFumadocsLoader(data)
-  const Content = clientLoader.getComponent(data.path)
+  const { pageTree, path } = useFumadocsLoader(data)
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      <Content />
+      <Suspense>{clientLoader.useContent(path)}</Suspense>
     </DocsLayout>
   )
 }

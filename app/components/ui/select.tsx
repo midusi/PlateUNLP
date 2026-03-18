@@ -4,7 +4,6 @@ import { cn } from "~/lib/utils"
 function Select<Value, Multiple extends boolean | undefined = false>(
   props: SelectPrimitive.Root.Props<Value, Multiple>,
 ): React.JSX.Element {
-  // @ts-expect-error Forwarding is broken
   return <SelectPrimitive.Root<Value, Multiple> {...props} data-slot="select" />
 }
 

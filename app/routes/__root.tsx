@@ -10,7 +10,6 @@ import {
   useRouter,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
-import { RootProvider as FumadocsProvider } from "fumadocs-ui/provider/tanstack"
 import type * as React from "react"
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary"
 import { Pending } from "~/components/Pending"
@@ -71,16 +70,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <FumadocsProvider
-          theme={{
-            enabled: false,
-          }}
-          search={{
-            options: { api: "/docs/search" },
-          }}
-        >
-          {children}
-        </FumadocsProvider>
+        {children}
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>

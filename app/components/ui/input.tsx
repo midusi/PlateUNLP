@@ -1,5 +1,4 @@
-import React from "react"
-import { Input as InputPrimitive } from "@base-ui-components/react/input"
+import { Input as InputPrimitive } from "@base-ui/react/input"
 import { cn } from "~/lib/utils"
 
 const inputClassname = cn(
@@ -8,22 +7,8 @@ const inputClassname = cn(
   "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
 )
 
-const Input = React.forwardRef<HTMLInputElement, InputPrimitive.Props>(
-  ({ className, ...props }, ref) => {
-    return (
-      <InputPrimitive
-        data-slot="input"
-        className={cn(
-          inputClassname,
-          className,
-        )}
-        ref={ref}
-        {...props}
-      />
-    )
-  },
-)
-
-Input.displayName = "Input"
+function Input({ className, ...props }: InputPrimitive.Props) {
+  return <InputPrimitive data-slot="input" className={cn(inputClassname, className)} {...props} />
+}
 
 export { Input, inputClassname }
