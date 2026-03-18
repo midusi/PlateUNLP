@@ -7,7 +7,8 @@ import { defineConfig } from "vite"
 import * as MdxConfig from "./source.config"
 
 export default defineConfig({
-  server: { port: 3000 },
+  server: { host: "0.0.0.0", port: 3000 },
+  preview: { host: "0.0.0.0" },
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
   },
