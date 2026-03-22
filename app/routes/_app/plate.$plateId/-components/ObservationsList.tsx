@@ -9,6 +9,8 @@ import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
 import type { Observation } from "../-actions/get-observations"
 import { updateObservation } from "../-actions/update-observation"
+import { getProjectName } from "../../project.$projectId/-actions/get-project-name"
+import { getObservationDetections } from "../-actions/get-observations-detections"
 
 function observationToBoundingBox(observation: Observation): BoundingBox {
   return {
@@ -46,6 +48,19 @@ export function ObservationsList({
     onError: (error) => notifyError("Error adding observation", error),
   })
 
+  const getObservationsDetectionsMut = useMutation({
+    mutationFn: async (plateId: string) => {
+      
+      return await getObservationDetections({ data: { plateId } })
+      //setBoundingBoxes((prev) => [observationToBoundingBox(observation), ...prev])
+    },
+    onSuccess: (detections) => {
+      console.log("Detections obtained:", detections)
+    },
+    onError: (error) => notifyError("Error obtainging observations detections", error),
+  })
+
+
   return (
     <Card className="overflow-hidden p-0">
       <CardContent className="h-[500px] p-0">
@@ -75,8 +90,10 @@ export function ObservationsList({
           <Button
             size="sm"
             variant="default"
-            disabled={addObservationMut.isPending}
-            onClick={() => notifyError("Not implemented yet")}
+            disabled={addObservationMut.isPending || getObservationsDetectionsMut.isPending}
+            onClick={() => {
+              getObservationsDetectionsMut.mutate(plateId)
+            }}
             className="h-7"
           >
             <span
