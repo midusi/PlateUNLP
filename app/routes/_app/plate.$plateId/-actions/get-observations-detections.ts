@@ -1,13 +1,12 @@
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
-import sharp from "sharp"
-import { db } from "~/db"
-import { readUploadedFile } from "~/lib/uploads"
 import * as tf from "@tensorflow/tfjs-node"
 import { info } from "console"
-import path from "path"
 import fs from "fs/promises"
-
+import path from "path"
+import sharp from "sharp"
+import { z } from "zod"
+import { db } from "~/db"
+import { readUploadedFile } from "~/lib/uploads"
 
 // const determineBBFunction = usePredictBBs(
 //     1088,
@@ -20,21 +19,24 @@ import fs from "fs/promises"
 export const getObservationDetections = createServerFn()
   .inputValidator(
     z.object({
-        plateId: z.string(),
+      plateId: z.string(),
     }),
   )
   .handler(async ({ data }) => {
     /** Imagen de la placa */
     const plate = await db.query.plate.findFirst({
-        where: (t, { eq }) => eq(t.id, data.plateId),
-        with: { image: true },
+      where: (t, { eq }) => eq(t.id, data.plateId),
+      with: { image: true },
     })
     if (!plate) return new Response("Plate not found", { status: 404 })
     // Always convert to sRGB and PNG format for consistency
-    let image = await readUploadedFile(plate.image.id)
-    const { data:data_img, info } = await sharp(image).rotate(plate.imageRotation).toColorspace("srgb").png()
-        .raw()
-        .toBuffer({ resolveWithObject: true })
+    const image = await readUploadedFile(plate.image.id)
+    const { data: data_img, info } = await sharp(image)
+      .rotate(plate.imageRotation)
+      .toColorspace("srgb")
+      .png()
+      .raw()
+      .toBuffer({ resolveWithObject: true })
 
     /** Guardar imagen */
     // const outputPath = path.join(process.cwd(), "tmp", `plate-${data.plateId}.png`)
@@ -44,22 +46,21 @@ export const getObservationDetections = createServerFn()
     /** Codigo duplicado de preview.ts */
     /** ------------------------------ */
 
-
     const result = tf.tidy(() => {
-        /** Preparar Input **/
-        const image_t = tf.tensor3d(data_img, [info.height, info.width, info.channels])
+      /** Preparar Input **/
+      const image_t = tf.tensor3d(data_img, [info.height, info.width, info.channels])
 
-        const minTensor = image_t.min()
-        const maxTensor = image_t.max()
+      const minTensor = image_t.min()
+      const maxTensor = image_t.max()
 
-        const min = minTensor.arraySync() as number
-        const max = maxTensor.arraySync() as number
+      // const min = minTensor.arraySync() as number
+      // const max = maxTensor.arraySync() as number
 
-        return {
-            shape: image_t.shape,
-            min,
-            max,
-        }
+      return {
+        shape: image_t.shape,
+        // min,
+        // max,
+      }
     })
 
     console.log(result)
@@ -100,6 +101,6 @@ export const getObservationDetections = createServerFn()
     //     // ]
     //     // setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev])
     // }
-    
+
     // return 1
   })
