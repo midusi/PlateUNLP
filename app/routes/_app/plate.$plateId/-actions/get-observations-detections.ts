@@ -30,25 +30,34 @@ export const getObservationDetections = createServerFn()
     })
     if (!plate) return new Response("Plate not found", { status: 404 })
     // Always convert to sRGB and PNG format for consistency
+    //image = await sharp(image).rotate(plate.imageRotation).toColorspace("srgb").png().toBuffer()
     const image = await readUploadedFile(plate.image.id)
     const { data: data_img, info } = await sharp(image)
       .rotate(plate.imageRotation)
+      .resize(640, 640, { fit: "contain", background: { r: 0, g: 0, b: 0 } })
       .toColorspace("srgb")
+      .removeAlpha()
       .png()
-      .raw()
       .toBuffer({ resolveWithObject: true })
 
     /** Guardar imagen */
     // const outputPath = path.join(process.cwd(), "tmp", `plate-${data.plateId}.png`)
     // await fs.mkdir(path.dirname(outputPath), { recursive: true })
-    // await fs.writeFile(outputPath, buffer)
+    // await fs.writeFile(outputPath, data_img)
     // console.log("Image saved at:", outputPath)
-    /** Codigo duplicado de preview.ts */
-    /** ------------------------------ */
+
+    /** Cargar modelo */
+    const modelPath = path.resolve("app/models/detect_observations/tfjs_model/model.json")
+    const model = await tf.loadGraphModel(`file://${modelPath}`)
+    //console.log("Modelo cargado:", model)
 
     const result = tf.tidy(() => {
       /** Preparar Input **/
-      const image_t = tf.tensor3d(data_img, [info.height, info.width, info.channels])
+      const image_t = tf.node.decodeImage(data_img, 3).expandDims(0).toFloat()
+
+      /** Predecir */
+      const predictions = model.predict(image_t)
+      //const image_t = tf.tensor3d(data_img, [info.height, info.width, info.channels])
 
       const minTensor = image_t.min()
       const maxTensor = image_t.max()
@@ -58,8 +67,10 @@ export const getObservationDetections = createServerFn()
 
       return {
         shape: image_t.shape,
-        // min,
-        // max,
+        min,
+        max,
+        predictions_arr_0: predictions[0].shape,
+        predictions_arr_1: predictions[1].shape,
       }
     })
 
@@ -104,3 +115,5 @@ export const getObservationDetections = createServerFn()
 
     // return 1
   })
+
+function decode(predictions: tf.Tensor | tf.Tensor[], imageWidth: number, imageHeight: number) {}
