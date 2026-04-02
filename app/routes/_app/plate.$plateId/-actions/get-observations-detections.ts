@@ -1,20 +1,10 @@
 import { createServerFn } from "@tanstack/react-start"
 import * as tf from "@tensorflow/tfjs-node"
-import { info } from "console"
-import fs from "fs/promises"
 import path from "path"
 import sharp from "sharp"
 import { z } from "zod"
 import { db } from "~/db"
 import { readUploadedFile } from "~/lib/uploads"
-
-// const determineBBFunction = usePredictBBs(
-//     1088,
-//     "spectrum_part_segmentator.onnx",
-//     classesSpectrumDetection,
-//     false,
-//     0.7,
-//   )
 
 export const getObservationDetections = createServerFn()
   .inputValidator(
@@ -40,46 +30,21 @@ export const getObservationDetections = createServerFn()
       .png()
       .toBuffer({ resolveWithObject: true })
 
+    const modelPath = path.resolve("C:\\Repositorios\\PlateUNLP\\public\\models\\best_saved_model")
+    const model = await tf.node.loadSavedModel(modelPath)
+    //const output = model.predict(input);
+    console.log(model)
+
     /** Guardar imagen */
     // const outputPath = path.join(process.cwd(), "tmp", `plate-${data.plateId}.png`)
     // await fs.mkdir(path.dirname(outputPath), { recursive: true })
     // await fs.writeFile(outputPath, data_img)
     // console.log("Image saved at:", outputPath)
-
-    /** Cargar modelo */
-    const modelPath = path.resolve("app/models/detect_observations/tfjs_model/model.json")
-    const model = await tf.loadGraphModel(`file://${modelPath}`)
-    //console.log("Modelo cargado:", model)
-
-    const result = tf.tidy(() => {
-      /** Preparar Input **/
-      const image_t = tf.node.decodeImage(data_img, 3).expandDims(0).toFloat()
-
-      /** Predecir */
-      const predictions = model.predict(image_t)
-      //const image_t = tf.tensor3d(data_img, [info.height, info.width, info.channels])
-
-      const minTensor = image_t.min()
-      const maxTensor = image_t.max()
-
-      // const min = minTensor.arraySync() as number
-      // const max = maxTensor.arraySync() as number
-
-      return {
-        shape: image_t.shape,
-        min,
-        max,
-        predictions_arr_0: predictions[0].shape,
-        predictions_arr_1: predictions[1].shape,
-      }
-    })
-
-    console.log(result)
     return 1
 
     /** Obtener ancho de la imagen */
-    const img = new Image()
-    img.src = `/plate/${data.plateId}/preview`
+    // const img = new Image()
+    // img.src = `/plate/${data.plateId}/preview`
     // img.onload = async () => {
     //     // //const boundingBoxes = predictions;
     //     // /** Actualizar base de datos */
