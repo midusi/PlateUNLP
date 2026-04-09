@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router"
+import defaultUserImage from "~/assets/avatar.png"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
@@ -10,7 +11,6 @@ import { authClient } from "~/lib/auth-client"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
-import defaultUserImage from "~/assets/avatar.png"
 
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
@@ -84,7 +84,7 @@ function RouteComponent() {
               alt={userInfo.name}
               className="h-8 w-8 rounded-full border border-gray-500 bg-blue-100 object-cover"
             />
-            <div className="flex w-full flex-col ">
+            <div className="flex w-full flex-col">
               <div className="flex flex-row justify-between">
                 <label className="flex w-full justify-start text-gray-500">{userInfo.name}</label>
               </div>

@@ -45,4 +45,4 @@ function FieldError({ className, match, ...props }: FieldPrimitive.Error.Props) 
   )
 }
 
-export { Field, FieldLabel, FieldControl, FieldDescription, FieldError }
+export { Field, FieldControl, FieldDescription, FieldError, FieldLabel }

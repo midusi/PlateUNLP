@@ -5,7 +5,6 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { notifyError } from "~/lib/notifications"
 import { cn, idxToColor } from "~/lib/utils"
-import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addObservation } from "../-actions/add-observation"
 import type { Observation } from "../-actions/get-observations"
 import { updateObservation } from "../-actions/update-observation"
@@ -48,7 +47,7 @@ export function ObservationsList({
 
   return (
     <Card className="overflow-hidden p-0">
-      <CardContent className="h-[500px] p-0">
+      <CardContent className="h-125 p-0">
         <BoundingBoxer
           imageSrc={`/plate/${plateId}/preview`}
           boundingBoxes={boundingBoxes}

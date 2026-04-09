@@ -57,7 +57,6 @@ export function ImageField({
           notifyError(`Image shape exceeds the maximum of ${maxWidth}pxX${maxHeight}px`)
           return
         }
-        console.log("Image loaded with size:", img.width, "x", img.height)
         setPreview(base64)
         field.handleChange(base64)
       }

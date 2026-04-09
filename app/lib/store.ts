@@ -66,8 +66,6 @@ export const globalStore = create<GlobalStore>()((set) => ({
   setMaterial: (value) => {
     if (LAMP_MATERIALS.includes(value)) {
       set({ material: value })
-    } else {
-      console.error(`Invalid material: ${value}`)
     }
   },
   setRangeMin: (value) => set({ rangeMin: Math.round(value) }),

@@ -4,7 +4,7 @@
 //   title: string
 // }
 
-export type Crumb<TOptions = unknown> = {
+export type Crumb<_TOptions = unknown> = {
   title: string
   to: string
   params?: Record<string, string>

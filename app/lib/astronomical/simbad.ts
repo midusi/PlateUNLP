@@ -57,6 +57,7 @@ async function querySimbad(script: string): Promise<Result<string[], Error>> {
     i++ // skip extra empty line between header and data
     return err(new Error(lines.slice(i, -2).join("\n"))) // SIMBAD adds two extra empty lines at the end of the output
   } else {
+    // biome-ignore lint/suspicious/noConsole: Log unexpected SIMBAD responses for debugging purposes
     console.error(`SIMBAD response:`, text)
     return err(new Error("Couldn't parse SIMBAD response"))
   }

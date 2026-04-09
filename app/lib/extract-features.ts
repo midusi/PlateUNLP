@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs"
 import { findPlateau, findXspacedPoints } from "~/lib/image"
-import { guardarFuncion, linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
+import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"
 
 /**

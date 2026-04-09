@@ -106,12 +106,12 @@ function DialogDescription({ className, ...props }: DialogPrimitive.Description.
 
 export {
   Dialog,
+  DialogBackdrop,
   DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogBackdrop,
   DialogPortal,
   DialogTitle,
   DialogTrigger,

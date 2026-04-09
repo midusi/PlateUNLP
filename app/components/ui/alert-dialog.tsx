@@ -94,13 +94,13 @@ function AlertDialogClose({ className, ...props }: AlertDialogPrimitive.Close.Pr
 
 export {
   AlertDialog,
-  AlertDialogPortal,
   AlertDialogBackdrop,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 }

@@ -14,15 +14,10 @@ export function peakFinder(
   const maxW = data[data.length - 1].wavelength
   const range = maxW - minW
   const delta = range * deltaPercent
-  console.log(`Delta ${delta}`)
   const window = data.filter((p) => Math.abs(p.wavelength - xVal) < delta)
 
   if (window.length === 0) {
-    console.log("Solo hay un pico en las proximidades no hay necesidad de ajustar en busca de otro")
-    return {
-      wavelength: xVal,
-      intensity: 0,
-    }
+    return { wavelength: xVal, intensity: 0 }
   }
 
   const peak = window.reduce((max, p) => (p.intensity > max.intensity ? p : max))

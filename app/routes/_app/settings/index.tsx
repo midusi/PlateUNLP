@@ -55,10 +55,7 @@ function RouteComponent() {
           })
         }
         if (image !== user.image) {
-          console.log(image, user.image)
-          await authClient.updateUser({
-            image,
-          })
+          await authClient.updateUser({ image })
         }
         //session.refetch()
       } catch (error) {

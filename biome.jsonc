@@ -7,7 +7,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!public"]
+    "includes": ["**", "!dataset", "!public"]
   },
   // Formatter
   "formatter": {

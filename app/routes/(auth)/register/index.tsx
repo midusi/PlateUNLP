@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import type z from "zod"
+import { createFileRoute } from "@tanstack/react-router"
+import type { z } from "zod"
 import defaultUserImage from "~/assets/avatar.png"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
@@ -13,8 +13,6 @@ export const Route = createFileRoute("/(auth)/register/")({
 })
 
 function RouteComponent() {
-  const navigate = useNavigate()
-
   const defaultValues: z.output<typeof LogUpFieldsSchema> = {
     email: "",
     password: "",
@@ -31,8 +29,7 @@ function RouteComponent() {
         const password = value.password
         const name = value.name
         const image = value.image || defaultUserImage
-        console.log(image)
-        const { data, error } = await authClient.signUp.email(
+        await authClient.signUp.email(
           {
             email, // user email address
             password, // user password -> min 8 characters by default
@@ -41,17 +38,7 @@ function RouteComponent() {
             callbackURL: "/login", // A URL to redirect to after the user verifies their email (optional)
           },
           {
-            onRequest: (ctx) => {
-              //show loading
-            },
-            onSuccess: (ctx) => {
-              console.log("User signed up successfully:", ctx.data)
-              //navigate({ to: "/login" })
-            },
-            onError: (ctx) => {
-              // display the error message
-              notifyError(ctx.error.message)
-            },
+            onError: (ctx) => notifyError(ctx.error.message),
           },
         )
         //formApi.reset(value)
@@ -63,7 +50,7 @@ function RouteComponent() {
 
   return (
     <div className="flex h-full w-full items-center justify-center">
-      <Card className="w-[400px] overflow-hidden">
+      <Card className="w-100 overflow-hidden">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -78,7 +65,7 @@ function RouteComponent() {
               {(field) => <field.TextField label="Username" placeholder="" />}
             </form.AppField>
             <form.AppField name="image">
-              {(field) => <field.ImageField label="Imagen" maxHeight={512} maxWidth={512}/>}
+              {(field) => <field.ImageField label="Imagen" maxHeight={512} maxWidth={512} />}
             </form.AppField>
             <form.AppField name="email">
               {(field) => <field.TextField label="Email" placeholder="" />}

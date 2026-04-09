@@ -221,7 +221,7 @@ function RouteComponent() {
                   </div>
                 ))}
 
-                <hr className="my-8"/>
+                <hr className="my-8" />
 
                 {/* Grafico espectro calibrado ciencia */}
                 <div>

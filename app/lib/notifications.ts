@@ -10,6 +10,7 @@ type ToastType = "default" | "success" | "error" | "warning" | "info"
  * @param error The error object or message to display in the notification, like "Invalid credentials" or an Error object.
  */
 export function notifyError(title: string, error?: unknown) {
+  // biome-ignore lint/suspicious/noConsole: We want to log unexpected errors
   if (error) console.error(error)
   toastManager.add({
     title,
