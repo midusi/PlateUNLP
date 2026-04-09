@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -51,14 +51,6 @@
   "json": {
     "formatter": {
       "enabled": true
-    }
-  },
-  "css": {
-    "formatter": {
-      "enabled": true
-    },
-    "parser": {
-      "tailwindDirectives": true
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
   "extends": "//",
   "files": {
     "includes": ["**", "!routeTree.gen.ts"]
@@ -20,13 +20,21 @@
           "level": "info",
           "options": {
             "attributes": ["classList"],
-            "functions": ["cn", "clsx", "cva", "tw"]
+            "functions": ["cn", "clsx"]
           }
         }
       },
       "suspicious": {
         "noConsole": "warn"
       }
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": true
+    },
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }
