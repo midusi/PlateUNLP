@@ -11,7 +11,7 @@ import { cn } from "~/lib/utils"
 const getObservatories = createServerFn().handler(async () => {
   const observatories = await db.query.observatory.findMany({
     columns: { id: true, name: true, aliases: true },
-    orderBy: (t, { asc }) => asc(t.name),
+    orderBy: (t, { asc, sql }) => asc(sql`lower(${t.name})`),
   })
   return observatories
 })
@@ -45,8 +45,7 @@ export function SelectObservatory({
     ...getObservatoriesQueryOptions(),
     initialData: [],
   })
-  // Orden alfabetico, intercalando mayusculas y minusculas.
-  observatories.sort((a, b) => a.name.localeCompare(b.name));
+
   const selectedValue = useMemo(
     () => observatories.find((o) => o.id === value) || null,
     [value, observatories],
