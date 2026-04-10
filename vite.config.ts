@@ -16,11 +16,9 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart({
       srcDirectory: "app",
-      spa: { enabled: true },
-      prerender: { enabled: false },
     }),
-    nitro(),
     react(),
+    nitro(),
     mdx(MdxConfig),
   ],
   resolve: {

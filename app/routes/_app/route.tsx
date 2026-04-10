@@ -8,6 +8,7 @@ import logoReTrOH from "~/assets/logoretroh.png"
 import { Button, buttonVariants } from "~/components/ui/button"
 import { Separator } from "~/components/ui/separator"
 import { authClient } from "~/lib/auth-client"
+import { getSession } from "./-actions/get-session"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
@@ -15,8 +16,8 @@ import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
   loader: async () => {
-    const session = await authClient.getSession()
-    if (!session.data) {
+    const session = await getSession()
+    if (!session) {
       throw redirect({ to: "/login" })
     }
     return { session }
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/_app")({
 function RouteComponent() {
   const { session } = Route.useLoaderData()
   const navigate = useNavigate()
-  const userInfo = session.data!.user
+  const userInfo = session!.user
   const logos = [
     {
       href: "https://weblidi.info.unlp.edu.ar/",

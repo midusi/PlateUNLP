@@ -8,6 +8,7 @@ import { Field, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
+import { getSession } from "../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { BasicUserFieldsSchema } from "~/types/auth"
@@ -16,8 +17,8 @@ import { ChangePasswordModal } from "./-components/ChangePasswordModal"
 export const Route = createFileRoute("/_app/settings/")({
   component: RouteComponent,
   loader: async () => {
-    const session = await authClient.getSession()
-    if (!session.data) {
+    const session = await getSession()
+    if (!session) {
       throw redirect({ to: "/login" })
     }
     return {
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/_app/settings/")({
           to: "/settings",
         }),
       ],
-      user: session.data.user,
+      user: session.user,
     }
   },
 })

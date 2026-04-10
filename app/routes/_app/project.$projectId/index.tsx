@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table"
-import { authClient } from "~/lib/auth-client"
+import { getSession } from "../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { formatObservation } from "~/lib/format"
 import { getProject } from "./-actions/get-project"
@@ -38,8 +38,8 @@ export const Route = createFileRoute("/_app/project/$projectId/")({
     const project = await getProject({ data: { projectId: params.projectId } })
     if (!project) throw notFound()
 
-    const session = await authClient.getSession()
-    const user = session.data!.user
+    const session = await getSession()
+    const user = session!.user
 
     return {
       breadcrumbs: [

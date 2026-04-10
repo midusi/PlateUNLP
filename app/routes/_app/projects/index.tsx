@@ -1,15 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import clsx from "clsx"
 import { Card, CardContent, CardHeader } from "~/components/ui/card"
-import { authClient } from "~/lib/auth-client"
+import { getSession } from "../-actions/get-session"
 import { getProjectsWithMetrics } from "./-actions/get-projects-with-metrics"
 
 export const Route = createFileRoute("/_app/projects/")({
   component: RouteComponent,
   loader: async () => {
-    const session = await authClient.getSession()
-    /** https://github.com/better-auth/better-auth/issues/3656?utm_source=chatgpt.com */
-    const user = session.data!.user
+    const session = await getSession()
+    const user = session!.user
     const userId = user.id as string
 
     return {

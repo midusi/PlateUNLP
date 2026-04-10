@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
-import { authClient } from "~/lib/auth-client"
+import { getSession } from "../../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { NewProyectSchema } from "~/types/proyect"
@@ -13,8 +13,8 @@ import { getUsers } from "./-actions/get-users"
 export const Route = createFileRoute("/_app/projects/add/")({
   component: RouteComponent,
   loader: async () => {
-    const session = await authClient.getSession()
-    const userId = session.data?.user.id as string
+    const session = await getSession()
+    const userId = session?.user.id as string
     const projects = await getProjectsNames({ data: { userId: userId } })
     const users = await getUsers()
     return {
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/_app/projects/add/")({
 function RouteComponent() {
   const { session, projects, users } = Route.useLoaderData()
 
-  const userId = session.data!.user.id
+  const userId = session!.user.id
   const defaultValues: z.output<typeof NewProyectSchema> = {
     name: "",
     existingProjectsNames: projects.map((p) => p.name),
@@ -46,7 +46,7 @@ function RouteComponent() {
     validators: { onChange: NewProyectSchema },
     onSubmit: async ({ value, formApi: _ }) => {
       try {
-        const userId = session.data?.user.id as string
+        const userId = session?.user.id as string
         const name = value.name
         const editors = value.usersRoles.filter((u) => u.role === "editor").map((u) => u.id)
         const viewers = value.usersRoles.filter((u) => u.role === "viewer").map((u) => u.id)

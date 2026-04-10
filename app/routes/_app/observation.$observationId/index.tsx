@@ -12,6 +12,7 @@ import { SpectrumsList } from "./-components/SpectrumsList"
 
 export const Route = createFileRoute("/_app/observation/$observationId/")({
   component: RouteComponent,
+  ssr: "data-only",
   loader: async ({ params }) => {
     const [project, plate, initialMetadata, spectrums] = await Promise.all([
       getProjectName({

@@ -2,7 +2,7 @@ import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
-import { authClient } from "~/lib/auth-client"
+import { getSession } from "../../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { EditProyectSchema } from "~/types/proyect"
@@ -16,8 +16,8 @@ export const Route = createFileRoute("/_app/project/$projectId/settings/")({
   loader: async ({ params }) => {
     const { projectId } = params
 
-    const session = await authClient.getSession()
-    const userId = session.data?.user.id as string
+    const session = await getSession()
+    const userId = session?.user.id as string
     const projects_names = await getProjectsNames({ data: { userId: userId } })
     const users = await getUsers()
 
