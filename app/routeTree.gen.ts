@@ -15,7 +15,7 @@ import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
 import { Route as AppProjectsIndexRouteImport } from './routes/_app/projects/index'
-import { Route as authRegisterIndexRouteImport } from './routes/(auth)/register/index'
+import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as authLoginIndexRouteImport } from './routes/(auth)/login/index'
 import { Route as DocsDocsSearchRouteImport } from './routes/_docs/docs/search'
 import { Route as DocsDocsSplatRouteImport } from './routes/_docs/docs/$'
@@ -62,10 +62,10 @@ const AppProjectsIndexRoute = AppProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const authRegisterIndexRoute = authRegisterIndexRouteImport.update({
-  id: '/register/',
-  path: '/register/',
-  getParentRoute: () => authRouteRoute,
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const authLoginIndexRoute = authLoginIndexRouteImport.update({
   id: '/login/',
@@ -173,7 +173,7 @@ export interface FileRoutesByFullPath {
   '/docs/$': typeof DocsDocsSplatRoute
   '/docs/search': typeof DocsDocsSearchRoute
   '/login/': typeof authLoginIndexRoute
-  '/register/': typeof authRegisterIndexRoute
+  '/admin/': typeof AppAdminIndexRoute
   '/projects/': typeof AppProjectsIndexRoute
   '/settings/': typeof AppSettingsIndexRoute
   '/api/auth/$': typeof authApiAuthSplatRoute
@@ -197,7 +197,7 @@ export interface FileRoutesByTo {
   '/docs/$': typeof DocsDocsSplatRoute
   '/docs/search': typeof DocsDocsSearchRoute
   '/login': typeof authLoginIndexRoute
-  '/register': typeof authRegisterIndexRoute
+  '/admin': typeof AppAdminIndexRoute
   '/projects': typeof AppProjectsIndexRoute
   '/settings': typeof AppSettingsIndexRoute
   '/api/auth/$': typeof authApiAuthSplatRoute
@@ -225,7 +225,7 @@ export interface FileRoutesById {
   '/_docs/docs/$': typeof DocsDocsSplatRoute
   '/_docs/docs/search': typeof DocsDocsSearchRoute
   '/(auth)/login/': typeof authLoginIndexRoute
-  '/(auth)/register/': typeof authRegisterIndexRoute
+  '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/projects/': typeof AppProjectsIndexRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
   '/(auth)/api/auth/$': typeof authApiAuthSplatRoute
@@ -251,7 +251,7 @@ export interface FileRouteTypes {
     | '/docs/$'
     | '/docs/search'
     | '/login/'
-    | '/register/'
+    | '/admin/'
     | '/projects/'
     | '/settings/'
     | '/api/auth/$'
@@ -275,7 +275,7 @@ export interface FileRouteTypes {
     | '/docs/$'
     | '/docs/search'
     | '/login'
-    | '/register'
+    | '/admin'
     | '/projects'
     | '/settings'
     | '/api/auth/$'
@@ -302,7 +302,7 @@ export interface FileRouteTypes {
     | '/_docs/docs/$'
     | '/_docs/docs/search'
     | '/(auth)/login/'
-    | '/(auth)/register/'
+    | '/_app/admin/'
     | '/_app/projects/'
     | '/_app/settings/'
     | '/(auth)/api/auth/$'
@@ -373,12 +373,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/(auth)/register/': {
-      id: '/(auth)/register/'
-      path: '/register'
-      fullPath: '/register/'
-      preLoaderRoute: typeof authRegisterIndexRouteImport
-      parentRoute: typeof authRouteRoute
+    '/_app/admin/': {
+      id: '/_app/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/(auth)/login/': {
       id: '/(auth)/login/'
@@ -511,13 +511,11 @@ declare module '@tanstack/react-router' {
 
 interface authRouteRouteChildren {
   authLoginIndexRoute: typeof authLoginIndexRoute
-  authRegisterIndexRoute: typeof authRegisterIndexRoute
   authApiAuthSplatRoute: typeof authApiAuthSplatRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
   authLoginIndexRoute: authLoginIndexRoute,
-  authRegisterIndexRoute: authRegisterIndexRoute,
   authApiAuthSplatRoute: authApiAuthSplatRoute,
 }
 
@@ -526,6 +524,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface AppRouteRouteChildren {
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
   AppProjectsIndexRoute: typeof AppProjectsIndexRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
   AppObservationObservationIdExtractedFitsRoute: typeof AppObservationObservationIdExtractedFitsRoute
@@ -545,6 +544,7 @@ interface AppRouteRouteChildren {
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppAdminIndexRoute: AppAdminIndexRoute,
   AppProjectsIndexRoute: AppProjectsIndexRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
   AppObservationObservationIdExtractedFitsRoute:

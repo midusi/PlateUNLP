@@ -1,4 +1,3 @@
-import { queryOptions } from "@tanstack/react-query"
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 import { db } from "~/db"
@@ -7,45 +6,31 @@ import { project, userToProject } from "~/db/schema"
 export const addProject = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      userId: z.string().min(1),
       name: z.string().min(1),
-      editors: z.array(z.string()),
-      viewers: z.array(z.string()),
+      usersRoles: z.array(
+        z.object({
+          id: z.string().min(1),
+          role: z.enum(["admin", "editor", "viewer"]),
+        }),
+      ),
     }),
   )
   .handler(async ({ data }) => {
-    const { userId, name, editors, viewers } = data
-    const [newProject] = await db.insert(project).values({ name: name }).returning({
+    const { name, usersRoles } = data
+    const [newProject] = await db.insert(project).values({ name }).returning({
       id: project.id,
       name: project.name,
     })
 
-    /** Asegurar que las de viewers no repita los usuarios editors */
-    const sanitizedViewers = viewers.filter((userId) => !editors.includes(userId))
+    const roles = usersRoles.map((u) => ({
+      userId: u.id,
+      projectId: newProject.id,
+      role: u.role,
+    }))
 
-    /** Listado de relaciones con usuarios a agregar */
-    const roles: { userId: string; projectId: string; role: "owner" | "editor" | "viewer" }[] = [
-      { userId, projectId: newProject.id, role: "owner" },
-      ...editors.map((id) => ({ userId: id, projectId: newProject.id, role: "editor" as const })),
-      ...sanitizedViewers.map((id) => ({
-        userId: id,
-        projectId: newProject.id,
-        role: "viewer" as const,
-      })),
-    ]
-
-    await db.insert(userToProject).values(roles)
+    if (roles.length > 0) {
+      await db.insert(userToProject).values(roles)
+    }
 
     return newProject
-  })
-
-export const addProjectQueryOptions = (
-  userId: string,
-  name: string,
-  editors: string[],
-  viewers: string[],
-) =>
-  queryOptions({
-    queryKey: ["add", "project", userId, name],
-    queryFn: () => addProject({ data: { userId, name, editors, viewers } }),
   })

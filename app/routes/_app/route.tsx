@@ -87,10 +87,25 @@ function RouteComponent() {
             />
             <div className="flex w-full flex-col">
               <div className="flex flex-row justify-between">
-                <label className="flex w-full justify-start text-olive-700">{userInfo.name}</label>
+                <label className="flex w-full justify-start text-olive-700">{userInfo.username || userInfo.name}</label>
               </div>
               <label className="flex justify-start text-olive-400">{userInfo.email}</label>
             </div>
+            {userInfo.role === "admin" && (
+              <Link
+                to="/admin"
+                className={cn(
+                  buttonVariants({
+                    variant: "outline",
+                    size: "default",
+                    className:
+                      "m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none",
+                  }),
+                )}
+              >
+                <span className="icon-[ph--user-gear-bold] size-5" />
+              </Link>
+            )}
             <Link
               to="/settings"
               className={cn(

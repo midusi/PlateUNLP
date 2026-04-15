@@ -2,10 +2,10 @@ import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
-import { getSession } from "../../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { EditProyectSchema } from "~/types/proyect"
+import { getSession } from "../../-actions/get-session"
 import { getProjectWithAuthLists } from "./-actions/get-project-with-auth-lists"
 import { getProjectsNames } from "./-actions/get-projects-names"
 import { getUsers } from "./-actions/get-users"
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/_app/project/$projectId/settings/")({
 })
 
 function RouteComponent() {
-  const { userId, project, projects_names, users } = Route.useLoaderData()
+  const { project, projects_names, users } = Route.useLoaderData()
   const navigate = useNavigate()
 
   const defaultValues: z.output<typeof EditProyectSchema> = {
@@ -67,14 +67,11 @@ function RouteComponent() {
   const form = useAppForm({
     defaultValues,
     validators: { onChange: EditProyectSchema },
-    onSubmit: async ({ value, formApi: _ }) => {
+    onSubmit: async ({ value }) => {
       try {
-        const name = value.name
-        const editors = value.usersRoles.filter((u) => u.role === "editor").map((u) => u.id)
-        const viewers = value.usersRoles.filter((u) => u.role === "viewer").map((u) => u.id)
         const projectId = project.id as string
-        const _project = await updateProject({
-          data: { userId, projectId, name, editors, viewers },
+        await updateProject({
+          data: { projectId, name: value.name, usersRoles: value.usersRoles },
         })
         navigate({ to: "/project/$projectId", params: { projectId } })
       } catch (error) {
@@ -93,7 +90,7 @@ function RouteComponent() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
           <form.AppField name="usersRoles">
             {(field) => (
-              <field.SelectUsersField ownerId={userId} label="Permissions" users={users} />
+              <field.SelectUsersField label="Permissions" users={users} />
             )}
           </form.AppField>
         </div>

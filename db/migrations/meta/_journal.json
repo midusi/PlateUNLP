@@ -43,6 +43,13 @@
       "when": 1773812317933,
       "tag": "0005_auth_upgrade",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1776277496557,
+      "tag": "0006_auth_refactor",
+      "breakpoints": true
     }
   ]
 }

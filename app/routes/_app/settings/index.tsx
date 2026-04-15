@@ -8,10 +8,10 @@ import { Field, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useAppForm } from "~/hooks/use-app-form"
 import { authClient } from "~/lib/auth-client"
-import { getSession } from "../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { BasicUserFieldsSchema } from "~/types/auth"
+import { getSession } from "../-actions/get-session"
 import { ChangePasswordModal } from "./-components/ChangePasswordModal"
 
 export const Route = createFileRoute("/_app/settings/")({
@@ -40,6 +40,7 @@ function RouteComponent() {
   const defaultValues: z.output<typeof BasicUserFieldsSchema> = {
     email: user.email,
     name: user.name,
+    username: user.username ?? "",
     image: user.image || null,
   }
 
@@ -49,25 +50,29 @@ function RouteComponent() {
     onSubmit: async ({ value }) => {
       try {
         const name = value.name
+        const username = value.username
         const image = value.image || defaultUserImage
         if (name !== user.name) {
-          await authClient.updateUser({
-            name,
-          })
+          const { error } = await authClient.updateUser({ name })
+          if (error) throw new Error(error.message)
+        }
+        if (username !== (user.username ?? "")) {
+          const { error } = await authClient.updateUser({ username })
+          if (error) throw new Error(error.message)
         }
         if (image !== user.image) {
-          await authClient.updateUser({ image })
+          const { error } = await authClient.updateUser({ image })
+          if (error) throw new Error(error.message)
         }
-        //session.refetch()
       } catch (error) {
-        notifyError("Failed to update user information", error)
+        notifyError("Failed to update profile", error)
       }
     },
   })
 
   return (
     <div className="mt-10 flex h-full w-full items-center justify-center">
-      <Card className="w-[400px] overflow-hidden">
+      <Card className="w-100 overflow-hidden">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -80,6 +85,9 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="m-4 flex flex-col gap-4">
             <form.AppField name="name">
+              {(field) => <field.SettingsField label="Name" />}
+            </form.AppField>
+            <form.AppField name="username">
               {(field) => <field.SettingsField label="Username" />}
             </form.AppField>
             <form.AppField name="image">

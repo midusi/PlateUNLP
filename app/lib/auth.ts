@@ -1,5 +1,7 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { admin } from "better-auth/plugins/admin"
+import { username } from "better-auth/plugins/username"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { db } from "~/db"
 
@@ -8,24 +10,10 @@ export const auth = betterAuth({
     provider: "sqlite",
     camelCase: false,
   }),
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        input: false,
-      },
-    },
-  },
   emailAndPassword: { enabled: true, autoSignIn: false },
-  plugins: [tanstackStartCookies()],
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    },
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    },
-  },
+  plugins: [
+    tanstackStartCookies(),
+    username(),
+    admin({ defaultRole: "user" }),
+  ],
 })

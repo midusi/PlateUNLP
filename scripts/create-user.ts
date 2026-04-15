@@ -9,17 +9,18 @@ const rl = readline.createInterface({
 })
 
 const name = await rl.question("Name: ")
+const username = await rl.question("Username: ")
 const email = await rl.question("Email: ")
 const password = await rl.question("Password: ")
 
 rl.close()
 
-if (name.length === 0 || email.length === 0 || password.length === 0) {
+if (name.length === 0 || username.length === 0 || email.length === 0 || password.length === 0) {
   console.log("Missing values")
   process.exit(1)
 }
 
 const response = await auth.api.signUpEmail({
-  body: { name, email, password },
+  body: { name, email, password, username },
 })
 console.log(`Created user ID ${response.user.id}`)

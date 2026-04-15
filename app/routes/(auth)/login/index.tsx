@@ -1,5 +1,4 @@
-import { useMutation } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
@@ -13,8 +12,10 @@ export const Route = createFileRoute("/(auth)/login/")({
 })
 
 function RouteComponent() {
+  const navigate = useNavigate()
+
   const defaultValues: z.output<typeof LogInFieldsSchema> = {
-    email: "",
+    identifier: "",
     password: "",
   }
 
@@ -23,61 +24,41 @@ function RouteComponent() {
     validators: { onChange: LogInFieldsSchema },
     onSubmit: async ({ value }) => {
       try {
-        const email = value.email
-        const password = value.password
-        const { error } = await authClient.signIn.email(
-          {
-            email,
+        const { identifier, password } = value
+        const isEmail = identifier.includes("@")
+
+        let error: { message: string } | null = null
+
+        if (isEmail) {
+          const result = await authClient.signIn.email({
+            email: identifier,
             password,
-            callbackURL: "/projects",
-            /**
-             * remember the user session after the browser is closed.
-             * @default true
-             */
             rememberMe: false,
-          },
-          {
-            //callbacks
-          },
-        )
-        error && notifyError("Failed to log in", error.message)
+          })
+          error = result.error
+        } else {
+          const result = await authClient.signIn.username({
+            username: identifier,
+            password,
+            rememberMe: false,
+          })
+          error = result.error
+        }
+
+        if (error) {
+          notifyError("Failed to log in", error.message)
+        } else {
+          navigate({ to: "/projects" })
+        }
       } catch (error) {
         notifyError("Failed to log in", error)
       }
     },
   })
 
-  const { mutate: googleLogIn, isPending: isGoogleLogIning } = useMutation({
-    mutationFn: async () => {
-      try {
-        const data = await authClient.signIn.social({
-          provider: "google",
-          callbackURL: "/projects",
-        })
-        return data
-      } catch (error) {
-        notifyError("Failed to log in with Google account", error)
-      }
-    },
-  })
-
-  const { mutate: githubLogIn, isPending: isGitHubLogIning } = useMutation({
-    mutationFn: async () => {
-      try {
-        const data = await authClient.signIn.social({
-          provider: "github",
-          callbackURL: "/projects",
-        })
-        return data
-      } catch (error) {
-        notifyError("Failed to log in with GitHub account", error)
-      }
-    },
-  })
-
   return (
     <div className="flex h-full w-full items-center justify-center">
-      <Card className="w-[400px] overflow-hidden">
+      <Card className="w-100 overflow-hidden">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -88,8 +69,8 @@ function RouteComponent() {
             <h1 className="font-bold text-2xl text-olive-950">Sign In</h1>
           </CardHeader>
           <CardContent className="mb-8 flex flex-col gap-4">
-            <form.AppField name="email">
-              {(field) => <field.TextField label="Email" placeholder="" />}
+            <form.AppField name="identifier">
+              {(field) => <field.TextField label="Email or Username" placeholder="" />}
             </form.AppField>
             <form.AppField name="password">
               {(field) => <field.PasswordField label="Password" placeholder="" />}
@@ -114,65 +95,6 @@ function RouteComponent() {
                   </Button>
                 )}
               </form.Subscribe>
-
-              <div className="p-2 text-olive-500 text-sm">
-                Don’t have an account?{" "}
-                <a href="/register" className="font-medium text-olive-950 hover:text-orange-600 hover:underline">
-                  Sign up
-                </a>
-              </div>
-            </div>
-            <hr className="w-full" />
-
-            <div className="w-full space-y-4 px-4 pt-2">
-              <Button
-                variant="outline"
-                className="flex w-full items-center justify-center gap-2 rounded-sm border border-olive-300 bg-white hover:bg-olive-100 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
-                onClick={() => {
-                  googleLogIn()
-                }}
-                disabled={isGoogleLogIning}
-              >
-                {isGoogleLogIning ? (
-                  <>
-                    <span className="icon-[ph--spinner-bold] animate-spin text-olive-500" />
-                    <span className="text-olive-500">Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <img
-                      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                      alt="Google logo"
-                      className="h-5 w-5"
-                    />
-                    <span>Sign in with Google</span>
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                className="flex w-full items-center justify-center gap-2 rounded-sm border border-olive-300 bg-white hover:bg-olive-100 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
-                onClick={() => {
-                  githubLogIn()
-                }}
-                disabled={isGitHubLogIning}
-              >
-                {isGitHubLogIning ? (
-                  <>
-                    <span className="icon-[ph--spinner-bold] animate-spin text-olive-500" />
-                    <span className="text-olive-500">Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <img
-                      src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-                      alt="GitHub logo"
-                      className="h-5 w-5"
-                    />
-                    <span>Sign in with GitHub</span>
-                  </>
-                )}
-              </Button>
             </div>
           </CardFooter>
         </form>

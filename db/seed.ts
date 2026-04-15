@@ -151,7 +151,14 @@ async function seedIERSBulletinA() {
 
 async function createUser(name: string, email: string, password: string, role: string = "user") {
   /** 1. Sign up the user via the auth client */
-  await auth.api.signUpEmail({ body: { email, password, name } })
+  await auth.api.signUpEmail({
+    body: {
+      email,
+      password,
+      username: email.split("@")[0],
+      name,
+    },
+  })
 
   /** 2. Find the newly created user and update their admin flag */
   if (role === "admin") {
@@ -171,7 +178,7 @@ async function createProject(name: string, ownerEmail: string) {
 
   const user = await db.query.user.findFirst({ where: (t, { eq }) => eq(t.email, ownerEmail) })
 
-  await db.insert(schema.userToProject).values({ userId: user!.id, projectId: id, role: "owner" })
+  await db.insert(schema.userToProject).values({ userId: user!.id, projectId: id, role: "admin" })
 
   console.log(pc.white(`✓ Created project ${pc.cyan(name)} (${pc.cyan(id)})`))
 }
@@ -200,12 +207,9 @@ async function main() {
   await seedIERSBulletinA()
 
   console.log(pc.gray("❖ Creating users..."))
-  await createUser("Admin", "admin@admin.com", "adminadmin", "admin")
+  await createUser("Admin", "admin@plate.unlp.dev", "plateunlp", "admin")
   // await createUser("Chidi Anagonye", "canagonye@saintjohns.edu.au", "chidi", false)
   // await createUser("Simone Garnett", "sgarnett@saintjohns.edu.au", "simone", false)
-
-  console.log(pc.gray("❖ Creating projects..."))
-  await createProject("Observatorio Astronómico de La Plata", "admin@admin.com")
 }
 
 main()

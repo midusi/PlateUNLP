@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
-import { getSession } from "../../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { NewProyectSchema } from "~/types/proyect"
+import { getSession } from "../../-actions/get-session"
 import { addProject } from "./-actions/add-project"
 import { getProjectsNames } from "./-actions/get-projects-names"
 import { getUsers } from "./-actions/get-users"
@@ -38,22 +38,17 @@ function RouteComponent() {
   const defaultValues: z.output<typeof NewProyectSchema> = {
     name: "",
     existingProjectsNames: projects.map((p) => p.name),
-    usersRoles: [{ id: userId, role: "owner" }],
+    usersRoles: [{ id: userId, role: "admin" }],
   }
 
   const form = useAppForm({
     defaultValues,
     validators: { onChange: NewProyectSchema },
-    onSubmit: async ({ value, formApi: _ }) => {
+    onSubmit: async ({ value }) => {
       try {
-        const userId = session?.user.id as string
-        const name = value.name
-        const editors = value.usersRoles.filter((u) => u.role === "editor").map((u) => u.id)
-        const viewers = value.usersRoles.filter((u) => u.role === "viewer").map((u) => u.id)
-        const _project = await addProject({
-          data: { userId, name, editors, viewers },
+        await addProject({
+          data: { name: value.name, usersRoles: value.usersRoles },
         })
-        //navigate({ to: "/projects" })
       } catch (error) {
         notifyError("Failed to create new project", error)
       }
@@ -71,7 +66,6 @@ function RouteComponent() {
           <form.AppField name="usersRoles">
             {(field) => (
               <field.SelectUsersField
-                ownerId={userId as string}
                 label="Permissions"
                 users={users}
               />

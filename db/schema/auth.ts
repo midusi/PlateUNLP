@@ -17,6 +17,13 @@ export const user = sqliteTable("user", {
   role: text("role", { enum: ["admin", "user"] })
     .default("user")
     .notNull(),
+  // username plugin
+  username: text("username").unique(),
+  displayUsername: text("display_username"),
+  // admin plugin
+  banned: integer("banned", { mode: "boolean" }).default(false),
+  banReason: text("ban_reason"),
+  banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
 })
 
 export const session = sqliteTable(
@@ -36,6 +43,8 @@ export const session = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    // admin plugin
+    impersonatedBy: text("impersonated_by"),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
 )

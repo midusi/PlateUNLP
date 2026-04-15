@@ -8,11 +8,11 @@ export const userToProject = sqliteTable(
   {
     userId: text()
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: "cascade" }),
     projectId: text()
       .notNull()
       .references(() => project.id),
-    role: text({ enum: ["owner", "editor", "viewer"] }).notNull(),
+    role: text({ enum: ["admin", "editor", "viewer"] }).notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.projectId] })],
 )

@@ -8,7 +8,7 @@ export const NewProyectSchema = z
     name: z.string().min(1),
     existingProjectsNames: z.array(z.string()),
     usersRoles: z.array(
-      z.object({ id: z.string().min(1), role: z.enum(["owner", "editor", "viewer"]) }),
+      z.object({ id: z.string().min(1), role: z.enum(["admin", "editor", "viewer"]) }),
     ),
   })
   .refine((data) => !data.existingProjectsNames.includes(data.name), {
@@ -23,12 +23,12 @@ export const EditProyectSchema = z
   .object({
     oldName: z.string().min(1),
     oldUsersRoles: z.array(
-      z.object({ id: z.string().min(1), role: z.enum(["owner", "editor", "viewer"]) }),
+      z.object({ id: z.string().min(1), role: z.enum(["admin", "editor", "viewer"]) }),
     ),
     otherProjectsNames: z.array(z.string()),
     name: z.string().min(1),
     usersRoles: z.array(
-      z.object({ id: z.string().min(1), role: z.enum(["owner", "editor", "viewer"]) }),
+      z.object({ id: z.string().min(1), role: z.enum(["admin", "editor", "viewer"]) }),
     ),
   })
   .refine((data) => !data.otherProjectsNames.includes(data.name), {

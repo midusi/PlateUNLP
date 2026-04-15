@@ -6,10 +6,9 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui
 import { Input } from "~/components/ui/input"
 import { useFieldContext } from "~/hooks/use-app-form-context"
 
-type UserRole = { id: string; role: "owner" | "editor" | "viewer" }
+type UserRole = { id: string; role: "admin" | "editor" | "viewer" }
 
 type SelectUsersFieldProps = {
-  ownerId: string
   className?: string
   label: React.ReactNode
   description?: React.ReactNode
@@ -19,11 +18,9 @@ type SelectUsersFieldProps = {
     email: string
     image: string | null
   }[]
-  initialsUsersRoles?: UserRole[]
 } & Pick<React.ComponentProps<typeof Input>, "placeholder">
 
 export function SelectUsersField({
-  ownerId,
   className,
   label,
   description,
@@ -32,44 +29,37 @@ export function SelectUsersField({
   const field = useFieldContext<UserRole[]>()
   const errors = useStore(field.store, (state) => state.meta.errors)
 
-  // Busqueda por email
   const [emailSearchTerm, setEmailSearchTerm] = useState<string>("")
 
   const selectedUsersRoles = field.state.value
 
-  /** Filtrar usuarios que no cumplen el criterio de busqueda de email */
   const filteredUsers = users.filter((user) =>
     user.email.toLowerCase().includes(emailSearchTerm.toLowerCase()),
   )
 
-  /** Usuarios a mostrar ordenados alfabeticamente por nombre de usuario */
   filteredUsers.sort((a, b) => {
     return a.name.localeCompare(b.name)
   })
 
-  /** Recuperar rol actual de un usuario dado su id */
   function getUserRole(userId: string) {
     const user = selectedUsersRoles.find((u) => u.id === userId)
     return user ? user.role : "-"
   }
 
-  /** Manejar cambio de rol de un usuario */
   function handleRoleChange(userId: string, newRole: string) {
-    /** Si el nuevo rol es "-" quitar al usuario de la lista */
     if (newRole === "-") {
       field.handleChange(selectedUsersRoles.filter((user) => user.id !== userId))
     } else {
-      /** Si ya existia en la lista cambia su valor, sino lo agrega */
       if (selectedUsersRoles.some((u) => u.id === userId)) {
         field.handleChange(
           selectedUsersRoles.map((user) =>
-            user.id === userId ? { ...user, role: newRole as "editor" | "viewer" } : user,
+            user.id === userId ? { ...user, role: newRole as "admin" | "editor" | "viewer" } : user,
           ),
         )
       } else {
         field.handleChange([
           ...selectedUsersRoles,
-          { id: userId, role: newRole as "editor" | "viewer" },
+          { id: userId, role: newRole as "admin" | "editor" | "viewer" },
         ])
       }
     }
@@ -111,22 +101,16 @@ export function SelectUsersField({
                 </span>
               </div>
             </div>
-            {/* Select element for roles */}
-            {user.id === ownerId ? (
-              // Mostrar el rol de owner no seleccionable
-              <span className="flex-shrink-0 rounded-md border bg-gray-200 p-1 text-sm">Owner</span>
-            ) : (
-              // Mostrar el select para los demás usuarios
-              <select
-                value={getUserRole(user.id)}
-                onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                className="flex-shrink-0 rounded-md border p-1 text-sm"
-              >
-                <option value="-">-</option>
-                <option value="editor">Editor</option>
-                <option value="viewer">Viewer</option>
-              </select>
-            )}
+            <select
+              value={getUserRole(user.id)}
+              onChange={(e) => handleRoleChange(user.id, e.target.value)}
+              className="shrink-0 rounded-md border p-1 text-sm"
+            >
+              <option value="-">-</option>
+              <option value="admin">Admin</option>
+              <option value="editor">Editor</option>
+              <option value="viewer">Viewer</option>
+            </select>
           </div>
         ))}
       </div>
