@@ -115,7 +115,7 @@ function DropdownMenuItem({
         "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[inset]:pl-8 data-[disabled]:opacity-50",
         "inner-icon:pointer-events-none inner-icon:not-[[class*='size-']]:size-4 inner-icon:shrink-0 inner-icon:not-[[class*='text-']]:text-muted-foreground",
         variant === "destructive" &&
-          "inner-icon:!text-destructive text-destructive focus:bg-destructive/10 focus:text-destructive dark:focus:bg-destructive/20",
+          "inner-icon:!text-destructive text-destructive focus:bg-destructive/10 focus:text-destructive",
         className,
       )}
       {...props}

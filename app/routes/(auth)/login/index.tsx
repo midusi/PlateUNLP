@@ -85,7 +85,7 @@ function RouteComponent() {
           }}
         >
           <CardHeader className="m-4 flex justify-center">
-            <h1 className="text-2xl">Sign In</h1>
+            <h1 className="font-bold text-2xl text-olive-950">Sign In</h1>
           </CardHeader>
           <CardContent className="mb-8 flex flex-col gap-4">
             <form.AppField name="email">
@@ -115,9 +115,9 @@ function RouteComponent() {
                 )}
               </form.Subscribe>
 
-              <div className="p-2 text-gray-600 text-sm">
+              <div className="p-2 text-olive-500 text-sm">
                 Don’t have an account?{" "}
-                <a href="/register" className="font-medium hover:underline">
+                <a href="/register" className="font-medium text-olive-950 hover:text-orange-600 hover:underline">
                   Sign up
                 </a>
               </div>
@@ -127,7 +127,7 @@ function RouteComponent() {
             <div className="w-full space-y-4 px-4 pt-2">
               <Button
                 variant="outline"
-                className="flex w-full items-center justify-center gap-2 rounded-none border border-gray-300 bg-white hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-sm border border-olive-300 bg-white hover:bg-olive-100 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
                 onClick={() => {
                   googleLogIn()
                 }}
@@ -135,8 +135,8 @@ function RouteComponent() {
               >
                 {isGoogleLogIning ? (
                   <>
-                    <span className="icon-[ph--spinner-bold] animate-spin text-gray-600" />
-                    <span className="text-gray-600">Signing in...</span>
+                    <span className="icon-[ph--spinner-bold] animate-spin text-olive-500" />
+                    <span className="text-olive-500">Signing in...</span>
                   </>
                 ) : (
                   <>
@@ -151,7 +151,7 @@ function RouteComponent() {
               </Button>
               <Button
                 variant="outline"
-                className="flex w-full items-center justify-center gap-2 rounded-none border border-gray-300 bg-white hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-sm border border-olive-300 bg-white hover:bg-olive-100 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
                 onClick={() => {
                   githubLogIn()
                 }}
@@ -159,8 +159,8 @@ function RouteComponent() {
               >
                 {isGitHubLogIning ? (
                   <>
-                    <span className="icon-[ph--spinner-bold] animate-spin text-gray-600" />
-                    <span className="text-gray-600">Signing in...</span>
+                    <span className="icon-[ph--spinner-bold] animate-spin text-olive-500" />
+                    <span className="text-olive-500">Signing in...</span>
                   </>
                 ) : (
                   <>

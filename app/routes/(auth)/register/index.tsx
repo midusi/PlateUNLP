@@ -58,7 +58,7 @@ function RouteComponent() {
           }}
         >
           <CardHeader className="m-4 flex justify-center">
-            <h1 className="text-2xl">Sign Up</h1>
+            <h1 className="font-bold text-2xl text-olive-950">Sign Up</h1>
           </CardHeader>
           <CardContent className="m-4 flex flex-col gap-4">
             <form.AppField name="name">
@@ -99,9 +99,9 @@ function RouteComponent() {
               )}
             </form.Subscribe>
 
-            <div className="p-2 text-gray-600 text-sm">
+            <div className="p-2 text-olive-500 text-sm">
               Already have an account?{" "}
-              <a href="/login" className="font-medium hover:underline">
+              <a href="/login" className="font-medium text-olive-950 hover:text-orange-600 hover:underline">
                 Sign in
               </a>
             </div>

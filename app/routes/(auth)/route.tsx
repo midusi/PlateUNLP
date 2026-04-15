@@ -32,12 +32,12 @@ function RouteComponent() {
     },
   ]
   return (
-    <div className="flex h-svh w-full flex-col">
-      <div className="flex flex-1 flex-col overflow-y-auto bg-accent">
+    <div className="flex h-svh w-full flex-col bg-stone-50">
+      <div className="flex flex-1 flex-col overflow-y-auto">
         <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4">
           <Outlet />
         </main>
-        <footer className="mt-10 flex items-center justify-evenly border-t p-4">
+        <footer className="mt-10 flex items-center justify-evenly border-t border-olive-300 p-4">
           {logos.map(({ href, src, alt }) => (
             <a
               key={href}

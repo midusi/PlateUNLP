@@ -69,10 +69,10 @@ function RouteComponent() {
 
   return (
     <div className="flex h-svh w-full flex-col">
-      <header className="shrink-0 border-b text-sm">
+      <header className="shrink-0 border-b border-olive-300 bg-white text-sm">
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <Link to="/">
+            <Link to="/" className="text-olive-950 hover:text-orange-600 transition-colors">
               <span className="icon-[ph--shooting-star-duotone] size-5 min-w-5" />
             </Link>
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
@@ -83,13 +83,13 @@ function RouteComponent() {
             <img
               src={userInfo.image ? userInfo.image : defaultUserImage}
               alt={userInfo.name}
-              className="h-8 w-8 rounded-full border border-gray-500 bg-blue-100 object-cover"
+              className="h-8 w-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
             />
             <div className="flex w-full flex-col">
               <div className="flex flex-row justify-between">
-                <label className="flex w-full justify-start text-gray-500">{userInfo.name}</label>
+                <label className="flex w-full justify-start text-olive-700">{userInfo.name}</label>
               </div>
-              <label className="flex justify-start text-gray-400">{userInfo.email}</label>
+              <label className="flex justify-start text-olive-400">{userInfo.email}</label>
             </div>
             <Link
               to="/settings"
@@ -118,7 +118,7 @@ function RouteComponent() {
         <main className={cn("mx-auto flex w-full flex-1 flex-col gap-4 p-4", "max-w-9/12")}>
           <Outlet />
         </main>
-        <footer className="mt-12 flex items-center justify-evenly border-t p-4">
+        <footer className="mt-12 flex items-center justify-evenly border-t border-olive-300 p-4">
           {logos.map(({ href, src, alt }) => (
             <a
               key={href}

@@ -55,7 +55,7 @@ export function SelectFieldSimple({
             "rounded-md border border-input bg-transparent shadow-xs",
             "outline-none transition-[color,box-shadow] selection:bg-primary selection:text-primary-foreground",
             "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-            "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+            "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
             "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm",
             "disabled:pointer-events-none disabled:cursor-not-allowed",
             "font-sans text-foreground text-sm file:font-medium",
@@ -72,7 +72,7 @@ export function SelectFieldSimple({
         <Select.Portal>
           <Select.Positioner className="z-10 select-none outline-none" sideOffset={8}>
             <Select.ScrollUpArrow className="top-0 z-[1] flex h-4 w-full cursor-default items-center justify-center rounded-md bg-[canvas] text-center text-xs before:absolute before:top-[-100%] before:left-0 before:h-full before:w-full before:content-[''] data-[direction=down]:bottom-0 data-[direction=down]:before:bottom-[-100%]" />
-            <Select.Popup className="group max-h-[var(--available-height)] origin-[var(--transform-origin)] overflow-y-auto rounded-md bg-[canvas] bg-clip-padding py-1 text-gray-900 shadow-gray-200 shadow-lg outline outline-1 outline-gray-200 transition-[transform,scale,opacity] data-[side=none]:data-[starting-style]:scale-100 data-[side=none]:data-[starting-style]:opacity-100 data-[side=none]:data-[ending-style]:transition-none data-[side=none]:data-[starting-style]:transition-none data-[ending-style]:scale-90 data-[starting-style]:scale-90 data-[side=none]:scroll-py-5 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:shadow-none dark:outline-gray-300">
+            <Select.Popup className="group max-h-[var(--available-height)] origin-[var(--transform-origin)] overflow-y-auto rounded-md bg-[canvas] bg-clip-padding py-1 text-gray-900 shadow-gray-200 shadow-lg outline outline-1 outline-gray-200 transition-[transform,scale,opacity] data-[side=none]:data-[starting-style]:scale-100 data-[side=none]:data-[starting-style]:opacity-100 data-[side=none]:data-[ending-style]:transition-none data-[side=none]:data-[starting-style]:transition-none data-[ending-style]:scale-90 data-[starting-style]:scale-90 data-[side=none]:scroll-py-5 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 ">
               {options.map(({ label, value }) => (
                 <Select.Item
                   key={label}

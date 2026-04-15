@@ -75,8 +75,8 @@ function RouteComponent() {
           }}
         >
           <CardHeader className="m-4 flex flex-col items-center justify-center">
-            <h1 className="text-2xl">Your Profile</h1>
-            <p className="text-gray-600 text-sm">Manage your profile information</p>
+            <h1 className="font-bold text-2xl text-olive-950">Your Profile</h1>
+            <p className="text-olive-500 text-sm">Manage your profile information</p>
           </CardHeader>
           <CardContent className="m-4 flex flex-col gap-4">
             <form.AppField name="name">
@@ -104,7 +104,8 @@ function RouteComponent() {
               <FieldLabel>Password</FieldLabel>
               <Button
                 type="button"
-                className="w-full border bg-gray-300 hover:bg-gray-400"
+                variant="secondary"
+                className="w-full"
                 onClick={() => setChangePasswordOpen(true)}
               >
                 Change Password

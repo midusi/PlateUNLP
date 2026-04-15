@@ -165,7 +165,7 @@ function RouteComponent() {
   return (
     <div className="w-full">
       <div className="flex flex-row items-center gap-4">
-        <h1 className="font-medium text-xl">{project.name}</h1>
+        <h1 className="font-bold text-xl text-olive-950 tracking-tight">{project.name}</h1>
         {user.role === "admin" && (
           <Link to="/project/$projectId/settings" params={{ projectId: project.id }}>
             <span className="icon-[ph--gear] size-5" />
@@ -186,7 +186,7 @@ function RouteComponent() {
           <UploadPlate projectId={project.id} />
         )}
       </div>
-      <div className="overflow-hidden rounded-md border bg-background">
+      <div className="overflow-hidden rounded-sm border border-olive-300 bg-background">
         <Table>
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (

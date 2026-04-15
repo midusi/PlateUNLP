@@ -37,7 +37,7 @@ export function ChangePasswordModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <Card className="w-[400px] p-4">
         <CardHeader>
-          <h2 className="text-xl">Change Password</h2>
+          <h2 className="font-bold text-xl text-olive-950">Change Password</h2>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <form.AppField name="currentPassword">

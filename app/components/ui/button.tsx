@@ -6,28 +6,30 @@ import { cn } from "~/lib/utils"
 const buttonVariants = cva(
   `
     inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap
-    rounded-md font-medium text-sm outline-none transition-all
+    rounded-sm font-medium text-sm outline-none transition-all cursor-pointer
     focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50
     disabled:pointer-events-none disabled:opacity-50
-    aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40
+    aria-invalid:border-destructive aria-invalid:ring-destructive/20
     inner-icon:not-[[class*='size-']]:size-4 inner-icon:pointer-events-none inner-icon:shrink-0
   `,
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+        default:
+          "bg-olive-950 text-white shadow-xs hover:opacity-70 hover:text-amber-500 active:opacity-80 active:scale-[0.98]",
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+          "bg-red-600 text-white shadow-xs hover:bg-red-700 focus-visible:ring-red-600/20",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
-        secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border border-olive-300 bg-background shadow-xs hover:bg-olive-100 hover:text-orange-600",
+        secondary:
+          "bg-olive-200 text-olive-700 shadow-xs hover:bg-olive-100 hover:text-orange-600",
+        ghost: "hover:bg-olive-100 hover:text-orange-600",
+        link: "text-olive-950 underline-offset-4 hover:text-orange-600 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2 has-inner-icon:px-3",
-        sm: "h-8 gap-1.5 rounded-md px-3 has-inner-icon:px-2.5",
-        lg: "h-10 rounded-md px-6 has-inner-icon:px-4",
+        sm: "h-8 gap-1.5 rounded-sm px-3 has-inner-icon:px-2.5",
+        lg: "h-10 rounded-sm px-6 has-inner-icon:px-4",
         icon: "size-9",
       },
     },

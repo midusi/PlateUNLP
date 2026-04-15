@@ -1,17 +1,17 @@
 @font-face {
-  font-family: GeistVariable;
+  font-family: "IBM Plex Sans Variable";
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 100 700;
   font-display: swap;
-  src: url("../assets/fonts/Geist[wght].woff2") format("woff2");
+  src: url("../assets/fonts/IBMPlexSans[wght].woff2") format("woff2");
 }
 
 @font-face {
-  font-family: GeistVariable;
+  font-family: "IBM Plex Sans Variable";
   font-style: italic;
-  font-weight: 100 900;
+  font-weight: 100 700;
   font-display: swap;
-  src: url("../assets/fonts/Geist-Italic[wght].woff2") format("woff2");
+  src: url("../assets/fonts/IBMPlexSans-Italic[wght].woff2") format("woff2");
 }
 
 @font-face {
