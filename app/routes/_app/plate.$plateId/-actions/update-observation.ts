@@ -24,10 +24,12 @@ export const updateObservation = createServerFn()
     })
     if (!observation) throw new Error(`Observation with id ${data.observationId} not found`)
 
-    if (data.imageLeft + data.imageWidth > observation.plate.imageWidth) {
+    const imageWidth = Math.min(data.imageWidth, observation.plate.imageWidth - data.imageLeft)
+    const imageHeight = Math.min(data.imageHeight, observation.plate.imageHeight - data.imageTop)
+    if (imageWidth <= 0 || data.imageLeft >= observation.plate.imageWidth) {
       throw new Error("Bounding box exceeds plate image width")
     }
-    if (data.imageTop + data.imageHeight > observation.plate.imageHeight) {
+    if (imageHeight <= 0 || data.imageTop >= observation.plate.imageHeight) {
       throw new Error("Bounding box exceeds plate image height")
     }
 
@@ -37,8 +39,8 @@ export const updateObservation = createServerFn()
         name: data.name,
         imageTop: data.imageTop,
         imageLeft: data.imageLeft,
-        imageWidth: data.imageWidth,
-        imageHeight: data.imageHeight,
+        imageWidth,
+        imageHeight,
       })
       .where(eq(s.observation.id, data.observationId))
   })

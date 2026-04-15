@@ -1,6 +1,6 @@
-import fs from "node:fs/promises"
 import { eq } from "drizzle-orm"
 import { err, ok, type Result } from "neverthrow"
+import fs from "node:fs/promises"
 import sharp from "sharp"
 import { z } from "zod"
 import { SUPPORTED_PLATE_MIMETYPES } from "~/consts"
@@ -38,7 +38,10 @@ export async function uploadFile(
       return id
     })
     const metadata = await image.metadata()
-    return ok({ id, mimeType: mimeType.data, width: metadata.width, height: metadata.height })
+    const swapDimensions = (rotate ?? 0) % 180 !== 0
+    const width = swapDimensions ? metadata.height : metadata.width
+    const height = swapDimensions ? metadata.width : metadata.height
+    return ok({ id, mimeType: mimeType.data, width, height })
   } catch (error) {
     return err(
       new Error(`Failed to upload file: ${error instanceof Error ? error.message : String(error)}`),

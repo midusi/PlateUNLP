@@ -20,10 +20,12 @@ export const addObservation = createServerFn({ method: "POST" })
     })
     if (!plate) throw new Error(`Plate with id ${data.plateId} not found`)
 
-    if (data.left + data.width > plate.imageWidth) {
+    const width = Math.min(data.width, plate.imageWidth - data.left)
+    const height = Math.min(data.height, plate.imageHeight - data.top)
+    if (width <= 0 || data.left >= plate.imageWidth) {
       throw new Error("Bounding box exceeds plate image width")
     }
-    if (data.top + data.height > plate.imageHeight) {
+    if (height <= 0 || data.top >= plate.imageHeight) {
       throw new Error("Bounding box exceeds plate image height")
     }
 
@@ -34,8 +36,8 @@ export const addObservation = createServerFn({ method: "POST" })
         name: `Observation ${nanoid(4)}`,
         imageTop: data.top,
         imageLeft: data.left,
-        imageWidth: data.width,
-        imageHeight: data.height,
+        imageWidth: width,
+        imageHeight: height,
         metadataCompletion: 0,
       })
       .returning({

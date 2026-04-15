@@ -10,6 +10,7 @@ import { PlateMetadataForm } from "./-components/PlateMetadataForm"
 
 export const Route = createFileRoute("/_app/plate/$plateId/")({
   component: RouteComponent,
+  ssr: "data-only",
   loader: async ({ context, params }) => {
     const [project, initialMetadata, initialObservations] = await Promise.all([
       getProjectName({ data: { from: "plate", id: params.plateId } }),
