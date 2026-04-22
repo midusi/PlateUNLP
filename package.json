@@ -17,7 +17,7 @@
     "db:seed": "tsx db/seed.ts",
     "db:init": "tsx db/dev-init.ts && pnpm db:migrate && pnpm db:seed"
   },
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=22.16.0",
     "pnpm": ">=10.22.0"
@@ -69,6 +69,7 @@
     "nanoid-dictionary": "^5.0.0",
     "neverthrow": "^8.2.0",
     "nitro": "3.0.260311-beta",
+    "onnxruntime-node": "^1.24.3",
     "onnxruntime-web": "^1.24.3",
     "picocolors": "^1.1.1",
     "react": "^19.2.4",

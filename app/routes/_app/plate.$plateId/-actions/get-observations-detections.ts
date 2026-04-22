@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start"
-import * as tf from "@tensorflow/tfjs-node"
+import { InferenceSession, Tensor } from "onnxruntime-node"
+//import * as tf from "@tensorflow/tfjs-node"
 import path from "path"
 import sharp from "sharp"
 import { z } from "zod"
@@ -30,11 +31,40 @@ export const getObservationDetections = createServerFn()
       .png()
       .toBuffer({ resolveWithObject: true })
 
-    const modelPath = path.resolve("C:\\Repositorios\\PlateUNLP\\public\\models\\best_saved_model")
-    const model = await tf.node.loadSavedModel(modelPath)
-    //const output = model.predict(input);
-    console.log(model)
+    // Convertir HWC → CHW
+    const width = info.width
+    const height = info.height
+    const channels = info.channels // debería ser 3
+    const floatData = new Float32Array(1 * channels * width * height)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * channels
 
+        const r = data_img[idx] / 255
+        const g = data_img[idx + 1] / 255
+        const b = data_img[idx + 2] / 255
+
+        const pixelIndex = y * width + x
+
+        floatData[pixelIndex] = r
+        floatData[pixelIndex + width * height] = g
+        floatData[pixelIndex + 2 * width * height] = b
+      }
+    }
+
+    // input (ejemplo)
+    const input = new Tensor("float32", floatData, [1, 3, height, width])
+
+    const session = await InferenceSession.create(
+      `C:\\Repositorios\\PlateUNLP\\app\\models\\detect_observations\\best.onnx`,
+    )
+
+    // inferencia
+    const feeds = { images: input } // nombre depende del modelo
+    const results = await session.run(feeds)
+
+    console.log(session.inputNames)
+    console.log(results)
     /** Guardar imagen */
     // const outputPath = path.join(process.cwd(), "tmp", `plate-${data.plateId}.png`)
     // await fs.mkdir(path.dirname(outputPath), { recursive: true })
@@ -80,5 +110,3 @@ export const getObservationDetections = createServerFn()
 
     // return 1
   })
-
-function decode(predictions: tf.Tensor | tf.Tensor[], imageWidth: number, imageHeight: number) {}
