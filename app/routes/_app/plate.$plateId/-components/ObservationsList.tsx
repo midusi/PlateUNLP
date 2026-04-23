@@ -6,11 +6,11 @@ import { Card, CardContent } from "~/components/ui/card"
 import { notifyError } from "~/lib/notifications"
 import { cn, idxToColor } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
+import { getProjectName } from "../../project.$projectId/-actions/get-project-name"
 import { addObservation } from "../-actions/add-observation"
 import type { Observation } from "../-actions/get-observations"
-import { updateObservation } from "../-actions/update-observation"
-import { getProjectName } from "../../project.$projectId/-actions/get-project-name"
 import { getObservationDetections } from "../-actions/get-observations-detections"
+import { updateObservation } from "../-actions/update-observation"
 
 function observationToBoundingBox(observation: Observation): BoundingBox {
   return {
@@ -50,16 +50,22 @@ export function ObservationsList({
 
   const getObservationsDetectionsMut = useMutation({
     mutationFn: async (plateId: string) => {
-      
-      return await getObservationDetections({ data: { plateId } })
-      //setBoundingBoxes((prev) => [observationToBoundingBox(observation), ...prev])
+      /** Detectar de observaciones */
+      const observations = await getObservationDetections({ data: { plateId } })
+      // 1. Salta error si algo impide que el proceso finalice
+      if (observations instanceof Response) {
+        const errorText = await observations.text()
+        throw new Error(errorText || "Error en la detección")
+      }
+      // 2. Si no salto error el proceso finalizo correctamente.
+      setBoundingBoxes(() => observations.map(observationToBoundingBox))
+      return observations
     },
     onSuccess: (detections) => {
       console.log("Detections obtained:", detections)
     },
     onError: (error) => notifyError("Error obtainging observations detections", error),
   })
-
 
   return (
     <Card className="overflow-hidden p-0">
