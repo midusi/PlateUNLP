@@ -1,10 +1,8 @@
 import { createServerFn } from "@tanstack/react-start"
 import { nanoid } from "nanoid"
 import { InferenceSession, Tensor } from "onnxruntime-node"
-import path from "path"
 import sharp from "sharp"
 import { z } from "zod"
-import type { BoundingBox } from "~/components/BoundingBoxer"
 import { db } from "~/db"
 import { readUploadedFile } from "~/lib/uploads"
 
@@ -34,7 +32,6 @@ export const getObservationDetections = createServerFn()
     const originalMetadata = await sharp(image).metadata()
     const origW = originalMetadata.width ?? 1
     const origH = originalMetadata.height ?? 1
-    console.log(`Dimensiones originales: ${origW}x${origH}`)
     // 1. Obtener los píxeles CRUDOS (sin comprimir a PNG)
     const { data: rawPixels, info } = await sharp(image)
       .rotate(plate.imageRotation)
@@ -92,9 +89,6 @@ export const getObservationDetections = createServerFn()
         validPredictions.push(detection)
       }
     }
-    // console.log(results)
-    // console.log(`Se encontraron ${validPredictions.length} detecciones válidas.`)
-    // console.table(validPredictions)
 
     const formattedPredictions = validPredictions.map((pred, idx) => {
       // x1, y1, x2, y2 vienen en el espacio de 640x640

@@ -6,6 +6,7 @@ import { Card, CardContent } from "~/components/ui/card"
 import { notifyError } from "~/lib/notifications"
 import { cn, idxToColor } from "~/lib/utils"
 import { addObservation } from "../-actions/add-observation"
+import { addObservations } from "../-actions/add-observations"
 import type { Observation } from "../-actions/get-observations"
 import { getObservationDetections } from "../-actions/get-observations-detections"
 import { updateObservation } from "../-actions/update-observation"
@@ -50,13 +51,25 @@ export function ObservationsList({
     mutationFn: async (plateId: string) => {
       /** Detectar de observaciones */
       const observations = await getObservationDetections({ data: { plateId } })
-      // 1. Salta error si algo impide que el proceso finalice
+      /** Salta error si algo impide que el proceso finalice */
       if (observations instanceof Response) {
         const errorText = await observations.text()
         throw new Error(errorText || "Error en la detección")
       }
-      // 2. Si no salto error el proceso finalizo correctamente.
-      setBoundingBoxes(() => observations.map(observationToBoundingBox))
+ 
+      /** Agregar observaciones en la DB */
+      const observations_added = await addObservations({ data: { 
+        plateId, 
+        resetExisting: true, // Elimina observaciones previas para evitar solapamientos/confusiones
+        observations: observations.map((obs) => ({ 
+          top: Math.round(obs.imageTop), 
+          left: Math.round(obs.imageLeft), 
+          width: Math.round(obs.imageWidth), 
+          height: Math.round(obs.imageHeight) 
+        }))
+      }})
+      
+      setBoundingBoxes(() => observations_added.map(observationToBoundingBox))
       return observations
     },
     onSuccess: (detections) => {
