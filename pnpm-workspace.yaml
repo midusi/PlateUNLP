@@ -1,8 +1,0 @@
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@tailwindcss/oxide'
-  - core-js
-  - esbuild
-  - msw
-  - protobufjs
-  - sharp

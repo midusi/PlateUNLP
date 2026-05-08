@@ -7,6 +7,7 @@ import { notifyError } from "~/lib/notifications"
 import { cn, idxToColor } from "~/lib/utils"
 import { addObservation } from "../-actions/add-observation"
 import type { Observation } from "../-actions/get-observations"
+import { getObservationDetections } from "../-actions/get-observations-detections"
 import { updateObservation } from "../-actions/update-observation"
 
 function observationToBoundingBox(observation: Observation): BoundingBox {
@@ -45,6 +46,25 @@ export function ObservationsList({
     onError: (error) => notifyError("Error adding observation", error),
   })
 
+  const getObservationsDetectionsMut = useMutation({
+    mutationFn: async (plateId: string) => {
+      /** Detectar de observaciones */
+      const observations = await getObservationDetections({ data: { plateId } })
+      // 1. Salta error si algo impide que el proceso finalice
+      if (observations instanceof Response) {
+        const errorText = await observations.text()
+        throw new Error(errorText || "Error en la detección")
+      }
+      // 2. Si no salto error el proceso finalizo correctamente.
+      setBoundingBoxes(() => observations.map(observationToBoundingBox))
+      return observations
+    },
+    onSuccess: (detections) => {
+      console.log("Detections obtained:", detections)
+    },
+    onError: (error) => notifyError("Error obtainging observations detections", error),
+  })
+
   return (
     <Card className="overflow-hidden p-0">
       <CardContent className="h-125 p-0">
@@ -74,8 +94,10 @@ export function ObservationsList({
           <Button
             size="sm"
             variant="default"
-            disabled={addObservationMut.isPending}
-            onClick={() => notifyError("Not implemented yet")}
+            disabled={addObservationMut.isPending || getObservationsDetectionsMut.isPending}
+            onClick={() => {
+              getObservationsDetectionsMut.mutate(plateId)
+            }}
             className="h-7"
           >
             <span
