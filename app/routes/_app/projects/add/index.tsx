@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
+import { SelectUsers } from "~/components/forms/select-users"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
 import { breadcrumb } from "~/lib/breadcrumbs"
@@ -64,16 +65,16 @@ function RouteComponent() {
         <form.AppField name="name">
           {(field) => <field.TextField label="Project name" placeholder="New proyect" />}
         </form.AppField>
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-          <form.AppField name="usersRoles">
-            {(field) => (
-              <field.SelectUsersField
-                label="Permissions"
-                users={users}
-              />
-            )}
-          </form.AppField>
-        </div>
+        <form.AppField name="usersRoles">
+          {(field) => (
+            <SelectUsers
+              label="Permissions"
+              users={users}
+              value={field.state.value}
+              onChange={field.handleChange}
+            />
+          )}
+        </form.AppField>
       </div>
       <form.Subscribe
         selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}

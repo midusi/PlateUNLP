@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router"
-import defaultUserImage from "~/assets/avatar.png"
+import { Hashvatar } from "hashvatar/react"
 import logoFCAGLP from "~/assets/fcaglp.png"
 import logoIALP from "~/assets/logoialp.png"
 import logoLIDI from "~/assets/logolidi.png"
@@ -70,7 +70,7 @@ function RouteComponent() {
   return (
     <div className="flex h-svh w-full flex-col">
       <header className="shrink-0 border-b border-olive-300 bg-white text-sm">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4">
+        <div className="mx-auto flex h-16 w-full max-w-9/12 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Link to="/" className="text-olive-950 hover:text-orange-600 transition-colors">
               <span className="icon-[ph--shooting-star-duotone] size-5 min-w-5" />
@@ -80,11 +80,20 @@ function RouteComponent() {
           </div>
 
           <div className="flex flex-row items-center gap-4">
-            <img
-              src={userInfo.image ? userInfo.image : defaultUserImage}
-              alt={userInfo.name}
-              className="h-8 w-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
-            />
+            {userInfo.image ? (
+              <img
+                src={userInfo.image}
+                alt={userInfo.name}
+                className="h-8 w-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
+              />
+            ) : (
+              <Hashvatar
+                hash={userInfo.email}
+                mode="dither"
+                size={32}
+                className="h-8 w-8 rounded-full border border-olive-300"
+              />
+            )}
             <div className="flex w-full flex-col">
               <div className="flex flex-row justify-between">
                 <label className="flex w-full justify-start text-olive-700">{userInfo.username || userInfo.name}</label>

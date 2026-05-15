@@ -59,6 +59,7 @@
     "fumadocs-core": "^16.7.16",
     "fumadocs-mdx": "^14.2.14",
     "fumadocs-ui": "^16.7.16",
+    "hashvatar": "^0.1.2",
     "image-js": "^1.5.0",
     "katex": "^0.16.45",
     "match-sorter": "^8.3.0",

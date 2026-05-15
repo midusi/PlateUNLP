@@ -1,6 +1,5 @@
 import { useStore } from "@tanstack/react-form"
 import { useRef, useState } from "react"
-import defaultUserImage from "~/assets/avatar.png"
 import { Field, FieldDescription, FieldError, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useFieldContext } from "~/hooks/use-app-form-context"
@@ -90,7 +89,7 @@ export function ImageField({
         onChange={handleFileChange}
       />
 
-      {showPreview && preview && preview !== defaultUserImage && (
+      {showPreview && preview && (
         <div className="relative w-fit overflow-hidden rounded-lg border border-border">
           <img src={preview} alt="Preview" className="h-32 object-cover" />
           <button

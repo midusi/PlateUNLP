@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
+import { Hashvatar } from "hashvatar/react"
 import { useState } from "react"
-import defaultUserImage from "~/assets/avatar.png"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader } from "~/components/ui/card"
 import {
@@ -92,11 +92,20 @@ function RouteComponent() {
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <img
-                          src={user.image || defaultUserImage}
-                          alt={user.name}
-                          className="size-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
-                        />
+                        {user.image ? (
+                          <img
+                            src={user.image}
+                            alt={user.name}
+                            className="size-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
+                          />
+                        ) : (
+                          <Hashvatar
+                            hash={user.email}
+                            mode="dither"
+                            size={32}
+                            className="size-8 rounded-full border border-olive-300"
+                          />
+                        )}
                         <span className="font-medium text-olive-950">{user.name}</span>
                       </div>
                     </TableCell>

@@ -1,6 +1,7 @@
 import { createFileRoute, notFound, redirect, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import type z from "zod"
+import { SelectUsers } from "~/components/forms/select-users"
 import {
   AlertDialog,
   AlertDialogClose,
@@ -11,7 +12,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog"
 import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader } from "~/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError, notifySucces } from "~/lib/notifications"
@@ -114,37 +115,46 @@ function RouteComponent() {
     <div className="flex w-full flex-col gap-8">
       <div>
         <h1 className="mb-6 font-bold text-2xl text-olive-950 tracking-tight">Project Settings</h1>
-        <div className="flex flex-col gap-6">
-          <form.AppField name="name">
-            {(field) => <field.TextField label="Project name" placeholder="Project name" />}
-          </form.AppField>
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+        <Card>
+          <CardContent className="flex flex-col gap-6">
+            <form.AppField name="name">
+              {(field) => <field.TextField label="Project name" placeholder="Project name" />}
+            </form.AppField>
             <form.AppField name="usersRoles">
               {(field) => (
-                <field.SelectUsersField label="Permissions" users={users} />
+                <SelectUsers
+                  label="Permissions"
+                  users={users}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                />
               )}
             </form.AppField>
-          </div>
-        </div>
-        <form.Subscribe
-          selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
-        >
-          {([isValid, isSubmitting, isDirty]) => (
-            <div className="flex w-full justify-end pt-10">
-              <Button
-                disabled={!isValid || !isDirty}
-                className="border"
-                onClick={form.handleSubmit}
-              >
-                {isSubmitting ? (
-                  <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
-                ) : (
-                  <span>Save</span>
-                )}
-              </Button>
-            </div>
-          )}
-        </form.Subscribe>
+          </CardContent>
+          <CardFooter className="justify-end">
+            <form.Subscribe
+              selector={(formState) => [
+                formState.isValid,
+                formState.isSubmitting,
+                formState.isDirty,
+              ]}
+            >
+              {([isValid, isSubmitting, isDirty]) => (
+                <Button
+                  disabled={!isValid || !isDirty}
+                  className="border"
+                  onClick={form.handleSubmit}
+                >
+                  {isSubmitting ? (
+                    <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
+                  ) : (
+                    <span>Save</span>
+                  )}
+                </Button>
+              )}
+            </form.Subscribe>
+          </CardFooter>
+        </Card>
       </div>
 
       <Card className="border-red-300">

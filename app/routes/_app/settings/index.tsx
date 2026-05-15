@@ -1,7 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useState } from "react"
 import type z from "zod"
-import defaultUserImage from "~/assets/avatar.png"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { Field, FieldLabel } from "~/components/ui/field"
@@ -51,7 +50,7 @@ function RouteComponent() {
       try {
         const name = value.name
         const username = value.username
-        const image = value.image || defaultUserImage
+        const image = value.image || ""
         if (name !== user.name) {
           const { error } = await authClient.updateUser({ name })
           if (error) throw new Error(error.message)
