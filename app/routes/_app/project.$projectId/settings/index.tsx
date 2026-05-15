@@ -1,11 +1,23 @@
-import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, notFound, redirect, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
 import type z from "zod"
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog"
 import { Button } from "~/components/ui/button"
+import { Card, CardContent, CardHeader } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { breadcrumb } from "~/lib/breadcrumbs"
-import { notifyError } from "~/lib/notifications"
+import { notifyError, notifySucces } from "~/lib/notifications"
 import { EditProyectSchema } from "~/types/proyect"
 import { getSession } from "../../-actions/get-session"
+import { deleteProject } from "./-actions/delete-project"
 import { getProjectWithAuthLists } from "./-actions/get-project-with-auth-lists"
 import { getProjectsNames } from "./-actions/get-projects-names"
 import { getUsers } from "./-actions/get-users"
@@ -17,18 +29,20 @@ export const Route = createFileRoute("/_app/project/$projectId/settings/")({
     const { projectId } = params
 
     const session = await getSession()
-    const userId = session?.user.id as string
-    const projects_names = await getProjectsNames({ data: { userId: userId } })
+    if (!session || session.user.role !== "admin") {
+      throw redirect({ to: "/project/$projectId", params: { projectId } })
+    }
+
+    const projects_names = await getProjectsNames({ data: { userId: session.user.id } })
     const users = await getUsers()
 
     const project = await getProjectWithAuthLists({
-      data: { projectId: projectId },
+      data: { projectId },
     })
 
     if (!project) throw notFound()
 
     return {
-      userId,
       project,
       projects_names,
       users,
@@ -55,6 +69,8 @@ export const Route = createFileRoute("/_app/project/$projectId/settings/")({
 function RouteComponent() {
   const { project, projects_names, users } = Route.useLoaderData()
   const navigate = useNavigate()
+  const [isDeleteOpen, setDeleteOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const defaultValues: z.output<typeof EditProyectSchema> = {
     oldName: project.name as string,
@@ -73,48 +89,103 @@ function RouteComponent() {
         await updateProject({
           data: { projectId, name: value.name, usersRoles: value.usersRoles },
         })
+        notifySucces("Project updated")
         navigate({ to: "/project/$projectId", params: { projectId } })
       } catch (error) {
-        notifyError("Failed to edit project settings", error)
+        notifyError("Failed to update project", error)
       }
     },
   })
 
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true)
+      await deleteProject({ data: { projectId: project.id } })
+      notifySucces("Project deleted")
+      navigate({ to: "/projects" })
+    } catch (error) {
+      notifyError("Failed to delete project", error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
-    <div className="flex w-full flex-col">
-      <h1 className="mb-6 font-bold text-2xl">Project Settings</h1>
-      <div className="flex flex-col gap-6">
-        <form.AppField name="name">
-          {(field) => <field.TextField label="Project name" placeholder="New proyect" />}
-        </form.AppField>
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-          <form.AppField name="usersRoles">
-            {(field) => (
-              <field.SelectUsersField label="Permissions" users={users} />
-            )}
+    <div className="flex w-full flex-col gap-8">
+      <div>
+        <h1 className="mb-6 font-bold text-2xl text-olive-950 tracking-tight">Project Settings</h1>
+        <div className="flex flex-col gap-6">
+          <form.AppField name="name">
+            {(field) => <field.TextField label="Project name" placeholder="Project name" />}
           </form.AppField>
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+            <form.AppField name="usersRoles">
+              {(field) => (
+                <field.SelectUsersField label="Permissions" users={users} />
+              )}
+            </form.AppField>
+          </div>
         </div>
+        <form.Subscribe
+          selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+        >
+          {([isValid, isSubmitting, isDirty]) => (
+            <div className="flex w-full justify-end pt-10">
+              <Button
+                disabled={!isValid || !isDirty}
+                className="border"
+                onClick={form.handleSubmit}
+              >
+                {isSubmitting ? (
+                  <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
+                ) : (
+                  <span>Save</span>
+                )}
+              </Button>
+            </div>
+          )}
+        </form.Subscribe>
       </div>
-      <form.Subscribe
-        selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
-      >
-        {([isValid, isSubmitting, isDirty]) => (
-          <div className="flex w-full justify-end pt-10">
-            <Button
-              //logIn("santiagoandresponteahon@hotmail.com", "12345678")
-              disabled={!isValid || !isDirty}
-              className="border"
-              onClick={form.handleSubmit}
-            >
-              {isSubmitting ? (
+
+      <Card className="border-red-300">
+        <CardHeader>
+          <h2 className="font-bold text-lg text-red-600">Danger Zone</h2>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <div>
+            <p className="font-medium text-olive-950">Delete this project</p>
+            <p className="text-olive-500 text-sm">
+              This will permanently delete the project, all its plates, and observations.
+            </p>
+          </div>
+          <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
+            <span className="icon-[ph--trash-bold] size-4" />
+            Delete Project
+          </Button>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{project.name}</strong>? All plates and
+              observations will be permanently removed. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogClose>Cancel</AlertDialogClose>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? (
                 <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
               ) : (
-                <span>Save</span>
+                <span>Delete Project</span>
               )}
             </Button>
-          </div>
-        )}
-      </form.Subscribe>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

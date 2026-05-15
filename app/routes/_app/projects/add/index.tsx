@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { useAppForm } from "~/hooks/use-app-form"
@@ -33,6 +33,7 @@ export const Route = createFileRoute("/_app/projects/add/")({
 
 function RouteComponent() {
   const { session, projects, users } = Route.useLoaderData()
+  const navigate = useNavigate()
 
   const userId = session!.user.id
   const defaultValues: z.output<typeof NewProyectSchema> = {
@@ -46,11 +47,12 @@ function RouteComponent() {
     validators: { onChange: NewProyectSchema },
     onSubmit: async ({ value }) => {
       try {
-        await addProject({
+        const newProject = await addProject({
           data: { name: value.name, usersRoles: value.usersRoles },
         })
+        navigate({ to: "/project/$projectId", params: { projectId: newProject.id } })
       } catch (error) {
-        notifyError("Failed to create new project", error)
+        notifyError("Failed to create project", error)
       }
     },
   })
