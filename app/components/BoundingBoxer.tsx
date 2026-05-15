@@ -22,6 +22,8 @@ export type BoundingBox = {
   id: string
   /** Name of the bounding box, used for display purposes. */
   name: string
+  /** Short user-facing label shown in the toolbar (e.g. an OBS-N letter). */
+  label?: string
   /** Position of the bounding box relative to the image. */
   top: number
   /** Position of the bounding box relative to the image. */
@@ -207,18 +209,13 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
             <Toolbar.Button
               key={bb.id}
               render={
-                <Toggle
-                  render={
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-16 data-[pressed]:bg-accent! data-[pressed]:text-primary!"
-                    />
-                  }
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-22 data-pressed:bg-accent! data-pressed:text-primary!"
                 />
               }
-              value="draw"
-              title="Draw box"
+              title={bb.label}
             >
               <Link
                 className="flex w-full flex-row items-center justify-center gap-1"
@@ -228,8 +225,8 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
                 <span
                   className="icon-[ph--rectangle-dashed-bold] size-4"
                   style={{ color: bb.color }}
-                ></span>
-                {bb.id.slice(0, 2)}...
+                />
+                {bb.label ?? ""}
               </Link>
             </Toolbar.Button>
           )

@@ -3,6 +3,7 @@ import { useState } from "react"
 import { type BoundingBox, BoundingBoxer } from "~/components/BoundingBoxer"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
+import { formatObservation } from "~/lib/format"
 import { notifyError } from "~/lib/notifications"
 import { cn, idxToColor } from "~/lib/utils"
 import { addObservation } from "../-actions/add-observation"
@@ -15,12 +16,17 @@ function observationToBoundingBox(observation: Observation): BoundingBox {
   return {
     id: observation.id,
     name: observation.name,
+    label: formatObservation(observation),
     color: "red",
     top: observation.imageTop,
     left: observation.imageLeft,
     width: observation.imageWidth,
     height: observation.imageHeight,
   }
+}
+
+function sortByLabel(boxes: BoundingBox[]): BoundingBox[] {
+  return [...boxes].sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""))
 }
 
 export function ObservationsList({
@@ -31,18 +37,18 @@ export function ObservationsList({
   initialObservations: Observation[]
 }) {
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    initialObservations.map((obs, idx) => {
-      return {
+    sortByLabel(
+      initialObservations.map((obs, idx) => ({
         ...observationToBoundingBox(obs),
         color: idxToColor(idx),
-      }
-    }),
+      })),
+    ),
   )
 
   const addObservationMut = useMutation({
     mutationFn: async (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => {
       const observation = await addObservation({ data: { ...boundingBox, plateId } })
-      setBoundingBoxes((prev) => [observationToBoundingBox(observation), ...prev])
+      setBoundingBoxes((prev) => sortByLabel([...prev, observationToBoundingBox(observation)]))
     },
     onError: (error) => notifyError("Error adding observation", error),
   })
@@ -56,20 +62,22 @@ export function ObservationsList({
         const errorText = await observations.text()
         throw new Error(errorText || "Error en la detección")
       }
- 
+
       /** Agregar observaciones en la DB */
-      const observations_added = await addObservations({ data: { 
-        plateId, 
-        resetExisting: true, // Elimina observaciones previas para evitar solapamientos/confusiones
-        observations: observations.map((obs) => ({ 
-          top: Math.round(obs.imageTop), 
-          left: Math.round(obs.imageLeft), 
-          width: Math.round(obs.imageWidth), 
-          height: Math.round(obs.imageHeight) 
-        }))
-      }})
-      
-      setBoundingBoxes(() => observations_added.map(observationToBoundingBox))
+      const observations_added = await addObservations({
+        data: {
+          plateId,
+          resetExisting: true, // Elimina observaciones previas para evitar solapamientos/confusiones
+          observations: observations.map((obs) => ({
+            top: Math.round(obs.imageTop),
+            left: Math.round(obs.imageLeft),
+            width: Math.round(obs.imageWidth),
+            height: Math.round(obs.imageHeight),
+          })),
+        },
+      })
+
+      setBoundingBoxes(() => sortByLabel(observations_added.map(observationToBoundingBox)))
       return observations
     },
     onSuccess: (detections) => {

@@ -109,11 +109,7 @@ const columns = [
                   backgroundImage: `linear-gradient(to right, var(--color-background) 25%, 75%, transparent)`,
                 }}
               >
-                {formatObservation({
-                  id: obs.id,
-                  OBJECT: obs.OBJECT,
-                  "DATE-OBS": { value: obs["DATE-OBS"], isKnown: obs["DATE-OBS?"] },
-                })}
+                {formatObservation({ "OBS-N": obs["OBS-N"] })}
               </span>
               <div className="table-cell w-full" />
             </Link>

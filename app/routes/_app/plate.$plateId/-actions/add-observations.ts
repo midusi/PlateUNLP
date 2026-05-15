@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { obsNFromIndex, obsNToIndex } from "~/lib/obs-n"
 
 export const addObservations = createServerFn({ method: "POST" })
     .inputValidator(
@@ -33,24 +34,36 @@ export const addObservations = createServerFn({ method: "POST" })
         .where(eq(s.observation.plateId, data.plateId))
     }
 
-    const values = data.observations.map((observation, idx) => {
-        const width = Math.min(observation.width, plate.imageWidth - observation.left)
-        const height = Math.min(observation.height, plate.imageHeight - observation.top)
-        if (width <= 0 || observation.left >= plate.imageWidth) {
-            throw new Error(`Bounding box ${idx} exceeds plate image width`)
+    const [{ maxObsN }] = await db
+      .select({ maxObsN: sql<string | null>`MAX(${s.observation["OBS-N"]})` })
+      .from(s.observation)
+      .where(eq(s.observation.plateId, data.plateId))
+
+    const startIndex = maxObsN ? obsNToIndex(maxObsN) + 1 : 0
+
+    const sortedObservations = data.observations
+      .map((obs, originalIdx) => ({ obs, originalIdx }))
+      .sort((a, b) => a.obs.top - b.obs.top || a.obs.left - b.obs.left)
+
+    const values = sortedObservations.map(({ obs, originalIdx }, sortedIdx) => {
+        const width = Math.min(obs.width, plate.imageWidth - obs.left)
+        const height = Math.min(obs.height, plate.imageHeight - obs.top)
+        if (width <= 0 || obs.left >= plate.imageWidth) {
+            throw new Error(`Bounding box ${originalIdx} exceeds plate image width`)
         }
-        if (height <= 0 || observation.top >= plate.imageHeight) {
-            throw new Error(`Bounding box ${idx} exceeds plate image height`)
+        if (height <= 0 || obs.top >= plate.imageHeight) {
+            throw new Error(`Bounding box ${originalIdx} exceeds plate image height`)
         }
 
         return {
             plateId: data.plateId,
             name: `Observation ${nanoid(4)}`,
-            imageTop: observation.top,
-            imageLeft: observation.left,
+            imageTop: obs.top,
+            imageLeft: obs.left,
             imageWidth: width,
             imageHeight: height,
             metadataCompletion: 0,
+            "OBS-N": obsNFromIndex(startIndex + sortedIdx),
         }
     })
 
@@ -60,6 +73,7 @@ export const addObservations = createServerFn({ method: "POST" })
       .returning({
         id: s.observation.id,
         name: s.observation.name,
+        "OBS-N": s.observation["OBS-N"],
         imageTop: s.observation.imageTop,
         imageLeft: s.observation.imageLeft,
         imageWidth: s.observation.imageWidth,

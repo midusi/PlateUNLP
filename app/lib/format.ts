@@ -1,6 +1,3 @@
-import { formatDate } from "date-fns"
-import { splitLocalDateTime } from "./local-datetime"
-
 /**
  * Converts a decimal degree value to a string representation in degrees, minutes, and seconds (DMS).
  * @param deg - The decimal degree value to convert.
@@ -75,23 +72,6 @@ export function radToHMS(rad: number, opts?: { digits?: number; sep?: string }) 
   return degToHMS(rad * (180 / Math.PI), opts)
 }
 
-export function formatObservation({
-  id,
-  OBJECT,
-  "DATE-OBS": DATE_OBS,
-}: {
-  id: string
-  OBJECT: string
-  "DATE-OBS": { value: string; isKnown: boolean }
-}) {
-  if (!OBJECT) return `Obs-${id.slice(0, 8)}`
-  const dateObs =
-    DATE_OBS.isKnown && DATE_OBS.value.length > 0 ? splitLocalDateTime(DATE_OBS.value) : null
-  return [
-    OBJECT,
-    dateObs ? formatDate(new Date(`${dateObs.date}T00:00:00`), "d/M/yyyy") : null,
-    dateObs ? dateObs.time : null,
-  ]
-    .filter(Boolean)
-    .join(" ")
+export function formatObservation({ "OBS-N": OBS_N }: { "OBS-N": string }) {
+  return OBS_N ? `Obs. ${OBS_N}` : "Obs. N/A"
 }

@@ -7,7 +7,11 @@ import type { ObservationMetadataSchema } from "~/types/spectrum-metadata"
 export const getObservationMetadata = createServerFn()
   .inputValidator(z.object({ observationId: z.string() }))
   .handler(
-    async ({ data }): Promise<z.infer<typeof ObservationMetadataSchema> & { OBSERVAT: string }> => {
+    async ({
+      data,
+    }): Promise<
+      z.infer<typeof ObservationMetadataSchema> & { OBSERVAT: string; "OBS-N": string }
+    > => {
       const observation = await db.query.observation.findFirst({
         where: (observation, { eq }) => eq(observation.id, data.observationId),
         with: { plate: true },
@@ -17,6 +21,7 @@ export const getObservationMetadata = createServerFn()
       }
       return {
         OBSERVAT: observation.plate.OBSERVAT,
+        "OBS-N": observation["OBS-N"],
         OBJECT: observation.OBJECT,
         "DATE-OBS": { value: observation["DATE-OBS"], isKnown: observation["DATE-OBS?"] },
         "MAIN-ID": { value: observation["MAIN-ID"], isKnown: observation["MAIN-ID?"] },

@@ -13,11 +13,10 @@ export const getProject = createServerFn()
           columns: { id: true, "PLATE-N": true },
           with: {
             observations: {
+              orderBy: (observation, { asc }) => [asc(observation["OBS-N"])],
               columns: {
                 id: true,
-                OBJECT: true,
-                "DATE-OBS": true,
-                "DATE-OBS?": true,
+                "OBS-N": true,
               },
             },
           },

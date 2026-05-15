@@ -10,9 +10,11 @@ export const getObservations = createServerFn()
   .handler(async ({ data }) => {
     const observations = await db.query.observation.findMany({
       where: (observation, { eq }) => eq(observation.plateId, data.plateId),
+      orderBy: (observation, { asc }) => [asc(observation["OBS-N"])],
       columns: {
         id: true,
         name: true,
+        "OBS-N": true,
         imageTop: true,
         imageLeft: true,
         imageWidth: true,

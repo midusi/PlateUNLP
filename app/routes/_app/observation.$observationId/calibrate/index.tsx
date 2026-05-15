@@ -60,7 +60,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
           params: { plateId: plate.id },
         }),
         breadcrumb({
-          title: formatObservation({ ...initialMetadata, id: params.observationId }),
+          title: formatObservation(initialMetadata),
           to: "/observation/$observationId",
           params: { observationId: params.observationId },
         }),

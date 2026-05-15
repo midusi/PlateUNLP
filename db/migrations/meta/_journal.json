@@ -50,6 +50,13 @@
       "when": 1776277496557,
       "tag": "0006_auth_refactor",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1778879765131,
+      "tag": "0007_add_obs_n",
+      "breakpoints": true
     }
   ]
 }

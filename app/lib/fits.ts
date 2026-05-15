@@ -30,6 +30,7 @@ export type PlateFITSMetadata = PlateScanMetadata & {
 }
 
 export type SpectrumCropFITSMetadata = PlateScanMetadata & {
+  obsN?: string
   object?: string
   dateObs?: string
   dateOrg?: string
@@ -270,6 +271,7 @@ function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMetadata) 
   fits.header.appendBlank(
     "--------------------------------------- Original data of the observation",
   )
+  setTextCard(fits, "OBS-N", metadata.obsN, "observation label within the plate")
   setTextCard(
     fits,
     "DATE-OBS",

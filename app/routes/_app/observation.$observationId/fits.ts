@@ -66,6 +66,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/fits")({
             observer: plate["OBSERVER?"] ? plate.OBSERVER : undefined,
             instrument: plate["INSTRUME?"] ? plate.INSTRUME : undefined,
             detector: plate["DETECTOR?"] ? plate.DETECTOR : undefined,
+            obsN: observation["OBS-N"] || undefined,
             object: observation["OBJECT?"] ? observation.OBJECT : undefined,
             dateObs: observation["DATE-OBS?"] ? observation["DATE-OBS"] : undefined,
             dateOrg: observation["DATE-ORG?"] ? observation["DATE-ORG"] : undefined,

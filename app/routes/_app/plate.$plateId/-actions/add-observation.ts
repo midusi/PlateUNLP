@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start"
+import { eq, sql } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { nextObsN } from "~/lib/obs-n"
 
 export const addObservation = createServerFn({ method: "POST" })
   .inputValidator(
@@ -29,6 +31,11 @@ export const addObservation = createServerFn({ method: "POST" })
       throw new Error("Bounding box exceeds plate image height")
     }
 
+    const [{ maxObsN }] = await db
+      .select({ maxObsN: sql<string | null>`MAX(${s.observation["OBS-N"]})` })
+      .from(s.observation)
+      .where(eq(s.observation.plateId, data.plateId))
+
     const [observation] = await db
       .insert(s.observation)
       .values({
@@ -39,10 +46,12 @@ export const addObservation = createServerFn({ method: "POST" })
         imageWidth: width,
         imageHeight: height,
         metadataCompletion: 0,
+        "OBS-N": nextObsN(maxObsN),
       })
       .returning({
         id: s.observation.id,
         name: s.observation.name,
+        "OBS-N": s.observation["OBS-N"],
         imageTop: s.observation.imageTop,
         imageLeft: s.observation.imageLeft,
         imageWidth: s.observation.imageWidth,
