@@ -21,13 +21,14 @@ export const getPlateMetadata = createServerFn()
       DETECTOR: { value: plate.DETECTOR, isKnown: plate["DETECTOR?"] },
       OBSERVER: { value: plate.OBSERVER, isKnown: plate["OBSERVER?"] },
       OBSNOTES: { value: plate.OBSNOTES, isKnown: plate["OBSNOTES?"] },
-      NOTES: { value: plate.NOTES, isKnown: plate["NOTES?"] },
+      PLATNOTE: { value: plate.PLATNOTE, isKnown: plate["PLATNOTE?"] },
       SCANNER: { value: plate.SCANNER, isKnown: plate["SCANNER?"] },
       SCANRES: { value: plate.SCANRES, isKnown: plate["SCANRES?"] },
       SCANGAIN: { value: plate.SCANGAIN, isKnown: plate["SCANGAIN?"] },
       SCANSOFT: { value: plate.SCANSOFT, isKnown: plate["SCANSOFT?"] },
       DATESCAN: { value: plate.DATESCAN, isKnown: plate["DATESCAN?"] },
       SCANAUTH: { value: plate.SCANAUTH, isKnown: plate["SCANAUTH?"] },
+      SCANNOTE: { value: plate.SCANNOTE, isKnown: plate["SCANNOTE?"] },
     }
   })
 

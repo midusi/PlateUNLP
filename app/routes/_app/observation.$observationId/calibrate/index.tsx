@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 import type z from "zod"
+import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
@@ -120,6 +121,7 @@ function RouteComponent() {
     deegre: calibration.deegre,
     materialPoints: calibration.materialPoints,
     lampPoints: calibration.lampPoints,
+    CALNOTES: { value: calibration.CALNOTES, isKnown: calibration["CALNOTES?"] },
   }
 
   const form = useAppForm({
@@ -142,6 +144,7 @@ function RouteComponent() {
               deegre: value.deegre,
               materialPoints: value.materialPoints,
               lampPoints: value.lampPoints,
+              CALNOTES: value.CALNOTES,
             },
           })
 
@@ -236,6 +239,16 @@ function RouteComponent() {
               </div>
             )}
           </form.Field>
+        </CardContent>
+        <CardContent>
+          <TextAreaFieldWithKnown
+            form={form}
+            fields="CALNOTES"
+            label="CALNOTES"
+            placeholder="e.g. lamp lines blended near 4500Å; used Legendre fit of degree 3"
+            description="Calibration notes."
+            rows={3}
+          />
         </CardContent>
         <CardFooter className="flex justify-end">
           <form.Subscribe

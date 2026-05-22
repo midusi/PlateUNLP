@@ -13,6 +13,10 @@ export const TeoricalSpectrumConfigSchema = z
     deegre: z.number().min(1, "Degre must be positive integer"),
     materialPoints: z.array(z.object({ x: z.number(), y: z.number() })),
     lampPoints: z.array(z.object({ x: z.number(), y: z.number() })),
+    CALNOTES: z.object({
+      value: z.string(),
+      isKnown: z.boolean(),
+    }),
   })
   .refine((data) => data.maxWavelength > data.minWavelength, {
     message: "Max wavelength must be greater than min wavelength",

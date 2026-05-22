@@ -2,6 +2,7 @@ import { Collapsible } from "@base-ui/react/collapsible"
 import { useMutation } from "@tanstack/react-query"
 import type { z } from "zod"
 import { SelectFieldSimpleWithKnown } from "~/components/forms/select-field-simple-with-known"
+import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
 import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
@@ -292,6 +293,16 @@ export function ObservationMetadataForm({
               label="DEC1950"
               placeholder="e.g. -00:20:24.8767"
               description="Declination in FK4 J1950.0."
+            />
+
+            <TextAreaFieldWithKnown
+              form={form}
+              fields="OBJNOTES"
+              label="OBJNOTES"
+              placeholder="e.g. spectrum contaminated by neighbouring source"
+              description="Notes about this specific observation."
+              rows={3}
+              className="col-span-full"
             />
           </CardContent>
           <CardFooter className="flex justify-end">

@@ -41,6 +41,7 @@ export const CalibrationSettingsUI = withForm({
     deegre: 1,
     materialPoints: [{ x: 1, y: 2 }],
     lampPoints: [{ x: 1, y: 2 }],
+    CALNOTES: { value: "", isKnown: true },
   },
   props: {
     materialArr: [

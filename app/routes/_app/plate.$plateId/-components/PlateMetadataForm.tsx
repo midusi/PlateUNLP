@@ -145,12 +145,14 @@ export function PlateMetadataForm({
               placeholder="e.g. W. Muench"
               description="Person who made the observation."
             />
-            <TextFieldWithKnown
+            <TextAreaFieldWithKnown
               form={form}
               fields="OBSNOTES"
               label="OBSNOTES"
               placeholder="e.g. bad guiding"
               description="Observer notes about the acquisition conditions."
+              rows={3}
+              className="col-span-full"
             />
 
             <Separator orientation="horizontal" className="col-span-full" />
@@ -199,15 +201,24 @@ export function PlateMetadataForm({
               placeholder="e.g. K. Tsvetkova"
               description="Person who digitized the plate."
             />
+            <TextAreaFieldWithKnown
+              form={form}
+              fields="SCANNOTE"
+              label="SCANNOTE"
+              placeholder="e.g. rescanned at higher resolution after dust removal"
+              description="Notes about the scanning process itself."
+              rows={3}
+              className="col-span-full"
+            />
 
             <Separator orientation="horizontal" className="col-span-full" />
 
             <TextAreaFieldWithKnown
               form={form}
-              fields="NOTES"
-              label="NOTES"
+              fields="PLATNOTE"
+              label="PLATNOTE"
               placeholder="e.g. SA 87 = Kapteyn Selected Area 87"
-              description="Miscellaneous notes about the plate or target."
+              description="Plate notes (about the plate itself, such as archival or provenance)."
               rows={4}
               className="col-span-full"
             />

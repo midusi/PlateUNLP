@@ -18,6 +18,7 @@ export const updateCalibration = createServerFn()
       deegre: z.number().min(1, "Degre must be positive integer").optional(),
       materialPoints: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
       lampPoints: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
+      CALNOTES: z.object({ value: z.string(), isKnown: z.boolean() }).optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -40,6 +41,8 @@ export const updateCalibration = createServerFn()
         deegre: data.deegre,
         materialPoints: data.materialPoints,
         lampPoints: data.lampPoints,
+        CALNOTES: data.CALNOTES?.value,
+        "CALNOTES?": data.CALNOTES?.isKnown,
       })
       .where(eq(s.calibration.id, data.id))
       .returning({
@@ -52,6 +55,8 @@ export const updateCalibration = createServerFn()
         deegre: s.calibration.deegre,
         materialPoints: s.calibration.materialPoints,
         lampPoints: s.calibration.lampPoints,
+        CALNOTES: s.calibration.CALNOTES,
+        "CALNOTES?": s.calibration["CALNOTES?"],
       })
     return updatedCalibration[0]
   })

@@ -41,13 +41,14 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
             detector: plate["DETECTOR?"] ? plate.DETECTOR : undefined,
             observer: plate["OBSERVER?"] ? plate.OBSERVER : undefined,
             observerNotes: plate["OBSNOTES?"] ? plate.OBSNOTES : undefined,
-            notes: plate["NOTES?"] ? plate.NOTES : undefined,
+            plateNotes: plate["PLATNOTE?"] ? plate.PLATNOTE : undefined,
             scanner: plate["SCANNER?"] ? plate.SCANNER : undefined,
             scanResolution: plate["SCANRES?"] ? plate.SCANRES : undefined,
             scanGain: plate["SCANGAIN?"] ? plate.SCANGAIN : undefined,
             scanSoftware: plate["SCANSOFT?"] ? plate.SCANSOFT : undefined,
             dateScan: plate["DATESCAN?"] ? plate.DATESCAN : undefined,
             scanAuthor: plate["SCANAUTH?"] ? plate.SCANAUTH : undefined,
+            scannerNotes: plate["SCANNOTE?"] ? plate.SCANNOTE : undefined,
           },
         })
 

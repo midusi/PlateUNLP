@@ -12,7 +12,9 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
           with: {
             observation: {
               with: {
-                plate: true,
+                plate: {
+                  with: { observatory: true, project: true },
+                },
                 calibration: true,
               },
             },
@@ -65,20 +67,56 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
             ? (wavelengthEnd - wavelengthStart) / (spectrum.intensityArr.length - 1)
             : 0
 
+        const plate = observation.plate
+        const fileName = observationToFITSFilename(
+          plate["PLATE-N"],
+          observation.OBJECT,
+          `${spectrum.type}.calibrated`,
+        )
+
         const fits = calibratedSpectrumToFITS(spectrum.intensityArr, {
-          plateNumber: observation.plate["PLATE-N"],
-          observatory: observation.plate.OBSERVAT,
-          observer: observation.plate["OBSERVER?"] ? observation.plate.OBSERVER : undefined,
-          instrument: observation.plate["INSTRUME?"] ? observation.plate.INSTRUME : undefined,
-          detector: observation.plate["DETECTOR?"] ? observation.plate.DETECTOR : undefined,
+          fileName,
+          origin: plate.project.name,
+          plateNumber: plate["PLATE-N"],
+          observatory: plate.OBSERVAT,
+          observatoryTimezone: plate.observatory.timezone,
+          telescope: plate["TELESCOPE?"] ? plate.TELESCOPE : undefined,
+          instrument: plate["INSTRUME?"] ? plate.INSTRUME : undefined,
+          detector: plate["DETECTOR?"] ? plate.DETECTOR : undefined,
+          observer: plate["OBSERVER?"] ? plate.OBSERVER : undefined,
+          observerNotes: plate["OBSNOTES?"] ? plate.OBSNOTES : undefined,
+          plateNotes: plate["PLATNOTE?"] ? plate.PLATNOTE : undefined,
+          scanner: plate["SCANNER?"] ? plate.SCANNER : undefined,
+          scanResolution: plate["SCANRES?"] ? plate.SCANRES : undefined,
+          scanGain: plate["SCANGAIN?"] ? plate.SCANGAIN : undefined,
+          scanSoftware: plate["SCANSOFT?"] ? plate.SCANSOFT : undefined,
+          dateScan: plate["DATESCAN?"] ? plate.DATESCAN : undefined,
+          scanAuthor: plate["SCANAUTH?"] ? plate.SCANAUTH : undefined,
+          scannerNotes: plate["SCANNOTE?"] ? plate.SCANNOTE : undefined,
+          obsN: observation["OBS-N"] || undefined,
+          objectNotes: observation["OBJNOTES?"] ? observation.OBJNOTES : undefined,
           object: observation["OBJECT?"] ? observation.OBJECT : undefined,
           dateObs: observation["DATE-OBS?"] ? observation["DATE-OBS"] : undefined,
+          dateOrg: observation["DATE-ORG?"] ? observation["DATE-ORG"] : undefined,
           exptime: observation["EXPTIME?"] ? observation.EXPTIME : undefined,
           imageType: observation["IMAGETYP?"] ? observation.IMAGETYP : undefined,
           mainId: observation["MAIN-ID?"] ? observation["MAIN-ID"] : undefined,
           spectralType: observation["SPTYPE?"] ? observation.SPTYPE : undefined,
+          ra: observation["RA?"] ? observation.RA : undefined,
+          dec: observation["DEC?"] ? observation.DEC : undefined,
+          epoch: observation["EQUINOX?"] ? observation.EQUINOX : undefined,
+          equinox: observation["EQUINOX?"] ? observation.EQUINOX : undefined,
+          ra2000: observation["RA2000?"] ? observation.RA2000 : undefined,
+          dec2000: observation["DEC2000?"] ? observation.DEC2000 : undefined,
+          ra1950: observation["RA1950?"] ? observation.RA1950 : undefined,
+          dec1950: observation["DEC1950?"] ? observation.DEC1950 : undefined,
+          jd: observation["JD?"] ? observation.JD : undefined,
+          siderealTime: observation["ST?"] ? observation.ST : undefined,
+          hourAngle: observation["HA?"] ? observation.HA : undefined,
+          airmass: observation["AIRMASS?"] ? observation.AIRMASS : undefined,
           calibrationMaterial: calibration.material,
           calibrationFunction: calibration.inferenceFunction,
+          calibrationNotes: calibration["CALNOTES?"] ? calibration.CALNOTES : undefined,
           wavelengthStart,
           wavelengthStep,
           wavelengthUnit: "Angstrom",
@@ -93,7 +131,7 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
         return new Response(fits.toBuffer(), {
           headers: {
             "Content-Type": "application/fits",
-            "Content-Disposition": `attachment; filename="${observationToFITSFilename(observation.plate["PLATE-N"], observation.OBJECT, `${spectrum.type}.calibrated`)}"`,
+            "Content-Disposition": `attachment; filename="${fileName}"`,
             "Cache-Control": "no-store",
           },
         })

@@ -30,6 +30,8 @@ export const calibration = sqliteTable(
       .notNull()
       .$type<{ x: number; y: number }[]>()
       .default(sql`'[]'`),
+    CALNOTES: text("calnotes").notNull().default(""),
+    "CALNOTES?": integer("calnotes_known", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [uniqueIndex("calibration_observation_idx").on(t.observationId)],
 )

@@ -57,6 +57,13 @@
       "when": 1778879765131,
       "tag": "0007_add_obs_n",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1778894684551,
+      "tag": "0008_add_notes_fields",
+      "breakpoints": true
     }
   ]
 }

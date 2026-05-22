@@ -23,6 +23,8 @@ export const getOrAddCalibration = createServerFn({ method: "POST" })
         deegre: true,
         lampPoints: true,
         materialPoints: true,
+        CALNOTES: true,
+        "CALNOTES?": true,
       },
     })
 
@@ -44,6 +46,8 @@ export const getOrAddCalibration = createServerFn({ method: "POST" })
           deegre: s.calibration.deegre,
           lampPoints: s.calibration.lampPoints,
           materialPoints: s.calibration.materialPoints,
+          CALNOTES: s.calibration.CALNOTES,
+          "CALNOTES?": s.calibration["CALNOTES?"],
         })
 
     return calibration

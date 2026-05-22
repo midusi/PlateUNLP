@@ -8,7 +8,7 @@ export const plateMetadataFormSchema = z.object({
   DETECTOR: z.string().optional(),
   OBSERVER: z.string().optional(),
   OBSNOTES: z.string().optional(),
-  NOTES: z.string().optional(),
+  PLATNOTE: z.string().optional(),
   SCANNER: z.string().optional(),
   SCANRES: z.string().optional(),
   SCANGAIN: z.string().optional(),

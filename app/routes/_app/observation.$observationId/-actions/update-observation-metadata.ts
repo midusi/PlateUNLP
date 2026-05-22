@@ -55,6 +55,8 @@ export const updateObservationMetadata = createServerFn({ method: "POST" })
         "EXPTIME?": data.metadata.EXPTIME.isKnown,
         IMAGETYP: data.metadata.IMAGETYP.value,
         "IMAGETYP?": data.metadata.IMAGETYP.isKnown,
+        OBJNOTES: data.metadata.OBJNOTES.value,
+        "OBJNOTES?": data.metadata.OBJNOTES.isKnown,
       })
       .where(eq(s.observation.id, data.observationId))
   })

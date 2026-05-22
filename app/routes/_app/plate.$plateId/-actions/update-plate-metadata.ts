@@ -29,8 +29,8 @@ export const updatePlateMetadata = createServerFn({ method: "POST" })
         "OBSERVER?": data.metadata.OBSERVER.isKnown,
         OBSNOTES: data.metadata.OBSNOTES.value,
         "OBSNOTES?": data.metadata.OBSNOTES.isKnown,
-        NOTES: data.metadata.NOTES.value,
-        "NOTES?": data.metadata.NOTES.isKnown,
+        PLATNOTE: data.metadata.PLATNOTE.value,
+        "PLATNOTE?": data.metadata.PLATNOTE.isKnown,
         SCANNER: data.metadata.SCANNER.value,
         "SCANNER?": data.metadata.SCANNER.isKnown,
         SCANRES: data.metadata.SCANRES.value,
@@ -43,6 +43,8 @@ export const updatePlateMetadata = createServerFn({ method: "POST" })
         "DATESCAN?": data.metadata.DATESCAN.isKnown,
         SCANAUTH: data.metadata.SCANAUTH.value,
         "SCANAUTH?": data.metadata.SCANAUTH.isKnown,
+        SCANNOTE: data.metadata.SCANNOTE.value,
+        "SCANNOTE?": data.metadata.SCANNOTE.isKnown,
       })
       .where(eq(s.plate.id, data.plateId))
   })

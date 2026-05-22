@@ -63,6 +63,8 @@ export const observation = sqliteTable(
     AIRMASS: text("airmass").notNull().default(""),
     "AIRMASS?": integer("airmass_known", { mode: "boolean" }).notNull().default(true),
     "OBS-N": text("obs_n").notNull().default(""),
+    OBJNOTES: text("objnotes").notNull().default(""),
+    "OBJNOTES?": integer("objnotes_known", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [uniqueIndex("observation_name_idx").on(t.plateId, t.name)],
 )

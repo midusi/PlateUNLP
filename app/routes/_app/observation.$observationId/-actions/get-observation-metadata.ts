@@ -40,6 +40,7 @@ export const getObservationMetadata = createServerFn()
         AIRMASS: { value: observation.AIRMASS, isKnown: observation["AIRMASS?"] },
         EXPTIME: { value: observation.EXPTIME, isKnown: observation["EXPTIME?"] },
         IMAGETYP: { value: observation.IMAGETYP, isKnown: observation["IMAGETYP?"] },
+        OBJNOTES: { value: observation.OBJNOTES, isKnown: observation["OBJNOTES?"] },
       }
     },
   )

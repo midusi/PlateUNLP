@@ -24,13 +24,14 @@ export const PlateMetadataSchema = z.object({
   DETECTOR: knowable(fitsString()),
   OBSERVER: knowable(fitsString()),
   OBSNOTES: knowable(fitsString()),
-  NOTES: knowable(fitsString()),
+  PLATNOTE: knowable(fitsString()),
   SCANNER: knowable(fitsString()),
   SCANRES: knowable(numericText()),
   SCANGAIN: knowable(numericText()),
   SCANSOFT: knowable(fitsString()),
   DATESCAN: knowable(localDateTime().or(z.literal(""))),
   SCANAUTH: knowable(fitsString()),
+  SCANNOTE: knowable(fitsString()),
 })
 /**
  * Compute the completion percentage of the plate metadata.
@@ -78,6 +79,7 @@ export const ObservationMetadataSchema = z.object({
   ST: knowable(z.iso.time().or(z.literal(""))), // HH:mm:ss.sss (any precision)
   HA: knowable(sexasegimal().or(z.literal(""))), // ±ddd:mm:ss.sss (any precision)
   AIRMASS: knowable(z.string().regex(z.regexes.number).or(z.literal(""))),
+  OBJNOTES: knowable(fitsString()),
 })
 /**
  * Compute the completion percentage of the observation metadata.
