@@ -1,8 +1,9 @@
 import type { z } from "zod"
 import type { FITSExportField } from "~/components/FITSExportButton"
-import type {
-  ObservationMetadataSchema,
-  PlateMetadataSchema,
+import {
+  exportsComputedMetadata,
+  type ObservationMetadataSchema,
+  type PlateMetadataSchema,
 } from "~/types/spectrum-metadata"
 
 /**
@@ -48,12 +49,19 @@ export function plateMetadataFields(plate: PlateMetadata): FITSExportField[] {
 
 /** Flattens the observation metadata into FITSExportField entries. */
 export function observationMetadataFields(obs: ObservationMetadata): FITSExportField[] {
-  return [
+  const baseFields: FITSExportField[] = [
     { label: "OBJECT", value: obs.OBJECT, isKnown: true },
     { label: "DATE-OBS", value: obs["DATE-OBS"].value, isKnown: obs["DATE-OBS"].isKnown },
     { label: "EXPTIME", value: obs.EXPTIME.value, isKnown: obs.EXPTIME.isKnown },
     { label: "IMAGETYP", value: obs.IMAGETYP.value, isKnown: obs.IMAGETYP.isKnown },
     { label: "OBJNOTES", value: obs.OBJNOTES.value, isKnown: obs.OBJNOTES.isKnown },
+  ]
+
+  // Computed fields aren't exported (nor shown) unless the frame is a sky object.
+  if (!exportsComputedMetadata(obs.IMAGETYP)) return baseFields
+
+  return [
+    ...baseFields,
     { label: "MAIN-ID", value: obs["MAIN-ID"].value, isKnown: obs["MAIN-ID"].isKnown },
     { label: "SPTYPE", value: obs.SPTYPE.value, isKnown: obs.SPTYPE.isKnown },
     { label: "DATE-ORG", value: obs["DATE-ORG"].value, isKnown: obs["DATE-ORG"].isKnown },

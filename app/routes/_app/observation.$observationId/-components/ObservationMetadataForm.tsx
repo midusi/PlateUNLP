@@ -1,9 +1,9 @@
 import { Collapsible } from "@base-ui/react/collapsible"
 import { useMutation } from "@tanstack/react-query"
 import type { z } from "zod"
-import { SelectFieldSimpleWithKnown } from "~/components/forms/select-field-simple-with-known"
-import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
+import { AutocompleteFieldWithKnown } from "~/components/forms/autocomplete-field-with-known"
 import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
+import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { Progress } from "~/components/ui/progress"
@@ -12,6 +12,7 @@ import { useAppForm } from "~/hooks/use-app-form"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
 import {
+  exportsComputedMetadata,
   getObservationMetadataCompletion,
   ObservationMetadataSchema,
 } from "~/types/spectrum-metadata"
@@ -153,149 +154,154 @@ export function ObservationMetadataForm({
               description="Integration time in seconds."
             />
 
-            <SelectFieldSimpleWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="IMAGETYP"
               label="IMAGETYP"
               placeholder="e.g. object"
               description="Observation type: object, dark, zero, flat, or arc."
-              options={["object", "dark", "zero", "flat", "arc"].map((v) => ({
-                label: v,
-                value: v,
-              }))}
+              options={["object", "dark", "zero", "flat", "arc"]}
             />
 
-            <div className="relative col-span-full flex h-12 items-center justify-center">
-              <Separator orientation="horizontal" className="absolute top-1/2" />
-              <form.Subscribe
-                selector={(formState) => [
-                  formState.fieldMeta.OBJECT?.isValid &&
-                    formState.fieldMeta["DATE-OBS.value"]?.isValid,
-                ]}
-              >
-                {([isValid]) => (
-                  <Button
-                    className="z-10"
-                    disabled={!isValid || isComputingMetadata}
-                    onClick={() => computeMetadata()}
-                  >
-                    <span
-                      className={
-                        isComputingMetadata
-                          ? "icon-[ph--spinner-bold] animate-spin"
-                          : "icon-[ph--calculator-bold]"
-                      }
+            <form.Subscribe selector={(state) => exportsComputedMetadata(state.values.IMAGETYP)}>
+              {(showComputed) =>
+                showComputed ? (
+                  <>
+                    <div className="relative col-span-full flex h-12 items-center justify-center">
+                      <Separator orientation="horizontal" className="absolute top-1/2" />
+                      <form.Subscribe
+                        selector={(formState) => [
+                          formState.fieldMeta.OBJECT?.isValid &&
+                            formState.fieldMeta["DATE-OBS.value"]?.isValid,
+                        ]}
+                      >
+                        {([isValid]) => (
+                          <Button
+                            className="z-10"
+                            disabled={!isValid || isComputingMetadata}
+                            onClick={() => computeMetadata()}
+                          >
+                            <span
+                              className={
+                                isComputingMetadata
+                                  ? "icon-[ph--spinner-bold] animate-spin"
+                                  : "icon-[ph--calculator-bold]"
+                              }
+                            />
+                            Compute the rest of the metadata
+                          </Button>
+                        )}
+                      </form.Subscribe>
+                    </div>
+
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="MAIN-ID"
+                      label="MAIN-ID"
+                      placeholder="e.g. * zet Vir"
+                      description="Main identifier returned by SIMBAD."
                     />
-                    Compute the rest of the metadata
-                  </Button>
-                )}
-              </form.Subscribe>
-            </div>
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="SPTYPE"
+                      label="SPTYPE"
+                      placeholder="e.g. A2Van"
+                      description="Spectral type returned by SIMBAD."
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="AIRMASS"
+                      label="AIRMASS"
+                      placeholder="e.g. 1.152887"
+                      description="Airmass of the object at the time of observation."
+                    />
 
-            <TextFieldWithKnown
-              form={form}
-              fields="MAIN-ID"
-              label="MAIN-ID"
-              placeholder="e.g. * zet Vir"
-              description="Main identifier returned by SIMBAD."
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="SPTYPE"
-              label="SPTYPE"
-              placeholder="e.g. A2Van"
-              description="Spectral type returned by SIMBAD."
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="AIRMASS"
-              label="AIRMASS"
-              placeholder="e.g. 1.152887"
-              description="Airmass of the object at the time of observation."
-            />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="DATE-ORG"
+                      label="DATE-ORG"
+                      placeholder="e.g. 1910-08-02T19:21:01"
+                      type="datetime-local"
+                      step="1"
+                      description="Local mean datetime of the observation."
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="ST"
+                      label="ST"
+                      placeholder="e.g. 13:38:09.8101"
+                      description="Local mean sidereal time."
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="HA"
+                      label="HA"
+                      placeholder="e.g. 00:06:02.2010"
+                      description="Local hour angle."
+                    />
 
-            <TextFieldWithKnown
-              form={form}
-              fields="DATE-ORG"
-              label="DATE-ORG"
-              placeholder="e.g. 1910-08-02T19:21:01"
-              type="datetime-local"
-              step="1"
-              description="Local mean datetime of the observation."
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="ST"
-              label="ST"
-              placeholder="e.g. 13:38:09.8101"
-              description="Local mean sidereal time."
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="HA"
-              label="HA"
-              placeholder="e.g. 00:06:02.2010"
-              description="Local hour angle."
-            />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="RA"
+                      label="RA"
+                      placeholder="e.g. 13:32:07.6091"
+                      description='Right ascension in FK4 format ("h:m:s").'
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="DEC"
+                      label="DEC"
+                      placeholder="e.g. -00:20:24.9813"
+                      description='Declination in FK4 format ("d:m:s").'
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="EQUINOX"
+                      label="EQUINOX"
+                      placeholder="e.g. 1976.1"
+                      description="Equinox of RA and DEC."
+                    />
 
-            <TextFieldWithKnown
-              form={form}
-              fields="RA"
-              label="RA"
-              placeholder="e.g. 13:32:07.6091"
-              description='Right ascension in FK4 format ("h:m:s").'
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="DEC"
-              label="DEC"
-              placeholder="e.g. -00:20:24.9813"
-              description='Declination in FK4 format ("d:m:s").'
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="EQUINOX"
-              label="EQUINOX"
-              placeholder="e.g. 1976.1"
-              description="Equinox of RA and DEC."
-            />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="RA2000"
+                      label="RA2000"
+                      placeholder="e.g. 13:34:41.5933"
+                      description="Right ascension in ICRS J2000."
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="DEC2000"
+                      label="DEC2000"
+                      placeholder="e.g. -00:35:45.009"
+                      description="Declination in ICRS J2000."
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="JD"
+                      label="JD"
+                      placeholder="e.g. 2442824.86111111"
+                      description="Julian date in Universal Time."
+                    />
 
-            <TextFieldWithKnown
-              form={form}
-              fields="RA2000"
-              label="RA2000"
-              placeholder="e.g. 13:34:41.5933"
-              description="Right ascension in ICRS J2000."
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="DEC2000"
-              label="DEC2000"
-              placeholder="e.g. -00:35:45.009"
-              description="Declination in ICRS J2000."
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="JD"
-              label="JD"
-              placeholder="e.g. 2442824.86111111"
-              description="Julian date in Universal Time."
-            />
-
-            <TextFieldWithKnown
-              form={form}
-              fields="RA1950"
-              label="RA1950"
-              placeholder="e.g. 13:32:07.6132"
-              description="Right ascension in FK4 J1950.0."
-            />
-            <TextFieldWithKnown
-              form={form}
-              fields="DEC1950"
-              label="DEC1950"
-              placeholder="e.g. -00:20:24.8767"
-              description="Declination in FK4 J1950.0."
-            />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="RA1950"
+                      label="RA1950"
+                      placeholder="e.g. 13:32:07.6132"
+                      description="Right ascension in FK4 J1950.0."
+                    />
+                    <TextFieldWithKnown
+                      form={form}
+                      fields="DEC1950"
+                      label="DEC1950"
+                      placeholder="e.g. -00:20:24.8767"
+                      description="Declination in FK4 J1950.0."
+                    />
+                  </>
+                ) : null
+              }
+            </form.Subscribe>
 
             <TextAreaFieldWithKnown
               form={form}

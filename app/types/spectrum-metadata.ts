@@ -63,7 +63,7 @@ export const ObservationMetadataSchema = z.object({
   OBJECT: fitsString(),
   "DATE-OBS": knowable(localDateTime().or(z.literal(""))), // yyyy-MM-ddTHH:mm[:ss[.sss]]
   EXPTIME: knowable(numericText()),
-  IMAGETYP: knowable(z.enum(["object", "dark", "zero", "flat", "arc"])),
+  IMAGETYP: knowable(fitsString()),
 
   "MAIN-ID": knowable(fitsString()),
   SPTYPE: knowable(fitsString()),
@@ -82,23 +82,61 @@ export const ObservationMetadataSchema = z.object({
   OBJNOTES: knowable(fitsString()),
 })
 /**
+ * Observation metadata fields derived from OBJECT + DATE-OBS (the "Compute the
+ * rest of the metadata" step). They only make sense for an actual sky object,
+ * so they are hidden in the form and omitted from the FITS export when
+ * IMAGETYP is anything other than `object`.
+ */
+export const COMPUTED_OBSERVATION_FIELDS = [
+  "MAIN-ID",
+  "SPTYPE",
+  "DATE-ORG",
+  "JD",
+  "ST",
+  "HA",
+  "RA",
+  "DEC",
+  "EQUINOX",
+  "RA2000",
+  "DEC2000",
+  "RA1950",
+  "DEC1950",
+  "AIRMASS",
+] as const satisfies readonly (keyof z.infer<typeof ObservationMetadataSchema>)[]
+
+const COMPUTED_FIELD_SET = new Set<string>(COMPUTED_OBSERVATION_FIELDS)
+
+/**
+ * Whether the computed metadata applies — i.e. the observation is a known sky
+ * object. Calibration frames (dark, zero, flat, arc) and unknown types omit it.
+ */
+export function exportsComputedMetadata(imageType: { value: string; isKnown: boolean }): boolean {
+  return imageType.isKnown && imageType.value === "object"
+}
+
+/**
  * Compute the completion percentage of the observation metadata.
  * It counts how many fields are filled in, considering `isKnown` and `value`.
+ * Computed fields are excluded from the tally when they don't apply.
  */
 export function getObservationMetadataCompletion(
   metadata: z.infer<typeof ObservationMetadataSchema>,
 ): { completed: number; total: number; percentage: number } {
-  const total = Object.keys(ObservationMetadataSchema.shape).length
-  const completed = Object.values(metadata).filter((value) => {
-    if (typeof value === "object") {
+  const showComputed = exportsComputedMetadata(metadata.IMAGETYP)
+  const entries = Object.entries(metadata).filter(
+    ([key]) => showComputed || !COMPUTED_FIELD_SET.has(key),
+  )
+  const total = entries.length
+  const completed = entries.filter(([, value]) => {
+    if (value && typeof value === "object") {
       return !value.isKnown || value.value.length > 0
     }
-    return value.length > 0
+    return typeof value === "string" && value.length > 0
   }).length
   return {
     completed,
     total,
-    percentage: (completed / total) * 100,
+    percentage: total === 0 ? 100 : (completed / total) * 100,
   }
 }
 

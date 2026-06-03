@@ -111,6 +111,10 @@ export function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata)
 }
 
 export function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMetadata) {
+  // Computed metadata only applies to actual sky objects; calibration frames
+  // (dark, zero, flat, arc) and unknown types omit it entirely.
+  const showComputed = metadata.imageType === "object"
+
   appendSectionBanner(fits, "Original data of the observation")
   setTextCard(fits, "OBS-N", metadata.obsN, "observation label within the plate")
   setTextCard(
@@ -119,16 +123,21 @@ export function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMet
     normalizeOptionalDateTime(metadata.dateObs),
     "UT mean datetime of the observation",
   )
-  setTextCard(
-    fits,
-    "DATE-ORG",
-    metadata.dateOrg ?? toLocalObservationDateTime(metadata.dateObs, metadata.observatoryTimezone),
-    "Local mean datetime of the observation",
-  )
+  if (showComputed) {
+    setTextCard(
+      fits,
+      "DATE-ORG",
+      metadata.dateOrg ??
+        toLocalObservationDateTime(metadata.dateObs, metadata.observatoryTimezone),
+      "Local mean datetime of the observation",
+    )
+  }
   setTextCard(fits, "OBJECT", metadata.object, "name of the observed object")
   setTextCard(fits, "IMAGETYP", metadata.imageType, "object, dark, zero, etc.")
   setExposureTimeCard(fits, metadata.exptime)
   setTextCard(fits, "OBJNOTES", metadata.objectNotes, "observation notes")
+
+  if (!showComputed) return
 
   appendSectionBanner(fits, "Computed data of the observation")
   setTextCard(fits, "MAIN-ID", metadata.mainId, "Simbad main ID object name")

@@ -30,9 +30,7 @@ export const observation = sqliteTable(
     "DATE-OBS?": integer("date_obs_known", { mode: "boolean" }).notNull().default(true),
     EXPTIME: text("exptime").notNull().default(""),
     "EXPTIME?": integer("exptime_known", { mode: "boolean" }).notNull().default(true),
-    IMAGETYP: text("imagetyp", { enum: ["object", "dark", "zero", "flat", "arc"] })
-      .notNull()
-      .default("object"),
+    IMAGETYP: text("imagetyp").notNull().default("object"),
     "IMAGETYP?": integer("imagetyp_known", { mode: "boolean" }).notNull().default(true),
     "MAIN-ID": text("main_id").notNull().default(""),
     "MAIN-ID?": integer("main_id_known", { mode: "boolean" }).notNull().default(true),
