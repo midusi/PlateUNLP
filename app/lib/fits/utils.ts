@@ -6,19 +6,16 @@ import { normalizeLocalDateTime } from "../local-datetime"
 
 const BLANK_LENGTH = 80 - 8
 
+/**
+ * Sentinel string written to a FITS card when the source field was explicitly
+ * marked as unknown by the user (`isKnown=false`). Distinguishes between
+ * "not recorded" (unknown) and "left empty" (a warning case before export).
+ */
+export const FITS_UNKNOWN = "UNKNOWN"
+
 /** Append a section header card with a dash-padded title (e.g. `"Plate metadata ----..."`). */
 export function appendSectionBanner(fits: FITS, title: string) {
   fits.header.appendBlank(`${title} `.padEnd(BLANK_LENGTH, "-"))
-}
-
-export function setIfPresent(
-  fits: FITS,
-  keyword: string,
-  value: string | undefined,
-  comment: string,
-) {
-  if (!value) return
-  fits.header.set(keyword, value, { comment })
 }
 
 export function setTextCard(
@@ -30,23 +27,41 @@ export function setTextCard(
   fits.header.set(keyword, value ?? "", { comment })
 }
 
-export function setNumericIfPresent(
+/**
+ * Always emits a card. Writes a number when the value parses as one, the
+ * `UNKNOWN` sentinel when explicitly unknown, otherwise an empty string.
+ */
+export function setNumericCard(
   fits: FITS,
   keyword: string,
   value: string | undefined,
   comment: string,
 ) {
-  if (!value) return
-  const numeric = Number.parseFloat(value)
-  if (!Number.isFinite(numeric)) return
+  if (value === FITS_UNKNOWN) {
+    fits.header.set(keyword as string, FITS_UNKNOWN, { comment })
+    return
+  }
+  const numeric = value ? Number.parseFloat(value) : Number.NaN
+  if (!Number.isFinite(numeric)) {
+    fits.header.set(keyword as string, "", { comment })
+    return
+  }
   fits.header.set(keyword, numeric, { comment })
 }
 
-export function setExposureTimeIfPresent(fits: FITS, value: string | undefined) {
-  if (!value) return
-  const seconds = parseExposureTimeSeconds(value)
-  if (seconds === undefined) return
-  fits.header.set("EXPTIME", seconds, { comment: "[s] exposure time" })
+/** Always emits an EXPTIME card; see {@link setNumericCard} for the value rules. */
+export function setExposureTimeCard(fits: FITS, value: string | undefined) {
+  const comment = "[s] exposure time"
+  if (value === FITS_UNKNOWN) {
+    fits.header.set("EXPTIME" as string, FITS_UNKNOWN, { comment })
+    return
+  }
+  const seconds = value ? parseExposureTimeSeconds(value) : undefined
+  if (seconds === undefined) {
+    fits.header.set("EXPTIME" as string, "", { comment })
+    return
+  }
+  fits.header.set("EXPTIME", seconds, { comment })
 }
 
 export function fromUint16Array(points: Uint16Array, axes: number[]): FITS {
@@ -79,7 +94,9 @@ export function sanitizeFilename(value: string): string {
 }
 
 export function normalizeOptionalDateTime(value: string | undefined) {
-  return value ? normalizeLocalDateTime(value) : undefined
+  if (!value) return undefined
+  if (value === FITS_UNKNOWN) return FITS_UNKNOWN
+  return normalizeLocalDateTime(value)
 }
 
 function parseExposureTimeSeconds(value: string): number | undefined {
@@ -103,6 +120,7 @@ function parseExposureTimeSeconds(value: string): number | undefined {
 
 export function derivePixelSizeFromScanResolution(value: string | undefined) {
   if (!value) return undefined
+  if (value === FITS_UNKNOWN) return FITS_UNKNOWN
   const dpi = Number.parseFloat(value)
   if (!Number.isFinite(dpi) || dpi <= 0) return undefined
   return (25400 / dpi).toString()
@@ -113,6 +131,7 @@ export function toLocalObservationDateTime(
   timezone: string | undefined,
 ) {
   if (!value || !timezone) return undefined
+  if (value === FITS_UNKNOWN) return FITS_UNKNOWN
 
   try {
     const utcDate = new UTCDate(`${normalizeLocalDateTime(value)}Z`)

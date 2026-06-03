@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { getObservatoriesQueryOptions } from "~/components/forms/SelectObservatory"
-import { buttonVariants } from "~/components/ui/button"
+import { FITSExportButton } from "~/components/FITSExportButton"
 import { breadcrumb } from "~/lib/breadcrumbs"
+import { plateMetadataFields } from "~/lib/fits-export-fields"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
+import type { PlateMetadataSchema } from "~/types/spectrum-metadata"
+import type { z } from "zod"
 import { getObservations } from "./-actions/get-observations"
 import { getPlateMetadata } from "./-actions/get-plate-metadata"
 import { ObservationsList } from "./-components/ObservationsList"
@@ -44,16 +47,24 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto w-full">
-      <PlateMetadataForm plateId={plateId} defaultValues={initialMetadata} />
-      <div className="my-8 flex justify-end">
-        <a
-          href={`/plate/${plateId}/fits`}
-          className={buttonVariants({ size: "sm", variant: "outline" })}
-        >
-          <span className="icon-[ph--download-simple-bold]" />
-          Download FITS
-        </a>
-      </div>
+      <PlateMetadataForm plateId={plateId} defaultValues={initialMetadata}>
+        {(form) => (
+          <div className="my-8 flex justify-end">
+            <form.Subscribe selector={(s) => s.values}>
+              {(values: z.output<typeof PlateMetadataSchema>) => (
+                <FITSExportButton
+                  href={`/plate/${plateId}/fits`}
+                  variant="outline"
+                  fields={plateMetadataFields(values)}
+                >
+                  <span className="icon-[ph--download-simple-bold]" />
+                  Download FITS
+                </FITSExportButton>
+              )}
+            </form.Subscribe>
+          </div>
+        )}
+      </PlateMetadataForm>
       <ObservationsList plateId={plateId} initialObservations={initialObservations} />
     </div>
   )

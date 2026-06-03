@@ -2,14 +2,21 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 import type z from "zod"
 import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
+import { FITSExportButton } from "~/components/FITSExportButton"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
 import { breadcrumb } from "~/lib/breadcrumbs"
+import {
+  calibrationMetadataFields,
+  observationMetadataFields,
+  plateMetadataFields,
+} from "~/lib/fits-export-fields"
 import { formatObservation } from "~/lib/format"
 import { notifyError } from "~/lib/notifications"
 import { CustomError } from "~/lib/utils"
+import { getPlateMetadata } from "~/routes/_app/plate.$plateId/-actions/get-plate-metadata"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"
 import { getProjectName } from "~/routes/_app/project.$projectId/-actions/get-project-name"
 import { TeoricalSpectrumConfigSchema } from "~/types/calibrate"
@@ -44,9 +51,10 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
         getMaterialsNames(),
       ])
 
-    const materialData = await getMaterialData({
-      data: { materialName: calibration.material },
-    })
+    const [materialData, plateMetadata] = await Promise.all([
+      getMaterialData({ data: { materialName: calibration.material } }),
+      getPlateMetadata({ data: { plateId: plate.id } }),
+    ])
 
     return {
       breadcrumbs: [
@@ -75,12 +83,24 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
       calibration: calibration,
       materialData: materialData,
       listOfMaterials: listOfMaterials,
+      plateMetadata,
+      initialMetadata,
     }
   },
 })
 
 function RouteComponent() {
-  const { spectrums, calibration, materialData, listOfMaterials } = Route.useLoaderData()
+  const {
+    spectrums,
+    calibration,
+    materialData,
+    listOfMaterials,
+    plateMetadata,
+    initialMetadata,
+  } = Route.useLoaderData()
+
+  const plateFields = plateMetadataFields(plateMetadata)
+  const observationFields = observationMetadataFields(initialMetadata)
 
   const lastMaterial = useRef<string>(calibration.material)
   const [materialArr, setMaterialArr] = useState<
@@ -313,40 +333,54 @@ function RouteComponent() {
       </Card>
 
       <form.Subscribe
-        selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+        selector={(formState) => ({
+          isValid: formState.isValid,
+          isSubmitting: formState.isSubmitting,
+          values: formState.values,
+        })}
       >
-        {([isValid, isSubmitting, _isDirty]) => (
-          <div className="my-4 flex w-full flex-wrap justify-center gap-4">
-            {lampSpectrumIds.map((lampId, idx) => (
-              <Button
-                key={lampId}
-                onClick={() => {
-                  window.location.href = `/spectrum/${lampId}/calibrated-fits`
-                }}
-                disabled={
-                  !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
-                }
-                variant="outline"
-              >
-                <span className="icon-[ph--lightbulb]" />
-                {`Download lamp (${idx + 1})`}
-              </Button>
-            ))}
-            {scienceSpectrumId && (
-              <Button
-                onClick={() => {
-                  window.location.href = `/spectrum/${scienceSpectrumId}/calibrated-fits`
-                }}
-                disabled={
-                  !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
-                }
-              >
-                <span className="icon-[ph--planet]" />
-                Download science
-              </Button>
-            )}
-          </div>
-        )}
+        {({ isValid, isSubmitting, values }) => {
+          const exportFields = [
+            ...plateFields,
+            ...observationFields,
+            ...calibrationMetadataFields({
+              material: values.material,
+              inferenceFunction: values.inferenceFunction,
+              CALNOTES: values.CALNOTES.value,
+              "CALNOTES?": values.CALNOTES.isKnown,
+            }),
+          ]
+          return (
+            <div className="my-4 flex w-full flex-wrap justify-center gap-4">
+              {lampSpectrumIds.map((lampId, idx) => (
+                <FITSExportButton
+                  key={lampId}
+                  href={`/spectrum/${lampId}/calibrated-fits`}
+                  disabled={
+                    !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
+                  }
+                  variant="outline"
+                  fields={exportFields}
+                >
+                  <span className="icon-[ph--lightbulb]" />
+                  {`Download lamp (${idx + 1})`}
+                </FITSExportButton>
+              ))}
+              {scienceSpectrumId && (
+                <FITSExportButton
+                  href={`/spectrum/${scienceSpectrumId}/calibrated-fits`}
+                  disabled={
+                    !isValid || isSubmitting || pixelToWavelengthFunction instanceof CustomError
+                  }
+                  fields={exportFields}
+                >
+                  <span className="icon-[ph--planet]" />
+                  Download science
+                </FITSExportButton>
+              )}
+            </div>
+          )
+        }}
       </form.Subscribe>
     </>
   )

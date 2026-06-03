@@ -14,7 +14,9 @@ import {
   type PlateFITSMetadata,
   type SpectrumCropFITSMetadata,
 } from "./sections"
-import { assertPixelCount, fromUint16Array, sanitizeFilename } from "./utils"
+import { assertPixelCount, FITS_UNKNOWN, fromUint16Array, sanitizeFilename } from "./utils"
+
+export { FITS_UNKNOWN }
 
 export type {
   CalibratedSpectrumFITSMetadata,
@@ -24,6 +26,16 @@ export type {
   PlateMetadata,
   SpectrumCropFITSMetadata,
 } from "./sections"
+
+/**
+ * Resolves a knowable DB field to the value that should be written to a FITS
+ * card: the real value when `isKnown` is true, or the `UNKNOWN` sentinel
+ * otherwise. Empty strings are passed through (callers warn the user before
+ * exporting).
+ */
+export function unknownable(value: string, isKnown: boolean): string {
+  return isKnown ? value : FITS_UNKNOWN
+}
 
 export function plateToFITS(
   pixels: Uint16Array,

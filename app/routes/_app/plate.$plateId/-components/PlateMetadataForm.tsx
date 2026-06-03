@@ -23,9 +23,16 @@ import { updatePlateMetadata } from "../-actions/update-plate-metadata"
 export function PlateMetadataForm({
   plateId,
   defaultValues,
+  children,
 }: {
   plateId: string
   defaultValues: z.input<typeof PlateMetadataSchema>
+  /**
+   * Optional render-prop receiving the live form instance. Use it to render
+   * siblings (such as a FITS export button) that need access to the current
+   * form values via `form.Subscribe`, without lifting form state into the page.
+   */
+  children?: (form: ReturnType<typeof useAppForm>) => React.ReactNode
 }) {
   const router = useRouter()
 
@@ -255,6 +262,7 @@ export function PlateMetadataForm({
           </CardFooter>
         </Collapsible.Panel>
       </Card>
+      {children?.(form)}
     </Collapsible.Root>
   )
 }

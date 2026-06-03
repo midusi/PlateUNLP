@@ -22,10 +22,12 @@ export function ObservationMetadataForm({
   observationId,
   OBSERVAT,
   defaultValues,
+  children,
 }: {
   observationId: string
   OBSERVAT: string
   defaultValues: z.output<typeof ObservationMetadataSchema>
+  children?: (form: ReturnType<typeof useAppForm>) => React.ReactNode
 }) {
   const form = useAppForm({
     defaultValues,
@@ -337,6 +339,7 @@ export function ObservationMetadataForm({
           </CardFooter>
         </Collapsible.Panel>
       </Card>
+      {children?.(form)}
     </Collapsible.Root>
   )
 }

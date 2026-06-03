@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
-import { plateToFITS, plateToFITSFilename } from "~/lib/fits"
+import { plateToFITS, plateToFITSFilename, unknownable } from "~/lib/fits"
 import { readUploadedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/plate/$plateId/fits")({
@@ -36,19 +36,19 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
             origin: plate.project.name,
             plateNumber: plate["PLATE-N"],
             observatory: plate.OBSERVAT,
-            telescope: plate["TELESCOPE?"] ? plate.TELESCOPE : undefined,
-            instrument: plate["INSTRUME?"] ? plate.INSTRUME : undefined,
-            detector: plate["DETECTOR?"] ? plate.DETECTOR : undefined,
-            observer: plate["OBSERVER?"] ? plate.OBSERVER : undefined,
-            observerNotes: plate["OBSNOTES?"] ? plate.OBSNOTES : undefined,
-            plateNotes: plate["PLATNOTE?"] ? plate.PLATNOTE : undefined,
-            scanner: plate["SCANNER?"] ? plate.SCANNER : undefined,
-            scanResolution: plate["SCANRES?"] ? plate.SCANRES : undefined,
-            scanGain: plate["SCANGAIN?"] ? plate.SCANGAIN : undefined,
-            scanSoftware: plate["SCANSOFT?"] ? plate.SCANSOFT : undefined,
-            dateScan: plate["DATESCAN?"] ? plate.DATESCAN : undefined,
-            scanAuthor: plate["SCANAUTH?"] ? plate.SCANAUTH : undefined,
-            scannerNotes: plate["SCANNOTE?"] ? plate.SCANNOTE : undefined,
+            telescope: unknownable(plate.TELESCOPE, plate["TELESCOPE?"]),
+            instrument: unknownable(plate.INSTRUME, plate["INSTRUME?"]),
+            detector: unknownable(plate.DETECTOR, plate["DETECTOR?"]),
+            observer: unknownable(plate.OBSERVER, plate["OBSERVER?"]),
+            observerNotes: unknownable(plate.OBSNOTES, plate["OBSNOTES?"]),
+            plateNotes: unknownable(plate.PLATNOTE, plate["PLATNOTE?"]),
+            scanner: unknownable(plate.SCANNER, plate["SCANNER?"]),
+            scanResolution: unknownable(plate.SCANRES, plate["SCANRES?"]),
+            scanGain: unknownable(plate.SCANGAIN, plate["SCANGAIN?"]),
+            scanSoftware: unknownable(plate.SCANSOFT, plate["SCANSOFT?"]),
+            dateScan: unknownable(plate.DATESCAN, plate["DATESCAN?"]),
+            scanAuthor: unknownable(plate.SCANAUTH, plate["SCANAUTH?"]),
+            scannerNotes: unknownable(plate.SCANNOTE, plate["SCANNOTE?"]),
           },
         })
 

@@ -4,8 +4,8 @@ import {
   derivePixelSizeFromScanResolution,
   inferRadesys,
   normalizeOptionalDateTime,
-  setExposureTimeIfPresent,
-  setNumericIfPresent,
+  setExposureTimeCard,
+  setNumericCard,
   setTextCard,
   toASCIIHeaderString,
   toFITSDateTimeString,
@@ -96,14 +96,14 @@ export function addPlateMetadata(fits: FITS, metadata: PlateMetadata) {
 export function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata) {
   appendSectionBanner(fits, "Scanned plate")
   setTextCard(fits, "SCANNER", metadata.scanner, "scanner name")
-  setNumericIfPresent(fits, "SCANRES", metadata.scanResolution, "[dpi] scan resolution")
-  setNumericIfPresent(
+  setNumericCard(fits, "SCANRES", metadata.scanResolution, "[dpi] scan resolution")
+  setNumericCard(
     fits,
     "PIXSIZE",
     derivePixelSizeFromScanResolution(metadata.scanResolution),
     "[um] pixel size",
   )
-  setNumericIfPresent(fits, "SCANGAIN", metadata.scanGain, "gain, electrons per adu")
+  setNumericCard(fits, "SCANGAIN", metadata.scanGain, "gain, electrons per adu")
   setTextCard(fits, "SCANSOFT", metadata.scanSoftware, "name of the scanning software")
   setTextCard(fits, "DATESCAN", normalizeOptionalDateTime(metadata.dateScan), "scan date and time")
   setTextCard(fits, "SCANAUTH", metadata.scanAuthor, "author of scan")
@@ -127,7 +127,7 @@ export function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMet
   )
   setTextCard(fits, "OBJECT", metadata.object, "name of the observed object")
   setTextCard(fits, "IMAGETYP", metadata.imageType, "object, dark, zero, etc.")
-  setExposureTimeIfPresent(fits, metadata.exptime)
+  setExposureTimeCard(fits, metadata.exptime)
   setTextCard(fits, "OBJNOTES", metadata.objectNotes, "observation notes")
 
   appendSectionBanner(fits, "Computed data of the observation")
@@ -135,9 +135,9 @@ export function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMet
   setTextCard(fits, "SPTYPE", metadata.spectralType, "Simbad spectral type")
   setTextCard(fits, "ST", metadata.siderealTime, "local mean sidereal time")
   setTextCard(fits, "HA", metadata.hourAngle, "local mean hour angle")
-  setNumericIfPresent(fits, "JD", metadata.jd, "Julian mean date of the observation")
-  setNumericIfPresent(fits, "EPOCH", metadata.epoch ?? metadata.equinox, "epoch of RA and DEC")
-  setNumericIfPresent(fits, "EQUINOX", metadata.equinox, "epoch of RA and DEC")
+  setNumericCard(fits, "JD", metadata.jd, "Julian mean date of the observation")
+  setNumericCard(fits, "EPOCH", metadata.epoch ?? metadata.equinox, "epoch of RA and DEC")
+  setNumericCard(fits, "EQUINOX", metadata.equinox, "epoch of RA and DEC")
   setTextCard(
     fits,
     "RADESYS",
@@ -150,7 +150,7 @@ export function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMet
   setTextCard(fits, "DEC2000", metadata.dec2000, 'declination J2000 ("d:m:s")')
   setTextCard(fits, "RA1950", metadata.ra1950, 'RA2000 precessed to ep.1950 eq.1950 ("h:m:s")')
   setTextCard(fits, "DEC1950", metadata.dec1950, 'DEC2000 precessed to ep.1950 eq.1950 ("d:m:s")')
-  setNumericIfPresent(fits, "AIRMASS", metadata.airmass, "estimated airmass at observation time")
+  setNumericCard(fits, "AIRMASS", metadata.airmass, "estimated airmass at observation time")
 }
 
 export function addCalibrationMetadata(fits: FITS, metadata: CalibrationMetadata) {
