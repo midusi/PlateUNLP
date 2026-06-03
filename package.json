@@ -17,10 +17,10 @@
     "db:seed": "tsx db/seed.ts",
     "db:init": "tsx db/dev-init.ts && pnpm db:migrate && pnpm db:seed"
   },
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@11.5.1",
   "engines": {
-    "node": ">=22.16.0",
-    "pnpm": ">=10.22.0"
+    "node": "24.x",
+    "pnpm": "11.x"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",

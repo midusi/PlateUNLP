@@ -1,0 +1,11 @@
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  better-sqlite3: true
+  core-js: true
+  esbuild: true
+  onnxruntime-node: true
+  prisma: true
+  protobufjs: true
+  sharp: true
+  skia-canvas: false
