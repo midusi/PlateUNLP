@@ -1,6 +1,7 @@
 import { Collapsible } from "@base-ui/react/collapsible"
 import { useRouter } from "@tanstack/react-router"
 import type { z } from "zod"
+import { AutocompleteFieldWithKnown } from "~/components/forms/autocomplete-field-with-known"
 import { SelectObservatory } from "~/components/forms/SelectObservatory"
 import { TextFieldWithKnown } from "~/components/forms/text-field-with-known"
 import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
@@ -18,15 +19,19 @@ import { useAppForm } from "~/hooks/use-app-form"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
 import { getPlateMetadataCompletion, PlateMetadataSchema } from "~/types/spectrum-metadata"
+import type { PlateMetadataSuggestions } from "../-actions/get-plate-metadata-suggestions"
 import { updatePlateMetadata } from "../-actions/update-plate-metadata"
 
 export function PlateMetadataForm({
   plateId,
   defaultValues,
+  suggestions,
   children,
 }: {
   plateId: string
   defaultValues: z.input<typeof PlateMetadataSchema>
+  /** Autocomplete suggestions aggregated from other plates in the project. */
+  suggestions: PlateMetadataSuggestions
   /**
    * Optional render-prop receiving the live form instance. Use it to render
    * siblings (such as a FITS export button) that need access to the current
@@ -123,34 +128,38 @@ export function PlateMetadataForm({
                 />
               )}
             </form.AppField>
-            <TextFieldWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="TELESCOPE"
               label="TELESCOPE"
               placeholder="e.g. Zeiss Triplet 15 cm"
               description="Telescope used to capture the plate."
+              options={suggestions.TELESCOPE}
             />
 
-            <TextFieldWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="INSTRUME"
               label="INSTRUME"
               placeholder="e.g. Objective prism spectrograph"
               description="Instrument used during the observation, for example a spectrograph."
+              options={suggestions.INSTRUME}
             />
-            <TextFieldWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="DETECTOR"
               label="DETECTOR"
               placeholder="e.g. Photographic plate"
               description="Detector that recorded the observation."
+              options={suggestions.DETECTOR}
             />
-            <TextFieldWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="OBSERVER"
               label="OBSERVER"
               placeholder="e.g. W. Muench"
               description="Person who made the observation."
+              options={suggestions.OBSERVER}
             />
             <TextAreaFieldWithKnown
               form={form}
@@ -164,12 +173,24 @@ export function PlateMetadataForm({
 
             <Separator orientation="horizontal" className="col-span-full" />
 
-            <TextFieldWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="SCANNER"
               label="SCANNER"
               placeholder="e.g. Epson Expression 10000XL"
               description="Technical specification or model of the scanner used."
+              options={suggestions.SCANNER}
+              onSelect={(scanner) => {
+                const defaults = suggestions.scannerDefaults[scanner]
+                if (!defaults) return
+                // Prefill the scan settings recorded for this scanner elsewhere.
+                if (defaults.SCANRES)
+                  form.setFieldValue("SCANRES", { value: defaults.SCANRES, isKnown: true })
+                if (defaults.SCANGAIN)
+                  form.setFieldValue("SCANGAIN", { value: defaults.SCANGAIN, isKnown: true })
+                if (defaults.SCANSOFT)
+                  form.setFieldValue("SCANSOFT", { value: defaults.SCANSOFT, isKnown: true })
+              }}
             />
             <TextFieldWithKnown
               form={form}
@@ -185,12 +206,13 @@ export function PlateMetadataForm({
               placeholder="e.g. 1.0"
               description="Scanner gain in electrons per ADU, if known."
             />
-            <TextFieldWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="SCANSOFT"
               label="SCANSOFT"
               placeholder="e.g. VueScan"
               description="Software used to digitize the plate."
+              options={suggestions.SCANSOFT}
             />
             <TextFieldWithKnown
               form={form}
@@ -201,12 +223,13 @@ export function PlateMetadataForm({
               step="1"
               description="Scan date and time in local datetime format."
             />
-            <TextFieldWithKnown
+            <AutocompleteFieldWithKnown
               form={form}
               fields="SCANAUTH"
               label="SCANAUTH"
               placeholder="e.g. K. Tsvetkova"
               description="Person who digitized the plate."
+              options={suggestions.SCANAUTH}
             />
             <TextAreaFieldWithKnown
               form={form}

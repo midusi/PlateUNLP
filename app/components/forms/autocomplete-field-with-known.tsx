@@ -13,6 +13,8 @@ type AutocompleteFieldWithKnownProps = {
   placeholder?: string
   /** Suggested values offered while typing. Free text is still allowed. */
   options: string[]
+  /** Fired when the user commits a suggestion (picks an item from the list). */
+  onSelect?: (value: string) => void
 }
 
 type Fields = {
@@ -25,7 +27,15 @@ export const AutocompleteFieldWithKnown = withFieldGroup<
   unknown,
   AutocompleteFieldWithKnownProps
 >({
-  render: function Render({ group, className, label, description, placeholder, options }) {
+  render: function Render({
+    group,
+    className,
+    label,
+    description,
+    placeholder,
+    options,
+    onSelect,
+  }) {
     const isKnown = useStore(group.store, (state) => state.values.isKnown)
 
     return (
@@ -37,7 +47,10 @@ export const AutocompleteFieldWithKnown = withFieldGroup<
               <Autocomplete.Root
                 items={options}
                 value={isKnown ? field.state.value : ""}
-                onValueChange={(value) => field.handleChange(value)}
+                onValueChange={(value, details) => {
+                  field.handleChange(value)
+                  if (details.reason === "item-press") onSelect?.(value)
+                }}
                 disabled={!isKnown}
                 openOnInputClick
                 autoHighlight
@@ -64,7 +77,7 @@ export const AutocompleteFieldWithKnown = withFieldGroup<
                       )}
                     >
                       <Autocomplete.Empty className="px-3 py-2 text-center text-olive-500 text-sm empty:hidden">
-                        No matching type.
+                        No matches.
                       </Autocomplete.Empty>
                       <Autocomplete.List>
                         {(item: string) => (
