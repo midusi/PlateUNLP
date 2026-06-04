@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { Button } from "~/components/ui/button"
 import {
   AlertDialog,
   AlertDialogClose,
@@ -9,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog"
+import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { notifyError, notifySucces } from "~/lib/notifications"
 import { resetPassword } from "../-actions/reset-password"
@@ -59,7 +59,8 @@ export function ResetPasswordDialog({
           <AlertDialogTitle>Reset Password</AlertDialogTitle>
           {!newPassword ? (
             <AlertDialogDescription>
-              Reset the password for <strong>{userName}</strong>? A new random password will be generated.
+              Reset the password for <strong>{userName}</strong>? A new random password will be
+              generated.
             </AlertDialogDescription>
           ) : (
             <AlertDialogDescription>

@@ -16,8 +16,6 @@ import {
 } from "./sections"
 import { assertPixelCount, FITS_UNKNOWN, fromUint16Array, sanitizeFilename } from "./utils"
 
-export { FITS_UNKNOWN }
-
 export type {
   CalibratedSpectrumFITSMetadata,
   CalibrationMetadata,
@@ -26,6 +24,7 @@ export type {
   PlateMetadata,
   SpectrumCropFITSMetadata,
 } from "./sections"
+export { FITS_UNKNOWN }
 
 /**
  * Resolves a knowable DB field to the value that should be written to a FITS

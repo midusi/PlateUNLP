@@ -21,8 +21,7 @@ const buttonVariants = cva(
           "bg-red-600 text-white shadow-xs hover:bg-red-700 focus-visible:ring-red-600/20",
         outline:
           "border border-olive-300 bg-background shadow-xs hover:bg-olive-100 hover:text-orange-600",
-        secondary:
-          "bg-olive-200 text-olive-700 shadow-xs hover:bg-olive-100 hover:text-orange-600",
+        secondary: "bg-olive-200 text-olive-700 shadow-xs hover:bg-olive-100 hover:text-orange-600",
         ghost: "hover:bg-olive-100 hover:text-orange-600",
         link: "text-olive-950 underline-offset-4 hover:text-orange-600 hover:underline",
       },

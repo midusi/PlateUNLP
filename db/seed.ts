@@ -170,19 +170,6 @@ async function createUser(name: string, email: string, password: string, role: s
   console.log(pc.white(`✓ Created user ${pc.cyan(name)} (${pc.cyan(email)})}`))
 }
 
-async function createProject(name: string, ownerEmail: string) {
-  const [{ id }] = await db
-    .insert(schema.project)
-    .values({ name })
-    .returning({ id: schema.project.id })
-
-  const user = await db.query.user.findFirst({ where: (t, { eq }) => eq(t.email, ownerEmail) })
-
-  await db.insert(schema.userToProject).values({ userId: user!.id, projectId: id, role: "admin" })
-
-  console.log(pc.white(`✓ Created project ${pc.cyan(name)} (${pc.cyan(id)})`))
-}
-
 async function main() {
   console.log(pc.bgBlue(" Seeding database... "))
   console.log(pc.gray("❖ Dropping existing tables..."))

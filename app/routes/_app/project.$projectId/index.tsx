@@ -25,9 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table"
-import { getSession } from "../-actions/get-session"
 import { breadcrumb } from "~/lib/breadcrumbs"
 import { formatObservation } from "~/lib/format"
+import { getSession } from "../-actions/get-session"
 import { getProject } from "./-actions/get-project"
 import { DeletePlates } from "./-components/DeletePlates"
 import { UploadPlate } from "./-components/UploadPlate"
@@ -161,7 +161,7 @@ function RouteComponent() {
   return (
     <div className="w-full">
       <div className="flex flex-row items-center gap-4">
-        <h1 className="font-bold text-xl text-olive-950 tracking-tight">{project.name}</h1>
+        <h1 className="font-bold text-olive-950 text-xl tracking-tight">{project.name}</h1>
         {user.role === "admin" && (
           <Link to="/project/$projectId/settings" params={{ projectId: project.id }}>
             <span className="icon-[ph--gear] size-5" />

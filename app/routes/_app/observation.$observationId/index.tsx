@@ -3,10 +3,7 @@ import type { z } from "zod"
 import { FITSExportButton } from "~/components/FITSExportButton"
 import { Button } from "~/components/ui/button"
 import { breadcrumb } from "~/lib/breadcrumbs"
-import {
-  observationMetadataFields,
-  plateMetadataFields,
-} from "~/lib/fits-export-fields"
+import { observationMetadataFields, plateMetadataFields } from "~/lib/fits-export-fields"
 import { formatObservation } from "~/lib/format"
 import { getPlateMetadata } from "~/routes/_app/plate.$plateId/-actions/get-plate-metadata"
 import { getPlateName } from "~/routes/_app/plate.$plateId/-actions/get-plate-name"

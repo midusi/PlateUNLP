@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
@@ -34,18 +34,14 @@ export function CreateUserModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <Card className="w-120 p-4">
         <CardHeader>
-          <h2 className="font-bold text-xl text-olive-950">Create User</h2>
+          <h2 className="font-bold text-olive-950 text-xl">Create User</h2>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <form.AppField name="name">
-            {(field) => <field.TextField label="Name" />}
-          </form.AppField>
+          <form.AppField name="name">{(field) => <field.TextField label="Name" />}</form.AppField>
           <form.AppField name="username">
             {(field) => <field.TextField label="Username" />}
           </form.AppField>
-          <form.AppField name="email">
-            {(field) => <field.TextField label="Email" />}
-          </form.AppField>
+          <form.AppField name="email">{(field) => <field.TextField label="Email" />}</form.AppField>
           <form.AppField name="password">
             {(field) => <field.PasswordField label="Password" />}
           </form.AppField>
@@ -62,9 +58,7 @@ export function CreateUserModal({ onClose }: { onClose: () => void }) {
           </form.AppField>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <form.Subscribe
-            selector={(formState) => [formState.isValid, formState.isSubmitting]}
-          >
+          <form.Subscribe selector={(formState) => [formState.isValid, formState.isSubmitting]}>
             {([isValid, isSubmitting]) => (
               <>
                 <Button onClick={onClose} variant="outline">

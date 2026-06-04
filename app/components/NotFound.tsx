@@ -10,13 +10,13 @@ export function NotFound({ children }: { children?: React.ReactNode }) {
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="rounded-sm bg-olive-950 px-2 py-1 font-bold text-sm text-white uppercase hover:opacity-70 hover:text-amber-500"
+          className="rounded-sm bg-olive-950 px-2 py-1 font-bold text-sm text-white uppercase hover:text-amber-500 hover:opacity-70"
         >
           Go back
         </button>
         <Link
           to="/"
-          className="rounded-sm bg-olive-200 px-2 py-1 font-bold text-sm text-olive-700 uppercase hover:text-orange-600"
+          className="rounded-sm bg-olive-200 px-2 py-1 font-bold text-olive-700 text-sm uppercase hover:text-orange-600"
         >
           Start Over
         </Link>

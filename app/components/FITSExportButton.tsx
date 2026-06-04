@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-import { OPTIONAL_FITS_FIELDS } from "~/lib/fits-export-fields"
 import {
   AlertDialog,
   AlertDialogClose,
@@ -10,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog"
 import { Button } from "~/components/ui/button"
+import { OPTIONAL_FITS_FIELDS } from "~/lib/fits-export-fields"
 
 export type FITSExportField = {
   /** Display label shown in the warning dialog (typically the FITS keyword). */
@@ -97,8 +97,8 @@ export function FITSExportButton({
             ))}
           </ul>
           <p className="text-muted-foreground text-sm">
-            The exported FITS will contain blank cards for these. If they were unrecorded,
-            consider marking them as <span className="font-medium">unknown</span> instead.
+            The exported FITS will contain blank cards for these. If they were unrecorded, consider
+            marking them as <span className="font-medium">unknown</span> instead.
           </p>
           <AlertDialogFooter>
             <AlertDialogClose>Cancel</AlertDialogClose>

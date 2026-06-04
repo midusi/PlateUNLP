@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_app/project/$projectId/settings/")({
     const { projectId } = params
 
     const session = await getSession()
-    if (!session || session.user.role !== "admin") {
+    if (session?.user.role !== "admin") {
       throw redirect({ to: "/project/$projectId", params: { projectId } })
     }
 

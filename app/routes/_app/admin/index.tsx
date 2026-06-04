@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Hashvatar } from "hashvatar/react"
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader } from "~/components/ui/card"
+import { Card, CardContent } from "~/components/ui/card"
 import {
   Table,
   TableBody,
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_app/admin/")({
   component: RouteComponent,
   loader: async () => {
     const session = await getSession()
-    if (!session || session.user.role !== "admin") {
+    if (session?.user.role !== "admin") {
       throw redirect({ to: "/projects" })
     }
     const users = await listUsers()
@@ -109,9 +109,7 @@ function RouteComponent() {
                         <span className="font-medium text-olive-950">{user.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-olive-500">
-                      {user.username || "—"}
-                    </TableCell>
+                    <TableCell className="text-olive-500">{user.username || "—"}</TableCell>
                     <TableCell className="text-olive-500">{user.email}</TableCell>
                     <TableCell>
                       <select

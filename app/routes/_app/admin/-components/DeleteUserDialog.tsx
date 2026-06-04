@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { Button } from "~/components/ui/button"
+import { useState } from "react"
 import {
   AlertDialog,
   AlertDialogClose,
@@ -9,9 +9,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog"
+import { Button } from "~/components/ui/button"
 import { notifyError, notifySucces } from "~/lib/notifications"
 import { removeUser } from "../-actions/remove-user"
-import { useState } from "react"
 
 export function DeleteUserDialog({
   userId,
@@ -47,7 +47,8 @@ export function DeleteUserDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete User</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete <strong>{userName}</strong>? This action cannot be undone.
+            Are you sure you want to delete <strong>{userName}</strong>? This action cannot be
+            undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

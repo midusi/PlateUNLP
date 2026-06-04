@@ -33,7 +33,7 @@ function RouteComponent() {
               params={{ projectId: id }}
             >
               <Card className="h-[220px] w-full transition-colors hover:border-olive-400">
-                <CardHeader className="border-b border-olive-300 py-0">{name}</CardHeader>
+                <CardHeader className="border-olive-300 border-b py-0">{name}</CardHeader>
                 <CardContent className="text-olive-500">
                   <dl className="flex flex-col">
                     <div className="flex justify-between">

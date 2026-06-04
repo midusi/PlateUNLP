@@ -37,7 +37,7 @@ function RouteComponent() {
         <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4">
           <Outlet />
         </main>
-        <footer className="mt-10 flex items-center justify-evenly border-t border-olive-300 p-4">
+        <footer className="mt-10 flex items-center justify-evenly border-olive-300 border-t p-4">
           {logos.map(({ href, src, alt }) => (
             <a
               key={href}

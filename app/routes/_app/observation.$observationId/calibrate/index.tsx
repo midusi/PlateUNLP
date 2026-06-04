@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useRef, useState } from "react"
-import type z from "zod"
-import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
+import type { z } from "zod"
 import { FITSExportButton } from "~/components/FITSExportButton"
-import { Button } from "~/components/ui/button"
+import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
@@ -90,14 +89,8 @@ export const Route = createFileRoute("/_app/observation/$observationId/calibrate
 })
 
 function RouteComponent() {
-  const {
-    spectrums,
-    calibration,
-    materialData,
-    listOfMaterials,
-    plateMetadata,
-    initialMetadata,
-  } = Route.useLoaderData()
+  const { spectrums, calibration, materialData, listOfMaterials, plateMetadata, initialMetadata } =
+    Route.useLoaderData()
 
   const plateFields = plateMetadataFields(plateMetadata)
   const observationFields = observationMetadataFields(initialMetadata)
