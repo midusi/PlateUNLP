@@ -96,11 +96,11 @@ function RouteComponent() {
             )}
             <div className="flex w-full flex-col">
               <div className="flex flex-row justify-between">
-                <label className="flex w-full justify-start text-olive-700">
+                <span className="flex w-full justify-start text-olive-700">
                   {userInfo.username || userInfo.name}
-                </label>
+                </span>
               </div>
-              <label className="flex justify-start text-olive-400">{userInfo.email}</label>
+              <span className="flex justify-start text-olive-400">{userInfo.email}</span>
             </div>
             {userInfo.role === "admin" && (
               <Link

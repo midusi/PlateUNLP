@@ -1,3 +1,5 @@
+// biome-ignore-all lint/suspicious/noConsole: logging to terminal
+
 import "dotenv/config"
 
 import { eq } from "drizzle-orm"

@@ -1,3 +1,5 @@
+// biome-ignore-all lint/suspicious/noConsole: logging to terminal
+
 import "dotenv/config"
 
 import readline from "node:readline/promises"

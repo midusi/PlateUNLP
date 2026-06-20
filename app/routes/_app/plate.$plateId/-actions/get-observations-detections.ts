@@ -77,7 +77,7 @@ export const getObservationDetections = createServerFn()
     const results = await session.run(feeds)
 
     // Procesar resultados (ejemplo)
-    const output = results["output0"] // dims: [1,300,6]
+    const output = results.output0 // dims: [1,300,6]
     const rawBoxes = output.data as Float32Array
     const elementsPerPrediction = 6
     const scoreIndex = 4 // score en posicion 4 de cada prediccion
@@ -90,7 +90,7 @@ export const getObservationDetections = createServerFn()
       }
     }
 
-    const formattedPredictions = validPredictions.map((pred, idx) => {
+    const formattedPredictions = validPredictions.map((pred, _idx) => {
       // x1, y1, x2, y2 vienen en el espacio de 640x640
       const [x1, y1, x2, y2, _score, _class] = pred
 
