@@ -5,8 +5,11 @@ import { auth } from "~/lib/auth"
 
 export const listUsers = createServerFn({ method: "GET" }).handler(async () => {
   const headers = getRequestHeaders()
-  const result = await auth.api.listUsers({ headers, query: {} })
-  return result
+  const { users, total } = await auth.api.listUsers({ headers, query: {} })
+  return {
+    total,
+    users: users as ((typeof users)[number] & { username?: string })[], // https://github.com/better-auth/better-auth/pull/9952
+  }
 })
 
 export const listUsersQueryOptions = () =>

@@ -84,16 +84,16 @@ export function SelectUsers({
         </div>
       )}
 
-      <Combobox.Root
+      <Combobox.Root<User>
         items={availableUsers}
         value={null}
         inputValue={query}
         onInputValueChange={(next) => setQuery(next)}
         onValueChange={(user) => {
-          if (user) addUser(user as User)
+          if (user) addUser(user)
         }}
-        itemToStringLabel={(u) => (u as User).name}
-        itemToStringValue={(u) => (u as User).id}
+        itemToStringLabel={(u) => u.name}
+        itemToStringValue={(u) => u.id}
       >
         <div className="relative">
           <span className="icon-[ph--magnifying-glass-bold] pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-olive-400" />

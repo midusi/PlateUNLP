@@ -27,7 +27,7 @@ function RouteComponent() {
         const { identifier, password } = value
         const isEmail = identifier.includes("@")
 
-        let error: { message: string } | null = null
+        let error: { message?: string } | null = null
 
         if (isEmail) {
           const result = await authClient.signIn.email({
