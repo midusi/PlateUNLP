@@ -19,18 +19,14 @@ import {
 import { computeObservationMetadata } from "../-actions/compute-observation-metadata"
 import { updateObservationMetadata } from "../-actions/update-observation-metadata"
 
-export function ObservationMetadataForm({
+export function useObservationForm({
   observationId,
-  OBSERVAT,
   defaultValues,
-  children,
 }: {
   observationId: string
-  OBSERVAT: string
   defaultValues: z.output<typeof ObservationMetadataSchema>
-  children?: (form: ReturnType<typeof useAppForm>) => React.ReactNode
 }) {
-  const form = useAppForm({
+  return useAppForm({
     defaultValues,
     validators: { onChange: ObservationMetadataSchema },
     onSubmit: async ({ value, formApi }) => {
@@ -53,7 +49,15 @@ export function ObservationMetadataForm({
       onChangeDebounceMs: 500,
     },
   })
+}
 
+export function ObservationMetadataForm({
+  form,
+  OBSERVAT,
+}: {
+  form: ReturnType<typeof useObservationForm>
+  OBSERVAT: string
+}) {
   const { mutate: computeMetadata, isPending: isComputingMetadata } = useMutation({
     mutationFn: async () => {
       try {
@@ -345,7 +349,6 @@ export function ObservationMetadataForm({
           </CardFooter>
         </Collapsible.Panel>
       </Card>
-      {children?.(form)}
     </Collapsible.Root>
   )
 }

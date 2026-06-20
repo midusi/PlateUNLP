@@ -55,20 +55,16 @@ function RouteComponent() {
         defaultValues={initialMetadata}
         suggestions={suggestions}
       >
-        {(form) => (
+        {(values) => (
           <div className="my-8 flex justify-end">
-            <form.Subscribe selector={(s) => s.values}>
-              {(values: z.output<typeof PlateMetadataSchema>) => (
-                <FITSExportButton
-                  href={`/plate/${plateId}/fits`}
-                  variant="outline"
-                  fields={plateMetadataFields(values)}
-                >
-                  <span className="icon-[ph--download-simple-bold]" />
-                  Download FITS
-                </FITSExportButton>
-              )}
-            </form.Subscribe>
+            <FITSExportButton
+              href={`/plate/${plateId}/fits`}
+              variant="outline"
+              fields={plateMetadataFields(values)}
+            >
+              <span className="icon-[ph--download-simple-bold]" />
+              Download FITS
+            </FITSExportButton>
           </div>
         )}
       </PlateMetadataForm>

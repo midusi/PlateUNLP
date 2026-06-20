@@ -22,26 +22,16 @@ import { getPlateMetadataCompletion, PlateMetadataSchema } from "~/types/spectru
 import type { PlateMetadataSuggestions } from "../-actions/get-plate-metadata-suggestions"
 import { updatePlateMetadata } from "../-actions/update-plate-metadata"
 
-export function PlateMetadataForm({
+function usePlateForm({
   plateId,
   defaultValues,
-  suggestions,
-  children,
 }: {
   plateId: string
   defaultValues: z.input<typeof PlateMetadataSchema>
-  /** Autocomplete suggestions aggregated from other plates in the project. */
-  suggestions: PlateMetadataSuggestions
-  /**
-   * Optional render-prop receiving the live form instance. Use it to render
-   * siblings (such as a FITS export button) that need access to the current
-   * form values via `form.Subscribe`, without lifting form state into the page.
-   */
-  children?: (form: ReturnType<typeof useAppForm>) => React.ReactNode
 }) {
   const router = useRouter()
 
-  const form = useAppForm({
+  return useAppForm({
     defaultValues: defaultValues,
     validators: { onChange: PlateMetadataSchema },
     onSubmit: async ({ value, formApi }) => {
@@ -66,6 +56,26 @@ export function PlateMetadataForm({
       onChangeDebounceMs: 500,
     },
   })
+}
+
+export function PlateMetadataForm({
+  plateId,
+  defaultValues,
+  suggestions,
+  children,
+}: {
+  plateId: string
+  defaultValues: z.input<typeof PlateMetadataSchema>
+  /** Autocomplete suggestions aggregated from other plates in the project. */
+  suggestions: PlateMetadataSuggestions
+  /**
+   * Optional render-prop receiving the live form instance. Use it to render
+   * siblings (such as a FITS export button) that need access to the current
+   * form values via `form.Subscribe`, without lifting form state into the page.
+   */
+  children?: (state: ReturnType<typeof usePlateForm>["state"]["values"]) => React.ReactNode
+}) {
+  const form = usePlateForm({ plateId, defaultValues })
 
   return (
     <Collapsible.Root defaultOpen={true}>
@@ -285,7 +295,7 @@ export function PlateMetadataForm({
           </CardFooter>
         </Collapsible.Panel>
       </Card>
-      {children?.(form)}
+      {children && <form.Subscribe selector={(s) => s.values}>{(s) => children(s)}</form.Subscribe>}
     </Collapsible.Root>
   )
 }
