@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { log } from "~/lib/log"
 import {
   getObservationMetadataCompletion,
   ObservationMetadataSchema,
@@ -16,10 +17,12 @@ export const updateObservationMetadata = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
+    const completion = getObservationMetadataCompletion(data.metadata).percentage
+    log().set({ observation: { id: data.observationId, completion } })
     await db
       .update(s.observation)
       .set({
-        metadataCompletion: getObservationMetadataCompletion(data.metadata).percentage,
+        metadataCompletion: completion,
         OBJECT: data.metadata.OBJECT,
         "DATE-OBS": data.metadata["DATE-OBS"].value,
         "DATE-OBS?": data.metadata["DATE-OBS"].isKnown,

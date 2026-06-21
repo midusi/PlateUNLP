@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
+import { createError } from "evlog"
 import { z } from "zod"
 import { db } from "~/db"
 import {
@@ -11,6 +12,7 @@ import { equatorialToHorizontal, getAirmass, getHourAngle } from "~/lib/astronom
 import { queryObjectById } from "~/lib/astronomical/simbad"
 import { degToDMS, degToHMS } from "~/lib/format"
 import { splitLocalDateTime } from "~/lib/local-datetime"
+import { log } from "~/lib/log"
 import { ObservationMetadataSchema, PlateMetadataSchema } from "~/types/spectrum-metadata"
 
 async function getDeltaT(mdj: number): Promise<number | null> {
@@ -68,7 +70,14 @@ export const computeObservationMetadata = createServerFn()
     }),
   )
   .handler(async ({ data }) => {
-    if (!data["DATE-OBS"].isKnown) throw new Error("DATE-OBS is not known")
+    log().set({ compute: { object: data.OBJECT, observatory: data.OBSERVAT } })
+    if (!data["DATE-OBS"].isKnown)
+      throw createError({
+        message: "DATE-OBS is required",
+        status: 400,
+        why: "Computing derived metadata needs a known observation datetime",
+        fix: "Set DATE-OBS and mark it as known before computing",
+      })
     const { date, time } = splitLocalDateTime(data["DATE-OBS"].value)
     // JD, EPOCH, EQUINOX
     const JD = getJulianDate(date, time)
@@ -76,13 +85,26 @@ export const computeObservationMetadata = createServerFn()
     const EQUINOX = EPOCH.slice(1) // Remove leading "J" from the epoch string
     // MAIN-ID, SPTYPE, RA, DEC, RA2000, DEC2000, RA1950, DEC1950
     const simbad = await queryObjectById(data.OBJECT, EPOCH, EQUINOX)
-    if (simbad.isErr()) throw new Error(simbad.error.message)
+    if (simbad.isErr())
+      throw createError({
+        message: "SIMBAD lookup failed",
+        status: 502,
+        why: simbad.error.message,
+        fix: "Check that the OBJECT name resolves in SIMBAD",
+      })
+    log().set({ simbad: { mainId: simbad.value["MAIN-ID"] } })
 
     // Get observatory data (latitude, longitude and timezone)
     const observatory = await db.query.observatory.findFirst({
       where: (observatory, { eq }) => eq(observatory.id, data.OBSERVAT),
     })
-    if (!observatory) throw new Error(`Observatory with ID ${data.OBSERVAT} was not found`)
+    if (!observatory)
+      throw createError({
+        message: "Observatory not found",
+        status: 404,
+        why: `No observatory with id ${data.OBSERVAT}`,
+        fix: "Select a valid observatory in the plate metadata",
+      })
 
     // DATE-ORG
     const DATE_ORG = getLocalDateTime(date, time, observatory.timezone)
@@ -92,7 +114,13 @@ export const computeObservationMetadata = createServerFn()
       (mjd) => getDeltaT(mjd),
       (mjd) => getPolarMotion(mjd),
     )
-    if (ST.isErr()) throw new Error(ST.error.message)
+    if (ST.isErr())
+      throw createError({
+        message: "Sidereal time computation failed",
+        status: 500,
+        why: ST.error.message,
+        fix: "Verify the observation datetime and observatory coordinates",
+      })
     const HA = getHourAngle(simbad.value.RA2000, ST.value)
     const { azimuth } = equatorialToHorizontal(HA, simbad.value.DEC2000, observatory.latitude)
     const AIRMASS = getAirmass(azimuth)

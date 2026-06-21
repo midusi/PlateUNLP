@@ -2,12 +2,16 @@ import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
 import { observationToFITSFilename, spectrumCropToFITS, unknownable } from "~/lib/fits"
+import { log } from "~/lib/log"
 import { readUploadedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/observation/$observationId/fits")({
   server: {
     handlers: {
       GET: async ({ params }) => {
+        log().set({
+          fitsExport: { kind: "observation-image", observationId: params.observationId },
+        })
         const observation = await db.query.observation.findFirst({
           where: (t, { eq }) => eq(t.id, params.observationId),
           with: {
@@ -16,7 +20,10 @@ export const Route = createFileRoute("/_app/observation/$observationId/fits")({
             },
           },
         })
-        if (!observation) return new Response("Not found", { status: 404 })
+        if (!observation) {
+          log().warn("FITS export: observation not found")
+          return new Response("Not found", { status: 404 })
+        }
 
         const { plate } = observation
         const fileName = observationToFITSFilename(
@@ -91,6 +98,15 @@ export const Route = createFileRoute("/_app/observation/$observationId/fits")({
           },
         })
 
+        log().set({
+          fitsExport: {
+            kind: "observation-image",
+            observationId: params.observationId,
+            plateId: plate.id,
+            width: observation.imageWidth,
+            height: observation.imageHeight,
+          },
+        })
         return new Response(fits.toBuffer(), {
           headers: {
             "Content-Type": "application/fits",

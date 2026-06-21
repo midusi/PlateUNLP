@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { log } from "~/lib/log"
 import { deleteUploadedFile } from "~/lib/uploads"
 
 export const deleteProject = createServerFn({ method: "POST" })
@@ -20,4 +21,7 @@ export const deleteProject = createServerFn({ method: "POST" })
 
     await db.delete(s.userToProject).where(eq(s.userToProject.projectId, data.projectId))
     await db.delete(s.project).where(eq(s.project.id, data.projectId))
+
+    log().set({ project: { id: data.projectId, platesDeleted: plates.length } })
+    log().info("project deleted")
   })

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 import { db } from "~/db"
 import { project, userToProject } from "~/db/schema"
+import { log } from "~/lib/log"
 
 export const addProject = createServerFn({ method: "POST" })
   .inputValidator(
@@ -32,5 +33,7 @@ export const addProject = createServerFn({ method: "POST" })
       await db.insert(userToProject).values(roles)
     }
 
+    log().set({ project: { id: newProject.id, name: newProject.name, members: usersRoles.length } })
+    log().info("project created")
     return newProject
   })

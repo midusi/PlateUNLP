@@ -55,6 +55,7 @@
     "decimal.js": "^10.6.0",
     "dedent": "^1.7.2",
     "drizzle-orm": "^0.45.2",
+    "evlog": "^2.19.1",
     "fits2js": "^0.0.6",
     "fumadocs-core": "^16.10.4",
     "fumadocs-mdx": "^15.0.12",

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { z } from "zod"
 import { auth } from "~/lib/auth"
+import { log } from "~/lib/log"
 
 export const createUser = createServerFn({ method: "POST" })
   .inputValidator(
@@ -25,5 +26,7 @@ export const createUser = createServerFn({ method: "POST" })
         data: { username: data.username },
       },
     })
+    log().set({ createdUser: { email: data.email, username: data.username, role: data.role } })
+    log().info("admin created user")
     return result
   })

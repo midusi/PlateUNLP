@@ -10,15 +10,21 @@ import {
   useRouter,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import { createMiddleware } from "@tanstack/react-start"
+import { evlogErrorHandler } from "evlog/nitro/v3"
 import type * as React from "react"
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary"
 import { Pending } from "~/components/Pending"
 import { Toaster } from "~/components/ui/toast"
+import { evlogIdentifyMiddleware } from "~/lib/evlog-identify"
 import { seo } from "~/lib/seo"
 
 import appCss from "~/styles/app.css?url"
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  server: {
+    middleware: [createMiddleware().server(evlogErrorHandler), evlogIdentifyMiddleware],
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
