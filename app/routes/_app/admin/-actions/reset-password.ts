@@ -5,7 +5,7 @@ import { z } from "zod"
 import { auth } from "~/lib/auth"
 
 export const resetPassword = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ userId: z.string().min(1) }))
+  .validator(z.object({ userId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     const newPassword = nanoid(20)

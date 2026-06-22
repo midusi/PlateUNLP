@@ -7,7 +7,7 @@ import { log } from "~/lib/log"
 import { deleteUploadedFile } from "~/lib/uploads"
 
 export const deleteProject = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ projectId: z.string().min(1) }))
+  .validator(z.object({ projectId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const plates = await db
       .select({ id: s.plate.id, imageId: s.plate.imageId })

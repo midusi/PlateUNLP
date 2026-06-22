@@ -5,7 +5,7 @@ import { db } from "~/db"
 import type { ObservationMetadataSchema } from "~/types/spectrum-metadata"
 
 export const getObservationMetadata = createServerFn()
-  .inputValidator(z.object({ observationId: z.string() }))
+  .validator(z.object({ observationId: z.string() }))
   .handler(
     async ({
       data,

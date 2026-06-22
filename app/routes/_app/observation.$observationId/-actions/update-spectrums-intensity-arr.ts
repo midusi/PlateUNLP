@@ -5,7 +5,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const updateSpectrumsIntensityArr = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.array(
       z.object({
         id: z.string(),

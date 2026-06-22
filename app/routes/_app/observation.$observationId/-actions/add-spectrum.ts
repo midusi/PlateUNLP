@@ -5,7 +5,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 
 export const addSpectrum = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       observationId: z.string(),
       top: z.number().int().nonnegative(),

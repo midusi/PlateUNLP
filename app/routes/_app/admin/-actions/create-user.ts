@@ -5,7 +5,7 @@ import { auth } from "~/lib/auth"
 import { log } from "~/lib/log"
 
 export const createUser = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       name: z.string().min(1),
       username: z.string().min(3).max(30),

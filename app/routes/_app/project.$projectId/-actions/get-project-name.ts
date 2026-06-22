@@ -9,7 +9,7 @@ const InputSchema = z.object({
 })
 
 export const getProjectName = createServerFn()
-  .inputValidator(InputSchema)
+  .validator(InputSchema)
   .handler(async ({ data }) => {
     if (data.from === "project") {
       const project = await db.query.project.findFirst({

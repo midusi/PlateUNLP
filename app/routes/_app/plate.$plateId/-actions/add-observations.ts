@@ -7,7 +7,7 @@ import * as s from "~/db/schema"
 import { obsNFromIndex, obsNToIndex } from "~/lib/obs-n"
 
 export const addObservations = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       plateId: z.string(),
       resetExisting: z.boolean().optional().default(false),

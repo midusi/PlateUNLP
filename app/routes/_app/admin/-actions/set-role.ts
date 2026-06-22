@@ -5,7 +5,7 @@ import { auth } from "~/lib/auth"
 import { log } from "~/lib/log"
 
 export const setUserRole = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       userId: z.string().min(1),
       role: z.enum(["admin", "user"]),

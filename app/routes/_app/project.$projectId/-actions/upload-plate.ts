@@ -7,7 +7,7 @@ import { log } from "~/lib/log"
 import { uploadFile } from "~/lib/uploads"
 
 export const uploadPlate = createServerFn({ method: "POST" })
-  .inputValidator(z.instanceof(FormData))
+  .validator(z.instanceof(FormData))
   .handler(async ({ data }) => {
     const projectId = data.get("projectId")
     if (typeof projectId !== "string") {

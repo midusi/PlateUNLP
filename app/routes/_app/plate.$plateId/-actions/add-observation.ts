@@ -7,7 +7,7 @@ import * as s from "~/db/schema"
 import { nextObsN } from "~/lib/obs-n"
 
 export const addObservation = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       plateId: z.string(),
       top: z.number().int().nonnegative(),

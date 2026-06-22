@@ -5,7 +5,7 @@ import { project, userToProject } from "~/db/schema"
 import { log } from "~/lib/log"
 
 export const addProject = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       name: z.string().min(1),
       usersRoles: z.array(

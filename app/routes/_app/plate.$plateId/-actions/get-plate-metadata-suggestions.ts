@@ -30,7 +30,7 @@ function distinct(values: string[]): string[] {
  * Computed once on form load.
  */
 export const getPlateMetadataSuggestions = createServerFn()
-  .inputValidator(z.object({ plateId: z.string() }))
+  .validator(z.object({ plateId: z.string() }))
   .handler(async ({ data }): Promise<PlateMetadataSuggestions> => {
     const plate = await db.query.plate.findFirst({
       where: (plate, { eq }) => eq(plate.id, data.plateId),

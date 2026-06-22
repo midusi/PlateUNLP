@@ -12,7 +12,7 @@ import { readUploadedFile } from "~/lib/uploads"
  * y score.
  */
 export const getObservationDetections = createServerFn()
-  .inputValidator(
+  .validator(
     z.object({
       plateId: z.string(),
       umbral: z.number().optional().default(0.5),

@@ -5,7 +5,7 @@ import { auth } from "~/lib/auth"
 import { log } from "~/lib/log"
 
 export const removeUser = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ userId: z.string().min(1) }))
+  .validator(z.object({ userId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     log().set({ targetUser: { id: data.userId } })
