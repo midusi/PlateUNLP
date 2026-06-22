@@ -8,6 +8,7 @@ export default defineConfig({
   modules: [
     evlog({
       env: { service: "plateunlp" },
+      pretty: true, // dev and prod
     }),
   ],
 })
