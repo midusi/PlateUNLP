@@ -7,9 +7,9 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Circle, LinePath } from "@visx/shape"
 import { Tooltip, useTooltip, useTooltipInPortal } from "@visx/tooltip"
-import * as d3 from "@visx/vendor/d3-array"
 import type { NumberValue, ScaleLinear } from "@visx/vendor/d3-scale"
 import { useMemo } from "react"
+import { maxBy, minBy } from "~/lib/array-stats"
 import { CustomError } from "~/lib/utils"
 import { GraphInErrorCase } from "./GraphInErrorCase"
 
@@ -95,10 +95,10 @@ export function ErrorScatterGraph({
     })
 
     /** Escalas min y max para valores a mostrar en el grafico*/
-    const xMin = d3.min(dispersionErrors, getX) ?? 0
-    const xMax = d3.max(dispersionErrors, getX) ?? 1000
-    const yMin = Math.min(d3.min(dispersionErrors, getY) ?? -1, -0.01)
-    const yMax = Math.max(d3.max(dispersionErrors, getY) ?? 1, 0.01)
+    const xMin = minBy(dispersionErrors, getX) ?? 0
+    const xMax = maxBy(dispersionErrors, getX) ?? 1000
+    const yMin = Math.min(minBy(dispersionErrors, getY) ?? -1, -0.01)
+    const yMax = Math.max(maxBy(dispersionErrors, getY) ?? 1, 0.01)
     const yLim = Math.max(Math.abs(yMin), Math.abs(yMax))
     const mX = 0.2 * (xMax - xMin)
     const mY = 0.2 * yLim
@@ -155,8 +155,8 @@ export function ErrorScatterGraph({
             <LinePath<{ Å: number; E: number }>
               curve={curveLinear}
               data={[
-                { Å: (d3.min(dispersionErrors, getX) ?? 0) - mX, E: 0 },
-                { Å: (d3.max(dispersionErrors, getX) ?? 0) + mX, E: 0 },
+                { Å: (minBy(dispersionErrors, getX) ?? 0) - mX, E: 0 },
+                { Å: (maxBy(dispersionErrors, getX) ?? 0) + mX, E: 0 },
               ]}
               x={(p) => xScale(getX(p)) ?? 0}
               y={(p) => yScale(getY(p)) ?? 0}

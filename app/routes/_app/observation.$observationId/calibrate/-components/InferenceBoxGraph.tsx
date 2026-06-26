@@ -7,9 +7,9 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Circle, LinePath } from "@visx/shape"
 import { Tooltip, useTooltip, useTooltipInPortal } from "@visx/tooltip"
-import * as d3 from "@visx/vendor/d3-array"
 import type { NumberValue, ScaleLinear } from "@visx/vendor/d3-scale"
 import { useMemo } from "react"
+import { maxBy, minBy } from "~/lib/array-stats"
 import { CustomError, generateRange } from "~/lib/utils"
 import { GraphInErrorCase } from "./GraphInErrorCase"
 
@@ -94,13 +94,13 @@ export function InferenceBoxGraph({
     }
 
     /** Valores minimo y maximo en el eje X (pixeles del espextro extraido) */
-    const xMin = d3.min(matches, getX)!
-    const xMax = d3.max(matches, getX)!
+    const xMin = minBy(matches, getX) ?? 0
+    const xMax = maxBy(matches, getX) ?? 1000
     const mX = 0.2 * (xMax - xMin)
 
     /** Valores minimo y maximo en el eje Y (wavelength real) */
-    const yMin = d3.min(matches, getY)!
-    const yMax = d3.max(matches, getY)!
+    const yMin = minBy(matches, getY) ?? 0
+    const yMax = maxBy(matches, getY) ?? 1000
     const mY = 0.2 * (yMax - yMin)
 
     /** Discretizacion de funcion de inferencia para graficado */

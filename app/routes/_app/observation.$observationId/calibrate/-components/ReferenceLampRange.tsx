@@ -6,8 +6,8 @@ import { Group } from "@visx/group"
 import { PatternLines } from "@visx/pattern"
 import { scaleLinear } from "@visx/scale"
 import { LinePath } from "@visx/shape"
-import * as d3 from "@visx/vendor/d3-array"
 import { useId, useMemo } from "react"
+import { maxBy, minBy } from "~/lib/array-stats"
 import { materialsPalette } from "~/lib/materials-palette"
 import type { SpectrumPoint } from "~/lib/spectral-data"
 
@@ -52,9 +52,9 @@ export function ReferenceLampRange({
   const localMargin = { ...margin, bottom: hideX ? 0 : margin.bottom }
 
   /** Minimos y maximos totales y especificos al range */
-  const materialArrXMax = Math.max(d3.max(materialArr, getX)!, 41000)
-  const materialArrXMin = d3.min(materialArr, getX)!
-  const materialArrYMax = d3.max(materialArr, getY)!
+  const materialArrXMax = Math.max(maxBy(materialArr, getX) ?? 0, 41000)
+  const materialArrXMin = minBy(materialArr, getX) ?? 0
+  const materialArrYMax = maxBy(materialArr, getY) ?? 1
   const xScale = scaleLinear<number>({ domain: [0, materialArrXMax] })
   const yScale = scaleLinear<number>({ domain: [0, materialArrYMax] })
   const rangeMin = minWavelength

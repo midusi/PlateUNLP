@@ -7,9 +7,9 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Bar, Line, LinePath } from "@visx/shape"
 import { useTooltip } from "@visx/tooltip"
-import * as d3 from "@visx/vendor/d3-array"
 import type { NumberValue } from "@visx/vendor/d3-scale"
 import { useCallback, useMemo } from "react"
+import { bisectRightBy, maxBy } from "~/lib/array-stats"
 import { CustomError } from "~/lib/utils"
 import { peakFinder } from "../../-utils/peak-finder"
 
@@ -58,19 +58,11 @@ export function EmpiricalSpectrum({
     [width, data.length],
   )
 
-  const wavelengthBisector = d3.bisector<
-    {
-      pixel: number
-      intensity: number
-    },
-    number
-  >((d) => d.pixel).right
-
   const intensityScale = useMemo(
     () =>
       scaleLinear({
         range: [height - margin.bottom - margin.top, 0],
-        domain: [0, (d3.max(data, getY) || 1) * 1.1],
+        domain: [0, (maxBy(data, getY) || 1) * 1.1],
         nice: true,
       }),
     [data],
@@ -81,12 +73,13 @@ export function EmpiricalSpectrum({
       let { x } = localPoint(event) || { x: 0 }
       x = x - margin.left
       const x0 = wavelengthScale.invert(x)
-      const index = wavelengthBisector(data, x0)
+      const index = bisectRightBy(data, x0, getX)
       const d0 = data[index - 1]
       const d1 = data[index]
+      if (!d0 && !d1) return
       /** Elegir el elemento mas cercano */
-      let d = d0
-      if (d1 && getX(d1)) {
+      let d = d0 ?? d1
+      if (d0 && d1 && getX(d1)) {
         const x0v = x0.valueOf()
         const x0d = getX(d0).valueOf()
         const x1d = getX(d1).valueOf()
@@ -105,7 +98,7 @@ export function EmpiricalSpectrum({
         tooltipTop: intensityScale(getY(d)),
       })
     },
-    [data, showTooltip, intensityScale, wavelengthScale, wavelengthBisector],
+    [data, showTooltip, intensityScale, wavelengthScale],
   )
 
   /** Manejar click en el grafico */

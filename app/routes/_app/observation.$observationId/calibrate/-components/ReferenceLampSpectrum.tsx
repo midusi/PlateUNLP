@@ -7,8 +7,8 @@ import { Group } from "@visx/group"
 import { scaleLinear } from "@visx/scale"
 import { Bar, Line, LinePath } from "@visx/shape"
 import { defaultStyles, TooltipWithBounds, useTooltip } from "@visx/tooltip"
-import * as d3 from "@visx/vendor/d3-array"
 import { useCallback, useMemo } from "react"
+import { bisectRightBy, maxBy } from "~/lib/array-stats"
 import { materialsPalette } from "~/lib/materials-palette"
 import type { SpectrumPoint } from "~/lib/spectral-data"
 import { peakFinder } from "../../-utils/peak-finder"
@@ -114,20 +114,11 @@ export function ReferenceLampSpectrum({
     [minWavelength, maxWavelength, width],
   )
 
-  const wavelengthBisector = d3.bisector<
-    {
-      wavelength: number
-      material: string
-      intensity: number
-    },
-    number
-  >((d) => d.wavelength).right
-
   const intensityScale = useMemo(
     () =>
       scaleLinear({
         range: [height - margin.bottom - margin.top, 0],
-        domain: [0, (d3.max(materialArr, getY) || 1) * 1.1],
+        domain: [0, (maxBy(materialArr, getY) || 1) * 1.1],
         nice: true,
       }),
     [materialArr],
@@ -138,14 +129,15 @@ export function ReferenceLampSpectrum({
       let { x } = localPoint(event) || { x: 0 }
       x = x - margin.left
       const x0 = wavelengthScale.invert(x)
-      const index = wavelengthBisector(materialArr, x0)
+      const index = bisectRightBy(materialArr, x0, getX)
       const d0 = materialArr[index - 1]
       const d1 = materialArr[index]
+      if (!d0 && !d1) return
       /** Elegir el elemento mas cercano */
-      let d = d0
+      let d = d0 ?? d1
       let interpolatedX: number | undefined
       let interpolatedY: number | undefined /* Da problemas con mas de un elemento */
-      if (d1 && getX(d1)) {
+      if (d0 && d1 && getX(d1)) {
         const x0v = x0.valueOf()
         const x0d = getX(d0).valueOf()
         const x1d = getX(d1).valueOf()
@@ -172,7 +164,7 @@ export function ReferenceLampSpectrum({
         tooltipTop: intensityScale(interpolatedY ?? getY(d)),
       })
     },
-    [materialArr, showTooltip, intensityScale, wavelengthScale, wavelengthBisector],
+    [materialArr, showTooltip, intensityScale, wavelengthScale],
   )
 
   /** Manejar click en el grafico */
