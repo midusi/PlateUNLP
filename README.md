@@ -48,7 +48,7 @@ pnpm start    # To start the application in production mode
 
 We're using [libSQL](https://github.com/tursodatabase/libsql) as our database solution, a fork of SQLite. This allows us to use a file-based database when developing locally, and a cloud-hosted database when deploying.
 
-We recommend hosting a libSQL server for easy access from the outside for maintenance and backups. You can find more about this [here](docs/src/maintenance/libsql.md).
+We recommend hosting a libSQL server for easy access from the outside for maintenance and backups. You can find more about this [here](docs/maintenance/libsql.mdx).
 
 ## Migrations
 
