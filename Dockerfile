@@ -34,6 +34,7 @@ ENV PORT=3000
 WORKDIR /app
 
 COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/app/models ./app/models
 
 EXPOSE 3000
 
