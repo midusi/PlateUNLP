@@ -5,6 +5,7 @@ export default defineConfig({
   experimental: {
     asyncContext: true,
   },
+  noExternals: ["tslib"],
   handlers: [
     {
       route: "/api/plate/:plateId/preview",
