@@ -10,7 +10,7 @@ import {
 } from "react-zoom-pan-pinch"
 import { Button } from "~/components/ui/button"
 import { Separator } from "~/components/ui/separator"
-import { loadImage } from "~/lib/image"
+import { loadImage } from "~/lib/load-image"
 import { clamp } from "~/lib/math"
 import { cn } from "~/lib/utils"
 
@@ -119,12 +119,28 @@ export function BoundingBoxer({
     width: 0,
     height: 0,
   })
+  const [imageError, setImageError] = useState<string | null>(null)
 
   // Update the image when the source is changed
   useEffect(() => {
-    loadImage(imageSrc).then((image) => {
-      setImageSize({ width: image.naturalWidth, height: image.naturalHeight })
-    })
+    let ignore = false
+
+    setImageSize({ width: 0, height: 0 })
+    setImageError(null)
+
+    loadImage(imageSrc)
+      .then((image) => {
+        if (ignore) return
+        setImageSize({ width: image.naturalWidth, height: image.naturalHeight })
+      })
+      .catch((error) => {
+        if (ignore) return
+        setImageError(error instanceof Error ? error.message : "Failed to load image")
+      })
+
+    return () => {
+      ignore = true
+    }
   }, [imageSrc])
 
   // Calculate the scale of the image based on the container size
@@ -145,7 +161,9 @@ export function BoundingBoxer({
 
   return (
     <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0 bg-checkered">
-      {imageScale ? (
+      {imageError ? (
+        <p className="p-3 text-destructive text-sm">{imageError}</p>
+      ) : imageScale ? (
         <TransformWrapper
           initialScale={imageScale}
           minScale={imageScale * 0.5}

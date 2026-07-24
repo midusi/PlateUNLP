@@ -25,6 +25,9 @@ export default defineConfig({
     alias: { tslib: "tslib/tslib.es6.js" },
     tsconfigPaths: true,
   },
+  ssr: {
+    noExternal: ["hashvatar"],
+  },
   assetsInclude: ["**/*.onnx"],
   optimizeDeps: {
     exclude: ["onnxruntime-web"],

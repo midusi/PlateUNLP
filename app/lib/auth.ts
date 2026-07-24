@@ -11,5 +11,5 @@ export const auth = betterAuth({
     camelCase: false,
   }),
   emailAndPassword: { enabled: true, autoSignIn: false },
-  plugins: [tanstackStartCookies(), username(), admin({ defaultRole: "user" })],
+  plugins: [username(), admin({ defaultRole: "user" }), tanstackStartCookies()],
 })

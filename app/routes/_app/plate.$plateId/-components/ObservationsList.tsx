@@ -90,7 +90,7 @@ export function ObservationsList({
     <Card className="overflow-hidden p-0">
       <CardContent className="h-125 p-0">
         <BoundingBoxer
-          imageSrc={`/plate/${plateId}/preview`}
+          imageSrc={`/api/plate/${plateId}/preview`}
           boundingBoxes={boundingBoxes}
           onBoundingBoxChange={(boundingBox) => {
             setBoundingBoxes((prev) =>

@@ -1,6 +1,6 @@
-import fs from "node:fs/promises"
 import { eq } from "drizzle-orm"
 import { err, ok, type Result } from "neverthrow"
+import fs from "node:fs/promises"
 import sharp from "sharp"
 import { z } from "zod"
 import { SUPPORTED_PLATE_MIMETYPES } from "~/consts"
@@ -33,7 +33,7 @@ export async function uploadFile(
       const [{ id }] = await tx
         .insert(s.upload)
         .values({ name: file.name, mimeType: mimeType.data })
-        .returning({ id: s.plate.id })
+        .returning({ id: s.upload.id })
       await fs.writeFile(`${env.UPLOADS_DIR}/${id}`, Buffer.from(arrayBuffer))
       return id
     })

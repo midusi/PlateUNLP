@@ -101,7 +101,7 @@ const columns = [
                 "table-row h-10 w-full bg-center bg-cover transition-opacity hover:opacity-80",
                 i < arr.length - 1 && "border-b",
               )}
-              style={{ backgroundImage: `url(/observation/${obs.id}/preview)` }}
+              style={{ backgroundImage: `url(/api/observation/${obs.id}/preview)` }}
             >
               <span
                 className="table-cell h-full pr-8 pl-1 align-middle"
