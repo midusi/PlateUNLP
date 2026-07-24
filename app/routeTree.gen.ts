@@ -25,10 +25,7 @@ import { Route as AppPlatePlateIdIndexRouteImport } from './routes/_app/plate.$p
 import { Route as AppObservationObservationIdIndexRouteImport } from './routes/_app/observation.$observationId/index'
 import { Route as AppSpectrumSpectrumIdFitsRouteImport } from './routes/_app/spectrum.$spectrumId/fits'
 import { Route as AppSpectrumSpectrumIdCalibratedFitsRouteImport } from './routes/_app/spectrum.$spectrumId/calibrated-fits'
-import { Route as AppPlatePlateIdPreviewRouteImport } from './routes/_app/plate.$plateId/preview'
 import { Route as AppPlatePlateIdFitsRouteImport } from './routes/_app/plate.$plateId/fits'
-import { Route as AppObservationObservationIdPreviewRouteImport } from './routes/_app/observation.$observationId/preview'
-import { Route as AppObservationObservationIdImageRouteImport } from './routes/_app/observation.$observationId/image'
 import { Route as AppObservationObservationIdFitsRouteImport } from './routes/_app/observation.$observationId/fits'
 import { Route as AppObservationObservationIdExtractedFitsRouteImport } from './routes/_app/observation.$observationId/extracted-fits'
 import { Route as authApiAuthSplatRouteImport } from './routes/(auth)/api.auth.$'
@@ -116,28 +113,11 @@ const AppSpectrumSpectrumIdCalibratedFitsRoute =
     path: '/spectrum/$spectrumId/calibrated-fits',
     getParentRoute: () => AppRouteRoute,
   } as any)
-const AppPlatePlateIdPreviewRoute = AppPlatePlateIdPreviewRouteImport.update({
-  id: '/plate/$plateId/preview',
-  path: '/plate/$plateId/preview',
-  getParentRoute: () => AppRouteRoute,
-} as any)
 const AppPlatePlateIdFitsRoute = AppPlatePlateIdFitsRouteImport.update({
   id: '/plate/$plateId/fits',
   path: '/plate/$plateId/fits',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppObservationObservationIdPreviewRoute =
-  AppObservationObservationIdPreviewRouteImport.update({
-    id: '/observation/$observationId/preview',
-    path: '/observation/$observationId/preview',
-    getParentRoute: () => AppRouteRoute,
-  } as any)
-const AppObservationObservationIdImageRoute =
-  AppObservationObservationIdImageRouteImport.update({
-    id: '/observation/$observationId/image',
-    path: '/observation/$observationId/image',
-    getParentRoute: () => AppRouteRoute,
-  } as any)
 const AppObservationObservationIdFitsRoute =
   AppObservationObservationIdFitsRouteImport.update({
     id: '/observation/$observationId/fits',
@@ -179,10 +159,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof authApiAuthSplatRoute
   '/observation/$observationId/extracted-fits': typeof AppObservationObservationIdExtractedFitsRoute
   '/observation/$observationId/fits': typeof AppObservationObservationIdFitsRoute
-  '/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
-  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
   '/plate/$plateId/fits': typeof AppPlatePlateIdFitsRoute
-  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewRoute
   '/spectrum/$spectrumId/calibrated-fits': typeof AppSpectrumSpectrumIdCalibratedFitsRoute
   '/spectrum/$spectrumId/fits': typeof AppSpectrumSpectrumIdFitsRoute
   '/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
@@ -203,10 +180,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof authApiAuthSplatRoute
   '/observation/$observationId/extracted-fits': typeof AppObservationObservationIdExtractedFitsRoute
   '/observation/$observationId/fits': typeof AppObservationObservationIdFitsRoute
-  '/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
-  '/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
   '/plate/$plateId/fits': typeof AppPlatePlateIdFitsRoute
-  '/plate/$plateId/preview': typeof AppPlatePlateIdPreviewRoute
   '/spectrum/$spectrumId/calibrated-fits': typeof AppSpectrumSpectrumIdCalibratedFitsRoute
   '/spectrum/$spectrumId/fits': typeof AppSpectrumSpectrumIdFitsRoute
   '/observation/$observationId': typeof AppObservationObservationIdIndexRoute
@@ -231,10 +205,7 @@ export interface FileRoutesById {
   '/(auth)/api/auth/$': typeof authApiAuthSplatRoute
   '/_app/observation/$observationId/extracted-fits': typeof AppObservationObservationIdExtractedFitsRoute
   '/_app/observation/$observationId/fits': typeof AppObservationObservationIdFitsRoute
-  '/_app/observation/$observationId/image': typeof AppObservationObservationIdImageRoute
-  '/_app/observation/$observationId/preview': typeof AppObservationObservationIdPreviewRoute
   '/_app/plate/$plateId/fits': typeof AppPlatePlateIdFitsRoute
-  '/_app/plate/$plateId/preview': typeof AppPlatePlateIdPreviewRoute
   '/_app/spectrum/$spectrumId/calibrated-fits': typeof AppSpectrumSpectrumIdCalibratedFitsRoute
   '/_app/spectrum/$spectrumId/fits': typeof AppSpectrumSpectrumIdFitsRoute
   '/_app/observation/$observationId/': typeof AppObservationObservationIdIndexRoute
@@ -257,10 +228,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/observation/$observationId/extracted-fits'
     | '/observation/$observationId/fits'
-    | '/observation/$observationId/image'
-    | '/observation/$observationId/preview'
     | '/plate/$plateId/fits'
-    | '/plate/$plateId/preview'
     | '/spectrum/$spectrumId/calibrated-fits'
     | '/spectrum/$spectrumId/fits'
     | '/observation/$observationId/'
@@ -281,10 +249,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/observation/$observationId/extracted-fits'
     | '/observation/$observationId/fits'
-    | '/observation/$observationId/image'
-    | '/observation/$observationId/preview'
     | '/plate/$plateId/fits'
-    | '/plate/$plateId/preview'
     | '/spectrum/$spectrumId/calibrated-fits'
     | '/spectrum/$spectrumId/fits'
     | '/observation/$observationId'
@@ -308,10 +273,7 @@ export interface FileRouteTypes {
     | '/(auth)/api/auth/$'
     | '/_app/observation/$observationId/extracted-fits'
     | '/_app/observation/$observationId/fits'
-    | '/_app/observation/$observationId/image'
-    | '/_app/observation/$observationId/preview'
     | '/_app/plate/$plateId/fits'
-    | '/_app/plate/$plateId/preview'
     | '/_app/spectrum/$spectrumId/calibrated-fits'
     | '/_app/spectrum/$spectrumId/fits'
     | '/_app/observation/$observationId/'
@@ -443,32 +405,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSpectrumSpectrumIdCalibratedFitsRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/plate/$plateId/preview': {
-      id: '/_app/plate/$plateId/preview'
-      path: '/plate/$plateId/preview'
-      fullPath: '/plate/$plateId/preview'
-      preLoaderRoute: typeof AppPlatePlateIdPreviewRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
     '/_app/plate/$plateId/fits': {
       id: '/_app/plate/$plateId/fits'
       path: '/plate/$plateId/fits'
       fullPath: '/plate/$plateId/fits'
       preLoaderRoute: typeof AppPlatePlateIdFitsRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/observation/$observationId/preview': {
-      id: '/_app/observation/$observationId/preview'
-      path: '/observation/$observationId/preview'
-      fullPath: '/observation/$observationId/preview'
-      preLoaderRoute: typeof AppObservationObservationIdPreviewRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/_app/observation/$observationId/image': {
-      id: '/_app/observation/$observationId/image'
-      path: '/observation/$observationId/image'
-      fullPath: '/observation/$observationId/image'
-      preLoaderRoute: typeof AppObservationObservationIdImageRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/observation/$observationId/fits': {
@@ -529,10 +470,7 @@ interface AppRouteRouteChildren {
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
   AppObservationObservationIdExtractedFitsRoute: typeof AppObservationObservationIdExtractedFitsRoute
   AppObservationObservationIdFitsRoute: typeof AppObservationObservationIdFitsRoute
-  AppObservationObservationIdImageRoute: typeof AppObservationObservationIdImageRoute
-  AppObservationObservationIdPreviewRoute: typeof AppObservationObservationIdPreviewRoute
   AppPlatePlateIdFitsRoute: typeof AppPlatePlateIdFitsRoute
-  AppPlatePlateIdPreviewRoute: typeof AppPlatePlateIdPreviewRoute
   AppSpectrumSpectrumIdCalibratedFitsRoute: typeof AppSpectrumSpectrumIdCalibratedFitsRoute
   AppSpectrumSpectrumIdFitsRoute: typeof AppSpectrumSpectrumIdFitsRoute
   AppObservationObservationIdIndexRoute: typeof AppObservationObservationIdIndexRoute
@@ -550,11 +488,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppObservationObservationIdExtractedFitsRoute:
     AppObservationObservationIdExtractedFitsRoute,
   AppObservationObservationIdFitsRoute: AppObservationObservationIdFitsRoute,
-  AppObservationObservationIdImageRoute: AppObservationObservationIdImageRoute,
-  AppObservationObservationIdPreviewRoute:
-    AppObservationObservationIdPreviewRoute,
   AppPlatePlateIdFitsRoute: AppPlatePlateIdFitsRoute,
-  AppPlatePlateIdPreviewRoute: AppPlatePlateIdPreviewRoute,
   AppSpectrumSpectrumIdCalibratedFitsRoute:
     AppSpectrumSpectrumIdCalibratedFitsRoute,
   AppSpectrumSpectrumIdFitsRoute: AppSpectrumSpectrumIdFitsRoute,

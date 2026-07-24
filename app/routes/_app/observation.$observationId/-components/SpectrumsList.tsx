@@ -69,7 +69,7 @@ export function SpectrumsList({
   // 		console.log("Modelo cargado:", model);
 
   // 		const img = new Image();
-  // 		img.src = `/observation/${observationId}/preview`;
+  // 		img.src = `/api/observation/${observationId}/preview`;
   // 		await new Promise((resolve, reject) => {
   // 			img.onload = resolve;
   // 			img.onerror = reject;
@@ -140,11 +140,11 @@ export function SpectrumsList({
     mutationFn: async () => {
       /** Obtener ancho de la imagen */
       const img = new Image()
-      img.src = `/observation/${observationId}/preview`
+      img.src = `/api/observation/${observationId}/preview`
       img.onload = async () => {
         /** Obtener predicciones */
         /** Obtener predicciones */
-        const boundingBoxes = await determineBBFunction(`/observation/${observationId}/preview`)
+        const boundingBoxes = await determineBBFunction(`/api/observation/${observationId}/preview`)
         //const boundingBoxes = predictions;
         /** Actualizar base de datos */
         const science = {
@@ -194,7 +194,7 @@ export function SpectrumsList({
     <Card className="overflow-hidden p-0">
       <CardContent className="h-[500px] p-0">
         <BoundingBoxer
-          imageSrc={`/observation/${observationId}/preview`}
+          imageSrc={`/api/observation/${observationId}/preview`}
           boundingBoxes={boundingBoxes}
           showBBList={false}
           onBoundingBoxChange={(boundingBox) => {

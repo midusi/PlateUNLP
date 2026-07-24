@@ -38,7 +38,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
   const { data: observationTensor } = useQuery({
     queryKey: ["observationImage", observationId],
     queryFn: async () => {
-      const image = await fetchGrayscaleImage(`/observation/${observationId}/image`)
+      const image = await fetchGrayscaleImage(`/api/observation/${observationId}/image`)
       return image
     },
   })
@@ -335,7 +335,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                                 </div>
                                 <ImageWithPixelExtraction
                                   image={{
-                                    url: `/observation/${observationId}/preview`,
+                                    url: `/api/observation/${observationId}/preview`,
                                     width: spec.imageWidth,
                                     height: spec.imageHeight,
                                     top: spec.imageTop,

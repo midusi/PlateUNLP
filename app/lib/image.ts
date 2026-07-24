@@ -2,18 +2,7 @@ import * as tf from "@tensorflow/tfjs"
 import { max as mathjsMax, round } from "mathjs"
 import { levenbergMarquardt } from "ml-levenberg-marquardt"
 
-/**
- * Loads an image from a given source URL as a Promise.
- * @param {string} src - image source URL.
- */
-export function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => resolve(img)
-    img.onerror = (reason) => reject(reason)
-    img.src = src
-  })
-}
+export { loadImage } from "./load-image"
 
 /**
  * Dada una imagen en un src devuelve una subimagen acorde a las especificaciones de recorte.
