@@ -19,6 +19,15 @@ import { z } from "zod"
  *   because it does coordinate transformations and other things that TAP doesn't do.
  */
 const SIMBAD_URL = "https://simbad.cds.unistra.fr/simbad/sim-script"
+const SIMBAD_TIMEOUT_MS = 15_000
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    const cause = error.cause instanceof Error ? `: ${error.cause.message}` : ""
+    return `${error.name}: ${error.message}${cause}`
+  }
+  return String(error)
+}
 
 /**
  * Queries SIMBAD script service.
@@ -30,13 +39,25 @@ const SIMBAD_URL = "https://simbad.cds.unistra.fr/simbad/sim-script"
  * @see https://simbad.cds.unistra.fr/guide/sim-fscript.htx
  */
 async function querySimbad(script: string): Promise<Result<string[], Error>> {
-  const url = new URL(SIMBAD_URL)
   script = `output script=off\n${script}` // add output script=off at the beginning of the script
-  url.searchParams.set("script", script)
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { Accept: "text/plain" },
-  })
+  const body = new URLSearchParams()
+  body.set("script", script)
+
+  let response: Response
+  try {
+    response = await fetch(SIMBAD_URL, {
+      method: "POST",
+      headers: {
+        Accept: "text/plain",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+      signal: AbortSignal.timeout(SIMBAD_TIMEOUT_MS),
+    })
+  } catch (error) {
+    return err(new Error(`Could not reach SIMBAD service: ${getErrorMessage(error)}`))
+  }
+
   if (!response.ok) {
     return err(new Error(`Error querying SIMBAD: ${response.status} ${response.statusText}`))
   }
