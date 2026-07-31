@@ -156,6 +156,10 @@ pnpm install
 pnpm dev            # http://localhost:3000
 ```
 
+`.claude/launch.json` is versioned and declares the dev server, so agent tooling can start it
+instead of shelling out. `.claude/worktrees/` is gitignored — that is where agent worktrees land,
+and committing it would nest a checkout inside the repo.
+
 `pnpm db:init` **destroys `.local/`** (`rm -rf`) and re-seeds. Only run it on an intentionally
 disposable database. To just apply new migrations use `pnpm db:migrate`.
 
@@ -217,13 +221,29 @@ Sign commits off with the standard trailer:
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 ```
 
-### Note on tooling
+### Issues and PRs
 
 The `gh` CLI is available and authenticated, so issues and PRs can be created from the shell.
-**Search the existing issues before filing anything** — the astronomers on the project report
-science-level bugs regularly, and a defect you find in the code may already be reported from the
+
+**Search the existing issues before filing anything.** The astronomers on the project report
+science-level bugs regularly, so a defect you find in the code may already be reported from the
 observational side. In that case comment the root cause on the existing issue instead of opening a
-duplicate (see #258 / #259 for an example).
+duplicate — see #258 / #259 for an example.
+
+**Back findings with numbers, not just code reading.** Reproduce the reported case by running the
+repo's own functions (`npx tsx` from the repo root — it fails with a top-level-await error if the
+script lives outside the project) and quote the measured values. That is what turned the #259
+hypothesis into a confirmation.
+
+**Mark anything you author as pending human review.** Open every issue, comment and PR body you
+write with a one-line marker:
+
+```
+> 🤖 En espera de revisión humana.
+```
+
+Only expand that into a full "found by an AI agent, please corroborate before merging" disclaimer
+when the maintainer explicitly asks for it on that particular issue.
 
 `.github/CODEOWNERS`: everything → `@Sansanto2000`; `app/lib/astronomical/` → `@JuanM04`.
 
