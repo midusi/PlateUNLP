@@ -9,7 +9,9 @@ lerna-debug.log*
 
 # Local
 .env.local
-/.local/
+# Sin barra final: así también matchea cuando `.local` es un symlink
+# (p. ej. un worktree apuntando a la base de datos del checkout principal)
+/.local
 
 # TanStack
 node_modules
@@ -19,6 +21,10 @@ node_modules
 
 # Fumadocs
 .source
+
+# Claude Code: la config (.claude/launch.json, etc.) SÍ se versiona.
+# Sólo se ignoran los worktrees temporales que crean los agentes.
+.claude/worktrees/
 
 # Editor directories and files
 .vscode/*
