@@ -89,17 +89,15 @@ function buildSegmentProfiles(
   })
 }
 
-/**
- * Recorta los outliers de cada perfil al limite superior de ±z·σ.
- * TODO(#276): el limite inferior se calculaba pero quedaba pisado; hoy solo se
- * aplica el superior. Revisar si el recorte tiene que ser de a dos lados.
- */
+/** Recorta los outliers de cada perfil, por arriba y por abajo, al limite de ±z·σ. */
 function clampOutliers(profiles: tf.Tensor2D): tf.Tensor2D {
   return tf.tidy(() => {
     const mean = profiles.mean(1, true)
     const std = profiles.sub(mean).square().mean(1, true).sqrt()
+    const lowerLimit = mean.sub(std.mul(OUTLIER_Z_THRESHOLD))
     const upperLimit = mean.add(std.mul(OUTLIER_Z_THRESHOLD))
-    return profiles.where(profiles.less(upperLimit), upperLimit) as tf.Tensor2D
+    const clampedLower = profiles.where(profiles.greater(lowerLimit), lowerLimit)
+    return clampedLower.where(clampedLower.less(upperLimit), upperLimit) as tf.Tensor2D
   })
 }
 
