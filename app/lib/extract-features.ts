@@ -216,23 +216,30 @@ export function extractSpectrum({
   const trace = buildTraceFunctions(mediasPoints, fitFunction, baseTrace)
 
   const gray2d = imgTensor.squeeze([0, 3]) as tf.Tensor2D
-  const spectrumMask = buildApertureMask(trace, { width, height, opening: avgOpening })
-  const transversalAvgs = averageAcrossAperture(gray2d, spectrumMask, trace.derived(0), {
+  const apertureMask = buildApertureMask(trace, { width, height, opening: avgOpening })
+  const transversalAvgs = averageAcrossAperture(gray2d, apertureMask, trace.derived(0), {
     width,
     height,
   })
+  // Un solo reshape en vez de dos expandDims encadenados: el resultado
+  // intermedio de expandDims(0) quedaba sin ninguna referencia para liberarlo.
+  const spectrumMask = apertureMask.reshape([1, height, width, 1]) as tf.Tensor4D
+  const transversalAvgsArr = transversalAvgs.arraySync() as number[]
 
+  imgTensor.dispose()
   profiles.dispose()
   clamped.dispose()
   binarized.dispose()
   gray2d.dispose()
+  apertureMask.dispose()
+  transversalAvgs.dispose()
 
   return {
     mediasPoints,
     opening: avgOpening,
     rectFunction: trace.funct,
     derivedFunction: trace.derived,
-    transversalAvgs: transversalAvgs.arraySync() as number[],
-    spectrumMask: spectrumMask.expandDims(0).expandDims(-1),
+    transversalAvgs: transversalAvgsArr,
+    spectrumMask,
   }
 }
