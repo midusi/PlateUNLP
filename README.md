@@ -27,6 +27,30 @@ pnpm db:init  # To initialize and seed the database
 pnpm dev      # To start the development server
 ```
 
+## Contributing
+
+Every change starts as a GitHub issue. Work happens on a dedicated branch and lands via a pull
+request — never commit directly to `main` or `dev`.
+
+1. Open an issue describing the problem before writing code.
+2. Branch off `dev`. Keep the branch scoped to that one issue.
+3. Open a PR **targeting `dev`**, not `main`. `dev` → `main` is batched separately by a maintainer,
+   who reviews and approves every PR.
+
+### Commit messages
+
+```
+<feat|fix>: [ID-XXX] <short description, emoji welcome>
+```
+
+`XXX` is the GitHub issue number the commit resolves. Keep commits small and single-purpose — if
+one commit mixes unrelated changes, split it into several.
+
+```
+feat: [ID-271] ✨ Autocompletar SCANRES desde placas del proyecto
+fix: [ID-268] 🐛 HA se formatea en horas, no en grados
+```
+
 ## Deployment
 
 As is, PlateUNLP can be deployed using any platform that supports Node.js applications. Right now, we are using [Railpack](https://railpack.com/) to deploy the application.
