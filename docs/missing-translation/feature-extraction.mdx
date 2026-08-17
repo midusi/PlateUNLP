@@ -20,13 +20,15 @@ x_i = i \cdot \left( \frac{W}{N} \right) + \frac{1}{2} \cdot \left( \frac{W}{N} 
 \end{equation}
 ```
 
-Cada valor $$x_i$$ se lo ubica sobre el eje X de la matriz de la imagen y se copian en una nueva imagen las columnas que corresponden al intervalo de columnas $$[x_i - S_\text{width}: x_i + S_\text{width}]$$ respecto a la matriz de la imagen original. $$S_\text{width}$$ es el ancho en pixeles de los segmentos a recortar, por defecto $$S_\text{width}=60$$. La subimagen correspondiente a cada $$x_i$$ la definimos como $$S_i$$
+Cada valor $$x_i$$ se lo ubica sobre el eje X de la matriz de la imagen y se copian en una nueva imagen las columnas que corresponden al intervalo de columnas $$[x_i - S_\text{width}/2: x_i + S_\text{width}/2]$$ respecto a la matriz de la imagen original. $$S_\text{width}$$ es el ancho **total** en pixeles de los segmentos a recortar, por defecto $$S_\text{width}=100$$. La subimagen correspondiente a cada $$x_i$$ la definimos como $$S_i$$
 
 ```math
 \begin{equation}
-S_i = \text{ImgSc}[...][ x_i - S_\text{width} : x_i + S_\text{width}]
+S_i = \text{ImgSc}[...][ x_i - S_\text{width}/2 : x_i + S_\text{width}/2]
 \end{equation}
 ```
+
+![Recorte de subimágenes desde la imagen de un espectro de ciencia](./segmentar.png)
 
 Dada cada subimagen $$S_i$$, la cual corresponde a una matriz de píxeles de 2 dimensiones vamos a mapear sus valores a un arreglo donde cada posición se corresponde con una fila del segmento y los valores de todos los pixeles de una misma fila son promediados. Llamamos al arreglo resultante arreglo de promedios horizontales $$S_iAvgH$$,
 
@@ -44,23 +46,80 @@ S_iAvgH[row] = \frac{1}{S_{i(width)}} \cdot ∑_{col=0}^{S_{i(width)}-1} S_i[row
 \end{equation}
 ```
 
-Teniendo los vectores $$S_iAvgH$$ se hace un filtrado de todos aquellos valores que queden por debajo de un umbral $$τ$$, por defecto $$τ=0.6$$. Entonces definimos a los arreglos $$F_i$$ como:
+![Ilustración de las operaciones involucradas al calcular la función por filas de un segmento](./extraer-funcion-segmento.png)
+
+Antes de filtrar, cada arreglo $$S_iAvgH$$ se pesa con una función tipo super-gaussiana $$w(row)$$: vale $$≈1$$ en la zona central del recorte y cae bruscamente sólo cerca de los dos bordes (fila $$0$$ y fila $$S_{height}-1$$). El objetivo es que una fuga de intensidad de un espectro vecino —típicamente cerca de uno de los bordes del recorte— no domine la detección del centro. $$p$$ es el exponente que controla qué tan plano queda el techo (por defecto $$p=4$$) y $$W_{min}$$ el peso exacto en esos dos bordes, fila $$0$$ y fila $$S_{height}-1$$ (por defecto $$W_{min}=0.05$$; no puede ser $$0$$, porque colapsaría a cero casi todo el arreglo):
 
 ```math
 \begin{equation}
-F_i= \{ x \in S_iAvgH \mid x \geq κ \}
+c = \frac{S_{height}-1}{2}, \quad \hat{row} = \frac{row - c}{c}, \quad w(row) = W_{min}^{\ \hat{row}^{\,2p}}
+\end{equation}
+```
+
+Definimos el arreglo pesado:
+
+```math
+\begin{equation}
+S_iAvgH_w[row] = S_iAvgH[row] \cdot w(row)
+\end{equation}
+```
+
+Este pesado sólo afecta la búsqueda del centro y la apertura que siguen a continuación; el promedio final del espectro 1D (más adelante, $$ArrCol_i$$) sigue usando los píxeles reales de la imagen, sin pesar. Se aplica igual para el espectro de ciencia y para las lámparas de comparación.
+
+Sobre $$S_iAvgH_w$$ se aplica una serie de transformaciones y suavizados, para facilitar la distinción de por dónde pasa el espectro y por dónde sólo hay fondo. Cada paso se marca con un superíndice numerado ($$^{(1)}, ^{(2)}, ...$$) respecto al anterior. Primero se acotan los valores atípicos, al límite de $$±1.96·σ$$ (el valor que cubre $$≈95\%$$ de los datos en una distribución normal):
+
+```math
+\begin{equation}
+S_iAvgH_w^{(1)}[row] =
+\begin{cases}
+L_{sup,i} & \text{si } S_iAvgH_w[row] > L_{sup,i} \\
+S_iAvgH_w[row] & \text{si } L_{inf,i} \leq S_iAvgH_w[row] \leq L_{sup,i} \\
+L_{inf,i} & \text{si } S_iAvgH_w[row] < L_{inf,i}
+\end{cases}
 \end{equation}
 ```
 
 ```math
 \begin{equation}
-κ = \min(S_iAvgH) + (\max(S_iAvgH) - \min(S_iAvgH)) \cdot \tau
+L_{inf,i} = \mu_i - 1.96 \cdot \sigma_i, \qquad L_{sup,i} = \mu_i + 1.96 \cdot \sigma_i
 \end{equation}
 ```
 
-Luego de obtener el arreglo filtrado $$𝐹_𝑖$$, identificamos segmentos contiguos de valores que estaban ubicados en posiciones consecutivas en el arreglo original $$𝑆_iAvgH$$. Es decir, si dos valores filtrados en $$𝐹_i$$ provienen de posiciones $$𝑗$$ y $$𝑗+1$$ en $$𝑆_iAvgH$$, se consideran parte del mismo grupo.
+con $$\mu_i$$ y $$\sigma_i$$ la media y el desvío de $$S_iAvgH_w$$. Con los datos acotados se hace un normalizado min-max, para dejar los valores entre $$0$$ y $$1$$:
 
-A partir de esta agrupación, se forman subconjuntos $$𝐺_{i,1}, 𝐺_{i,2}, ..., 𝐺_{i,k}$$ tales que cada grupo contiene valores contiguos (según su posición original). Finalmente, se elige el grupo más largo:
+```math
+\begin{equation}
+S_iAvgH_w^{(2)}[row] = \frac{S_iAvgH_w^{(1)}[row] - \min(S_iAvgH_w^{(1)})}{\max(S_iAvgH_w^{(1)}) - \min(S_iAvgH_w^{(1)})}
+\end{equation}
+```
+
+Como el punto medio de un arreglo normalizado siempre es $$0.5$$, se aprovecha ese límite como umbral $$τ=0.5$$ para empujar la señal a los extremos, lo que la hace más pronunciada:
+
+```math
+\begin{equation}
+S_iAvgH_w^{(3)}[row] =
+\begin{cases}
+1 & \text{si } S_iAvgH_w^{(2)}[row] \geq τ \\
+0 & \text{si } S_iAvgH_w^{(2)}[row] < τ
+\end{cases}
+\end{equation}
+```
+
+Por último se aplica un suavizado de media móvil, con una ventana proporcional al alto del recorte, para tratar irregularidades puntuales de la señal (si la mayor parte de una franja está en $$1$$ pero un tramo chico está en $$0$$, el suavizado la empuja de vuelta a $$1$$):
+
+```math
+\begin{equation}
+window = S_{height} \cdot 0.15
+\end{equation}
+```
+
+```math
+\begin{equation}
+S_iAvgH_w^{(4)}[row] = \frac{1}{window} \cdot \sum_{k=-\lfloor(window-1)/2\rfloor}^{\lfloor(window-1)/2\rfloor} S_iAvgH_w^{(3)}[row+k]
+\end{equation}
+```
+
+Sobre el arreglo suavizado se identifican las secuencias contiguas de valores que quedan por encima del umbral $$τ=0.5$$, denominadas $$𝐺_{i,1}, 𝐺_{i,2}, ..., 𝐺_{i,k}$$. Se elige el grupo más largo, que se asume es el que mejor corresponde a la señal del espectro:
 
 ```math
 \begin{equation}
@@ -68,13 +127,15 @@ G_i = \arg\max_{G_{i,j}} \, |G_{i,j}|
 \end{equation}
 ```
 
-Los valores contenidos en $$G_i$$ se corresponden con el rango de píxeles verticales donde se estima que se encuentra el espectro. Dado el índice superior $$y_{i, up}$$ el inferior $$y_{i, down}$$, se calcula el píxel central del espectro en el segmento $$S_i$$ como:
+Los valores contenidos en $$G_i$$ se corresponden con el rango de píxeles verticales donde se estima que se encuentra el espectro. Dado el índice superior $$y_{i, up}$$ y el inferior $$y_{i, down}$$, se calcula el píxel central del espectro en el segmento $$S_i$$ y la apertura de ese segmento:
 
 ```math
 \begin{equation}
-y_i = \mathrm{round}(\frac{y_{i, up} + y_{i, down}}{2})
+y_i = \frac{y_{i, up} + y_{i, down}}{2}, \qquad opening_i = |y_{i, up} - y_{i, down}|
 \end{equation}
 ```
+
+![Pasos para encontrar las coordenadas del centro de un espectro dada una coordenada horizontal](./detectar-traza.png)
 
 Ahora que conocemos que a cada píxel horizontal $$x_i$$ le corresponde una fila $$y_i$$. que representa el centro del espectro, se puede definir una serie de $$N$$ puntos que trazan el centro del espectro de ciencia como:
 
@@ -90,11 +151,11 @@ C = \{(x_i, y_i)\}_{i=0}^{N-1}
 \end{equation}
 ```
 
-Aprovechando los grupos $$G_i$$ calculados antes también obtenemos el valor promedio de que tan ancho es el espectro en todos los $$S_i$$:
+Promediando las aperturas $$opening_i$$ calculadas antes se obtiene el valor promedio de qué tan ancho es el espectro en todos los $$S_i$$:
 
 ```math
 \begin{equation}
-Opening = \frac{1}{N} \cdot ∑_{i=0}^{N-1} |G_i|
+Opening = \frac{1}{N} \cdot ∑_{i=0}^{N-1} |opening_i|
 \end{equation}
 ```
 
@@ -114,7 +175,7 @@ f(x) = Spline_{quadratic}(C)
 \end{equation}
 ```
 
-PlateUNLP delega al usuario la elección del método de interpolación para realizar el trazado de la recta media a través de la imagen del espectro de ciencia. Para tener más información respecto a cada opción consultar [Funciones de Interpolación](../interpolation-functions/index.md).
+`extractSpectrum` soporta ambos métodos, pero hoy el llamador (`recalculateSpectrums1D`) siempre usa regresión lineal — la elección de método no está expuesta al usuario en la interfaz actual. Para tener más información respecto a cada opción consultar [Funciones de Interpolación](../interpolation-functions/index.md).
 
 Una vez definida la función $$f(x)$$, que dado cualquier píxel horizontal $$x$$ indica la altura por la que pasa el centro del espectro, es posible obtener las funciones que delimitan el borde superior $$u(x)$$ e inferior $$d(x)$$ del espectro, utilizando el valor promedio de apertura $$Opening$$:
 
@@ -166,25 +227,41 @@ El siguiente gráfico proporciona una visión general de todo el procedimiento n
 
 ## Lamparas de comparación
 
-Para realizar la extraccion de los espectros de los espectros 1D de las lamparas de comparación se parte de la funciones $$u(x)$$ y $$d(x)$$ halladas para el espectro de ciencia. No obstante, hay que tener en cuenta que la lampara del espectro de lampara puede llegar a tener una altura mayor o menor que la de la imagen del espectro de ciencia por lo que se calcula la escala $$\text{Scale}_Y$$ necesaria para mapear una altura del espectro de ciencia a una altura para un espectro de lampara de comparación.
+Para extraer las lámparas de comparación **no se ajusta una función nueva**: se reutiliza la misma función de traza $$f(x)$$ ya calculada para el espectro de ciencia y se la desplaza verticalmente (offset constante) hasta que coincida con los centros detectados en el recorte de la lámpara. La altura del recorte de la lámpara no se usa para nada en este cálculo.
+
+Se repite el mismo procedimiento de la sección anterior (incluyendo el pesado de bordes) sobre la imagen de la lámpara, obteniendo su propio conjunto de centros $$C_{lamp} = \{(x_i, y_{i,lamp})\}_{i=0}^{N-1}$$ y su propia apertura promedio $$Opening_{lamp}$$ (calculada igual que $$Opening$$, sin relación con la del espectro de ciencia). Con la traza de ciencia $$f(x)$$ ya ajustada, se calcula cuánto habría que desplazarla en cada checkpoint para que pase por el centro detectado ahí:
 
 ```math
 \begin{equation}
-\text{Scale}_Y=\frac{\text{Science}_{heigth}}{\text{Lamp1}_{heigth}}
+offset_i = f(x_i) - y_{i,lamp}
 \end{equation}
 ```
 
-Con esto podemos calcular $$u'(x)$$ y $$d'(x)$$:
+y se toma la mediana de esos desplazamientos, no el de un único checkpoint, para que uno solo contaminado no arrastre la traza completa:
 
 ```math
 \begin{equation}
-u'(x) = u(x) \cdot \text{Scale}_Y
+offset = \mathrm{median}(\{offset_0, offset_1, ..., offset_{N-1}\})
 \end{equation}
 ```
 
 ```math
 \begin{equation}
-d'(x)= d(x) \cdot \text{Scale}_Y
+f_{lamp}(x) = f(x) - offset
+\end{equation}
+```
+
+Con esto podemos calcular $$u'(x)$$ y $$d'(x)$$, análogas a $$u(x)$$ y $$d(x)$$ pero para la lámpara:
+
+```math
+\begin{equation}
+u'(x) = f_{lamp}(x) + Opening_{lamp} / 2
+\end{equation}
+```
+
+```math
+\begin{equation}
+d'(x)= f_{lamp}(x) - Opening_{lamp} / 2
 \end{equation}
 ```
 
@@ -213,3 +290,11 @@ M = |ArrCol_i|
 Este procedimiento se repite para ambas lamparas de comparación, obteniendo asi las funciones descriptivas de cada una:
 
 ![All spectrums with images](./Spectrums1D.png)
+
+## Enmascarado
+
+Muchas observaciones están inclinadas, lo que hace que el recorte usado para encuadrar cada espectro sea más alto de lo estrictamente necesario — y a mayor altura, más probable que la banda de un espectro invada la imagen de otro. Para que esa invasión no contamine la detección de los espectros que todavía faltan procesar, cada vez que se termina de extraer un espectro se enmascara su apertura ($$u(x)$$/$$d(x)$$, o $$u'(x)$$/$$d'(x)$$ para una lámpara) sobre la observación completa, rellenando esa franja con fondo antes de seguir con el próximo. El orden es siempre el mismo: primero el espectro de ciencia, después cada lámpara de comparación.
+
+En el código esto lo resuelve `maskingObservation` (`app/routes/_app/observation.$observationId/-utils/mask-observation.ts`), reusando `spectrumMask` que devuelve `extractSpectrum` para cada espectro.
+
+![Proceso de enmascarado tras extraer cada espectro de una observación](./mascareado.png)
