@@ -12,7 +12,13 @@ const PLATEAU_THRESHOLD = 0.5
 const SMOOTHING_WINDOW_RATIO = 0.15
 /** Exponente de la super-gaussiana de bordes: mas alto = techo mas plano y caida mas brusca. */
 const EDGE_WEIGHT_POWER = 4
-/** Peso minimo (en el borde exacto) de la super-gaussiana de bordes. */
+/**
+ * Peso minimo (en el borde exacto) de la super-gaussiana de bordes.
+ * No puede valer 0: en `EDGE_WEIGHT_MIN ** normalized ** (2*power)` la base
+ * en 0 da 0 en toda fila salvo la del centro geometrico exacto (que ademas
+ * no existe si `height` es par), asi que colapsa casi todo el perfil a cero
+ * antes de clampOutliers/binarizeProfiles. Ver #301.
+ */
 const EDGE_WEIGHT_MIN = 0.05
 
 /** Metodo de ajuste para la traza media. */
