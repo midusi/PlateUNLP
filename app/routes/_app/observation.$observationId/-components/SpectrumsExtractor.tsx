@@ -270,11 +270,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                             }
                             const analysis = analysisArr.find((a) => a.id === st.id)?.analysis
                             if (!analysis) return "Spectrum analysis data not found"
-                            const analysisPrincipal = analysisArr.find(
-                              (a) => a.id === prevFormValues.current.idPrincipalSpectrum,
-                            )?.analysis
-                            if (!analysisPrincipal)
-                              return "Principal spectrum analysis data not found"
                             return (
                               <div>
                                 <div className="flex w-full flex-row items-center justify-center gap-2">
@@ -342,8 +337,8 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                                     left: spec.imageLeft,
                                   }}
                                   pointsWMed={analysis.mediasPoints}
-                                  drawFunction={analysisPrincipal.rectFunction}
-                                  opening={analysisPrincipal.opening}
+                                  drawFunction={analysis.rectFunction}
+                                  opening={analysis.opening}
                                 />
                                 <SimpleFunctionXY data={analysis.transversalAvgs} />
                               </div>

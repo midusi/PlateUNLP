@@ -1,4 +1,5 @@
 import * as tf from "@tensorflow/tfjs"
+import { median } from "~/lib/array-stats"
 import { findPlateau, findXspacedPoints } from "~/lib/image"
 import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"
@@ -9,6 +10,10 @@ const OUTLIER_Z_THRESHOLD = 1.96
 const PLATEAU_THRESHOLD = 0.5
 /** Ventana de suavizado, como fraccion del alto del recorte. */
 const SMOOTHING_WINDOW_RATIO = 0.15
+/** Exponente de la super-gaussiana de bordes: mas alto = techo mas plano y caida mas brusca. */
+const EDGE_WEIGHT_POWER = 4
+/** Peso minimo (en el borde exacto) de la super-gaussiana de bordes. */
+const EDGE_WEIGHT_MIN = 0.05
 
 /** Metodo de ajuste para la traza media. */
 export type FitFunction = "linal-regression" | "spline"
@@ -37,6 +42,14 @@ export interface ExtractSpectrumProps {
   fitFunction?: FitFunction
   /** Traza ya calculada en otro espectro. Si se pasa, se reusa en vez de ajustar una nueva. */
   baseTrace?: TraceFunctions
+  /**
+   * Le resta peso a las filas cercanas al borde superior/inferior del recorte
+   * al buscar el centro de cada checkpoint, para que una fuga puntual de un
+   * espectro vecino no domine la deteccion. Solo afecta la busqueda del
+   * centro; transversalAvgs siempre promedia los pixeles reales, sin pesar.
+   * @default true
+   */
+  deemphasizeEdges?: boolean
 }
 
 /** Respuesta de extractSpectrum. */
@@ -86,6 +99,27 @@ function buildSegmentProfiles(
       .cropAndResize(imgTensor, boxes, boxIdx, [height, segmentWidth], "nearest")
       .squeeze() // saca el canal: [countCheckpoints, height, segmentWidth]
     return segments.mean(2) as tf.Tensor2D
+  })
+}
+
+/**
+ * Peso vertical tipo super-gaussiana: ~1 en el medio, techo casi plano, y
+ * caida pronunciada solo cerca de los dos bordes (fila 0 y fila height-1).
+ */
+function edgeWeights(height: number): number[] {
+  const center = (height - 1) / 2
+  const halfWidth = center || 1
+  return Array.from({ length: height }, (_, row) => {
+    const normalized = (row - center) / halfWidth // -1..1
+    return EDGE_WEIGHT_MIN ** (normalized ** (2 * EDGE_WEIGHT_POWER))
+  })
+}
+
+/** Aplica edgeWeights a cada fila de los perfiles, para restarle peso a los bordes. */
+function applyEdgeWeights(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
+  return tf.tidy(() => {
+    const weights = tf.tensor2d(edgeWeights(height), [1, height])
+    return profiles.mul(weights) as tf.Tensor2D
   })
 }
 
@@ -142,8 +176,11 @@ function buildTraceFunctions(
   baseTrace?: TraceFunctions,
 ): TraceFunctions {
   if (baseTrace) {
-    // Se ancla al primer centro y se desplaza verticalmente.
-    const offset = baseTrace.funct(mediasPoints[0].x) - mediasPoints[0].y
+    // Se ancla con la mediana del desplazamiento de todos los checkpoints, no
+    // solo el primero: si uno queda contaminado (p.ej. una fuga del espectro
+    // vecino) no arrastra la traza entera.
+    const offsets = mediasPoints.map((p) => baseTrace.funct(p.x) - p.y)
+    const offset = median(offsets)
     return { funct: (x) => baseTrace.funct(x) - offset, derived: baseTrace.derived }
   }
   const xs = mediasPoints.map((p) => p.x)
@@ -202,13 +239,15 @@ export function extractSpectrum({
   percentAperture = 1.0,
   fitFunction,
   baseTrace,
+  deemphasizeEdges = true,
 }: ExtractSpectrumProps): ExtractSpectrumResponse {
   const imgTensor = spectrum.toFloat()
   /** Coordenadas X de los checkpoints repartidos a lo largo de la imagen. */
   const xpoints = findXspacedPoints(width, countCheckpoints)
 
   const profiles = buildSegmentProfiles(imgTensor, xpoints, { width, height, segmentWidth })
-  const clamped = clampOutliers(profiles)
+  const weighted = deemphasizeEdges ? applyEdgeWeights(profiles, height) : profiles
+  const clamped = clampOutliers(weighted)
   const binarized = binarizeProfiles(clamped, height)
 
   const { mediasPoints, opening } = findTraceAnchors(binarized, xpoints)
@@ -228,6 +267,7 @@ export function extractSpectrum({
 
   imgTensor.dispose()
   profiles.dispose()
+  if (weighted !== profiles) weighted.dispose()
   clamped.dispose()
   binarized.dispose()
   gray2d.dispose()
