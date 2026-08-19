@@ -3,7 +3,7 @@ import sharp from "sharp"
 import { db } from "~/db"
 import { observationToFITSFilename, spectrumCropToFITS, unknownable } from "~/lib/fits"
 import { log } from "~/lib/log"
-import { readUploadedFile } from "~/lib/uploads"
+import { readEditedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/observation/$observationId/fits")({
   server: {
@@ -32,9 +32,10 @@ export const Route = createFileRoute("/_app/observation/$observationId/fits")({
           "observation",
         )
 
-        let image = await readUploadedFile(plate.image.id)
+        // let image = await readUploadedFile(plate.image.id)
+        let image = await readEditedFile(plate)
+
         image = await sharp(image)
-          .rotate(plate.imageRotation)
           .extract({
             height: observation.imageHeight,
             top: observation.imageTop,

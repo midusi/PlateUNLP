@@ -1,3 +1,4 @@
+import type { InferSelectModel } from "drizzle-orm"
 import { eq } from "drizzle-orm"
 import { err, ok, type Result } from "neverthrow"
 import fs from "node:fs/promises"
@@ -5,6 +6,7 @@ import sharp from "sharp"
 import { z } from "zod"
 import { SUPPORTED_PLATE_MIMETYPES } from "~/consts"
 import { db } from "~/db"
+import type { plate, upload } from "~/db/schema"
 import * as s from "~/db/schema"
 import { env } from "~/env"
 
@@ -15,6 +17,11 @@ type UploadedFile = {
   mimeType: z.infer<typeof MimeSchema>
   width: number
   height: number
+}
+
+
+type PlateWithImage = InferSelectModel<typeof plate> & {
+  image?: InferSelectModel<typeof upload>
 }
 
 export async function uploadFile(
@@ -51,6 +58,15 @@ export async function uploadFile(
 
 export async function readUploadedFile(id: string): Promise<Buffer> {
   return await fs.readFile(`${env.UPLOADS_DIR}/${id}`)
+}
+
+export async function readEditedFile(plate: PlateWithImage): Promise<Buffer> {
+  const imageId = plate.image?.id || plate.imageId;
+  let i = sharp(await readUploadedFile(imageId)).rotate(plate.imageRotation || 0);
+  if (plate.imageInverted) {
+    i = i.negate({ alpha: false });
+  }
+  return i.toBuffer();
 }
 
 export async function deleteUploadedFile(id: string) {

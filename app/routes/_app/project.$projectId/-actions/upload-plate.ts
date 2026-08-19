@@ -20,6 +20,8 @@ export const uploadPlate = createServerFn({ method: "POST" })
       log().warn("plate upload rejected", { reason: "malformed rotate", projectId })
       return { success: false as const, error: "Malformed input" }
     }
+    
+    const isInverted = data.get("inverted") === "true";
 
     const plate = data.get("plate")
     if (!(plate instanceof File)) {
@@ -51,6 +53,7 @@ export const uploadPlate = createServerFn({ method: "POST" })
         imageWidth: image.value.width,
         imageHeight: image.value.height,
         imageRotation: ((rotate.data % 360) + 360) % 360,
+        imageInverted: isInverted,
         metadataCompletion: 0,
       })
       .returning({ id: s.plate.id })

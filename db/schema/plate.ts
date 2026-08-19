@@ -17,6 +17,7 @@ export const plate = sqliteTable("plate", {
   imageWidth: integer().notNull(),
   imageHeight: integer().notNull(),
   imageRotation: integer().notNull().default(0),
+  imageInverted: integer("is_inverted", { mode: "boolean" }).notNull().default(false),
   // metadata, with a flag indicating if the value is known
   metadataCompletion: real().notNull(), // percentage of metadata completed [0, 100]
   OBSERVAT: text("observat")
