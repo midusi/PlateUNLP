@@ -4,7 +4,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 import { auth } from "~/lib/auth"
 import { bufferToArrayBuffer } from "~/lib/node"
-import { readUploadedFile } from "~/lib/uploads"
+import { readEditedFile } from "~/lib/uploads"
 
 async function getAuthorizedObservation(request: Request, observationId: string) {
   const session = await auth.api.getSession({ headers: request.headers })
@@ -42,9 +42,9 @@ export async function getObservationPreviewResponse(
   if (result.response) return result.response
 
   const { observation } = result
-  let image = await readUploadedFile(observation.plate.image.id)
+  // let image = await readUploadedFile(observation.plate.image.id)
+  let image = await readEditedFile(observation.plate)
   image = await sharp(image)
-    .rotate(observation.plate.imageRotation)
     .extract({
       height: observation.imageHeight,
       top: observation.imageTop,
@@ -71,9 +71,9 @@ export async function getObservationImageResponse(
   if (result.response) return result.response
 
   const { observation } = result
-  let image = await readUploadedFile(observation.plate.image.id)
+  // let image = await readUploadedFile(observation.plate.image.id)
+  let image = await readEditedFile(observation.plate)
   image = await sharp(image)
-    .rotate(observation.plate.imageRotation)
     .extract({
       height: observation.imageHeight,
       top: observation.imageTop,

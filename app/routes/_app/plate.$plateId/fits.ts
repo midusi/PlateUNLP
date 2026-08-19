@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
 import { plateToFITS, plateToFITSFilename, unknownable } from "~/lib/fits"
-import { readUploadedFile } from "~/lib/uploads"
+import { readEditedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/plate/$plateId/fits")({
   server: {
@@ -15,9 +15,10 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
         if (!plate) return new Response("Not found", { status: 404 })
         const fileName = plateToFITSFilename(plate["PLATE-N"])
 
-        let image = await readUploadedFile(plate.image.id)
+        // let image = await readUploadedFile(plate.image.id)
+        let image = await readEditedFile(plate)
+
         image = await sharp(image)
-          .rotate(plate.imageRotation)
           .toColorspace("b-w")
           .extractChannel(0)
           .raw({ depth: "ushort" })

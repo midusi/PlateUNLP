@@ -4,7 +4,7 @@ import { db } from "~/db"
 import * as s from "~/db/schema"
 import { auth } from "~/lib/auth"
 import { bufferToArrayBuffer } from "~/lib/node"
-import { readUploadedFile } from "~/lib/uploads"
+import { readEditedFile } from "~/lib/uploads"
 
 export async function getPlatePreviewResponse(
   request: Request,
@@ -34,8 +34,9 @@ export async function getPlatePreviewResponse(
     if (!membership) return new Response("Forbidden", { status: 403 })
   }
 
-  let image = await readUploadedFile(plate.image.id)
-  image = await sharp(image).rotate(plate.imageRotation).toColorspace("srgb").png().toBuffer()
+  // let image = await readUploadedFile(plate.image.id)
+  let image = await readEditedFile(plate)
+  image = await sharp(image).toColorspace("srgb").png().toBuffer()
 
   return new Response(bufferToArrayBuffer(image), {
     headers: {

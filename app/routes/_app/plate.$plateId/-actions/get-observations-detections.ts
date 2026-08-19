@@ -4,7 +4,7 @@ import { InferenceSession, Tensor } from "onnxruntime-node"
 import sharp from "sharp"
 import { z } from "zod"
 import { db } from "~/db"
-import { readUploadedFile } from "~/lib/uploads"
+import { readEditedFile } from "~/lib/uploads"
 
 /**
  * Función para obtener las detecciones de observaciones en una placa utilizando un modelo ONNX.
@@ -27,14 +27,15 @@ export const getObservationDetections = createServerFn()
     if (!plate) return new Response("Plate not found", { status: 404 })
     //image = await sharp(image).rotate(plate.imageRotation).toColorspace("srgb").png().toBuffer()
     /** Obtener imagen */
-    const image = await readUploadedFile(plate.image.id)
+    // const image = await readUploadedFile(plate.image.id)
+    const image = await readEditedFile(plate)
+
     // 0. Obtener dimensiones originales
     const originalMetadata = await sharp(image).metadata()
     const origW = originalMetadata.width ?? 1
     const origH = originalMetadata.height ?? 1
     // 1. Obtener los píxeles CRUDOS (sin comprimir a PNG)
     const { data: rawPixels, info } = await sharp(image)
-      .rotate(plate.imageRotation)
       .resize(640, 640, { fit: "contain", background: { r: 0, g: 0, b: 0 } })
       .toColorspace("srgb")
       .removeAlpha()
