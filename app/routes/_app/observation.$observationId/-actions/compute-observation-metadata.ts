@@ -139,7 +139,7 @@ export const computeObservationMetadata = createServerFn()
       "DATE-ORG": { value: DATE_ORG, isKnown: true },
       JD: { value: JD.toFixed(4), isKnown: true },
       ST: { value: degToHMS(ST.value), isKnown: true },
-      HA: { value: degToDMS(HA), isKnown: true },
+      HA: { value: degToHMS(HA), isKnown: true },
       AIRMASS: { value: AIRMASS.toString(), isKnown: true },
     } satisfies Partial<z.input<typeof ObservationMetadataSchema>>
   })
