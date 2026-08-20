@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
+import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import { type BoundingBox, BoundingBoxer } from "~/components/BoundingBoxer"
 import { Button } from "~/components/ui/button"
@@ -8,6 +9,8 @@ import { notifyError } from "~/lib/notifications"
 import { cn, idxToColor } from "~/lib/utils"
 import { addObservation } from "../-actions/add-observation"
 import { addObservations } from "../-actions/add-observations"
+import { deleteObservation } from "../-actions/delete-observation"
+import { deleteObservations } from "../-actions/delete-observations"
 import type { Observation } from "../-actions/get-observations"
 import { getObservationDetections } from "../-actions/get-observations-detections"
 import { updateObservation } from "../-actions/update-observation"
@@ -36,6 +39,7 @@ export function ObservationsList({
   plateId: string
   initialObservations: Observation[]
 }) {
+  const router = useRouter()
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     sortByLabel(
       initialObservations.map((obs, idx) => ({
@@ -44,6 +48,22 @@ export function ObservationsList({
       })),
     ),
   )
+
+  const deleteObservationMut = useMutation({
+    mutationFn: async (observationId: string) => {
+      await deleteObservation({ data: { observationId } })
+      setBoundingBoxes((prev) => prev.filter((box) => box.id !== observationId))
+    },
+    onError: (error) => notifyError("Error deleting observation", error),
+  })
+
+  const deleteObservationsMut = useMutation({
+    mutationFn: async (plateId: string) => {
+      await deleteObservations({ data: { plateId } })
+      setBoundingBoxes([])
+    },
+    onError: (error) => notifyError("Error deleting observations", error),
+  })
 
   const addObservationMut = useMutation({
     mutationFn: async (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => {
@@ -110,6 +130,7 @@ export function ObservationsList({
             })
           }}
           onBoundingBoxAdd={(boundingBox) => addObservationMut.mutate(boundingBox)}
+          onBoundingBoxDelete={(id) => deleteObservationMut.mutate(id)}
           showBBList={true}
         >
           <Button
@@ -129,6 +150,23 @@ export function ObservationsList({
               )}
             />
             Autodetect
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            title="Delete Observations"
+            disabled={deleteObservationsMut.isPending || boundingBoxes.length === 0}
+            onClick={() => {
+              deleteObservationsMut.mutate(plateId)
+            }}
+            className="h-7 w-7 p-0"
+          >
+            <span className={cn(
+              deleteObservationsMut.isPending
+                ? "icon-[ph--spinner-bold] animate-spin"
+                : "icon-[ph--broom] text-base"
+            )} />
+            <span className="sr-only">Delete Observations</span>
           </Button>
         </BoundingBoxer>
       </CardContent>

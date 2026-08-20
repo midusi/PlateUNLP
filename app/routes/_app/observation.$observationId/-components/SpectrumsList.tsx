@@ -10,6 +10,7 @@ import { cn } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addSpectrum } from "../-actions/add-spectrum"
 import { addSpectrums } from "../-actions/add-spectrums"
+import { deleteSpectrum } from "../-actions/delete-spectrum"
 import { updateSpectrum } from "../-actions/update-spectrum"
 
 export type Spectrum = {
@@ -190,6 +191,14 @@ export function SpectrumsList({
     onError: (error) => notifyError("Error adding spectrum", error),
   })
 
+  const deleteSpectrumMut = useMutation({
+    mutationFn: async (spectrumId: string) => {
+      await deleteSpectrum({ data: { spectrumId } })
+      setBoundingBoxes((prev) => prev.filter((box) => box.id !== spectrumId))
+    },
+    onError: (error) => notifyError("Error deleting spectrum", error),
+  })
+
   return (
     <Card className="overflow-hidden p-0">
       <CardContent className="h-[500px] p-0">
@@ -215,6 +224,7 @@ export function SpectrumsList({
             router.invalidate()
           }}
           onBoundingBoxAdd={(boundingBox) => addSpectrumMut.mutate(boundingBox)}
+          onBoundingBoxDelete={(id) => deleteSpectrumMut.mutate(id)}
         >
           <Button
             size="sm"
