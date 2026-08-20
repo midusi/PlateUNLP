@@ -65,6 +65,11 @@ export type BoundingBoxerProps = {
    */
   onBoundingBoxAdd?: (boundingBox: Pick<BoundingBox, "top" | "left" | "width" | "height">) => void
   /**
+   * Function triggered when a bounding box is deleted.
+   * The bounding box is identified by its `id`.
+   */
+  onBoundingBoxDelete?: (id: string) => void
+  /**
    * Whether the bounding boxes can be modified by the user.
    * @default false
    */
@@ -108,6 +113,7 @@ export function BoundingBoxer({
   onBoundingBoxChange,
   onBoundingBoxChangeEnd,
   onBoundingBoxAdd,
+  onBoundingBoxDelete,
   disabled = false,
   showZoomActions = true,
   showBBList = false,
@@ -195,6 +201,7 @@ export function BoundingBoxer({
                 boundingBox={boundingBox}
                 onChange={onBoundingBoxChange}
                 onChangeEnd={onBoundingBoxChangeEnd}
+                onDelete={onBoundingBoxDelete}
                 limits={{ x: imageSize.width, y: imageSize.height }}
                 disabled={disabled}
               />
@@ -239,11 +246,11 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
                 className="flex w-full flex-row items-center justify-center gap-1"
                 to="/observation/$observationId"
                 params={{ observationId: bb.id }}
-              >
+                >
                 <span
                   className="icon-[ph--rectangle-dashed-bold] size-4"
                   style={{ color: bb.color }}
-                />
+                  />
                 {bb.label ?? ""}
               </Link>
             </Toolbar.Button>
@@ -345,12 +352,14 @@ function BoundingBoxComponent({
   boundingBox,
   onChange,
   onChangeEnd,
+  onDelete,
   limits,
   disabled = false,
 }: {
   boundingBox: BoundingBox
   onChange?: (boundingBox: BoundingBox) => void
   onChangeEnd?: (boundingBox: BoundingBox) => void
+  onDelete?: (id: string) => void
   limits: { x: number; y: number }
   disabled?: boolean
 }) {
@@ -486,6 +495,24 @@ function BoundingBoxComponent({
       className="group absolute grid"
       data-resizing={resizing !== null}
     >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          onDelete?.(boundingBox.id)
+        }}
+        className="absolute -top-1.5 -right-1.5 z-10 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-black bg-white text-black shadow-sm transition-colors hover:bg-black hover:text-white group-hover:flex group-data-[resizing=true]:hidden"
+      >
+        <svg 
+          viewBox="0 0 14 14" 
+          className="h-2.5 w-2.5" 
+          stroke="currentColor" 
+          strokeWidth="1.5" 
+          strokeLinecap="round"
+        >
+          <path d="M3 3l8 8m0-8l-8 8" />
+        </svg>
+      </button>
       {/* <p
         className="absolute top-0 left-0 origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"
         style={{
