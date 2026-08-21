@@ -122,8 +122,8 @@ export const computeObservationMetadata = createServerFn()
         fix: "Verify the observation datetime and observatory coordinates",
       })
     const HA = getHourAngle(simbad.value.RA2000, ST.value)
-    const { azimuth } = equatorialToHorizontal(HA, simbad.value.DEC2000, observatory.latitude)
-    const AIRMASS = getAirmass(azimuth)
+    const { altitude } = equatorialToHorizontal(HA, simbad.value.DEC2000, observatory.latitude)
+    const AIRMASS = getAirmass(altitude)
     return {
       OBJECT: data.OBJECT,
       "DATE-OBS": data["DATE-OBS"],
