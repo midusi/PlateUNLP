@@ -28,9 +28,11 @@ export function simpleHash(str: string) {
  * and then getting a color from a predefined palette.
  */
 export function idToColor(id: string): string {
-  const colors = ["red", "blue", "green"]
-  const index = simpleHash(id) % colors.length
-  return colors[index]
+  const hue = simpleHash(id) % 360
+  const saturation = 65
+  const lightness = 50
+  let res = `hsl(${hue} ${saturation}% ${lightness}%)`
+  return res
 }
 
 /**
@@ -38,17 +40,15 @@ export function idToColor(id: string): string {
  */
 export function idxToColor(idx: number): string {
   const colors = [
-    "#e6194b",
-    "#3cb44b",
-    "#4363d8",
-    "#911eb4",
-    "#46f0f0",
-    "#f032e6",
-    "#f58231",
-    "#bcf60c",
-    "#fabebe",
-    "#008080",
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "indigo",
+    "violet",
   ]
+  console.log("in", idx, "out", colors[idx % colors.length])
   return colors[idx % colors.length]
 }
 

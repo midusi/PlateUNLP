@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
-import { cn } from "~/lib/utils"
+import { cn, idToColor } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addSpectrum } from "../-actions/add-spectrum"
 import { addSpectrums } from "../-actions/add-spectrums"
@@ -26,7 +26,7 @@ export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
   return {
     id: spectrum.id,
     name: "",
-    color: spectrum.type === "science" ? "red" : "green",
+    color: idToColor(spectrum.id),
     top: spectrum.imageTop,
     left: spectrum.imageLeft,
     width: spectrum.imageWidth,

@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { formatObservation } from "~/lib/format"
 import { notifyError } from "~/lib/notifications"
-import { cn, idxToColor } from "~/lib/utils"
+import { cn, idToColor } from "~/lib/utils"
 import { addObservation } from "../-actions/add-observation"
 import { addObservations } from "../-actions/add-observations"
 import { deleteObservation } from "../-actions/delete-observation"
@@ -20,7 +20,7 @@ function observationToBoundingBox(observation: Observation): BoundingBox {
     id: observation.id,
     name: observation.name,
     label: formatObservation(observation),
-    color: "red",
+    color: idToColor(observation.id),
     top: observation.imageTop,
     left: observation.imageLeft,
     width: observation.imageWidth,
@@ -42,10 +42,7 @@ export function ObservationsList({
   const router = useRouter()
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
     sortByLabel(
-      initialObservations.map((obs, idx) => ({
-        ...observationToBoundingBox(obs),
-        color: idxToColor(idx),
-      })),
+      initialObservations.map(observationToBoundingBox),
     ),
   )
 
