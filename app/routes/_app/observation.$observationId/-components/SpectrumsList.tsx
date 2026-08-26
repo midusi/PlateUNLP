@@ -6,12 +6,13 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
-import { cn, idToColor } from "~/lib/utils"
+import { cn } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addSpectrum } from "../-actions/add-spectrum"
 import { addSpectrums } from "../-actions/add-spectrums"
 import { deleteSpectrum } from "../-actions/delete-spectrum"
 import { updateSpectrum } from "../-actions/update-spectrum"
+
 
 export type Spectrum = {
   type: "lamp" | "science"
@@ -23,10 +24,12 @@ export type Spectrum = {
 }
 
 export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
+  console.log(spectrum.type);
+  let color = spectrum.type == 'lamp' ? 'red' : 'green';
   return {
     id: spectrum.id,
     name: "",
-    color: idToColor(spectrum.id),
+    color: color,
     top: spectrum.imageTop,
     left: spectrum.imageLeft,
     width: spectrum.imageWidth,
@@ -54,88 +57,6 @@ export function SpectrumsList({
     false,
     0.7,
   )
-
-  // const [predictions, setPredictions] = useState<BoundingBox[]>([]);
-  // useEffect(() => {
-  // 	const loadModel = async () => {
-  // 		const input_height = 1088;
-  // 		const input_width = 1088;
-  // 		const forceMaxWidth = true;
-  // 		const CONFIDENCE_THRESHOLD = 0.7;
-  // 		const CLASSES = classesSpectrumDetection;
-  // 		const model = await tf.loadGraphModel(
-  // 			"/models/spectrum_part_segmentator_tfjs/model.json",
-  // 		);
-  // 		// podés guardar el modelo en un state si lo necesitás
-  // 		console.log("Modelo cargado:", model);
-
-  // 		const img = new Image();
-  // 		img.src = `/api/observation/${observationId}/preview`;
-  // 		await new Promise((resolve, reject) => {
-  // 			img.onload = resolve;
-  // 			img.onerror = reject;
-  // 		});
-
-  // 		let tensor = tf.browser.fromPixels(img, 3).toFloat();
-  // 		tensor = tf.image.resizeNearestNeighbor(tensor, [
-  // 			input_height,
-  // 			input_width,
-  // 		]);
-  // 		tensor = tensor.div(255);
-
-  // 		tensor = tensor.expandDims(0); // (1, 1088, 1088, 3)
-  // 		tensor = tensor.transpose([0, 3, 1, 2]); // (1, 3, 1088, 1088)
-
-  // 		let output = model.predict(tensor) as tf.Tensor;
-  // 		output = output.reshape(output.shape); // (1, 6:atributos, x:predicciones)
-  // 		output = output.squeeze(); // (6, x:predicciones)
-  // 		const scores = output.gather(4); // Vector de atributo 5 (probabilidades)
-  // 		const mask = scores.greater(tf.scalar(CONFIDENCE_THRESHOLD)); // Vector de ejemplos que cumplen
-  // 		output = await tf.booleanMaskAsync(output, mask, 1); // Filtra ejemplos que no cumplen con confianza minima
-  // 		const boundingBoxArr: number[][] = output
-  // 			.transpose()
-  // 			.arraySync() as number[][]; // (x, 6)
-  // 		const maped = boundingBoxArr.map((bb, idx) => {
-  // 			const xc: number = bb[0];
-  // 			const yc: number = bb[1];
-  // 			let w: number = bb[2];
-  // 			let h: number = bb[3];
-  // 			const prob: number = bb[4];
-  // 			const class_id: number = Math.round(bb[5]);
-
-  // 			let x1 = xc - w / 2;
-  // 			let y1 = yc - h / 2;
-
-  // 			// Escalado
-  // 			x1 = x1 * (img.naturalWidth / input_width);
-  // 			y1 = y1 * (img.naturalHeight / input_width);
-  // 			w = w * (img.naturalWidth / input_width);
-  // 			h = h * (img.naturalHeight / input_width);
-
-  // 			// Modificacion para que el ancho valla hasta los extremos
-  // 			if (forceMaxWidth) {
-  // 				x1 = 0;
-  // 				w = img.naturalWidth;
-  // 			}
-  // 			return {
-  // 				id: `${idx}`,
-  // 				name: "",
-  // 				top: y1,
-  // 				left: x1,
-  // 				width: w,
-  // 				height: h,
-  // 				color: CLASSES[class_id].color,
-  // 				prob,
-  // 			};
-  // 		});
-  // 		const sorted = maped.sort((bb1, bb2) => bb2.prob - bb1.prob);
-  // 		setPredictions(sorted);
-  // 	};
-
-  // 	loadModel().catch(console.error);
-
-  // 	return () => {};
-  // }, [observationId]);
 
   const determineBBMut = useMutation({
     mutationFn: async () => {
@@ -175,7 +96,7 @@ export function SpectrumsList({
           spectrumToBoundingBox(newSpectrums.lamp1),
           spectrumToBoundingBox(newSpectrums.lamp2),
         ]
-        setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev])
+        setBoundingBoxes((prev) => [...boundingBoxesFormated])
       }
     },
     onError: (error) => notifyError("Error determine bounding boxes", error),
@@ -193,8 +114,10 @@ export function SpectrumsList({
 
   const deleteSpectrumMut = useMutation({
     mutationFn: async (spectrumId: string) => {
-      await deleteSpectrum({ data: { spectrumId } })
-      setBoundingBoxes((prev) => prev.filter((box) => box.id !== spectrumId))
+      await Promise.all(
+        boundingBoxes.map((box) => deleteSpectrum({ data: { spectrumId: box.id } }))
+      )
+      setBoundingBoxes((prev) => ([]))
     },
     onError: (error) => notifyError("Error deleting spectrum", error),
   })
@@ -241,6 +164,23 @@ export function SpectrumsList({
               )}
             />
             Autodetect
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            title="Delete Observations"
+            disabled={deleteSpectrumMut.isPending || boundingBoxes.length === 0}
+            onClick={() => {
+              deleteSpectrumMut.mutate(observationId)
+            }}
+            className="h-7 w-7 p-0"
+          >
+            <span className={cn(
+              deleteSpectrumMut.isPending
+                ? "icon-[ph--spinner-bold] animate-spin"
+                : "icon-[ph--broom] text-base"
+            )} />
+            <span className="sr-only">Delete Observations</span>
           </Button>
         </BoundingBoxer>
       </CardContent>

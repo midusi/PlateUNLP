@@ -501,14 +501,22 @@ function BoundingBoxComponent({
           e.stopPropagation()
           onDelete?.(boundingBox.id)
         }}
-        className="absolute -top-1.5 -right-1.5 z-10 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-black bg-white text-black shadow-sm transition-colors hover:bg-black hover:text-white group-hover:flex group-data-[resizing=true]:hidden"
+        style={{
+          width: `${16 / scale}px`,   // Equivale a w-4 (16px)
+          height: `${16 / scale}px`,  // Equivale a h-4 (16px)
+          top: `${-6 / scale}px`,     // Equivale a -top-1.5 (-6px)
+          right: `${-6 / scale}px`,   // Equivale a -right-1.5 (-6px)
+        }}
+        // Se eliminaron h-4, w-4, -top-1.5, -right-1.5 de este className
+        className="absolute z-10 hidden cursor-pointer items-center justify-center rounded-full border border-black bg-white text-black shadow-sm transition-colors hover:bg-black hover:text-white group-hover:flex group-data-[resizing=true]:hidden"
       >
         <svg 
           viewBox="0 0 14 14" 
-          className="h-2.5 w-2.5" 
           stroke="currentColor" 
           strokeWidth="1.5" 
           strokeLinecap="round"
+          // Hacemos que el ícono interno también se ajuste al tamaño del contenedor
+          style={{ width: '60%', height: '60%' }} 
         >
           <path d="M3 3l8 8m0-8l-8 8" />
         </svg>
