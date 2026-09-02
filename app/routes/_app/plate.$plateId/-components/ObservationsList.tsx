@@ -12,7 +12,7 @@ import { addObservations } from "../-actions/add-observations"
 import { deleteObservation } from "../-actions/delete-observation"
 import { deleteObservations } from "../-actions/delete-observations"
 import type { Observation } from "../-actions/get-observations"
-import { getObservationDetections } from "../-actions/get-observations-detections"
+import { getObservationDetections } from "../-actions/get-spectrums-detections"
 import { updateObservation } from "../-actions/update-observation"
 
 function observationToBoundingBox(observation: Observation): BoundingBox {

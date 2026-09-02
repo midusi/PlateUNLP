@@ -51,8 +51,8 @@ export function SpectrumsList({
   )
 
   const determineBBFunction = usePredictBBs(
-    1088,
-    "spectrum_part_segmentator.onnx",
+    640,
+    "detect_observations.3.0.0.m.onnx",
     classesSpectrumDetection,
     false,
     0.7,
@@ -60,44 +60,47 @@ export function SpectrumsList({
 
   const determineBBMut = useMutation({
     mutationFn: async () => {
-      /** Obtener ancho de la imagen */
-      const img = new Image()
-      img.src = `/api/observation/${observationId}/preview`
-      img.onload = async () => {
-        /** Obtener predicciones */
-        /** Obtener predicciones */
-        const boundingBoxes = await determineBBFunction(`/api/observation/${observationId}/preview`)
-        //const boundingBoxes = predictions;
-        /** Actualizar base de datos */
-        const science = {
-          imageTop: Math.round(boundingBoxes[0].y), //.top
-          imageLeft: 0, // Forzar ancho maximo
-          imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: Math.round(boundingBoxes[0].height),
-        }
-        const lamp1 = {
-          imageTop: Math.round(boundingBoxes[1].y), //.top
-          imageLeft: 0, // Forzar ancho maximo
-          imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: Math.round(boundingBoxes[1].height),
-        }
-        const lamp2 = {
-          imageTop: Math.round(boundingBoxes[2].y), //.top
-          imageLeft: 0, // Forzar ancho maximo
-          imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: Math.round(boundingBoxes[2].height),
-        }
-        const newSpectrums = await addSpectrums({
-          data: { observationId, science, lamp1, lamp2 },
-        })
-        router.invalidate()
-        const boundingBoxesFormated = [
-          spectrumToBoundingBox(newSpectrums.science),
-          spectrumToBoundingBox(newSpectrums.lamp1),
-          spectrumToBoundingBox(newSpectrums.lamp2),
-        ]
-        setBoundingBoxes((prev) => [...boundingBoxesFormated])
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image()
+        image.onload = () => resolve(image)
+        image.onerror = () => reject(new Error("No se pudo cargar la vista previa de la observación"))
+        image.src = `/api/observation/${observationId}/preview`
+      })
+
+      const boundingBoxes = await determineBBFunction(observationId)
+      if (!boundingBoxes || boundingBoxes.length < 3) {
+        throw new Error("No se detectaron observaciones en la placa")
       }
+
+      const science = {
+        imageTop: Math.round(boundingBoxes[0].y),
+        imageLeft: 0,
+        imageWidth: img.naturalWidth,
+        imageHeight: Math.round(boundingBoxes[0].height),
+      }
+      const lamp1 = {
+        imageTop: Math.round(boundingBoxes[1].y),
+        imageLeft: 0,
+        imageWidth: img.naturalWidth,
+        imageHeight: Math.round(boundingBoxes[1].height),
+      }
+      const lamp2 = {
+        imageTop: Math.round(boundingBoxes[2].y),
+        imageLeft: 0,
+        imageWidth: img.naturalWidth,
+        imageHeight: Math.round(boundingBoxes[2].height),
+      }
+
+      const newSpectrums = await addSpectrums({
+        data: { observationId, science, lamp1, lamp2 },
+      })
+      router.invalidate()
+      const boundingBoxesFormated = [
+        spectrumToBoundingBox(newSpectrums.science),
+        spectrumToBoundingBox(newSpectrums.lamp1),
+        spectrumToBoundingBox(newSpectrums.lamp2),
+      ]
+      setBoundingBoxes((prev) => [...boundingBoxesFormated])
     },
     onError: (error) => notifyError("Error determine bounding boxes", error),
   })
