@@ -13,6 +13,7 @@ import { addSpectrums } from "../-actions/add-spectrums"
 import { deleteSpectrum } from "../-actions/delete-spectrum"
 import { updateSpectrum } from "../-actions/update-spectrum"
 
+
 export type Spectrum = {
   type: "lamp" | "science"
   id: string
@@ -23,10 +24,12 @@ export type Spectrum = {
 }
 
 export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
+  console.log(spectrum.type);
+  let color = spectrum.type == 'lamp' ? 'red' : 'green';
   return {
     id: spectrum.id,
     name: "",
-    color: idToColor(spectrum.id),
+    color: color,
     top: spectrum.imageTop,
     left: spectrum.imageLeft,
     width: spectrum.imageWidth,
@@ -48,135 +51,56 @@ export function SpectrumsList({
   )
 
   const determineBBFunction = usePredictBBs(
-    1088,
-    "spectrum_part_segmentator.onnx",
+    640,
+    "detect_observations.3.0.0.m.onnx",
     classesSpectrumDetection,
     false,
     0.7,
   )
 
-  // const [predictions, setPredictions] = useState<BoundingBox[]>([]);
-  // useEffect(() => {
-  // 	const loadModel = async () => {
-  // 		const input_height = 1088;
-  // 		const input_width = 1088;
-  // 		const forceMaxWidth = true;
-  // 		const CONFIDENCE_THRESHOLD = 0.7;
-  // 		const CLASSES = classesSpectrumDetection;
-  // 		const model = await tf.loadGraphModel(
-  // 			"/models/spectrum_part_segmentator_tfjs/model.json",
-  // 		);
-  // 		// podés guardar el modelo en un state si lo necesitás
-  // 		console.log("Modelo cargado:", model);
-
-  // 		const img = new Image();
-  // 		img.src = `/api/observation/${observationId}/preview`;
-  // 		await new Promise((resolve, reject) => {
-  // 			img.onload = resolve;
-  // 			img.onerror = reject;
-  // 		});
-
-  // 		let tensor = tf.browser.fromPixels(img, 3).toFloat();
-  // 		tensor = tf.image.resizeNearestNeighbor(tensor, [
-  // 			input_height,
-  // 			input_width,
-  // 		]);
-  // 		tensor = tensor.div(255);
-
-  // 		tensor = tensor.expandDims(0); // (1, 1088, 1088, 3)
-  // 		tensor = tensor.transpose([0, 3, 1, 2]); // (1, 3, 1088, 1088)
-
-  // 		let output = model.predict(tensor) as tf.Tensor;
-  // 		output = output.reshape(output.shape); // (1, 6:atributos, x:predicciones)
-  // 		output = output.squeeze(); // (6, x:predicciones)
-  // 		const scores = output.gather(4); // Vector de atributo 5 (probabilidades)
-  // 		const mask = scores.greater(tf.scalar(CONFIDENCE_THRESHOLD)); // Vector de ejemplos que cumplen
-  // 		output = await tf.booleanMaskAsync(output, mask, 1); // Filtra ejemplos que no cumplen con confianza minima
-  // 		const boundingBoxArr: number[][] = output
-  // 			.transpose()
-  // 			.arraySync() as number[][]; // (x, 6)
-  // 		const maped = boundingBoxArr.map((bb, idx) => {
-  // 			const xc: number = bb[0];
-  // 			const yc: number = bb[1];
-  // 			let w: number = bb[2];
-  // 			let h: number = bb[3];
-  // 			const prob: number = bb[4];
-  // 			const class_id: number = Math.round(bb[5]);
-
-  // 			let x1 = xc - w / 2;
-  // 			let y1 = yc - h / 2;
-
-  // 			// Escalado
-  // 			x1 = x1 * (img.naturalWidth / input_width);
-  // 			y1 = y1 * (img.naturalHeight / input_width);
-  // 			w = w * (img.naturalWidth / input_width);
-  // 			h = h * (img.naturalHeight / input_width);
-
-  // 			// Modificacion para que el ancho valla hasta los extremos
-  // 			if (forceMaxWidth) {
-  // 				x1 = 0;
-  // 				w = img.naturalWidth;
-  // 			}
-  // 			return {
-  // 				id: `${idx}`,
-  // 				name: "",
-  // 				top: y1,
-  // 				left: x1,
-  // 				width: w,
-  // 				height: h,
-  // 				color: CLASSES[class_id].color,
-  // 				prob,
-  // 			};
-  // 		});
-  // 		const sorted = maped.sort((bb1, bb2) => bb2.prob - bb1.prob);
-  // 		setPredictions(sorted);
-  // 	};
-
-  // 	loadModel().catch(console.error);
-
-  // 	return () => {};
-  // }, [observationId]);
-
   const determineBBMut = useMutation({
     mutationFn: async () => {
-      /** Obtener ancho de la imagen */
-      const img = new Image()
-      img.src = `/api/observation/${observationId}/preview`
-      img.onload = async () => {
-        /** Obtener predicciones */
-        /** Obtener predicciones */
-        const boundingBoxes = await determineBBFunction(`/api/observation/${observationId}/preview`)
-        //const boundingBoxes = predictions;
-        /** Actualizar base de datos */
-        const science = {
-          imageTop: Math.round(boundingBoxes[0].y), //.top
-          imageLeft: 0, // Forzar ancho maximo
-          imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: Math.round(boundingBoxes[0].height),
-        }
-        const lamp1 = {
-          imageTop: Math.round(boundingBoxes[1].y), //.top
-          imageLeft: 0, // Forzar ancho maximo
-          imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: Math.round(boundingBoxes[1].height),
-        }
-        const lamp2 = {
-          imageTop: Math.round(boundingBoxes[2].y), //.top
-          imageLeft: 0, // Forzar ancho maximo
-          imageWidth: img.naturalWidth, // Forzar ancho maximo
-          imageHeight: Math.round(boundingBoxes[2].height),
-        }
-        const newSpectrums = await addSpectrums({
-          data: { observationId, science, lamp1, lamp2 },
-        })
-        router.invalidate()
-        const boundingBoxesFormated = [
-          spectrumToBoundingBox(newSpectrums.science),
-          spectrumToBoundingBox(newSpectrums.lamp1),
-          spectrumToBoundingBox(newSpectrums.lamp2),
-        ]
-        setBoundingBoxes((prev) => [...boundingBoxesFormated, ...prev])
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image()
+        image.onload = () => resolve(image)
+        image.onerror = () => reject(new Error("No se pudo cargar la vista previa de la observación"))
+        image.src = `/api/observation/${observationId}/preview`
+      })
+
+      const boundingBoxes = await determineBBFunction(observationId)
+      if (!boundingBoxes || boundingBoxes.length < 3) {
+        throw new Error("No se detectaron observaciones en la placa")
       }
+
+      const science = {
+        imageTop: Math.round(boundingBoxes[0].y),
+        imageLeft: 0,
+        imageWidth: img.naturalWidth,
+        imageHeight: Math.round(boundingBoxes[0].height),
+      }
+      const lamp1 = {
+        imageTop: Math.round(boundingBoxes[1].y),
+        imageLeft: 0,
+        imageWidth: img.naturalWidth,
+        imageHeight: Math.round(boundingBoxes[1].height),
+      }
+      const lamp2 = {
+        imageTop: Math.round(boundingBoxes[2].y),
+        imageLeft: 0,
+        imageWidth: img.naturalWidth,
+        imageHeight: Math.round(boundingBoxes[2].height),
+      }
+
+      const newSpectrums = await addSpectrums({
+        data: { observationId, science, lamp1, lamp2 },
+      })
+      router.invalidate()
+      const boundingBoxesFormated = [
+        spectrumToBoundingBox(newSpectrums.science),
+        spectrumToBoundingBox(newSpectrums.lamp1),
+        spectrumToBoundingBox(newSpectrums.lamp2),
+      ]
+      setBoundingBoxes((prev) => [...boundingBoxesFormated])
     },
     onError: (error) => notifyError("Error determine bounding boxes", error),
   })
@@ -193,8 +117,10 @@ export function SpectrumsList({
 
   const deleteSpectrumMut = useMutation({
     mutationFn: async (spectrumId: string) => {
-      await deleteSpectrum({ data: { spectrumId } })
-      setBoundingBoxes((prev) => prev.filter((box) => box.id !== spectrumId))
+      await Promise.all(
+        boundingBoxes.map((box) => deleteSpectrum({ data: { spectrumId: box.id } }))
+      )
+      setBoundingBoxes((prev) => ([]))
     },
     onError: (error) => notifyError("Error deleting spectrum", error),
   })
@@ -241,6 +167,23 @@ export function SpectrumsList({
               )}
             />
             Autodetect
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            title="Delete Observations"
+            disabled={deleteSpectrumMut.isPending || boundingBoxes.length === 0}
+            onClick={() => {
+              deleteSpectrumMut.mutate(observationId)
+            }}
+            className="h-7 w-7 p-0"
+          >
+            <span className={cn(
+              deleteSpectrumMut.isPending
+                ? "icon-[ph--spinner-bold] animate-spin"
+                : "icon-[ph--broom] text-base"
+            )} />
+            <span className="sr-only">Delete Observations</span>
           </Button>
         </BoundingBoxer>
       </CardContent>

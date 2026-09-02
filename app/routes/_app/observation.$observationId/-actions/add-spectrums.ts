@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
+import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
@@ -36,6 +37,11 @@ export const addSpectrums = createServerFn({ method: "POST" })
       where: (observation, { eq }) => eq(observation.id, data.observationId),
     })
     if (!observation) throw new Error(`Observation with id ${data.observationId} not found`)
+
+    await db
+    .delete(s.spectrum)
+    .where(eq(s.spectrum.observationId, data.observationId))
+    console.log(s.spectrum);
 
     const { science: sc, lamp1: l1, lamp2: l2 } = data
     const [newScience] = await db
