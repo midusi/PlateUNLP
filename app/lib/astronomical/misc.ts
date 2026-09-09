@@ -20,21 +20,21 @@ export function getHourAngle(ra: number, st: number): number {
  * azimuth. Kept because it is documented reference API; see #327 before
  * deleting it.
  * @param ha local hour angle in degrees.
- * @param dec declination in degrees, referred to the same equinox as `ha`.
+ * @param dec2000 declination in degrees (ICRS).
  * @param lat latitude of the observer in degrees.
  * @return azimuth and altitude in degrees.
  * @see {@link /docs/reference/astronomical/#equatorialtohorizontal}
  */
 export function equatorialToHorizontal(
   ha: number,
-  dec: number,
+  dec2000: number,
   lat: number,
 ): { azimuth: number; altitude: number } {
   // Trigonometrical functions
   const sh = math.sin(math.bignumber(ha).times(DEG_TO_RAD))
   const ch = math.cos(math.bignumber(ha).times(DEG_TO_RAD))
-  const sd = math.sin(math.bignumber(dec).times(DEG_TO_RAD))
-  const cd = math.cos(math.bignumber(dec).times(DEG_TO_RAD))
+  const sd = math.sin(math.bignumber(dec2000).times(DEG_TO_RAD))
+  const cd = math.cos(math.bignumber(dec2000).times(DEG_TO_RAD))
   const sp = math.sin(math.bignumber(lat).times(DEG_TO_RAD))
   const cp = math.cos(math.bignumber(lat).times(DEG_TO_RAD))
 
