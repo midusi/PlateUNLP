@@ -30,8 +30,8 @@ From those, PlateUNLP is able to compute the following metadata, ordered by the 
 | `DEC1950`  | Declination (FK4, J1950.0)                       | SIMBAD                                                                  | `OBJECT`                               | Same as `DEC`                                                                       |
 | `DATE-ORG` | Local mean datetime of the observation           | [`getLocalDateTime`](../reference/astronomical/index.md#getlocaltime)   | `DATE-OBS`, `OBSERVAT` (timezone)      | —                                                                                   |
 |    `ST`    | Local mean sidereal time                         | [`getSiderealTime`](../reference/astronomical/index.md#getsiderealtime) | `JD`, `OBSERVAT` (longitude)           | 0–24 h; minutes and seconds between 0 and 60                                        |
-|    `HA`    | Local hour angle                                 | [`getHourAngle`](../reference/astronomical/index.md#gethourangle)       | `ST`, `RA2000`                         | 0–24 h; minutes and seconds between 0 and 60                                        |
-| `AIRMASS`  | Airmass of the object at the time of observation | [`getAirmass`](../reference/astronomical/index.md#getairmass)           | `HA`, `DEC2000`, `OBSERVAT` (latitude) | Approximately 1 to 3; outside this range, review coordinates and observation datetime |
+|    `HA`    | Local hour angle                                 | [`getHourAngle`](../reference/astronomical/index.md#gethourangle)       | `ST`, `RA`                             | 0–24 h; minutes and seconds between 0 and 60                                        |
+| `AIRMASS`  | Airmass of the object at the time of observation | [`getAirmass`](../reference/astronomical/index.md#getairmass)           | `HA`, `DEC`, `OBSERVAT` (latitude)     | Approximately 1 to 3; outside this range, review coordinates and observation datetime |
 
 `EPOCH` is derived internally from `JD` to query SIMBAD, but it is not stored as observation metadata.
 
