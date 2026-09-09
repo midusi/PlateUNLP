@@ -51,6 +51,33 @@ feat: [ID-271] ✨ Autocompletar SCANRES desde placas del proyecto
 fix: [ID-268] 🐛 HA se formatea en horas, no en grados
 ```
 
+### Releases
+
+Published versions are numbered `X.Y.Z`:
+
+| Part | Bump it when                                                                             |
+| ---- | ---------------------------------------------------------------------------------------- |
+| `X`  | The published version changes.                                                            |
+| `Y`  | Something breaks backwards compatibility.                                                 |
+| `Z`  | Nothing breaks the installation — no dependency reinstall, no migration on the user side. |
+
+The first published version is `0.0.1`.
+
+Every release is published as a GitHub Release **linked to its own tag** (`vX.Y.Z`), created from
+`main` once the changes are merged there.
+
+**Title:** `X.Y.Z - CodenameInPascalCase` — for example `0.5.0 - OBBYComponentes`,
+`0.4.0 - UnSoloCanal`, `0.3.0 - AdiosShim`. The codename summarises the main change of the release,
+with no spaces.
+
+**Body:** written in Spanish, without accents, matching the rest of the codebase. Organise it in
+paragraphs — one per relevant feature or change, each opening with its main idea in bold. It is a
+description of what changed, not a list of commits. When a change lends itself to being measured,
+quote the actual numbers (`0.4.0`: "75 ms a 45 ms, 1.68x"; `0.5.0`: "IoU de 0.964 a 0.971").
+
+Anything that breaks backwards compatibility goes in its own `## Cambios incompatibles` section,
+explaining what stops working and what someone relying on it has to do now.
+
 ## Deployment
 
 As is, PlateUNLP can be deployed using any platform that supports Node.js applications. Right now, we are using [Railpack](https://railpack.com/) to deploy the application.

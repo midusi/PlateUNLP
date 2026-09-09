@@ -235,6 +235,26 @@ Sign commits off with the standard trailer:
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 ```
 
+### Releases
+
+Published versions are `X.Y.Z`: bump **X** when the published version changes, **Y** when
+something breaks backwards compatibility, **Z** when nothing breaks the installation (no dependency
+reinstall, no migration on the user's side). The first published version is `0.0.1`.
+
+Each release is a GitHub Release **linked to its own tag** (`vX.Y.Z`), cut from `main` after the
+changes are merged there — not from `dev`.
+
+Title: `X.Y.Z - CodenameInPascalCase` (e.g. `0.5.0 - OBBYComponentes`, `0.4.0 - UnSoloCanal`). The
+codename summarises the release's main change, no spaces.
+
+Body **in Spanish, without accents**, in paragraphs — one per relevant change, each opening with
+its main idea in bold. It describes what changed; it is *not* a list of commits. Quote real numbers
+whenever the change lends itself to being measured (`0.4.0`: "75 ms a 45 ms, 1.68x"). Anything that
+breaks backwards compatibility goes in its own `## Cambios incompatibles` section, saying what
+stops working and what someone relying on it has to do now.
+
+Same rules are in `README.md`; keep both in sync (see #298).
+
 ### Issues and PRs
 
 The `gh` CLI is available and authenticated, so issues and PRs can be created from the shell.
