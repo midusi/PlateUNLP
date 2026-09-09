@@ -79,7 +79,7 @@ export const CalibrationSettingsUI = withForm({
                 className="w-full border-r-0 bg-white shadow-none hover:cursor-pointer hover:bg-white"
                 onClick={() => setIsLoadLampModalOpen(true)}
               >
-                <span className="icon-[ph--file-plus] size-5 text-gray-600 group-hover:text-orange-500" />
+                <span className="icon-[ph--file-plus] size-5 text-black!" style={{ color: '#000' }}></span>
               </Button>
               {isLoadLampModalOpen && (
                 <form.AppField name="material">
