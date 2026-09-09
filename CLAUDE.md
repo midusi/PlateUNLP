@@ -239,7 +239,12 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 
 Published versions are `X.Y.Z`: bump **X** when the published version changes, **Y** when
 something breaks backwards compatibility, **Z** when nothing breaks the installation (no dependency
-reinstall, no migration on the user's side). The first published version is `0.0.1`.
+reinstall, no migration on the user's side).
+
+Numbering continues from the deployed rewrite, informally called `2.0.0` and never tagged, so the
+first release published under these conventions is `2.0.1`. The `v1.0.x` tags and their GitHub
+Releases belong to the pre-React software and sit on commits that are **not** ancestors of `main` —
+don't read them as part of this sequence.
 
 Each release is a GitHub Release **linked to its own tag** (`vX.Y.Z`), cut from `main` after the
 changes are merged there — not from `dev`.
