@@ -39,6 +39,7 @@ type ReferenceLampSpectrumProps = {
   onlyOneLine: boolean
   materialPoints: { x: number; y: number }[]
   setMaterialPoints: (arr: { x: number; y: number }[]) => void
+  onDeleteIndex?: (index: number) => void
 }
 
 export function ReferenceLampSpectrum({
@@ -49,6 +50,7 @@ export function ReferenceLampSpectrum({
   onlyOneLine,
   materialPoints,
   setMaterialPoints,
+  onDeleteIndex,
 }: ReferenceLampSpectrumProps) {
   const { materialArrInRange, materialArrForLabel } = useMemo(() => {
     /** Arreglo de todos los registros que encajan en el rango seleccionado */
@@ -186,9 +188,14 @@ export function ReferenceLampSpectrum({
     ])
   }
 
-  /** Permite al usuario borrar las longitudes de onda que marco */
-  function handleUserMarkDelete(x: number) {
-    setMaterialPoints(materialPoints.filter((mp) => mp.x !== x))
+  /** Permite al usuario borrar las longitudes de onda que marco por índice */
+  function handleUserMarkDeleteIndex(idx: number) {
+    if (idx < 0 || idx >= materialPoints.length) return
+    if (typeof onDeleteIndex === "function") {
+      onDeleteIndex(idx)
+    } else {
+      setMaterialPoints(materialPoints.filter((_, i) => i !== idx))
+    }
   }
 
   return (
@@ -270,7 +277,7 @@ export function ReferenceLampSpectrum({
             const xClick = wavelengthScale(mp.x)
 
             return (
-              <g key={`ReferenceLampSpectrumLine-${mp.x}`}>
+              <g key={`ReferenceLampSpectrumLine-${mp.x}-${idx}`}>
                 <Line
                   x1={xClick}
                   y1={0} // Valor inicial en el eje y
@@ -288,7 +295,7 @@ export function ReferenceLampSpectrum({
                   fill="transparent"
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleUserMarkDelete(mp.x)
+                    handleUserMarkDeleteIndex(idx)
                   }}
                   style={{
                     cursor:

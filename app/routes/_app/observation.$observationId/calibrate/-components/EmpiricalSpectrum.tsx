@@ -24,6 +24,7 @@ interface EmpiricalSpectrumProps {
   }[]
   lampPoints: { x: number; y: number }[]
   setLampPoints: (arr: { x: number; y: number }[]) => void
+  onDeleteIndex?: (index: number) => void
   pixelToWavelengthFunction: CustomError | ((value: number) => number)
 }
 const height = 150
@@ -34,6 +35,7 @@ export function EmpiricalSpectrum({
   data,
   lampPoints,
   setLampPoints,
+  onDeleteIndex,
   pixelToWavelengthFunction,
 }: EmpiricalSpectrumProps) {
   const isPixelToWavelengthValid = !(pixelToWavelengthFunction instanceof CustomError)
@@ -124,9 +126,14 @@ export function EmpiricalSpectrum({
     ])
   }
 
-  /** Permite al usuario borrar las longitudes de onda que marco */
-  function handleUserMarkDelete(x: number) {
-    setLampPoints(lampPoints.filter((mp) => mp.x !== x))
+  /** Permite al usuario borrar las longitudes de onda que marco por índice */
+  function handleUserMarkDeleteLampIndex(idx: number) {
+    if (idx < 0 || idx >= lampPoints.length) return
+    if (typeof onDeleteIndex === "function") {
+      onDeleteIndex(idx)
+    } else {
+      setLampPoints(lampPoints.filter((_, i) => i !== idx))
+    }
   }
 
   return (
@@ -202,7 +209,7 @@ export function EmpiricalSpectrum({
             // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
 
             return (
-              <g key={`EmpiricalLine-${lp.x}`}>
+              <g key={`EmpiricalLine-${lp.x}-${idx}`}>
                 <Line
                   x1={xClick}
                   y1={0}
@@ -220,7 +227,7 @@ export function EmpiricalSpectrum({
                   fill="transparent"
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleUserMarkDelete(lp.x)
+                    handleUserMarkDeleteLampIndex(idx)
                   }}
                   style={{
                     cursor:
