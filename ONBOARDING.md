@@ -45,6 +45,11 @@ pnpm dev              # http://localhost:3000
 
 ## 3. El flujo de trabajo es:
 
+**Para elegir con qué empezar**, conviene filtrar el listado de issues por la etiqueta
+[`good first issue`](https://github.com/midusi/PlateUNLP/labels/good%20first%20issue). Son issues
+acotados y sencillos, pensados para familiarizarse con el repositorio sin necesitar contexto previo
+del resto del pipeline.
+
 1. **Todo cambio arranca como un issue** en GitHub describiendo el problema.
 2. **Se trabaja en una rama dedicada**, creada desde `dev`. Nunca se commitea directo a `main` ni
    a `dev`. Para cada Issue se crea una rama `ID-###` donde ### es el número del Issue.
