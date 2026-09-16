@@ -23,27 +23,25 @@ export function LoadLampFileModal({
   const [fileFormatError, setFileFormatError] = useState<string | null>(null)
 
   const validateLampFile = async (file: File): Promise<boolean> => {
-  try {
-    const text = await file.text()
-    const lines = text
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean)
+    try {
+      const text = await file.text()
+      const lines = text
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean)
 
-    const dataLines =
-      lines[0]?.toLowerCase().includes("intensity") &&
-      lines[0]?.toLowerCase().includes("wavelength")
-        ? lines.slice(1, 11)
-        : lines.slice(0, 10)
+      const dataLines = /wavelength/i.test(lines[0] ?? "") ? lines.slice(1, 11) : lines.slice(0, 10)
 
-    if (dataLines.length === 0) return false
+      if (dataLines.length === 0) return false
 
-    const lineRegex = /^\d+(\.\d+)?\s+\d+(\.\d+)?(\s+\S+)?$/
-    return dataLines.every((line) => lineRegex.test(line))
-  } catch {
-    return false
+      // Wavelength, un Intensity numérico opcional, y un Material obligatorio
+      // (sin material no hay forma de identificar la línea espectral).
+      const lineRegex = /^\d+(\.\d+)?(\s+\d+(\.\d+)?)?\s+\S*[A-Za-z]\S*$/
+      return dataLines.every((line) => lineRegex.test(line))
+    } catch {
+      return false
+    }
   }
-}
 
   const LoadLampFormSchema = createLoadLampFormSchema(actualLampsNamesList)
   const form = useAppForm({
@@ -80,21 +78,15 @@ export function LoadLampFileModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <Card className="w-100 p-4">
         <CardHeader>
-          <h2 className="text-xl">
-            <div className="flex items-center gap-2">
-              <span>Upload Lamp File</span>
-              <button
-                type="button"
-                title="Select a .dat file containing lamp data with the format: Wave Intensity [Material]"
-                aria-label="Información sobre el formato del archivo"
-                className="p-0.5 rounded hover:bg-gray-100"
-              >
-                <span className="icon-[ph--info] size-5 text-black!" style={{ color: "#000" }} />
-              </button>
-            </div>
-          </h2>
+          <h2 className="text-xl">Upload Lamp File</h2>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          <div className="rounded-md border border-gray-200 bg-gray-50 p-2 text-xs">
+            <p className="mb-1 text-gray-600">Expected .dat format (whitespace-separated):</p>
+            <code className="block whitespace-pre font-mono">
+              Wavelength [Intensity] Material{"\n"}3020.6391   182       FeI
+            </code>
+          </div>
           <form.AppField name="name">{(field) => <field.TextField label="Name" />}</form.AppField>
           <form.Field name="file">
             {(field) => (
@@ -113,7 +105,7 @@ export function LoadLampFileModal({
                         setFileFormatError(null)
                         field.handleChange(f) // archivo válido
                       } else {
-                        setFileFormatError("File formato not valid. Expected: Wavelength Intensity [Material]")
+                        setFileFormatError("Invalid file format.")
                         field.handleChange(undefined as unknown as File) // resetear campo
                         if (fileInputRef.current) {
                           fileInputRef.current.value = ""
