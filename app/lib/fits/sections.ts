@@ -93,7 +93,7 @@ export function addPlateMetadata(fits: FITS, metadata: PlateMetadata) {
   setTextCard(fits, "PLATNOTE", metadata.plateNotes, "plate notes")
 }
 
-export function (fits: FITS, metadata: PlateScanMetadata) {
+export function addScannedPlateMetaData(fits: FITS, metadata: PlateScanMetadata) {
   appendSectionBanner(fits, "Scanned plate")
   setTextCard(fits, "SCANNER", metadata.scanner, "scanner name")
   setNumericCard(fits, "SCANRES", metadata.scanResolution, "[dpi] scan resolution")
