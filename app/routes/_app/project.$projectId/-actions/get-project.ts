@@ -17,6 +17,7 @@ export const getProject = createServerFn()
               columns: {
                 id: true,
                 "OBS-N": true,
+                OBJECT: true, 
               },
             },
           },
