@@ -70,7 +70,7 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
         const plate = observation.plate
         const fileName = observationToFITSFilename(
           plate["PLATE-N"],
-          observation.OBJECT,
+          observation["OBS-N"],
           `${spectrum.type}.calibrated`,
         )
 

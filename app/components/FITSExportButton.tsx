@@ -43,6 +43,7 @@ type FITSExportButtonProps = {
   variant?: React.ComponentProps<typeof Button>["variant"]
   className?: string
   disabled?: boolean
+  title?: string
 }
 
 export function FITSExportButton({
@@ -53,6 +54,7 @@ export function FITSExportButton({
   variant,
   className,
   disabled,
+  title,
 }: FITSExportButtonProps) {
   const [warningOpen, setWarningOpen] = useState(false)
 
@@ -78,7 +80,14 @@ export function FITSExportButton({
 
   return (
     <>
-      <Button onClick={handleClick} variant={variant} className={className} disabled={disabled}>
+      <Button
+        onClick={handleClick}
+        variant={variant}
+        className={className}
+        disabled={disabled}
+        title={title}
+        aria-label={title}
+      >
         {children}
       </Button>
       <AlertDialog open={warningOpen} onOpenChange={setWarningOpen}>

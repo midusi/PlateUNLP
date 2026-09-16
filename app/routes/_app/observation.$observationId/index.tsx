@@ -102,6 +102,7 @@ function ObservationExportBar({
         href={`/observation/${observationId}/extracted-fits`}
         variant="outline"
         fields={exportFields}
+        title="Descarga un ZIP con un FITS por cada espectro detectado en esta observación."
       >
         <span className="icon-[ph--chart-line]" />
         Download FITS (extracted)
