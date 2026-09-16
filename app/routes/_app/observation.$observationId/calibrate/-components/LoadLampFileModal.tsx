@@ -37,11 +37,9 @@ export function LoadLampFileModal({
         : lines.slice(0, 10)
 
     if (dataLines.length === 0) return false
-    console.log("Data lines to validate:", dataLines)
+
     const lineRegex = /^\d+(\.\d+)?\s+\d+(\.\d+)?(\s+\S+)?$/
-    const isValid = dataLines.every((line) => lineRegex.test(line))
-    console.log("Lamp file validation result:", isValid)
-    return isValid
+    return dataLines.every((line) => lineRegex.test(line))
   } catch {
     return false
   }
