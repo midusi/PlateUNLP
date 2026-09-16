@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/fits")({
         const { plate } = observation
         const fileName = observationToFITSFilename(
           plate["PLATE-N"],
-          observation.OBJECT,
+          observation["OBS-N"],
           `${spectrum.type}.extracted`,
         )
 

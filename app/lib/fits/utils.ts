@@ -86,6 +86,21 @@ export function assertPixelCount(length: number, width: number, height: number) 
   }
 }
 
+// flipHorizontalUint16 removed — flipVerticalUint16 is used to correct FITS orientation.
+
+export function flipVerticalUint16(pixels: Uint16Array, width: number, height: number) {
+  assertPixelCount(pixels.length, width, height)
+  const out = new Uint16Array(pixels.length)
+  for (let y = 0; y < height; y++) {
+    const srcRow = y * width
+    const dstRow = (height - 1 - y) * width
+    for (let x = 0; x < width; x++) {
+      out[dstRow + x] = pixels[srcRow + x]
+    }
+  }
+  return out
+}
+
 export function sanitizeFilename(value: string): string {
   return value
     .trim()

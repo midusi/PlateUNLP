@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
 import { plateToFITS, plateToFITSFilename, unknownable } from "~/lib/fits"
+import { flipVerticalUint16 } from "~/lib/fits/utils"
 import { readEditedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/plate/$plateId/fits")({
@@ -29,7 +30,10 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
           image.byteOffset,
           image.byteLength / Uint16Array.BYTES_PER_ELEMENT,
         )
-        const fits = plateToFITS(pixels, {
+
+        const flipped = flipVerticalUint16(pixels, plate.imageWidth, plate.imageHeight)
+
+        const fits = plateToFITS(flipped, {
           width: plate.imageWidth,
           height: plate.imageHeight,
           metadata: {
