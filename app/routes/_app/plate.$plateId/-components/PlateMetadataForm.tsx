@@ -228,10 +228,9 @@ export function PlateMetadataForm({
               form={form}
               fields="DATESCAN"
               label="DATESCAN"
-              placeholder="e.g. 2011-05-17T10:33:26"
-              type="datetime-local"
-              step="1"
-              description="Scan date and time in local datetime format."
+              placeholder="e.g. 2011-05-17"
+              type="date"
+              description="Scan date."
             />
             <AutocompleteFieldWithKnown
               form={form}
