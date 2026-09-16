@@ -104,6 +104,4 @@ export async function parseLampFile(
     .filter((d) => !Number.isNaN(d.wavelength) && !Number.isNaN(d.intensity))
 
   return parsedData
-
-  return data
 }
