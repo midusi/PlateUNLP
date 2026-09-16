@@ -93,7 +93,7 @@ export function addPlateMetadata(fits: FITS, metadata: PlateMetadata) {
   setTextCard(fits, "PLATNOTE", metadata.plateNotes, "plate notes")
 }
 
-export function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata) {
+export function (fits: FITS, metadata: PlateScanMetadata) {
   appendSectionBanner(fits, "Scanned plate")
   setTextCard(fits, "SCANNER", metadata.scanner, "scanner name")
   setNumericCard(fits, "SCANRES", metadata.scanResolution, "[dpi] scan resolution")
@@ -105,7 +105,7 @@ export function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata)
   )
   setNumericCard(fits, "SCANGAIN", metadata.scanGain, "gain, electrons per adu")
   setTextCard(fits, "SCANSOFT", metadata.scanSoftware, "name of the scanning software")
-  setTextCard(fits, "DATESCAN", normalizeOptionalDateTime(metadata.dateScan), "scan date and time")
+  setTextCard(fits, "DATESCAN", normalizeOptionalDateTime(metadata.dateScan), "scan date")
   setTextCard(fits, "SCANAUTH", metadata.scanAuthor, "author of scan")
   setTextCard(fits, "SCANNOTE", metadata.scannerNotes, "scanner notes")
 }
