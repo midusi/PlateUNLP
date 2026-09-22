@@ -159,8 +159,8 @@ export function PlateMetadataForm({
               form={form}
               fields="DETECTOR"
               label="DETECTOR"
-              placeholder="e.g. Photographic plate"
-              description="Detector that recorded the observation."
+              placeholder="e.g. IIIa-0"
+              description="Type of photographic emulsion used as detector."
               options={suggestions.DETECTOR}
             />
             <AutocompleteFieldWithKnown
