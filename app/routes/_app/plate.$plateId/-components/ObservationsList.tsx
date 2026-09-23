@@ -70,7 +70,7 @@ export function ObservationsList({
     ),
   )
   const prevLabelsRef = useRef<Record<string, string>>({})
-
+ //
   useEffect(() => {
     const current: Record<string, string> = {}
     boundingBoxes.forEach((b) => (current[b.id] = b.name ?? b.label))    
