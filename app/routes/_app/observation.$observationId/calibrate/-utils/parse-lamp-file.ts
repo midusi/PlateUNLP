@@ -102,6 +102,7 @@ export async function parseLampFile(
       return { wavelength, material, intensity }
     })
     .filter((d) => !Number.isNaN(d.wavelength) && !Number.isNaN(d.intensity))
+    .sort((a, b) => a.wavelength - b.wavelength)
 
   return parsedData
 }
