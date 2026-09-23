@@ -4,6 +4,7 @@ import { InferenceSession, Tensor } from "onnxruntime-node"
 import sharp from "sharp"
 import { z } from "zod"
 import { db } from "~/db"
+import { obsNFromIndex } from "~/lib/obs-n"
 import { readEditedFile } from "~/lib/uploads"
 
 /**
@@ -102,10 +103,10 @@ export const getObservationDetections = createServerFn()
       const realY1 = (y1 - offsetY) / scale
       const realX2 = (x2 - offsetX) / scale
       const realY2 = (y2 - offsetY) / scale
-
+      const obsN = obsNFromIndex(_idx) // Generar OBS-N basado en el índice de la predicción
       return {
-        id: nanoid(), // Mejor usar nanoid aquí para evitar conflictos de keys
-        name: `Observation ${nanoid(4)}`,
+        id: nanoid(),
+        name: `Obs. ${obsN}`,
         imageWidth: realX2 - realX1,
         imageHeight: realY2 - realY1,
         imageLeft: realX1,
