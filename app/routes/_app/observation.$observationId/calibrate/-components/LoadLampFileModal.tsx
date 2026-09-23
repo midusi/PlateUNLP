@@ -22,7 +22,7 @@ export function LoadLampFileModal({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileFormatError, setFileFormatError] = useState<string | null>(null)
 
-  const validateLampFile = async (file: File): Promise<boolean> => {
+  const validateLampFile = async (file: File): Promise<{ valid: boolean; error?: string }> => {
     try {
       const text = await file.text()
       const lines = text
@@ -32,14 +32,30 @@ export function LoadLampFileModal({
 
       const dataLines = /wavelength/i.test(lines[0] ?? "") ? lines.slice(1, 11) : lines.slice(0, 10)
 
-      if (dataLines.length === 0) return false
+      if (dataLines.length === 0) return { valid: false, error: "Invalid file format." }
 
-      // Wavelength, un Intensity numérico opcional, y un Material obligatorio
-      // (sin material no hay forma de identificar la línea espectral).
-      const lineRegex = /^\d+(\.\d+)?(\s+\d+(\.\d+)?)?\s+\S*[A-Za-z]\S*$/
-      return dataLines.every((line) => lineRegex.test(line))
+      const lineRegex = /^\d+(\.\d+)?(\s+-?\d+(\.\d+)?)?\s+\S*[A-Za-z]\S*$/
+      if (!dataLines.every((line) => lineRegex.test(line))) {
+        return { valid: false, error: "Invalid file format." }
+      }
+
+      // Verificar valores negativos en Intensity
+      const hasNegativeIntensity = dataLines.some((line) => {
+        const parts = line.trim().split(/\s+/)
+        if (parts.length >= 3) {
+          const intensity = parseFloat(parts[1])
+          return !isNaN(intensity) && intensity < 0
+        }
+        return false
+      })
+
+      if (hasNegativeIntensity) {
+        return { valid: false, error: "Intensity field values must be non-negative." }
+      }
+
+      return { valid: true }
     } catch {
-      return false
+      return { valid: false, error: "Invalid file format." }
     }
   }
 
@@ -84,8 +100,9 @@ export function LoadLampFileModal({
           <div className="rounded-md border border-gray-200 bg-gray-50 p-2 text-xs">
             <p className="mb-1 text-gray-600">Expected .dat format (whitespace-separated):</p>
             <code className="block whitespace-pre font-mono">
-              Wavelength [Intensity] Material{"\n"}3020.6391   182       FeI
+              Wavelength Intensity Material{"\n"}3020.6391   182       FeI
             </code>
+            <p className="mb- text-gray-600">Intensity field values must be non-negative</p>
           </div>
           <form.AppField name="name">{(field) => <field.TextField label="Name" />}</form.AppField>
           <form.Field name="file">
@@ -100,17 +117,17 @@ export function LoadLampFileModal({
                     const files = e.target.files
                     if (files && files.length > 0) {
                       const f = files[0]
-                      const ok = await validateLampFile(f)
-                      if (ok) {
-                        setFileFormatError(null)
-                        field.handleChange(f) // archivo válido
-                      } else {
-                        setFileFormatError("Invalid file format.")
-                        field.handleChange(undefined as unknown as File) // resetear campo
-                        if (fileInputRef.current) {
-                          fileInputRef.current.value = ""
+                       const result = await validateLampFile(f)
+                        if (result.valid) {
+                          setFileFormatError(null)
+                          field.handleChange(f) // archivo válido
+                        } else {
+                          setFileFormatError(result.error ?? "Invalid file format.")
+                          field.handleChange(undefined as unknown as File) // resetear campo
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = ""
+                          }
                         }
-                      }
 
                     } else {
                       /** Dejar que Zod marque error */
