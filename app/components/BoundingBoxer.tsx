@@ -184,7 +184,13 @@ export function BoundingBoxer({
           >
             {children}
           </BoundingBoxControls>
-          {showBBList && <BoundingBoxList boundingBoxes={boundingBoxes} />}
+          {showBBList && (
+            <BoundingBoxList
+              boundingBoxes={boundingBoxes}
+              onChange={onBoundingBoxChange}
+              onChangeEnd={onBoundingBoxChangeEnd}
+            />
+          )}
           <TransformComponent
             wrapperStyle={{ width: "100%", height: "100%" }}
             contentClass={cn("relative", selectedTool === "draw" && "cursor-crosshair")}
@@ -220,8 +226,25 @@ export function BoundingBoxer({
   )
 }
 
-function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
+function BoundingBoxList({
+  boundingBoxes,
+  onChange,
+  onChangeEnd,
+}: {
+  boundingBoxes: BoundingBox[]
+  onChange?: (boundingBox: BoundingBox) => void
+  onChangeEnd?: (boundingBox: BoundingBox) => void
+}) {
   if (boundingBoxes.length === 0) return
+
+  const [labels, setLabels] = useState<Record<string, string>>({})
+  const focusListenerRef = useRef<((e: MouseEvent) => void) | null>(null)
+
+  useEffect(() => {
+    const map: Record<string, string> = {}
+    boundingBoxes.forEach((bb) => (map[bb.id] = bb.label ?? ""))
+    setLabels(map)
+  }, [boundingBoxes])
 
   return (
     <Toolbar.Root
@@ -230,6 +253,16 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
     >
       <ToggleGroup defaultValue={[boundingBoxes[0].id]} orientation="horizontal">
         {boundingBoxes.map((bb) => {
+          // Save helper ensures same behavior for blur and Enter key
+          const saveLabel = (value: string) => {
+            const newLabel = value
+            if (newLabel !== bb.label) {
+              const updated = { ...bb, label: newLabel, name: newLabel }
+              onChange?.(updated)
+              onChangeEnd?.(updated)
+            }
+          }
+
           return (
             <Toolbar.Button
               key={bb.id}
@@ -237,22 +270,54 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-22 data-pressed:bg-accent! data-pressed:text-primary!"
+                  className="h-8 w-22 gap-0 pr-1.5 data-pressed:bg-accent! data-pressed:text-primary!"
                 />
               }
               title={bb.label}
             >
               <Link
-                className="flex w-full flex-row items-center justify-center gap-1"
+                className="flex w-full flex-row items-center justify-center"
                 to="/observation/$observationId"
                 params={{ observationId: bb.id }}
-                >
-                <span
-                  className="icon-[ph--rectangle-dashed-bold] size-4"
-                  style={{ color: bb.color }}
-                  />
-                {bb.label ?? ""}
+              >
+                <span className="icon-[ph--rectangle-dashed-bold] size-5" style={{ color: bb.color }} />
               </Link>
+              <div className="flex w-150 flex-row items-center justify-center text-sm ml-1 h-2 rounded-full gap-4">
+                <input
+                  className="w-full"
+                  value={labels[bb.id] ?? ""}
+                  onChange={(e) => setLabels((p) => ({ ...p, [bb.id]: e.target.value }))}
+                  onFocus={(e) => {
+                    // When focused, add a document listener so clicks outside will blur the input.
+                    // Use pointerdown + setTimeout to ensure blur happens after focus/mouse ordering.
+                    const inputEl = e.currentTarget as HTMLInputElement
+                    focusListenerRef.current = (ev: PointerEvent) => {
+                      const target = ev.target
+                      if (!(target instanceof Node) || !inputEl.contains(target as Node)) {
+                        setTimeout(() => inputEl.blur(), 0)
+                      }
+                    }
+                    document.addEventListener("pointerdown", focusListenerRef.current)
+                  }}
+                  onBlur={(e) => {
+                    // Remove the outside-click listener
+                    if (focusListenerRef.current) {
+                      document.removeEventListener("pointerdown", focusListenerRef.current)
+                      focusListenerRef.current = null
+                    }
+                    // Use saveLabel to guarantee same behavior
+                    saveLabel(e.currentTarget.value)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      // call saveLabel directly and then blur to keep same flow
+                      saveLabel((e.currentTarget as HTMLInputElement).value)
+                      ;(e.currentTarget as HTMLInputElement).blur()
+                    }
+                  }}
+                />
+              </div>
             </Toolbar.Button>
           )
         })}
@@ -450,6 +515,7 @@ function BoundingBoxComponent({
         e.preventDefault()
         e.stopPropagation()
         setResizing(null)
+        console.log("#A BoundingBoxComponent resize end - calling onChangeEnd", { id: boundingBox.id })
         onChangeEnd?.(boundingBox)
       }
     }

@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq, sql } from "drizzle-orm"
-import { nanoid } from "nanoid"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
@@ -35,18 +34,18 @@ export const addObservation = createServerFn({ method: "POST" })
       .select({ maxObsN: sql<string | null>`MAX(${s.observation["OBS-N"]})` })
       .from(s.observation)
       .where(eq(s.observation.plateId, data.plateId))
-
+    const obsN = nextObsN(maxObsN)
     const [observation] = await db
       .insert(s.observation)
       .values({
         plateId: data.plateId,
-        name: `Observation ${nanoid(4)}`,
+        name: `Obs. ${obsN}`,
         imageTop: data.top,
         imageLeft: data.left,
         imageWidth: width,
         imageHeight: height,
         metadataCompletion: 0,
-        "OBS-N": nextObsN(maxObsN),
+        "OBS-N": obsN,
       })
       .returning({
         id: s.observation.id,

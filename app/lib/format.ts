@@ -73,12 +73,12 @@ export function radToHMS(rad: number, opts?: { digits?: number; sep?: string }) 
 }
 
 export function formatObservation({
-  "OBS-N": obsN,
+  "name": name,
   OBJECT,
 }: {
-  "OBS-N": string;
+  name: string;
   OBJECT?: string | null;
 }) {
-  const base = `Obs. ${obsN}`;
+  const base = `${name}`;
   return OBJECT ? `${base}: ${OBJECT}` : base;
 }
