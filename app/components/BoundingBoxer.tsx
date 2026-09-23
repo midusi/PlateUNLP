@@ -270,7 +270,7 @@ function BoundingBoxList({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-22 gap-0 pr-1.5 data-pressed:bg-accent! data-pressed:text-primary!"
+                  className="h-8 w-auto min-w-fit gap-0 pr-1.5 data-pressed:bg-accent! data-pressed:text-primary!"
                 />
               }
               title={bb.label}
@@ -282,7 +282,7 @@ function BoundingBoxList({
               >
                 <span className="icon-[ph--rectangle-dashed-bold] size-5" style={{ color: bb.color }} />
               </Link>
-              <div className="flex w-150 flex-row items-center justify-center text-sm ml-1 h-2 rounded-full gap-4">
+              <div className="ml-1 flex h-2 w-35 min-w-35 flex-row items-center justify-center rounded-full text-sm">
                 <input
                   className="w-full"
                   value={labels[bb.id] ?? ""}
