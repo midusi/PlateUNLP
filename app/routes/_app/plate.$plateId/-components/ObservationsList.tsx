@@ -13,6 +13,7 @@ import { deleteObservation } from "../-actions/delete-observation"
 import { deleteObservations } from "../-actions/delete-observations"
 import type { Observation } from "../-actions/get-observations"
 import { getObservationDetections } from "../-actions/get-spectrums-detections"
+import { rotatePlateImage } from "../-actions/rotate-plate-image"
 import { updateObservation } from "../-actions/update-observation"
 
 function generateSequentialLabel(index: number, prefix: string = "Obs."): string {
@@ -69,6 +70,7 @@ export function ObservationsList({
       initialObservations.map((obs, idx) => observationToBoundingBox(obs, idx)),
     ),
   )
+  const [previewVersion, setPreviewVersion] = useState(() => Date.now())
   const prevLabelsRef = useRef<Record<string, string>>({})
  //
   useEffect(() => {
@@ -140,12 +142,56 @@ export function ObservationsList({
     onError: (error) => notifyError("Error obtainging observations detections", error),
   })
 
+  const rotatePlateMut = useMutation({
+    mutationFn: async (direction: "left" | "right") => {
+      const result = await rotatePlateImage({
+        data: {
+          plateId,
+          direction,
+        },
+      })
+
+      setBoundingBoxes((prev) => {
+        const rotatedById = new Map(result.observations.map((obs) => [obs.id, obs]))
+        return sortByHeight(
+          prev.map((box) => {
+            const rotated = rotatedById.get(box.id)
+            if (!rotated) return box
+            return {
+              ...box,
+              top: rotated.imageTop,
+              left: rotated.imageLeft,
+              width: rotated.imageWidth,
+              height: rotated.imageHeight,
+            }
+          }),
+        )
+      })
+
+      setPreviewVersion(Date.now())
+    },
+    onSuccess: async () => {
+      await router.invalidate()
+    },
+    onError: (error) => notifyError("Error rotating plate", error),
+  })
+
   return (
     <Card className="overflow-hidden p-0">
       <CardContent className="h-125 p-0">
         <BoundingBoxer
-          imageSrc={`/api/plate/${plateId}/preview`}
+          imageSrc={`/api/plate/${plateId}/preview?v=${previewVersion}`}
           boundingBoxes={boundingBoxes}
+          showRotateActions
+          showImageAdjustActions
+          onRotateLeft={() => {
+            if (rotatePlateMut.isPending) return
+            rotatePlateMut.mutate("left")
+          }}
+          onRotateRight={() => {
+            if (rotatePlateMut.isPending) return
+            rotatePlateMut.mutate("right")
+          }}
           onBoundingBoxChange={(boundingBox) => {
             setBoundingBoxes((prev) =>
               prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),

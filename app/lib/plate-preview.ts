@@ -41,7 +41,7 @@ export async function getPlatePreviewResponse(
   return new Response(bufferToArrayBuffer(image), {
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": "private, max-age=31536000",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
     },
   })
 }
