@@ -119,6 +119,7 @@ export type BoundingBoxerProps = {
  * It can be either "select" for selecting and moving bounding boxes, or "draw" for drawing new bounding boxes.
  */
 type BoundingBoxerTools = "select" | "draw"
+type ColorFilterPreset = "none" | "warm" | "cool" | "green"
 
 /**
  * `BoundingBoxer` component allows users to display an image with interactive bounding boxes.
@@ -193,12 +194,27 @@ export function BoundingBoxer({
   const [brightness, setBrightness] = useState(100)
   const [contrast, setContrast] = useState(100)
   const [isInverted, setIsInverted] = useState(false)
+  const [colorFilterPreset, setColorFilterPreset] = useState<ColorFilterPreset>("none")
+
+  const presetFilter = useMemo(() => {
+    switch (colorFilterPreset) {
+      case "warm":
+        return "sepia(0.35) saturate(1.2) hue-rotate(-10deg)"
+      case "cool":
+        return "saturate(1.15) hue-rotate(20deg)"
+      case "green":
+        return "sepia(0.3) saturate(1.25) hue-rotate(55deg)"
+      default:
+        return ""
+    }
+  }, [colorFilterPreset])
 
   const imageFilter = useMemo(() => {
     const filters = [`brightness(${brightness}%)`, `contrast(${contrast}%)`]
+    if (presetFilter) filters.push(presetFilter)
     if (isInverted) filters.push("invert(1)")
     return filters.join(" ")
-  }, [brightness, contrast, isInverted])
+  }, [brightness, contrast, isInverted, presetFilter])
 
   return (
     <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0 bg-checkered">
@@ -223,9 +239,11 @@ export function BoundingBoxer({
             brightness={brightness}
             contrast={contrast}
             isInverted={isInverted}
+            selectedColorFilterPreset={colorFilterPreset}
             onBrightnessChange={setBrightness}
             onContrastChange={setContrast}
             onToggleInverted={() => setIsInverted((prev) => !prev)}
+            onColorFilterPresetChange={setColorFilterPreset}
           >
             {children}
           </BoundingBoxControls>
@@ -387,9 +405,11 @@ function BoundingBoxControls({
   brightness,
   contrast,
   isInverted,
+  selectedColorFilterPreset,
   onBrightnessChange,
   onContrastChange,
   onToggleInverted,
+  onColorFilterPresetChange,
   children,
 }: {
   showDrawNew: boolean
@@ -403,18 +423,24 @@ function BoundingBoxControls({
   brightness: number
   contrast: number
   isInverted: boolean
+  selectedColorFilterPreset: ColorFilterPreset
   onBrightnessChange: (value: number) => void
   onContrastChange: (value: number) => void
   onToggleInverted: () => void
+  onColorFilterPresetChange: (preset: ColorFilterPreset) => void
   children?: React.ReactNode
 }) {
   const { zoomIn, zoomOut } = useControls()
   const [hoveredAdjust, setHoveredAdjust] = useState<"brightness" | "contrast" | null>(null)
   const [pinnedAdjust, setPinnedAdjust] = useState<"brightness" | "contrast" | null>(null)
+  const [hoveredFilterMenu, setHoveredFilterMenu] = useState(false)
+  const [pinnedFilterMenu, setPinnedFilterMenu] = useState(false)
   const brightnessContainerRef = useRef<HTMLDivElement>(null)
   const contrastContainerRef = useRef<HTMLDivElement>(null)
+  const filterMenuContainerRef = useRef<HTMLDivElement>(null)
   const hideBrightnessTimeoutRef = useRef<number | null>(null)
   const hideContrastTimeoutRef = useRef<number | null>(null)
+  const hideFilterMenuTimeoutRef = useRef<number | null>(null)
 
   const clearHideTimeout = (kind: "brightness" | "contrast") => {
     if (kind === "brightness" && hideBrightnessTimeoutRef.current !== null) {
@@ -436,8 +462,23 @@ function BoundingBoxControls({
     if (kind === "contrast") hideContrastTimeoutRef.current = timeoutId
   }
 
+  const clearFilterMenuHideTimeout = () => {
+    if (hideFilterMenuTimeoutRef.current !== null) {
+      window.clearTimeout(hideFilterMenuTimeoutRef.current)
+      hideFilterMenuTimeoutRef.current = null
+    }
+  }
+
+  const scheduleFilterMenuHide = () => {
+    clearFilterMenuHideTimeout()
+    hideFilterMenuTimeoutRef.current = window.setTimeout(() => {
+      setHoveredFilterMenu(false)
+    }, 300)
+  }
+
   const showBrightnessSlider = hoveredAdjust === "brightness" || pinnedAdjust === "brightness"
   const showContrastSlider = hoveredAdjust === "contrast" || pinnedAdjust === "contrast"
+  const showFilterMenu = hoveredFilterMenu || pinnedFilterMenu
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -456,6 +497,11 @@ function BoundingBoxControls({
       ) {
         setPinnedAdjust(null)
       }
+
+      if (!filterMenuContainerRef.current?.contains(target)) {
+        setPinnedFilterMenu(false)
+        setHoveredFilterMenu(false)
+      }
     }
 
     document.addEventListener("pointerdown", handlePointerDown)
@@ -463,6 +509,7 @@ function BoundingBoxControls({
       document.removeEventListener("pointerdown", handlePointerDown)
       clearHideTimeout("brightness")
       clearHideTimeout("contrast")
+      clearFilterMenuHideTimeout()
     }
   }, [])
 
@@ -660,6 +707,94 @@ function BoundingBoxControls({
                 aria-label="Contrast"
               />
               <span className="w-10 text-right text-xs">{contrast}%</span>
+            </div>
+          </div>
+
+          <div
+            ref={filterMenuContainerRef}
+            className="relative ml-1"
+            onMouseEnter={() => {
+              clearFilterMenuHideTimeout()
+              setHoveredFilterMenu(true)
+            }}
+            onMouseLeave={() => {
+              scheduleFilterMenuHide()
+            }}
+          >
+            <Toolbar.Button
+              render={<Button size="icon" variant="ghost" className="size-8" />}
+              onClick={() => {
+                clearFilterMenuHideTimeout()
+                setPinnedFilterMenu((prev) => !prev)
+                setHoveredFilterMenu(true)
+              }}
+              title="Filters"
+            >
+              <span className="icon-[ph--faders-horizontal-bold] size-4" />
+            </Toolbar.Button>
+
+            <div
+              className={cn(
+                "absolute top-8 left-0 z-20 items-center gap-1 rounded-md border bg-background p-1 shadow-md",
+                showFilterMenu ? "flex" : "hidden",
+              )}
+            >
+              <Toolbar.Button
+                render={
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "size-7",
+                      selectedColorFilterPreset === "warm" && "bg-accent text-primary",
+                    )}
+                  />
+                }
+                onClick={() =>
+                  onColorFilterPresetChange(selectedColorFilterPreset === "warm" ? "none" : "warm")
+                }
+                title="Warm"
+              >
+                <span className="icon-[ph--fire-bold] size-4" />
+              </Toolbar.Button>
+
+              <Toolbar.Button
+                render={
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "size-7",
+                      selectedColorFilterPreset === "cool" && "bg-accent text-primary",
+                    )}
+                  />
+                }
+                onClick={() =>
+                  onColorFilterPresetChange(selectedColorFilterPreset === "cool" ? "none" : "cool")
+                }
+                title="Cool"
+              >
+                <span className="icon-[ph--snowflake-bold] size-4" />
+              </Toolbar.Button>
+
+              <Toolbar.Button
+                render={
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "size-7",
+                      selectedColorFilterPreset === "green" && "bg-accent text-primary",
+                    )}
+                  />
+                }
+                onClick={() =>
+                  onColorFilterPresetChange(selectedColorFilterPreset === "green" ? "none" : "green")
+                }
+                title="Green"
+              >
+                <span className="icon-[ph--leaf-bold] size-4" />
+              </Toolbar.Button>
             </div>
           </div>
         </>
