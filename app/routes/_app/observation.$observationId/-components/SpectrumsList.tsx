@@ -23,11 +23,16 @@ export type Spectrum = {
   imageTop: number
 }
 
-export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
+export function spectrumToBoundingBox(spectrum: Spectrum, lampIndex?: number):
+BoundingBox {
   let color = spectrum.type == 'lamp' ? 'red' : 'green';
+  const label = spectrum.type === 'science'
+    ? 'Science'
+    : lampIndex !== undefined ? `Lamp ${lampIndex}` : 'Lamp'
   return {
     id: spectrum.id,
     name: "",
+    label,
     color: color,
     top: spectrum.imageTop,
     left: spectrum.imageLeft,
@@ -46,7 +51,13 @@ export function SpectrumsList({
   const router = useRouter()
 
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    initialSpectrums.map(spectrumToBoundingBox),
+    initialSpectrums.map((spectrum, i) => {
+    const lampIndex = initialSpectrums
+      .slice(0, i)
+      .filter((s) => s.type === 'lamp')
+      .length + 1
+    return spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampIndex : undefined)
+    }),
   )
 
   const determineBBFunction = usePredictBBs(
@@ -96,8 +107,8 @@ export function SpectrumsList({
       router.invalidate()
       const boundingBoxesFormated = [
         spectrumToBoundingBox(newSpectrums.science),
-        spectrumToBoundingBox(newSpectrums.lamp1),
-        spectrumToBoundingBox(newSpectrums.lamp2),
+        spectrumToBoundingBox(newSpectrums.lamp1, 1),
+        spectrumToBoundingBox(newSpectrums.lamp2, 2),
       ]
       setBoundingBoxes((prev) => [...boundingBoxesFormated])
     },
@@ -109,7 +120,10 @@ export function SpectrumsList({
       const spectrum = await addSpectrum({
         data: { ...boundingBox, observationId },
       })
-      setBoundingBoxes((prev) => [spectrumToBoundingBox(spectrum), ...prev])
+      setBoundingBoxes((prev) => {
+        const lampCount = prev.filter((b) => b.color === 'red').length + 1
+        return [spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampCount : undefined), ...prev]
+      })
     },
     onError: (error) => notifyError("Error adding spectrum", error),
   })

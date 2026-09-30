@@ -982,15 +982,17 @@ function BoundingBoxComponent({
           <path d="M3 3l8 8m0-8l-8 8" />
         </svg>
       </button>
-      {/* <p
+      <p
         className="absolute top-0 left-0 origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"
         style={{
           backgroundColor: boundingBox.color,
           transform: `scale(${1 / scale})`,
+          color: '#1e1e1e',
+          padding: "0 4px",
         }}
       >
-        {boundingBox.name}
-      </p> */}
+        {boundingBox.label}
+      </p>
 
       {/* Top-left */}
       <div
