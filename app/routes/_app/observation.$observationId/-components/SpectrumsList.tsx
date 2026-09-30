@@ -67,7 +67,6 @@ export function SpectrumsList({
           .slice(0, i)
           .filter((s) => s.type === "lamp")
           .length + 1
-        console.log("spectrum", spectrum, "lampIndex", lampIndex)
         return spectrumToBoundingBox(
           spectrum,
           spectrum.type === "lamp" ? lampIndex : undefined,
