@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { type BoundingBox, BoundingBoxer } from "~/components/BoundingBoxer"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
@@ -59,6 +59,22 @@ export function SpectrumsList({
     return spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampIndex : undefined)
     }),
   )
+
+  useEffect(() => {
+    setBoundingBoxes(
+      initialSpectrums.map((spectrum, i) => {
+        const lampIndex = initialSpectrums
+          .slice(0, i)
+          .filter((s) => s.type === "lamp")
+          .length + 1
+        console.log("spectrum", spectrum, "lampIndex", lampIndex)
+        return spectrumToBoundingBox(
+          spectrum,
+          spectrum.type === "lamp" ? lampIndex : undefined,
+        )
+      }),
+    )
+  }, [initialSpectrums])
 
   const determineBBFunction = usePredictBBs(
     640,
