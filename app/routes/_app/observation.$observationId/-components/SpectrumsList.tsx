@@ -131,6 +131,7 @@ export function SpectrumsList({
           imageSrc={`/api/observation/${observationId}/preview`}
           boundingBoxes={boundingBoxes}
           showBBList={false}
+          showImageAdjustActions
           onBoundingBoxChange={(boundingBox) => {
             setBoundingBoxes((prev) =>
               prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),
