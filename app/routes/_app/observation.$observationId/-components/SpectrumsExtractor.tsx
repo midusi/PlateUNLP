@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useRouter } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import type z from "zod"
 import { ImageWithPixelExtraction } from "~/components/ImageWithPixelExtraction"
@@ -35,6 +36,8 @@ type SpectrumsExtractorProps = {
 }
 
 export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsExtractorProps) {
+  const router = useRouter()
+
   const { data: observationTensor } = useQuery({
     queryKey: ["observationImage", observationId],
     queryFn: async () => {
@@ -153,6 +156,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
               (s, idx) => s.type !== prevFormValues.current.spectrums[idx].type,
             )
           await updateSpectrumsTypes({ data: typesWhoChanged })
+          await router.invalidate()
         }
         /** Si cambio el arreglo de intensidades de un espectro se actualiza */
         if (newAnalysis.length > 0)
