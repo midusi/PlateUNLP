@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
-import { cn, idToColor } from "~/lib/utils"
+import { cn } from "~/lib/utils"
 import { classesSpectrumDetection } from "~/types/BBClasses"
 import { addSpectrum } from "../-actions/add-spectrum"
 import { addSpectrums } from "../-actions/add-spectrums"
@@ -23,12 +23,16 @@ export type Spectrum = {
   imageTop: number
 }
 
-export function spectrumToBoundingBox(spectrum: Spectrum): BoundingBox {
-  console.log(spectrum.type);
+export function spectrumToBoundingBox(spectrum: Spectrum, lampIndex?: number):
+BoundingBox {
   let color = spectrum.type == 'lamp' ? 'red' : 'green';
+  const label = spectrum.type === 'science'
+    ? 'Science'
+    : lampIndex !== undefined ? `Lamp ${lampIndex}` : 'Lamp'
   return {
     id: spectrum.id,
     name: "",
+    label,
     color: color,
     top: spectrum.imageTop,
     left: spectrum.imageLeft,
@@ -47,7 +51,13 @@ export function SpectrumsList({
   const router = useRouter()
 
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>(
-    initialSpectrums.map(spectrumToBoundingBox),
+    initialSpectrums.map((spectrum, i) => {
+    const lampIndex = initialSpectrums
+      .slice(0, i)
+      .filter((s) => s.type === 'lamp')
+      .length + 1
+    return spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampIndex : undefined)
+    }),
   )
 
   const determineBBFunction = usePredictBBs(
@@ -97,8 +107,8 @@ export function SpectrumsList({
       router.invalidate()
       const boundingBoxesFormated = [
         spectrumToBoundingBox(newSpectrums.science),
-        spectrumToBoundingBox(newSpectrums.lamp1),
-        spectrumToBoundingBox(newSpectrums.lamp2),
+        spectrumToBoundingBox(newSpectrums.lamp1, 1),
+        spectrumToBoundingBox(newSpectrums.lamp2, 2),
       ]
       setBoundingBoxes((prev) => [...boundingBoxesFormated])
     },
@@ -110,7 +120,10 @@ export function SpectrumsList({
       const spectrum = await addSpectrum({
         data: { ...boundingBox, observationId },
       })
-      setBoundingBoxes((prev) => [spectrumToBoundingBox(spectrum), ...prev])
+      setBoundingBoxes((prev) => {
+        const lampCount = prev.filter((b) => b.color === 'red').length + 1
+        return [spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampCount : undefined), ...prev]
+      })
     },
     onError: (error) => notifyError("Error adding spectrum", error),
   })
@@ -132,6 +145,7 @@ export function SpectrumsList({
           imageSrc={`/api/observation/${observationId}/preview`}
           boundingBoxes={boundingBoxes}
           showBBList={false}
+          showImageAdjustActions
           onBoundingBoxChange={(boundingBox) => {
             setBoundingBoxes((prev) =>
               prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),

@@ -66,7 +66,31 @@ export async function readEditedFile(plate: PlateWithImage): Promise<Buffer> {
   if (plate.imageInverted) {
     i = i.negate({ alpha: false });
   }
-  return i.toBuffer();
+  const buf = await i.toBuffer();
+  return buf;
+}
+
+export async function saveDebugImage(
+  buf: Buffer,
+  opts: { id?: string; mime?: string; subdir?: string; name?: string } = {},
+): Promise<string> {
+  const { id, mime, subdir, name } = opts
+  const mimeToExt: Record<string, string> = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/tiff": "tif",
+    "image/tif": "tif",
+    "image/gif": "gif",
+    "image/webp": "webp",
+  }
+  const ext = mime ? (mimeToExt[mime] ?? mime.split("/").pop() ?? "bin") : "png"
+  const debugName =
+    name ?? `debug-${id ?? "unknown"}-${Date.now()}.${ext}`
+  const dir = subdir ? `${env.UPLOADS_DIR}/${subdir}` : env.UPLOADS_DIR
+  await fs.mkdir(dir, { recursive: true })
+  await fs.writeFile(`${dir}/${debugName}`, buf)
+  return subdir ? `${subdir}/${debugName}` : debugName
 }
 
 export async function deleteUploadedFile(id: string) {

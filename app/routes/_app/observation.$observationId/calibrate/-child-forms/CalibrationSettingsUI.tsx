@@ -52,8 +52,9 @@ export const CalibrationSettingsUI = withForm({
       },
     ],
     materialsNamesList: ["Fe-Ne", "Fe-Ne-Ar"],
+    onDeleteIndex: undefined,
   },
-  render: function Render({ form, materialArr, materialsNamesList }) {
+  render: function Render({ form, materialArr, materialsNamesList, onDeleteIndex }) {
     const [isLoadLampModalOpen, setIsLoadLampModalOpen] = useState(false)
     const router = useRouter()
 
@@ -237,6 +238,7 @@ export const CalibrationSettingsUI = withForm({
                               setMaterialPoints={(arr: { x: number; y: number }[]) => {
                                 fieldMP.handleChange(arr)
                               }}
+                              onDeleteIndex={onDeleteIndex}
                             />
                           )}
                         </form.Field>

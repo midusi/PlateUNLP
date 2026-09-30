@@ -18,6 +18,8 @@ export type PlateMetadataSuggestions = {
   scannerDefaults: Record<string, ScannerDefaults>
 }
 
+const KNOWN_DETECTOR_EMULSIONS = ["IIIa-0", "103a-F3", "IIa-J"]
+
 function distinct(values: string[]): string[] {
   return [...new Set(values.map((v) => v.trim()).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b),
@@ -70,7 +72,7 @@ export const getPlateMetadataSuggestions = createServerFn()
     return {
       TELESCOPE: distinct(plates.map((p) => p.TELESCOPE)),
       INSTRUME: distinct(plates.map((p) => p.INSTRUME)),
-      DETECTOR: distinct(plates.map((p) => p.DETECTOR)),
+      DETECTOR: distinct([...KNOWN_DETECTOR_EMULSIONS, ...plates.map((p) => p.DETECTOR)]),
       OBSERVER: distinct(plates.map((p) => p.OBSERVER)),
       SCANNER: distinct(plates.map((p) => p.SCANNER)),
       SCANSOFT: distinct(plates.map((p) => p.SCANSOFT)),
@@ -84,3 +86,4 @@ export const getPlateMetadataSuggestionsQueryOptions = (plateId: string) =>
     queryKey: ["plate", "metadata-suggestions", plateId],
     queryFn: () => getPlateMetadataSuggestions({ data: { plateId } }),
   })
+  

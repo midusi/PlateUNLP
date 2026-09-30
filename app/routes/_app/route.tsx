@@ -130,6 +130,19 @@ function RouteComponent() {
             >
               <span className="icon-[ph--gear] size-5" />
             </Link>
+            <a
+              href="/docs"
+              className={cn(
+                buttonVariants({
+                  variant: "outline",
+                  size: "default",
+                  className:
+                    "m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none",
+                }),
+              )}
+            >
+              <span className="icon-[ph--book-open] size-5" />
+            </a>
             <Button
               onClick={() => signOut()}
               variant="outline"

@@ -20,6 +20,7 @@ export const getObservationMetadata = createServerFn()
         throw new Error(`Observation with ID ${data.observationId} not found`)
       }
       return {
+        name: observation.name,
         OBSERVAT: observation.plate.OBSERVAT,
         "OBS-N": observation["OBS-N"],
         OBJECT: observation.OBJECT,

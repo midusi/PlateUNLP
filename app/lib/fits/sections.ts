@@ -105,7 +105,7 @@ export function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata)
   )
   setNumericCard(fits, "SCANGAIN", metadata.scanGain, "gain, electrons per adu")
   setTextCard(fits, "SCANSOFT", metadata.scanSoftware, "name of the scanning software")
-  setTextCard(fits, "DATESCAN", normalizeOptionalDateTime(metadata.dateScan), "scan date and time")
+  setTextCard(fits, "DATESCAN", normalizeOptionalDateTime(metadata.dateScan), "scan date")
   setTextCard(fits, "SCANAUTH", metadata.scanAuthor, "author of scan")
   setTextCard(fits, "SCANNOTE", metadata.scannerNotes, "scanner notes")
 }

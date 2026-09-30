@@ -4,6 +4,7 @@ import { InferenceSession, Tensor } from "onnxruntime-node"
 import sharp from "sharp"
 import { z } from "zod"
 import { db } from "~/db"
+import { obsNFromIndex } from "~/lib/obs-n"
 import { readEditedFile } from "~/lib/uploads"
 
 /**
@@ -91,27 +92,35 @@ export const getObservationDetections = createServerFn()
       }
     }
 
-    const formattedPredictions = validPredictions.map((pred, _idx) => {
-      // x1, y1, x2, y2 vienen en el espacio de 640x640
-      const [x1, y1, x2, y2, _score, _class] = pred
+    const clamp = (v: number, max: number) => Math.min(Math.max(v, 0), max)
+    const formattedPredictions = validPredictions
+      .map((pred) => {
+        // x1, y1, x2, y2 vienen en el espacio de 640x640
+        const [x1, y1, x2, y2, _score, _class] = pred
 
-      // Mapear de vuelta al espacio original:
-      // 1. Restar el padding (offset)
-      // 2. Dividir por la escala aplicada
-      const realX1 = (x1 - offsetX) / scale
-      const realY1 = (y1 - offsetY) / scale
-      const realX2 = (x2 - offsetX) / scale
-      const realY2 = (y2 - offsetY) / scale
-
-      return {
-        id: nanoid(), // Mejor usar nanoid aquí para evitar conflictos de keys
-        name: `Observation ${nanoid(4)}`,
-        imageWidth: realX2 - realX1,
-        imageHeight: realY2 - realY1,
-        imageLeft: realX1,
-        imageTop: realY1,
-      }
-    })
+        // Mapear de vuelta al espacio original:
+        // 1. Restar el padding (offset)
+        // 2. Dividir por la escala aplicada
+        // 3. Recortar a los bordes: el modelo puede predecir cajas que se salen
+        //    unos píxeles de la imagen (p. ej. left = -0.88 en una placa rotada)
+        const realX1 = clamp((x1 - offsetX) / scale, origW)
+        const realY1 = clamp((y1 - offsetY) / scale, origH)
+        const realX2 = clamp((x2 - offsetX) / scale, origW)
+        const realY2 = clamp((y2 - offsetY) / scale, origH)
+        return {
+          imageWidth: realX2 - realX1,
+          imageHeight: realY2 - realY1,
+          imageLeft: realX1,
+          imageTop: realY1,
+        }
+      })
+      // Descartar cajas que tras el recorte quedan sin área (predichas fuera de la imagen)
+      .filter((box) => box.imageWidth >= 1 && box.imageHeight >= 1)
+      .map((box, idx) => ({
+        id: nanoid(),
+        name: `Obs. ${obsNFromIndex(idx)}`,
+        ...box,
+      }))
 
     return formattedPredictions
   })

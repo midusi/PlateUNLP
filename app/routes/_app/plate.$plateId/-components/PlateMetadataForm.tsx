@@ -159,8 +159,8 @@ export function PlateMetadataForm({
               form={form}
               fields="DETECTOR"
               label="DETECTOR"
-              placeholder="e.g. Photographic plate"
-              description="Detector that recorded the observation."
+              placeholder="e.g. IIIa-0"
+              description="Type of photographic emulsion used as detector."
               options={suggestions.DETECTOR}
             />
             <AutocompleteFieldWithKnown
@@ -228,10 +228,9 @@ export function PlateMetadataForm({
               form={form}
               fields="DATESCAN"
               label="DATESCAN"
-              placeholder="e.g. 2011-05-17T10:33:26"
-              type="datetime-local"
-              step="1"
-              description="Scan date and time in local datetime format."
+              placeholder="e.g. 2011-05-17"
+              type="date"
+              description="Scan date."
             />
             <AutocompleteFieldWithKnown
               form={form}

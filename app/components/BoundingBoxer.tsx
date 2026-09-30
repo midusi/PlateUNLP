@@ -81,6 +81,28 @@ export type BoundingBoxerProps = {
   showZoomActions?: boolean
 
   /**
+   * Whether to show rotation actions (rotate left and rotate right buttons).
+   * @default false
+   */
+  showRotateActions?: boolean
+
+  /**
+   * Function triggered when rotate-left action is clicked.
+   */
+  onRotateLeft?: () => void
+
+  /**
+   * Function triggered when rotate-right action is clicked.
+   */
+  onRotateRight?: () => void
+
+  /**
+   * Whether to show temporary image adjustment actions (brightness, invert, contrast).
+   * @default false
+   */
+  showImageAdjustActions?: boolean
+
+  /**
    * Mostrar listado de bounding boxes en la parte inferior
    * @default false
    */
@@ -97,6 +119,7 @@ export type BoundingBoxerProps = {
  * It can be either "select" for selecting and moving bounding boxes, or "draw" for drawing new bounding boxes.
  */
 type BoundingBoxerTools = "select" | "draw"
+type ColorFilterPreset = "none" | "warm" | "cool" | "green"
 
 /**
  * `BoundingBoxer` component allows users to display an image with interactive bounding boxes.
@@ -116,7 +139,11 @@ export function BoundingBoxer({
   onBoundingBoxDelete,
   disabled = false,
   showZoomActions = true,
+  showRotateActions = false,
+  showImageAdjustActions = false,
   showBBList = false,
+  onRotateLeft,
+  onRotateRight,
   children,
 }: BoundingBoxerProps) {
   // Size of the container and the image (natural size)
@@ -164,6 +191,30 @@ export function BoundingBoxer({
 
   // Control user actions
   const [selectedTool, setSelectedTool] = useState<BoundingBoxerTools>("select")
+  const [brightness, setBrightness] = useState(100)
+  const [contrast, setContrast] = useState(100)
+  const [isInverted, setIsInverted] = useState(false)
+  const [colorFilterPreset, setColorFilterPreset] = useState<ColorFilterPreset>("none")
+
+  const presetFilter = useMemo(() => {
+    switch (colorFilterPreset) {
+      case "warm":
+        return "sepia(0.35) saturate(1.2) hue-rotate(-10deg)"
+      case "cool":
+        return "saturate(1.15) hue-rotate(20deg)"
+      case "green":
+        return "sepia(0.3) saturate(1.25) hue-rotate(55deg)"
+      default:
+        return ""
+    }
+  }, [colorFilterPreset])
+
+  const imageFilter = useMemo(() => {
+    const filters = [`brightness(${brightness}%)`, `contrast(${contrast}%)`]
+    if (presetFilter) filters.push(presetFilter)
+    if (isInverted) filters.push("invert(1)")
+    return filters.join(" ")
+  }, [brightness, contrast, isInverted, presetFilter])
 
   return (
     <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0 bg-checkered">
@@ -181,10 +232,28 @@ export function BoundingBoxer({
             onToolChange={setSelectedTool}
             showDrawNew={onBoundingBoxAdd !== undefined}
             showZoomActions={showZoomActions}
+            showRotateActions={showRotateActions}
+            showImageAdjustActions={showImageAdjustActions}
+            onRotateLeft={onRotateLeft}
+            onRotateRight={onRotateRight}
+            brightness={brightness}
+            contrast={contrast}
+            isInverted={isInverted}
+            selectedColorFilterPreset={colorFilterPreset}
+            onBrightnessChange={setBrightness}
+            onContrastChange={setContrast}
+            onToggleInverted={() => setIsInverted((prev) => !prev)}
+            onColorFilterPresetChange={setColorFilterPreset}
           >
             {children}
           </BoundingBoxControls>
-          {showBBList && <BoundingBoxList boundingBoxes={boundingBoxes} />}
+          {showBBList && (
+            <BoundingBoxList
+              boundingBoxes={boundingBoxes}
+              onChange={onBoundingBoxChange}
+              onChangeEnd={onBoundingBoxChangeEnd}
+            />
+          )}
           <TransformComponent
             wrapperStyle={{ width: "100%", height: "100%" }}
             contentClass={cn("relative", selectedTool === "draw" && "cursor-crosshair")}
@@ -193,7 +262,11 @@ export function BoundingBoxer({
               src={imageSrc}
               width={imageSize.width}
               height={imageSize.height}
-              style={{ maxWidth: imageSize.width, maxHeight: imageSize.height }}
+              style={{
+                maxWidth: imageSize.width,
+                maxHeight: imageSize.height,
+                filter: imageFilter,
+              }}
             />
             {boundingBoxes.map((boundingBox) => (
               <BoundingBoxComponent
@@ -220,8 +293,25 @@ export function BoundingBoxer({
   )
 }
 
-function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
+function BoundingBoxList({
+  boundingBoxes,
+  onChange,
+  onChangeEnd,
+}: {
+  boundingBoxes: BoundingBox[]
+  onChange?: (boundingBox: BoundingBox) => void
+  onChangeEnd?: (boundingBox: BoundingBox) => void
+}) {
   if (boundingBoxes.length === 0) return
+
+  const [labels, setLabels] = useState<Record<string, string>>({})
+  const focusListenerRef = useRef<((e: PointerEvent) => void) | null>(null)
+
+  useEffect(() => {
+    const map: Record<string, string> = {}
+    boundingBoxes.forEach((bb) => (map[bb.id] = bb.label ?? ""))
+    setLabels(map)
+  }, [boundingBoxes])
 
   return (
     <Toolbar.Root
@@ -230,6 +320,16 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
     >
       <ToggleGroup defaultValue={[boundingBoxes[0].id]} orientation="horizontal">
         {boundingBoxes.map((bb) => {
+          // Save helper ensures same behavior for blur and Enter key
+          const saveLabel = (value: string) => {
+            const newLabel = value
+            if (newLabel !== bb.label) {
+              const updated = { ...bb, label: newLabel, name: newLabel }
+              onChange?.(updated)
+              onChangeEnd?.(updated)
+            }
+          }
+
           return (
             <Toolbar.Button
               key={bb.id}
@@ -237,22 +337,54 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-22 data-pressed:bg-accent! data-pressed:text-primary!"
+                  className="h-8 w-auto min-w-fit gap-0 pr-1.5 data-pressed:bg-accent! data-pressed:text-primary!"
                 />
               }
               title={bb.label}
             >
               <Link
-                className="flex w-full flex-row items-center justify-center gap-1"
+                className="flex w-full flex-row items-center justify-center"
                 to="/observation/$observationId"
                 params={{ observationId: bb.id }}
-                >
-                <span
-                  className="icon-[ph--rectangle-dashed-bold] size-4"
-                  style={{ color: bb.color }}
-                  />
-                {bb.label ?? ""}
+              >
+                <span className="icon-[ph--rectangle-dashed-bold] size-5" style={{ color: bb.color }} />
               </Link>
+              <div className="ml-1 flex h-2 w-35 min-w-35 flex-row items-center justify-center rounded-full text-sm">
+                <input
+                  className="w-full"
+                  value={labels[bb.id] ?? ""}
+                  onChange={(e) => setLabels((p) => ({ ...p, [bb.id]: e.target.value }))}
+                  onFocus={(e) => {
+                    // When focused, add a document listener so clicks outside will blur the input.
+                    // Use pointerdown + setTimeout to ensure blur happens after focus/mouse ordering.
+                    const inputEl = e.currentTarget as HTMLInputElement
+                    focusListenerRef.current = (ev: PointerEvent) => {
+                      const target = ev.target
+                      if (!(target instanceof Node) || !inputEl.contains(target as Node)) {
+                        setTimeout(() => inputEl.blur(), 0)
+                      }
+                    }
+                    document.addEventListener("pointerdown", focusListenerRef.current)
+                  }}
+                  onBlur={(e) => {
+                    // Remove the outside-click listener
+                    if (focusListenerRef.current) {
+                      document.removeEventListener("pointerdown", focusListenerRef.current)
+                      focusListenerRef.current = null
+                    }
+                    // Use saveLabel to guarantee same behavior
+                    saveLabel(e.currentTarget.value)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      // call saveLabel directly and then blur to keep same flow
+                      saveLabel((e.currentTarget as HTMLInputElement).value)
+                      ;(e.currentTarget as HTMLInputElement).blur()
+                    }
+                  }}
+                />
+              </div>
             </Toolbar.Button>
           )
         })}
@@ -264,17 +396,122 @@ function BoundingBoxList({ boundingBoxes }: { boundingBoxes: BoundingBox[] }) {
 function BoundingBoxControls({
   showDrawNew,
   showZoomActions,
+  showRotateActions,
+  showImageAdjustActions,
   selectedTool,
   onToolChange,
+  onRotateLeft,
+  onRotateRight,
+  brightness,
+  contrast,
+  isInverted,
+  selectedColorFilterPreset,
+  onBrightnessChange,
+  onContrastChange,
+  onToggleInverted,
+  onColorFilterPresetChange,
   children,
 }: {
   showDrawNew: boolean
   showZoomActions: boolean
+  showRotateActions: boolean
+  showImageAdjustActions: boolean
   selectedTool: BoundingBoxerTools
   onToolChange: (tool: BoundingBoxerTools) => void
+  onRotateLeft?: () => void
+  onRotateRight?: () => void
+  brightness: number
+  contrast: number
+  isInverted: boolean
+  selectedColorFilterPreset: ColorFilterPreset
+  onBrightnessChange: (value: number) => void
+  onContrastChange: (value: number) => void
+  onToggleInverted: () => void
+  onColorFilterPresetChange: (preset: ColorFilterPreset) => void
   children?: React.ReactNode
 }) {
   const { zoomIn, zoomOut } = useControls()
+  const [hoveredAdjust, setHoveredAdjust] = useState<"brightness" | "contrast" | null>(null)
+  const [pinnedAdjust, setPinnedAdjust] = useState<"brightness" | "contrast" | null>(null)
+  const [hoveredFilterMenu, setHoveredFilterMenu] = useState(false)
+  const [pinnedFilterMenu, setPinnedFilterMenu] = useState(false)
+  const brightnessContainerRef = useRef<HTMLDivElement>(null)
+  const contrastContainerRef = useRef<HTMLDivElement>(null)
+  const filterMenuContainerRef = useRef<HTMLDivElement>(null)
+  const hideBrightnessTimeoutRef = useRef<number | null>(null)
+  const hideContrastTimeoutRef = useRef<number | null>(null)
+  const hideFilterMenuTimeoutRef = useRef<number | null>(null)
+
+  const clearHideTimeout = (kind: "brightness" | "contrast") => {
+    if (kind === "brightness" && hideBrightnessTimeoutRef.current !== null) {
+      window.clearTimeout(hideBrightnessTimeoutRef.current)
+      hideBrightnessTimeoutRef.current = null
+    }
+    if (kind === "contrast" && hideContrastTimeoutRef.current !== null) {
+      window.clearTimeout(hideContrastTimeoutRef.current)
+      hideContrastTimeoutRef.current = null
+    }
+  }
+
+  const scheduleHide = (kind: "brightness" | "contrast") => {
+    clearHideTimeout(kind)
+    const timeoutId = window.setTimeout(() => {
+      setHoveredAdjust((current) => (current === kind ? null : current))
+    }, 1000)
+    if (kind === "brightness") hideBrightnessTimeoutRef.current = timeoutId
+    if (kind === "contrast") hideContrastTimeoutRef.current = timeoutId
+  }
+
+  const clearFilterMenuHideTimeout = () => {
+    if (hideFilterMenuTimeoutRef.current !== null) {
+      window.clearTimeout(hideFilterMenuTimeoutRef.current)
+      hideFilterMenuTimeoutRef.current = null
+    }
+  }
+
+  const scheduleFilterMenuHide = () => {
+    clearFilterMenuHideTimeout()
+    hideFilterMenuTimeoutRef.current = window.setTimeout(() => {
+      setHoveredFilterMenu(false)
+    }, 300)
+  }
+
+  const showBrightnessSlider = hoveredAdjust === "brightness" || pinnedAdjust === "brightness"
+  const showContrastSlider = hoveredAdjust === "contrast" || pinnedAdjust === "contrast"
+  const showFilterMenu = hoveredFilterMenu || pinnedFilterMenu
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Node)) return
+
+      if (!brightnessContainerRef.current?.contains(target)) {
+        setHoveredAdjust((current) => (current === "brightness" ? null : current))
+      }
+      if (!contrastContainerRef.current?.contains(target)) {
+        setHoveredAdjust((current) => (current === "contrast" ? null : current))
+      }
+      if (
+        !brightnessContainerRef.current?.contains(target) &&
+        !contrastContainerRef.current?.contains(target)
+      ) {
+        setPinnedAdjust(null)
+      }
+
+      if (!filterMenuContainerRef.current?.contains(target)) {
+        setPinnedFilterMenu(false)
+        setHoveredFilterMenu(false)
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      clearHideTimeout("brightness")
+      clearHideTimeout("contrast")
+      clearFilterMenuHideTimeout()
+    }
+  }, [])
 
   return (
     <Toolbar.Root className="absolute top-2 right-2 left-2 z-10 flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs">
@@ -291,7 +528,7 @@ function BoundingBoxControls({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="size-8 data-[pressed]:bg-accent! data-[pressed]:text-primary!"
+                  className="size-8 data-pressed:bg-accent! data-pressed:text-primary!"
                 />
               }
             />
@@ -309,7 +546,7 @@ function BoundingBoxControls({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="size-8 data-[pressed]:bg-accent! data-[pressed]:text-primary!"
+                    className="size-8 data-pressed:bg-accent! data-pressed:text-primary!"
                   />
                 }
               />
@@ -340,6 +577,229 @@ function BoundingBoxControls({
           <span className="icon-[ph--magnifying-glass-minus-bold] size-4" />
         </Toolbar.Button>
       )}
+      <Toolbar.Separator render={<Separator orientation="vertical" />} />
+
+      {showRotateActions && (
+        <>
+          <Toolbar.Button
+            render={<Button size="icon" variant="ghost" className="size-8" />}
+            onClick={() => onRotateLeft?.()}
+            disabled={!onRotateLeft}
+            title="Rotate left"
+          >
+            <span className="icon-[ph--arrow-counter-clockwise-bold] size-4" />
+          </Toolbar.Button>
+          <Toolbar.Button
+            render={<Button size="icon" variant="ghost" className="size-8" />}
+            onClick={() => onRotateRight?.()}
+            disabled={!onRotateRight}
+            title="Rotate right"
+          >
+            <span className="icon-[ph--arrow-clockwise-bold] size-4" />
+          </Toolbar.Button>
+        </>
+      )}
+
+      {showImageAdjustActions && (
+        <>
+          <div
+            ref={brightnessContainerRef}
+            className="relative ml-1"
+            onMouseEnter={() => {
+              clearHideTimeout("brightness")
+              setHoveredAdjust("brightness")
+            }}
+            onMouseLeave={() => {
+              scheduleHide("brightness")
+            }}
+          >
+            <Toolbar.Button
+              render={<Button size="icon" variant="ghost" className="size-8" />}
+              onClick={() => {
+                clearHideTimeout("brightness")
+                if (pinnedAdjust === "brightness") {
+                  setPinnedAdjust(null)
+                  setHoveredAdjust(null)
+                  return
+                }
+                setPinnedAdjust("brightness")
+                setHoveredAdjust("brightness")
+              }}
+              title={`Brightness (${brightness}%)`}
+            >
+              <span className="icon-[ph--sun-bold] size-4" />
+            </Toolbar.Button>
+            <div
+              className={cn(
+                "absolute top-8 left-0 z-20 min-w-52 items-center gap-2 rounded-md border bg-background p-2 shadow-md",
+                showBrightnessSlider ? "flex" : "hidden",
+              )}
+            >
+              <input
+                type="range"
+                min={0}
+                max={200}
+                step={1}
+                value={brightness}
+                onChange={(e) => onBrightnessChange(Number(e.currentTarget.value))}
+                className="h-2 w-32"
+                title={`Brightness (${brightness}%)`}
+                aria-label="Brightness"
+              />
+              <span className="w-10 text-right text-xs">{brightness}%</span>
+            </div>
+          </div>
+          <Toolbar.Button
+            render={
+              <Button
+                size="icon"
+                variant="ghost"
+                className={cn("size-8", isInverted && "bg-accent text-primary")}
+              />
+            }
+            onClick={onToggleInverted}
+            title="Invert colors"
+          >
+            <span className="icon-[ph--selection-inverse] size-4" />
+          </Toolbar.Button>
+          <div
+            ref={contrastContainerRef}
+            className="relative"
+            onMouseEnter={() => {
+              clearHideTimeout("contrast")
+              setHoveredAdjust("contrast")
+            }}
+            onMouseLeave={() => {
+              scheduleHide("contrast")
+            }}
+          >
+            <Toolbar.Button
+              render={<Button size="icon" variant="ghost" className="size-8" />}
+              onClick={() => {
+                clearHideTimeout("contrast")
+                if (pinnedAdjust === "contrast") {
+                  setPinnedAdjust(null)
+                  setHoveredAdjust(null)
+                  return
+                }
+                setPinnedAdjust("contrast")
+                setHoveredAdjust("contrast")
+              }}
+              title={`Contrast (${contrast}%)`}
+            >
+              <span className="icon-[ph--circle-half-bold] size-4" />
+            </Toolbar.Button>
+            <div
+              className={cn(
+                "absolute top-8 left-0 z-20 min-w-52 items-center gap-2 rounded-md border bg-background p-2 shadow-md",
+                showContrastSlider ? "flex" : "hidden",
+              )}
+            >
+              <input
+                type="range"
+                min={0}
+                max={200}
+                step={1}
+                value={contrast}
+                onChange={(e) => onContrastChange(Number(e.currentTarget.value))}
+                className="h-2 w-32"
+                title={`Contrast (${contrast}%)`}
+                aria-label="Contrast"
+              />
+              <span className="w-10 text-right text-xs">{contrast}%</span>
+            </div>
+          </div>
+
+          <div
+            ref={filterMenuContainerRef}
+            className="relative ml-1"
+            onMouseEnter={() => {
+              clearFilterMenuHideTimeout()
+              setHoveredFilterMenu(true)
+            }}
+            onMouseLeave={() => {
+              scheduleFilterMenuHide()
+            }}
+          >
+            <Toolbar.Button
+              render={<Button size="icon" variant="ghost" className="size-8" />}
+              onClick={() => {
+                clearFilterMenuHideTimeout()
+                setPinnedFilterMenu((prev) => !prev)
+                setHoveredFilterMenu(true)
+              }}
+              title="Filters"
+            >
+              <span className="icon-[ph--faders-horizontal-bold] size-4" />
+            </Toolbar.Button>
+
+            <div
+              className={cn(
+                "absolute top-8 left-0 z-20 items-center gap-1 rounded-md border bg-background p-1 shadow-md",
+                showFilterMenu ? "flex" : "hidden",
+              )}
+            >
+              <Toolbar.Button
+                render={
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "size-7",
+                      selectedColorFilterPreset === "warm" && "bg-accent text-primary",
+                    )}
+                  />
+                }
+                onClick={() =>
+                  onColorFilterPresetChange(selectedColorFilterPreset === "warm" ? "none" : "warm")
+                }
+                title="Warm"
+              >
+                <span className="icon-[ph--fire-bold] size-4" />
+              </Toolbar.Button>
+
+              <Toolbar.Button
+                render={
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "size-7",
+                      selectedColorFilterPreset === "cool" && "bg-accent text-primary",
+                    )}
+                  />
+                }
+                onClick={() =>
+                  onColorFilterPresetChange(selectedColorFilterPreset === "cool" ? "none" : "cool")
+                }
+                title="Cool"
+              >
+                <span className="icon-[ph--snowflake-bold] size-4" />
+              </Toolbar.Button>
+
+              <Toolbar.Button
+                render={
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "size-7",
+                      selectedColorFilterPreset === "green" && "bg-accent text-primary",
+                    )}
+                  />
+                }
+                onClick={() =>
+                  onColorFilterPresetChange(selectedColorFilterPreset === "green" ? "none" : "green")
+                }
+                title="Green"
+              >
+                <span className="icon-[ph--leaf-bold] size-4" />
+              </Toolbar.Button>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="flex-1" />
       {children}
     </Toolbar.Root>
@@ -450,6 +910,7 @@ function BoundingBoxComponent({
         e.preventDefault()
         e.stopPropagation()
         setResizing(null)
+        console.log("#A BoundingBoxComponent resize end - calling onChangeEnd", { id: boundingBox.id })
         onChangeEnd?.(boundingBox)
       }
     }
@@ -521,15 +982,17 @@ function BoundingBoxComponent({
           <path d="M3 3l8 8m0-8l-8 8" />
         </svg>
       </button>
-      {/* <p
+      <p
         className="absolute top-0 left-0 origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"
         style={{
           backgroundColor: boundingBox.color,
           transform: `scale(${1 / scale})`,
+          color: '#1e1e1e',
+          padding: "0 4px",
         }}
       >
-        {boundingBox.name}
-      </p> */}
+        {boundingBox.label}
+      </p>
 
       {/* Top-left */}
       <div

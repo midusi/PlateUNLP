@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
 import { observationToFITSFilename, spectrumCropToFITS, unknownable } from "~/lib/fits"
+import { flipVerticalUint16 } from "~/lib/fits/utils"
 import { log } from "~/lib/log"
 import { readEditedFile } from "~/lib/uploads"
 
@@ -54,7 +55,9 @@ export const Route = createFileRoute("/_app/observation/$observationId/fits")({
           image.byteLength / Uint16Array.BYTES_PER_ELEMENT,
         )
 
-        const fits = spectrumCropToFITS(pixels, {
+        const flipped = flipVerticalUint16(pixels, observation.imageWidth, observation.imageHeight)
+
+        const fits = spectrumCropToFITS(flipped, {
           width: observation.imageWidth,
           height: observation.imageHeight,
           metadata: {

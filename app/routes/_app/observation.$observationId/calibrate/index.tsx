@@ -208,6 +208,17 @@ function RouteComponent() {
     },
   })
 
+  function handleDeletePointAtIndex(index: number) {
+    const lampPoints = (form.getFieldValue("lampPoints") as { x: number; y: number }[]) || []
+    const materialPoints = (form.getFieldValue("materialPoints") as { x: number; y: number }[]) || []
+
+    const newLampPoints = lampPoints.filter((_, i) => i !== index)
+    const newMaterialPoints = materialPoints.filter((_, i) => i !== index)
+
+    form.setFieldValue("lampPoints", newLampPoints)
+    form.setFieldValue("materialPoints", newMaterialPoints)
+  }
+
   return (
     <>
       <Card className="mx-auto w-full px-8">
@@ -217,6 +228,7 @@ function RouteComponent() {
             form={form}
             materialArr={materialArr}
             materialsNamesList={listOfMaterials}
+            onDeleteIndex={handleDeletePointAtIndex}
           />
         </CardContent>
         <CardContent>
@@ -232,6 +244,7 @@ function RouteComponent() {
                       data={lamp.data}
                       lampPoints={fieldLP.state.value}
                       setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                      onDeleteIndex={handleDeletePointAtIndex}
                       pixelToWavelengthFunction={pixelToWavelengthFunction}
                     />
                   </div>
@@ -246,6 +259,7 @@ function RouteComponent() {
                     data={scienceSpectrum}
                     lampPoints={fieldLP.state.value}
                     setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                    onDeleteIndex={handleDeletePointAtIndex}
                     pixelToWavelengthFunction={pixelToWavelengthFunction}
                   />
                 </div>

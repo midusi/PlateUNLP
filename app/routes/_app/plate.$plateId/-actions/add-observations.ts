@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq, sql } from "drizzle-orm"
-import { nanoid } from "nanoid"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
@@ -52,16 +51,16 @@ export const addObservations = createServerFn({ method: "POST" })
       if (height <= 0 || obs.top >= plate.imageHeight) {
         throw new Error(`Bounding box ${originalIdx} exceeds plate image height`)
       }
-
+      const obsN = obsNFromIndex(startIndex + sortedIdx)
       return {
         plateId: data.plateId,
-        name: `Observation ${nanoid(4)}`,
+        name: `Obs. ${obsN}`,
         imageTop: obs.top,
         imageLeft: obs.left,
         imageWidth: width,
         imageHeight: height,
         metadataCompletion: 0,
-        "OBS-N": obsNFromIndex(startIndex + sortedIdx),
+        "OBS-N": obsN,
       }
     })
 

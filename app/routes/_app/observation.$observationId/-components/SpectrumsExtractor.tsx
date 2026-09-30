@@ -49,7 +49,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
   /** Valores iniciales para el formulario de extraccion */
   const defaultValues: z.output<typeof ExtractionConfigurationSchema> = {
     countMediasPoints: 5,
-    apertureCoefficient: 1,
+    apertureCoefficient: 0.95,
     spectrums: orderedSpectrums,
   }
 

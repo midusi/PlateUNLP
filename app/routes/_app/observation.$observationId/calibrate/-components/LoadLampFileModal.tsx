@@ -22,30 +22,42 @@ export function LoadLampFileModal({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileFormatError, setFileFormatError] = useState<string | null>(null)
 
-  const validateLampFile = async (file: File): Promise<boolean> => {
-  try {
-    const text = await file.text()
-    const lines = text
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean)
+  const validateLampFile = async (file: File): Promise<{ valid: boolean; error?: string }> => {
+    try {
+      const text = await file.text()
+      const lines = text
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean)
 
-    const dataLines =
-      lines[0]?.toLowerCase().includes("intensity") &&
-      lines[0]?.toLowerCase().includes("wavelength")
-        ? lines.slice(1, 11)
-        : lines.slice(0, 10)
+      const dataLines = /wavelength/i.test(lines[0] ?? "") ? lines.slice(1, 11) : lines.slice(0, 10)
 
-    if (dataLines.length === 0) return false
-    console.log("Data lines to validate:", dataLines)
-    const lineRegex = /^\d+(\.\d+)?\s+\d+(\.\d+)?(\s+\S+)?$/
-    const isValid = dataLines.every((line) => lineRegex.test(line))
-    console.log("Lamp file validation result:", isValid)
-    return isValid
-  } catch {
-    return false
+      if (dataLines.length === 0) return { valid: false, error: "Invalid file format." }
+
+      const lineRegex = /^\d+(\.\d+)?(\s+-?\d+(\.\d+)?)?\s+\S*[A-Za-z]\S*$/
+      if (!dataLines.every((line) => lineRegex.test(line))) {
+        return { valid: false, error: "Invalid file format." }
+      }
+
+      // Verificar valores negativos en Intensity
+      const hasNegativeIntensity = dataLines.some((line) => {
+        const parts = line.trim().split(/\s+/)
+        if (parts.length >= 3) {
+          const intensity = parseFloat(parts[1])
+          return !isNaN(intensity) && intensity < 0
+        }
+        return false
+      })
+
+      if (hasNegativeIntensity) {
+        return { valid: false, error: "Intensity field values must be non-negative." }
+      }
+
+      return { valid: true }
+    } catch {
+      return { valid: false, error: "Invalid file format." }
+    }
   }
-}
 
   const LoadLampFormSchema = createLoadLampFormSchema(actualLampsNamesList)
   const form = useAppForm({
@@ -82,21 +94,16 @@ export function LoadLampFileModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <Card className="w-100 p-4">
         <CardHeader>
-          <h2 className="text-xl">
-            <div className="flex items-center gap-2">
-              <span>Upload Lamp File</span>
-              <button
-                type="button"
-                title="Select a .dat file containing lamp data with the format: Wave Intensity [Material]"
-                aria-label="Información sobre el formato del archivo"
-                className="p-0.5 rounded hover:bg-gray-100"
-              >
-                <span className="icon-[ph--info] size-5 text-black!" style={{ color: "#000" }} />
-              </button>
-            </div>
-          </h2>
+          <h2 className="text-xl">Upload Lamp File</h2>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          <div className="rounded-md border border-gray-200 bg-gray-50 p-2 text-xs">
+            <p className="mb-1 text-gray-600">Expected .dat format (whitespace-separated):</p>
+            <code className="block whitespace-pre font-mono">
+              Wavelength Intensity Material{"\n"}3020.6391   182       FeI
+            </code>
+            <p className="mb- text-gray-600">Intensity field values must be non-negative</p>
+          </div>
           <form.AppField name="name">{(field) => <field.TextField label="Name" />}</form.AppField>
           <form.Field name="file">
             {(field) => (
@@ -110,17 +117,17 @@ export function LoadLampFileModal({
                     const files = e.target.files
                     if (files && files.length > 0) {
                       const f = files[0]
-                      const ok = await validateLampFile(f)
-                      if (ok) {
-                        setFileFormatError(null)
-                        field.handleChange(f) // archivo válido
-                      } else {
-                        setFileFormatError("File formato not valid. Expected: Wavelength Intensity [Material]")
-                        field.handleChange(undefined as unknown as File) // resetear campo
-                        if (fileInputRef.current) {
-                          fileInputRef.current.value = ""
+                       const result = await validateLampFile(f)
+                        if (result.valid) {
+                          setFileFormatError(null)
+                          field.handleChange(f) // archivo válido
+                        } else {
+                          setFileFormatError(result.error ?? "Invalid file format.")
+                          field.handleChange(undefined as unknown as File) // resetear campo
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = ""
+                          }
                         }
-                      }
 
                     } else {
                       /** Dejar que Zod marque error */

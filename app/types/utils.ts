@@ -25,8 +25,10 @@ export const localDateTime = () =>
   z
     .string()
     .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/g,
-      "Invalid datetime format, expected YYYY-MM-DDTHH:mm[:ss[.sss]]",
+      ///^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/g,
+      /^\d{4}-\d{2}-\d{2}$/g,
+      //"Invalid datetime format, expected YYYY-MM-DDTHH:mm[:ss[.sss]]"
+      "Invalid date format, expected YYYY-MM-DD",
     )
 
 /**
