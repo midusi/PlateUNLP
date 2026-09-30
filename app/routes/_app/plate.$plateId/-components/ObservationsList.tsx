@@ -139,7 +139,11 @@ export function ObservationsList({
     onSuccess: (detections) => {
       console.log("Detections obtained:", detections)
     },
-    onError: (error) => notifyError("Error obtainging observations detections", error),
+    onError: (error) => {
+      // borrar observaciones detectadas previamente si hubo un error
+      deleteObservationsMut.mutate(plateId);
+      notifyError("Error obtainging observations detections", error);
+    }
   })
 
   const rotatePlateMut = useMutation({
