@@ -43,11 +43,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/extracted
 
         // Para cada observación el archivo debe llamarce [plate][obs.label][spectrum.type][|1|2].fits
         const { plate } = observation
-<<<<<<< HEAD
-        const obsNameLabel = observation.OBJECT + observation["OBS-N"]
-=======
-        const obsNameLabel = observation.OBJECT + "." + observation["OBS-N"]
->>>>>>> 0f6aba67e9c9a97f87adbf51335c675a177010ea
+        const obsNameLabel = `${observation.OBJECT}.${observation["OBS-N"]}`
         const baseFileName = observationToFITSFilename(
           plate["PLATE-N"],
           obsNameLabel,
