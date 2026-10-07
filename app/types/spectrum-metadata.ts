@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { fitsString, localDateTime, numericText, sexasegimal } from "./utils"
+import { fitsString, localDate, localDateTime, numericText, sexasegimal } from "./utils"
 
 /**
  * Describes a value that the user declared as "missing" or "lost".
@@ -29,7 +29,7 @@ export const PlateMetadataSchema = z.object({
   SCANRES: knowable(numericText()),
   SCANGAIN: knowable(numericText()),
   SCANSOFT: knowable(fitsString()),
-  DATESCAN: knowable(localDateTime().or(z.literal(""))),
+  DATESCAN: knowable(localDate().or(z.literal(""))),
   SCANAUTH: knowable(fitsString()),
   SCANNOTE: knowable(fitsString()),
 })

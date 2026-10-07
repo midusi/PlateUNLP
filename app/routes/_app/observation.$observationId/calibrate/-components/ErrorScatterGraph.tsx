@@ -13,6 +13,10 @@ import { maxBy, minBy } from "~/lib/array-stats"
 import { CustomError } from "~/lib/utils"
 import { GraphInErrorCase } from "./GraphInErrorCase"
 
+const C_KMS = 299_792.458
+
+type Unit = "Å" | "km/s"
+
 const formatNumber = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
@@ -27,12 +31,14 @@ interface ErrorScatterGraphProps {
   pixelToWavelengthFunction: CustomError | ((value: number) => number)
   lampPoints: { x: number; y: number }[]
   materialPoints: { x: number; y: number }[]
+  unit: Unit
 }
 
 export function ErrorScatterGraph({
   pixelToWavelengthFunction,
   lampPoints,
   materialPoints,
+  unit,
 }: ErrorScatterGraphProps) {
   const [ref, bounds] = useMeasure()
   const width = bounds.width ?? 0
@@ -108,9 +114,33 @@ export function ErrorScatterGraph({
     return { dispersionErrors, xScale, yScale, mX, mY }
   }, [lampPoints, materialPoints, pixelToWavelengthFunction])
 
+  /** Convierte el error de un punto según la unidad seleccionada */
+  const convertE = (point: { Å: number; E: number }): number =>
+    unit === "km/s" ? (point.E / point.Å) * C_KMS : point.E
+
+  /** Puntos con el valor Y convertido a la unidad activa */
+  const convertedErrors = useMemo(
+    () => dispersionErrors.map((p) => ({ ...p, E: convertE(p) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dispersionErrors, unit],
+  )
+
+  /** Escala Y recalculada según unidad */
+  const yScaleConverted = useMemo(() => {
+    if (convertedErrors.length === 0) return yScale
+    const yMin = Math.min(minBy(convertedErrors, getY) ?? -1, -0.01)
+    const yMax = Math.max(maxBy(convertedErrors, getY) ?? 1, 0.01)
+    const yLim = Math.max(Math.abs(yMin), Math.abs(yMax))
+    const mY = 0.2 * yLim
+    return scaleLinear<number>({ domain: [-yLim - mY, yLim + mY] })
+  }, [convertedErrors, yScale])
+
+  const yLabel = unit === "km/s" ? "Dispersion error (km/s)" : "Dispersion error (Å)"
+
   /** Pone al dia rangos numericos con resolucion de pantalla */
   xScale.range([margin.right, width - margin.left])
   yScale.range([height - margin.bottom - margin.top, 0])
+  yScaleConverted.range([height - margin.bottom - margin.top, 0])
 
   return (
     <div ref={ref} className="relative w-full overflow-visible">
@@ -147,7 +177,7 @@ export function ErrorScatterGraph({
             />
             <GridRows
               left={margin.right}
-              scale={yScale}
+              scale={yScaleConverted}
               width={width - margin.right - margin.left}
               height={height - margin.bottom - margin.top}
               stroke="rgba(255,255,255,0.15)"
@@ -155,11 +185,11 @@ export function ErrorScatterGraph({
             <LinePath<{ Å: number; E: number }>
               curve={curveLinear}
               data={[
-                { Å: (minBy(dispersionErrors, getX) ?? 0) - mX, E: 0 },
-                { Å: (maxBy(dispersionErrors, getX) ?? 0) + mX, E: 0 },
+                { Å: (minBy(convertedErrors, getX) ?? 0) - mX, E: 0 },
+                { Å: (maxBy(convertedErrors, getX) ?? 0) + mX, E: 0 },
               ]}
               x={(p) => xScale(getX(p)) ?? 0}
-              y={(p) => yScale(getY(p)) ?? 0}
+              y={(p) => yScaleConverted(getY(p)) ?? 0}
               shapeRendering="geometricPrecision"
               className="stroke-1"
               style={{
@@ -168,16 +198,16 @@ export function ErrorScatterGraph({
                 overflow: "hidden",
               }}
             />
-            {dispersionErrors.map((match, _idx) => (
+            {convertedErrors.map((match) => (
               <Circle
                 key={`ErrorScatterGraphDot-${getX(match)}-${getY(match)}`}
                 className="dot"
                 cx={xScale(getX(match))}
-                cy={yScale(getY(match))}
+                cy={yScaleConverted(getY(match))}
                 stroke="grey"
                 r={3}
-                fill={tooltipData === match ? "white" : "#f6c431"}
-                onMouseOver={(e) => handleMouseOver(e, match)}
+                fill={tooltipData?.idxMatch === match.idxMatch ? "white" : "#f6c431"}
+                onMouseOver={(e) => handleMouseOver(e, dispersionErrors[match.idxMatch])}
                 onMouseOut={hideTooltip}
               />
             ))}
@@ -190,9 +220,9 @@ export function ErrorScatterGraph({
               tickFormat={(value: NumberValue) => formatNumber(Number(value))}
             />
             <AxisLeft
-              scale={yScale}
+              scale={yScaleConverted}
               left={margin.right}
-              label="Dispersion error"
+              label={yLabel}
               numTicks={5}
               tickFormat={(value: NumberValue) => formatNumber(Number(value))}
             />
@@ -200,7 +230,7 @@ export function ErrorScatterGraph({
         )}
       </svg>
       {tooltipOpen && tooltipData && tooltipTop && tooltipLeft && (
-        <Tooltip className="w-30" left={tooltipLeft + 10} top={tooltipTop + 10}>
+        <Tooltip className="w-40" left={tooltipLeft + 10} top={tooltipTop + 10}>
           <div className="w-full" style={{ display: "inline-block" }}>
             <span className="flex justify-center pb-2 font-bold">#{tooltipData.idxMatch}</span>
             <div className="flex justify-between">
@@ -208,8 +238,8 @@ export function ErrorScatterGraph({
               <span className="text-right font-mono">{formatNumber(getX(tooltipData))}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold">E:</span>
-              <span className="text-right font-mono">{formatNumber(getY(tooltipData))}</span>
+              <span className="font-bold">E ({unit}):</span>
+              <span className="text-right font-mono">{formatNumber(convertE(tooltipData))}</span>
             </div>
           </div>
         </Tooltip>
