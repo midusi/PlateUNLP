@@ -12,6 +12,7 @@ export default defineConfig({
       method: "GET",
       handler: "./app/api/plate/[plateId]/preview.ts",
     },
+    
     {
       route: "/api/observation/:observationId/preview",
       method: "GET",
