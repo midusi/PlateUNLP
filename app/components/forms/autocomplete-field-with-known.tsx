@@ -106,6 +106,7 @@ export const AutocompleteFieldWithKnown = withFieldGroup<
                       className="ml-auto h-min px-1 py-0 font-normal text-muted-foreground text-xs italic underline"
                       variant="ghost"
                       onClick={() => field.handleChange((prev) => !prev)}
+                      type="button"
                     >
                       {field.state.value ? "unknown?" : "known!"}
                     </Button>
