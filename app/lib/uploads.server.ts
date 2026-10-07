@@ -1,0 +1,137 @@
+import type { InferSelectModel } from "drizzle-orm"
+import { eq } from "drizzle-orm"
+import { err, ok, type Result } from "neverthrow"
+import fs from "node:fs/promises"
+import sharp from "sharp"
+import { z } from "zod"
+import { SUPPORTED_PLATE_MIMETYPES } from "~/consts"
+import { db } from "~/db"
+import type { plate, upload } from "~/db/schema"
+import * as s from "~/db/schema"
+import { env } from "~/env"
+
+const MimeSchema = z.enum(SUPPORTED_PLATE_MIMETYPES)
+const AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const
+const AVATAR_MAX_SIZE = 512
+
+type UploadedFile = {
+  id: string
+  mimeType: z.infer<typeof MimeSchema>
+  width: number
+  height: number
+}
+
+type PlateWithImage = InferSelectModel<typeof plate> & {
+  image?: InferSelectModel<typeof upload>
+}
+
+export async function uploadAvatarFile(file: File): Promise<Result<UploadedFile, Error>> {
+  const sourceArrayBuffer = await file.arrayBuffer()
+  const mimeType = z.enum(AVATAR_MIME_TYPES).safeParse(file.type)
+  if (!mimeType.success) {
+    return err(new Error("Invalid avatar file type"))
+  }
+
+  try {
+    const processed = await sharp(sourceArrayBuffer)
+      .resize(AVATAR_MAX_SIZE, AVATAR_MAX_SIZE, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .rotate()
+      .jpeg({ quality: 85 })
+      .toBuffer()
+
+    const avatar = new File([new Uint8Array(processed)], file.name || "avatar.jpg", {
+      type: "image/jpeg",
+    })
+
+    const result = await uploadFile(avatar)
+    if (result.isErr()) {
+      return err(result.error)
+    }
+
+    return ok(result.value)
+  } catch (error) {
+    return err(
+      new Error(
+        `Failed to process avatar image: ${error instanceof Error ? error.message : String(error)}`,
+      ),
+    )
+  }
+}
+
+export async function uploadFile(
+  file: File,
+  { rotate }: { rotate?: number } = {},
+): Promise<Result<UploadedFile, Error>> {
+  const arrayBuffer = await file.arrayBuffer()
+  const mimeType = MimeSchema.safeParse(file.type)
+  if (!mimeType.success) {
+    return err(new Error("Invalid file type"))
+  }
+  const image = sharp(arrayBuffer).rotate(rotate ?? 0)
+
+  try {
+    const id = await db.transaction(async (tx) => {
+      const [{ id }] = await tx
+        .insert(s.upload)
+        .values({ name: file.name, mimeType: mimeType.data })
+        .returning({ id: s.upload.id })
+      await fs.writeFile(`${env.UPLOADS_DIR}/${id}`, Buffer.from(arrayBuffer))
+      return id
+    })
+    const metadata = await image.metadata()
+    const swapDimensions = (rotate ?? 0) % 180 !== 0
+    const width = swapDimensions ? metadata.height : metadata.width
+    const height = swapDimensions ? metadata.width : metadata.height
+    return ok({ id, mimeType: mimeType.data, width, height })
+  } catch (error) {
+    return err(
+      new Error(`Failed to upload file: ${error instanceof Error ? error.message : String(error)}`),
+    )
+  }
+}
+
+export async function readUploadedFile(id: string): Promise<Buffer> {
+  return await fs.readFile(`${env.UPLOADS_DIR}/${id}`)
+}
+
+export async function readEditedFile(plate: PlateWithImage): Promise<Buffer> {
+  const imageId = plate.image?.id || plate.imageId
+  let i = sharp(await readUploadedFile(imageId)).rotate(plate.imageRotation || 0)
+  if (plate.imageInverted) {
+    i = i.negate({ alpha: false })
+  }
+  const buf = await i.toBuffer()
+  return buf
+}
+
+export async function saveDebugImage(
+  buf: Buffer,
+  opts: { id?: string; mime?: string; subdir?: string; name?: string } = {},
+): Promise<string> {
+  const { id, mime, subdir, name } = opts
+  const mimeToExt: Record<string, string> = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/tiff": "tif",
+    "image/tif": "tif",
+    "image/gif": "gif",
+    "image/webp": "webp",
+  }
+  const ext = mime ? (mimeToExt[mime] ?? mime.split("/").pop() ?? "bin") : "png"
+  const debugName = name ?? `debug-${id ?? "unknown"}-${Date.now()}.${ext}`
+  const dir = subdir ? `${env.UPLOADS_DIR}/${subdir}` : env.UPLOADS_DIR
+  await fs.mkdir(dir, { recursive: true })
+  await fs.writeFile(`${dir}/${debugName}`, buf)
+  return subdir ? `${subdir}/${debugName}` : debugName
+}
+
+export async function deleteUploadedFile(id: string) {
+  await db.transaction(async (tx) => {
+    await tx.delete(s.upload).where(eq(s.upload.id, id))
+    await fs.rm(`${env.UPLOADS_DIR}/${id}`)
+  })
+}

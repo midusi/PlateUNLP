@@ -22,6 +22,11 @@ export default defineConfig({
       method: "GET",
       handler: "./app/api/observation/[observationId]/image.ts",
     },
+    {
+      route: "/api/avatar/:uploadId",
+      method: "GET",
+      handler: "./app/api/avatar/[uploadId].ts",
+    },
   ],
   modules: [
     evlog({
