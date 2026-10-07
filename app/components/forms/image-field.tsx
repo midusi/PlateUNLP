@@ -17,6 +17,7 @@ type TextFieldProps = {
   showPreview?: boolean
   maxWidth?: number
   maxHeight?: number
+  onFileChange?: (file: File | null) => void
 } & Pick<React.ComponentProps<typeof Input>, "placeholder">
 
 export function ImageField({
@@ -31,6 +32,7 @@ export function ImageField({
   showPreview = true,
   maxWidth = 512,
   maxHeight = 512,
+  onFileChange,
   ...props
 }: TextFieldProps) {
   const field = useFieldContext<string | null>()
@@ -43,31 +45,35 @@ export function ImageField({
     const file = e.target.files?.[0]
     if (!file) {
       notifyError("Failed to load file")
+      onFileChange?.(null)
       return
     }
 
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      const base64 = reader.result as string
-
-      const img = new Image()
-      img.onload = () => {
-        if ((maxWidth && img.width > maxWidth) || (maxHeight && img.height > maxHeight)) {
-          notifyError(`Image shape exceeds the maximum of ${maxWidth}pxX${maxHeight}px`)
-          return
-        }
-        setPreview(base64)
-        field.handleChange(base64)
+    const objectUrl = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      if ((maxWidth && img.width > maxWidth) || (maxHeight && img.height > maxHeight)) {
+        URL.revokeObjectURL(objectUrl)
+        notifyError(`Image shape exceeds the maximum of ${maxWidth}pxX${maxHeight}px`)
+        onFileChange?.(null)
+        return
       }
-      img.src = base64
+      setPreview(objectUrl)
+      field.handleChange(objectUrl)
+      onFileChange?.(file)
     }
-
-    reader.readAsDataURL(file)
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      notifyError("Failed to read image file")
+      onFileChange?.(null)
+    }
+    img.src = objectUrl
   }
 
   const handleClear = () => {
     field.handleChange(null)
     setPreview(null)
+    onFileChange?.(null)
 
     if (inputRef.current) {
       inputRef.current.value = ""
@@ -84,7 +90,6 @@ export function ImageField({
         className={`disabled:bg-gray-200 ${hight_modifier}`}
         type="file"
         name={field.name}
-        //value={field.state.value}
         onBlur={field.handleBlur}
         onChange={handleFileChange}
       />

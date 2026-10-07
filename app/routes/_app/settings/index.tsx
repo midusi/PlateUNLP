@@ -11,7 +11,16 @@ import { breadcrumb } from "~/lib/breadcrumbs"
 import { notifyError } from "~/lib/notifications"
 import { BasicUserFieldsSchema } from "~/types/auth"
 import { getSession } from "../-actions/get-session"
+import { uploadAvatar } from "./-actions/upload-avatar"
 import { ChangePasswordModal } from "./-components/ChangePasswordModal"
+
+function getAvatarSrc(image: string | null | undefined) {
+  if (!image) return null
+  if (image.startsWith("data:") || image.startsWith("http://") || image.startsWith("https://")) {
+    return image
+  }
+  return `/api/avatar/${encodeURIComponent(image)}`
+}
 
 export const Route = createFileRoute("/_app/settings/")({
   component: RouteComponent,
@@ -34,13 +43,15 @@ export const Route = createFileRoute("/_app/settings/")({
 
 function RouteComponent() {
   const [isChangePasswordOpen, setChangePasswordOpen] = useState(false)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const { user } = Route.useLoaderData()
+  const currentAvatar = getAvatarSrc(user.image)
 
   const defaultValues: z.output<typeof BasicUserFieldsSchema> = {
     email: user.email,
     name: user.name,
     username: user.username ?? "",
-    image: user.image || null,
+    image: currentAvatar,
   }
 
   const form = useAppForm({
@@ -50,7 +61,20 @@ function RouteComponent() {
       try {
         const name = value.name
         const username = value.username
-        const image = value.image || ""
+        let image = user.image ?? null
+
+        if (avatarFile) {
+          const formData = new FormData()
+          formData.set("avatar", avatarFile)
+          const result = await uploadAvatar({ data: formData })
+          if (!result.success) {
+            throw new Error(result.error)
+          }
+          image = result.uploadId
+        } else if (value.image === null && user.image) {
+          image = null
+        }
+
         if (name !== user.name) {
           const { error } = await authClient.updateUser({ name })
           if (error) throw new Error(error.message)
@@ -59,7 +83,7 @@ function RouteComponent() {
           const { error } = await authClient.updateUser({ username })
           if (error) throw new Error(error.message)
         }
-        if (image !== user.image) {
+        if (image !== (user.image ?? null)) {
           const { error } = await authClient.updateUser({ image })
           if (error) throw new Error(error.message)
         }
@@ -96,6 +120,10 @@ function RouteComponent() {
                   value={field.state.value}
                   maxHeight={512}
                   maxWidth={512}
+                  onFileChange={(file) => {
+                    setAvatarFile(file)
+                    field.handleChange(file ? URL.createObjectURL(file) : null)
+                  }}
                 />
               )}
             </form.AppField>

@@ -13,6 +13,14 @@ import { cn } from "~/lib/utils"
 import { getSession } from "./-actions/get-session"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
 
+function getAvatarSrc(image: string | null | undefined) {
+  if (!image) return null
+  if (image.startsWith("data:") || image.startsWith("http://") || image.startsWith("https://")) {
+    return image
+  }
+  return `/api/avatar/${encodeURIComponent(image)}`
+}
+
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
   loader: async () => {
@@ -28,6 +36,7 @@ function RouteComponent() {
   const { session } = Route.useLoaderData()
   const navigate = useNavigate()
   const userInfo = session!.user
+  const avatarSrc = getAvatarSrc(userInfo.image)
   const logos = [
     {
       href: "https://weblidi.info.unlp.edu.ar/",
@@ -80,9 +89,9 @@ function RouteComponent() {
           </div>
 
           <div className="flex flex-row items-center gap-4">
-            {userInfo.image ? (
+            {avatarSrc ? (
               <img
-                src={userInfo.image}
+                src={avatarSrc}
                 alt={userInfo.name}
                 className="h-8 w-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
               />

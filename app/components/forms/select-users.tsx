@@ -32,6 +32,14 @@ const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "viewer", label: "Viewer" },
 ]
 
+function getAvatarSrc(image: string | null | undefined) {
+  if (!image) return null
+  if (image.startsWith("data:") || image.startsWith("http://") || image.startsWith("https://")) {
+    return image
+  }
+  return `/api/avatar/${encodeURIComponent(image)}`
+}
+
 export function SelectUsers({
   className,
   label,
@@ -136,7 +144,7 @@ export function SelectUsers({
                   >
                     {user.image ? (
                       <img
-                        src={user.image}
+                        src={getAvatarSrc(user.image) ?? undefined}
                         alt=""
                         className="size-8 shrink-0 rounded-full border border-olive-300 object-cover"
                       />
@@ -174,7 +182,7 @@ export function SelectUsers({
               >
                 {member.image ? (
                   <img
-                    src={member.image}
+                    src={getAvatarSrc(member.image) ?? undefined}
                     alt=""
                     className="size-9 shrink-0 rounded-full border border-olive-300 object-cover"
                   />
