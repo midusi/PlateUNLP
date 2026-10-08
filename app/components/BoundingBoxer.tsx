@@ -226,6 +226,7 @@ export function BoundingBoxer({
           minScale={imageScale * 0.5}
           centerOnInit
           centerZoomedOut
+          wheel={{ activationKeys: ["Control"] }}
         >
           <BoundingBoxControls
             selectedTool={selectedTool}
