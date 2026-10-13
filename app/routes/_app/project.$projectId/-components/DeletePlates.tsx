@@ -17,13 +17,16 @@ import { deletePlates } from "../-actions/delete-plates"
 export function DeletePlates({
   plateIds,
   onDeleted,
+  iconOnly = false,
 }: {
   plateIds: string[]
   onDeleted?: () => void
+  iconOnly?: boolean
 }) {
   const router = useRouter()
   const [alertOpen, setAlertOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSinglePlate = plateIds.length === 1
 
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true)
@@ -46,16 +49,30 @@ export function DeletePlates({
         if (!isSubmitting) setAlertOpen(open)
       }}
     >
-      <AlertDialogTrigger render={<Button variant="destructive" />}>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="destructive"
+            size={iconOnly ? "icon" : "default"}
+            className={iconOnly ? "h-8 w-8 p-0" : undefined}
+            aria-label={isSinglePlate ? "Delete plate" : "Delete plates"}
+            title={iconOnly ? "Delete" : undefined}
+          />
+        }
+      >
         <span className="icon-[ph--trash-bold]" />
-        Delete
+        {!iconOnly && (isSinglePlate ? "Delete plate" : "Delete")}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            You are about to delete <strong>{plateIds.length} plate(s)</strong>. This action cannot
-            be undone.
+            You are about to delete{" "}
+            <strong>
+              {plateIds.length} {isSinglePlate ? "plate" : "plates"}
+            </strong>
+            . This will also permanently delete all associated observations, calibrations, spectra,
+            and related data. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
