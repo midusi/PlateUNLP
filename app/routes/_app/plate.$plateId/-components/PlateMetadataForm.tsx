@@ -126,16 +126,24 @@ export function PlateMetadataForm({
                   {field.state.meta.errors[0] && (
                     <FieldError>{field.state.meta.errors[0].message}</FieldError>
                   )}
+                  {!field.state.meta.errors[0] && field.state.value.trim().length === 0 && (
+                    <FieldError>OBSERVAT must be selected.</FieldError>
+                  )}
                 </Field>
               )}
             </form.Field>
             <form.AppField name="PLATE-N">
               {(field) => (
-                <field.TextField
-                  label="PLATE-N"
-                  placeholder="e.g. 317"
-                  description="Plate identifier in the original observation catalogue."
-                />
+                <div>
+                  <field.TextField
+                    label="PLATE-N"
+                    placeholder="e.g. 317"
+                    description="Plate identifier in the original observation catalogue."
+                  />
+                  {field.state.value.trim().length === 0 && (
+                    <p className="text-destructive text-sm">PLATE-N cannot be empty.</p>
+                  )}
+                </div>
               )}
             </form.AppField>
             <AutocompleteFieldWithKnown

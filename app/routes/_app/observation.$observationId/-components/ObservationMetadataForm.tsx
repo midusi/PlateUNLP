@@ -198,13 +198,28 @@ export function ObservationMetadataForm({
                       </form.Subscribe>
                     </div>
 
-                    <TextFieldWithKnown
-                      form={form}
-                      fields="MAIN-ID"
-                      label="MAIN-ID"
-                      placeholder="e.g. * zet Vir"
-                      description="Main identifier returned by SIMBAD."
-                    />
+                    <div>
+                      <TextFieldWithKnown
+                        form={form}
+                        fields="MAIN-ID"
+                        label="MAIN-ID"
+                        placeholder="e.g. * zet Vir"
+                        description="Main identifier returned by SIMBAD."
+                      />
+                      <form.Subscribe
+                        selector={(state) => ({
+                          showComputed: exportsComputedMetadata(state.values.IMAGETYP),
+                          isKnown: state.values["MAIN-ID"].isKnown,
+                          value: state.values["MAIN-ID"].value,
+                        })}
+                      >
+                        {({ showComputed, isKnown, value }) =>
+                          showComputed && isKnown && value.trim().length === 0 ? (
+                            <p className="text-destructive text-sm">MAIN-ID cannot be empty.</p>
+                          ) : null
+                        }
+                      </form.Subscribe>
+                    </div>
                     <TextFieldWithKnown
                       form={form}
                       fields="SPTYPE"
