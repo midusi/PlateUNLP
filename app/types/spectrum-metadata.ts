@@ -85,7 +85,7 @@ export const ObservationMetadataSchema = z.object({
  * Observation metadata fields derived from OBJECT + DATE-OBS (the "Compute the
  * rest of the metadata" step). They only make sense for an actual sky object,
  * so they are hidden in the form and omitted from the FITS export when
- * IMAGETYP is anything other than `object`.
+ * IMAGETYP is anything other than `object` (ignoring case and surrounding spaces).
  */
 export const COMPUTED_OBSERVATION_FIELDS = [
   "MAIN-ID",
@@ -111,7 +111,7 @@ const COMPUTED_FIELD_SET = new Set<string>(COMPUTED_OBSERVATION_FIELDS)
  * object. Calibration frames (dark, zero, flat, arc) and unknown types omit it.
  */
 export function exportsComputedMetadata(imageType: { value: string; isKnown: boolean }): boolean {
-  return imageType.isKnown && imageType.value === "object"
+  return imageType.isKnown && imageType.value.trim().toLowerCase() === "object"
 }
 
 /**
