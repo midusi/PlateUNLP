@@ -1,0 +1,1 @@
+ALTER TABLE `plate` ADD `scan_col` integer DEFAULT true NOT NULL;

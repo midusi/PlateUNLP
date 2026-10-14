@@ -32,6 +32,7 @@ export const PlateMetadataSchema = z.object({
   DATESCAN: knowable(localDate().or(z.literal(""))),
   SCANAUTH: knowable(fitsString()),
   SCANNOTE: knowable(fitsString()),
+  "SCAN-COL": knowable(fitsString()),
 })
 /**
  * Compute the completion percentage of the plate metadata.

@@ -210,6 +210,16 @@ export function PlateMetadataForm({
               description="Scan resolution in dpi. PIXSIZE is derived automatically from this value."
             />
             <TextFieldWithKnown
+              //AutocompleteFieldWithKnown
+              form={form}
+              fields="SCAN-COL"
+              label="SCAN-COL"
+              placeholder="e.g. 16 bits gray scale"
+              description="Scanner color resolution"
+              //options={suggestions.SCAN_COL}
+            
+            />
+            <TextFieldWithKnown
               form={form}
               fields="SCANGAIN"
               label="SCANGAIN"
