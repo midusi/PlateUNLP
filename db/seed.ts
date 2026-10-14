@@ -2,6 +2,8 @@
 
 import "dotenv/config"
 
+import { readFile } from "node:fs/promises"
+import path from "node:path"
 import { eq } from "drizzle-orm"
 import { reset } from "drizzle-seed"
 import pc from "picocolors"
@@ -11,6 +13,30 @@ import { auth } from "~/lib/auth"
 import { getMaterialSpectralData } from "~/lib/spectral-data"
 import { db } from "."
 import * as schema from "./schema"
+
+/** Snapshots of the IERS files, see the README in that directory. */
+const IERS_SNAPSHOTS_DIR = path.join(import.meta.dirname, "seed-data", "iers")
+
+/**
+ * Downloads an IERS file from the USNO server, which is often unreachable (it resets the TLS
+ * handshake). When the download fails, falls back to the snapshot versioned in
+ * `db/seed-data/iers/` so that `pnpm db:init` doesn't depend on an external server being up.
+ */
+async function fetchIERSFile(url: string, snapshot: string): Promise<string> {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(60_000) })
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`)
+    }
+    return await response.text()
+  } catch (error) {
+    const reason = error instanceof Error ? (error.cause ?? error) : error
+    console.warn(
+      pc.yellow(`⚠ Could not fetch ${url} (${String(reason)}), using the versioned snapshot`),
+    )
+    return await readFile(path.join(IERS_SNAPSHOTS_DIR, snapshot), "utf8")
+  }
+}
 
 async function seedObservatories() {
   const response = await fetch("https://www.astropy.org/astropy-data/coordinates/sites.json")
@@ -55,11 +81,7 @@ async function seedObservatories() {
 async function seedIERSDeltaT() {
   // Fetch the latest ΔT (TT - UT1) data from IERS (1973-present)
   // More info: https://maia.usno.navy.mil/products/deltaT
-  const response = await fetch("https://maia.usno.navy.mil/ser7/deltat.data")
-  if (!response.ok) {
-    throw new Error(`Failed to fetch deltat.data: ${response.statusText}`)
-  }
-  const data = await response.text()
+  const data = await fetchIERSFile("https://maia.usno.navy.mil/ser7/deltat.data", "deltat.data")
   const lines = data.trimEnd().split("\n")
 
   const res = await db.insert(schema.iersDeltaT).values(
@@ -85,11 +107,10 @@ async function seedIERSDeltaT() {
 async function seedIERSHistoricDeltaT() {
   // Fetch historic ΔT (TT - UT1) data from IERS (1665-1984)
   // More info: https://maia.usno.navy.mil/products/deltaT
-  const response = await fetch("https://maia.usno.navy.mil/ser7/historic_deltat.data")
-  if (!response.ok) {
-    throw new Error(`Failed to fetch historic_deltat.data: ${response.statusText}`)
-  }
-  const data = await response.text()
+  const data = await fetchIERSFile(
+    "https://maia.usno.navy.mil/ser7/historic_deltat.data",
+    "historic_deltat.data",
+  )
   const lines = data.trimEnd().split("\n").slice(2) // Skip the first two header lines
 
   const oldestDeltaT = await db.query.iersDeltaT.findFirst({
@@ -118,11 +139,10 @@ async function seedIERSHistoricDeltaT() {
 async function seedIERSBulletinA() {
   // Fetch IERS Bulletin A data (polar motion, DUT1) from IERS
   // More info: https://maia.usno.navy.mil/products/bulletin-a
-  const response = await fetch("https://maia.usno.navy.mil/ser7/finals2000A.all")
-  if (!response.ok) {
-    throw new Error(`Failed to fetch finals2000A.all: ${response.statusText}`)
-  }
-  const data = await response.text()
+  const data = await fetchIERSFile(
+    "https://maia.usno.navy.mil/ser7/finals2000A.all",
+    "finals2000A.all",
+  )
   const lines = data.trimEnd().split("\n")
 
   let total = 0
