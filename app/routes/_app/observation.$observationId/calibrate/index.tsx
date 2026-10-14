@@ -265,6 +265,7 @@ function RouteComponent() {
                     setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
                     onDeleteIndex={handleDeletePointAtIndex}
                     pixelToWavelengthFunction={pixelToWavelengthFunction}
+                    showLines={false}
                   />
                 </div>
               </div>

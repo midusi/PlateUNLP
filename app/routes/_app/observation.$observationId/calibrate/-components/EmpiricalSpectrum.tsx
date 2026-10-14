@@ -26,6 +26,7 @@ interface EmpiricalSpectrumProps {
   setLampPoints: (arr: { x: number; y: number }[]) => void
   onDeleteIndex?: (index: number) => void
   pixelToWavelengthFunction: CustomError | ((value: number) => number)
+  showLines?: boolean
 }
 const height = 150
 /** Problema al agregar margenes a izquierda y derecha */
@@ -37,6 +38,7 @@ export function EmpiricalSpectrum({
   setLampPoints,
   onDeleteIndex,
   pixelToWavelengthFunction,
+  showLines = true
 }: EmpiricalSpectrumProps) {
   const isPixelToWavelengthValid = !(pixelToWavelengthFunction instanceof CustomError)
 
@@ -204,7 +206,7 @@ export function EmpiricalSpectrum({
             </g>
           )}
           {/* Referencias marcadas por el usuario */}
-          {lampPoints.map((lp, idx) => {
+          {showLines && lampPoints.map((lp, idx) => {
             const xClick = wavelengthScale(lp.x)
             // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
 
