@@ -17,8 +17,8 @@ const knowable = <T extends z.ZodType>(field: T) =>
  * This schema defines the metadata for a single plate.
  */
 export const PlateMetadataSchema = z.object({
-  OBSERVAT: fitsString().min(1),
-  "PLATE-N": fitsString().min(1),
+  OBSERVAT: fitsString().min(1, "OBSERVAT must be selected."),
+  "PLATE-N": fitsString().min(1, "PLATE-N cannot be empty."),
   TELESCOPE: knowable(fitsString()),
   INSTRUME: knowable(fitsString()),
   DETECTOR: knowable(fitsString()),

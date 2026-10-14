@@ -33,7 +33,8 @@ function usePlateForm({
 
   return useAppForm({
     defaultValues: defaultValues,
-    validators: { onChange: PlateMetadataSchema },
+    // onMount so required-field errors (e.g. OBSERVAT on a new plate) show before the first edit
+    validators: { onMount: PlateMetadataSchema, onChange: PlateMetadataSchema },
     onSubmit: async ({ value, formApi }) => {
       try {
         await updatePlateMetadata({ data: { plateId, metadata: value } })
@@ -126,24 +127,16 @@ export function PlateMetadataForm({
                   {field.state.meta.errors[0] && (
                     <FieldError>{field.state.meta.errors[0].message}</FieldError>
                   )}
-                  {!field.state.meta.errors[0] && field.state.value.trim().length === 0 && (
-                    <FieldError>OBSERVAT must be selected.</FieldError>
-                  )}
                 </Field>
               )}
             </form.Field>
             <form.AppField name="PLATE-N">
               {(field) => (
-                <div>
-                  <field.TextField
-                    label="PLATE-N"
-                    placeholder="e.g. 317"
-                    description="Plate identifier in the original observation catalogue."
-                  />
-                  {field.state.value.trim().length === 0 && (
-                    <p className="text-destructive text-sm">PLATE-N cannot be empty.</p>
-                  )}
-                </div>
+                <field.TextField
+                  label="PLATE-N"
+                  placeholder="e.g. 317"
+                  description="Plate identifier in the original observation catalogue."
+                />
               )}
             </form.AppField>
             <AutocompleteFieldWithKnown
