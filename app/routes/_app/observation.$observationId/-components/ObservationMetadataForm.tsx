@@ -144,7 +144,7 @@ export function ObservationMetadataForm({
               step="1"
               description={
                 <>
-                  Observation datetime in Universal Time.{" "}
+                  Observation datetime, always in UT{" "}
                   <span className="font-medium">Required to compute the derived metadata</span>
                 </>
               }
