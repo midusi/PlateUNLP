@@ -48,6 +48,7 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/fits")({
           dateScan: unknownable(plate.DATESCAN, plate["DATESCAN?"]),
           scanAuthor: unknownable(plate.SCANAUTH, plate["SCANAUTH?"]),
           scannerNotes: unknownable(plate.SCANNOTE, plate["SCANNOTE?"]),
+          scanCol: unknownable(plate.SCANCOL, plate["SCANCOL?"]),
           observer: unknownable(plate.OBSERVER, plate["OBSERVER?"]),
           instrument: unknownable(plate.INSTRUME, plate["INSTRUME?"]),
           detector: unknownable(plate.DETECTOR, plate["DETECTOR?"]),
