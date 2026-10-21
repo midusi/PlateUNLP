@@ -31,8 +31,8 @@ export type PlateScanMetadata = PlateMetadata & {
   dateScan?: string
   scanAuthor?: string
   scannerNotes?: string
+  scanCol?: string
   origin?: string
-  scanCol?:string
 }
 
 export type PlateFITSMetadata = PlateScanMetadata & {

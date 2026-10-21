@@ -201,7 +201,6 @@ export function PlateMetadataForm({
                   form.setFieldValue("SCANGAIN", { value: defaults.SCANGAIN, isKnown: true })
                 if (defaults.SCANSOFT)
                   form.setFieldValue("SCANSOFT", { value: defaults.SCANSOFT, isKnown: true })
-                
               }}
             />
             <TextFieldWithKnown
