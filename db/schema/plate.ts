@@ -51,6 +51,8 @@ export const plate = sqliteTable("plate", {
   "DATESCAN?": integer("datescan_known", { mode: "boolean" }).notNull().default(true),
   SCANAUTH: text("scanauth").notNull().default(""),
   "SCANAUTH?": integer("scanauth_known", { mode: "boolean" }).notNull().default(true),
+  SCANCOL: text("scancol").notNull().default(""),
+  "SCANCOL?": integer("scan_col_know", { mode: "boolean" }).notNull().default(true),
 })
 
 export const plateRelations = relations(plate, ({ one, many }) => ({
