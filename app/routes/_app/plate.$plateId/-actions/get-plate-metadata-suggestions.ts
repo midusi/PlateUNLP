@@ -14,6 +14,7 @@ export type PlateMetadataSuggestions = {
   SCANNER: string[]
   SCANSOFT: string[]
   SCANAUTH: string[]
+  SCANCOL: string[]
   /** Per-scanner scan settings collected from other plates in the project. */
   scannerDefaults: Record<string, ScannerDefaults>
 }
@@ -52,6 +53,7 @@ export const getPlateMetadataSuggestions = createServerFn()
         SCANGAIN: true,
         SCANSOFT: true,
         SCANAUTH: true,
+        SCANCOL: true,
       },
     })
 
@@ -77,6 +79,7 @@ export const getPlateMetadataSuggestions = createServerFn()
       SCANNER: distinct(plates.map((p) => p.SCANNER)),
       SCANSOFT: distinct(plates.map((p) => p.SCANSOFT)),
       SCANAUTH: distinct(plates.map((p) => p.SCANAUTH)),
+      SCANCOL: distinct(plates.map((p) => p.SCANCOL)),
       scannerDefaults,
     }
   })

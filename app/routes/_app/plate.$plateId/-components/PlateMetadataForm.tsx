@@ -201,6 +201,7 @@ export function PlateMetadataForm({
                   form.setFieldValue("SCANGAIN", { value: defaults.SCANGAIN, isKnown: true })
                 if (defaults.SCANSOFT)
                   form.setFieldValue("SCANSOFT", { value: defaults.SCANSOFT, isKnown: true })
+                
               }}
             />
             <TextFieldWithKnown
@@ -209,6 +210,14 @@ export function PlateMetadataForm({
               label="SCANRES"
               placeholder="e.g. 2400"
               description="Scan resolution in dpi. PIXSIZE is derived automatically from this value."
+            />
+            <AutocompleteFieldWithKnown
+              form={form}
+              fields="SCANCOL"
+              label="SCAN-COL"
+              placeholder="e.g. 16 bits gray scale"
+              description="Scanner color resolution"
+              options={suggestions.SCANCOL}
             />
             <TextFieldWithKnown
               form={form}
