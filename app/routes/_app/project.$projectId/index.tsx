@@ -92,10 +92,9 @@ const statusColorByKey: Record<PlateProcessingStatusKey, string> = {
   completed: "bg-green-600 border-green-800",
 }
 
-const statusFilterOptions: Array<{ value: PlateProcessingStatusKey | "pending" | "all"; label: string }> =
+const statusFilterOptions: Array<{ value: PlateProcessingStatusKey | "all"; label: string }> =
   [
     { value: "all", label: "All states" },
-    { value: "pending", label: "Pending" },
     { value: "plate-metadata", label: "Plate metadata" },
     { value: "observation-metadata", label: "Observation metadata" },
     { value: "spectrum-detection", label: "Spectrum detection" },
@@ -198,11 +197,10 @@ const columns = [
 
       return rowA.original["PLATE-N"].localeCompare(rowB.original["PLATE-N"])
     },
-    filterFn: (row, columnId, filterValue: PlateProcessingStatusKey | "pending" | "all") => {
+    filterFn: (row, columnId, filterValue: PlateProcessingStatusKey | "all") => {
       if (!filterValue || filterValue === "all") return true
 
       const status = row.getValue<PlateProcessingStatus>(columnId)
-      if (filterValue === "pending") return status.statusKey !== "completed"
       return status.statusKey === filterValue
     },
     cell: (info) => {
