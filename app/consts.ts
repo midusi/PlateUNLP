@@ -1,1 +1,1 @@
-export const SUPPORTED_PLATE_MIMETYPES = ["image/jpeg", "image/png", "image/tiff"]
+export const SUPPORTED_PLATE_MIMETYPES = ["image/jpeg", "image/png", "image/tiff", "image/tif"]
