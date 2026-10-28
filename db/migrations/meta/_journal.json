@@ -78,6 +78,20 @@
       "when": 1792590980579,
       "tag": "0011_fix_scan_col_known_column",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793141762278,
+      "tag": "0012_add_params_spectrum",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1793211654163,
+      "tag": "0013_add_params_spectrum_regretion",
+      "breakpoints": true
     }
   ]
 }

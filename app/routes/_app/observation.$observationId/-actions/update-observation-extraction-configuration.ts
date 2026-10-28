@@ -18,6 +18,7 @@ export const updateObservationExtractionConfiguration = createServerFn({ method:
       .set({
         countMediasPoints: data.countMediasPoints,
         apertureCoefficient: data.apertureCoefficient,
+        // fitDegree: data.fitDegree,
       })
       .where(eq(s.observation.id, data.observationId))
   })
