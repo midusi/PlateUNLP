@@ -34,7 +34,7 @@ export function LoadLampFileModal({
 
       if (dataLines.length === 0) return { valid: false, error: "Invalid file format." }
 
-      const lineRegex = /^\d+(\.\d+)?(\s+-?\d+(\.\d+)?)?\s+\S*[A-Za-z]\S*$/
+      const lineRegex = /^\d+(\.\d+)?\s+-?\d+(\.\d+)?(\s+\S*[A-Za-z]\S*)?$/
       if (!dataLines.every((line) => lineRegex.test(line))) {
         return { valid: false, error: "Invalid file format." }
       }
@@ -42,7 +42,7 @@ export function LoadLampFileModal({
       // Verificar valores negativos en Intensity
       const hasNegativeIntensity = dataLines.some((line) => {
         const parts = line.trim().split(/\s+/)
-        if (parts.length >= 3) {
+        if (parts.length >= 2) {
           const intensity = parseFloat(parts[1])
           return !isNaN(intensity) && intensity < 0
         }
@@ -100,9 +100,13 @@ export function LoadLampFileModal({
           <div className="rounded-md border border-gray-200 bg-gray-50 p-2 text-xs">
             <p className="mb-1 text-gray-600">Expected .dat format (whitespace-separated):</p>
             <code className="block whitespace-pre font-mono">
-              Wavelength Intensity Material{"\n"}3020.6391   182       FeI
+              Wavelength Intensity Element{"\n"}3020.6391   182       FeI
             </code>
-            <p className="mb- text-gray-600">Intensity field values must be non-negative</p>
+            <p className="mb- text-gray-600">- Intensity field values must be non-negative</p>
+            <p className="mb- text-gray-600">
+              <span className="font-bold">- Element is optional:</span> chemical element and ionization stage of each line 
+              (e.g. FeI). If present, the reference graph can color each element separately.
+            </p>
           </div>
           <form.AppField name="name">{(field) => <field.TextField label="Name" />}</form.AppField>
           <form.Field name="file">
