@@ -41,7 +41,6 @@ export const addSpectrums = createServerFn({ method: "POST" })
     await db
     .delete(s.spectrum)
     .where(eq(s.spectrum.observationId, data.observationId))
-    console.log(s.spectrum);
 
     const { science: sc, lamp1: l1, lamp2: l2 } = data
     const [newScience] = await db

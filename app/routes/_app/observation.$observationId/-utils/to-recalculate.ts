@@ -6,80 +6,89 @@ interface Spectrum {
   imageTop: number
   imageWidth: number
 }
+interface Spectrum {
+  id: string
+  type: "lamp" | "science"
+  imageTop: number
+  imageLeft: number
+  imageWidth: number
+  imageHeight: number
+  countMediasPoints: number
+  apertureCoefficient: number
+  fitDegree: number
+}
 
-/**
- * Funcion que encapsula la logica de decicion para decidir si el analisis
- * de un espectro debe ser recalculado o no.
- * @param actual - Arreglo con todos los espectros actuales
- * @param prev - Arreglo con todos los espectros tal como se los conocia
- * en la iteracion anterior.
- * @returns - Arreglo de espectros que deben ser recalculados.
- */
 export function toRecalculate(
   actual: {
-    countMediasPoints: number
-    apertureCoefficient: number
     spectrums: Spectrum[]
   },
   prev: {
     idPrincipalSpectrum: string
-    countMediasPoints: number
-    apertureCoefficient: number
     spectrums: Spectrum[]
   },
 ) {
-  /** ¿Cambio la cantidad de puntos medios? */
-  const changeMediasPoints = actual.countMediasPoints !== prev.countMediasPoints
-  /** ¿Cambio el coeficiente de apertura? */
-  const changeApertureCoefficient = actual.apertureCoefficient !== prev.apertureCoefficient
-  /** ¿Cambio el espectro principal o sus dimensiones? */
-  let changePrincipalSpectrum: boolean
+  /** Obtener espectro principal actual */
   const principalSpectrum = actual.spectrums.find((s) => s.type === "science")
-  if (!principalSpectrum) changePrincipalSpectrum = true
-  else {
-    changePrincipalSpectrum = principalSpectrum.id !== prev.idPrincipalSpectrum
-    if (!changePrincipalSpectrum) {
-      const prevPrincipalSpectrum = prev.spectrums.find((s) => s.id === prev.idPrincipalSpectrum)
-      if (!prevPrincipalSpectrum) {
-        changePrincipalSpectrum = true
-      } else {
-        changePrincipalSpectrum =
-          prevPrincipalSpectrum.imageHeight !== principalSpectrum.imageHeight ||
-          prevPrincipalSpectrum.imageLeft !== principalSpectrum.imageLeft ||
-          prevPrincipalSpectrum.imageTop !== principalSpectrum.imageTop ||
-          prevPrincipalSpectrum.imageWidth !== principalSpectrum.imageWidth
-      }
+  if (!principalSpectrum) throw new Error("The main spectrum is not specified")
+
+  /** ¿Cambio el espectro principal, sus dimensiones, o sus parámetros de extracción? */
+  let changePrincipalSpectrum = false
+  
+  if (principalSpectrum.id !== prev.idPrincipalSpectrum) {
+    changePrincipalSpectrum = true
+  } else {
+    const prevPrincipalSpectrum = prev.spectrums.find((s) => s.id === principalSpectrum.id)
+    if (!prevPrincipalSpectrum) {
+      changePrincipalSpectrum = true
+    } else {
+      // Si cambia algo en el principal, se recalcula TODO porque las lámparas dependen de su traza
+      changePrincipalSpectrum =
+        prevPrincipalSpectrum.imageHeight !== principalSpectrum.imageHeight ||
+        prevPrincipalSpectrum.imageLeft !== principalSpectrum.imageLeft ||
+        prevPrincipalSpectrum.imageTop !== principalSpectrum.imageTop ||
+        prevPrincipalSpectrum.imageWidth !== principalSpectrum.imageWidth ||
+        prevPrincipalSpectrum.countMediasPoints !== principalSpectrum.countMediasPoints ||
+        prevPrincipalSpectrum.apertureCoefficient !== principalSpectrum.apertureCoefficient ||
+        prevPrincipalSpectrum.fitDegree !== principalSpectrum.fitDegree
     }
   }
 
   /**
-   * Espectros a recalcular, si cambio la configuracion entonces todos
-   * si solo cambiaron las dimensiones algun espectro no principal
+   * Espectros a recalcular: si cambió la configuración del principal, entonces todos.
+   * Si el principal sigue igual, solo los espectros individuales que hayan cambiado.
    */
   let recalculateArr: Spectrum[] = []
-  if (!principalSpectrum) throw new Error("The main spectrum is not specified")
-  if (changeMediasPoints || changeApertureCoefficient || changePrincipalSpectrum) {
+  
+  if (changePrincipalSpectrum) {
     recalculateArr = actual.spectrums
   } else {
     recalculateArr = actual.spectrums.filter((s) => {
       const prevData = prev.spectrums.find((st) => st.id === s.id)
+      
+      // Si es un espectro nuevo
       if (!prevData) return true
+      
+      // Si cambiaron las dimensiones, la configuración individual o el tipo
       if (
         s.imageHeight !== prevData.imageHeight ||
         s.imageLeft !== prevData.imageLeft ||
         s.imageTop !== prevData.imageTop ||
-        s.imageWidth !== prevData.imageWidth
-      )
+        s.imageWidth !== prevData.imageWidth ||
+        s.countMediasPoints !== prevData.countMediasPoints ||
+        s.apertureCoefficient !== prevData.apertureCoefficient ||
+        s.fitDegree !== prevData.fitDegree ||
+        s.type !== prevData.type
+      ) {
         return true
+      }
+      
       return false
     })
   }
 
   return {
-    recalculateArr: recalculateArr,
-    changeMediasPoints: changeMediasPoints,
-    changeApertureCoefficient: changeApertureCoefficient,
-    changePrincipalSpectrum: changePrincipalSpectrum,
+    recalculateArr,
+    changePrincipalSpectrum,
     idPrincipalSpectrum: principalSpectrum.id,
   }
 }

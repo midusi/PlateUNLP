@@ -2,8 +2,8 @@
  * @fileoverview Transform the raw theoretical data into a more usable format.
  */
 
-import fs from "node:fs/promises"
-import { parse } from "@std/csv/parse"
+import { parse } from "@std/csv/parse";
+import fs from "node:fs/promises";
 
 type SpectrumPoint = { wavelength: number; material: string; intensity: number }
 type Spectrum = { id: string; name: string; points: SpectrumPoint[] }
@@ -73,5 +73,3 @@ const json = {
   datasets,
 }
 await fs.writeFile(new URL("./spectrums.json", spectrums), JSON.stringify(json))
-
-console.log("Generado el archivo spectrums.json")

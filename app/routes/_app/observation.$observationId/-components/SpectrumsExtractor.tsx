@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import type z from "zod"
 import { ImageWithPixelExtraction } from "~/components/ImageWithPixelExtraction"
 import { SimpleFunctionXY } from "~/components/SimpleFunctionXY"
 import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card"
+import { Card, CardContent, CardFooter } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import type { ExtractSpectrumResponse } from "~/lib/extract-features"
 import { fetchGrayscaleImage } from "~/lib/image"
@@ -13,7 +13,7 @@ import { notifyError } from "~/lib/notifications"
 import { ExtractionConfigurationSchema } from "~/types/spectrum-metadata"
 import { getObservationExtractionConfiguration } from "../-actions/get-observation-extraction-configuration"
 import type { getSpectrums } from "../-actions/get-spectrums"
-import { updateObservationExtractionConfiguration } from "../-actions/update-observation-extraction-configuration"
+import { updateSpectrum } from "../-actions/update-spectrum"
 import { updateSpectrumsIntensityArr } from "../-actions/update-spectrums-intensity-arr"
 import { updateSpectrumsTypes } from "../-actions/update-spectrums-types"
 import { recalculateSpectrums1D } from "../-utils/recalculate-spectrums-1d"
@@ -26,8 +26,10 @@ interface Spectrum {
   imageHeight: number
   imageLeft: number
   imageTop: number
+  countMediasPoints: number
+  apertureCoefficient: number
+  fitDegree: number
 }
-
 type SpectrumsExtractorProps = {
   /** Id de la observacion */
   observationId: string
@@ -46,13 +48,20 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
     },
   })
 
-  const orderedSpectrums = spectrums.sort(
-    (a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft,
-  )
+  const orderedSpectrums = useMemo(() => {
+    return spectrums.map(s => ({
+      ...s,
+      countMediasPoints: s.countMediasPoints ?? 5,
+      apertureCoefficient: s.apertureCoefficient ?? 0.95,
+      fitDegree: s.fitDegree ?? 1,
+    })).sort(
+      (a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft,
+    )
+  }, [spectrums])
   /** Valores iniciales para el formulario de extraccion */
   const defaultValues: z.output<typeof ExtractionConfigurationSchema> = {
-    countMediasPoints: 5,
-    apertureCoefficient: 0.95,
+    // countMediasPoints: 5,
+    // apertureCoefficient: 0.95,
     spectrums: orderedSpectrums,
   }
 
@@ -65,13 +74,9 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
 
   /** Registro temporal de valores previos */
   const prevFormValues = useRef<{
-    countMediasPoints: number
-    apertureCoefficient: number
     spectrums: Spectrum[]
     idPrincipalSpectrum: string
   }>({
-    countMediasPoints: 0,
-    apertureCoefficient: 0,
     spectrums: [],
     idPrincipalSpectrum: orderedSpectrums.find((s) => s.type === "science")?.id ?? "",
   })
@@ -80,7 +85,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
     /** Se usa la configuracion del 1er espectro */
     defaultValues: defaultValues,
     validators: {
-      onMount: ExtractionConfigurationSchema,
+      // onMount: ExtractionConfigurationSchema,
       onChange: ExtractionConfigurationSchema,
     },
     onSubmit: async ({ value }) => {
@@ -90,12 +95,10 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
         /** Averiguar que espectros del listado deben ser recalculados */
         const {
           recalculateArr,
-          changeMediasPoints,
-          changeApertureCoefficient,
           changePrincipalSpectrum,
           idPrincipalSpectrum,
         } = toRecalculate(value, prevFormValues.current)
-
+        
         /** Realizar analisis */
         let newAnalysis: {
           id: string
@@ -107,8 +110,10 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
             recalculateArr,
             prevFormValues.current.spectrums,
             idPrincipalSpectrum,
-            value.countMediasPoints,
-            value.apertureCoefficient,
+            // 8, // value.countMediasPoints,
+            // 1.0,
+            // value.countMediasPoints,
+            // value.apertureCoefficient,
             analysisArr,
           )
           /** Actualizar informacion de analisis guardada en estado */
@@ -125,54 +130,80 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
           setAnalysisArr(newAnalysisArr)
         }
 
-        if (changeMediasPoints || changeApertureCoefficient) {
-          /** Actualizar parametros de extraccion de la observacion */
-          await updateObservationExtractionConfiguration({
-            data: {
-              observationId: observationId,
-              countMediasPoints: changeMediasPoints ? value.countMediasPoints : undefined,
-              apertureCoefficient: changeApertureCoefficient
-                ? value.apertureCoefficient
-                : undefined,
-            },
-          })
-        }
+        // if (changeMediasPoints || changeApertureCoefficient) {
+        //   /** Actualizar parametros de extraccion de la observacion */
+        //   await updateObservationExtractionConfiguration({
+        //     data: {
+        //       observationId: observationId,
+        //       countMediasPoints: changeMediasPoints ? value.countMediasPoints : undefined,
+        //       apertureCoefficient: changeApertureCoefficient
+        //         ? value.apertureCoefficient
+        //         : undefined,
+        //     },
+        //   })
+        // }
+        await Promise.all(
+          value.spectrums.map((spectrum) =>
+            updateSpectrum({
+              data: {
+                spectrumId: spectrum.id,
+                countMediasPoints: spectrum.countMediasPoints,
+                apertureCoefficient: spectrum.apertureCoefficient,
+                fitDegree: spectrum.fitDegree,
+                type: spectrum.type,
+              },
+            })
+          )
+        )
 
-        /** Si los parametros de extraccion de la observacion cambiaron los actualiza */
-        await updateObservationExtractionConfiguration({
-          data: {
-            observationId: observationId,
-            countMediasPoints: value.countMediasPoints,
-            apertureCoefficient: value.apertureCoefficient,
-          },
-        })
+        // /** Si los parametros de extraccion de la observacion cambiaron los actualiza */
+        // await updateObservationExtractionConfiguration({
+        //   data: {
+        //     observationId: observationId,
+        //     countMediasPoints: value.countMediasPoints,
+        //     apertureCoefficient: value.apertureCoefficient,
+        //   },
+        // })
+
+        // await updateSpectrum({
+        //   data: {
+        //     spectrumId: idPrincipalSpectrum,
+        //     countMediasPoints: value.countMediasPoints,
+        //     apertureCoefficient: value.apertureCoefficient,
+        //   },
+        // })
 
         /** Si los tipos de los espectros cambiaron los actualiza */
         if (changePrincipalSpectrum) {
-          let typesWhoChanged: Spectrum[]
-          if (prevFormValues.current.spectrums.length <= 0) typesWhoChanged = value.spectrums
-          else
+          let typesWhoChanged = [];
+          if (prevFormValues.current.spectrums.length <= 0) {
+            typesWhoChanged = value.spectrums;
+          } else {
             typesWhoChanged = value.spectrums.filter(
               (s, idx) => s.type !== prevFormValues.current.spectrums[idx].type,
-            )
-          await updateSpectrumsTypes({ data: typesWhoChanged })
-          await router.invalidate()
+            );
+          }
+          
+          if (typesWhoChanged.length > 0) {
+            await updateSpectrumsTypes({ data: typesWhoChanged });
+            await router.invalidate(); // Solo recarga si realmente se invirtieron los roles
+          }
         }
+        
         /** Si cambio el arreglo de intensidades de un espectro se actualiza */
-        if (newAnalysis.length > 0)
+        if (newAnalysis.length > 0) {
           await updateSpectrumsIntensityArr({
             data: newAnalysis.map((a) => ({
               id: a.id,
               intensityArr: a.analysis.transversalAvgs,
             })),
           })
+        }
 
         /** Actualizar registros para detectar futuros cambios */
-        if (changeMediasPoints) prevFormValues.current.countMediasPoints = value.countMediasPoints
-        if (changeApertureCoefficient)
-          prevFormValues.current.apertureCoefficient = value.apertureCoefficient
-        if (changePrincipalSpectrum)
+        if (changePrincipalSpectrum) {
           prevFormValues.current.idPrincipalSpectrum = idPrincipalSpectrum
+        }
         prevFormValues.current.spectrums = value.spectrums
 
         /** Avisar fin del procesado */
@@ -194,8 +225,8 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
           if (!result) {
             notifyError("The required observation does not exist", "")
           }
-          formApi.setFieldValue("countMediasPoints", result.countMediasPoints)
-          formApi.setFieldValue("apertureCoefficient", result.apertureCoefficient)
+          // formApi.setFieldValue("countMediasPoints", result.countMediasPoints)
+          // formApi.setFieldValue("apertureCoefficient", result.apertureCoefficient)
           formApi.handleSubmit()
         } catch (error) {
           notifyError(
@@ -218,40 +249,20 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
     },
   })
 
+  // useEffect(() => {
+  //   form.setFieldValue("spectrums", orderedSpectrums)
+  //   form.handleSubmit()
+  // }, [orderedSpectrums, form.setFieldValue, form.handleSubmit])
+
   useEffect(() => {
     form.setFieldValue("spectrums", orderedSpectrums)
-    form.handleSubmit()
-  }, [orderedSpectrums, form.setFieldValue, form.handleSubmit])
+    if (observationTensor) {
+      form.handleSubmit()
+    }
+  }, [orderedSpectrums, observationTensor, form.setFieldValue, form.handleSubmit])
 
   return (
     <Card>
-      <CardHeader>
-        <div id="spectrum-extraction-controls" className="flex gap-10">
-          <form.AppField name="countMediasPoints">
-            {(field) => (
-              <field.RangeField
-                label="Count checkpoints"
-                //disabled={state !== "ready"}
-                min={2}
-                max={20}
-                step={1}
-              />
-            )}
-          </form.AppField>
-          <form.AppField name="apertureCoefficient">
-            {(field) => (
-              <field.RangeField
-                label="Aperture Percentage"
-                //disabled={state !== "ready"}
-                min={0.5}
-                max={1.5}
-                step={0.1}
-              />
-            )}
-          </form.AppField>
-        </div>
-        <hr />
-      </CardHeader>
       <CardContent className="flex items-center justify-center" style={{ minHeight: "400px" }}>
         {state === "running" ? (
           <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
@@ -277,6 +288,42 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                             return (
                               <div>
                                 <div className="flex w-full flex-row items-center justify-center gap-2">
+
+                                  {/* Esto ya no sería necesario segun el issue 312 */}
+                                  {/* <form.AppField name={`spectrums[${idx}].countMediasPoints` as any}>
+                                    {(field) => (
+                                      <field.RangeField
+                                        label="Count checkpoints"
+                                        //disabled={state !== "ready"}
+                                        min={2}
+                                        max={20}
+                                        step={1}
+                                      />
+                                    )}
+                                  </form.AppField> */}
+
+                                  <form.AppField name={`spectrums[${idx}].fitDegree` as any}>
+                                    {(field) => (
+                                      <field.RangeField
+                                        label="Polynomial Degree"
+                                        min={1}
+                                        max={5} // Un grado 5 suele ser el límite práctico para evitar el fenómeno de Runge
+                                        step={1}
+                                      />
+                                    )}
+                                  </form.AppField>
+
+                                  <form.AppField name={`spectrums[${idx}].apertureCoefficient` as any}>
+                                    {(field) => (
+                                      <field.RangeField
+                                        label="Aperture Percentage"
+                                        //disabled={state !== "ready"}
+                                        min={0.5}
+                                        max={1.5}
+                                        step={0.1}
+                                      />
+                                    )}
+                                  </form.AppField>
                                   <h3 className="flex flex-row items-center justify-center gap-2 font-semibold text-lg text-slate-500">
                                     Spectrum {idx} [
                                     <select

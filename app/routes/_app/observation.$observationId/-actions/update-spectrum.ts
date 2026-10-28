@@ -8,10 +8,13 @@ export const updateSpectrum = createServerFn()
   .validator(
     z.object({
       spectrumId: z.string(),
-      imageTop: z.number().int().min(0),
-      imageLeft: z.number().int().min(0),
-      imageWidth: z.number().int().min(1),
-      imageHeight: z.number().int().min(1),
+      imageTop: z.number().int().min(0).optional(),
+      imageLeft: z.number().int().min(0).optional(),
+      imageWidth: z.number().int().min(1).optional(),
+      imageHeight: z.number().int().min(1).optional(),
+      countMediasPoints: z.number().int().min(1).optional(),
+      apertureCoefficient: z.number().min(0).max(1.5).optional(),
+      fitDegree: z.number().int().min(1).max(5),
       type: z.enum(["lamp", "science"]).optional(),
     }),
   )
@@ -37,6 +40,9 @@ export const updateSpectrum = createServerFn()
         imageLeft: data.imageLeft,
         imageWidth: data.imageWidth,
         imageHeight: data.imageHeight,
+        apertureCoefficient: data.apertureCoefficient,
+        countMediasPoints: data.countMediasPoints,
+        fitDegree: data.fitDegree,
         ...(data.type !== undefined && { type: data.type }),
       })
       .where(eq(s.spectrum.id, data.spectrumId))
