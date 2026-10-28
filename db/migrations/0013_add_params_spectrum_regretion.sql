@@ -1,0 +1,1 @@
+ALTER TABLE `spectrum` ADD `fit_degree` integer DEFAULT 1 NOT NULL;

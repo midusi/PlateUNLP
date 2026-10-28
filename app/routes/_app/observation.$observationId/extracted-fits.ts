@@ -69,8 +69,6 @@ export const Route = createFileRoute("/_app/observation/$observationId/extracted
           const width = spectrum.imageWidth ?? 0
           const height = spectrum.imageHeight ?? 0
 
-          console.log(`Extracting spectrum ${spectrum.id} at ${left},${top} size ${width}x${height}`)
-
           if (width > 0 && height > 0) {
             // clonar la instancia sharp y extraer la región
             // preview kept in memory for extraction, no debug file written
