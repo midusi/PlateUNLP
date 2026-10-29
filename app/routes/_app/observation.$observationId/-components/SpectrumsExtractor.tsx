@@ -107,7 +107,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
             recalculateArr,
             prevFormValues.current.spectrums,
             idPrincipalSpectrum,
-            value.countMediasPoints,
             value.apertureCoefficient,
             analysisArr,
           )
@@ -227,17 +226,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
     <Card>
       <CardHeader>
         <div id="spectrum-extraction-controls" className="flex gap-10">
-          <form.AppField name="countMediasPoints">
-            {(field) => (
-              <field.RangeField
-                label="Count checkpoints"
-                //disabled={state !== "ready"}
-                min={2}
-                max={20}
-                step={1}
-              />
-            )}
-          </form.AppField>
           <form.AppField name="apertureCoefficient">
             {(field) => (
               <field.RangeField

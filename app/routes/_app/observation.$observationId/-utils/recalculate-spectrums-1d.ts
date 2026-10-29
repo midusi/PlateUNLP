@@ -8,8 +8,6 @@ import {
 import { cropSpectrum } from "./crop-spectrum-from-observation"
 import { maskingObservation } from "./mask-observation"
 
-/** Ancho de los segmentos verticales que se analizan en cada checkpoint. */
-const SEGMENT_WIDTH = 100
 const FIT_FUNCTION: FitFunction = "linal-regression"
 
 interface Spectrum {
@@ -21,7 +19,6 @@ interface Spectrum {
 }
 
 interface ExtractionSettings {
-  countCheckpoints: number
   percentAperture: number
 }
 
@@ -47,9 +44,7 @@ function extractAndMask(
     spectrum: spectrumTensor,
     width,
     height,
-    segmentWidth: SEGMENT_WIDTH,
     fitFunction: FIT_FUNCTION,
-    countCheckpoints: settings.countCheckpoints,
     percentAperture: settings.percentAperture,
     baseTrace,
   })
@@ -74,8 +69,6 @@ export function recalculateSpectrums1D(
   prevSpectrums: Spectrum[],
   /** Identificador del espectro principal */
   idPrincipalSpectrum: string,
-  /** Cantidad puntos intermedios */
-  countCheckpoints: number,
   /** Porcentaje de apertura */
   percentAperture: number,
   /** Analisis conocidos */
@@ -83,7 +76,7 @@ export function recalculateSpectrums1D(
 ): Analysis[] {
   if (spectrums.length === 0) return []
 
-  const settings: ExtractionSettings = { countCheckpoints, percentAperture }
+  const settings: ExtractionSettings = { percentAperture }
 
   /** Imagen de observacion a Tensor4D Grey [1, H, W, 1] */
   let obsTensor = tf.tidy(() => observationTensor.expandDims(0).expandDims(-1)) as tf.Tensor4D
