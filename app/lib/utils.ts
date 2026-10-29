@@ -49,7 +49,6 @@ export function idxToColor(idx: number): string {
     "indigo",
     "violet",
   ]
-  console.log("in", idx, "out", colors[idx % colors.length])
   return colors[idx % colors.length]
 }
 

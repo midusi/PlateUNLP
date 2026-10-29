@@ -145,8 +145,8 @@ export function getObservationMetadataCompletion(
  * This schema defines the metadata for a extraction configuration of spectrums of a observation.
  */
 export const ExtractionConfigurationSchema = z.object({
-  countMediasPoints: z.number().int().min(1, "Must be at least 1."),
-  apertureCoefficient: z.number().min(0.001, "Must be positive"),
+  // countMediasPoints: z.number().int().min(1, "Must be at least 1."),
+  // apertureCoefficient: z.number().min(0.001, "Must be positive"),
   spectrums: z.array(
     z.object({
       id: z.string(),
@@ -155,6 +155,9 @@ export const ExtractionConfigurationSchema = z.object({
       imageHeight: z.number(),
       imageLeft: z.number(),
       imageTop: z.number(),
-    }),
+      countMediasPoints: z.number().min(2).max(20),
+      apertureCoefficient: z.number().min(0.5).max(1.5), 
+      fitDegree: z.number().int().min(1).max(5)
+    })
   ),
 })

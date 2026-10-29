@@ -1,14 +1,11 @@
 import * as tf from "@tensorflow/tfjs"
 import {
-  type ExtractSpectrumResponse,
   extractSpectrum,
-  type FitFunction,
+  type ExtractSpectrumResponse,
   type TraceFunctions,
 } from "~/lib/extract-features"
 import { cropSpectrum } from "./crop-spectrum-from-observation"
 import { maskingObservation } from "./mask-observation"
-
-const FIT_FUNCTION: FitFunction = "linal-regression"
 
 interface Spectrum {
   id: string
@@ -16,10 +13,14 @@ interface Spectrum {
   imageLeft: number
   imageWidth: number
   imageHeight: number
+  countMediasPoints: number
+  apertureCoefficient: number
+  fitDegree: number
 }
 
 interface ExtractionSettings {
   percentAperture: number
+  fitDegree: number
 }
 
 type Analysis = { id: string; analysis: ExtractSpectrumResponse }
@@ -44,7 +45,7 @@ function extractAndMask(
     spectrum: spectrumTensor,
     width,
     height,
-    fitFunction: FIT_FUNCTION,
+    fitFunction: settings.fitDegree === 1 ? "linal-regression" : "spline",
     percentAperture: settings.percentAperture,
     baseTrace,
   })
@@ -69,14 +70,10 @@ export function recalculateSpectrums1D(
   prevSpectrums: Spectrum[],
   /** Identificador del espectro principal */
   idPrincipalSpectrum: string,
-  /** Porcentaje de apertura */
-  percentAperture: number,
   /** Analisis conocidos */
   prevAnalysis: Analysis[],
 ): Analysis[] {
   if (spectrums.length === 0) return []
-
-  const settings: ExtractionSettings = { percentAperture }
 
   /** Imagen de observacion a Tensor4D Grey [1, H, W, 1] */
   let obsTensor = tf.tidy(() => observationTensor.expandDims(0).expandDims(-1)) as tf.Tensor4D
@@ -101,6 +98,10 @@ export function recalculateSpectrums1D(
   const specsLamps = spectrums.filter((s) => s.id !== idPrincipalSpectrum)
 
   if (specPrincipal) {
+    const settings: ExtractionSettings = {
+      percentAperture: specPrincipal.apertureCoefficient,
+      fitDegree: specPrincipal.fitDegree,
+    }
     const result = extractAndMask(obsTensor, zeros, specPrincipal, settings)
     obsTensor = result.obsTensor
     principalTrace = {
@@ -119,6 +120,10 @@ export function recalculateSpectrums1D(
   }
 
   for (const spectrum of specsLamps) {
+    const settings: ExtractionSettings = {
+      percentAperture: spectrum.apertureCoefficient,
+      fitDegree: spectrum.fitDegree,
+    }
     const result = extractAndMask(obsTensor, zeros, spectrum, settings, principalTrace)
     obsTensor = result.obsTensor
     analysisArr.push({ id: spectrum.id, analysis: result.analysis })
