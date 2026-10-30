@@ -2,6 +2,7 @@ import type * as tf from "@tensorflow/tfjs"
 import { type ClassValue, clsx } from "clsx"
 import { inv, lusolve, matrix, multiply, transpose } from "mathjs"
 import { twMerge } from "tailwind-merge"
+import { median, robustSigma } from "~/lib/array-stats"
 import type { BoundingBox } from "~/types/BoundingBox"
 
 export function cn(...inputs: ClassValue[]) {
@@ -267,6 +268,104 @@ export function linearRegressionWhitDerived(
       return m
     },
   }
+}
+
+/**
+ * Peso de corte duro: 1 mientras el desvio (en unidades de sigma robusta) no
+ * pase de `k`, 0 despues.
+ */
+export function hardCutWeight(k = 3): (deviation: number) => number {
+  return (deviation) => (deviation <= k ? 1 : 0)
+}
+
+/**
+ * Ajuste polinomico por minimos cuadrados reponderados, que ignora los puntos
+ * que se alejan de la tendencia. En cada ronda calcula el desvio de cada punto,
+ * lo expresa en sigmas robustas (MAD) y le asigna un peso con `weight`.
+ * @param {number[]} x - Valores en el eje X. Largo minimo `degree + 1`
+ * @param {number[]} y - Valores en el eje Y
+ * @param options.degree - Grado del polinomio (1 = recta).
+ * @param options.weight - Peso en [0, 1] segun el desvio en sigmas robustas.
+ * @param options.maxIter - Rondas maximas de reponderado.
+ * @returns La funcion ajustada, su derivada y que puntos se consideraron validos
+ * (inliers: peso mayor a 0.5 en la ultima ronda).
+ */
+export function robustPolyFit(
+  x: number[],
+  y: number[],
+  {
+    degree = 1,
+    weight = hardCutWeight(),
+    maxIter = 10,
+  }: { degree?: number; weight?: (deviation: number) => number; maxIter?: number } = {},
+): TraceFit {
+  if (x.length !== y.length) {
+    throw new CustomError(
+      ErrorCodes.DIFFERENT_PROMP_SIZE,
+      "Los arreglos de números recibidos deben tener el mismo tamaño.",
+    )
+  }
+  if (x.length < degree + 1) {
+    throw new CustomError(
+      ErrorCodes.INSUFFICIENT_MATCHES,
+      `Insufficient matches, at least ${degree + 1} are required for a degree ${degree} fit.`,
+    )
+  }
+
+  /** x se centra y escala para que la matriz normal quede bien condicionada. */
+  const center = (x[0] + x[x.length - 1]) / 2
+  const scale = Math.abs(x[x.length - 1] - x[0]) / 2 || 1
+  const t = x.map((v) => (v - center) / scale)
+
+  const solve = (w: number[]): number[] => {
+    const size = degree + 1
+    const normal = Array.from({ length: size }, (_, i) =>
+      Array.from({ length: size }, (_, j) =>
+        t.reduce((acc, ti, k) => acc + w[k] * ti ** (i + j), 0),
+      ),
+    )
+    const rhs = Array.from({ length: size }, (_, i) =>
+      t.reduce((acc, ti, k) => acc + w[k] * y[k] * ti ** i, 0),
+    )
+    return (lusolve(normal, rhs) as unknown as number[][]).map((row) => row[0])
+  }
+  const evaluate = (coefs: number[], ti: number) =>
+    coefs.reduce((acc, c, i) => acc + c * ti ** i, 0)
+
+  let weights = new Array<number>(x.length).fill(1)
+  let coefs = solve(weights)
+  for (let iter = 0; iter < maxIter; iter++) {
+    const residuals = t.map((ti, k) => y[k] - evaluate(coefs, ti))
+    const med = median(residuals)
+    const sigma = robustSigma(residuals)
+    if (sigma < 1e-9) break
+    const next = residuals.map((r) => weight(Math.abs(r - med) / sigma))
+    /** Si quedan menos puntos que parametros el ajuste no esta definido. */
+    if (next.filter((w) => w > 0.5).length < degree + 1) break
+    const changed = next.some((w, k) => Math.abs(w - weights[k]) > 1e-6)
+    weights = next
+    coefs = solve(weights)
+    if (!changed) break
+  }
+
+  return {
+    funct: (value) => evaluate(coefs, (value - center) / scale),
+    derived: (value) =>
+      coefs.reduce(
+        (acc, c, i) =>
+          i === 0 ? acc : acc + (i * c * ((value - center) / scale) ** (i - 1)) / scale,
+        0,
+      ),
+    inliers: weights.map((w) => w > 0.5),
+  }
+}
+
+/** Resultado de `robustPolyFit`. */
+export interface TraceFit {
+  funct: (value: number) => number
+  derived: (value: number) => number
+  /** Un valor por punto: true si el punto sigue la tendencia ajustada. */
+  inliers: boolean[]
 }
 
 /**

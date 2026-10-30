@@ -110,10 +110,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
             recalculateArr,
             prevFormValues.current.spectrums,
             idPrincipalSpectrum,
-            // 8, // value.countMediasPoints,
-            // 1.0,
-            // value.countMediasPoints,
-            // value.apertureCoefficient,
             analysisArr,
           )
           /** Actualizar informacion de analisis guardada en estado */
