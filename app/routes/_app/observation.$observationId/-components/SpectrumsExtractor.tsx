@@ -2,10 +2,6 @@ import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 import type z from "zod"
-import { ImageWithPixelExtraction } from "~/components/ImageWithPixelExtraction"
-import { SimpleFunctionXY } from "~/components/SimpleFunctionXY"
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardFooter } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import type { ExtractSpectrumResponse } from "~/lib/extract-features"
 import { fetchGrayscaleImage } from "~/lib/image"
@@ -18,6 +14,8 @@ import { updateSpectrumsIntensityArr } from "../-actions/update-spectrums-intens
 import { updateSpectrumsTypes } from "../-actions/update-spectrums-types"
 import { recalculateSpectrums1D } from "../-utils/recalculate-spectrums-1d"
 import { toRecalculate } from "../-utils/to-recalculate"
+import { SpectrumCard } from "./SpectrumCard"
+import { SpectrumCardSkeleton } from "./SpectrumCardSkeleton"
 
 interface Spectrum {
   id: string
@@ -49,19 +47,17 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
   })
 
   const orderedSpectrums = useMemo(() => {
-    return spectrums.map(s => ({
-      ...s,
-      countMediasPoints: s.countMediasPoints ?? 5,
-      apertureCoefficient: s.apertureCoefficient ?? 0.95,
-      fitDegree: s.fitDegree ?? 1,
-    })).sort(
-      (a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft,
-    )
+    return spectrums
+      .map((s) => ({
+        ...s,
+        countMediasPoints: s.countMediasPoints ?? 5,
+        apertureCoefficient: s.apertureCoefficient ?? 0.95,
+        fitDegree: s.fitDegree ?? 1,
+      }))
+      .sort((a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft)
   }, [spectrums])
   /** Valores iniciales para el formulario de extraccion */
   const defaultValues: z.output<typeof ExtractionConfigurationSchema> = {
-    // countMediasPoints: 5,
-    // apertureCoefficient: 0.95,
     spectrums: orderedSpectrums,
   }
 
@@ -82,10 +78,8 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
   })
 
   const form = useAppForm({
-    /** Se usa la configuracion del 1er espectro */
     defaultValues: defaultValues,
     validators: {
-      // onMount: ExtractionConfigurationSchema,
       onChange: ExtractionConfigurationSchema,
     },
     onSubmit: async ({ value }) => {
@@ -93,12 +87,11 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
       try {
         setState("running")
         /** Averiguar que espectros del listado deben ser recalculados */
-        const {
-          recalculateArr,
-          changePrincipalSpectrum,
-          idPrincipalSpectrum,
-        } = toRecalculate(value, prevFormValues.current)
-        
+        const { recalculateArr, changePrincipalSpectrum, idPrincipalSpectrum } = toRecalculate(
+          value,
+          prevFormValues.current,
+        )
+
         /** Realizar analisis */
         let newAnalysis: {
           id: string
@@ -126,18 +119,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
           setAnalysisArr(newAnalysisArr)
         }
 
-        // if (changeMediasPoints || changeApertureCoefficient) {
-        //   /** Actualizar parametros de extraccion de la observacion */
-        //   await updateObservationExtractionConfiguration({
-        //     data: {
-        //       observationId: observationId,
-        //       countMediasPoints: changeMediasPoints ? value.countMediasPoints : undefined,
-        //       apertureCoefficient: changeApertureCoefficient
-        //         ? value.apertureCoefficient
-        //         : undefined,
-        //     },
-        //   })
-        // }
         await Promise.all(
           value.spectrums.map((spectrum) =>
             updateSpectrum({
@@ -148,44 +129,27 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                 fitDegree: spectrum.fitDegree,
                 type: spectrum.type,
               },
-            })
-          )
+            }),
+          ),
         )
-
-        // /** Si los parametros de extraccion de la observacion cambiaron los actualiza */
-        // await updateObservationExtractionConfiguration({
-        //   data: {
-        //     observationId: observationId,
-        //     countMediasPoints: value.countMediasPoints,
-        //     apertureCoefficient: value.apertureCoefficient,
-        //   },
-        // })
-
-        // await updateSpectrum({
-        //   data: {
-        //     spectrumId: idPrincipalSpectrum,
-        //     countMediasPoints: value.countMediasPoints,
-        //     apertureCoefficient: value.apertureCoefficient,
-        //   },
-        // })
 
         /** Si los tipos de los espectros cambiaron los actualiza */
         if (changePrincipalSpectrum) {
-          let typesWhoChanged = [];
+          let typesWhoChanged = []
           if (prevFormValues.current.spectrums.length <= 0) {
-            typesWhoChanged = value.spectrums;
+            typesWhoChanged = value.spectrums
           } else {
             typesWhoChanged = value.spectrums.filter(
               (s, idx) => s.type !== prevFormValues.current.spectrums[idx].type,
-            );
+            )
           }
-          
+
           if (typesWhoChanged.length > 0) {
-            await updateSpectrumsTypes({ data: typesWhoChanged });
-            await router.invalidate(); // Solo recarga si realmente se invirtieron los roles
+            await updateSpectrumsTypes({ data: typesWhoChanged })
+            await router.invalidate() // Solo recarga si realmente se invirtieron los roles
           }
         }
-        
+
         /** Si cambio el arreglo de intensidades de un espectro se actualiza */
         if (newAnalysis.length > 0) {
           await updateSpectrumsIntensityArr({
@@ -204,8 +168,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
 
         /** Avisar fin del procesado */
         setState("ready")
-        //router.invalidate();
-        // formApi.reset(value);
       } catch (error) {
         if (error instanceof Error && error.message !== "The main spectrum is not specified") {
           notifyError("Failed to update spectrum extraction configuration", error)
@@ -221,8 +183,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
           if (!result) {
             notifyError("The required observation does not exist", "")
           }
-          // formApi.setFieldValue("countMediasPoints", result.countMediasPoints)
-          // formApi.setFieldValue("apertureCoefficient", result.apertureCoefficient)
           formApi.handleSubmit()
         } catch (error) {
           notifyError(
@@ -245,11 +205,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
     },
   })
 
-  // useEffect(() => {
-  //   form.setFieldValue("spectrums", orderedSpectrums)
-  //   form.handleSubmit()
-  // }, [orderedSpectrums, form.setFieldValue, form.handleSubmit])
-
   useEffect(() => {
     form.setFieldValue("spectrums", orderedSpectrums)
     if (observationTensor) {
@@ -258,171 +213,70 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
   }, [orderedSpectrums, observationTensor, form.setFieldValue, form.handleSubmit])
 
   return (
-    <Card>
-      <CardContent className="flex items-center justify-center" style={{ minHeight: "400px" }}>
-        {state === "running" ? (
-          <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
-        ) : (
-          <form.Field name="spectrums" mode="array">
-            {(spectrumsField) => {
-              const spectrumsArr = spectrumsField.state.value
-              const scienceCount = spectrumsArr.filter((s) => s.type === "science").length
+    <div className="flex flex-col gap-4">
+      <form.Field name="spectrums" mode="array">
+        {(spectrumsField) => {
+          const spectrumsArr = spectrumsField.state.value
+          const scienceCount = spectrumsArr.filter((s) => s.type === "science").length
+          if (!spectrumsArr.length) {
+            return <p className="text-muted-foreground text-sm">Waiting definition of spectrums</p>
+          }
+          return spectrumsArr.map((item, idx) => {
+            const spec = spectrums.find((s) => s.id === item.id)
+            if (!spec) {
               return (
-                <div className="flex flex-col gap-4">
-                  {!spectrumsArr.length
-                    ? "Waiting definition of spectrums"
-                    : spectrumsArr.map((item, idx) => (
-                        <form.Field key={item.id} name={`spectrums[${idx}]`}>
-                          {(field) => {
-                            const st = field.state.value
-                            const spec = spectrums.find((s) => s.id === st.id)
-                            if (!spec) {
-                              return "Spectrum image not found"
-                            }
-                            const analysis = analysisArr.find((a) => a.id === st.id)?.analysis
-                            if (!analysis) return "Spectrum analysis data not found"
-                            return (
-                              <div>
-                                <div className="flex w-full flex-row items-center justify-center gap-2">
-
-                                  {/* Esto ya no sería necesario segun el issue 312 */}
-                                  {/* <form.AppField name={`spectrums[${idx}].countMediasPoints` as any}>
-                                    {(field) => (
-                                      <field.RangeField
-                                        label="Count checkpoints"
-                                        //disabled={state !== "ready"}
-                                        min={2}
-                                        max={20}
-                                        step={1}
-                                      />
-                                    )}
-                                  </form.AppField> */}
-
-                                  <form.AppField name={`spectrums[${idx}].fitDegree` as any}>
-                                    {(field) => (
-                                      <field.RangeField
-                                        label="Polynomial Degree"
-                                        min={1}
-                                        max={5} // Un grado 5 suele ser el límite práctico para evitar el fenómeno de Runge
-                                        step={1}
-                                      />
-                                    )}
-                                  </form.AppField>
-
-                                  <form.AppField name={`spectrums[${idx}].apertureCoefficient` as any}>
-                                    {(field) => (
-                                      <field.RangeField
-                                        label="Aperture Percentage"
-                                        //disabled={state !== "ready"}
-                                        min={0.5}
-                                        max={1.5}
-                                        step={0.1}
-                                      />
-                                    )}
-                                  </form.AppField>
-                                  <h3 className="flex flex-row items-center justify-center gap-2 font-semibold text-lg text-slate-500">
-                                    Spectrum {idx} [
-                                    <select
-                                      value={st.type}
-                                      className="rounded-lg bg-gray-100"
-                                      style={{
-                                        textAlign: "center",
-                                        textAlignLast: "center",
-                                      }}
-                                      onChange={(e) => {
-                                        const selectedValue = e.target.value as "lamp" | "science"
-                                        if (st.type === selectedValue) return
-
-                                        if (selectedValue === "lamp") {
-                                          field.handleChange({
-                                            ...st,
-                                            id: st.id,
-                                            type: "lamp",
-                                          })
-                                        } else {
-                                          const delOtherScience = [...spectrumsArr].map((sty) => ({
-                                            ...sty,
-                                            id: sty.id,
-                                            type:
-                                              sty.id === st.id
-                                                ? ("science" as const)
-                                                : ("lamp" as const),
-                                          }))
-
-                                          spectrumsField.handleChange(delOtherScience)
-                                        }
-                                      }}
-                                      onBlur={field.handleBlur}
-                                    >
-                                      <option value={"science"}>Science</option>
-                                      <option
-                                        value={"lamp"}
-                                        disabled={scienceCount >= 1 && st.type === "science"}
-                                        className="disabled:cursor-not-allowed disabled:text-gray-400"
-                                      >
-                                        Comparison Lamp
-                                      </option>
-                                    </select>
-                                    ]
-                                  </h3>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => {
-                                      window.location.href = `/spectrum/${spec.id}/fits`
-                                    }}
-                                  >
-                                    <span className="icon-[ph--file-arrow-down]" />
-                                  </Button>
-                                </div>
-                                <ImageWithPixelExtraction
-                                  image={{
-                                    url: `/api/observation/${observationId}/preview`,
-                                    width: spec.imageWidth,
-                                    height: spec.imageHeight,
-                                    top: spec.imageTop,
-                                    left: spec.imageLeft,
-                                  }}
-                                  pointsWMed={analysis.mediasPoints}
-                                  drawFunction={analysis.rectFunction}
-                                  opening={analysis.opening}
-                                />
-                                <SimpleFunctionXY data={analysis.transversalAvgs} />
-                              </div>
-                            )
-                          }}
-                        </form.Field>
-                      ))}
-                </div>
+                <p key={item.id} className="text-muted-foreground text-sm">
+                  Spectrum image not found
+                </p>
               )
-            }}
-          </form.Field>
+            }
+            const analysis = analysisArr.find((a) => a.id === item.id)?.analysis
+            /**
+             * Sin analisis, o con uno de otro ancho (el recorte cambio y todavia no se
+             * recalculo), se muestra el esqueleto. En cualquier otro recalculo la
+             * tarjeta sigue montada, asi se conserva el zoom que tenga.
+             */
+            if (!analysis || analysis.transversalAvgs.length !== Math.floor(spec.imageWidth)) {
+              return <SpectrumCardSkeleton key={item.id} />
+            }
+            return (
+              <SpectrumCard
+                key={item.id}
+                form={form}
+                index={idx}
+                observationId={observationId}
+                spectrum={spec}
+                analysis={analysis}
+                type={item.type}
+                scienceCount={scienceCount}
+                isCalculating={state === "running"}
+              />
+            )
+          })
+        }}
+      </form.Field>
+      <form.Subscribe selector={(formState) => [formState.isValid, formState.isSubmitting]}>
+        {([isValid, isSubmitting, isDirty]) => (
+          <p className="flex items-center justify-end text-muted-foreground text-xs italic">
+            {!isValid ? (
+              <>
+                <span>Changes aren't beign saved! Please fix the errors above</span>
+                <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
+              </>
+            ) : isSubmitting || isDirty ? (
+              <>
+                <span>Calculating spectral vectors...</span>
+                <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
+              </>
+            ) : (
+              <>
+                <span>Extraction configuration saved on database</span>
+                <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
+              </>
+            )}
+          </p>
         )}
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <form.Subscribe selector={(formState) => [formState.isValid, formState.isSubmitting]}>
-          {([isValid, isSubmitting, isDirty]) => (
-            <p className="flex items-center text-muted-foreground text-xs italic">
-              {!isValid ? (
-                <>
-                  <span>Changes aren't beign saved! Please fix the errors above</span>
-                  <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
-                </>
-              ) : isSubmitting || isDirty ? (
-                <>
-                  <span>Calculating spectral vectors...</span>
-                  <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
-                </>
-              ) : (
-                <>
-                  <span>Extraction configuration saved on database</span>
-                  <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
-                </>
-              )}
-            </p>
-          )}
-        </form.Subscribe>
-      </CardFooter>
-    </Card>
+      </form.Subscribe>
+    </div>
   )
 }

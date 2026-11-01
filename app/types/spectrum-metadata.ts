@@ -141,6 +141,10 @@ export function getObservationMetadataCompletion(
   }
 }
 
+/** Limites del grado de ajuste de la traza de un espectro. */
+export const FIT_DEGREE_MIN = 1
+export const FIT_DEGREE_MAX = 8
+
 /**
  * This schema defines the metadata for a extraction configuration of spectrums of a observation.
  */
@@ -157,7 +161,7 @@ export const ExtractionConfigurationSchema = z.object({
       imageTop: z.number(),
       countMediasPoints: z.number().min(2).max(20),
       apertureCoefficient: z.number().min(0.5).max(1.5), 
-      fitDegree: z.number().int().min(1).max(5)
+      fitDegree: z.number().int().min(FIT_DEGREE_MIN).max(FIT_DEGREE_MAX)
     })
   ),
 })
