@@ -348,6 +348,7 @@ function RouteComponent() {
                         lampPoints={fieldLP.state.value}
                         materialPoints={fieldMP.state.value}
                         unit={unit}
+                        onDeleteIndex={handleDeletePointAtIndex}
                       />
                     </div>
                   </div>
