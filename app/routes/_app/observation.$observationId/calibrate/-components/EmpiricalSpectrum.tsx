@@ -272,7 +272,7 @@ export function EmpiricalSpectrum({
                     >
                       {`#${idx}`}: 
                       {isPixelToWavelengthValid
-                        ? ` ${(pixelToWavelengthFunction as (v: number) => number)(lp.x).toFixed(0)} Å`
+                        ? ` ${(pixelToWavelengthFunction as (v: number) => number)(lp.x).toFixed(0)}Å`
                         : ""}
                     </text>
                   )
