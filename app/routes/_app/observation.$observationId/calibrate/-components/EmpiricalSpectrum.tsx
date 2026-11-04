@@ -30,7 +30,7 @@ interface EmpiricalSpectrumProps {
 }
 const height = 150
 /** Problema al agregar margenes a izquierda y derecha */
-const margin = { top: 0, right: 12, bottom: 40, left: 12 }
+const margin = { top: 20, right: 12, bottom: 40, left: 12 }
 
 export function EmpiricalSpectrum({
   data,
@@ -140,6 +140,17 @@ export function EmpiricalSpectrum({
 
   return (
     <div ref={measureRef} className="relative" style={{ height: `${height}px` }}>
+      <style>{`
+        #empirical-labels-container:hover .line-label {
+          opacity: 0.15;
+          fill: #999999;
+        }
+        #empirical-labels-container .line-label:hover {
+          opacity: 1 !important;
+          fill: #0ea5e9 !important;
+          font-weight: bold;
+        }
+      `}</style>
       <svg width={width} height={height} role="img" aria-label="Empirical Spectrum">
         <Group top={margin.top} left={margin.left}>
           <rect x={0} y={0} width={xMax} height={yMax} fill="#374151" rx={1} />
@@ -206,48 +217,69 @@ export function EmpiricalSpectrum({
             </g>
           )}
           {/* Referencias marcadas por el usuario */}
-          {showLines && lampPoints.map((lp, idx) => {
-            const xClick = wavelengthScale(lp.x)
-            // const yPix = (height - margin.bottom) - (height - margin.bottom - margin.top - yScale(point.y))
-
-            return (
-              <g key={`EmpiricalLine-${lp.x}-${idx}`}>
-                <Line
-                  x1={xClick}
-                  y1={0}
-                  x2={xClick}
-                  y2={yMax}
-                  stroke="#FFFFFF"
-                  strokeWidth={2}
-                  strokeDasharray="5,2"
-                />
-                <rect // Area cliqueable
-                  x={xClick - 2}
-                  y={0}
-                  width={4}
-                  height={yMax}
-                  fill="transparent"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleUserMarkDeleteLampIndex(idx)
-                  }}
-                  style={{
-                    cursor:
-                      "url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
-                  }}
-                />
-                <text
-                  x={xClick + 5}
-                  y={10}
-                  fill="#FFFFFF"
-                  fontSize="12"
-                  fontFamily="Arial, sans-serif"
-                >
-                  #{`${idx}`}
-                </text>
+          {showLines && (
+            <>
+              {/* Líneas verticales y áreas clicleables (fuera del contenedor de labels) */}
+              {lampPoints.map((lp, idx) => {
+                const xClick = wavelengthScale(lp.x)
+                return (
+                  <g key={`EmpiricalLine-${lp.x}-${idx}`}>
+                    <Line
+                      x1={xClick}
+                      y1={0}
+                      x2={xClick}
+                      y2={yMax}
+                      stroke="#FFFFFF"
+                      strokeWidth={2}
+                      strokeDasharray="5,2"
+                    />
+                    <rect // Area cliqueable
+                      x={xClick - 2}
+                      y={0}
+                      width={4}
+                      height={yMax}
+                      fill="transparent"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleUserMarkDeleteLampIndex(idx)
+                      }}
+                      style={{
+                        cursor:
+                          "url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
+                      }}
+                    />
+                  </g>
+                )
+              })}
+              {/* Etiquetas en contenedor separado para el efecto hover CSS */}
+              <g id="empirical-labels-container">
+                {lampPoints.map((lp, idx) => {
+                  const xClick = wavelengthScale(lp.x)
+                  return (
+                    <text
+                      key={`EmpiricalLabel-${lp.x}-${idx}`}
+                      x={xClick - 28}
+                      y={-6}
+                      fill="#000000"
+                      fontSize="11"
+                      fontFamily="Arial, sans-serif"
+                      className="line-label" 
+                      style={{
+                        cursor: "pointer",
+                        transition: "opacity 0.15s ease, fill 0.15s ease",
+                        userSelect: "text",
+                      }}
+                    >
+                      {`#${idx}`}: 
+                      {isPixelToWavelengthValid
+                        ? ` ${(pixelToWavelengthFunction as (v: number) => number)(lp.x).toFixed(0)} Å`
+                        : ""}
+                    </text>
+                  )
+                })}
               </g>
-            )
-          })}
+            </>
+          )}
 
           <AxisBottom
             scale={wavelengthScale}
