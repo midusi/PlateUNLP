@@ -1,8 +1,8 @@
 import { Toggle, ToggleGroup, Toolbar } from "@base-ui/react"
 import { Link } from "@tanstack/react-router"
-import { useMeasure } from "@uidotdev/usehooks"
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
+  type ReactZoomPanPinchRef,
   TransformComponent,
   TransformWrapper,
   useControls,
@@ -146,19 +146,22 @@ export function BoundingBoxer({
   onRotateRight,
   children,
 }: BoundingBoxerProps) {
-  // Size of the container and the image (natural size)
-  const [containerRef, containerSize] = useMeasure()
+  // Natural size of the image
   const [imageSize, setImageSize] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
   })
   const [imageError, setImageError] = useState<string | null>(null)
+  // Scale that fits the image inside the zoom viewport, known once the viewport is laid out
+  const [fitScale, setFitScale] = useState<number | null>(null)
+  const transformRef = useRef<ReactZoomPanPinchRef>(null)
 
   // Update the image when the source is changed
   useEffect(() => {
     let ignore = false
 
     setImageSize({ width: 0, height: 0 })
+    setFitScale(null)
     setImageError(null)
 
     loadImage(imageSrc)
@@ -176,18 +179,10 @@ export function BoundingBoxer({
     }
   }, [imageSrc])
 
-  // Calculate the scale of the image based on the container size
-  const imageScale = useMemo(() => {
-    if (
-      !containerSize.width ||
-      !containerSize.height ||
-      imageSize.width === 0 ||
-      imageSize.height === 0
-    ) {
-      return null
-    }
-    return Math.min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)
-  }, [containerSize.width, containerSize.height, imageSize.width, imageSize.height])
+  // Fit the image once TransformWrapper has applied the new minScale (child effects run first)
+  useEffect(() => {
+    if (fitScale !== null) transformRef.current?.centerView(fitScale, 0)
+  }, [fitScale])
 
   // Control user actions
   const [selectedTool, setSelectedTool] = useState<BoundingBoxerTools>("select")
@@ -217,16 +212,28 @@ export function BoundingBoxer({
   }, [brightness, contrast, isInverted, presetFilter])
 
   return (
-    <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0 bg-checkered">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
       {imageError ? (
         <p className="p-3 text-destructive text-sm">{imageError}</p>
-      ) : imageScale ? (
+      ) : imageSize.width > 0 ? (
         <TransformWrapper
-          initialScale={imageScale}
-          minScale={imageScale * 0.5}
+          key={imageSrc}
+          ref={transformRef}
+          minScale={fitScale ? fitScale * 0.5 : 0}
           centerOnInit
           centerZoomedOut
           wheel={{ activationKeys: ["Control"] }}
+          onInit={(ref) => {
+            // Measure the zoom viewport itself, not the container that also holds the toolbars
+            const viewport = ref.instance.wrapperComponent
+            if (!viewport) return
+            setFitScale(
+              Math.min(
+                viewport.offsetWidth / imageSize.width,
+                viewport.offsetHeight / imageSize.height,
+              ),
+            )
+          }}
         >
           <BoundingBoxControls
             selectedTool={selectedTool}
@@ -248,16 +255,14 @@ export function BoundingBoxer({
           >
             {children}
           </BoundingBoxControls>
-          {showBBList && (
-            <BoundingBoxList
-              boundingBoxes={boundingBoxes}
-              onChange={onBoundingBoxChange}
-              onChangeEnd={onBoundingBoxChangeEnd}
-            />
-          )}
           <TransformComponent
-            wrapperStyle={{ width: "100%", height: "100%" }}
-            contentClass={cn("relative", selectedTool === "draw" && "cursor-crosshair")}
+            wrapperClass="min-h-0 flex-1 bg-checkered"
+            wrapperStyle={{ width: "100%" }}
+            contentClass={cn(
+              "relative",
+              selectedTool === "draw" && "cursor-crosshair",
+              fitScale === null && "invisible",
+            )}
           >
             <img
               src={imageSrc}
@@ -286,6 +291,13 @@ export function BoundingBoxer({
               limits={{ x: imageSize.width, y: imageSize.height }}
             />
           </TransformComponent>
+          {showBBList && (
+            <BoundingBoxList
+              boundingBoxes={boundingBoxes}
+              onChange={onBoundingBoxChange}
+              onChangeEnd={onBoundingBoxChangeEnd}
+            />
+          )}
         </TransformWrapper>
       ) : (
         <p>Loading...</p>
@@ -317,7 +329,7 @@ function BoundingBoxList({
   return (
     <Toolbar.Root
       id="bounding-boxes-list"
-      className="absolute right-2 bottom-2 left-2 z-10 flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs"
+      className="relative z-10 m-2 flex h-9 shrink-0 items-center gap-1 rounded-md border bg-background p-1 shadow-xs"
     >
       <ToggleGroup defaultValue={[boundingBoxes[0].id]} orientation="horizontal">
         {boundingBoxes.map((bb) => {
@@ -515,7 +527,7 @@ function BoundingBoxControls({
   }, [])
 
   return (
-    <Toolbar.Root className="absolute top-2 right-2 left-2 z-10 flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs">
+    <Toolbar.Root className="relative z-10 m-2 flex h-9 shrink-0 items-center gap-1 rounded-md border bg-background p-1 shadow-xs">
       <ToggleGroup
         value={[selectedTool]}
         onValueChange={(values) => {
