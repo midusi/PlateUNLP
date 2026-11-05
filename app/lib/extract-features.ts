@@ -31,8 +31,11 @@ const EDGE_WEIGHT_POWER = 4
  */
 const EDGE_WEIGHT_MIN = 0.05
 
-/** Metodo de ajuste para la traza media. */
-export type FitFunction = "linal-regression" | "spline"
+/**
+ * Grado maximo con el que la traza se ajusta como polinomio. Por encima se
+ * usa un spline cuadratico, que interpola las anclas en vez de promediarlas.
+ */
+const MAX_POLYNOMIAL_DEGREE = 8
 
 /** Traza media del espectro y su derivada, en pixeles. */
 export interface TraceFunctions {
@@ -56,8 +59,12 @@ export interface ExtractSpectrumProps {
   centerStep?: number
   /** Multiplicador de la apertura calculada. */
   percentAperture?: number
-  /** Metodo de ajuste. Se ignora si se pasa baseTrace. */
-  fitFunction?: FitFunction
+  /**
+   * Grado de la traza: 1 es una recta y hasta MAX_POLYNOMIAL_DEGREE un
+   * polinomio de ese grado; mas alto usa un spline. Se ignora si se pasa baseTrace.
+   * @default 1
+   */
+  fitDegree?: number
   /** Traza ya calculada en otro espectro. Si se pasa, se reusa en vez de ajustar una nueva. */
   baseTrace?: TraceFunctions
   /**
@@ -224,7 +231,7 @@ function findTraceAnchors(
  */
 function buildTraceFunctions(
   anchors: Anchor[],
-  fitFunction: FitFunction | undefined,
+  fitDegree: number,
   baseTrace?: TraceFunctions,
 ): { trace: TraceFunctions; inliers: boolean[] } {
   if (baseTrace) {
@@ -241,8 +248,12 @@ function buildTraceFunctions(
   }
   const xs = anchors.map((p) => p.x)
   const ys = anchors.map((p) => p.y)
-  const fit = robustPolyFit(xs, ys, { degree: 1, weight: hardCutWeight(TRACE_MAD_K) })
-  if (fitFunction !== "spline") return { trace: fit, inliers: fit.inliers }
+  // Los outliers se buscan con un polinomio del grado pedido: una recta no
+  // describe un espectro curvo y deja pasar las anclas que se enganchan a las
+  // lineas de un espectro vecino. Con menos anclas que parametros no hay ajuste.
+  const degree = Math.min(fitDegree, MAX_POLYNOMIAL_DEGREE, xs.length - 1)
+  const fit = robustPolyFit(xs, ys, { degree, weight: hardCutWeight(TRACE_MAD_K) })
+  if (fitDegree <= MAX_POLYNOMIAL_DEGREE) return { trace: fit, inliers: fit.inliers }
   return {
     trace: splineCuadratic(
       xs.filter((_, i) => fit.inliers[i]),
@@ -300,7 +311,7 @@ export function extractSpectrum({
   height,
   centerStep = CENTER_STEP,
   percentAperture = 1.0,
-  fitFunction,
+  fitDegree = 1,
   baseTrace,
   deemphasizeEdges = true,
 }: ExtractSpectrumProps): ExtractSpectrumResponse {
@@ -314,7 +325,7 @@ export function extractSpectrum({
   const binarized = binarizeProfiles(clamped, height)
 
   const anchors = findTraceAnchors(binarized, profileContrasts(clamped), xpoints)
-  const { trace, inliers } = buildTraceFunctions(anchors, fitFunction, baseTrace)
+  const { trace, inliers } = buildTraceFunctions(anchors, fitDegree, baseTrace)
   const valid = anchors.filter((_, i) => inliers[i])
   const mediasPoints = valid.map(({ x, y }) => ({ x, y }))
   const avgOpening = median(valid.map((a) => a.opening)) * percentAperture
