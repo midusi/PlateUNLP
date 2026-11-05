@@ -45,7 +45,7 @@ function extractAndMask(
     spectrum: spectrumTensor,
     width,
     height,
-    fitFunction: settings.fitDegree === 1 ? "linal-regression" : "spline",
+    fitDegree: settings.fitDegree,
     percentAperture: settings.percentAperture,
     baseTrace,
   })
