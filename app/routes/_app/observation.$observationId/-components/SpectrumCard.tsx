@@ -99,17 +99,20 @@ export const SpectrumCard = withForm({
             </Select>
           </div>
 
-          <form.AppField name={`spectrums[${index}].fitDegree`}>
-            {(field) => (
-              <field.StepperField
-                className="shrink-0"
-                label="Degree"
-                min={FIT_DEGREE_MIN}
-                max={FIT_DEGREE_MAX}
-                step={1}
-              />
-            )}
-          </form.AppField>
+          {/* Las lamparas reusan la traza del espectro de ciencia: su grado no cuenta. */}
+          {type === "science" && (
+            <form.AppField name={`spectrums[${index}].fitDegree`}>
+              {(field) => (
+                <field.StepperField
+                  className="shrink-0"
+                  label="Degree"
+                  min={FIT_DEGREE_MIN}
+                  max={FIT_DEGREE_MAX}
+                  step={1}
+                />
+              )}
+            </form.AppField>
+          )}
 
           <form.AppField name={`spectrums[${index}].apertureCoefficient`}>
             {(field) => (
