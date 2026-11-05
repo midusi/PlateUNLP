@@ -49,7 +49,7 @@ in there are stale; the prose is correct.
 
 | Model | Runtime | File | Loaded by |
 |-------|---------|------|-----------|
-| Observation detector | `onnxruntime-node` (server) | `app/models/detect_observations/detect_observations.3.0.0.m.onnx` | `get-observations-detections.ts`, path is **hardcoded relative to cwd** |
+| Observation detector | `onnxruntime-node` (server) | `app/models/detect_observations/0.0.7.m.obb.observation.cont.onnx` | `get-observations-detections.ts`, path is **hardcoded relative to cwd** |
 | Spectrum-part segmenter | `onnxruntime-web` (browser) | `public/models/spectrum_part_segmentator.onnx` (38 MB) | `use-predict-BBs.ts`, fetched from `/models/…` |
 
 The Dockerfile copies `app/models` into the runner image explicitly — if you move or rename the

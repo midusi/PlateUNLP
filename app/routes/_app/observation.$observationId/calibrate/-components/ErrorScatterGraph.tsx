@@ -32,6 +32,7 @@ interface ErrorScatterGraphProps {
   lampPoints: { x: number; y: number }[]
   materialPoints: { x: number; y: number }[]
   unit: Unit
+  onDeleteIndex?: (index: number) => void
 }
 
 export function ErrorScatterGraph({
@@ -39,6 +40,7 @@ export function ErrorScatterGraph({
   lampPoints,
   materialPoints,
   unit,
+  onDeleteIndex,
 }: ErrorScatterGraphProps) {
   const [ref, bounds] = useMeasure()
   const width = bounds.width ?? 0
@@ -67,6 +69,13 @@ export function ErrorScatterGraph({
       tooltipTop: coords.y,
       tooltipData: datum,
     })
+  }
+
+  /** borra el par (lampPoints/materialPoints) del índice indicado */
+  function handleDeleteIndex(idx: number) {
+    if (idx < 0 || idx >= lampPoints.length || idx >= materialPoints.length) return
+    hideTooltip()
+    onDeleteIndex?.(idx)
   }
 
   /** Arreglo con x (Å indicado) e y (Å inferido) */
@@ -209,6 +218,14 @@ export function ErrorScatterGraph({
                 fill={tooltipData?.idxMatch === match.idxMatch ? "white" : "#f6c431"}
                 onMouseOver={(e) => handleMouseOver(e, dispersionErrors[match.idxMatch])}
                 onMouseOut={hideTooltip}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDeleteIndex(match.idxMatch)
+                }}
+                style={{
+                    cursor:
+                      "url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
+                  }}
               />
             ))}
 

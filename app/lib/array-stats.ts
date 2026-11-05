@@ -24,6 +24,19 @@ export function median(values: number[]): number {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]
 }
 
+/** Factor que lleva el MAD a una estimacion de sigma en una distribucion normal. */
+const MAD_TO_SIGMA = 1.4826
+
+/**
+ * Sigma robusta: MAD (mediana de |valor - mediana|) escalada para equivaler a
+ * la desviacion estandar de una normal. A diferencia de esta, unos pocos
+ * valores muy alejados casi no la mueven.
+ */
+export function robustSigma(values: number[]): number {
+  const center = median(values)
+  return MAD_TO_SIGMA * median(values.map((v) => Math.abs(v - center)))
+}
+
 export function bisectRightBy<T>(
   values: T[],
   target: number,

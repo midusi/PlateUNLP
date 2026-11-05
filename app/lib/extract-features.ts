@@ -1,8 +1,18 @@
 import * as tf from "@tensorflow/tfjs"
-import { median } from "~/lib/array-stats"
-import { findPlateau, findXspacedPoints } from "~/lib/image"
-import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
+import { median, robustSigma } from "~/lib/array-stats"
+import { findPlateau } from "~/lib/image"
+import { hardCutWeight, robustPolyFit, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"
+
+/** Separacion, en pixeles, entre centros consecutivos (y ancho de cada segmento). */
+const CENTER_STEP = 8
+/** Multiplicador de sigma robusta (MAD) a partir del cual un centro se descarta. */
+const TRACE_MAD_K = 3
+/**
+ * Contraste minimo de un perfil (max-min), como fraccion de la mediana de
+ * contrastes, para fiarse de su centro. Sin linea ni continuo no hay senal.
+ */
+const MIN_CONTRAST_RATIO = 0.25
 
 /** Z-score al que se recortan los outliers de cada perfil (~95% en una normal). */
 const OUTLIER_Z_THRESHOLD = 1.96
@@ -38,10 +48,12 @@ export interface ExtractSpectrumProps {
   width: number
   /** Alto del recorte. */
   height: number
-  /** Cantidad de puntos intermedios a usar. */
-  countCheckpoints: number
-  /** Ancho a considerar para el analisis de segmentos. */
-  segmentWidth: number
+  /**
+   * Separacion en pixeles entre centros consecutivos, que tambien es el ancho
+   * de cada segmento analizado (segmentos contiguos).
+   * @default 8
+   */
+  centerStep?: number
   /** Multiplicador de la apertura calculada. */
   percentAperture?: number
   /** Metodo de ajuste. Se ignora si se pasa baseTrace. */
@@ -60,9 +72,9 @@ export interface ExtractSpectrumProps {
 
 /** Respuesta de extractSpectrum. */
 export interface ExtractSpectrumResponse {
-  /** Puntos medios elegidos para la extracción */
+  /** Centros que siguen la traza (los descartados por outliers o sin señal no figuran). */
   mediasPoints: Point[]
-  /** Apertura promedio detectada */
+  /** Apertura detectada (mediana de la de los centros que siguen la traza) */
   opening: number
   /** Funcion de la recta media del espectro medida en pixels */
   rectFunction: (value: number) => number
@@ -83,7 +95,7 @@ export interface ExtractSpectrumResponse {
 /**
  * Recorta un segmento vertical centrado en cada checkpoint y lo promedia
  * horizontalmente, dejando un perfil por checkpoint.
- * @returns Tensor [countCheckpoints, height].
+ * @returns Tensor [xpoints.length, height].
  */
 function buildSegmentProfiles(
   imgTensor: tf.Tensor4D,
@@ -103,7 +115,7 @@ function buildSegmentProfiles(
     )
     const segments = tf.image
       .cropAndResize(imgTensor, boxes, boxIdx, [height, segmentWidth], "nearest")
-      .squeeze() // saca el canal: [countCheckpoints, height, segmentWidth]
+      .squeeze([3]) // saca solo el canal: [xpoints.length, height, segmentWidth]
     return segments.mean(2) as tf.Tensor2D
   })
 }
@@ -149,7 +161,8 @@ function binarizeProfiles(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
   return tf.tidy(() => {
     const min = profiles.min(1, true)
     const max = profiles.max(1, true)
-    const normalized = profiles.sub(min).div(max.sub(min))
+    // Un perfil plano (max == min) daria 0/0; con el piso queda todo bajo el umbral.
+    const normalized = profiles.sub(min).div(max.sub(min).maximum(1e-6))
 
     const pushed = tf
       .onesLike(profiles)
@@ -158,40 +171,85 @@ function binarizeProfiles(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
     let window = Math.round(height * SMOOTHING_WINDOW_RATIO)
     if (window % 2 === 0) window += 1
     const kernel = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
-    return pushed.expandDims(2).conv1d(kernel, 1, "same").squeeze() as tf.Tensor2D
+    return pushed.expandDims(2).conv1d(kernel, 1, "same").squeeze([2]) as tf.Tensor2D
   })
 }
 
-/** Centro y apertura del altiplano de cada perfil binarizado. */
-function findTraceAnchors(
-  binarized: tf.Tensor2D,
-  xpoints: number[],
-): { mediasPoints: Point[]; opening: number } {
-  const profiles = binarized.arraySync() as number[][]
-  const plateaus = profiles.map((profile) => findPlateau(profile, PLATEAU_THRESHOLD))
-  return {
-    mediasPoints: xpoints.map((x, i) => ({ x, y: plateaus[i].medium })),
-    opening: plateaus.reduce((sum, p) => sum + p.opening, 0) / plateaus.length,
-  }
+/** Contraste (max - min) de cada perfil. */
+function profileContrasts(profiles: tf.Tensor2D): number[] {
+  const contrasts = tf.tidy(() => profiles.max(1).sub(profiles.min(1)))
+  const values = contrasts.arraySync() as number[]
+  contrasts.dispose()
+  return values
 }
 
-/** Reusa la traza base desplazada, o ajusta una nueva sobre los centros hallados. */
+/** Centro de un segmento y apertura del altiplano que lo ubica. */
+interface Anchor extends Point {
+  opening: number
+}
+
+/**
+ * Centros contiguos de `step` px a lo largo de todo el ancho. Descarta el resto
+ * final (< step) y garantiza al menos 2 centros para poder ajustar una recta.
+ */
+function buildCenters(width: number, centerStep: number): { xpoints: number[]; step: number } {
+  const step = Math.max(1, Math.min(centerStep, Math.floor(width / 2)))
+  const count = Math.floor(width / step)
+  return { xpoints: Array.from({ length: count }, (_, i) => Math.round(i * step + step / 2)), step }
+}
+
+/**
+ * Centro y apertura del altiplano de cada perfil binarizado. Se descartan los
+ * perfiles sin senal (poco contraste o sin altiplano), que no ubican ningun
+ * centro. Si casi todos quedan afuera se usan todos, para poder ajustar igual.
+ */
+function findTraceAnchors(
+  binarized: tf.Tensor2D,
+  contrasts: number[],
+  xpoints: number[],
+): Anchor[] {
+  const profiles = binarized.arraySync() as number[][]
+  const plateaus = profiles.map((profile) => findPlateau(profile, PLATEAU_THRESHOLD))
+  const minContrast = median(contrasts) * MIN_CONTRAST_RATIO
+  const all = xpoints.map((x, i) => ({ x, y: plateaus[i].medium, opening: plateaus[i].opening }))
+  const withSignal = all.filter((_, i) => contrasts[i] >= minContrast && plateaus[i].opening > 0)
+  return withSignal.length >= 2 ? withSignal : all
+}
+
+/**
+ * Reusa la traza base desplazada, o ajusta una nueva sobre los centros hallados.
+ * En ambos casos los centros que se alejan de la tendencia (defectos de la
+ * placa, fugas del espectro vecino) se marcan como no validos.
+ * @returns La traza y, por centro, si sigue esa traza.
+ */
 function buildTraceFunctions(
-  mediasPoints: Point[],
+  anchors: Anchor[],
   fitFunction: FitFunction | undefined,
   baseTrace?: TraceFunctions,
-): TraceFunctions {
+): { trace: TraceFunctions; inliers: boolean[] } {
   if (baseTrace) {
-    // Se ancla con la mediana del desplazamiento de todos los checkpoints, no
-    // solo el primero: si uno queda contaminado (p.ej. una fuga del espectro
-    // vecino) no arrastra la traza entera.
-    const offsets = mediasPoints.map((p) => baseTrace.funct(p.x) - p.y)
+    // Se ancla con la mediana del desplazamiento de todos los centros, no solo
+    // el primero: si alguno queda contaminado no arrastra la traza entera.
+    const offsets = anchors.map((p) => baseTrace.funct(p.x) - p.y)
     const offset = median(offsets)
-    return { funct: (x) => baseTrace.funct(x) - offset, derived: baseTrace.derived }
+    const sigma = robustSigma(offsets)
+    const weight = hardCutWeight(TRACE_MAD_K)
+    return {
+      trace: { funct: (x) => baseTrace.funct(x) - offset, derived: baseTrace.derived },
+      inliers: offsets.map((o) => sigma < 1e-9 || weight(Math.abs(o - offset) / sigma) > 0),
+    }
   }
-  const xs = mediasPoints.map((p) => p.x)
-  const ys = mediasPoints.map((p) => p.y)
-  return fitFunction === "spline" ? splineCuadratic(xs, ys) : linearRegressionWhitDerived(xs, ys)
+  const xs = anchors.map((p) => p.x)
+  const ys = anchors.map((p) => p.y)
+  const fit = robustPolyFit(xs, ys, { degree: 1, weight: hardCutWeight(TRACE_MAD_K) })
+  if (fitFunction !== "spline") return { trace: fit, inliers: fit.inliers }
+  return {
+    trace: splineCuadratic(
+      xs.filter((_, i) => fit.inliers[i]),
+      ys.filter((_, i) => fit.inliers[i]),
+    ),
+    inliers: fit.inliers,
+  }
 }
 
 /** Mascara booleana [height, width] de la banda de apertura alrededor de la traza. */
@@ -240,25 +298,26 @@ export function extractSpectrum({
   spectrum,
   width,
   height,
-  countCheckpoints,
-  segmentWidth,
+  centerStep = CENTER_STEP,
   percentAperture = 1.0,
   fitFunction,
   baseTrace,
   deemphasizeEdges = true,
 }: ExtractSpectrumProps): ExtractSpectrumResponse {
   const imgTensor = spectrum.toFloat()
-  /** Coordenadas X de los checkpoints repartidos a lo largo de la imagen. */
-  const xpoints = findXspacedPoints(width, countCheckpoints)
+  /** Coordenadas X de los centros, uno cada `segmentWidth` px a lo largo de toda la imagen. */
+  const { xpoints, step: segmentWidth } = buildCenters(width, centerStep)
 
   const profiles = buildSegmentProfiles(imgTensor, xpoints, { width, height, segmentWidth })
   const weighted = deemphasizeEdges ? applyEdgeWeights(profiles, height) : profiles
   const clamped = clampOutliers(weighted)
   const binarized = binarizeProfiles(clamped, height)
 
-  const { mediasPoints, opening } = findTraceAnchors(binarized, xpoints)
-  const avgOpening = opening * percentAperture
-  const trace = buildTraceFunctions(mediasPoints, fitFunction, baseTrace)
+  const anchors = findTraceAnchors(binarized, profileContrasts(clamped), xpoints)
+  const { trace, inliers } = buildTraceFunctions(anchors, fitFunction, baseTrace)
+  const valid = anchors.filter((_, i) => inliers[i])
+  const mediasPoints = valid.map(({ x, y }) => ({ x, y }))
+  const avgOpening = median(valid.map((a) => a.opening)) * percentAperture
 
   const gray2d = imgTensor.squeeze([0, 3]) as tf.Tensor2D
   const apertureMask = buildApertureMask(trace, { width, height, opening: avgOpening })

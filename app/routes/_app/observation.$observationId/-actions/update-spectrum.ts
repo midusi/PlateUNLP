@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { FIT_DEGREE_MAX, FIT_DEGREE_MIN } from "~/types/spectrum-metadata"
 
 export const updateSpectrum = createServerFn()
   .validator(
@@ -14,7 +15,7 @@ export const updateSpectrum = createServerFn()
       imageHeight: z.number().int().min(1).optional(),
       countMediasPoints: z.number().int().min(1).optional(),
       apertureCoefficient: z.number().min(0).max(1.5).optional(),
-      fitDegree: z.number().int().min(1).max(5),
+      fitDegree: z.number().int().min(FIT_DEGREE_MIN).max(FIT_DEGREE_MAX).optional(),
       type: z.enum(["lamp", "science"]).optional(),
     }),
   )
@@ -27,10 +28,18 @@ export const updateSpectrum = createServerFn()
     })
     if (!spectrum) throw new Error(`Spectrum with id ${data.spectrumId} not found`)
 
-    if (data.imageLeft + data.imageWidth > spectrum.observation.imageWidth) {
+    if (
+      data.imageLeft !== undefined &&
+      data.imageWidth !== undefined &&
+      data.imageLeft + data.imageWidth > spectrum.observation.imageWidth
+    ) {
       throw new Error("Bounding box exceeds plate image width")
     }
-    if (data.imageTop + data.imageHeight > spectrum.observation.imageHeight) {
+    if (
+      data.imageTop !== undefined &&
+      data.imageHeight !== undefined &&
+      data.imageTop + data.imageHeight > spectrum.observation.imageHeight
+    ) {
       throw new Error("Bounding box exceeds plate image height")
     }
     await db
