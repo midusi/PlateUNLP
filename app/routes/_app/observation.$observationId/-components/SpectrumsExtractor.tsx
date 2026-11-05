@@ -205,6 +205,11 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
     },
   })
 
+  // useEffect(() => {
+  //   form.setFieldValue("spectrums", orderedSpectrums)
+  //   form.handleSubmit()
+  // }, [orderedSpectrums, form.setFieldValue, form.handleSubmit])
+
   useEffect(() => {
     form.setFieldValue("spectrums", orderedSpectrums)
     if (observationTensor) {
