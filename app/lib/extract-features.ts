@@ -279,17 +279,21 @@ function buildApertureMask(
   })
 }
 
-/** Promedia, columna por columna, los pixeles que caen dentro de la apertura. */
+/**
+ * Promedia, columna por columna, los pixeles que caen dentro de la apertura.
+ * `slope` es la inclinacion global de la traza: con la de un extremo, una traza
+ * curva rotaria la banda fuera del recorte y dejaria columnas sin pixeles.
+ */
 function averageAcrossAperture(
   gray2d: tf.Tensor2D,
   mask: tf.Tensor2D,
-  slopeAtOrigin: number,
+  slope: number,
   { width, height }: { width: number; height: number },
 ): tf.Tensor1D {
   return tf.tidy(() => {
     const masked = tf.where(mask, gray2d, tf.fill([height, width], 0))
     /** Se rota para dejar la traza horizontal antes de promediar. */
-    const rad = Math.atan(slopeAtOrigin)
+    const rad = Math.atan(slope)
     const rotate = (t: tf.Tensor2D) =>
       tf.image.rotateWithOffset(t.expandDims(0).expandDims(-1) as tf.Tensor4D, rad, 0, [0.5, 0.5])
 
@@ -332,7 +336,9 @@ export function extractSpectrum({
 
   const gray2d = imgTensor.squeeze([0, 3]) as tf.Tensor2D
   const apertureMask = buildApertureMask(trace, { width, height, opening: avgOpening })
-  const transversalAvgs = averageAcrossAperture(gray2d, apertureMask, trace.derived(0), {
+  /** Pendiente de la cuerda (de punta a punta): es la de la traza si es una recta. */
+  const chordSlope = (trace.funct(width - 1) - trace.funct(0)) / Math.max(1, width - 1)
+  const transversalAvgs = averageAcrossAperture(gray2d, apertureMask, chordSlope, {
     width,
     height,
   })
