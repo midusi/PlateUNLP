@@ -77,7 +77,7 @@ export function SpectrumsList({
 
   const determineBBFunction = usePredictBBs(
     640,
-    "detect_observations.3.0.0.m.onnx",
+    "0.0.9.m.obb.components.cont2.onnx",
     classesSpectrumDetection,
     false,
     0.7,

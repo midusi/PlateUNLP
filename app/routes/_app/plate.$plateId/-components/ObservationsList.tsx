@@ -113,6 +113,7 @@ export function ObservationsList({
     mutationFn: async (plateId: string) => {
       /** Detectar de observaciones */
       const observations = await getObservationDetections({ data: { plateId } })
+      console.log("Detections obtained from getObservationDetections:", observations)
       /** Salta error si algo impide que el proceso finalice */
       if (observations instanceof Response) {
         const errorText = await observations.text()

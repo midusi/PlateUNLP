@@ -17,7 +17,7 @@ export const predictBoundingBoxes = createServerFn()
     z.object({
       observationId: z.string(),
       size: z.number().default(640),
-      model: z.string().default("detect_observations.3.0.0.m.onnx"),
+      model: z.string().default("0.0.7.m.obb.observation.cont.onnx"),
       classes: z.array(z.any()),
       forceMaxWidth: z.boolean().optional().default(false),
       confidenceThreshold: z.number().optional().default(0.75),
@@ -38,8 +38,18 @@ export const predictBoundingBoxes = createServerFn()
     })
     if (!observation) throw new Error("Observation not found")
 
-    // Obtener imagen
-    const image = await readEditedFile(observation.plate)
+    // Obtener imagen de la observación (mismo recorte que preview)
+    const plateImage = await readEditedFile(observation.plate)
+    const image = await sharp(plateImage)
+      .extract({
+        height: observation.imageHeight,
+        top: observation.imageTop,
+        left: observation.imageLeft,
+        width: observation.imageWidth,
+      })
+      .toColorspace("srgb")
+      .png()
+      .toBuffer()
 
     // Pre-procesamiento: equivalente a prepare_input del frontend
     const originalMetadata = await sharp(image).metadata()
@@ -48,22 +58,25 @@ export const predictBoundingBoxes = createServerFn()
 
     // Redimensionar a SIZE_M y obtener píxeles RGB
     const { data: rawPixels, info } = await sharp(image)
-      .resize(SIZE_M, SIZE_M, { fit: "fill", background: { r: 0, g: 0, b: 0 } })
+      .resize(SIZE_M, SIZE_M, { fit: "contain"  })
       .toColorspace("srgb")
       .removeAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true })
 
     const { width, height, channels } = info
+    const scale = Math.min(SIZE_M / NATURALWIDTH, SIZE_M / NATURALHEIGHT)
+    const offsetX = (SIZE_M - NATURALWIDTH * scale) / 2
+    const offsetY = (SIZE_M - NATURALHEIGHT * scale) / 2
 
     // Separar canales RGB y normalizar
     const red: number[] = new Array(SIZE_M * SIZE_M)
     const green: number[] = new Array(SIZE_M * SIZE_M)
     const blue: number[] = new Array(SIZE_M * SIZE_M)
     for (let i = 0; i < SIZE_M * SIZE_M; i++) {
-      red[i] = rawPixels[i * 4] / 255
-      green[i] = rawPixels[i * 4 + 1] / 255
-      blue[i] = rawPixels[i * 4 + 2] / 255
+      red[i] = rawPixels[i * channels] / 255
+      green[i] = rawPixels[i * channels + 1] / 255
+      blue[i] = rawPixels[i * channels + 2] / 255
     }
 
     const input = new Float32Array([...red, ...green, ...blue])
@@ -74,55 +87,69 @@ export const predictBoundingBoxes = createServerFn()
     const outputs = await session.run(feeds)
     session.release()
 
-    // Post-procesamiento: equivalente a processOutputs del frontend
+    // Post-procesamiento
     const DATA = outputs.output0.data as Float32Array
-    const COLS = outputs.output0.dims[2]
-    const ROWS = outputs.output0.dims[1]
+    const DIMS = outputs.output0.dims
 
     let boundingBoxes: BoundingBox[] = []
     let id = 0
-
-    for (let column = 0; column < COLS; column++) {
-      const [class_id, prob] = [...Array.from({ length: ROWS - 4 }).keys()]
-        .map((row) => [row, DATA[COLS * (row + 4) + column]])
-        .reduce((accum, item) => (item[1] > accum[1] ? item : accum), [0, 0])
-
-      if (prob < CONFIDENCE_THRESHOLD) {
-        continue
+    const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max)
+    const obbToAabb = (w: number, h: number, angleRad: number) => {
+      const cos = Math.cos(angleRad)
+      const sin = Math.sin(angleRad)
+      return {
+        width: Math.abs(w * cos) + Math.abs(h * sin),
+        height: Math.abs(w * sin) + Math.abs(h * cos),
       }
+    }
 
-      const xc: number = DATA[COLS * 0 + column]
-      const yc: number = DATA[COLS * 1 + column]
-      let w: number = DATA[COLS * 2 + column]
-      let h: number = DATA[COLS * 3 + column]
+    // Formato OBB: [1, N, 7] => [xc, yc, w, h, score, class, angle]
+    const predictionCount = DIMS[1]
+    for (let i = 0; i < predictionCount; i++) {
+      const base = i * 7
+      const xc = DATA[base]
+      const yc = DATA[base + 1]
+      const w = DATA[base + 2]
+      const h = DATA[base + 3]
+      const prob = DATA[base + 4]
+      const class_id = Math.round(DATA[base + 5])
+      const angle = DATA[base + 6]
 
-      let x1 = xc - w / 2
-      let y1 = yc - h / 2
+      if (prob < CONFIDENCE_THRESHOLD) continue
 
-      // Escalado al espacio original
-      x1 = x1 * (NATURALWIDTH / SIZE_M)
-      y1 = y1 * (NATURALHEIGHT / SIZE_M)
-      w = w * (NATURALWIDTH / SIZE_M)
-      h = h * (NATURALHEIGHT / SIZE_M)
+      const centerX = (xc - offsetX) / scale
+      const centerY = (yc - offsetY) / scale
+      const obbW = w / scale
+      const obbH = h / scale
+      const aabb = obbToAabb(obbW, obbH, angle)
+
+      let x1 = centerX - aabb.width / 2
+      let y1 = centerY - aabb.height / 2
+      let widthBB = aabb.width
+      let heightBB = aabb.height
 
       if (forceMaxWidth) {
         x1 = 0
-        w = NATURALWIDTH
+        widthBB = NATURALWIDTH
       }
 
-      const boundingBox: BoundingBox = {
+      widthBB = clamp(widthBB, 1, NATURALWIDTH)
+      heightBB = clamp(heightBB, 1, NATURALHEIGHT)
+      x1 = clamp(x1, 0, Math.max(0, NATURALWIDTH - widthBB))
+      y1 = clamp(y1, 0, Math.max(0, NATURALHEIGHT - heightBB))
+
+      boundingBoxes.push({
         id: id++,
         name: "",
         x: x1,
         y: y1,
-        width: w,
-        height: h,
-        class_info: CLASSES[class_id] as BBClassesProps,
+        width: widthBB,
+        height: heightBB,
+        class_info: (CLASSES[class_id] ?? CLASSES[0]) as BBClassesProps,
         prob,
-      }
-
-      boundingBoxes.push(boundingBox)
+      })
     }
+    
 
     // NMS (Non-Maximum Suppression)
     boundingBoxes = boundingBoxes.sort((bb1, bb2) => bb2.prob - bb1.prob)
@@ -131,6 +158,5 @@ export const predictBoundingBoxes = createServerFn()
       result.push(boundingBoxes[0])
       boundingBoxes = boundingBoxes.filter((bb) => iou(boundingBoxes[0], bb) < IOU_THRESHOLD)
     }
-
     return result
   })
