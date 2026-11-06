@@ -279,29 +279,64 @@ function buildApertureMask(
   })
 }
 
+/** Valor interpolado bilinealmente en (x, y) de una imagen [height, width], o undefined si cae fuera. */
+function sampleBilinear(
+  data: Float32Array | Int32Array | Uint8Array,
+  { width, height }: { width: number; height: number },
+  x: number,
+  y: number,
+): number | undefined {
+  if (x < 0 || y < 0 || x > width - 1 || y > height - 1) return undefined
+  const x0 = Math.floor(x)
+  const y0 = Math.floor(y)
+  const x1 = Math.min(x0 + 1, width - 1)
+  const y1 = Math.min(y0 + 1, height - 1)
+  const fx = x - x0
+  const fy = y - y0
+  const top = data[y0 * width + x0] * (1 - fx) + data[y0 * width + x1] * fx
+  const bottom = data[y1 * width + x0] * (1 - fx) + data[y1 * width + x1] * fx
+  return top * (1 - fy) + bottom * fy
+}
+
 /**
- * Promedia, columna por columna, los pixeles que caen dentro de la apertura.
- * `slope` es la inclinacion global de la traza: con la de un extremo, una traza
- * curva rotaria la banda fuera del recorte y dejaria columnas sin pixeles.
+ * Promedia, para cada columna x de la traza, los pixeles de la apertura sobre
+ * la perpendicular a la traza en ese punto (la normal, que sale de su derivada).
+ * Asi las lineas espectrales, que cortan la traza en angulo recto, quedan
+ * dentro de una sola muestra aunque la traza este inclinada o curvada.
+ *
+ * `opening` es el alto vertical de la banda: sobre la normal mide
+ * `opening / sqrt(1 + y'^2)`, que es la misma banda que cubre la mascara.
+ * @returns Un valor por columna; NaN si ningun punto de la normal cae en el recorte.
  */
 function averageAcrossAperture(
   gray2d: tf.Tensor2D,
-  mask: tf.Tensor2D,
-  slope: number,
+  trace: TraceFunctions,
+  opening: number,
   { width, height }: { width: number; height: number },
-): tf.Tensor1D {
-  return tf.tidy(() => {
-    const masked = tf.where(mask, gray2d, tf.fill([height, width], 0))
-    /** Se rota para dejar la traza horizontal antes de promediar. */
-    const rad = Math.atan(slope)
-    const rotate = (t: tf.Tensor2D) =>
-      tf.image.rotateWithOffset(t.expandDims(0).expandDims(-1) as tf.Tensor4D, rad, 0, [0.5, 0.5])
-
-    const maskedRotated = rotate(masked).squeeze([0, 3])
-    const maskRotated = rotate(mask.toFloat()).toInt().squeeze([0, 3])
-
-    const validPerColumn = maskRotated.cast("int32").sum(0)
-    return maskedRotated.sum(0).div(validPerColumn) as tf.Tensor1D
+): number[] {
+  const data = gray2d.dataSync()
+  return Array.from({ length: width }, (_, x) => {
+    const slope = trace.derived(x)
+    const norm = Math.sqrt(1 + slope * slope)
+    const center = trace.funct(x)
+    const half = opening / (2 * norm)
+    /** Una muestra por pixel de espesor, tomadas en el medio de cada tramo. */
+    const count = Math.max(1, Math.round(2 * half))
+    let sum = 0
+    let valid = 0
+    for (let k = 0; k < count; k++) {
+      const t = -half + ((k + 0.5) * 2 * half) / count
+      const value = sampleBilinear(
+        data,
+        { width, height },
+        x - (t * slope) / norm,
+        center + t / norm,
+      )
+      if (value === undefined) continue
+      sum += value
+      valid++
+    }
+    return valid > 0 ? sum / valid : Number.NaN
   })
 }
 
@@ -336,16 +371,10 @@ export function extractSpectrum({
 
   const gray2d = imgTensor.squeeze([0, 3]) as tf.Tensor2D
   const apertureMask = buildApertureMask(trace, { width, height, opening: avgOpening })
-  /** Pendiente de la cuerda (de punta a punta): es la de la traza si es una recta. */
-  const chordSlope = (trace.funct(width - 1) - trace.funct(0)) / Math.max(1, width - 1)
-  const transversalAvgs = averageAcrossAperture(gray2d, apertureMask, chordSlope, {
-    width,
-    height,
-  })
+  const transversalAvgs = averageAcrossAperture(gray2d, trace, avgOpening, { width, height })
   // Un solo reshape en vez de dos expandDims encadenados: el resultado
   // intermedio de expandDims(0) quedaba sin ninguna referencia para liberarlo.
   const spectrumMask = apertureMask.reshape([1, height, width, 1]) as tf.Tensor4D
-  const transversalAvgsArr = transversalAvgs.arraySync() as number[]
 
   imgTensor.dispose()
   profiles.dispose()
@@ -354,14 +383,13 @@ export function extractSpectrum({
   binarized.dispose()
   gray2d.dispose()
   apertureMask.dispose()
-  transversalAvgs.dispose()
 
   return {
     mediasPoints,
     opening: avgOpening,
     rectFunction: trace.funct,
     derivedFunction: trace.derived,
-    transversalAvgs: transversalAvgsArr,
+    transversalAvgs,
     spectrumMask,
   }
 }
