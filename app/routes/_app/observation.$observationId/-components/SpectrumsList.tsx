@@ -151,22 +151,42 @@ export function SpectrumsList({
           boundingBoxes={boundingBoxes}
           showBBList={false}
           showImageAdjustActions
-          onBoundingBoxChange={(boundingBox) => {
-            setBoundingBoxes((prev) =>
-              prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),
-            )
+          onBoundingBoxChange={(changedBox) => {
+            setBoundingBoxes((prev) => {
+              const activeBoxPrev = prev.find((b) => b.id === changedBox.id);
+              const newLeft = changedBox.left ?? activeBoxPrev?.left ?? 0;
+              const newWidth = changedBox.width ?? activeBoxPrev?.width ?? 0;
+
+              return prev.map((box) => ({
+                ...box,
+                ...(box.id === changedBox.id ? changedBox : {}),
+                left: newLeft,
+                width: newWidth,
+              }));
+            });
           }}
-          onBoundingBoxChangeEnd={async (boundingBox) => {
-            await updateSpectrum({
-              data: {
-                spectrumId: boundingBox.id,
-                imageTop: boundingBox.top,
-                imageLeft: boundingBox.left,
-                imageWidth: boundingBox.width,
-                imageHeight: boundingBox.height,
-              },
-            })
-            router.invalidate()
+          onBoundingBoxChangeEnd={async (changedBox) => {
+            const activeBox = boundingBoxes.find((b) => b.id === changedBox.id);
+            const finalLeft = changedBox.left ?? activeBox?.left ?? 0;
+            const finalWidth = changedBox.width ?? activeBox?.width ?? 0;
+
+            await Promise.all(
+              boundingBoxes.map((box) => {
+                const finalTop = box.id === changedBox.id ? (changedBox.top ?? box.top) : box.top;
+                const finalHeight = box.id === changedBox.id ? (changedBox.height ?? box.height) : box.height;
+
+                return updateSpectrum({
+                  data: {
+                    spectrumId: box.id,
+                    imageTop: Math.round(finalTop),
+                    imageHeight: Math.round(finalHeight),
+                    imageLeft: Math.round(finalLeft),
+                    imageWidth: Math.round(finalWidth),
+                  },
+                });
+              })
+            );
+            router.invalidate();
           }}
           onBoundingBoxAdd={(boundingBox) => addSpectrumMut.mutate(boundingBox)}
           onBoundingBoxDelete={(id) => deleteSpectrumMut.mutate(id)}
