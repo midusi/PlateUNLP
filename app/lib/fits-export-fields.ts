@@ -45,6 +45,7 @@ export function plateMetadataFields(plate: PlateMetadata): FITSExportField[] {
     { label: "SCANAUTH", value: plate.SCANAUTH.value, isKnown: plate.SCANAUTH.isKnown },
     { label: "SCANNOTE", value: plate.SCANNOTE.value, isKnown: plate.SCANNOTE.isKnown },
     { label: "SCANCOL", value: plate.SCANCOL.value, isKnown: plate.SCANCOL.isKnown },
+    { label: "DATEPLT", value: plate.DATEPLT.value, isKnown: plate.DATEPLT.isKnown },
   ]
 }
 

@@ -55,6 +55,7 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
             scanAuthor: unknownable(plate.SCANAUTH, plate["SCANAUTH?"]),
             scannerNotes: unknownable(plate.SCANNOTE, plate["SCANNOTE?"]),
             scanCol: unknownable(plate.SCANCOL, plate["SCANCOL?"]),
+            datePlt: unknownable(plate.DATEPLT, plate["DATEPLT?"]),
           },
         })
 

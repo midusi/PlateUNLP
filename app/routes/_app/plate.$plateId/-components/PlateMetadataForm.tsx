@@ -172,6 +172,16 @@ export function PlateMetadataForm({
               description="Person who made the observation."
               options={suggestions.OBSERVER}
             />
+
+            <TextFieldWithKnown
+              form={form}
+              fields="DATEPLT"
+              label="DATE-PLT"
+              placeholder="e.g. 1965-03-22"
+              type="date"
+              description="Date the plate was obtained"
+            />
+
             <TextAreaFieldWithKnown
               form={form}
               fields="OBSNOTES"
