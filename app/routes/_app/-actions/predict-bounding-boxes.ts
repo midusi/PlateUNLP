@@ -119,6 +119,10 @@ export const predictBoundingBoxes = createServerFn()
 
       const centerX = (xc - offsetX) / scale
       const centerY = (yc - offsetY) / scale
+
+      // Detecciones con el centro fuera de la imagen: caen en el relleno de la imagen cuadrada
+      // (falsos positivos). Se descartan en vez de recortarlas contra el borde.
+      if (centerX < 0 || centerX > NATURALWIDTH || centerY < 0 || centerY > NATURALHEIGHT) continue
       const obbW = w / scale
       const obbH = h / scale
       const aabb = obbToAabb(obbW, obbH, angle)
