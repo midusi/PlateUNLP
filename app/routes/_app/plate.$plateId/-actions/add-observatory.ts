@@ -35,7 +35,7 @@ export const addObservatory = createServerFn({ method: "POST" })
       return observatory
     } catch (err) {
       if (err instanceof Error && err.message.includes("UNIQUE constraint failed")) {
-        throw new Error(`Observatory with id \"${data.id}\" already exists`)
+        throw new Error(`Observatory with id "${data.id}" already exists`)
       }
       throw err
     }
