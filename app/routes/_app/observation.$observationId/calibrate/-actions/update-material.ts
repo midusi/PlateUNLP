@@ -18,6 +18,7 @@ export const updateMaterial = createServerFn({ method: "POST" })
               intensity: z.number(),
             }),
           )
+          .min(1, "A lamp needs at least one line")
           .optional(),
       })
       .refine(

@@ -7,13 +7,15 @@ export const addMaterial = createServerFn({ method: "POST" })
   .validator(
     z.object({
       name: z.string(),
-      arr: z.array(
-        z.object({
-          wavelength: z.number(),
-          material: z.string(),
-          intensity: z.number(),
-        }),
-      ),
+      arr: z
+        .array(
+          z.object({
+            wavelength: z.number(),
+            material: z.string(),
+            intensity: z.number(),
+          }),
+        )
+        .min(1, "A lamp needs at least one line"),
     }),
   )
   .handler(async ({ data }) => {
