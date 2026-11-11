@@ -13,6 +13,7 @@ import { addSpectrum } from "../-actions/add-spectrum"
 import { addSpectrums } from "../-actions/add-spectrums"
 import { deleteSpectrum } from "../-actions/delete-spectrum"
 import { updateSpectrum } from "../-actions/update-spectrum"
+import { updateSpectrumsTypes } from "../-actions/update-spectrums-types"
 import { pickSpectrumRoles } from "../-utils/pick-spectrum-roles"
 
 
@@ -133,14 +134,51 @@ export function SpectrumsList({
     onError: (error) => notifyError("Error adding spectrum", error),
   })
 
+  /**
+   * Borra solo el espectro indicado (la "x" de cada caja). Si era el de ciencia y quedan lámparas,
+   * la más cercana a él pasa a ser el de ciencia: siempre tiene que haber uno.
+   */
   const deleteSpectrumMut = useMutation({
     mutationFn: async (spectrumId: string) => {
-      await Promise.all(
-        boundingBoxes.map((box) => deleteSpectrum({ data: { spectrumId: box.id } }))
+      const deleted = boundingBoxes.find((box) => box.id === spectrumId)
+      await deleteSpectrum({ data: { spectrumId } })
+
+      if (deleted?.color !== "green") return { spectrumId, promotedId: null }
+      const centerY = (box: BoundingBox) => box.top + box.height / 2
+      const distance = (box: BoundingBox) => Math.abs(centerY(box) - centerY(deleted))
+      const heir = boundingBoxes
+        .filter((box) => box.id !== spectrumId && box.color === "red")
+        .sort((a, b) => distance(a) - distance(b) || a.top - b.top)[0]
+      if (!heir) return { spectrumId, promotedId: null }
+
+      await updateSpectrumsTypes({ data: [{ id: heir.id, type: "science" }] })
+      return { spectrumId, promotedId: heir.id }
+    },
+    onSuccess: ({ spectrumId, promotedId }) => {
+      setBoundingBoxes((prev) =>
+        prev
+          .filter((box) => box.id !== spectrumId)
+          .map((box) =>
+            box.id === promotedId ? { ...box, color: "green", label: "Science" } : box,
+          ),
       )
-      setBoundingBoxes((prev) => ([]))
+      router.invalidate()
     },
     onError: (error) => notifyError("Error deleting spectrum", error),
+  })
+
+  /** Borra todos los espectros de la observación (la escoba de la barra). */
+  const clearSpectrumsMut = useMutation({
+    mutationFn: async () => {
+      await Promise.all(
+        boundingBoxes.map((box) => deleteSpectrum({ data: { spectrumId: box.id } })),
+      )
+    },
+    onSuccess: () => {
+      setBoundingBoxes([])
+      router.invalidate()
+    },
+    onError: (error) => notifyError("Error deleting spectrums", error),
   })
 
   return (
@@ -211,14 +249,14 @@ export function SpectrumsList({
             size="sm"
             variant="destructive"
             title="Delete Observations"
-            disabled={deleteSpectrumMut.isPending || boundingBoxes.length === 0}
+            disabled={clearSpectrumsMut.isPending || boundingBoxes.length === 0}
             onClick={() => {
-              deleteSpectrumMut.mutate(observationId)
+              clearSpectrumsMut.mutate()
             }}
             className="h-7 w-7 p-0"
           >
             <span className={cn(
-              deleteSpectrumMut.isPending
+              clearSpectrumsMut.isPending
                 ? "icon-[ph--spinner-bold] animate-spin"
                 : "icon-[ph--broom] text-base"
             )} />
