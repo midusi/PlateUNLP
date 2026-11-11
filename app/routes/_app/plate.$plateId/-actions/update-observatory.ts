@@ -15,7 +15,6 @@ export const updateObservatory = createServerFn({ method: "POST" })
       elevation: z.number().optional(),
       timezone: ianaTimezone().optional(),
       aliases: z.array(z.string().min(1)).optional(),
-      source: z.enum(["astropy-data", "plateunlp", "user"]).optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -31,7 +30,6 @@ export const updateObservatory = createServerFn({ method: "POST" })
       ...(data.elevation !== undefined && { elevation: data.elevation }),
       ...(data.timezone !== undefined && { timezone: data.timezone }),
       ...(data.aliases !== undefined && { aliases: data.aliases }),
-      ...(data.source !== undefined && { source: data.source }),
     }
 
     const [updated] = await db
