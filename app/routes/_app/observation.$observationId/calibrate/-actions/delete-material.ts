@@ -24,7 +24,7 @@ export const deleteMaterial = createServerFn({ method: "POST" })
 
     if (calibrationUsingIt) {
       throw new Error(
-        `Cannot delete material \"${material.name}\" because it is used by one or more calibrations`,
+        `Cannot delete material "${material.name}" because it is used by one or more calibrations`,
       )
     }
 

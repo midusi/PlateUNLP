@@ -53,7 +53,7 @@ export const updateMaterial = createServerFn({ method: "POST" })
       })
     } catch (err) {
       if (err instanceof Error && err.message.includes("UNIQUE constraint failed")) {
-        throw new Error(`Material with name \"${data.name}\" already exists`)
+        throw new Error(`Material with name "${data.name}" already exists`)
       }
       throw err
     }

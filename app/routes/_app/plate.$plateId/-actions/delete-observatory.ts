@@ -24,7 +24,7 @@ export const deleteObservatory = createServerFn({ method: "POST" })
 
     if (plateUsingIt) {
       throw new Error(
-        `Cannot delete observatory \"${observatory.id}\" because it is used by one or more plates`,
+        `Cannot delete observatory "${observatory.id}" because it is used by one or more plates`,
       )
     }
 
