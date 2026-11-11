@@ -7,11 +7,13 @@ import { Card, CardContent } from "~/components/ui/card"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
-import { classesSpectrumDetection } from "~/types/BBClasses"
+import { classesSpectrumPartSegmentation } from "~/types/BBClasses"
+import type { BoundingBox as DetectedBox } from "~/types/BoundingBox"
 import { addSpectrum } from "../-actions/add-spectrum"
 import { addSpectrums } from "../-actions/add-spectrums"
 import { deleteSpectrum } from "../-actions/delete-spectrum"
 import { updateSpectrum } from "../-actions/update-spectrum"
+import { pickSpectrumRoles } from "../-utils/pick-spectrum-roles"
 
 
 export type Spectrum = {
@@ -78,9 +80,9 @@ export function SpectrumsList({
   const determineBBFunction = usePredictBBs(
     640,
     "0.0.9.m.obb.components.cont2.onnx",
-    classesSpectrumDetection,
+    classesSpectrumPartSegmentation,
     false,
-    0.7,
+    0.5,
   )
 
   const determineBBMut = useMutation({
@@ -93,28 +95,16 @@ export function SpectrumsList({
       })
 
       const boundingBoxes = await determineBBFunction(observationId)
-      if (!boundingBoxes || boundingBoxes.length < 3) {
-        throw new Error("No se detectaron observaciones en la placa")
-      }
-
-      const science = {
-        imageTop: Math.round(boundingBoxes[0].y),
+      const roles = pickSpectrumRoles(boundingBoxes ?? [])
+      const toExtent = (box: DetectedBox) => ({
+        imageTop: Math.round(box.y),
         imageLeft: 0,
         imageWidth: img.naturalWidth,
-        imageHeight: Math.round(boundingBoxes[0].height),
-      }
-      const lamp1 = {
-        imageTop: Math.round(boundingBoxes[1].y),
-        imageLeft: 0,
-        imageWidth: img.naturalWidth,
-        imageHeight: Math.round(boundingBoxes[1].height),
-      }
-      const lamp2 = {
-        imageTop: Math.round(boundingBoxes[2].y),
-        imageLeft: 0,
-        imageWidth: img.naturalWidth,
-        imageHeight: Math.round(boundingBoxes[2].height),
-      }
+        imageHeight: Math.round(box.height),
+      })
+      const science = toExtent(roles.science)
+      const lamp1 = toExtent(roles.lamp1)
+      const lamp2 = toExtent(roles.lamp2)
 
       const newSpectrums = await addSpectrums({
         data: { observationId, science, lamp1, lamp2 },
