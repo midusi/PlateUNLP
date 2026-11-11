@@ -197,64 +197,35 @@ export function ObservationsList({
             if (rotatePlateMut.isPending) return
             rotatePlateMut.mutate("right")
           }}
-          onBoundingBoxChange={(changedBox) => {
-            setBoundingBoxes((prev) => {
-              const activeBoxPrev = prev.find((b) => b.id === changedBox.id)
-              const newLeft = changedBox.left ?? activeBoxPrev?.left ?? 0
-              const newWidth = changedBox.width ?? activeBoxPrev?.width ?? 0
-
-              return prev.map((box) => ({
-                ...box,
-                ...(box.id === changedBox.id ? changedBox : {}),
-                left: newLeft,
-                width: newWidth,
-              }))
-            })
+          onBoundingBoxChange={(boundingBox) => {
+            setBoundingBoxes((prev) =>
+              prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),
+            )
           }}
-          onBoundingBoxChangeEnd={async (changedBox) => {
+          onBoundingBoxChangeEnd={async (boundingBox) => {
             try {
-              const activeBox = boundingBoxes.find((b) => b.id === changedBox.id)
-              const newName = changedBox.label ?? changedBox.name ?? activeBox?.name ?? activeBox?.label
+              const newName = boundingBox.label ?? boundingBox.name
 
               // Validar que no exista otro nombre igual
               const duplicateName = boundingBoxes.some(
-                (box) => box.id !== changedBox.id && (box.name ?? box.label) === newName,
+                (box) => box.id !== boundingBox.id && (box.name ?? box.label) === newName,
               )
               if (duplicateName) {
                 notifyError("Error", new Error(`The name '${newName}' already exists in another observation. Please choose a unique name.`))
                 return
               }
 
-              const finalLeft = changedBox.left ?? activeBox?.left ?? 0
-              const finalWidth = changedBox.width ?? activeBox?.width ?? 0
-
-              await Promise.all(
-                boundingBoxes.map((box) => {
-                  const finalTop = box.id === changedBox.id ? (changedBox.top ?? box.top) : box.top
-                  const finalHeight = box.id === changedBox.id
-                    ? (changedBox.height ?? box.height)
-                    : box.height
-                  const finalName = box.id === changedBox.id
-                    ? newName
-                    : (box.name ?? box.label ?? generateSequentialLabel(0))
-                  const finalObsN = getObsNFromLabel(
-                    box.id === changedBox.id ? newName : (box.label ?? box.name),
-                    boundingBoxes,
-                  )
-
-                  return updateObservation({
-                    data: {
-                      observationId: box.id,
-                      name: finalName,
-                      "OBS-N": finalObsN,
-                      imageTop: Math.round(finalTop ?? 0),
-                      imageLeft: Math.round(finalLeft),
-                      imageWidth: Math.round(finalWidth),
-                      imageHeight: Math.round(finalHeight ?? 1),
-                    },
-                  })
-                }),
-              )
+              await updateObservation({
+                data: {
+                  observationId: boundingBox.id,
+                  name: newName,
+                  "OBS-N": getObsNFromLabel(newName, boundingBoxes),
+                  imageTop: Math.round(boundingBox.top),
+                  imageLeft: Math.round(boundingBox.left),
+                  imageWidth: Math.round(boundingBox.width),
+                  imageHeight: Math.round(boundingBox.height),
+                },
+              })
               router.invalidate()
             } catch (error) {
               notifyError("Error saving observation", error)
