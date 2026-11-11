@@ -205,6 +205,15 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
     },
   })
 
+  /** Liberar los tensores de los analisis al desmontar (el extractor se remonta al cambiar los espectros). */
+  const analysisArrRef = useRef(analysisArr)
+  analysisArrRef.current = analysisArr
+  useEffect(() => {
+    return () => {
+      for (const { analysis } of analysisArrRef.current) analysis.spectrumMask.dispose()
+    }
+  }, [])
+
   useEffect(() => {
     form.setFieldValue("spectrums", orderedSpectrums)
     if (observationTensor) {
