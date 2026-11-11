@@ -83,7 +83,7 @@ export function SpectrumsList({
     "0.0.9.m.obb.components.cont2.onnx",
     classesSpectrumPartSegmentation,
     false,
-    0.5,
+    0.4,
   )
 
   const determineBBMut = useMutation({
