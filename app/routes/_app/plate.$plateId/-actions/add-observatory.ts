@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { ianaTimezone } from "~/types/utils"
 
 export const addObservatory = createServerFn({ method: "POST" })
   .validator(
@@ -11,7 +12,7 @@ export const addObservatory = createServerFn({ method: "POST" })
       latitude: z.number().min(-90).max(90),
       longitude: z.number().min(-180).max(180),
       elevation: z.number(),
-      timezone: z.string().min(1),
+      timezone: ianaTimezone(),
       aliases: z.array(z.string().min(1)).optional(),
       source: z.enum(["astropy-data", "plateunlp", "user"]).optional(),
     }),
