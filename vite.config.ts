@@ -28,8 +28,4 @@ export default defineConfig({
   ssr: {
     noExternal: ["hashvatar"],
   },
-  assetsInclude: ["**/*.onnx"],
-  optimizeDeps: {
-    exclude: ["onnxruntime-web"],
-  },
 })
