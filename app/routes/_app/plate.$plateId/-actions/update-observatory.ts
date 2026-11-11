@@ -7,15 +7,21 @@ import { ianaTimezone } from "~/types/utils"
 
 export const updateObservatory = createServerFn({ method: "POST" })
   .validator(
-    z.object({
-      observatoryId: z.string().min(1),
-      name: z.string().min(1).optional(),
-      latitude: z.number().min(-90).max(90).optional(),
-      longitude: z.number().min(-180).max(180).optional(),
-      elevation: z.number().optional(),
-      timezone: ianaTimezone().optional(),
-      aliases: z.array(z.string().min(1)).optional(),
-    }),
+    z
+      .object({
+        observatoryId: z.string().min(1),
+        name: z.string().min(1).optional(),
+        latitude: z.number().min(-90).max(90).optional(),
+        longitude: z.number().min(-180).max(180).optional(),
+        elevation: z.number().optional(),
+        timezone: ianaTimezone().optional(),
+        aliases: z.array(z.string().min(1)).optional(),
+      })
+      .refine(
+        ({ observatoryId: _observatoryId, ...fields }) =>
+          Object.values(fields).some((value) => value !== undefined),
+        "At least one field to update is required",
+      ),
   )
   .handler(async ({ data }) => {
     const observatory = await db.query.observatory.findFirst({

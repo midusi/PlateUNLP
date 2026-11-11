@@ -6,19 +6,25 @@ import * as s from "~/db/schema"
 
 export const updateMaterial = createServerFn({ method: "POST" })
   .validator(
-    z.object({
-      materialId: z.string().min(1),
-      name: z.string().min(1).optional(),
-      arr: z
-        .array(
-          z.object({
-            wavelength: z.number(),
-            material: z.string(),
-            intensity: z.number(),
-          }),
-        )
-        .optional(),
-    }),
+    z
+      .object({
+        materialId: z.string().min(1),
+        name: z.string().min(1).optional(),
+        arr: z
+          .array(
+            z.object({
+              wavelength: z.number(),
+              material: z.string(),
+              intensity: z.number(),
+            }),
+          )
+          .optional(),
+      })
+      .refine(
+        ({ materialId: _materialId, ...fields }) =>
+          Object.values(fields).some((value) => value !== undefined),
+        "At least one field to update is required",
+      ),
   )
   .handler(async ({ data }) => {
     const material = await db.query.material.findFirst({
