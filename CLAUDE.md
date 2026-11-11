@@ -50,7 +50,7 @@ in there are stale; the prose is correct.
 | Model | Runtime | File | Loaded by |
 |-------|---------|------|-----------|
 | Observation detector | `onnxruntime-node` (server) | `app/models/detect_observations/0.0.7.m.obb.observation.cont.onnx` | `get-observations-detections.ts`, path is **hardcoded relative to cwd** |
-| Spectrum-part segmenter | `onnxruntime-web` (browser) | `public/models/spectrum_part_segmentator.onnx` (38 MB) | `use-predict-BBs.ts`, fetched from `/models/…` |
+| Spectrum-part detector | `onnxruntime-node` (server) | `app/models/detect_observations/0.0.9.m.obb.components.cont2.onnx` | `app/routes/_app/-actions/predict-bounding-boxes.ts` (via `use-predict-BBs.ts`), model name passed from `SpectrumsList.tsx` |
 
 The Dockerfile copies `app/models` into the runner image explicitly — if you move or rename the
 server model, update `Dockerfile` too.
