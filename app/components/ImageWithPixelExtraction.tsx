@@ -1,5 +1,5 @@
 import { useMeasure } from "@uidotdev/usehooks"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useViewportGestures, type XViewportController } from "~/hooks/use-x-viewport"
 import { normalHalfLength, pointOnNormal, type TraceFunctions } from "~/lib/extract-features"
 import { loadImage } from "~/lib/load-image"
@@ -19,6 +19,12 @@ interface ImageWithPixelExtractionProps {
   derivedFunction?: (x: number) => number
   /** Dibuja las normales a la traza sobre las que se promedia cada columna. */
   showNormals?: boolean
+  /**
+   * Pixeles del recorte que la extraccion vio tapados por mascaras de otros
+   * espectros (`data[fila * width + columna]` vale 1 si lo estan). Se pintan
+   * encima de la imagen.
+   */
+  maskOverlay?: { data: Uint8Array; width: number; height: number } | null
   /** Rango de columnas visibles, compartido con el grafico 1D. */
   xViewport: XViewportController
 }
@@ -33,6 +39,8 @@ const DASH_PATTERN = [4, 4]
 const CURVE_SAMPLE_STEP = 2
 const DRAW_COLOR = "red"
 const NORMAL_COLOR = "#22d3ee"
+/** Color (RGBA) con el que se pintan los pixeles tapados por una mascara. */
+const MASK_RGBA = [217, 70, 239, 140] as const
 /** Distancia en pantalla, en pixeles, entre dos normales consecutivas. */
 const NORMAL_SPACING = 18
 
@@ -97,6 +105,22 @@ function strokeNormals(
   ctx.stroke()
 }
 
+/** Canvas del tamaño del recorte con los pixeles enmascarados pintados, listo para escalar. */
+function renderMaskCanvas(overlay: { data: Uint8Array; width: number; height: number }) {
+  const canvas = document.createElement("canvas")
+  canvas.width = overlay.width
+  canvas.height = overlay.height
+  const ctx = canvas.getContext("2d")
+  if (!ctx) return null
+  const pixels = ctx.createImageData(overlay.width, overlay.height)
+  for (let i = 0; i < overlay.data.length; i++) {
+    if (!overlay.data[i]) continue
+    pixels.data.set(MASK_RGBA, i * 4)
+  }
+  ctx.putImageData(pixels, 0, 0)
+  return canvas
+}
+
 /**
  * Imagen del recorte de un espectro, a todo el ancho disponible, con la traza,
  * la apertura y los centros dibujados encima. Muestra solo las columnas de
@@ -109,9 +133,14 @@ export function ImageWithPixelExtraction({
   opening,
   derivedFunction,
   showNormals,
+  maskOverlay,
   xViewport,
 }: ImageWithPixelExtractionProps) {
   const { viewport, isZoomed } = xViewport
+  const maskCanvas = useMemo(
+    () => (maskOverlay ? renderMaskCanvas(maskOverlay) : null),
+    [maskOverlay],
+  )
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [measureRef, { width: cssWidth, height: cssHeight }] = useMeasure()
   const gestureRef = useViewportGestures<HTMLDivElement>(xViewport)
@@ -170,6 +199,21 @@ export function ImageWithPixelExtraction({
       canvas.height,
     )
 
+    if (maskCanvas) {
+      ctx.imageSmoothingEnabled = false
+      ctx.drawImage(
+        maskCanvas,
+        viewport.start,
+        0,
+        span,
+        maskCanvas.height,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      )
+    }
+
     ctx.fillStyle = DRAW_COLOR
     ctx.strokeStyle = DRAW_COLOR
     ctx.lineWidth = LINE_WIDTH * dpr
@@ -218,6 +262,7 @@ export function ImageWithPixelExtraction({
     opening,
     derivedFunction,
     showNormals,
+    maskCanvas,
   ])
 
   return (

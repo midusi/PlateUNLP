@@ -13,6 +13,7 @@ import type { getSpectrums } from "../-actions/get-spectrums"
 import { updateSpectrum } from "../-actions/update-spectrum"
 import { updateSpectrumsIntensityArr } from "../-actions/update-spectrums-intensity-arr"
 import { updateSpectrumsTypes } from "../-actions/update-spectrums-types"
+import type { MaskSource } from "../-utils/build-applied-mask-overlay"
 import { recalculateSpectrums1D } from "../-utils/recalculate-spectrums-1d"
 import { toRecalculate } from "../-utils/to-recalculate"
 import { SpectrumCard } from "./SpectrumCard"
@@ -29,6 +30,9 @@ interface Spectrum {
   apertureCoefficient: number
   fitDegree: number
 }
+/** Referencia estable para los espectros sin mascaras previas. */
+const NO_MASK_SOURCES: MaskSource[] = []
+
 type SpectrumsExtractorProps = {
   /** Id de la observacion */
   observationId: string
@@ -78,6 +82,28 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
   const [analysisArr, setAnalysisArr] = useState<
     { id: string; analysis: ExtractSpectrumResponse }[]
   >([])
+
+  /**
+   * Mascaras que ya estaban aplicadas cuando se extrajo cada espectro: el de
+   * ciencia se extrae primero y despues el resto, en orden, y cada uno tapa su
+   * apertura para los que siguen.
+   */
+  const maskSourcesById = useMemo(() => {
+    const principal = orderedSpectrums.find((s) => s.type === "science")
+    const extractionOrder = principal
+      ? [principal, ...orderedSpectrums.filter((s) => s !== principal)]
+      : orderedSpectrums
+    const byId = new Map<string, MaskSource[]>()
+    extractionOrder.forEach((target, position) => {
+      const sources: MaskSource[] = []
+      for (const source of extractionOrder.slice(0, position)) {
+        const analysis = analysisArr.find((a) => a.id === source.id)?.analysis
+        if (analysis) sources.push({ spectrum: source, mask: analysis.spectrumMask })
+      }
+      byId.set(target.id, sources)
+    })
+    return byId
+  }, [orderedSpectrums, analysisArr])
 
   /** Registro temporal de valores previos */
   const prevFormValues = useRef<{
@@ -270,6 +296,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                 type={item.type}
                 scienceCount={scienceCount}
                 isCalculating={state === "running"}
+                maskSources={maskSourcesById.get(item.id) ?? NO_MASK_SOURCES}
                 xViewport={xViewport}
               />
             )
