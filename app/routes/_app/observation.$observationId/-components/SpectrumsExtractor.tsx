@@ -3,6 +3,7 @@ import { useRouter } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 import type z from "zod"
 import { useAppForm } from "~/hooks/use-app-form"
+import { useXViewport } from "~/hooks/use-x-viewport"
 import type { ExtractSpectrumResponse } from "~/lib/extract-features"
 import { fetchGrayscaleImage } from "~/lib/image"
 import { notifyError } from "~/lib/notifications"
@@ -56,6 +57,16 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
       }))
       .sort((a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft)
   }, [spectrums])
+  /**
+   * Zoom compartido por todas las tarjetas: acercarse o desplazarse en una lo
+   * hace en las demas. Una columna por valor del grafico 1D (el recorte se hace
+   * con el ancho truncado); si los anchos difieren se usa el menor, para que el
+   * rango sea valido en todas.
+   */
+  const sharedLength = orderedSpectrums.length
+    ? Math.min(...orderedSpectrums.map((s) => Math.floor(s.imageWidth)))
+    : 0
+  const xViewport = useXViewport(sharedLength)
   /** Valores iniciales para el formulario de extraccion */
   const defaultValues: z.output<typeof ExtractionConfigurationSchema> = {
     spectrums: orderedSpectrums,
@@ -259,6 +270,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
                 type={item.type}
                 scienceCount={scienceCount}
                 isCalculating={state === "running"}
+                xViewport={xViewport}
               />
             )
           })

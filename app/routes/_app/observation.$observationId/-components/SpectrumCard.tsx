@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "~/components/ui/select"
 import { withForm } from "~/hooks/use-app-form"
-import { useXViewport } from "~/hooks/use-x-viewport"
+import type { XViewportController } from "~/hooks/use-x-viewport"
 import type { ExtractSpectrumResponse } from "~/lib/extract-features"
 import { cn } from "~/lib/utils"
 import {
@@ -55,6 +55,8 @@ export const SpectrumCard = withForm({
     scienceCount: 1,
     /** Hay un recalculo en curso: se muestra el resultado anterior, atenuado. */
     isCalculating: false,
+    /** Rango de columnas visibles, compartido por todas las tarjetas del extractor. */
+    xViewport: {} as XViewportController,
   },
   render: function Render({
     form,
@@ -65,9 +67,8 @@ export const SpectrumCard = withForm({
     type,
     scienceCount,
     isCalculating,
+    xViewport,
   }) {
-    /** Una columna por valor del grafico 1D (el recorte se hace con el ancho truncado). */
-    const xViewport = useXViewport(analysis.transversalAvgs.length)
     /** Dibuja las normales sobre las que se promedia cada columna. Solo de diagnostico. */
     const [showNormals, setShowNormals] = useState(false)
 
