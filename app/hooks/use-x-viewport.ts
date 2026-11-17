@@ -48,8 +48,9 @@ export type XViewportController = ReturnType<typeof useXViewport>
 
 /**
  * Gestos sobre un elemento que muestra las columnas del viewport de punta a
- * punta: rueda = zoom centrado en el cursor, arrastrar = desplazar y doble
- * clic = vista completa.
+ * punta: Control + rueda = zoom centrado en el cursor, arrastrar = desplazar y
+ * doble clic = vista completa. La rueda sola no hace zoom, como en el
+ * segmentador de la placa.
  *
  * Los listeners son nativos porque `onWheel` de React es pasivo y no permite
  * `preventDefault`, y asi el scroll de la pagina se frena solo cuando la rueda
@@ -87,6 +88,13 @@ export function useViewportGestures<T extends HTMLElement>({
         })
         return
       }
+
+      /**
+       * Sin Control la rueda es el scroll normal de la pagina: asi no se hace zoom
+       * sin querer al recorrer las tarjetas. El pellizco del trackpad llega como
+       * rueda con Control, asi que sigue funcionando.
+       */
+      if (!event.ctrlKey) return
 
       const factor = Math.exp(-event.deltaY * lineScale * WHEEL_ZOOM_SENSITIVITY)
       /** Con la vista completa alejar no hace nada: se deja pasar el scroll de la pagina. */
