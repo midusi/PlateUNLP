@@ -175,11 +175,24 @@ function binarizeProfiles(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
       .onesLike(profiles)
       .where(normalized.greater(PLATEAU_THRESHOLD), tf.zerosLike(profiles))
 
-    let window = Math.round(height * SMOOTHING_WINDOW_RATIO)
-    if (window % 2 === 0) window += 1
-    const kernel = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
-    return pushed.expandDims(2).conv1d(kernel, 1, "same").squeeze([2]) as tf.Tensor2D
+    return movingAverage(pushed as tf.Tensor2D, height)
   })
+}
+
+/** Ventana (impar) del suavizado de perfiles, en filas. */
+function smoothingWindow(height: number): number {
+  const window = Math.round(height * SMOOTHING_WINDOW_RATIO)
+  return window % 2 === 0 ? window + 1 : window
+}
+
+/** Promedio movil sobre las filas de cada perfil; los bordes se rellenan con ceros. */
+function movingAverage(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
+  const window = smoothingWindow(height)
+  // El kernel se crea dentro del tidy: asi se libera junto con los intermedios.
+  return tf.tidy(() => {
+    const kernel = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
+    return profiles.expandDims(2).conv1d(kernel, 1, "same").squeeze([2])
+  }) as tf.Tensor2D
 }
 
 /** Contraste (max - min) de cada perfil. */
