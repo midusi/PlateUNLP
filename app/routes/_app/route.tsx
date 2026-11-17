@@ -79,7 +79,7 @@ function RouteComponent() {
   return (
     <div className="flex h-svh w-full flex-col">
       <header className="shrink-0 border-olive-300 border-b bg-white text-sm">
-        <div className="mx-auto flex h-16 w-full max-w-9/12 items-center justify-between px-4">
+        <div className="mx-auto flex h-16 w-full max-w-11/12 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Link to="/" className="text-olive-950 transition-colors hover:text-orange-600">
               <span className="icon-[ph--shooting-star-duotone] size-5 min-w-5" />
@@ -163,7 +163,7 @@ function RouteComponent() {
         </div>
       </header>
       <div className="flex w-full flex-1 flex-col overflow-y-auto bg-accent">
-        <main className={cn("mx-auto flex w-full flex-1 flex-col gap-4 p-4", "max-w-9/12")}>
+        <main className={cn("mx-auto flex w-full flex-1 flex-col gap-4 p-4", "max-w-11/12")}>
           <Outlet />
         </main>
         <footer className="mt-12 flex items-center justify-evenly border-olive-300 border-t p-4">
