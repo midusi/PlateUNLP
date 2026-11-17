@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import type z from "zod"
 import { ImageWithPixelExtraction } from "~/components/ImageWithPixelExtraction"
 import { SimpleFunctionXY } from "~/components/SimpleFunctionXY"
@@ -20,6 +20,7 @@ import {
   FIT_DEGREE_MAX,
   FIT_DEGREE_MIN,
 } from "~/types/spectrum-metadata"
+import { buildAppliedMaskOverlay, type MaskSource } from "../-utils/build-applied-mask-overlay"
 import { type SpectrumType, setSpectrumType } from "../-utils/set-spectrum-type"
 
 const TYPE_OPTIONS: { value: SpectrumType; label: string }[] = [
@@ -55,6 +56,8 @@ export const SpectrumCard = withForm({
     scienceCount: 1,
     /** Hay un recalculo en curso: se muestra el resultado anterior, atenuado. */
     isCalculating: false,
+    /** Mascaras de los espectros extraidos antes que este, que tapan parte de su recorte. */
+    maskSources: [] as MaskSource[],
     /** Rango de columnas visibles, compartido por todas las tarjetas del extractor. */
     xViewport: {} as XViewportController,
   },
@@ -67,10 +70,17 @@ export const SpectrumCard = withForm({
     type,
     scienceCount,
     isCalculating,
+    maskSources,
     xViewport,
   }) {
     /** Dibuja las normales sobre las que se promedia cada columna. Solo de diagnostico. */
     const [showNormals, setShowNormals] = useState(false)
+    /** Pinta lo que las mascaras de otros espectros taparon antes de extraer este. */
+    const [showMasks, setShowMasks] = useState(false)
+    const maskOverlay = useMemo(
+      () => (showMasks ? buildAppliedMaskOverlay(spectrum, maskSources) : null),
+      [showMasks, spectrum, maskSources],
+    )
 
     return (
       <Card className="gap-0 overflow-hidden py-0" aria-busy={isCalculating}>
@@ -143,6 +153,17 @@ export const SpectrumCard = withForm({
               <span className="icon-[ph--ruler]" />
             </Button>
             <Button
+              variant={showMasks ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Show masks"
+              aria-pressed={showMasks}
+              title="Show the regions masked out by the spectra extracted before this one"
+              disabled={maskSources.length === 0}
+              onClick={() => setShowMasks((shown) => !shown)}
+            >
+              <span className="icon-[ph--mask-happy]" />
+            </Button>
+            <Button
               variant="ghost"
               size="icon"
               aria-label="Reset zoom"
@@ -180,6 +201,7 @@ export const SpectrumCard = withForm({
             opening={analysis.opening}
             derivedFunction={analysis.derivedFunction}
             showNormals={showNormals}
+            maskOverlay={maskOverlay}
             xViewport={xViewport}
           />
           <SimpleFunctionXY data={analysis.transversalAvgs} xViewport={xViewport} />
