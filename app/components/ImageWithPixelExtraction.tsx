@@ -1,6 +1,7 @@
 import { useMeasure } from "@uidotdev/usehooks"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useViewportGestures, type XViewportController } from "~/hooks/use-x-viewport"
+import { normalHalfLength, pointOnNormal, type TraceFunctions } from "~/lib/extract-features"
 import { loadImage } from "~/lib/load-image"
 import { cn } from "~/lib/utils"
 import type { Point } from "~/types/Point"
@@ -14,6 +15,10 @@ interface ImageWithPixelExtractionProps {
   drawFunction: (x: number) => number
   /** Apertura (alto, en pixeles) alrededor de la traza. */
   opening?: number
+  /** Derivada de la traza. Hace falta, junto con `opening`, para dibujar las normales. */
+  derivedFunction?: (x: number) => number
+  /** Dibuja las normales a la traza sobre las que se promedia cada columna. */
+  showNormals?: boolean
   /** Rango de columnas visibles, compartido con el grafico 1D. */
   xViewport: XViewportController
 }
@@ -27,6 +32,9 @@ const DASH_PATTERN = [4, 4]
 /** Distancia, en pixeles de pantalla, entre dos muestras consecutivas de una curva. */
 const CURVE_SAMPLE_STEP = 2
 const DRAW_COLOR = "red"
+const NORMAL_COLOR = "#22d3ee"
+/** Distancia en pantalla, en pixeles, entre dos normales consecutivas. */
+const NORMAL_SPACING = 18
 
 /** Escala del dibujo: de coordenadas del recorte a pixeles del canvas. */
 interface CanvasScale {
@@ -62,6 +70,34 @@ function strokeCurve(
 }
 
 /**
+ * Dibuja, cada `NORMAL_SPACING` px de pantalla, el segmento de la normal a la
+ * traza que `averageAcrossAperture` promedia en esa columna. Los extremos se
+ * calculan en coordenadas del recorte y recien despues se escalan, asi que si
+ * el zoom estira solo el eje x se ven tal cual los usa la extraccion.
+ */
+function strokeNormals(
+  ctx: CanvasRenderingContext2D,
+  trace: TraceFunctions,
+  opening: number,
+  scale: CanvasScale,
+  viewport: { start: number; end: number },
+  dpr: number,
+) {
+  const stepColumns = Math.max(1, Math.round((NORMAL_SPACING * dpr) / scale.x))
+  const first = Math.ceil(viewport.start / stepColumns) * stepColumns
+  ctx.strokeStyle = NORMAL_COLOR
+  ctx.beginPath()
+  for (let x = first; x < viewport.end; x += stepColumns) {
+    const half = normalHalfLength(trace, x, opening)
+    const top = pointOnNormal(trace, x, -half)
+    const bottom = pointOnNormal(trace, x, half)
+    ctx.moveTo((top.x + 0.5 - viewport.start) * scale.x, (top.y + 0.5) * scale.y)
+    ctx.lineTo((bottom.x + 0.5 - viewport.start) * scale.x, (bottom.y + 0.5) * scale.y)
+  }
+  ctx.stroke()
+}
+
+/**
  * Imagen del recorte de un espectro, a todo el ancho disponible, con la traza,
  * la apertura y los centros dibujados encima. Muestra solo las columnas de
  * `xViewport`, y permite acercarse y desplazarse.
@@ -71,6 +107,8 @@ export function ImageWithPixelExtraction({
   pointsWMed,
   drawFunction,
   opening,
+  derivedFunction,
+  showNormals,
   xViewport,
 }: ImageWithPixelExtractionProps) {
   const { viewport, isZoomed } = xViewport
@@ -149,6 +187,18 @@ export function ImageWithPixelExtraction({
       ctx.fill()
     }
 
+    if (showNormals && opening && derivedFunction) {
+      strokeNormals(
+        ctx,
+        { funct: drawFunction, derived: derivedFunction },
+        opening,
+        scale,
+        viewport,
+        dpr,
+      )
+      ctx.strokeStyle = DRAW_COLOR
+    }
+
     strokeCurve(ctx, drawFunction, 0, scale, canvas.width)
 
     if (opening) {
@@ -157,7 +207,18 @@ export function ImageWithPixelExtraction({
       strokeCurve(ctx, drawFunction, -opening / 2, scale, canvas.width)
       ctx.setLineDash([])
     }
-  }, [source, cssWidth, cssHeight, viewport, image, pointsWMed, drawFunction, opening])
+  }, [
+    source,
+    cssWidth,
+    cssHeight,
+    viewport,
+    image,
+    pointsWMed,
+    drawFunction,
+    opening,
+    derivedFunction,
+    showNormals,
+  ])
 
   return (
     <div

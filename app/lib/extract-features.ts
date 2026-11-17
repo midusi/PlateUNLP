@@ -279,6 +279,27 @@ function buildApertureMask(
   })
 }
 
+/**
+ * Punto de la normal a la traza en la columna `x`, a `t` pixeles del centro
+ * medidos sobre la normal (positivo hacia abajo). Es la geometria que usa
+ * `averageAcrossAperture`, exportada para que la interfaz dibuje lo mismo.
+ */
+export function pointOnNormal(trace: TraceFunctions, x: number, t: number): Point {
+  const slope = trace.derived(x)
+  const norm = Math.sqrt(1 + slope * slope)
+  return { x: x - (t * slope) / norm, y: trace.funct(x) + t / norm }
+}
+
+/**
+ * Semilongitud, sobre la normal en la columna `x`, de la banda de apertura.
+ * `opening` es el alto vertical de la banda, que sobre la normal mide
+ * `opening / sqrt(1 + y'^2)`.
+ */
+export function normalHalfLength(trace: TraceFunctions, x: number, opening: number): number {
+  const slope = trace.derived(x)
+  return opening / (2 * Math.sqrt(1 + slope * slope))
+}
+
 /** Valor interpolado bilinealmente en (x, y) de una imagen [height, width], o undefined si cae fuera. */
 function sampleBilinear(
   data: Float32Array | Int32Array | Uint8Array,
@@ -316,22 +337,15 @@ function averageAcrossAperture(
 ): number[] {
   const data = gray2d.dataSync()
   return Array.from({ length: width }, (_, x) => {
-    const slope = trace.derived(x)
-    const norm = Math.sqrt(1 + slope * slope)
-    const center = trace.funct(x)
-    const half = opening / (2 * norm)
+    const half = normalHalfLength(trace, x, opening)
     /** Una muestra por pixel de espesor, tomadas en el medio de cada tramo. */
     const count = Math.max(1, Math.round(2 * half))
     let sum = 0
     let valid = 0
     for (let k = 0; k < count; k++) {
       const t = -half + ((k + 0.5) * 2 * half) / count
-      const value = sampleBilinear(
-        data,
-        { width, height },
-        x - (t * slope) / norm,
-        center + t / norm,
-      )
+      const point = pointOnNormal(trace, x, t)
+      const value = sampleBilinear(data, { width, height }, point.x, point.y)
       if (value === undefined) continue
       sum += value
       valid++
