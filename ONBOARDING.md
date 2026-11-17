@@ -36,7 +36,7 @@ pnpm dev              # http://localhost:3000
 ```
 
 - Usuario admin de desarrollo: `admin` / `plateunlp` (definido en `db/seed.ts`).
-- Hay placas de ejemplo para probar manualmente en `public/forTest/` (p. ej. `placa_ejemplo.png`).
+- Hay placas de ejemplo para probar manualmente en `public/forTest/plates/` (p. ej. `placa_ejemplo.png`).
 - **`pnpm db:init` borra `.local/` por completo** (`rm -rf`) antes de re-sembrar. Solo correrlo
   sobre una base de datos que sea intencionalmente descartable. Para aplicar migraciones nuevas sin
   perder datos, usar `pnpm db:migrate`.

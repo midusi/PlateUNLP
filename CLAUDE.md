@@ -99,7 +99,7 @@ db/
   seed.ts, dev-init.ts
 docs/                     fumadocs MDX
 dataset/                  sample FITS + reference lamp spectra (not shipped)
-public/forTest/           sample plate scans usable for manual testing
+public/forTest/           sample data for manual testing: plates/ observations/ spectra/ fits/ calibration/
 ```
 
 Directories prefixed with `-` inside `routes/` are **excluded from routing** by TanStack — that is
@@ -174,7 +174,7 @@ disposable database. To just apply new migrations use `pnpm db:migrate`.
 
 Dev seed admin: username `admin` / password `plateunlp` (`db/seed.ts`).
 
-Sample plate scans for manual testing live in `public/forTest/` (e.g. `placa_ejemplo.png`) and are
+Sample plate scans for manual testing live in `public/forTest/plates/` (e.g. `placa_ejemplo.png`) and are
 served by the dev server.
 
 Required env (`.env`, see `.env.sample`): `DATABASE_URL`, `UPLOADS_DIR`, `BETTER_AUTH_SECRET`,
