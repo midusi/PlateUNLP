@@ -1,3 +1,4 @@
+import { useState } from "react"
 import type z from "zod"
 import { ImageWithPixelExtraction } from "~/components/ImageWithPixelExtraction"
 import { SimpleFunctionXY } from "~/components/SimpleFunctionXY"
@@ -43,10 +44,11 @@ export const SpectrumCard = withForm({
       mediasPoints: [],
       opening: 0,
       rectFunction: (x: number) => x,
+      derivedFunction: () => 1,
       transversalAvgs: [],
     } as Pick<
       ExtractSpectrumResponse,
-      "mediasPoints" | "opening" | "rectFunction" | "transversalAvgs"
+      "mediasPoints" | "opening" | "rectFunction" | "derivedFunction" | "transversalAvgs"
     >,
     type: "science" as SpectrumType,
     /** Cantidad de espectros de ciencia, para no dejar la observacion sin ninguno. */
@@ -66,6 +68,8 @@ export const SpectrumCard = withForm({
   }) {
     /** Una columna por valor del grafico 1D (el recorte se hace con el ancho truncado). */
     const xViewport = useXViewport(analysis.transversalAvgs.length)
+    /** Dibuja las normales sobre las que se promedia cada columna. Solo de diagnostico. */
+    const [showNormals, setShowNormals] = useState(false)
 
     return (
       <Card className="gap-0 overflow-hidden py-0" aria-busy={isCalculating}>
@@ -128,6 +132,16 @@ export const SpectrumCard = withForm({
 
           <div className="ml-auto flex shrink-0 items-center gap-1">
             <Button
+              variant={showNormals ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Show normals"
+              aria-pressed={showNormals}
+              title="Show the perpendiculars the aperture is averaged along"
+              onClick={() => setShowNormals((shown) => !shown)}
+            >
+              <span className="icon-[ph--ruler]" />
+            </Button>
+            <Button
               variant="ghost"
               size="icon"
               aria-label="Reset zoom"
@@ -163,6 +177,8 @@ export const SpectrumCard = withForm({
             pointsWMed={analysis.mediasPoints}
             drawFunction={analysis.rectFunction}
             opening={analysis.opening}
+            derivedFunction={analysis.derivedFunction}
+            showNormals={showNormals}
             xViewport={xViewport}
           />
           <SimpleFunctionXY data={analysis.transversalAvgs} xViewport={xViewport} />
