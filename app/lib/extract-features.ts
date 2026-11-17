@@ -20,6 +20,16 @@ const MIN_CONTRAST_RATIO = 0.25
  */
 const CONTRAST_REFERENCE_PERCENTILE = 0.9
 
+/** Centros vecinos, a cada lado, con los que se compara la continuidad de la traza. */
+const CONTINUITY_NEIGHBOURS = 5
+/**
+ * Cuanto puede apartarse un centro de lo que predicen sus vecinos, como
+ * fraccion de la apertura detectada, antes de considerarlo un salto.
+ */
+const CONTINUITY_TOLERANCE_RATIO = 0.2
+/** Tolerancia minima de continuidad, en pixeles: el centro de un altiplano vibra ~1 px. */
+const MIN_CONTINUITY_TOLERANCE = 1.5
+
 /** Z-score al que se recortan los outliers de cada perfil (~95% en una normal). */
 const OUTLIER_Z_THRESHOLD = 1.96
 /** Umbral, sobre el perfil normalizado, que separa espectro de fondo. */
@@ -262,6 +272,34 @@ function findTraceAnchors(
 }
 
 /**
+ * Centros que siguen la tendencia de sus vecinos. Cada uno se compara con la
+ * recta (Theil-Sen, robusta) que ajustan los `CONTINUITY_NEIGHBOURS` centros
+ * de cada lado, sin contarlo: una traza real no salta de un centro al
+ * siguiente, y un centro aislado que lo hace es luz de otro espectro o ruido.
+ * El ajuste global no lo ve porque lo promedia con el resto.
+ */
+function continuousAnchors(anchors: Anchor[]): boolean[] {
+  const tolerance = Math.max(
+    MIN_CONTINUITY_TOLERANCE,
+    CONTINUITY_TOLERANCE_RATIO * median(anchors.map((a) => a.opening)),
+  )
+  return anchors.map((anchor, i) => {
+    const neighbours = anchors.filter((_, j) => j !== i && Math.abs(j - i) <= CONTINUITY_NEIGHBOURS)
+    if (neighbours.length < 3) return true
+    const slopes: number[] = []
+    for (let a = 0; a < neighbours.length; a++) {
+      for (let b = a + 1; b < neighbours.length; b++) {
+        const dx = neighbours[b].x - neighbours[a].x
+        if (dx !== 0) slopes.push((neighbours[b].y - neighbours[a].y) / dx)
+      }
+    }
+    const slope = median(slopes)
+    const intercept = median(neighbours.map((n) => n.y - slope * n.x))
+    return Math.abs(anchor.y - (slope * anchor.x + intercept)) <= tolerance
+  })
+}
+
+/**
  * Reusa la traza base desplazada, o ajusta una nueva sobre los centros hallados.
  * En ambos casos los centros que se alejan de la tendencia (defectos de la
  * placa, fugas del espectro vecino) se marcan como no validos.
@@ -284,20 +322,27 @@ function buildTraceFunctions(
       inliers: offsets.map((o) => sigma < 1e-9 || weight(Math.abs(o - offset) / sigma) > 0),
     }
   }
-  const xs = anchors.map((p) => p.x)
-  const ys = anchors.map((p) => p.y)
+  // Se ajusta solo con los centros continuos; el resto queda como no valido.
+  const continuous = continuousAnchors(anchors)
+  const useContinuous = continuous.filter(Boolean).length >= 2
+  const keep = anchors.map((_, i) => !useContinuous || continuous[i])
+  const xs = anchors.filter((_, i) => keep[i]).map((p) => p.x)
+  const ys = anchors.filter((_, i) => keep[i]).map((p) => p.y)
   // Los outliers se buscan con un polinomio del grado pedido: una recta no
   // describe un espectro curvo y deja pasar las anclas que se enganchan a las
   // lineas de un espectro vecino. Con menos anclas que parametros no hay ajuste.
   const degree = Math.min(fitDegree, MAX_POLYNOMIAL_DEGREE, xs.length - 1)
   const fit = robustPolyFit(xs, ys, { degree, weight: hardCutWeight(TRACE_MAD_K) })
-  if (fitDegree <= MAX_POLYNOMIAL_DEGREE) return { trace: fit, inliers: fit.inliers }
+  /** Vuelve del subconjunto ajustado a todos los centros. */
+  let next = 0
+  const inliers = keep.map((kept) => kept && fit.inliers[next++])
+  if (fitDegree <= MAX_POLYNOMIAL_DEGREE) return { trace: fit, inliers }
   return {
     trace: splineCuadratic(
       xs.filter((_, i) => fit.inliers[i]),
       ys.filter((_, i) => fit.inliers[i]),
     ),
-    inliers: fit.inliers,
+    inliers,
   }
 }
 
