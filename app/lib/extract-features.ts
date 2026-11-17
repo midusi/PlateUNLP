@@ -13,6 +13,12 @@ const TRACE_MAD_K = 3
  * contrastes, para fiarse de su centro. Sin linea ni continuo no hay senal.
  */
 const MIN_CONTRAST_RATIO = 0.25
+/**
+ * Percentil de los contrastes que se toma como "senal fuerte" de referencia.
+ * No es la mediana: en una lampara con lineas solo en un tramo, la mayoria de
+ * los segmentos son fondo y su mediana es ruido.
+ */
+const CONTRAST_REFERENCE_PERCENTILE = 0.9
 
 /** Z-score al que se recortan los outliers de cada perfil (~95% en una normal). */
 const OUTLIER_Z_THRESHOLD = 1.96
@@ -195,12 +201,31 @@ function movingAverage(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
   }) as tf.Tensor2D
 }
 
-/** Contraste (max - min) de cada perfil. */
-function profileContrasts(profiles: tf.Tensor2D): number[] {
-  const contrasts = tf.tidy(() => profiles.max(1).sub(profiles.min(1)))
+/**
+ * Contraste de cada perfil: rango (max - min) del perfil suavizado.
+ *
+ * Se mide sobre la imagen real y no sobre el perfil ponderado en los bordes:
+ * ahi el minimo siempre es ~0 por el peso, y el contraste termina siendo el
+ * brillo del fondo. Un segmento sin senal parecia tener tanto contraste como uno
+ * con lineas. Suavizar baja el ruido a una fraccion de su rango, mientras la
+ * banda del espectro (mas ancha que la ventana) casi no se toca. Se descartan
+ * las filas de los bordes, que el relleno con ceros de la media movil arrastra.
+ */
+function profileContrasts(profiles: tf.Tensor2D, height: number): number[] {
+  const margin = (smoothingWindow(height) - 1) / 2
+  const contrasts = tf.tidy(() => {
+    const smoothed = movingAverage(profiles, height).slice([0, margin], [-1, height - 2 * margin])
+    return smoothed.max(1).sub(smoothed.min(1))
+  })
   const values = contrasts.arraySync() as number[]
   contrasts.dispose()
   return values
+}
+
+/** Valor en el percentil `q` (0..1) de una lista, por rango mas cercano. */
+function percentile(values: number[], q: number): number {
+  const sorted = [...values].sort((a, b) => a - b)
+  return sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))]
 }
 
 /** Centro de un segmento y apertura del altiplano que lo ubica. */
@@ -230,7 +255,7 @@ function findTraceAnchors(
 ): Anchor[] {
   const profiles = binarized.arraySync() as number[][]
   const plateaus = profiles.map((profile) => findPlateau(profile, PLATEAU_THRESHOLD))
-  const minContrast = median(contrasts) * MIN_CONTRAST_RATIO
+  const minContrast = percentile(contrasts, CONTRAST_REFERENCE_PERCENTILE) * MIN_CONTRAST_RATIO
   const all = xpoints.map((x, i) => ({ x, y: plateaus[i].medium, opening: plateaus[i].opening }))
   const withSignal = all.filter((_, i) => contrasts[i] >= minContrast && plateaus[i].opening > 0)
   return withSignal.length >= 2 ? withSignal : all
@@ -390,7 +415,7 @@ export function extractSpectrum({
   const clamped = clampOutliers(weighted)
   const binarized = binarizeProfiles(clamped, height)
 
-  const anchors = findTraceAnchors(binarized, profileContrasts(clamped), xpoints)
+  const anchors = findTraceAnchors(binarized, profileContrasts(profiles, height), xpoints)
   const { trace, inliers } = buildTraceFunctions(anchors, fitDegree, baseTrace)
   const valid = anchors.filter((_, i) => inliers[i])
   const mediasPoints = valid.map(({ x, y }) => ({ x, y }))
