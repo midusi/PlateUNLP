@@ -113,6 +113,7 @@ export function ObservationsList({
     mutationFn: async (plateId: string) => {
       /** Detectar de observaciones */
       const observations = await getObservationDetections({ data: { plateId } })
+      console.log("Detections obtained from getObservationDetections:", observations)
       /** Salta error si algo impide que el proceso finalice */
       if (observations instanceof Response) {
         const errorText = await observations.text()
@@ -204,28 +205,25 @@ export function ObservationsList({
           onBoundingBoxChangeEnd={async (boundingBox) => {
             try {
               const newName = boundingBox.label ?? boundingBox.name
-              
+
               // Validar que no exista otro nombre igual
               const duplicateName = boundingBoxes.some(
-                (box) => box.id !== boundingBox.id && (box.name ?? box.label) === newName
+                (box) => box.id !== boundingBox.id && (box.name ?? box.label) === newName,
               )
               if (duplicateName) {
                 notifyError("Error", new Error(`The name '${newName}' already exists in another observation. Please choose a unique name.`))
                 return
               }
-              
-              // Generar OBS-N basado en el label
-              const newObsN = getObsNFromLabel(newName, boundingBoxes)
-              
+
               await updateObservation({
                 data: {
                   observationId: boundingBox.id,
                   name: newName,
-                  "OBS-N": newName,
-                  imageTop: boundingBox.top,
-                  imageLeft: boundingBox.left,
-                  imageWidth: boundingBox.width,
-                  imageHeight: boundingBox.height,
+                  "OBS-N": getObsNFromLabel(newName, boundingBoxes),
+                  imageTop: Math.round(boundingBox.top),
+                  imageLeft: Math.round(boundingBox.left),
+                  imageWidth: Math.round(boundingBox.width),
+                  imageHeight: Math.round(boundingBox.height),
                 },
               })
               router.invalidate()

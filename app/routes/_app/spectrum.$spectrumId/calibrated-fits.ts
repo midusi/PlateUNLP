@@ -95,6 +95,7 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
           scanAuthor: unknownable(plate.SCANAUTH, plate["SCANAUTH?"]),
           scannerNotes: unknownable(plate.SCANNOTE, plate["SCANNOTE?"]),
           scanCol: unknownable(plate.SCANCOL, plate["SCANCOL?"]),
+          datePlt: unknownable(plate.DATEPLT, plate["DATEPLT?"]),
           obsN: observation["OBS-N"] || undefined,
           objectNotes: unknownable(observation.OBJNOTES, observation["OBJNOTES?"]),
           object: unknownable(observation.OBJECT, observation["OBJECT?"]),

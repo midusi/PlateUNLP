@@ -28,31 +28,35 @@ export const updateSpectrum = createServerFn()
     })
     if (!spectrum) throw new Error(`Spectrum with id ${data.spectrumId} not found`)
 
-    if (
-      data.imageLeft !== undefined &&
-      data.imageWidth !== undefined &&
-      data.imageLeft + data.imageWidth > spectrum.observation.imageWidth
-    ) {
+    const nextLeft = data.imageLeft ?? spectrum.imageLeft
+    const nextWidth = data.imageWidth ?? spectrum.imageWidth
+    const nextTop = data.imageTop ?? spectrum.imageTop
+    const nextHeight = data.imageHeight ?? spectrum.imageHeight
+
+    if (nextLeft + nextWidth > spectrum.observation.imageWidth) {
       throw new Error("Bounding box exceeds plate image width")
     }
-    if (
-      data.imageTop !== undefined &&
-      data.imageHeight !== undefined &&
-      data.imageTop + data.imageHeight > spectrum.observation.imageHeight
-    ) {
+    if (nextTop + nextHeight > spectrum.observation.imageHeight) {
       throw new Error("Bounding box exceeds plate image height")
     }
+
+    const updates: Partial<typeof s.spectrum.$inferInsert> = {
+      ...(data.imageTop !== undefined && { imageTop: data.imageTop }),
+      ...(data.imageLeft !== undefined && { imageLeft: data.imageLeft }),
+      ...(data.imageWidth !== undefined && { imageWidth: data.imageWidth }),
+      ...(data.imageHeight !== undefined && { imageHeight: data.imageHeight }),
+      ...(data.apertureCoefficient !== undefined && {
+        apertureCoefficient: data.apertureCoefficient,
+      }),
+      ...(data.countMediasPoints !== undefined && {
+        countMediasPoints: data.countMediasPoints,
+      }),
+      ...(data.fitDegree !== undefined && { fitDegree: data.fitDegree }),
+      ...(data.type !== undefined && { type: data.type }),
+    }
+
     await db
       .update(s.spectrum)
-      .set({
-        imageTop: data.imageTop,
-        imageLeft: data.imageLeft,
-        imageWidth: data.imageWidth,
-        imageHeight: data.imageHeight,
-        apertureCoefficient: data.apertureCoefficient,
-        countMediasPoints: data.countMediasPoints,
-        fitDegree: data.fitDegree,
-        ...(data.type !== undefined && { type: data.type }),
-      })
+      .set(updates)
       .where(eq(s.spectrum.id, data.spectrumId))
   })

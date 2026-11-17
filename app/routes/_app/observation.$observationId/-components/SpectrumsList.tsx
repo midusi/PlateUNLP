@@ -7,11 +7,14 @@ import { Card, CardContent } from "~/components/ui/card"
 import { usePredictBBs } from "~/hooks/use-predict-BBs"
 import { notifyError } from "~/lib/notifications"
 import { cn } from "~/lib/utils"
-import { classesSpectrumDetection } from "~/types/BBClasses"
+import { classesSpectrumPartSegmentation } from "~/types/BBClasses"
+import type { BoundingBox as DetectedBox } from "~/types/BoundingBox"
 import { addSpectrum } from "../-actions/add-spectrum"
 import { addSpectrums } from "../-actions/add-spectrums"
 import { deleteSpectrum } from "../-actions/delete-spectrum"
 import { updateSpectrum } from "../-actions/update-spectrum"
+import { updateSpectrumsTypes } from "../-actions/update-spectrums-types"
+import { pickSpectrumRoles } from "../-utils/pick-spectrum-roles"
 
 
 export type Spectrum = {
@@ -77,10 +80,10 @@ export function SpectrumsList({
 
   const determineBBFunction = usePredictBBs(
     640,
-    "detect_observations.3.0.0.m.onnx",
-    classesSpectrumDetection,
+    "0.0.9.m.obb.components.cont2.onnx",
+    classesSpectrumPartSegmentation,
     false,
-    0.7,
+    0.4,
   )
 
   const determineBBMut = useMutation({
@@ -93,28 +96,16 @@ export function SpectrumsList({
       })
 
       const boundingBoxes = await determineBBFunction(observationId)
-      if (!boundingBoxes || boundingBoxes.length < 3) {
-        throw new Error("No se detectaron observaciones en la placa")
-      }
-
-      const science = {
-        imageTop: Math.round(boundingBoxes[0].y),
+      const roles = pickSpectrumRoles(boundingBoxes ?? [])
+      const toExtent = (box: DetectedBox) => ({
+        imageTop: Math.round(box.y),
         imageLeft: 0,
         imageWidth: img.naturalWidth,
-        imageHeight: Math.round(boundingBoxes[0].height),
-      }
-      const lamp1 = {
-        imageTop: Math.round(boundingBoxes[1].y),
-        imageLeft: 0,
-        imageWidth: img.naturalWidth,
-        imageHeight: Math.round(boundingBoxes[1].height),
-      }
-      const lamp2 = {
-        imageTop: Math.round(boundingBoxes[2].y),
-        imageLeft: 0,
-        imageWidth: img.naturalWidth,
-        imageHeight: Math.round(boundingBoxes[2].height),
-      }
+        imageHeight: Math.round(box.height),
+      })
+      const science = toExtent(roles.science)
+      const lamp1 = toExtent(roles.lamp1)
+      const lamp2 = toExtent(roles.lamp2)
 
       const newSpectrums = await addSpectrums({
         data: { observationId, science, lamp1, lamp2 },
@@ -143,14 +134,51 @@ export function SpectrumsList({
     onError: (error) => notifyError("Error adding spectrum", error),
   })
 
+  /**
+   * Borra solo el espectro indicado (la "x" de cada caja). Si era el de ciencia y quedan lámparas,
+   * la más cercana a él pasa a ser el de ciencia: siempre tiene que haber uno.
+   */
   const deleteSpectrumMut = useMutation({
     mutationFn: async (spectrumId: string) => {
-      await Promise.all(
-        boundingBoxes.map((box) => deleteSpectrum({ data: { spectrumId: box.id } }))
+      const deleted = boundingBoxes.find((box) => box.id === spectrumId)
+      await deleteSpectrum({ data: { spectrumId } })
+
+      if (deleted?.color !== "green") return { spectrumId, promotedId: null }
+      const centerY = (box: BoundingBox) => box.top + box.height / 2
+      const distance = (box: BoundingBox) => Math.abs(centerY(box) - centerY(deleted))
+      const heir = boundingBoxes
+        .filter((box) => box.id !== spectrumId && box.color === "red")
+        .sort((a, b) => distance(a) - distance(b) || a.top - b.top)[0]
+      if (!heir) return { spectrumId, promotedId: null }
+
+      await updateSpectrumsTypes({ data: [{ id: heir.id, type: "science" }] })
+      return { spectrumId, promotedId: heir.id }
+    },
+    onSuccess: ({ spectrumId, promotedId }) => {
+      setBoundingBoxes((prev) =>
+        prev
+          .filter((box) => box.id !== spectrumId)
+          .map((box) =>
+            box.id === promotedId ? { ...box, color: "green", label: "Science" } : box,
+          ),
       )
-      setBoundingBoxes((prev) => ([]))
+      router.invalidate()
     },
     onError: (error) => notifyError("Error deleting spectrum", error),
+  })
+
+  /** Borra todos los espectros de la observación (la escoba de la barra). */
+  const clearSpectrumsMut = useMutation({
+    mutationFn: async () => {
+      await Promise.all(
+        boundingBoxes.map((box) => deleteSpectrum({ data: { spectrumId: box.id } })),
+      )
+    },
+    onSuccess: () => {
+      setBoundingBoxes([])
+      router.invalidate()
+    },
+    onError: (error) => notifyError("Error deleting spectrums", error),
   })
 
   return (
@@ -161,22 +189,42 @@ export function SpectrumsList({
           boundingBoxes={boundingBoxes}
           showBBList={false}
           showImageAdjustActions
-          onBoundingBoxChange={(boundingBox) => {
-            setBoundingBoxes((prev) =>
-              prev.map((box) => (box.id === boundingBox.id ? { ...box, ...boundingBox } : box)),
-            )
+          onBoundingBoxChange={(changedBox) => {
+            setBoundingBoxes((prev) => {
+              const activeBoxPrev = prev.find((b) => b.id === changedBox.id);
+              const newLeft = changedBox.left ?? activeBoxPrev?.left ?? 0;
+              const newWidth = changedBox.width ?? activeBoxPrev?.width ?? 0;
+
+              return prev.map((box) => ({
+                ...box,
+                ...(box.id === changedBox.id ? changedBox : {}),
+                left: newLeft,
+                width: newWidth,
+              }));
+            });
           }}
-          onBoundingBoxChangeEnd={async (boundingBox) => {
-            await updateSpectrum({
-              data: {
-                spectrumId: boundingBox.id,
-                imageTop: boundingBox.top,
-                imageLeft: boundingBox.left,
-                imageWidth: boundingBox.width,
-                imageHeight: boundingBox.height,
-              },
-            })
-            router.invalidate()
+          onBoundingBoxChangeEnd={async (changedBox) => {
+            const activeBox = boundingBoxes.find((b) => b.id === changedBox.id);
+            const finalLeft = changedBox.left ?? activeBox?.left ?? 0;
+            const finalWidth = changedBox.width ?? activeBox?.width ?? 0;
+
+            await Promise.all(
+              boundingBoxes.map((box) => {
+                const finalTop = box.id === changedBox.id ? (changedBox.top ?? box.top) : box.top;
+                const finalHeight = box.id === changedBox.id ? (changedBox.height ?? box.height) : box.height;
+
+                return updateSpectrum({
+                  data: {
+                    spectrumId: box.id,
+                    imageTop: Math.round(finalTop),
+                    imageHeight: Math.round(finalHeight),
+                    imageLeft: Math.round(finalLeft),
+                    imageWidth: Math.round(finalWidth),
+                  },
+                });
+              })
+            );
+            router.invalidate();
           }}
           onBoundingBoxAdd={(boundingBox) => addSpectrumMut.mutate(boundingBox)}
           onBoundingBoxDelete={(id) => deleteSpectrumMut.mutate(id)}
@@ -201,14 +249,14 @@ export function SpectrumsList({
             size="sm"
             variant="destructive"
             title="Delete Observations"
-            disabled={deleteSpectrumMut.isPending || boundingBoxes.length === 0}
+            disabled={clearSpectrumsMut.isPending || boundingBoxes.length === 0}
             onClick={() => {
-              deleteSpectrumMut.mutate(observationId)
+              clearSpectrumsMut.mutate()
             }}
             className="h-7 w-7 p-0"
           >
             <span className={cn(
-              deleteSpectrumMut.isPending
+              clearSpectrumsMut.isPending
                 ? "icon-[ph--spinner-bold] animate-spin"
                 : "icon-[ph--broom] text-base"
             )} />

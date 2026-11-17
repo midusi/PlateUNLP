@@ -33,6 +33,7 @@ export type PlateScanMetadata = PlateMetadata & {
   scannerNotes?: string
   scanCol?: string
   origin?: string
+  datePlt?: string
 }
 
 export type PlateFITSMetadata = PlateScanMetadata & {
@@ -110,6 +111,7 @@ export function addScannedPlateMetadata(fits: FITS, metadata: PlateScanMetadata)
   setTextCard(fits, "SCANAUTH", metadata.scanAuthor, "author of scan")
   setTextCard(fits, "SCANNOTE", metadata.scannerNotes, "scanner notes")
   setTextCard(fits, "SCANCOL", metadata.scanCol, "scanner color resolution")
+  setTextCard(fits, "DATE-PLT", normalizeOptionalDateTime(metadata.datePlt), "date the plate was obtained")
 }
 
 export function addObservationMetadata(fits: FITS, metadata: SpectrumCropFITSMetadata) {

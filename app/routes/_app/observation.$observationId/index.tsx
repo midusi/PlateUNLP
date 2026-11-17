@@ -59,13 +59,28 @@ function RouteComponent() {
   const plateFields = plateMetadataFields(plateMetadata)
   const form = useObservationForm({ observationId, defaultValues: initialMetadata })
 
+  /** La extracción necesita como mínimo un espectro de ciencia y una lámpara. */
+  const canExtract =
+    spectrums.some((s) => s.type === "science") && spectrums.some((s) => s.type === "lamp")
+  /** Cambia cuando se agregan o borran espectros, para que el extractor arranque sin estado previo. */
+  const spectrumsKey = spectrums
+    .map((s) => s.id)
+    .sort()
+    .join(",")
+
   return (
     <div className="mx-auto w-full">
       <ObservationMetadataForm form={form} OBSERVAT={initialMetadata.OBSERVAT} />
       <div className="h-8" />
       <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
-      <SpectrumsExtractor observationId={observationId} spectrums={spectrums} />
+      {canExtract ? (
+        <SpectrumsExtractor key={spectrumsKey} observationId={observationId} spectrums={spectrums} />
+      ) : (
+        <p className="text-muted-foreground text-sm">
+          At least one science spectrum and one lamp spectrum are needed to extract the spectra.
+        </p>
+      )}
       <ObservationExportBar form={form} plateFields={plateFields} observationId={observationId} />
     </div>
   )
