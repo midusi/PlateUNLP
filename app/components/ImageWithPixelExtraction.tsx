@@ -22,7 +22,7 @@ interface ImageWithPixelExtractionProps {
   /**
    * Pixeles del recorte que la extraccion vio tapados por mascaras de otros
    * espectros (`data[fila * width + columna]` vale 1 si lo estan). Se pintan
-   * encima de la imagen.
+   * como los ve el extractor, en negro, para mostrar la imagen tal cual la proceso.
    */
   maskOverlay?: { data: Uint8Array; width: number; height: number } | null
   /** Rango de columnas visibles, compartido con el grafico 1D. */
@@ -39,8 +39,11 @@ const DASH_PATTERN = [4, 4]
 const CURVE_SAMPLE_STEP = 2
 const DRAW_COLOR = "red"
 const NORMAL_COLOR = "#22d3ee"
-/** Color (RGBA) con el que se pintan los pixeles tapados por una mascara. */
-const MASK_RGBA = [217, 70, 239, 140] as const
+/**
+ * Color (RGBA) de los pixeles tapados por una mascara. Es el que ve el
+ * extractor: `maskingObservation` los reemplaza por negro, sin transparencia.
+ */
+const MASK_RGBA = [0, 0, 0, 255] as const
 /** Distancia en pantalla, en pixeles, entre dos normales consecutivas. */
 const NORMAL_SPACING = 18
 

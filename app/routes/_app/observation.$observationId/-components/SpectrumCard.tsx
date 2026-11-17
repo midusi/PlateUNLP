@@ -75,7 +75,7 @@ export const SpectrumCard = withForm({
   }) {
     /** Dibuja las normales sobre las que se promedia cada columna. Solo de diagnostico. */
     const [showNormals, setShowNormals] = useState(false)
-    /** Pinta lo que las mascaras de otros espectros taparon antes de extraer este. */
+    /** Muestra la imagen como la vio el extractor: con lo que taparon las mascaras de otros espectros en negro. */
     const [showMasks, setShowMasks] = useState(false)
     const maskOverlay = useMemo(
       () => (showMasks ? buildAppliedMaskOverlay(spectrum, maskSources) : null),
@@ -157,7 +157,7 @@ export const SpectrumCard = withForm({
               size="icon"
               aria-label="Show masks"
               aria-pressed={showMasks}
-              title="Show the regions masked out by the spectra extracted before this one"
+              title="Show the image as the extractor saw it, with the regions masked by earlier spectra blanked"
               disabled={maskSources.length === 0}
               onClick={() => setShowMasks((shown) => !shown)}
             >
