@@ -43,6 +43,9 @@ type SpectrumsExtractorProps = {
 export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsExtractorProps) {
   const router = useRouter()
 
+  const hadExtractedOnMount = spectrums.some((s) => s.extractedLength > 0)
+  const hadExtractedRef = useRef(hadExtractedOnMount)
+
   const { data: observationTensor } = useQuery({
     queryKey: ["observationImage", observationId],
     queryFn: async () => {
@@ -195,6 +198,10 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
               intensityArr: a.analysis.transversalAvgs,
             })),
           })
+          if (!hadExtractedRef.current) {
+            hadExtractedRef.current = true
+            await router.invalidate()
+          } 
         }
 
         /** Actualizar registros para detectar futuros cambios */

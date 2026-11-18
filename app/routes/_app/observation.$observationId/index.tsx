@@ -68,6 +68,8 @@ function RouteComponent() {
     .sort()
     .join(",")
 
+  const hasExtracted = spectrums.some((s) => s.extractedLength > 0)
+
   return (
     <div className="mx-auto w-full">
       <ObservationMetadataForm form={form} OBSERVAT={initialMetadata.OBSERVAT} />
@@ -81,7 +83,12 @@ function RouteComponent() {
           At least one science spectrum and one lamp spectrum are needed to extract the spectra.
         </p>
       )}
-      <ObservationExportBar form={form} plateFields={plateFields} observationId={observationId} />
+      <ObservationExportBar 
+        form={form} 
+        plateFields={plateFields} 
+        observationId={observationId} 
+        hasExtracted={hasExtracted}
+      />
     </div>
   )
 }
@@ -95,13 +102,17 @@ function ObservationExportBar({
   form,
   plateFields,
   observationId,
+  hasExtracted,
 }: {
   form: ReturnType<typeof useObservationForm>
   plateFields: FITSExportField[]
   observationId: string
+  hasExtracted: boolean
 }) {
   const values = useStore(form.store, (s) => s.values)
   const exportFields = [...plateFields, ...observationMetadataFields(values)]
+
+  const disabledTitle = "Available once spectra have been extracted"
 
   return (
     <div className="m-4 flex w-full justify-center gap-4">
@@ -117,14 +128,22 @@ function ObservationExportBar({
         href={`/observation/${observationId}/extracted-fits`}
         variant="outline"
         fields={exportFields}
-        title="Descarga un ZIP con un FITS por cada espectro detectado en esta observación."
+        disabled={!hasExtracted}
+        title={!hasExtracted ? disabledTitle : undefined}
       >
         <span className="icon-[ph--chart-line]" />
         Download FITS (extracted)
       </FITSExportButton>
-      <Link to="/observation/$observationId/calibrate" params={{ observationId }}>
-        <Button className="flex justify-center">Calibrate</Button>
-      </Link>
+
+      {hasExtracted ? (
+        <Link to="/observation/$observationId/calibrate" params={{ observationId }}>
+          <Button className="flex justify-center">Calibrate</Button>
+        </Link>
+      ) : (
+          <Button disabled title={disabledTitle} className="flex justify-center">
+            Calibrate
+          </Button>
+      )}
     </div>
   )
 }
