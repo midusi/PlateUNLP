@@ -30,9 +30,9 @@ import { formatObservation } from "~/lib/format"
 import { getSession } from "../-actions/get-session"
 import { getProject } from "./-actions/get-project"
 import {
+  type CircleState,
   getProjectPlatesStatus,
-  type PlateProcessingStatus,
-  type PlateProcessingStatusKey,
+  type PlateStatus,
 } from "./-actions/get-project-plates-status"
 import { DeletePlates } from "./-components/DeletePlates"
 import { UploadPlate } from "./-components/UploadPlate"
@@ -65,12 +65,9 @@ export const Route = createFileRoute("/_app/project/$projectId/")({
           ...plate,
           processingStatus: statusByPlateId.get(plate.id) ?? {
             plateId: plate.id,
-            statusKey: "plate-metadata",
-            statusLabel: "Plate metadata",
-            statusRank: 0,
-            stageProgress: 0,
-            overallProgress: 0,
-            continueTarget: { type: "plate", plateId: plate.id },
+            plateMetadata: "empty" as CircleState,
+            observations: [],
+            sortRank: 0,
           },
         })),
       },
@@ -80,28 +77,176 @@ export const Route = createFileRoute("/_app/project/$projectId/")({
 })
 
 type Plate = NonNullable<Awaited<ReturnType<typeof getProject>>>["plates"][number] & {
-  processingStatus: PlateProcessingStatus
+  processingStatus: PlateStatus
 }
 
-const statusColorByKey: Record<PlateProcessingStatusKey, string> = {
-  "plate-metadata": "bg-white border-olive-500",
-  "observation-metadata": "bg-yellow-300 border-yellow-500",
-  "spectrum-detection": "bg-amber-400 border-amber-600",
-  "signal-extraction": "bg-orange-500 border-orange-700",
-  calibration: "bg-lime-500 border-lime-700",
-  completed: "bg-green-600 border-green-800",
+type CircleProps =
+  | { state: CircleState; label: string; to: string; params: Record<string, string> }
+  | { state: "done"; label: string; to?: undefined }
+
+const circleClasses: Record<CircleState, string> = {
+  empty: "border-2 border-muted-foreground/30 bg-background text-muted-foreground/50",
+  partial: "border-2 border-yellow-400 bg-yellow-100 text-yellow-700",
+  done: "border-2 border-green-600 bg-green-100 text-green-700",
 }
 
-const statusFilterOptions: Array<{ value: PlateProcessingStatusKey | "all"; label: string }> =
-  [
-    { value: "all", label: "All states" },
-    { value: "plate-metadata", label: "Plate metadata" },
-    { value: "observation-metadata", label: "Observation metadata" },
-    { value: "spectrum-detection", label: "Spectrum detection" },
-    { value: "signal-extraction", label: "Signal extraction" },
-    { value: "calibration", label: "Calibration" },
-    { value: "completed", label: "Completed" },
-  ]
+function StatusCircle(props: CircleProps) {
+  const base = clsx(
+    "inline-flex size-7 items-center justify-center rounded-full text-[10px] font-bold leading-none transition-opacity",
+    circleClasses[props.state],
+  )
+
+  if (!props.to) {
+    return (
+      <span className={base} aria-label={props.label} title={props.label}>
+        ✓
+      </span>
+    )
+  }
+
+  return (
+    <Link
+      to={props.to}
+      params={props.params}
+      className={clsx(base, "hover:opacity-70")}
+      aria-label={props.label}
+      title={props.label}
+    >
+      {props.label}
+    </Link>
+  )
+}
+
+function PlateStatusIndicators({
+  status,
+  plateId,
+  observations,
+}: {
+  status: PlateStatus
+  plateId: string
+  observations: Plate["observations"]
+}) {
+  const obsById = new Map(observations.map((o) => [o.id, o]))
+
+  return (
+    <div className="flex flex-col gap-1">
+      {status.observations.length === 0 ? (
+        // Sin observaciones: solo el círculo P
+        <div className="flex items-center gap-1.5">
+          <StatusCircle
+            state={status.plateMetadata}
+            label="P"
+            to="/plate/$plateId"
+            params={{ plateId }}
+          />
+        </div>
+      ) : (
+        status.observations.map((obs) => {
+          const obsData = obsById.get(obs.id)
+          const allDone =
+            status.plateMetadata === "done" &&
+            obs.metadata === "done" &&
+            obs.extraction === "done" &&
+            obs.calibration === "done"
+
+          return (
+            <div key={obs.id} className="flex items-center gap-1.5">
+              {/* P — metadatos de la placa, igual en todas las filas */}
+              <StatusCircle
+                state={status.plateMetadata}
+                label="P"
+                to="/plate/$plateId"
+                params={{ plateId }}
+              />
+
+              {/* O — metadatos de la observación */}
+              <StatusCircle
+                state={obs.metadata}
+                label="O"
+                to="/observation/$observationId"
+                params={{ observationId: obs.id }}
+              />
+
+              {/* E — detección y extracción */}
+              <StatusCircle
+                state={obs.extraction}
+                label="E"
+                to="/observation/$observationId"
+                params={{ observationId: obs.id }}
+              />
+
+              {/* C — calibración */}
+              <StatusCircle
+                state={obs.calibration}
+                label="C"
+                to="/observation/$observationId/calibrate"
+                params={{ observationId: obs.id }}
+              />
+
+              {/* ✓ — completo */}
+              {allDone && (
+                <StatusCircle
+                  state="done"
+                  label={`${obsData ? formatObservation({ name: obsData["OBS-N"], OBJECT: obsData.OBJECT }) : obs.obsN} completada`}
+                />
+              )}
+            </div>
+          )
+        })
+      )}
+    </div>
+  )
+}
+
+type StatusFilterValue = "all" | "plate-metadata" | "observation-metadata" | "extraction" | "calibration" | "completed"
+
+const statusFilterOptions: Array<{ value: StatusFilterValue; label: string }> = [
+  { value: "all", label: "All states" },
+  { value: "plate-metadata", label: "Plate metadata" },
+  { value: "observation-metadata", label: "Observation metadata" },
+  { value: "extraction", label: "Spectrum / Extraction" },
+  { value: "calibration", label: "Calibration" },
+  { value: "completed", label: "Completed" },
+]
+
+function matchesStatusFilter(status: PlateStatus, filter: StatusFilterValue): boolean {
+  if (filter === "all") return true
+
+  const { plateMetadata, observations } = status
+
+  if (filter === "plate-metadata") return plateMetadata !== "done"
+
+  if (observations.length === 0) return false
+
+  if (filter === "observation-metadata")
+    return plateMetadata === "done" && observations.some((o) => o.metadata !== "done")
+
+  if (filter === "extraction")
+    return (
+      plateMetadata === "done" &&
+      observations.every((o) => o.metadata === "done") &&
+      observations.some((o) => o.extraction !== "done")
+    )
+
+  if (filter === "calibration")
+    return (
+      plateMetadata === "done" &&
+      observations.every((o) => o.metadata === "done") &&
+      observations.every((o) => o.extraction === "done") &&
+      observations.some((o) => o.calibration !== "done")
+    )
+
+  if (filter === "completed")
+    return (
+      plateMetadata === "done" &&
+      observations.length > 0 &&
+      observations.every(
+        (o) => o.metadata === "done" && o.extraction === "done" && o.calibration === "done",
+      )
+    )
+
+  return true
+}
 
 const columnWidthById: Record<string, string> = {
   delete: "44px",
@@ -109,7 +254,6 @@ const columnWidthById: Record<string, string> = {
   "PLATE-N": "23%",
   observations: "50%",
   status: "20%",
-  continue: "72px",
 }
 
 const columnHelper = createColumnHelper<Plate>()
@@ -192,96 +336,22 @@ const columns = [
       const a = rowA.original.processingStatus
       const b = rowB.original.processingStatus
 
-      if (a.statusRank !== b.statusRank) return a.statusRank - b.statusRank
-      if (a.stageProgress !== b.stageProgress) return b.stageProgress - a.stageProgress
-
+      if (a.sortRank !== b.sortRank) return a.sortRank - b.sortRank
       return rowA.original["PLATE-N"].localeCompare(rowB.original["PLATE-N"])
     },
-    filterFn: (row, columnId, filterValue: PlateProcessingStatusKey | "all") => {
-      if (!filterValue || filterValue === "all") return true
-
-      const status = row.getValue<PlateProcessingStatus>(columnId)
-      return status.statusKey === filterValue
+    filterFn: (row, columnId, filterValue: StatusFilterValue) => {
+      const status = row.getValue<PlateStatus>(columnId)
+      return matchesStatusFilter(status, filterValue)
     },
     cell: (info) => {
       const status = info.getValue()
 
       return (
-        <div className="min-w-0 max-w-full">
-          <div className="flex items-center gap-2">
-            <span className="truncate font-medium text-sm">{status.statusLabel}</span>
-            <span className="text-muted-foreground text-xs">({status.stageProgress}%)</span>
-            <span className="sr-only">Status {status.statusLabel} with progress {status.stageProgress}%</span>
-          </div>
-          <div className="mt-1 h-1.5 w-full max-w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full"
-              style={{
-                width: `${Math.max(0, Math.min(100, status.stageProgress))}%`,
-                backgroundImage:
-                  "linear-gradient(to right, rgb(255 255 255), rgb(253 224 71), rgb(251 146 60), rgb(22 163 74))",
-              }}
-            />
-          </div>
-        </div>
-      )
-    },
-  }),
-  columnHelper.display({
-    id: "continue",
-    size: 72,
-    enableSorting: false,
-    header: "Go",
-    cell: ({ row }) => {
-      const status = row.original.processingStatus
-
-      if (!status.continueTarget) {
-        return (
-          <span className="inline-flex size-8 items-center justify-center text-muted-foreground/40">
-            <span className="icon-[ph--check-circle] size-5" aria-hidden="true" />
-            <span className="sr-only">Completed</span>
-          </span>
-        )
-      }
-
-      if (status.continueTarget.type === "plate") {
-        return (
-          <Link
-            to="/plate/$plateId"
-            params={{ plateId: status.continueTarget.plateId }}
-            className="inline-flex size-8 items-center justify-center rounded-sm border border-olive-300 text-foreground transition-colors hover:bg-muted"
-            aria-label="Continue processing plate"
-            title="Continue"
-          >
-            <span className="icon-[ph--arrow-square-out-bold] size-4" aria-hidden="true" />
-          </Link>
-        )
-      }
-
-      if (status.continueTarget.type === "calibration") {
-        return (
-          <Link
-            to="/observation/$observationId/calibrate"
-            params={{ observationId: status.continueTarget.observationId }}
-            className="inline-flex size-8 items-center justify-center rounded-sm border border-olive-300 text-foreground transition-colors hover:bg-muted"
-            aria-label="Continue calibration"
-            title="Continue"
-          >
-            <span className="icon-[ph--arrow-square-out-bold] size-4" aria-hidden="true" />
-          </Link>
-        )
-      }
-
-      return (
-        <Link
-          to="/observation/$observationId"
-          params={{ observationId: status.continueTarget.observationId }}
-          className="inline-flex size-8 items-center justify-center rounded-sm border border-olive-300 text-foreground transition-colors hover:bg-muted"
-          aria-label="Continue observation"
-          title="Continue"
-        >
-          <span className="icon-[ph--arrow-square-out-bold] size-4" aria-hidden="true" />
-        </Link>
+        <PlateStatusIndicators
+          status={status}
+          plateId={info.row.original.id}
+          observations={info.row.original.observations}
+        />
       )
     },
   }),
@@ -348,7 +418,7 @@ function RouteComponent() {
         <select
           id="status-filter"
           value={((table.getColumn("status")?.getFilterValue() as string | undefined) ?? "all") as string}
-          onChange={(event) => table.getColumn("status")?.setFilterValue(event.target.value)}
+          onChange={(event) => table.getColumn("status")?.setFilterValue(event.target.value as StatusFilterValue)}
           className="ml-2 h-9 rounded-sm border border-olive-300 bg-olive-100 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           aria-label="Filter by status"
         >
