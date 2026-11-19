@@ -13,7 +13,7 @@ import {
   getCosZenithDistance,
   getHourAngle,
 } from "~/lib/astronomical/misc"
-import { queryObjectById } from "~/lib/astronomical/simbad"
+import { queryObjectById, SimbadUnavailableError } from "~/lib/astronomical/simbad"
 import { degToDMS, degToHMS } from "~/lib/format"
 import { splitLocalDateTime } from "~/lib/local-datetime"
 import { log } from "~/lib/log"
@@ -89,13 +89,22 @@ export const computeObservationMetadata = createServerFn()
     const EQUINOX = EPOCH.slice(1) // Remove leading "J" from the epoch string
     // MAIN-ID, SPTYPE, RA, DEC, RA2000, DEC2000, RA1950, DEC1950
     const simbad = await queryObjectById(data.OBJECT, EPOCH, EQUINOX)
-    if (simbad.isErr())
+    if (simbad.isErr()) {
+      if (simbad.error instanceof SimbadUnavailableError) {
+        throw createError({
+          message: "SIMBAD service unavailable",
+          status: 502,
+          why: simbad.error.serverErrors.map((e) => `${e.url}: ${e.reason}`).join("; "),
+          fix: "SIMBAD no responde; reintentar en unos minutos",
+        })
+      }
       throw createError({
         message: "SIMBAD lookup failed",
         status: 502,
         why: simbad.error.message,
         fix: "Check that the OBJECT name resolves in SIMBAD",
       })
+    }
     log().set({ simbad: { mainId: simbad.value["MAIN-ID"] } })
 
     // Get observatory data (latitude, longitude and timezone)
