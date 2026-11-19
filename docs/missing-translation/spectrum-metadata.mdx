@@ -45,7 +45,7 @@ The user can also complete additional observation metadata directly in the form:
 
 Only `OBJECT`, `DATE-OBS` and the observatory inherited from the plate are required to compute most of the derived values.
 
-SPTYPE y MAIN-ID no son obtenibles de forma puramente analítica por lo que es necesario consultarlo al repositorio externo [SIMBAD](https://simbad.cfa.harvard.edu/simbad/).
+SPTYPE y MAIN-ID no son obtenibles de forma puramente analítica por lo que es necesario consultarlo al repositorio externo [SIMBAD](https://simbad.cfa.harvard.edu/simbad/). PlateUNLP consulta primero el servidor de CDS (`simbad.cds.unistra.fr`) y, si no responde, recurre automáticamente al espejo de Harvard (`simbad.cfa.harvard.edu`).
 
 Además, el usuario puede indicar que no conoce algunos de los 4 metadatos esenciales. Dependiendo de la información disponible el sistema calculara mas o menos información. El siguiente diagrama muestra que metadatos se requieren para obtener cada uno  y si estos requieren la interacción del usuario o una consulta a un repositorio externo:
 
