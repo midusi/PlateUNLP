@@ -201,7 +201,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
           if (!hadExtractedRef.current) {
             hadExtractedRef.current = true
             await router.invalidate()
-          } 
+          }
         }
 
         /** Actualizar registros para detectar futuros cambios */

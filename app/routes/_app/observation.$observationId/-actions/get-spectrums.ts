@@ -22,8 +22,9 @@ export const getSpectrums = createServerFn()
         fitDegree: true,
       },
       extras: {
-        extractedLength:
-          sql<number>`json_array_length(${spectrumTable.intensityArr})`.as("extracted_length"),
+        extractedLength: sql<number>`json_array_length(${spectrumTable.intensityArr})`.as(
+          "extracted_length",
+        ),
       },
     })
     return spectrums
