@@ -130,6 +130,9 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
           prevFormValues.current,
         )
 
+        /** Espectros de la pasada anterior, antes de actualizar el registro. */
+        const prevSpectrums = prevFormValues.current.spectrums
+
         /** Realizar analisis */
         let newAnalysis: {
           id: string
@@ -157,6 +160,16 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
           setAnalysisArr(newAnalysisArr)
         }
 
+        /**
+         * Actualizar registros para detectar futuros cambios. Se hace antes de guardar:
+         * si el guardado falla, la proxima pasada no debe tratar todo como nuevo (eso
+         * invalida el router, vuelve a llegar la lista de espectros y reinicia el ciclo).
+         */
+        if (changePrincipalSpectrum) {
+          prevFormValues.current.idPrincipalSpectrum = idPrincipalSpectrum
+        }
+        prevFormValues.current.spectrums = value.spectrums
+
         await Promise.all(
           value.spectrums.map((spectrum) =>
             updateSpectrum({
@@ -174,11 +187,11 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
         /** Si los tipos de los espectros cambiaron los actualiza */
         if (changePrincipalSpectrum) {
           let typesWhoChanged = []
-          if (prevFormValues.current.spectrums.length <= 0) {
+          if (prevSpectrums.length <= 0) {
             typesWhoChanged = value.spectrums
           } else {
             typesWhoChanged = value.spectrums.filter(
-              (s, idx) => s.type !== prevFormValues.current.spectrums[idx].type,
+              (s, idx) => s.type !== prevSpectrums[idx].type,
             )
           }
 
@@ -197,12 +210,6 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
             })),
           })
         }
-
-        /** Actualizar registros para detectar futuros cambios */
-        if (changePrincipalSpectrum) {
-          prevFormValues.current.idPrincipalSpectrum = idPrincipalSpectrum
-        }
-        prevFormValues.current.spectrums = value.spectrums
 
         /** Avisar fin del procesado */
         setState("ready")
