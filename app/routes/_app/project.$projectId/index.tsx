@@ -92,7 +92,7 @@ const circleClasses: Record<CircleState, string> = {
 
 function StatusCircle(props: CircleProps) {
   const base = clsx(
-    "inline-flex size-7 items-center justify-center rounded-full font-bold text-[10px] leading-none transition-opacity",
+    "inline-flex size-7 items-center justify-center rounded-full font-bold text-[10px] leading-none transition",
     circleClasses[props.state],
   )
 
@@ -108,7 +108,10 @@ function StatusCircle(props: CircleProps) {
     <Link
       to={props.to}
       params={props.params}
-      className={clsx(base, "hover:opacity-70")}
+      className={clsx(
+        base,
+        "cursor-pointer hover:scale-110 hover:shadow-md hover:ring-2 hover:ring-primary/40",
+      )}
       aria-label={props.label}
       title={props.label}
     >
