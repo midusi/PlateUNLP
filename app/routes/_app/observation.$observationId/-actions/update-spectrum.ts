@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { storedOrientation } from "~/lib/oriented-box"
+import { orientedBoxFields } from "~/types/oriented-box"
 import { FIT_DEGREE_MAX, FIT_DEGREE_MIN } from "~/types/spectrum-metadata"
 
 export const updateSpectrum = createServerFn()
@@ -13,6 +15,7 @@ export const updateSpectrum = createServerFn()
       imageLeft: z.number().int().min(0).optional(),
       imageWidth: z.number().int().min(1).optional(),
       imageHeight: z.number().int().min(1).optional(),
+      ...orientedBoxFields,
       countMediasPoints: z.number().int().min(1).optional(),
       apertureCoefficient: z.number().min(0).max(1.5).optional(),
       fitDegree: z.number().int().min(FIT_DEGREE_MIN).max(FIT_DEGREE_MAX).optional(),
@@ -40,7 +43,20 @@ export const updateSpectrum = createServerFn()
       throw new Error("Bounding box exceeds plate image height")
     }
 
+    /**
+     * Si cambia el rectangulo, el angulo que tenia guardado deja de valer: se
+     * reemplaza por el que llega, o la caja vuelve a ser el rectangulo.
+     */
+    const rectChanged =
+      data.imageTop !== undefined ||
+      data.imageLeft !== undefined ||
+      data.imageWidth !== undefined ||
+      data.imageHeight !== undefined ||
+      data.imageAngle !== undefined
+
     const updates: Partial<typeof s.spectrum.$inferInsert> = {
+      ...(rectChanged &&
+        storedOrientation(data)),
       ...(data.imageTop !== undefined && { imageTop: data.imageTop }),
       ...(data.imageLeft !== undefined && { imageLeft: data.imageLeft }),
       ...(data.imageWidth !== undefined && { imageWidth: data.imageWidth }),

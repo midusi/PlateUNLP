@@ -29,6 +29,17 @@ Project           a collection being digitised; users are members with a role
 and crops are re-derived on demand with `sharp`. Preserve this — it avoids repeated lossy
 recompression of irreplaceable scientific data.
 
+**Oriented boxes (OBB).** The two detectors are OBB models, so `observation` and `spectrum` also
+store the tilt: `imageAngle` (degrees, clockwise, in (-45, 45]). `imageLeft/Top/Width/Height` stay the
+axis-aligned rectangle that contains the box (the one that is cropped); the box is centred on it and
+its own size is derived from the rectangle and the angle (`boxFromExtent`), so there are no extra size
+columns. Angle `0` = the rectangle itself. Outside its box everything is **black** wherever the image is processed or shown: the observation
+preview is black outside the observation's box (`app/lib/observation-preview.ts`; `/image`, which feeds
+the extraction, stays the plain crop), and `cropSpectrum` blacks out whatever is outside each spectrum's
+box, as one more mask next to the ones that processed spectra leave (`maskingObservation`) — masked pixels
+are zeros, not excluded from the averages. The extraction preview can show each spectrum's box levelled
+(`ImageWithPixelExtraction`) or the crop as the extractor sees it. All the geometry and the mask live in `app/lib/oriented-box.ts` — don't re-derive it elsewhere.
+
 ### The pipeline, stage by stage
 
 | # | Stage | Where | How |
