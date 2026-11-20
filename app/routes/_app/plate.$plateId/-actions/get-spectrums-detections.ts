@@ -45,14 +45,6 @@ export const getObservationDetections = createServerFn()
       .toBuffer({ resolveWithObject: true })
     const { width, height, channels } = info
 
-    // imprimir imagen para debug
-    await sharp(image)
-      .resize(640, 640, { fit: "fill", background: { r: 0, g: 0, b: 0 } })
-      .toColorspace("srgb")
-      .removeAlpha()
-      .png()
-      .toFile(`./plate_${data.plateId}_4.png`)
-
     // 2. Calcular el factor de escala y el desplazamiento (offset) por el padding
     const scale = Math.min(640 / origW, 640 / origH)
     const offsetX = (640 - origW * scale) / 2
