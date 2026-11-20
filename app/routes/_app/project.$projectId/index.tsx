@@ -81,7 +81,14 @@ type Plate = NonNullable<Awaited<ReturnType<typeof getProject>>>["plates"][numbe
 }
 
 type CircleProps =
-  | { state: CircleState; label: string; to: string; params: Record<string, string> }
+  | {
+      state: CircleState
+      label: string
+      to: string
+      params: Record<string, string>
+      /** Si se informa, el círculo no navega y muestra este texto como motivo. */
+      disabledReason?: string
+    }
   | { state: "done"; label: string; to?: undefined }
 
 const circleClasses: Record<CircleState, string> = {
@@ -100,6 +107,19 @@ function StatusCircle(props: CircleProps) {
     return (
       <span className={base} role="img" aria-label={props.label} title={props.label}>
         ✓
+      </span>
+    )
+  }
+
+  if (props.disabledReason) {
+    return (
+      <span
+        className={clsx(base, "cursor-not-allowed opacity-40")}
+        role="img"
+        aria-label={`${props.label}: ${props.disabledReason}`}
+        title={props.disabledReason}
+      >
+        {props.label}
       </span>
     )
   }
@@ -184,6 +204,9 @@ function PlateStatusIndicators({
                 label="C"
                 to="/observation/$observationId/calibrate"
                 params={{ observationId: obs.id }}
+                disabledReason={
+                  obs.extraction === "done" ? undefined : "Available once extraction is done"
+                }
               />
 
               {/* ✓ — completo */}
