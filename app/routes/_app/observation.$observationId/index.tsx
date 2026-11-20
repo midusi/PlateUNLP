@@ -1,5 +1,6 @@
 import { useStore } from "@tanstack/react-form"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useState } from "react"
 import { FITSExportButton, type FITSExportField } from "~/components/FITSExportButton"
 import { Button } from "~/components/ui/button"
 import { breadcrumb } from "~/lib/breadcrumbs"
@@ -68,7 +69,13 @@ function RouteComponent() {
     .sort()
     .join(",")
 
-  const hasExtracted = spectrums.some((s) => s.extractedLength > 0)
+  /**
+   * El extractor guarda las intensidades por su cuenta, sin que el loader se entere: se recuerda
+   * aca para habilitar los botones sin depender de una recarga. Queda atado al conjunto de
+   * espectros, de modo que se descarta si este cambia.
+   */
+  const [extractedKey, setExtractedKey] = useState<string | null>(null)
+  const hasExtracted = spectrums.some((s) => s.extractedLength > 0) || extractedKey === spectrumsKey
 
   return (
     <div className="mx-auto w-full">
@@ -81,6 +88,7 @@ function RouteComponent() {
           key={spectrumsKey}
           observationId={observationId}
           spectrums={spectrums}
+          onExtracted={() => setExtractedKey(spectrumsKey)}
         />
       ) : (
         <p className="text-muted-foreground text-sm">
@@ -133,7 +141,11 @@ function ObservationExportBar({
         variant="outline"
         fields={exportFields}
         disabled={!hasExtracted}
-        title={!hasExtracted ? disabledTitle : undefined}
+        title={
+          hasExtracted
+            ? "Downloads a ZIP with one FITS per spectrum detected in this observation."
+            : disabledTitle
+        }
       >
         <span className="icon-[ph--chart-line]" />
         Download FITS (extracted)
