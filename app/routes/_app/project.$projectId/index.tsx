@@ -92,13 +92,13 @@ const circleClasses: Record<CircleState, string> = {
 
 function StatusCircle(props: CircleProps) {
   const base = clsx(
-    "inline-flex size-7 items-center justify-center rounded-full text-[10px] font-bold leading-none transition-opacity",
+    "inline-flex size-7 items-center justify-center rounded-full font-bold text-[10px] leading-none transition-opacity",
     circleClasses[props.state],
   )
 
   if (!props.to) {
     return (
-      <span className={base} aria-label={props.label} title={props.label}>
+      <span className={base} role="img" aria-label={props.label} title={props.label}>
         ✓
       </span>
     )
@@ -198,7 +198,13 @@ function PlateStatusIndicators({
   )
 }
 
-type StatusFilterValue = "all" | "plate-metadata" | "observation-metadata" | "extraction" | "calibration" | "completed"
+type StatusFilterValue =
+  | "all"
+  | "plate-metadata"
+  | "observation-metadata"
+  | "extraction"
+  | "calibration"
+  | "completed"
 
 const statusFilterOptions: Array<{ value: StatusFilterValue; label: string }> = [
   { value: "all", label: "All states" },
@@ -263,9 +269,7 @@ const columns = [
     size: 44,
     enableSorting: false,
     header: () => <span className="sr-only">Delete</span>,
-    cell: ({ row }) => (
-      <DeletePlates plateIds={[row.original.id]} iconOnly />
-    ),
+    cell: ({ row }) => <DeletePlates plateIds={[row.original.id]} iconOnly />,
   }),
   columnHelper.display({
     id: "select",
@@ -319,7 +323,7 @@ const columns = [
                   backgroundImage: `linear-gradient(to right, var(--color-background) 25%, 75%, transparent)`,
                 }}
               >
-                {formatObservation({ "name": obs["OBS-N"], OBJECT: obs.OBJECT })}
+                {formatObservation({ name: obs["OBS-N"], OBJECT: obs.OBJECT })}
               </span>
               <div className="table-cell w-full" />
             </Link>
@@ -417,8 +421,12 @@ function RouteComponent() {
         </label>
         <select
           id="status-filter"
-          value={((table.getColumn("status")?.getFilterValue() as string | undefined) ?? "all") as string}
-          onChange={(event) => table.getColumn("status")?.setFilterValue(event.target.value as StatusFilterValue)}
+          value={
+            ((table.getColumn("status")?.getFilterValue() as string | undefined) ?? "all") as string
+          }
+          onChange={(event) =>
+            table.getColumn("status")?.setFilterValue(event.target.value as StatusFilterValue)
+          }
           className="ml-2 h-9 rounded-sm border border-olive-300 bg-olive-100 px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           aria-label="Filter by status"
         >
@@ -444,7 +452,10 @@ function RouteComponent() {
                   const width = columnWidthById[header.column.id]
 
                   return (
-                    <TableHead key={header.id} style={{ width: width ?? (header.getSize() || "auto") }}>
+                    <TableHead
+                      key={header.id}
+                      style={{ width: width ?? (header.getSize() || "auto") }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}

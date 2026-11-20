@@ -9,8 +9,8 @@ export type CircleState = "empty" | "partial" | "done"
 export type ObservationStatus = {
   id: string
   obsN: string
-  metadata: CircleState   // O
-  extraction: CircleState // E 
+  metadata: CircleState // O
+  extraction: CircleState // E
   calibration: CircleState // C
 }
 
@@ -102,17 +102,20 @@ export const getProjectPlatesStatus = createServerFn()
           obsN: observation["OBS-N"],
           metadataCompletion: observation.metadataCompletion,
           spectrumCount: sql<number>`count(${spectrum.id})`,
-          extractedSpectrumCount:
-            sql<number>`sum(case when json_array_length(${spectrum.intensityArr}) > 0 then 1 else 0 end)`,
-          calibratedWithPoints:
-            sql<number>`max(case when ${calibration.id} is not null and json_array_length(${calibration.lampPoints}) > 0 and json_array_length(${calibration.materialPoints}) > 0 then 1 else 0 end)`,
+          extractedSpectrumCount: sql<number>`sum(case when json_array_length(${spectrum.intensityArr}) > 0 then 1 else 0 end)`,
+          calibratedWithPoints: sql<number>`max(case when ${calibration.id} is not null and json_array_length(${calibration.lampPoints}) > 0 and json_array_length(${calibration.materialPoints}) > 0 then 1 else 0 end)`,
         })
         .from(observation)
         .innerJoin(plate, eq(plate.id, observation.plateId))
         .leftJoin(spectrum, eq(spectrum.observationId, observation.id))
         .leftJoin(calibration, eq(calibration.observationId, observation.id))
         .where(eq(plate.projectId, data.projectId))
-        .groupBy(observation.id, observation.plateId, observation["OBS-N"], observation.metadataCompletion)
+        .groupBy(
+          observation.id,
+          observation.plateId,
+          observation["OBS-N"],
+          observation.metadataCompletion,
+        )
         .orderBy(asc(observation["OBS-N"])),
     ])
 
