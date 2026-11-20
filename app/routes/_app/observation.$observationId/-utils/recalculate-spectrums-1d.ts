@@ -13,6 +13,7 @@ interface Spectrum {
   imageLeft: number
   imageWidth: number
   imageHeight: number
+  imageAngle?: number | null
   countMediasPoints: number
   apertureCoefficient: number
   fitDegree: number

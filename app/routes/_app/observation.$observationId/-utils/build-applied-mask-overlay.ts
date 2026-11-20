@@ -24,11 +24,16 @@ export interface MaskOverlay {
  * Pasa las mascaras que se aplicaron antes de extraer un espectro (las de los
  * espectros extraidos primero) a las coordenadas de su recorte. Son las
  * regiones que la extraccion vio reemplazadas por fondo.
+ *
+ * Con `boxMask` (`[alto * ancho]`, 1 = pixel dentro de la caja inclinada del espectro)
+ * tambien se marcan las esquinas del recorte que quedan fuera de ella, que la
+ * extraccion ve en negro.
  * @returns `null` si ninguna mascara toca el recorte.
  */
 export function buildAppliedMaskOverlay(
   target: CropGeometry,
   sources: MaskSource[],
+  boxMask?: Uint8Array | null,
 ): MaskOverlay | null {
   const width = Math.floor(target.imageWidth)
   const height = Math.floor(target.imageHeight)
@@ -36,6 +41,14 @@ export function buildAppliedMaskOverlay(
   const targetLeft = Math.floor(target.imageLeft)
   const data = new Uint8Array(width * height)
   let touched = false
+
+  if (boxMask) {
+    for (let i = 0; i < data.length; i++) {
+      if (boxMask[i]) continue
+      data[i] = 1
+      touched = true
+    }
+  }
 
   for (const { spectrum, mask } of sources) {
     if (mask.isDisposed) continue

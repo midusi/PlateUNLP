@@ -3,12 +3,26 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useViewportGestures, type XViewportController } from "~/hooks/use-x-viewport"
 import { normalHalfLength, pointOnNormal, type TraceFunctions } from "~/lib/extract-features"
 import { loadImage } from "~/lib/load-image"
+import { boxFromExtent } from "~/lib/oriented-box"
 import { cn } from "~/lib/utils"
 import type { Point } from "~/types/Point"
 
 interface ImageWithPixelExtractionProps {
-  /** Recorte de la imagen de la observacion que se muestra. */
-  image: { url: string; width: number; height: number; top: number; left: number }
+  /**
+   * Recorte de la imagen de la observacion que se muestra: el rectangulo que contiene
+   * a la caja del espectro. Si la caja esta inclinada (`angle`, en grados), se muestra
+   * enderezada, rotada sobre su centro para que el angulo sea 0 y la caja llene la
+   * vista; todo lo demas (traza, puntos, mascaras) sigue en coordenadas del recorte
+   * original y solo se transforma para dibujarlo.
+   */
+  image: {
+    url: string
+    width: number
+    height: number
+    top: number
+    left: number
+    angle?: number | null
+  }
   /** Centros de la traza, en pixeles del recorte. */
   pointsWMed?: Point[]
   /** Traza del espectro: devuelve la fila para cada columna del recorte. */
@@ -47,16 +61,19 @@ const MASK_RGBA = [0, 0, 0, 255] as const
 /** Distancia en pantalla, en pixeles, entre dos normales consecutivas. */
 const NORMAL_SPACING = 18
 
-/** Escala del dibujo: de coordenadas del recorte a pixeles del canvas. */
+/**
+ * Pasaje de coordenadas del recorte a pixeles del canvas: rotacion (para enderezar la
+ * caja) y escala. Con angulo 0 es solo una escala.
+ */
 interface CanvasScale {
-  /** Primera columna visible. */
+  /** Primera columna visible del recorte. */
   start: number
-  /** Pixeles de canvas por columna del recorte. */
+  /** Pixeles de canvas por columna del recorte, a lo largo de la traza. */
   x: number
-  /** Pixeles de canvas por fila del recorte. */
-  y: number
   /** Distancia, en pixeles de canvas, entre dos muestras consecutivas de una curva. */
   sampleStep: number
+  /** Pixeles del recorte (con el +0.5 del centro del pixel ya sumado) -> pixeles del canvas. */
+  toCanvas: (x: number, y: number) => [number, number]
 }
 
 /**
@@ -68,14 +85,17 @@ function strokeCurve(
   drawFunction: (x: number) => number,
   offset: number,
   scale: CanvasScale,
-  canvasWidth: number,
+  viewport: { start: number; end: number },
+  margin: number,
 ) {
+  const stepColumns = Math.max(0.25, scale.sampleStep / scale.x)
   ctx.beginPath()
-  for (let px = 0; px <= canvasWidth; px += scale.sampleStep) {
-    const index = scale.start + px / scale.x - 0.5
-    const y = (drawFunction(index) + offset + 0.5) * scale.y
-    if (px === 0) ctx.moveTo(px, y)
-    else ctx.lineTo(px, y)
+  let first = true
+  for (let column = viewport.start - margin; column <= viewport.end + margin; column += stepColumns) {
+    const [px, py] = scale.toCanvas(column + 0.5, drawFunction(column) + offset + 0.5)
+    if (first) ctx.moveTo(px, py)
+    else ctx.lineTo(px, py)
+    first = false
   }
   ctx.stroke()
 }
@@ -83,8 +103,8 @@ function strokeCurve(
 /**
  * Dibuja, cada `NORMAL_SPACING` px de pantalla, el segmento de la normal a la
  * traza que `averageAcrossAperture` promedia en esa columna. Los extremos se
- * calculan en coordenadas del recorte y recien despues se escalan, asi que si
- * el zoom estira solo el eje x se ven tal cual los usa la extraccion.
+ * calculan en coordenadas del recorte y recien despues se pasan al canvas, asi que
+ * se ven tal cual los usa la extraccion.
  */
 function strokeNormals(
   ctx: CanvasRenderingContext2D,
@@ -102,8 +122,8 @@ function strokeNormals(
     const half = normalHalfLength(trace, x, opening)
     const top = pointOnNormal(trace, x, -half)
     const bottom = pointOnNormal(trace, x, half)
-    ctx.moveTo((top.x + 0.5 - viewport.start) * scale.x, (top.y + 0.5) * scale.y)
-    ctx.lineTo((bottom.x + 0.5 - viewport.start) * scale.x, (bottom.y + 0.5) * scale.y)
+    ctx.moveTo(...scale.toCanvas(top.x + 0.5, top.y + 0.5))
+    ctx.lineTo(...scale.toCanvas(bottom.x + 0.5, bottom.y + 0.5))
   }
   ctx.stroke()
 }
@@ -181,56 +201,69 @@ export function ImageWithPixelExtraction({
     canvas.height = Math.round(cssHeight * dpr)
 
     const span = viewport.end - viewport.start
+    // La vista es la caja enderezada: del ancho y alto propios de la caja. Las columnas
+    // visibles se pasan a su eje horizontal en proporcion, que es como se alarga la
+    // caja respecto del recorte, asi cada columna del grafico queda sobre su traza.
+    const angle = ((image.angle ?? 0) * Math.PI) / 180
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    const box = boxFromExtent(image.width, image.height, image.angle ?? 0)
+    const columnScale = box.width / image.width
+    const originX = viewport.start * columnScale
+    const sx = canvas.width / (span * columnScale)
+    const sy = canvas.height / box.height
+    /** Recorte -> vista enderezada -> canvas. */
+    const toCanvas = (x: number, y: number): [number, number] => {
+      const dx = x - image.width / 2
+      const dy = y - image.height / 2
+      return [
+        (cos * dx + sin * dy + box.width / 2 - originX) * sx,
+        (-sin * dx + cos * dy + box.height / 2) * sy,
+      ]
+    }
     const scale: CanvasScale = {
       start: viewport.start,
-      x: canvas.width / span,
-      y: canvas.height / image.height,
+      x: sx * columnScale,
       sampleStep: CURVE_SAMPLE_STEP * dpr,
+      toCanvas,
     }
+    /** Margen de columnas fuera de la vista que se dibujan: la rotacion corre la traza unos pixeles. */
+    const margin = image.height * Math.abs(Math.tan(angle)) + 2
+
+    /** Matriz que dibuja un canvas/imagen del tamaño del recorte ya enderezado. */
+    const [e, f] = toCanvas(0, 0)
+    const placeCrop = () => ctx.setTransform(sx * cos, -sy * sin, sx * sin, sy * cos, e, f)
 
     /** Suavizar solo al reducir: al ampliar se ven los pixeles tal cual son. */
-    ctx.imageSmoothingEnabled = scale.x < 1
+    ctx.imageSmoothingEnabled = scale.x < 1 || angle !== 0
+    placeCrop()
     ctx.drawImage(
       source,
-      image.left + viewport.start,
+      image.left,
       image.top,
-      span,
+      image.width,
       image.height,
       0,
       0,
-      canvas.width,
-      canvas.height,
+      image.width,
+      image.height,
     )
 
     if (maskCanvas) {
       ctx.imageSmoothingEnabled = false
-      ctx.drawImage(
-        maskCanvas,
-        viewport.start,
-        0,
-        span,
-        maskCanvas.height,
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-      )
+      ctx.drawImage(maskCanvas, 0, 0, image.width, image.height)
     }
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
 
     ctx.fillStyle = DRAW_COLOR
     ctx.strokeStyle = DRAW_COLOR
     ctx.lineWidth = LINE_WIDTH * dpr
 
     for (const point of pointsWMed ?? []) {
-      if (point.x < viewport.start || point.x > viewport.end) continue
+      if (point.x < viewport.start - margin || point.x > viewport.end + margin) continue
+      const [px, py] = toCanvas(point.x + 0.5, point.y + 0.5)
       ctx.beginPath()
-      ctx.arc(
-        (point.x + 0.5 - viewport.start) * scale.x,
-        (point.y + 0.5) * scale.y,
-        POINT_RADIUS * dpr,
-        0,
-        2 * Math.PI,
-      )
+      ctx.arc(px, py, POINT_RADIUS * dpr, 0, 2 * Math.PI)
       ctx.fill()
     }
 
@@ -246,12 +279,12 @@ export function ImageWithPixelExtraction({
       ctx.strokeStyle = DRAW_COLOR
     }
 
-    strokeCurve(ctx, drawFunction, 0, scale, canvas.width)
+    strokeCurve(ctx, drawFunction, 0, scale, viewport, margin)
 
     if (opening) {
       ctx.setLineDash(DASH_PATTERN.map((length) => length * dpr))
-      strokeCurve(ctx, drawFunction, opening / 2, scale, canvas.width)
-      strokeCurve(ctx, drawFunction, -opening / 2, scale, canvas.width)
+      strokeCurve(ctx, drawFunction, opening / 2, scale, viewport, margin)
+      strokeCurve(ctx, drawFunction, -opening / 2, scale, viewport, margin)
       ctx.setLineDash([])
     }
   }, [
@@ -279,7 +312,7 @@ export function ImageWithPixelExtraction({
         aria-label="Spectrum crop with the extraction trace and aperture"
         className="block w-full"
         style={{
-          aspectRatio: `${image.width} / ${image.height}`,
+          aspectRatio: `${boxFromExtent(image.width, image.height, image.angle ?? 0).width} / ${boxFromExtent(image.width, image.height, image.angle ?? 0).height}`,
           minHeight: MIN_CANVAS_HEIGHT,
         }}
       />

@@ -20,6 +20,7 @@ import {
   FIT_DEGREE_MAX,
   FIT_DEGREE_MIN,
 } from "~/types/spectrum-metadata"
+import { buildGeometryMask } from "~/lib/oriented-box"
 import { buildAppliedMaskOverlay, type MaskSource } from "../-utils/build-applied-mask-overlay"
 import { type SpectrumType, setSpectrumType } from "../-utils/set-spectrum-type"
 
@@ -40,7 +41,14 @@ export const SpectrumCard = withForm({
     /** Posicion del espectro en el arreglo `spectrums` del formulario. */
     index: 0,
     observationId: "",
-    spectrum: { id: "", imageWidth: 1, imageHeight: 1, imageTop: 0, imageLeft: 0 },
+    spectrum: {
+      id: "",
+      imageWidth: 1,
+      imageHeight: 1,
+      imageTop: 0,
+      imageLeft: 0,
+      imageAngle: 0 as number | null,
+    },
     analysis: {
       mediasPoints: [],
       opening: 0,
@@ -75,11 +83,24 @@ export const SpectrumCard = withForm({
   }) {
     /** Dibuja las normales sobre las que se promedia cada columna. Solo de diagnostico. */
     const [showNormals, setShowNormals] = useState(false)
-    /** Muestra la imagen como la vio el extractor: con lo que taparon las mascaras de otros espectros en negro. */
+    /**
+     * Muestra la imagen como la vio el extractor: con lo que taparon las mascaras de otros
+     * espectros y lo que cae fuera de la caja del espectro, en negro.
+     */
     const [showMasks, setShowMasks] = useState(false)
+    /**
+     * Vista enderezada de la caja del espectro (por defecto) o el recorte tal como lo ve la
+     * extraccion: el rectangulo sin rotar, con todo en negro menos lo que esta dentro de la caja.
+     */
+    const [levelBox, setLevelBox] = useState(true)
+    const isTilted = (spectrum.imageAngle ?? 0) !== 0
+    /** Pixeles dentro de la caja inclinada del espectro; el resto lo ve la extraccion en negro. */
+    const boxMask = useMemo(() => buildGeometryMask(spectrum), [spectrum])
+    /** Enderezada, el exterior de la caja queda fuera de la vista: solo se ve en el recorte sin rotar. */
+    const outsideBox = levelBox ? null : boxMask
     const maskOverlay = useMemo(
-      () => (showMasks ? buildAppliedMaskOverlay(spectrum, maskSources) : null),
-      [showMasks, spectrum, maskSources],
+      () => (showMasks ? buildAppliedMaskOverlay(spectrum, maskSources, outsideBox) : null),
+      [showMasks, spectrum, maskSources, outsideBox],
     )
 
     return (
@@ -153,12 +174,27 @@ export const SpectrumCard = withForm({
               <span className="icon-[ph--ruler]" />
             </Button>
             <Button
+              variant={isTilted && levelBox ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Level the box"
+              aria-pressed={isTilted && levelBox}
+              title={
+                levelBox
+                  ? "Showing the spectrum box levelled. Click to see the crop as the extractor sees it (not rotated)"
+                  : "Showing the crop as the extractor sees it (not rotated, black outside the box). Click to level the spectrum box"
+              }
+              disabled={!isTilted}
+              onClick={() => setLevelBox((level) => !level)}
+            >
+              <span className="icon-[ph--perspective]" />
+            </Button>
+            <Button
               variant={showMasks ? "secondary" : "ghost"}
               size="icon"
               aria-label="Show masks"
               aria-pressed={showMasks}
-              title="Show the image as the extractor saw it, with the regions masked by earlier spectra blanked"
-              disabled={maskSources.length === 0}
+              title="Show the image as the extractor saw it, with the regions masked by earlier spectra and what is outside the spectrum box blanked"
+              disabled={maskSources.length === 0 && !outsideBox}
               onClick={() => setShowMasks((shown) => !shown)}
             >
               <span className="icon-[ph--mask-happy]" />
@@ -190,11 +226,16 @@ export const SpectrumCard = withForm({
         <div className={cn("transition-opacity", isCalculating && "opacity-60")}>
           <ImageWithPixelExtraction
             image={{
-              url: `/api/observation/${observationId}/preview`,
+              // Nivelada: con negro fuera de la observacion. Sin nivelar: el recorte crudo.
+              url:
+                isTilted && !levelBox
+                  ? `/api/observation/${observationId}/preview?raw=1`
+                  : `/api/observation/${observationId}/preview`,
               width: spectrum.imageWidth,
               height: spectrum.imageHeight,
               top: spectrum.imageTop,
               left: spectrum.imageLeft,
+              angle: levelBox ? spectrum.imageAngle : 0,
             }}
             pointsWMed={analysis.mediasPoints}
             drawFunction={analysis.rectFunction}
