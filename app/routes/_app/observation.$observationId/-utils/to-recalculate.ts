@@ -13,6 +13,7 @@ interface Spectrum {
   imageLeft: number
   imageWidth: number
   imageHeight: number
+  imageAngle?: number | null
   countMediasPoints: number
   apertureCoefficient: number
   fitDegree: number
@@ -47,6 +48,7 @@ export function toRecalculate(
         prevPrincipalSpectrum.imageLeft !== principalSpectrum.imageLeft ||
         prevPrincipalSpectrum.imageTop !== principalSpectrum.imageTop ||
         prevPrincipalSpectrum.imageWidth !== principalSpectrum.imageWidth ||
+        prevPrincipalSpectrum.imageAngle !== principalSpectrum.imageAngle ||
         prevPrincipalSpectrum.countMediasPoints !== principalSpectrum.countMediasPoints ||
         prevPrincipalSpectrum.apertureCoefficient !== principalSpectrum.apertureCoefficient ||
         prevPrincipalSpectrum.fitDegree !== principalSpectrum.fitDegree
@@ -74,6 +76,7 @@ export function toRecalculate(
         s.imageLeft !== prevData.imageLeft ||
         s.imageTop !== prevData.imageTop ||
         s.imageWidth !== prevData.imageWidth ||
+        s.imageAngle !== prevData.imageAngle ||
         s.countMediasPoints !== prevData.countMediasPoints ||
         s.apertureCoefficient !== prevData.apertureCoefficient ||
         s.fitDegree !== prevData.fitDegree ||
