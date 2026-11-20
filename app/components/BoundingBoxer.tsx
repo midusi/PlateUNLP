@@ -12,10 +12,25 @@ import { Button } from "~/components/ui/button"
 import { Separator } from "~/components/ui/separator"
 import { loadImage } from "~/lib/load-image"
 import { clamp } from "~/lib/math"
+import {
+  boxFitsInside,
+  boxFromExtent,
+  endLinesOf,
+  extendBoxToLines,
+  orientedBoxExtent,
+  rotatePlacedBox,
+  type PlacedBox,
+  toStoredGeometry,
+} from "~/lib/oriented-box"
 import { cn } from "~/lib/utils"
 
 /**
  * `BoundingBox` type represents a rectangular area defined by its top-left corner, width, and height.
+ *
+ * It can also be an oriented box (OBB): `angle` tilts it around its center. In
+ * that case `top/left/width/height` are the axis-aligned rectangle that
+ * contains it (the one that gets cropped); the box itself is derived from that
+ * rectangle and the angle. See `~/lib/oriented-box`.
  */
 export type BoundingBox = {
   /** Unique identifier for the bounding box. */
@@ -32,6 +47,11 @@ export type BoundingBox = {
   width: number
   /** Height of the bounding box. */
   height: number
+  /**
+   * Tilt of the box in degrees, clockwise, in (-45, 45].
+   * @default 0
+   */
+  angle?: number
   /** Color of the bounding box, as a valid CSS color string. */
   color: string
   /**
@@ -39,6 +59,15 @@ export type BoundingBox = {
    * @default true
    */
   canChange?: boolean
+}
+
+/** What the user is doing to a bounding box when `onBoundingBoxChange` fires. */
+export type BoundingBoxChangeInfo = {
+  action: "move" | "resize" | "rotate"
+  /** Edges being dragged (`t`, `b`, `l`, `r`) when `action` is `resize`. */
+  dir?: string
+  /** Size of the image, the box has to stay inside it. */
+  limits: { x: number; y: number }
 }
 
 /**
@@ -53,7 +82,7 @@ export type BoundingBoxerProps = {
    * Function triggered when a bounding box is moved or modified.
    * The bounding box is identified by its `id`.
    */
-  onBoundingBoxChange?: (boundingBox: BoundingBox) => void
+  onBoundingBoxChange?: (boundingBox: BoundingBox, info?: BoundingBoxChangeInfo) => void
   /**
    * Function triggered when the user finishes modifying a bounding box.
    * The bounding box is identified by its `id`.
@@ -74,6 +103,13 @@ export type BoundingBoxerProps = {
    * @default false
    */
   disabled?: boolean
+  /**
+   * Boxes keep their end lines when they are rotated or their height changes: they get
+   * longer or shorter along their own axis instead of wider. For boxes that share their
+   * ends, like the spectra of an observation.
+   * @default false
+   */
+  keepEndLines?: boolean
   /**
    * Whether to show zoom actions (zoom in and zoom out buttons).
    * @default true
@@ -138,6 +174,7 @@ export function BoundingBoxer({
   onBoundingBoxAdd,
   onBoundingBoxDelete,
   disabled = false,
+  keepEndLines = false,
   showZoomActions = true,
   showRotateActions = false,
   showImageAdjustActions = false,
@@ -186,6 +223,11 @@ export function BoundingBoxer({
 
   // Control user actions
   const [selectedTool, setSelectedTool] = useState<BoundingBoxerTools>("select")
+  // Box whose angle can be typed in the toolbar: the last one touched, or the only one.
+  const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null)
+  const selectedBox =
+    boundingBoxes.find((box) => box.id === selectedBoxId) ??
+    (boundingBoxes.length === 1 ? boundingBoxes[0] : undefined)
   const [brightness, setBrightness] = useState(100)
   const [contrast, setContrast] = useState(100)
   const [isInverted, setIsInverted] = useState(false)
@@ -252,6 +294,19 @@ export function BoundingBoxer({
             onContrastChange={setContrast}
             onToggleInverted={() => setIsInverted((prev) => !prev)}
             onColorFilterPresetChange={setColorFilterPreset}
+            angleInput={
+              selectedBox && (
+                <BoundingBoxAngleInput
+                  key={selectedBox.id}
+                  boundingBox={selectedBox}
+                  limits={{ x: imageSize.width, y: imageSize.height }}
+                  keepSpan={keepEndLines}
+                  disabled={disabled || selectedBox.canChange === false}
+                  onChange={onBoundingBoxChange}
+                  onChangeEnd={onBoundingBoxChangeEnd}
+                />
+              )
+            }
           >
             {children}
           </BoundingBoxControls>
@@ -281,6 +336,8 @@ export function BoundingBoxer({
                 onChange={onBoundingBoxChange}
                 onChangeEnd={onBoundingBoxChangeEnd}
                 onDelete={onBoundingBoxDelete}
+                onSelect={setSelectedBoxId}
+                keepSpan={keepEndLines}
                 limits={{ x: imageSize.width, y: imageSize.height }}
                 disabled={disabled}
               />
@@ -423,8 +480,10 @@ function BoundingBoxControls({
   onContrastChange,
   onToggleInverted,
   onColorFilterPresetChange,
+  angleInput,
   children,
 }: {
+  angleInput?: React.ReactNode
   showDrawNew: boolean
   showZoomActions: boolean
   showRotateActions: boolean
@@ -814,25 +873,123 @@ function BoundingBoxControls({
       )}
 
       <div className="flex-1" />
+      {angleInput}
       {children}
     </Toolbar.Root>
   )
 }
 
 const BB_MIN_WIDTH = 5
+/** Largest tilt the rotation handle gives (the models predict within (-45, 45]). */
+const BB_MAX_ANGLE = 45
+/** Within this many degrees of the horizontal the rotation handle levels the box (angle 0). */
+const BB_LEVEL_SNAP = 0.3
+
+/** The oriented box a `BoundingBox` describes. Its center is the one of its rectangle. */
+function placedBoxOf(
+  box: Pick<BoundingBox, "left" | "top" | "width" | "height" | "angle">,
+): PlacedBox {
+  return {
+    ...boxFromExtent(box.width, box.height, box.angle ?? 0),
+    centerX: box.left + box.width / 2,
+    centerY: box.top + box.height / 2,
+  }
+}
+
+/** `box` with the geometry of `placed`: integer rectangle that contains it, inside `limits`. */
+function withPlacedBox(
+  box: BoundingBox,
+  placed: PlacedBox,
+  limits: { x: number; y: number },
+  /** false: the box is not shrunk nor moved to fit inside `limits` (used when rotating). */
+  fit = true,
+) {
+  const stored = toStoredGeometry(placed, limits, fit)
+  return {
+    ...box,
+    left: stored.imageLeft,
+    top: stored.imageTop,
+    width: stored.imageWidth,
+    height: stored.imageHeight,
+    angle: stored.imageAngle,
+  }
+}
+
+/** Toolbar field to type the tilt, in degrees, of the selected box. */
+function BoundingBoxAngleInput({
+  boundingBox,
+  limits,
+  keepSpan,
+  disabled,
+  onChange,
+  onChangeEnd,
+}: {
+  keepSpan: boolean
+  boundingBox: BoundingBox
+  limits: { x: number; y: number }
+  disabled: boolean
+  onChange?: (boundingBox: BoundingBox, info?: BoundingBoxChangeInfo) => void
+  onChangeEnd?: (boundingBox: BoundingBox) => void
+}) {
+  const angle = boundingBox.angle ?? 0
+  const [draft, setDraft] = useState<string | null>(null)
+
+  const commit = (text: string) => {
+    setDraft(null)
+    const typed = Number.parseFloat(text.replace(",", "."))
+    if (!Number.isFinite(typed)) return
+    const placed = placedBoxOf(boundingBox)
+    const target = clamp(Math.round(typed * 10) / 10, -BB_MAX_ANGLE, BB_MAX_ANGLE)
+    // The box stops at the largest tilt that still fits inside the image.
+    const turned = rotatePlacedBox(placed, target, limits, keepSpan)
+    if (turned.angle === angle) return
+    const rotated = withPlacedBox(boundingBox, turned, limits, false)
+    onChange?.(rotated, { action: "rotate", limits })
+    onChangeEnd?.(rotated)
+  }
+
+  return (
+    <label className="mr-2 flex items-center gap-1 text-xs" title="Tilt of the selected box, in degrees">
+      <span className="text-muted-foreground">
+        {boundingBox.label || boundingBox.name || "Box"} angle
+      </span>
+      <input
+        type="number"
+        step={0.1}
+        min={-BB_MAX_ANGLE}
+        max={BB_MAX_ANGLE}
+        disabled={disabled}
+        value={draft ?? angle.toFixed(1)}
+        onChange={(e) => setDraft(e.currentTarget.value)}
+        onBlur={(e) => draft !== null && commit(e.currentTarget.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit(e.currentTarget.value)
+          if (e.key === "Escape") setDraft(null)
+        }}
+        className="h-7 w-16 rounded-md border bg-background px-1 text-right"
+        aria-label="Box angle in degrees"
+      />
+      <span>°</span>
+    </label>
+  )
+}
 
 function BoundingBoxComponent({
   boundingBox,
   onChange,
   onChangeEnd,
   onDelete,
+  onSelect,
+  keepSpan = false,
   limits,
   disabled = false,
 }: {
+  keepSpan?: boolean
   boundingBox: BoundingBox
-  onChange?: (boundingBox: BoundingBox) => void
+  onChange?: (boundingBox: BoundingBox, info?: BoundingBoxChangeInfo) => void
   onChangeEnd?: (boundingBox: BoundingBox) => void
   onDelete?: (id: string) => void
+  onSelect?: (id: string) => void
   limits: { x: number; y: number }
   disabled?: boolean
 }) {
@@ -868,9 +1025,9 @@ function BoundingBoxComponent({
   const ref = useRef<HTMLDivElement>(null)
 
   const [resizing, setResizing] = useState<{
-    dir: `${"t" | "b" | ""}${"l" | "r" | ""}` | "c"
+    dir: `${"t" | "b" | ""}${"l" | "r" | ""}` | "c" | "rotate"
     initialMouse: { x: number; y: number }
-    initialBoundingBox: Pick<BoundingBox, "left" | "top" | "width" | "height">
+    initialBoundingBox: Pick<BoundingBox, "left" | "top" | "width" | "height" | "angle">
   } | null>(null)
 
   useEffect(() => {
@@ -880,6 +1037,92 @@ function BoundingBoxComponent({
 
       e.preventDefault()
       e.stopPropagation()
+
+      const initialPlaced = placedBoxOf(resizing.initialBoundingBox)
+
+      // Rotate: the angle is the one between "up" and the line from the center to the mouse.
+      if (resizing.dir === "rotate") {
+        const rect = ref.current.getBoundingClientRect()
+        const dx = e.clientX - (rect.left + rect.width / 2)
+        const dy = e.clientY - (rect.top + rect.height / 2)
+        const degrees = (Math.atan2(dx, -dy) * 180) / Math.PI
+        const snapped = Math.abs(degrees) < BB_LEVEL_SNAP ? 0 : Math.round(degrees * 10) / 10
+        const target = clamp(snapped, -BB_MAX_ANGLE, BB_MAX_ANGLE)
+        // Gira sobre su centro; si se acerca al borde de la imagen simplemente no gira mas.
+        const turned = rotatePlacedBox(initialPlaced, target, limits, keepSpan)
+        onChange?.(withPlacedBox(boundingBox, turned, limits, false), {
+          action: "rotate",
+          limits,
+        })
+        return
+      }
+
+      // Tilted box: move and resize in the box's own axes.
+      if ((resizing.initialBoundingBox.angle ?? 0) !== 0) {
+        const dx = (e.clientX - resizing.initialMouse.x) / scale
+        const dy = (e.clientY - resizing.initialMouse.y) / scale
+        const radians = (initialPlaced.angle * Math.PI) / 180
+        const cos = Math.cos(radians)
+        const sin = Math.sin(radians)
+        let placed: PlacedBox = initialPlaced
+        if (resizing.dir === "c") {
+          // Move: the box slides along the image borders instead of leaving the image.
+          const extent = orientedBoxExtent(initialPlaced)
+          placed = {
+            ...initialPlaced,
+            centerX: clamp(initialPlaced.centerX + dx, extent.width / 2, limits.x - extent.width / 2),
+            centerY: clamp(initialPlaced.centerY + dy, extent.height / 2, limits.y - extent.height / 2),
+          }
+        } else {
+          // Mouse movement along the box's width axis (du) and height axis (dv).
+          const du = dx * cos + dy * sin
+          const dv = -dx * sin + dy * cos
+          /** The box after dragging the edge(s) a fraction `t` of the way to the mouse. */
+          const resized = (t: number): PlacedBox => {
+            let x0 = -initialPlaced.width / 2
+            let x1 = initialPlaced.width / 2
+            let y0 = -initialPlaced.height / 2
+            let y1 = initialPlaced.height / 2
+            if (resizing.dir.includes("t")) y0 = Math.min(y0 + dv * t, y1 - BB_MIN_WIDTH)
+            else if (resizing.dir.includes("b")) y1 = Math.max(y1 + dv * t, y0 + BB_MIN_WIDTH)
+            if (resizing.dir.includes("l")) x0 = Math.min(x0 + du * t, x1 - BB_MIN_WIDTH)
+            else if (resizing.dir.includes("r")) x1 = Math.max(x1 + du * t, x0 + BB_MIN_WIDTH)
+            const midX = (x0 + x1) / 2
+            const midY = (y0 + y1) / 2
+            const result: PlacedBox = {
+              ...initialPlaced,
+              width: x1 - x0,
+              height: y1 - y0,
+              centerX: initialPlaced.centerX + midX * cos - midY * sin,
+              centerY: initialPlaced.centerY + midX * sin + midY * cos,
+            }
+            // Changing only the height keeps the end lines: the box slides along its axis.
+            if (keepSpan && !/[lr]/.test(resizing.dir)) {
+              return extendBoxToLines(result, endLinesOf(initialPlaced))
+            }
+            return result
+          }
+          // The opposite edge stays where it is: if the dragged edge would leave the
+          // image it stops at the border (largest fraction of the drag that still fits).
+          placed = resized(1)
+          if (!boxFitsInside(placed, limits)) {
+            let low = 0
+            let high = 1
+            for (let i = 0; i < 30; i++) {
+              const mid = (low + high) / 2
+              if (boxFitsInside(resized(mid), limits)) low = mid
+              else high = mid
+            }
+            placed = resized(low)
+          }
+        }
+        onChange?.(withPlacedBox(boundingBox, placed, limits, false), {
+          action: resizing.dir === "c" ? "move" : "resize",
+          dir: resizing.dir,
+          limits,
+        })
+        return
+      }
 
       let deltaLeft = (e.clientX - resizing.initialMouse.x) / scale
       let deltaTop = (e.clientY - resizing.initialMouse.y) / scale
@@ -908,14 +1151,17 @@ function BoundingBoxComponent({
         top = clamp(top + deltaTop, 0, limits.y - height)
       }
 
-      onChange?.({
-        ...boundingBox,
-        // Return integers
-        left: Math.round(left),
-        top: Math.round(top),
-        width: Math.round(width),
-        height: Math.round(height),
-      })
+      onChange?.(
+        {
+          ...boundingBox,
+          // Return integers
+          left: Math.round(left),
+          top: Math.round(top),
+          width: Math.round(width),
+          height: Math.round(height),
+        },
+        { action: resizing.dir === "c" ? "move" : "resize", dir: resizing.dir, limits },
+      )
     }
 
     const handleMouseUp = (e: MouseEvent) => {
@@ -935,11 +1181,12 @@ function BoundingBoxComponent({
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [resizing, scale, boundingBox, onChange, onChangeEnd, limits])
+  }, [resizing, scale, boundingBox, onChange, onChangeEnd, limits, keepSpan])
 
   const handleMouseDown = (dir: NonNullable<typeof resizing>["dir"]) => (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    onSelect?.(boundingBox.id)
     if (boundingBox.canChange === false) return
     if (disabled) return
     setResizing({
@@ -950,19 +1197,28 @@ function BoundingBoxComponent({
         top: boundingBox.top,
         width: boundingBox.width,
         height: boundingBox.height,
+        angle: boundingBox.angle,
       },
     })
   }
+
+  // The element is the box itself (before rotating), centered on its rectangle and
+  // tilted around that center. Without a tilt it is the rectangle.
+  const placed = placedBoxOf(boundingBox)
+  const angle = boundingBox.angle ?? 0
+  const canRotate = !disabled && boundingBox.canChange !== false
 
   return (
     <div
       ref={ref}
       key={boundingBox.id}
       style={{
-        top: boundingBox.top,
-        left: boundingBox.left,
-        width: boundingBox.width,
-        height: boundingBox.height,
+        top: placed.centerY - placed.height / 2,
+        left: placed.centerX - placed.width / 2,
+        width: placed.width,
+        height: placed.height,
+        transform: angle !== 0 ? `rotate(${angle}deg)` : undefined,
+        transformOrigin: "center",
         gridTemplateColumns: `${handleWidth} 1fr ${handleWidth}`,
         gridTemplateRows: `${handleWidth} 1fr ${handleWidth}`,
       }}
@@ -995,6 +1251,27 @@ function BoundingBoxComponent({
           <path d="M3 3l8 8m0-8l-8 8" />
         </svg>
       </button>
+      {canRotate && (
+        // Centered on the top edge, so the mouse never leaves the box on its way to it.
+        <button
+          type="button"
+          title="Drag to rotate. Drop it near the horizontal to level the box"
+          aria-label="Rotate bounding box"
+          onMouseDown={handleMouseDown("rotate")}
+          style={{
+            width: `${34 / scale}px`,
+            height: `${34 / scale}px`,
+            top: `${-17 / scale}px`,
+            left: `calc(50% - ${17 / scale}px)`,
+            borderWidth: `${1 / scale}px`,
+            fontSize: `${10 / scale}px`,
+          }}
+          className="absolute z-10 hidden cursor-grab items-center justify-center rounded-full border-black border-solid bg-white p-0 text-black leading-none shadow-sm group-hover:flex group-data-[resizing=true]:flex"
+        >
+          {/* Keeps the text upright while the box is tilted. */}
+          <span style={{ transform: `rotate(${-angle}deg)` }}>{angle.toFixed(1)}°</span>
+        </button>
+      )}
       <p
         className="absolute top-0 left-0 origin-top-left group-hover:hidden group-[[data-resizing=true]]:hidden"
         style={{
