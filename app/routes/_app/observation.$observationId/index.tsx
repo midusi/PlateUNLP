@@ -77,16 +77,20 @@ function RouteComponent() {
       <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
       {canExtract ? (
-        <SpectrumsExtractor key={spectrumsKey} observationId={observationId} spectrums={spectrums} />
+        <SpectrumsExtractor
+          key={spectrumsKey}
+          observationId={observationId}
+          spectrums={spectrums}
+        />
       ) : (
         <p className="text-muted-foreground text-sm">
           At least one science spectrum and one lamp spectrum are needed to extract the spectra.
         </p>
       )}
-      <ObservationExportBar 
-        form={form} 
-        plateFields={plateFields} 
-        observationId={observationId} 
+      <ObservationExportBar
+        form={form}
+        plateFields={plateFields}
+        observationId={observationId}
         hasExtracted={hasExtracted}
       />
     </div>
@@ -140,9 +144,9 @@ function ObservationExportBar({
           <Button className="flex justify-center">Calibrate</Button>
         </Link>
       ) : (
-          <Button disabled title={disabledTitle} className="flex justify-center">
-            Calibrate
-          </Button>
+        <Button disabled title={disabledTitle} className="flex justify-center">
+          Calibrate
+        </Button>
       )}
     </div>
   )
