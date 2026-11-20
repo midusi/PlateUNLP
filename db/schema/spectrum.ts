@@ -14,6 +14,8 @@ export const spectrum = sqliteTable("spectrum", {
   imageTop: integer().notNull(), // offset from the top of the observation image
   imageWidth: integer().notNull(), // width of the spectrum image
   imageHeight: integer().notNull(), // height of the spectrum image
+  // tilt of the oriented box (OBB) inside that rectangle, centered on it. 0 = same as the rectangle
+  imageAngle: real().notNull().default(0), // tilt in degrees (clockwise), in (-45, 45]
   // params for spectrums extraction
   countMediasPoints: integer().notNull().default(5), // cantidad de puntos intermedios
   apertureCoefficient: real().notNull().default(0.95), // coeficiente de tamaño de apertura

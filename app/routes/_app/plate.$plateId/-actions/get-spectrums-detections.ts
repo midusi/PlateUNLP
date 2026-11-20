@@ -5,6 +5,7 @@ import sharp from "sharp"
 import { z } from "zod"
 import { db } from "~/db"
 import { obsNFromIndex } from "~/lib/obs-n"
+import { normalizeOrientedBoxRadians, toStoredGeometry } from "~/lib/oriented-box"
 import { readEditedFile } from "~/lib/uploads"
 
 /**
@@ -100,17 +101,6 @@ export const getObservationDetections = createServerFn()
 
     // console.log("Valid predictions after filtering:", validPredictions)
 
-    const clamp = (v: number, min: number, max: number) =>
-      Math.min(Math.max(v, min), max)
-    const obbToAabb = (w: number, h: number, angleRad: number) => {
-      const cos = Math.cos(angleRad)
-      const sin = Math.sin(angleRad)
-      return {
-        width: Math.abs(w * cos) + Math.abs(h * sin),
-        height: Math.abs(w * sin) + Math.abs(h * cos),
-      }
-    }
-
     const formattedPredictions = validPredictions
       .map((pred) => {
         // x1, y1 coordendas del centro
@@ -118,32 +108,23 @@ export const getObservationDetections = createServerFn()
         // h es alto
         // score es la confianza
         // class es la clase predicha (0 = observación)
-        // inc es la inclinación de la caja
+        // inc es la inclinación de la caja, en radianes y sin normalizar
+
         const [x1, y1, w, h, _score, _class, inc] = pred
 
         // Mapear de vuelta al espacio original:
         // 1. Restar el padding (offset)
         // 2. Dividir por la escala aplicada
-        // 3. Recortar a los bordes: el modelo puede predecir cajas que se salen
-        //    unos píxeles de la imagen (p. ej. left = -0.88 en una placa rotada)
-
-        const centerX = (x1 - offsetX) / scale
-        const centerY = (y1 - offsetY) / scale
-        const obbW = w / scale
-        const obbH = h / scale
-        const aabb = obbToAabb(obbW, obbH, inc)
-
-        const imageWidth = clamp(aabb.width, 0, origW)
-        const imageHeight = clamp(aabb.height, 0, origH)
-        const imageLeft = clamp(centerX - imageWidth / 2, 0, Math.max(0, origW - imageWidth))
-        const imageTop = clamp(centerY - imageHeight / 2, 0, Math.max(0, origH - imageHeight))
-
-        return {
-          imageWidth,
-          imageHeight,
-          imageLeft,
-          imageTop,
-        }
+        // 3. Normalizar la inclinación a (-45°, 45°] intercambiando ancho y alto si hace falta
+        // 4. Guardar el rectángulo envolvente (el que se recorta) junto con la caja
+        //    orientada. El rectángulo se acota a los bordes: el modelo puede predecir
+        //    cajas que se salen unos píxeles de la imagen (p. ej. left = -0.88 en una
+        //    placa rotada).
+        const box = normalizeOrientedBoxRadians(w / scale, h / scale, inc)
+        return toStoredGeometry(
+          { ...box, centerX: (x1 - offsetX) / scale, centerY: (y1 - offsetY) / scale },
+          { x: origW, y: origH },
+        )
       })
       // Descartar cajas que tras el recorte quedan sin área (predichas fuera de la imagen)
       .filter((box) => box.imageWidth >= 1 && box.imageHeight >= 1)

@@ -4,6 +4,8 @@ import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
 import { obsNFromIndex, obsNToIndex } from "~/lib/obs-n"
+import { storedOrientation } from "~/lib/oriented-box"
+import { orientedBoxFields } from "~/types/oriented-box"
 
 export const addObservations = createServerFn({ method: "POST" })
   .validator(
@@ -16,6 +18,7 @@ export const addObservations = createServerFn({ method: "POST" })
           left: z.number().int().nonnegative(),
           width: z.number().int().positive(),
           height: z.number().int().positive(),
+          ...orientedBoxFields,
         }),
       ),
     }),
@@ -59,6 +62,7 @@ export const addObservations = createServerFn({ method: "POST" })
         imageLeft: obs.left,
         imageWidth: width,
         imageHeight: height,
+        ...storedOrientation(obs),
         metadataCompletion: 0,
         "OBS-N": obsN,
       }
@@ -72,6 +76,7 @@ export const addObservations = createServerFn({ method: "POST" })
       imageLeft: s.observation.imageLeft,
       imageWidth: s.observation.imageWidth,
       imageHeight: s.observation.imageHeight,
+      imageAngle: s.observation.imageAngle,
     })
 
     return observations

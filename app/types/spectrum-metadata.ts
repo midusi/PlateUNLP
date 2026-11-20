@@ -160,6 +160,7 @@ export const ExtractionConfigurationSchema = z.object({
       imageHeight: z.number(),
       imageLeft: z.number(),
       imageTop: z.number(),
+      imageAngle: z.number().nullish(),
       countMediasPoints: z.number().min(2).max(20),
       apertureCoefficient: z.number().min(0.5).max(1.5), 
       fitDegree: z.number().int().min(FIT_DEGREE_MIN).max(FIT_DEGREE_MAX)

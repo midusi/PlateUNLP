@@ -3,8 +3,8 @@ import { InferenceSession, Tensor } from "onnxruntime-node"
 import sharp from "sharp"
 import { z } from "zod"
 import { db } from "~/db"
+import { normalizeOrientedBoxRadians, orientedBoxExtent } from "~/lib/oriented-box"
 import { readEditedFile } from "~/lib/uploads"
-import { iou } from "~/lib/utils"
 import type { BBClassesProps } from "~/types/BBClasses"
 import type { BoundingBox } from "~/types/BoundingBox"
 
@@ -21,14 +21,12 @@ export const predictBoundingBoxes = createServerFn()
       classes: z.array(z.any()),
       forceMaxWidth: z.boolean().optional().default(false),
       confidenceThreshold: z.number().optional().default(0.75),
-      iouThreshold: z.number().optional().default(0.7),
     }),
   )
   .handler(async ({ data }) => {
     const SIZE_M = data.size
     const CLASSES = data.classes as BBClassesProps[]
     const CONFIDENCE_THRESHOLD = data.confidenceThreshold
-    const IOU_THRESHOLD = data.iouThreshold
     const forceMaxWidth = data.forceMaxWidth
 
     // Obtener observación/placa
@@ -91,18 +89,9 @@ export const predictBoundingBoxes = createServerFn()
     const DATA = outputs.output0.data as Float32Array
     const DIMS = outputs.output0.dims
 
-    let boundingBoxes: BoundingBox[] = []
+    const boundingBoxes: BoundingBox[] = []
     let id = 0
     const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max)
-    const obbToAabb = (w: number, h: number, angleRad: number) => {
-      const cos = Math.cos(angleRad)
-      const sin = Math.sin(angleRad)
-      return {
-        width: Math.abs(w * cos) + Math.abs(h * sin),
-        height: Math.abs(w * sin) + Math.abs(h * cos),
-      }
-    }
-
     // Formato OBB: [1, N, 7] => [xc, yc, w, h, score, class, angle]
     const predictionCount = DIMS[1]
     for (let i = 0; i < predictionCount; i++) {
@@ -123,9 +112,10 @@ export const predictBoundingBoxes = createServerFn()
       // Detecciones con el centro fuera de la imagen: caen en el relleno de la imagen cuadrada
       // (falsos positivos). Se descartan en vez de recortarlas contra el borde.
       if (centerX < 0 || centerX > NATURALWIDTH || centerY < 0 || centerY > NATURALHEIGHT) continue
-      const obbW = w / scale
-      const obbH = h / scale
-      const aabb = obbToAabb(obbW, obbH, angle)
+      // La caja orientada se guarda normalizada (angulo en (-45, 45]) junto al rectangulo
+      // envolvente, que es el que se recorta.
+      const obb = normalizeOrientedBoxRadians(w / scale, h / scale, angle)
+      const aabb = orientedBoxExtent(obb)
 
       let x1 = centerX - aabb.width / 2
       let y1 = centerY - aabb.height / 2
@@ -151,16 +141,15 @@ export const predictBoundingBoxes = createServerFn()
         height: heightBB,
         class_info: (CLASSES[class_id] ?? CLASSES[0]) as BBClassesProps,
         prob,
+        centerX,
+        centerY,
+        angle: obb.angle,
       })
     }
-    
 
-    // NMS (Non-Maximum Suppression)
-    boundingBoxes = boundingBoxes.sort((bb1, bb2) => bb2.prob - bb1.prob)
-    const result = []
-    while (boundingBoxes.length > 0) {
-      result.push(boundingBoxes[0])
-      boundingBoxes = boundingBoxes.filter((bb) => iou(boundingBoxes[0], bb) < IOU_THRESHOLD)
-    }
-    return result
+    // Sin NMS: el modelo es NMS-free (la salida ya trae a lo sumo una caja por objeto, hasta
+    // 300), y un NMS sobre el rectangulo envolvente de cajas inclinadas puede descartar un
+    // vecino legitimo, ademas de no distinguir clases. Se mide: sobre las imagenes de
+    // prueba no descartaba nada.
+    return boundingBoxes.sort((bb1, bb2) => bb2.prob - bb1.prob)
   })

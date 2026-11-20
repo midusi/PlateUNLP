@@ -55,6 +55,7 @@ export const addObservation = createServerFn({ method: "POST" })
         imageLeft: s.observation.imageLeft,
         imageWidth: s.observation.imageWidth,
         imageHeight: s.observation.imageHeight,
+        imageAngle: s.observation.imageAngle,
       })
     return observation
   })

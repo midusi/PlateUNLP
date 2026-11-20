@@ -12,6 +12,7 @@ type ObservationBox = {
   imageLeft: number
   imageWidth: number
   imageHeight: number
+  imageAngle: number
 }
 
 function normalizeDegrees(value: number): number {
@@ -23,9 +24,12 @@ function rotateBoundingBox90(
   plateWidth: number,
   plateHeight: number,
   direction: z.infer<typeof RotateDirectionSchema>,
-): Pick<ObservationBox, "imageTop" | "imageLeft" | "imageWidth" | "imageHeight"> {
+): Omit<ObservationBox, "id"> {
+  // Al girar la imagen 90 grados, el rectangulo envolvente intercambia ancho y alto y la
+  // inclinacion queda igual: el eje largo pasa a ser el otro, con el mismo angulo.
   if (direction === "right") {
     return {
+      imageAngle: box.imageAngle,
       imageLeft: plateHeight - (box.imageTop + box.imageHeight),
       imageTop: box.imageLeft,
       imageWidth: box.imageHeight,
@@ -34,6 +38,7 @@ function rotateBoundingBox90(
   }
 
   return {
+    imageAngle: box.imageAngle,
     imageLeft: box.imageTop,
     imageTop: plateWidth - (box.imageLeft + box.imageWidth),
     imageWidth: box.imageHeight,
@@ -65,6 +70,7 @@ export const rotatePlateImage = createServerFn({ method: "POST" })
           imageLeft: true,
           imageWidth: true,
           imageHeight: true,
+          imageAngle: true,
         },
       })
 

@@ -19,6 +19,7 @@ export const getObservations = createServerFn()
         imageLeft: true,
         imageWidth: true,
         imageHeight: true,
+        imageAngle: true,
       },
     })
     return observations
