@@ -215,43 +215,33 @@ const statusFilterOptions: Array<{ value: StatusFilterValue; label: string }> = 
   { value: "completed", label: "Completed" },
 ]
 
+/**
+ * Cada filtro mira solo su propia etapa, igual que el círculo con esa letra: una placa con la
+ * extracción pendiente aparece en "Spectrum / Extraction" aunque otras etapas también lo estén.
+ */
 function matchesStatusFilter(status: PlateStatus, filter: StatusFilterValue): boolean {
-  if (filter === "all") return true
-
   const { plateMetadata, observations } = status
 
-  if (filter === "plate-metadata") return plateMetadata !== "done"
-
-  if (observations.length === 0) return false
-
-  if (filter === "observation-metadata")
-    return plateMetadata === "done" && observations.some((o) => o.metadata !== "done")
-
-  if (filter === "extraction")
-    return (
-      plateMetadata === "done" &&
-      observations.every((o) => o.metadata === "done") &&
-      observations.some((o) => o.extraction !== "done")
-    )
-
-  if (filter === "calibration")
-    return (
-      plateMetadata === "done" &&
-      observations.every((o) => o.metadata === "done") &&
-      observations.every((o) => o.extraction === "done") &&
-      observations.some((o) => o.calibration !== "done")
-    )
-
-  if (filter === "completed")
-    return (
-      plateMetadata === "done" &&
-      observations.length > 0 &&
-      observations.every(
-        (o) => o.metadata === "done" && o.extraction === "done" && o.calibration === "done",
+  switch (filter) {
+    case "all":
+      return true
+    case "plate-metadata":
+      return plateMetadata !== "done"
+    case "observation-metadata":
+      return observations.some((o) => o.metadata !== "done")
+    case "extraction":
+      return observations.some((o) => o.extraction !== "done")
+    case "calibration":
+      return observations.some((o) => o.calibration !== "done")
+    case "completed":
+      return (
+        plateMetadata === "done" &&
+        observations.length > 0 &&
+        observations.every(
+          (o) => o.metadata === "done" && o.extraction === "done" && o.calibration === "done",
+        )
       )
-    )
-
-  return true
+  }
 }
 
 const columnWidthById: Record<string, string> = {
