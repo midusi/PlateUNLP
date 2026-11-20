@@ -33,6 +33,7 @@ function observationToBoundingBox(observation: Observation, index: number): Boun
     left: observation.imageLeft,
     width: observation.imageWidth,
     height: observation.imageHeight,
+    angle: observation.imageAngle,
   }
 }
 
@@ -130,6 +131,7 @@ export function ObservationsList({
             left: Math.round(obs.imageLeft),
             width: Math.round(obs.imageWidth),
             height: Math.round(obs.imageHeight),
+            imageAngle: obs.imageAngle,
           })),
         },
       })
@@ -168,6 +170,7 @@ export function ObservationsList({
               left: rotated.imageLeft,
               width: rotated.imageWidth,
               height: rotated.imageHeight,
+              angle: rotated.imageAngle,
             }
           }),
         )
@@ -224,6 +227,7 @@ export function ObservationsList({
                   imageLeft: Math.round(boundingBox.left),
                   imageWidth: Math.round(boundingBox.width),
                   imageHeight: Math.round(boundingBox.height),
+                  imageAngle: boundingBox.angle ?? 0,
                 },
               })
               router.invalidate()
