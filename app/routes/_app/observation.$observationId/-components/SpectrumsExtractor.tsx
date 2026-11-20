@@ -38,13 +38,16 @@ type SpectrumsExtractorProps = {
   observationId: string
   /** Arreglo con especificaciones de espectros de la observacion */
   spectrums: Awaited<ReturnType<typeof getSpectrums>>
+  /** Se llama cuando las intensidades extraidas quedaron guardadas en la base */
+  onExtracted?: () => void
 }
 
-export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsExtractorProps) {
+export function SpectrumsExtractor({
+  observationId,
+  spectrums = [],
+  onExtracted,
+}: SpectrumsExtractorProps) {
   const router = useRouter()
-
-  const hadExtractedOnMount = spectrums.some((s) => s.extractedLength > 0)
-  const hadExtractedRef = useRef(hadExtractedOnMount)
 
   const { data: observationTensor } = useQuery({
     queryKey: ["observationImage", observationId],
@@ -198,10 +201,7 @@ export function SpectrumsExtractor({ observationId, spectrums = [] }: SpectrumsE
               intensityArr: a.analysis.transversalAvgs,
             })),
           })
-          if (!hadExtractedRef.current) {
-            hadExtractedRef.current = true
-            await router.invalidate()
-          }
+          onExtracted?.()
         }
 
         /** Actualizar registros para detectar futuros cambios */
