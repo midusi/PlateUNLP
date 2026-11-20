@@ -7,6 +7,7 @@
 import dedent from "dedent"
 import { err, ok, type Result } from "neverthrow"
 import { z } from "zod"
+import { log } from "~/lib/log"
 
 /**
  * SIMBAD service hosted by the Strasbourg Astronomical Data Center (CDS)
@@ -58,7 +59,7 @@ async function querySimbad(script: string): Promise<Result<string[], Error>> {
 
   const serverErrors: { url: string; reason: string }[] = []
 
-  for (const url of SIMBAD_URLS) {
+  for (const [index, url] of SIMBAD_URLS.entries()) {
     let response: Response
     try {
       response = await fetch(url, {
@@ -73,8 +74,8 @@ async function querySimbad(script: string): Promise<Result<string[], Error>> {
     } catch (error) {
       const reason = getErrorMessage(error)
       serverErrors.push({ url, reason })
-      if (url !== SIMBAD_URLS[0]) {
-        console.warn(`SIMBAD: falling back to mirror ${url}`, { failedServer: SIMBAD_URLS[0], reason })
+      if (index < SIMBAD_URLS.length - 1) {
+        log().warn("SIMBAD: server failed, trying the next one", { failedServer: url, reason })
       }
       continue
     }
@@ -82,8 +83,8 @@ async function querySimbad(script: string): Promise<Result<string[], Error>> {
     if (!response.ok) {
       const reason = `${response.status} ${response.statusText}`
       serverErrors.push({ url, reason })
-      if (url !== SIMBAD_URLS[0]) {
-        console.warn(`SIMBAD: falling back to mirror ${url}`, { failedServer: SIMBAD_URLS[0], reason })
+      if (index < SIMBAD_URLS.length - 1) {
+        log().warn("SIMBAD: server failed, trying the next one", { failedServer: url, reason })
       }
       continue
     }
@@ -105,10 +106,12 @@ async function querySimbad(script: string): Promise<Result<string[], Error>> {
       i++
       return err(new Error(lines.slice(i, -2).join("\n")))
     } else {
-      console.error(`SIMBAD response from ${url}:`, text)
       const reason = "Couldn't parse SIMBAD response"
+      log().warn("SIMBAD: unexpected response", { url, preview: text.slice(0, 200) })
       serverErrors.push({ url, reason })
-      continue
+      if (index < SIMBAD_URLS.length - 1) {
+        log().warn("SIMBAD: server failed, trying the next one", { failedServer: url, reason })
+      }
     }
   }
   return err(new SimbadUnavailableError(serverErrors))
