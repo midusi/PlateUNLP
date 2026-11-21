@@ -209,17 +209,6 @@ export const SpectrumCard = withForm({
             >
               <span className="icon-[ph--arrow-counter-clockwise]" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Download FITS"
-              title="Download FITS"
-              render={
-                <a href={`/spectrum/${spectrum.id}/fits`}>
-                  <span className="icon-[ph--file-arrow-down]" />
-                </a>
-              }
-            />
           </div>
         </div>
 

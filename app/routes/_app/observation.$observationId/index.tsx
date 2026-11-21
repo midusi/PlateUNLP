@@ -81,6 +81,11 @@ function RouteComponent() {
     <div className="mx-auto w-full">
       <ObservationMetadataForm form={form} OBSERVAT={initialMetadata.OBSERVAT} />
       <div className="h-8" />
+      <ObservationDownloadButton
+        form={form}
+        plateFields={plateFields}
+        observationId={observationId}
+      />
       <SpectrumsList observationId={observationId} initialSpectrums={spectrums} />
       <div className="h-8" />
       {canExtract ? (
@@ -105,10 +110,48 @@ function RouteComponent() {
   )
 }
 
+/** Every field that ends up in the exported FITS: the plate's and the live observation form's. */
+function useExportFields(
+  form: ReturnType<typeof useObservationForm>,
+  plateFields: FITSExportField[],
+) {
+  const values = useStore(form.store, (s) => s.values)
+  return [...plateFields, ...observationMetadataFields(values)]
+}
+
 /**
- * Export action bar. Lives outside the metadata form and subscribes to the live
- * values on its own so a keystroke only re-renders this bar — not the spectrum
- * list/extractor siblings.
+ * Button that downloads the observation image as a FITS. It sits above the bounding boxer, like
+ * the plate's download button, and subscribes to the live form values on its own so a keystroke
+ * only re-renders this button — not the spectrum list/extractor siblings.
+ */
+function ObservationDownloadButton({
+  form,
+  plateFields,
+  observationId,
+}: {
+  form: ReturnType<typeof useObservationForm>
+  plateFields: FITSExportField[]
+  observationId: string
+}) {
+  const exportFields = useExportFields(form, plateFields)
+
+  return (
+    <div className="mb-4 flex justify-end">
+      <FITSExportButton
+        href={`/observation/${observationId}/fits`}
+        variant="outline"
+        fields={exportFields}
+      >
+        <span className="icon-[ph--download-simple-bold]" />
+        Download Observation
+      </FITSExportButton>
+    </div>
+  )
+}
+
+/**
+ * Bottom action bar (extracted spectra and calibration). Lives outside the metadata form and
+ * subscribes to the live values on its own, for the same reason as the button above.
  */
 function ObservationExportBar({
   form,
@@ -121,21 +164,12 @@ function ObservationExportBar({
   observationId: string
   hasExtracted: boolean
 }) {
-  const values = useStore(form.store, (s) => s.values)
-  const exportFields = [...plateFields, ...observationMetadataFields(values)]
+  const exportFields = useExportFields(form, plateFields)
 
   const disabledTitle = "Available once spectra have been extracted"
 
   return (
     <div className="m-4 flex w-full justify-center gap-4">
-      <FITSExportButton
-        href={`/observation/${observationId}/fits`}
-        variant="outline"
-        fields={exportFields}
-      >
-        <span className="icon-[ph--image]" />
-        Download FITS (image)
-      </FITSExportButton>
       <FITSExportButton
         href={`/observation/${observationId}/extracted-fits`}
         variant="outline"
@@ -143,12 +177,12 @@ function ObservationExportBar({
         disabled={!hasExtracted}
         title={
           hasExtracted
-            ? "Downloads a ZIP with one FITS per spectrum detected in this observation."
+            ? "Downloads a ZIP with one FITS per extracted spectrum, holding its 1-D intensities."
             : disabledTitle
         }
       >
         <span className="icon-[ph--chart-line]" />
-        Download FITS (extracted)
+        Download extracted
       </FITSExportButton>
 
       {hasExtracted ? (
