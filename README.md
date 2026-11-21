@@ -61,8 +61,8 @@ Published versions are numbered `X.Y.Z`:
 | `Y`  | Something breaks backwards compatibility.                                                 |
 | `Z`  | Nothing breaks the installation — no dependency reinstall, no migration on the user side. |
 
-Numbering continues from the deployed rewrite, informally called `2.0.0` and never tagged, so the
-first release published under these conventions is `2.0.1`. The `v1.0.x` tags already in the
+The deployed rewrite is published as `2.0.0` (tag `v2.0.0`, release "2.0.0 - Reescritura"), and
+numbering continues from there. The `v1.0.x` tags already in the
 repository belong to the pre-React software; they are not ancestors of `main` and are not part of
 this sequence.
 

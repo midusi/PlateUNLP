@@ -321,6 +321,7 @@ export function BoundingBoxer({
           >
             <img
               src={imageSrc}
+              alt="Scanned plate"
               width={imageSize.width}
               height={imageSize.height}
               style={{
@@ -1227,6 +1228,7 @@ function BoundingBoxComponent({
     >
       <button
         type="button"
+        aria-label="Delete bounding box"
         onClick={(e) => {
           e.stopPropagation()
           onDelete?.(boundingBox.id)
@@ -1240,8 +1242,9 @@ function BoundingBoxComponent({
         // Se eliminaron h-4, w-4, -top-1.5, -right-1.5 de este className
         className="absolute z-10 hidden cursor-pointer items-center justify-center rounded-full border border-black bg-white text-black shadow-sm transition-colors hover:bg-black hover:text-white group-hover:flex group-data-[resizing=true]:hidden"
       >
-        <svg 
-          viewBox="0 0 14 14" 
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 14 14"
           stroke="currentColor" 
           strokeWidth="1.5" 
           strokeLinecap="round"

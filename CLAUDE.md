@@ -199,10 +199,14 @@ pnpm lint
 
 `pnpm lint` = `tsc --noEmit && biome lint .`.
 
-**Baseline as of this writing: typecheck is clean, Biome reports 13 pre-existing errors + 3
-warnings** (mostly `a11y` on `BoundingBoxer.tsx` and the calibration SVG components, plus two unused
-`biome-ignore` suppressions). Don't treat those as caused by your change — but don't add new ones.
-`pnpm lint:fix` runs `biome check --write .`.
+**Baseline as of this writing (November 2026): typecheck is clean, Biome reports 27 pre-existing
+errors + 10 warnings** (mostly `a11y` on `BoundingBoxer.tsx` and the calibration SVG components, plus
+a few React hook rules such as `useExhaustiveDependencies`). Don't treat those as caused by your
+change — but don't add new ones. `pnpm lint:fix` runs `biome check --write .`.
+
+**The typecheck must stay clean:** the Docker image is built with `pnpm build`, which runs
+`vite build && tsc --noEmit`, so a single type error stops the deploy. Run `biome` with `--write`
+only on the files you touched, never on whole directories (it reformats unrelated files).
 
 There is **no test suite**. Verify changes by running `pnpm dev` and walking the affected stage.
 
@@ -252,8 +256,8 @@ Published versions are `X.Y.Z`: bump **X** when the published version changes, *
 something breaks backwards compatibility, **Z** when nothing breaks the installation (no dependency
 reinstall, no migration on the user's side).
 
-Numbering continues from the deployed rewrite, informally called `2.0.0` and never tagged, so the
-first release published under these conventions is `2.0.1`. The `v1.0.x` tags and their GitHub
+The deployed rewrite is published as `2.0.0` (tag `v2.0.0`, release "2.0.0 - Reescritura"), and
+numbering continues from there. The `v1.0.x` tags and their GitHub
 Releases belong to the pre-React software and sit on commits that are **not** ancestors of `main` —
 don't read them as part of this sequence.
 

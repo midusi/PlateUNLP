@@ -61,7 +61,7 @@ export const Route = createFileRoute("/_app/observation/$observationId/extracted
         const zipName = `${observationToFITSFilename(plate["PLATE-N"], obsNameLabel, "extracted", false)}.zip`
         const content = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" })
 
-        return new Response(content, {
+        return new Response(new Uint8Array(content), {
           headers: {
             "Content-Type": "application/zip",
             "Content-Disposition": `attachment; filename="${zipName}"`,
