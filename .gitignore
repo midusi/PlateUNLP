@@ -38,3 +38,6 @@ node_modules
 *.sln
 *.sw?
 .env
+
+# Imágenes de depuración que escribía la detección de espectros (ya eliminadas del código, #404)
+/plate_*_4.png
