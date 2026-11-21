@@ -1,10 +1,11 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq, sql } from "drizzle-orm"
-import { nanoid } from "nanoid"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
 import { obsNFromIndex, obsNToIndex } from "~/lib/obs-n"
+import { storedOrientation } from "~/lib/oriented-box"
+import { orientedBoxFields } from "~/types/oriented-box"
 
 export const addObservations = createServerFn({ method: "POST" })
   .validator(
@@ -17,6 +18,7 @@ export const addObservations = createServerFn({ method: "POST" })
           left: z.number().int().nonnegative(),
           width: z.number().int().positive(),
           height: z.number().int().positive(),
+          ...orientedBoxFields,
         }),
       ),
     }),
@@ -52,16 +54,17 @@ export const addObservations = createServerFn({ method: "POST" })
       if (height <= 0 || obs.top >= plate.imageHeight) {
         throw new Error(`Bounding box ${originalIdx} exceeds plate image height`)
       }
-
+      const obsN = obsNFromIndex(startIndex + sortedIdx)
       return {
         plateId: data.plateId,
-        name: `Observation ${nanoid(4)}`,
+        name: `Obs. ${obsN}`,
         imageTop: obs.top,
         imageLeft: obs.left,
         imageWidth: width,
         imageHeight: height,
+        ...storedOrientation(obs),
         metadataCompletion: 0,
-        "OBS-N": obsNFromIndex(startIndex + sortedIdx),
+        "OBS-N": obsN,
       }
     })
 
@@ -73,6 +76,7 @@ export const addObservations = createServerFn({ method: "POST" })
       imageLeft: s.observation.imageLeft,
       imageWidth: s.observation.imageWidth,
       imageHeight: s.observation.imageHeight,
+      imageAngle: s.observation.imageAngle,
     })
 
     return observations

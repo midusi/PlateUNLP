@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { fitsString, localDateTime, numericText, sexasegimal } from "./utils"
+import { fitsString, localDate, localDateTime, numericText, sexasegimal } from "./utils"
 
 /**
  * Describes a value that the user declared as "missing" or "lost".
@@ -17,8 +17,8 @@ const knowable = <T extends z.ZodType>(field: T) =>
  * This schema defines the metadata for a single plate.
  */
 export const PlateMetadataSchema = z.object({
-  OBSERVAT: fitsString().min(1),
-  "PLATE-N": fitsString().min(1),
+  OBSERVAT: fitsString().min(1, "OBSERVAT must be selected."),
+  "PLATE-N": fitsString().min(1, "PLATE-N cannot be empty."),
   TELESCOPE: knowable(fitsString()),
   INSTRUME: knowable(fitsString()),
   DETECTOR: knowable(fitsString()),
@@ -29,9 +29,11 @@ export const PlateMetadataSchema = z.object({
   SCANRES: knowable(numericText()),
   SCANGAIN: knowable(numericText()),
   SCANSOFT: knowable(fitsString()),
-  DATESCAN: knowable(localDateTime().or(z.literal(""))),
+  DATESCAN: knowable(localDate().or(z.literal(""))),
   SCANAUTH: knowable(fitsString()),
   SCANNOTE: knowable(fitsString()),
+  SCANCOL: knowable(fitsString()),
+  DATEPLT: knowable(localDate().or(z.literal(""))),
 })
 /**
  * Compute the completion percentage of the plate metadata.
@@ -85,7 +87,7 @@ export const ObservationMetadataSchema = z.object({
  * Observation metadata fields derived from OBJECT + DATE-OBS (the "Compute the
  * rest of the metadata" step). They only make sense for an actual sky object,
  * so they are hidden in the form and omitted from the FITS export when
- * IMAGETYP is anything other than `object`.
+ * IMAGETYP is anything other than `object` (ignoring case and surrounding spaces).
  */
 export const COMPUTED_OBSERVATION_FIELDS = [
   "MAIN-ID",
@@ -111,7 +113,7 @@ const COMPUTED_FIELD_SET = new Set<string>(COMPUTED_OBSERVATION_FIELDS)
  * object. Calibration frames (dark, zero, flat, arc) and unknown types omit it.
  */
 export function exportsComputedMetadata(imageType: { value: string; isKnown: boolean }): boolean {
-  return imageType.isKnown && imageType.value === "object"
+  return imageType.isKnown && imageType.value.trim().toLowerCase() === "object"
 }
 
 /**
@@ -140,12 +142,16 @@ export function getObservationMetadataCompletion(
   }
 }
 
+/** Limites del grado de ajuste de la traza de un espectro. */
+export const FIT_DEGREE_MIN = 1
+export const FIT_DEGREE_MAX = 8
+
 /**
  * This schema defines the metadata for a extraction configuration of spectrums of a observation.
  */
 export const ExtractionConfigurationSchema = z.object({
-  countMediasPoints: z.number().int().min(1, "Must be at least 1."),
-  apertureCoefficient: z.number().min(0.001, "Must be positive"),
+  // countMediasPoints: z.number().int().min(1, "Must be at least 1."),
+  // apertureCoefficient: z.number().min(0.001, "Must be positive"),
   spectrums: z.array(
     z.object({
       id: z.string(),
@@ -154,6 +160,10 @@ export const ExtractionConfigurationSchema = z.object({
       imageHeight: z.number(),
       imageLeft: z.number(),
       imageTop: z.number(),
-    }),
+      imageAngle: z.number().nullish(),
+      countMediasPoints: z.number().min(2).max(20),
+      apertureCoefficient: z.number().min(0.5).max(1.5), 
+      fitDegree: z.number().int().min(FIT_DEGREE_MIN).max(FIT_DEGREE_MAX)
+    })
   ),
 })

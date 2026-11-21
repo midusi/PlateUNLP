@@ -10,7 +10,11 @@ export const getObservationMetadata = createServerFn()
     async ({
       data,
     }): Promise<
-      z.infer<typeof ObservationMetadataSchema> & { OBSERVAT: string; "OBS-N": string }
+      z.infer<typeof ObservationMetadataSchema> & {
+        name: string
+        OBSERVAT: string
+        "OBS-N": string
+      }
     > => {
       const observation = await db.query.observation.findFirst({
         where: (observation, { eq }) => eq(observation.id, data.observationId),
@@ -20,6 +24,7 @@ export const getObservationMetadata = createServerFn()
         throw new Error(`Observation with ID ${data.observationId} not found`)
       }
       return {
+        name: observation.name,
         OBSERVAT: observation.plate.OBSERVAT,
         "OBS-N": observation["OBS-N"],
         OBJECT: observation.OBJECT,

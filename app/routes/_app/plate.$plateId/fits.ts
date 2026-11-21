@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router"
 import sharp from "sharp"
 import { db } from "~/db"
 import { plateToFITS, plateToFITSFilename, unknownable } from "~/lib/fits"
-import { readUploadedFile } from "~/lib/uploads"
+import { flipVerticalUint16 } from "~/lib/fits/utils"
+import { readEditedFile } from "~/lib/uploads"
 
 export const Route = createFileRoute("/_app/plate/$plateId/fits")({
   server: {
@@ -15,9 +16,10 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
         if (!plate) return new Response("Not found", { status: 404 })
         const fileName = plateToFITSFilename(plate["PLATE-N"])
 
-        let image = await readUploadedFile(plate.image.id)
+        // let image = await readUploadedFile(plate.image.id)
+        let image = await readEditedFile(plate)
+
         image = await sharp(image)
-          .rotate(plate.imageRotation)
           .toColorspace("b-w")
           .extractChannel(0)
           .raw({ depth: "ushort" })
@@ -28,7 +30,10 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
           image.byteOffset,
           image.byteLength / Uint16Array.BYTES_PER_ELEMENT,
         )
-        const fits = plateToFITS(pixels, {
+
+        const flipped = flipVerticalUint16(pixels, plate.imageWidth, plate.imageHeight)
+
+        const fits = plateToFITS(flipped, {
           width: plate.imageWidth,
           height: plate.imageHeight,
           metadata: {
@@ -49,6 +54,8 @@ export const Route = createFileRoute("/_app/plate/$plateId/fits")({
             dateScan: unknownable(plate.DATESCAN, plate["DATESCAN?"]),
             scanAuthor: unknownable(plate.SCANAUTH, plate["SCANAUTH?"]),
             scannerNotes: unknownable(plate.SCANNOTE, plate["SCANNOTE?"]),
+            scanCol: unknownable(plate.SCANCOL, plate["SCANCOL?"]),
+            datePlt: unknownable(plate.DATEPLT, plate["DATEPLT?"]),
           },
         })
 

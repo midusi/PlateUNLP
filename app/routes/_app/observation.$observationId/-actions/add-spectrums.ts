@@ -1,7 +1,29 @@
 import { createServerFn } from "@tanstack/react-start"
+import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { storedOrientation } from "~/lib/oriented-box"
+import { orientedBoxFields } from "~/types/oriented-box"
+
+const SpectrumExtentSchema = z.object({
+  imageTop: z.number().int().min(0),
+  imageLeft: z.number().int().min(0),
+  imageWidth: z.number().int().min(1),
+  imageHeight: z.number().int().min(1),
+  ...orientedBoxFields,
+})
+
+/** Columnas que se devuelven de cada espectro insertado. */
+const returning = {
+  id: s.spectrum.id,
+  type: s.spectrum.type,
+  imageTop: s.spectrum.imageTop,
+  imageLeft: s.spectrum.imageLeft,
+  imageWidth: s.spectrum.imageWidth,
+  imageHeight: s.spectrum.imageHeight,
+  imageAngle: s.spectrum.imageAngle,
+}
 
 /**
  * Añade 3 espectros (1 de ciencia y 2 de lampara de comparación) en la
@@ -11,24 +33,9 @@ export const addSpectrums = createServerFn({ method: "POST" })
   .validator(
     z.object({
       observationId: z.string(),
-      science: z.object({
-        imageTop: z.number().int().min(0),
-        imageLeft: z.number().int().min(0),
-        imageWidth: z.number().int().min(1),
-        imageHeight: z.number().int().min(1),
-      }),
-      lamp1: z.object({
-        imageTop: z.number().int().min(0),
-        imageLeft: z.number().int().min(0),
-        imageWidth: z.number().int().min(1),
-        imageHeight: z.number().int().min(1),
-      }),
-      lamp2: z.object({
-        imageTop: z.number().int().min(0),
-        imageLeft: z.number().int().min(0),
-        imageWidth: z.number().int().min(1),
-        imageHeight: z.number().int().min(1),
-      }),
+      science: SpectrumExtentSchema,
+      lamp1: SpectrumExtentSchema,
+      lamp2: SpectrumExtentSchema,
     }),
   )
   .handler(async ({ data }) => {
@@ -37,61 +44,26 @@ export const addSpectrums = createServerFn({ method: "POST" })
     })
     if (!observation) throw new Error(`Observation with id ${data.observationId} not found`)
 
-    const { science: sc, lamp1: l1, lamp2: l2 } = data
-    const [newScience] = await db
-      .insert(s.spectrum)
-      .values({
-        observationId: data.observationId,
-        type: "science",
-        imageTop: sc.imageTop,
-        imageLeft: sc.imageLeft,
-        imageWidth: sc.imageWidth,
-        imageHeight: sc.imageHeight,
-      })
-      .returning({
-        id: s.spectrum.id,
-        type: s.spectrum.type,
-        imageTop: s.spectrum.imageTop,
-        imageLeft: s.spectrum.imageLeft,
-        imageWidth: s.spectrum.imageWidth,
-        imageHeight: s.spectrum.imageHeight,
-      })
-    const [newLamp1] = await db
-      .insert(s.spectrum)
-      .values({
-        observationId: data.observationId,
-        type: "lamp",
-        imageTop: l1.imageTop,
-        imageLeft: l1.imageLeft,
-        imageWidth: l1.imageWidth,
-        imageHeight: l1.imageHeight,
-      })
-      .returning({
-        id: s.spectrum.id,
-        type: s.spectrum.type,
-        imageTop: s.spectrum.imageTop,
-        imageLeft: s.spectrum.imageLeft,
-        imageWidth: s.spectrum.imageWidth,
-        imageHeight: s.spectrum.imageHeight,
-      })
-    const [newLamp2] = await db
-      .insert(s.spectrum)
-      .values({
-        observationId: data.observationId,
-        type: "lamp",
-        imageTop: l2.imageTop,
-        imageLeft: l2.imageLeft,
-        imageWidth: l2.imageWidth,
-        imageHeight: l2.imageHeight,
-      })
-      .returning({
-        id: s.spectrum.id,
-        type: s.spectrum.type,
-        imageTop: s.spectrum.imageTop,
-        imageLeft: s.spectrum.imageLeft,
-        imageWidth: s.spectrum.imageWidth,
-        imageHeight: s.spectrum.imageHeight,
-      })
+    await db.delete(s.spectrum).where(eq(s.spectrum.observationId, data.observationId))
 
-    return { science: newScience, lamp1: newLamp1, lamp2: newLamp2 }
+    const insert = async (type: "science" | "lamp", extent: z.infer<typeof SpectrumExtentSchema>) => {
+      const [spectrum] = await db
+        .insert(s.spectrum)
+        .values({
+          observationId: data.observationId,
+          type,
+          imageTop: extent.imageTop,
+          imageLeft: extent.imageLeft,
+          imageWidth: extent.imageWidth,
+          imageHeight: extent.imageHeight,
+          ...storedOrientation(extent),
+        })
+        .returning(returning)
+      return spectrum
+    }
+
+    const science = await insert("science", data.science)
+    const lamp1 = await insert("lamp", data.lamp1)
+    const lamp2 = await insert("lamp", data.lamp2)
+    return { science, lamp1, lamp2 }
   })

@@ -12,6 +12,7 @@ export default defineConfig({
       method: "GET",
       handler: "./app/api/plate/[plateId]/preview.ts",
     },
+    
     {
       route: "/api/observation/:observationId/preview",
       method: "GET",
@@ -21,6 +22,11 @@ export default defineConfig({
       route: "/api/observation/:observationId/image",
       method: "GET",
       handler: "./app/api/observation/[observationId]/image.ts",
+    },
+    {
+      route: "/api/avatar/:uploadId",
+      method: "GET",
+      handler: "./app/api/avatar/[uploadId].ts",
     },
   ],
   modules: [

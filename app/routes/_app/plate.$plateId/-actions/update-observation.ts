@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { storedOrientation } from "~/lib/oriented-box"
+import { orientedBoxFields } from "~/types/oriented-box"
 
 export const updateObservation = createServerFn()
   .validator(
@@ -13,6 +15,10 @@ export const updateObservation = createServerFn()
       imageLeft: z.int().min(0),
       imageWidth: z.int().min(1),
       imageHeight: z.int().min(1),
+      ...orientedBoxFields,
+      // Optional metadata fields to persist label formatting
+      "OBS-N": z.string().optional(),
+      OBJECT: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -33,14 +39,17 @@ export const updateObservation = createServerFn()
       throw new Error("Bounding box exceeds plate image height")
     }
 
-    await db
-      .update(s.observation)
-      .set({
-        name: data.name,
-        imageTop: data.imageTop,
-        imageLeft: data.imageLeft,
-        imageWidth,
-        imageHeight,
-      })
-      .where(eq(s.observation.id, data.observationId))
+    const updates: any = {
+      name: data.name,
+      imageTop: data.imageTop,
+      imageLeft: data.imageLeft,
+      imageWidth,
+      imageHeight,
+      // El rectangulo cambio: sin orientacion nueva la caja vuelve a ser el rectangulo.
+      ...storedOrientation(data),
+    }
+    if (data["OBS-N"] !== undefined) updates["OBS-N"] = data["OBS-N"]
+    if (data.OBJECT !== undefined) updates.OBJECT = data.OBJECT
+
+    await db.update(s.observation).set(updates).where(eq(s.observation.id, data.observationId))
   })

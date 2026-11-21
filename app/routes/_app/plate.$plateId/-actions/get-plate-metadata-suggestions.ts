@@ -14,9 +14,12 @@ export type PlateMetadataSuggestions = {
   SCANNER: string[]
   SCANSOFT: string[]
   SCANAUTH: string[]
+  SCANCOL: string[]
   /** Per-scanner scan settings collected from other plates in the project. */
   scannerDefaults: Record<string, ScannerDefaults>
 }
+
+const KNOWN_DETECTOR_EMULSIONS = ["IIIa-0", "103a-F3", "IIa-J"]
 
 function distinct(values: string[]): string[] {
   return [...new Set(values.map((v) => v.trim()).filter(Boolean))].sort((a, b) =>
@@ -50,6 +53,7 @@ export const getPlateMetadataSuggestions = createServerFn()
         SCANGAIN: true,
         SCANSOFT: true,
         SCANAUTH: true,
+        SCANCOL: true,
       },
     })
 
@@ -70,11 +74,12 @@ export const getPlateMetadataSuggestions = createServerFn()
     return {
       TELESCOPE: distinct(plates.map((p) => p.TELESCOPE)),
       INSTRUME: distinct(plates.map((p) => p.INSTRUME)),
-      DETECTOR: distinct(plates.map((p) => p.DETECTOR)),
+      DETECTOR: distinct([...KNOWN_DETECTOR_EMULSIONS, ...plates.map((p) => p.DETECTOR)]),
       OBSERVER: distinct(plates.map((p) => p.OBSERVER)),
       SCANNER: distinct(plates.map((p) => p.SCANNER)),
       SCANSOFT: distinct(plates.map((p) => p.SCANSOFT)),
       SCANAUTH: distinct(plates.map((p) => p.SCANAUTH)),
+      SCANCOL: distinct(plates.map((p) => p.SCANCOL)),
       scannerDefaults,
     }
   })
@@ -84,3 +89,4 @@ export const getPlateMetadataSuggestionsQueryOptions = (plateId: string) =>
     queryKey: ["plate", "metadata-suggestions", plateId],
     queryFn: () => getPlateMetadataSuggestions({ data: { plateId } }),
   })
+  

@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
+import JSZip from "jszip"
 import { db } from "~/db"
-import { extractedObservationToFITS, observationToFITSFilename, unknownable } from "~/lib/fits"
+import { extractedSpectrumToFITS, observationToFITSFilename } from "~/lib/fits"
+import { extractedSpectrumMetadata } from "~/lib/fits/from-db"
 
+// Ruta que devuelve un .zip con un FITS 1D (las intensidades extraidas) por cada espectro.
 export const Route = createFileRoute("/_app/observation/$observationId/extracted-fits")({
   server: {
     handlers: {
@@ -16,76 +19,52 @@ export const Route = createFileRoute("/_app/observation/$observationId/extracted
           },
         })
         if (!observation) return new Response("Not found", { status: 404 })
-        if (observation.spectra.length === 0) {
-          return new Response("No spectra found", { status: 400 })
-        }
 
-        const orderedSpectra = [...observation.spectra].sort(
-          (a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft,
-        )
-        const maxLength = Math.max(
-          ...orderedSpectra.map((spectrum) => spectrum.intensityArr.length),
-        )
-        if (maxLength === 0) {
+        // Solo los espectros ya extraidos, de arriba hacia abajo en la observacion.
+        const extracted = [...observation.spectra]
+          .filter((spectrum) => spectrum.intensityArr.length > 0)
+          .sort((a, b) => a.imageTop - b.imageTop || a.imageLeft - b.imageLeft)
+        if (extracted.length === 0) {
           return new Response("No extracted spectra found", { status: 400 })
         }
 
         const { plate } = observation
-        const fileName = observationToFITSFilename(
-          plate["PLATE-N"],
-          observation.OBJECT,
-          "observation.extracted",
-        )
+        const obsNameLabel = `${observation.OBJECT}.${observation["OBS-N"]}`
 
-        const fits = extractedObservationToFITS(
-          orderedSpectra.map((spectrum) => spectrum.intensityArr),
-          {
-            fileName,
-            origin: plate.project.name,
-            plateNumber: plate["PLATE-N"],
-            observatory: plate.OBSERVAT,
-            observatoryTimezone: plate.observatory.timezone,
-            telescope: unknownable(plate.TELESCOPE, plate["TELESCOPE?"]),
-            observerNotes: unknownable(plate.OBSNOTES, plate["OBSNOTES?"]),
-            plateNotes: unknownable(plate.PLATNOTE, plate["PLATNOTE?"]),
-            scanner: unknownable(plate.SCANNER, plate["SCANNER?"]),
-            scanResolution: unknownable(plate.SCANRES, plate["SCANRES?"]),
-            scanGain: unknownable(plate.SCANGAIN, plate["SCANGAIN?"]),
-            scanSoftware: unknownable(plate.SCANSOFT, plate["SCANSOFT?"]),
-            dateScan: unknownable(plate.DATESCAN, plate["DATESCAN?"]),
-            scanAuthor: unknownable(plate.SCANAUTH, plate["SCANAUTH?"]),
-            scannerNotes: unknownable(plate.SCANNOTE, plate["SCANNOTE?"]),
-            observer: unknownable(plate.OBSERVER, plate["OBSERVER?"]),
-            instrument: unknownable(plate.INSTRUME, plate["INSTRUME?"]),
-            detector: unknownable(plate.DETECTOR, plate["DETECTOR?"]),
-            obsN: observation["OBS-N"] || undefined,
-            objectNotes: unknownable(observation.OBJNOTES, observation["OBJNOTES?"]),
-            object: unknownable(observation.OBJECT, observation["OBJECT?"]),
-            dateObs: unknownable(observation["DATE-OBS"], observation["DATE-OBS?"]),
-            dateOrg: unknownable(observation["DATE-ORG"], observation["DATE-ORG?"]),
-            exptime: unknownable(observation.EXPTIME, observation["EXPTIME?"]),
-            imageType: unknownable(observation.IMAGETYP, observation["IMAGETYP?"]),
-            mainId: unknownable(observation["MAIN-ID"], observation["MAIN-ID?"]),
-            spectralType: unknownable(observation.SPTYPE, observation["SPTYPE?"]),
-            ra: unknownable(observation.RA, observation["RA?"]),
-            dec: unknownable(observation.DEC, observation["DEC?"]),
-            epoch: unknownable(observation.EQUINOX, observation["EQUINOX?"]),
-            equinox: unknownable(observation.EQUINOX, observation["EQUINOX?"]),
-            ra2000: unknownable(observation.RA2000, observation["RA2000?"]),
-            dec2000: unknownable(observation.DEC2000, observation["DEC2000?"]),
-            ra1950: unknownable(observation.RA1950, observation["RA1950?"]),
-            dec1950: unknownable(observation.DEC1950, observation["DEC1950?"]),
-            jd: unknownable(observation.JD, observation["JD?"]),
-            siderealTime: unknownable(observation.ST, observation["ST?"]),
-            hourAngle: unknownable(observation.HA, observation["HA?"]),
-            airmass: unknownable(observation.AIRMASS, observation["AIRMASS?"]),
-          },
-        )
+        // Cada archivo se llama [placa].[obs].[tipo][-1|-2].extracted.fits. Se numera el tipo
+        // solo cuando hay mas de un espectro de ese tipo (p. ej. dos lamparas).
+        const totalByType = new Map<string, number>()
+        for (const spectrum of extracted) {
+          totalByType.set(spectrum.type, (totalByType.get(spectrum.type) ?? 0) + 1)
+        }
+        const seenByType = new Map<string, number>()
 
-        return new Response(fits.toBuffer(), {
+        const zip = new JSZip()
+        for (const spectrum of extracted) {
+          const seen = (seenByType.get(spectrum.type) ?? 0) + 1
+          seenByType.set(spectrum.type, seen)
+          const typeLabel =
+            (totalByType.get(spectrum.type) ?? 1) > 1 ? `${spectrum.type}-${seen}` : spectrum.type
+
+          const fileName = observationToFITSFilename(
+            plate["PLATE-N"],
+            obsNameLabel,
+            `${typeLabel}.extracted`,
+          )
+          const fits = extractedSpectrumToFITS(
+            spectrum.intensityArr,
+            extractedSpectrumMetadata(plate, observation, fileName),
+          )
+          zip.file(fileName, fits.toBuffer())
+        }
+
+        const zipName = `${observationToFITSFilename(plate["PLATE-N"], obsNameLabel, "extracted", false)}.zip`
+        const content = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" })
+
+        return new Response(new Uint8Array(content), {
           headers: {
-            "Content-Type": "application/fits",
-            "Content-Disposition": `attachment; filename="${fileName}"`,
+            "Content-Type": "application/zip",
+            "Content-Disposition": `attachment; filename="${zipName}"`,
             "Cache-Control": "no-store",
           },
         })

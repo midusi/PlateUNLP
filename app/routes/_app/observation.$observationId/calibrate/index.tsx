@@ -31,6 +31,8 @@ import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
 import { InferenceBoxGraph } from "./-components/InferenceBoxGraph"
 import { updateInferenceFuntionInStore } from "./-utils/updateInferenceFunctionInStore"
 
+type Unit = "Å" | "km/s"
+
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
   component: RouteComponent,
   loader: async ({ params }) => {
@@ -99,6 +101,8 @@ function RouteComponent() {
   const [materialArr, setMaterialArr] = useState<
     { wavelength: number; material: string; intensity: number }[]
   >(materialData?.arr ?? [])
+
+  const [unit, setUnit] = useState<Unit>("Å")
 
   const [pixelToWavelengthFunction, setPixelToWavelengthFunction] = useGlobalStore((s) => [
     s.pixelToWavelengthFunction,
@@ -208,6 +212,17 @@ function RouteComponent() {
     },
   })
 
+  function handleDeletePointAtIndex(index: number) {
+    const lampPoints = (form.getFieldValue("lampPoints") as { x: number; y: number }[]) || []
+    const materialPoints = (form.getFieldValue("materialPoints") as { x: number; y: number }[]) || []
+
+    const newLampPoints = lampPoints.filter((_, i) => i !== index)
+    const newMaterialPoints = materialPoints.filter((_, i) => i !== index)
+
+    form.setFieldValue("lampPoints", newLampPoints)
+    form.setFieldValue("materialPoints", newMaterialPoints)
+  }
+
   return (
     <>
       <Card className="mx-auto w-full px-8">
@@ -217,6 +232,7 @@ function RouteComponent() {
             form={form}
             materialArr={materialArr}
             materialsNamesList={listOfMaterials}
+            onDeleteIndex={handleDeletePointAtIndex}
           />
         </CardContent>
         <CardContent>
@@ -232,6 +248,7 @@ function RouteComponent() {
                       data={lamp.data}
                       lampPoints={fieldLP.state.value}
                       setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                      onDeleteIndex={handleDeletePointAtIndex}
                       pixelToWavelengthFunction={pixelToWavelengthFunction}
                     />
                   </div>
@@ -246,7 +263,9 @@ function RouteComponent() {
                     data={scienceSpectrum}
                     lampPoints={fieldLP.state.value}
                     setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                    onDeleteIndex={handleDeletePointAtIndex}
                     pixelToWavelengthFunction={pixelToWavelengthFunction}
+                    showLines={false}
                   />
                 </div>
               </div>
@@ -295,6 +314,19 @@ function RouteComponent() {
           <CardTitle className="px-8">Inference analysis</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-1 flex justify-end items-center gap-2 text-lg font-semibold text-slate-500">
+            Error unit: [
+            <select
+              value={unit}
+              className="rounded-lg bg-gray-100"
+              style={{ textAlign: "center", textAlignLast: "center" }}
+              onChange={(e) => setUnit(e.target.value as Unit)}
+            >
+              <option value="Å">Å</option>
+              <option value="km/s">km/s</option>
+            </select>
+            ]
+          </div>
           <form.Field name="lampPoints">
             {(fieldLP) => (
               <form.Field name="materialPoints">
@@ -315,6 +347,8 @@ function RouteComponent() {
                         pixelToWavelengthFunction={pixelToWavelengthFunction}
                         lampPoints={fieldLP.state.value}
                         materialPoints={fieldMP.state.value}
+                        unit={unit}
+                        onDeleteIndex={handleDeletePointAtIndex}
                       />
                     </div>
                   </div>

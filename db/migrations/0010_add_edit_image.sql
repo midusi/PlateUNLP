@@ -1,0 +1,1 @@
+ALTER TABLE `plate` ADD `is_inverted` integer DEFAULT false NOT NULL;

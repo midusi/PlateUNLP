@@ -8,8 +8,12 @@ import {
   getLocalDateTime,
   getSiderealTime,
 } from "~/lib/astronomical/datetime"
-import { equatorialToHorizontal, getAirmass, getHourAngle } from "~/lib/astronomical/misc"
-import { queryObjectById } from "~/lib/astronomical/simbad"
+import {
+  getAirmassFromCosZenithDistance,
+  getCosZenithDistance,
+  getHourAngle,
+} from "~/lib/astronomical/misc"
+import { queryObjectById, SimbadUnavailableError } from "~/lib/astronomical/simbad"
 import { degToDMS, degToHMS } from "~/lib/format"
 import { splitLocalDateTime } from "~/lib/local-datetime"
 import { log } from "~/lib/log"
@@ -85,13 +89,22 @@ export const computeObservationMetadata = createServerFn()
     const EQUINOX = EPOCH.slice(1) // Remove leading "J" from the epoch string
     // MAIN-ID, SPTYPE, RA, DEC, RA2000, DEC2000, RA1950, DEC1950
     const simbad = await queryObjectById(data.OBJECT, EPOCH, EQUINOX)
-    if (simbad.isErr())
+    if (simbad.isErr()) {
+      if (simbad.error instanceof SimbadUnavailableError) {
+        throw createError({
+          message: "SIMBAD service unavailable",
+          status: 502,
+          why: simbad.error.serverErrors.map((e) => `${e.url}: ${e.reason}`).join("; "),
+          fix: "SIMBAD no responde; reintentar en unos minutos",
+        })
+      }
       throw createError({
         message: "SIMBAD lookup failed",
         status: 502,
         why: simbad.error.message,
         fix: "Check that the OBJECT name resolves in SIMBAD",
       })
+    }
     log().set({ simbad: { mainId: simbad.value["MAIN-ID"] } })
 
     // Get observatory data (latitude, longitude and timezone)
@@ -121,16 +134,19 @@ export const computeObservationMetadata = createServerFn()
         why: ST.error.message,
         fix: "Verify the observation datetime and observatory coordinates",
       })
-    const HA = getHourAngle(simbad.value.RA2000, ST.value)
-    const { azimuth } = equatorialToHorizontal(HA, simbad.value.DEC2000, observatory.latitude)
-    const AIRMASS = getAirmass(azimuth)
+    // RA and DEC are referred to the equinox of the observation, the same one
+    // ST is computed for. Using the J2000 pair here would offset the hour angle
+    // by the precession accumulated since the plate was taken.
+    const HA = getHourAngle(simbad.value.RA, ST.value)
+    const cosZenithDistance = getCosZenithDistance(HA, simbad.value.DEC, observatory.latitude)
+    const AIRMASS = getAirmassFromCosZenithDistance(cosZenithDistance)
     return {
       OBJECT: data.OBJECT,
       "DATE-OBS": data["DATE-OBS"],
       "MAIN-ID": { value: simbad.value["MAIN-ID"], isKnown: true },
       SPTYPE: { value: simbad.value.SPTYPE ?? "", isKnown: true },
-      RA: { value: degToHMS(simbad.value.RA2000), isKnown: true },
-      DEC: { value: degToDMS(simbad.value.DEC2000), isKnown: true },
+      RA: { value: degToHMS(simbad.value.RA), isKnown: true },
+      DEC: { value: degToDMS(simbad.value.DEC), isKnown: true },
       EQUINOX: { value: EQUINOX, isKnown: true },
       RA2000: { value: degToHMS(simbad.value.RA2000), isKnown: true },
       DEC2000: { value: degToDMS(simbad.value.DEC2000), isKnown: true },
@@ -139,7 +155,7 @@ export const computeObservationMetadata = createServerFn()
       "DATE-ORG": { value: DATE_ORG, isKnown: true },
       JD: { value: JD.toFixed(4), isKnown: true },
       ST: { value: degToHMS(ST.value), isKnown: true },
-      HA: { value: degToDMS(HA), isKnown: true },
+      HA: { value: degToHMS(HA), isKnown: true },
       AIRMASS: { value: AIRMASS.toString(), isKnown: true },
     } satisfies Partial<z.input<typeof ObservationMetadataSchema>>
   })

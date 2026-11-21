@@ -45,6 +45,10 @@ export const updatePlateMetadata = createServerFn({ method: "POST" })
         "SCANAUTH?": data.metadata.SCANAUTH.isKnown,
         SCANNOTE: data.metadata.SCANNOTE.value,
         "SCANNOTE?": data.metadata.SCANNOTE.isKnown,
+        SCANCOL: data.metadata.SCANCOL.value,
+        "SCANCOL?": data.metadata.SCANCOL.isKnown,
+        DATEPLT: data.metadata.DATEPLT.value,
+        "DATEPLT?": data.metadata.DATEPLT.isKnown,
       })
       .where(eq(s.plate.id, data.plateId))
   })

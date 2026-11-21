@@ -51,6 +51,7 @@ export const addSpectrum = createServerFn({ method: "POST" })
         imageLeft: s.spectrum.imageLeft,
         imageWidth: s.spectrum.imageWidth,
         imageHeight: s.spectrum.imageHeight,
+        imageAngle: s.spectrum.imageAngle,
       })
     return spectrum
   })

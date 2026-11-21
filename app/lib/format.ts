@@ -72,6 +72,13 @@ export function radToHMS(rad: number, opts?: { digits?: number; sep?: string }) 
   return degToHMS(rad * (180 / Math.PI), opts)
 }
 
-export function formatObservation({ "OBS-N": OBS_N }: { "OBS-N": string }) {
-  return OBS_N ? `Obs. ${OBS_N}` : "Obs. N/A"
+export function formatObservation({
+  "name": name,
+  OBJECT,
+}: {
+  name: string;
+  OBJECT?: string | null;
+}) {
+  const base = `${name}`;
+  return OBJECT ? `${base}: ${OBJECT}` : base;
 }

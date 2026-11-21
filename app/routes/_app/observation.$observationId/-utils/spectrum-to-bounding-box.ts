@@ -1,6 +1,6 @@
-import type { BoundingBox } from "~/components/BoundingBoxer"
-import { idToColor } from "~/lib/utils"
-import type { getSpectrums } from "../-actions/get-spectrums"
+import type { BoundingBox } from "~/components/BoundingBoxer";
+import { idToColor } from "~/lib/utils";
+import type { getSpectrums } from "../-actions/get-spectrums";
 
 export type Spectrum = Awaited<ReturnType<typeof getSpectrums>>[number]
 

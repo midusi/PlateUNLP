@@ -29,6 +29,8 @@ export const getPlateMetadata = createServerFn()
       DATESCAN: { value: plate.DATESCAN, isKnown: plate["DATESCAN?"] },
       SCANAUTH: { value: plate.SCANAUTH, isKnown: plate["SCANAUTH?"] },
       SCANNOTE: { value: plate.SCANNOTE, isKnown: plate["SCANNOTE?"] },
+      SCANCOL: { value: plate.SCANCOL, isKnown: plate["SCANCOL?"] },
+      DATEPLT: { value: plate.DATEPLT, isKnown: plate["DATEPLT?"] },
     }
   })
 

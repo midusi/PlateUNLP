@@ -1,7 +1,9 @@
 import { queryOptions } from "@tanstack/react-query"
 import { createServerFn } from "@tanstack/react-start"
+import { sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "~/db"
+import { spectrum as spectrumTable } from "~/db/schema"
 
 export const getSpectrums = createServerFn()
   .validator(z.object({ observationId: z.string() }))
@@ -15,6 +17,15 @@ export const getSpectrums = createServerFn()
         imageLeft: true,
         imageWidth: true,
         imageHeight: true,
+        imageAngle: true,
+        countMediasPoints: true,
+        apertureCoefficient: true,
+        fitDegree: true,
+      },
+      extras: {
+        extractedLength: sql<number>`json_array_length(${spectrumTable.intensityArr})`.as(
+          "extracted_length",
+        ),
       },
     })
     return spectrums

@@ -1,3 +1,4 @@
+import { TZDate } from "@date-fns/tz"
 import { z } from "zod"
 
 /**
@@ -29,6 +30,14 @@ export const localDateTime = () =>
       "Invalid datetime format, expected YYYY-MM-DDTHH:mm[:ss[.sss]]",
     )
 
+export const localDate = () =>
+  z
+    .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}$/g,
+      "Invalid date format, expected YYYY-MM-DD",
+    )
+
 /**
  * Validates a numeric string that should be preserved as plain text in forms.
  */
@@ -46,3 +55,21 @@ export const sexasegimal = () =>
       /[+-]?(?:[0-2]\d|3[0-5]|\d)?\d:[0-5]\d:[0-5]\d(?:\.\d+)?/g,
       "Invalid sexagesimal format, expected ±ddd:mm:ss.sss",
     )
+
+/**
+ * Validates an IANA time zone name (e.g. `America/Argentina/Buenos_Aires`).
+ * Uses `TZDate`, the same constructor that `getLocalDateTime` and
+ * `toLocalObservationDateTime` rely on, so any value accepted here can be used
+ * to compute the local datetime of an observation.
+ */
+export const ianaTimezone = () =>
+  z
+    .string()
+    .min(1)
+    .refine((tz) => {
+      try {
+        return !Number.isNaN(new TZDate(0, tz).getTime())
+      } catch {
+        return false
+      }
+    }, "Invalid IANA time zone, expected a name like America/Argentina/Buenos_Aires")

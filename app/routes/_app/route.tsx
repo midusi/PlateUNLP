@@ -13,6 +13,14 @@ import { cn } from "~/lib/utils"
 import { getSession } from "./-actions/get-session"
 import { AppBreadcrumbs } from "./-components/AppBreadcrumbs"
 
+function getAvatarSrc(image: string | null | undefined) {
+  if (!image) return null
+  if (image.startsWith("data:") || image.startsWith("http://") || image.startsWith("https://")) {
+    return image
+  }
+  return `/api/avatar/${encodeURIComponent(image)}`
+}
+
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
   loader: async () => {
@@ -28,6 +36,7 @@ function RouteComponent() {
   const { session } = Route.useLoaderData()
   const navigate = useNavigate()
   const userInfo = session!.user
+  const avatarSrc = getAvatarSrc(userInfo.image)
   const logos = [
     {
       href: "https://weblidi.info.unlp.edu.ar/",
@@ -70,7 +79,7 @@ function RouteComponent() {
   return (
     <div className="flex h-svh w-full flex-col">
       <header className="shrink-0 border-olive-300 border-b bg-white text-sm">
-        <div className="mx-auto flex h-16 w-full max-w-9/12 items-center justify-between px-4">
+        <div className="mx-auto flex h-16 w-full max-w-11/12 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Link to="/" className="text-olive-950 transition-colors hover:text-orange-600">
               <span className="icon-[ph--shooting-star-duotone] size-5 min-w-5" />
@@ -80,9 +89,9 @@ function RouteComponent() {
           </div>
 
           <div className="flex flex-row items-center gap-4">
-            {userInfo.image ? (
+            {avatarSrc ? (
               <img
-                src={userInfo.image}
+                src={avatarSrc}
                 alt={userInfo.name}
                 className="h-8 w-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
               />
@@ -130,6 +139,19 @@ function RouteComponent() {
             >
               <span className="icon-[ph--gear] size-5" />
             </Link>
+            <a
+              href="/docs"
+              className={cn(
+                buttonVariants({
+                  variant: "outline",
+                  size: "default",
+                  className:
+                    "m-0 flex cursor-pointer items-center justify-center border-none p-0 shadow-none",
+                }),
+              )}
+            >
+              <span className="icon-[ph--book-open] size-5" />
+            </a>
             <Button
               onClick={() => signOut()}
               variant="outline"
@@ -141,7 +163,7 @@ function RouteComponent() {
         </div>
       </header>
       <div className="flex w-full flex-1 flex-col overflow-y-auto bg-accent">
-        <main className={cn("mx-auto flex w-full flex-1 flex-col gap-4 p-4", "max-w-9/12")}>
+        <main className={cn("mx-auto flex w-full flex-1 flex-col gap-4 p-4", "max-w-11/12")}>
           <Outlet />
         </main>
         <footer className="mt-12 flex items-center justify-evenly border-olive-300 border-t p-4">

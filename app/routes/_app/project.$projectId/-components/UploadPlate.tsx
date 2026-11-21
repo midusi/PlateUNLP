@@ -23,6 +23,7 @@ export function UploadPlate({ projectId }: { projectId: string }) {
   const [image, setImage] = useState<Image>()
   const [filename, setFilename] = useState<string>("")
   const [rotate, setRotate] = useState(0)
+  const [isInverted, setIsInverted] = useState(false)
 
   const formRef = useRef<HTMLFormElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -78,6 +79,7 @@ export function UploadPlate({ projectId }: { projectId: string }) {
       />
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="rotate" value={rotate} />
+      <input type="hidden" name="inverted" value={String(isInverted)} />
 
       <Button
         type="button"
@@ -108,7 +110,8 @@ export function UploadPlate({ projectId }: { projectId: string }) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="-mb-2 flex items-center justify-center gap-4">
+          <div className="-mb-2 flex items-center justify-start gap-4">
+
             <Button
               type="button"
               variant="outline"
@@ -132,6 +135,20 @@ export function UploadPlate({ projectId }: { projectId: string }) {
               }}
             >
               <span className="icon-[ph--arrow-clockwise-bold]" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={state === "uploading"}
+              onClick={() => {
+                setImage(image!.invert());
+                setIsInverted((prev) => !prev);
+                setImage(image!.invert());
+              }}
+            >
+
+              <span className="icon-[ph--selection-inverse]" />
             </Button>
           </div>
 

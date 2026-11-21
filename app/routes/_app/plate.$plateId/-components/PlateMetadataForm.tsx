@@ -33,7 +33,8 @@ function usePlateForm({
 
   return useAppForm({
     defaultValues: defaultValues,
-    validators: { onChange: PlateMetadataSchema },
+    // onMount so required-field errors (e.g. OBSERVAT on a new plate) show before the first edit
+    validators: { onMount: PlateMetadataSchema, onChange: PlateMetadataSchema },
     onSubmit: async ({ value, formApi }) => {
       try {
         await updatePlateMetadata({ data: { plateId, metadata: value } })
@@ -159,8 +160,8 @@ export function PlateMetadataForm({
               form={form}
               fields="DETECTOR"
               label="DETECTOR"
-              placeholder="e.g. Photographic plate"
-              description="Detector that recorded the observation."
+              placeholder="e.g. IIIa-0"
+              description="Type of photographic emulsion used as detector."
               options={suggestions.DETECTOR}
             />
             <AutocompleteFieldWithKnown
@@ -171,6 +172,16 @@ export function PlateMetadataForm({
               description="Person who made the observation."
               options={suggestions.OBSERVER}
             />
+
+            <TextFieldWithKnown
+              form={form}
+              fields="DATEPLT"
+              label="DATE-PLT"
+              placeholder="e.g. 1965-03-22"
+              type="date"
+              description="Date the plate was obtained"
+            />
+
             <TextAreaFieldWithKnown
               form={form}
               fields="OBSNOTES"
@@ -209,6 +220,14 @@ export function PlateMetadataForm({
               placeholder="e.g. 2400"
               description="Scan resolution in dpi. PIXSIZE is derived automatically from this value."
             />
+            <AutocompleteFieldWithKnown
+              form={form}
+              fields="SCANCOL"
+              label="SCAN-COL"
+              placeholder="e.g. 16 bits gray scale"
+              description="Scanner color resolution"
+              options={suggestions.SCANCOL}
+            />
             <TextFieldWithKnown
               form={form}
               fields="SCANGAIN"
@@ -228,10 +247,9 @@ export function PlateMetadataForm({
               form={form}
               fields="DATESCAN"
               label="DATESCAN"
-              placeholder="e.g. 2011-05-17T10:33:26"
-              type="datetime-local"
-              step="1"
-              description="Scan date and time in local datetime format."
+              placeholder="e.g. 2011-05-17"
+              type="date"
+              description="Scan date."
             />
             <AutocompleteFieldWithKnown
               form={form}

@@ -21,6 +21,14 @@ import { CreateUserModal } from "./-components/CreateUserModal"
 import { DeleteUserDialog } from "./-components/DeleteUserDialog"
 import { ResetPasswordDialog } from "./-components/ResetPasswordDialog"
 
+function getAvatarSrc(image: string | null | undefined) {
+  if (!image) return null
+  if (image.startsWith("data:") || image.startsWith("http://") || image.startsWith("https://")) {
+    return image
+  }
+  return `/api/avatar/${encodeURIComponent(image)}`
+}
+
 export const Route = createFileRoute("/_app/admin/")({
   component: RouteComponent,
   loader: async () => {
@@ -88,13 +96,14 @@ function RouteComponent() {
             <TableBody>
               {users.users.map((user) => {
                 const isSelf = user.id === currentUserId
+                const avatarSrc = getAvatarSrc(user.image)
                 return (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        {user.image ? (
+                        {avatarSrc ? (
                           <img
-                            src={user.image}
+                            src={avatarSrc}
                             alt={user.name}
                             className="size-8 rounded-full border border-olive-300 bg-olive-100 object-cover"
                           />

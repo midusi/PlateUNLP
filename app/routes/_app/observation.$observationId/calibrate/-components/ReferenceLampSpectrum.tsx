@@ -18,7 +18,7 @@ const getX = (p: SpectrumPoint) => p.wavelength ?? 0
 const getY = (p: SpectrumPoint) => p.intensity ?? 0
 
 const height = 150
-const margin = { top: 0, right: 12, bottom: 40, left: 12 }
+const margin = { top: 20, right: 12, bottom: 40, left: 12 }
 
 const tooltipStyles = {
   ...defaultStyles,
@@ -39,6 +39,7 @@ type ReferenceLampSpectrumProps = {
   onlyOneLine: boolean
   materialPoints: { x: number; y: number }[]
   setMaterialPoints: (arr: { x: number; y: number }[]) => void
+  onDeleteIndex?: (index: number) => void
 }
 
 export function ReferenceLampSpectrum({
@@ -49,6 +50,7 @@ export function ReferenceLampSpectrum({
   onlyOneLine,
   materialPoints,
   setMaterialPoints,
+  onDeleteIndex,
 }: ReferenceLampSpectrumProps) {
   const { materialArrInRange, materialArrForLabel } = useMemo(() => {
     /** Arreglo de todos los registros que encajan en el rango seleccionado */
@@ -186,13 +188,29 @@ export function ReferenceLampSpectrum({
     ])
   }
 
-  /** Permite al usuario borrar las longitudes de onda que marco */
-  function handleUserMarkDelete(x: number) {
-    setMaterialPoints(materialPoints.filter((mp) => mp.x !== x))
+  /** Permite al usuario borrar las longitudes de onda que marco por índice */
+  function handleUserMarkDeleteIndex(idx: number) {
+    if (idx < 0 || idx >= materialPoints.length) return
+    if (typeof onDeleteIndex === "function") {
+      onDeleteIndex(idx)
+    } else {
+      setMaterialPoints(materialPoints.filter((_, i) => i !== idx))
+    }
   }
 
   return (
     <div ref={measureRef} className="relative" style={{ height: `${height}px` }}>
+      <style>{`
+        #reference-labels-container:hover .line-label {
+          opacity: 0.15;
+          fill: #999999;
+        }
+        #reference-labels-container .line-label:hover {
+          opacity: 1 !important;
+          fill: #FF7F0E !important;
+          font-weight: bold;
+        }
+      `}</style>
       <svg width={width} height={height} role="img" aria-label="Lamp Spectrum">
         <Group top={margin.top} left={margin.left}>
           <rect x={0} y={0} width={xMax} height={yMax} fill="#374151" rx={1} />
@@ -263,50 +281,73 @@ export function ReferenceLampSpectrum({
           )}
 
           {/* Longitudes de onda marcadas por el usuario */}
-          {materialPoints.map((mp, idx) => {
-            if (materialArrInRange.length === 0) return null
-            if (minWavelength > mp.x && mp.x > maxWavelength) return null
-
-            const xClick = wavelengthScale(mp.x)
+          {(() => {
+            const visiblePoints = materialPoints
+              .map((mp, idx) => ({ mp, idx }))
+              .filter(({ mp }) => !(materialArrInRange.length === 0) && !(minWavelength > mp.x && mp.x > maxWavelength))
 
             return (
-              <g key={`ReferenceLampSpectrumLine-${mp.x}`}>
-                <Line
-                  x1={xClick}
+              <>
+                {/* Líneas verticales y áreas clicleables */}
+                {visiblePoints.map(({ mp, idx }) => {
+                  const xClick = wavelengthScale(mp.x)
+
+                  return (
+                    <g key={`ReferenceLampSpectrumLine-${mp.x}-${idx}`}>
+                      <Line
+                        x1={xClick}
                   y1={0} // Valor inicial en el eje y
-                  x2={xClick}
+                        x2={xClick}
                   y2={height - margin.bottom - margin.top} // Altura del gráfico
-                  stroke="#FFFFFF"
-                  strokeWidth={2}
+                        stroke="#FFFFFF"
+                        strokeWidth={2}
                   strokeDasharray="5,2" // Define el patrón de punteado
-                />
-                <rect // Area cliqueable
-                  x={xClick - 2}
-                  y={0}
-                  width={4}
-                  height={height - margin.bottom - margin.top}
-                  fill="transparent"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleUserMarkDelete(mp.x)
-                  }}
-                  style={{
-                    cursor:
-                      "url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
-                  }}
-                />
-                <text
-                  x={xClick + 5}
-                  y={10}
-                  fill="#FFFFFF"
-                  fontSize="12"
-                  fontFamily="Arial, sans-serif"
-                >
-                  #{`${idx}`}
-                </text>
-              </g>
+                      />
+                      <rect // Area cliqueable
+                        x={xClick - 2}
+                        y={0}
+                        width={4}
+                        height={height - margin.bottom - margin.top}
+                        fill="transparent"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleUserMarkDeleteIndex(idx)
+                        }}
+                        style={{
+                          cursor:
+                            "url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 height=%2216%22 width=%2216%22><text y=%2214%22 font-size=%2216%22 fill=%22red%22>✖</text></svg>') 8 8, not-allowed",
+                        }}
+                      />
+                    </g>
+                  )
+                })}
+                {/* Etiquetas en contenedor separado para el efecto hover CSS */}
+                <g id="reference-labels-container">
+                  {visiblePoints.map(({ mp, idx }) => {
+                    const xClick = wavelengthScale(mp.x)
+                    return (
+                      <text
+                        key={`ReferenceLampSpectrumLabel-${mp.x}-${idx}`}
+                        x={xClick - 28}
+                        y={-6}
+                        fill="#000000"
+                        fontSize="11"
+                        fontFamily="Arial, sans-serif"
+                        className="line-label"
+                        style={{
+                          cursor: "pointer",
+                          transition: "opacity 0.15s ease, fill 0.15s ease",
+                          userSelect: "text",
+                        }}
+                      >
+                        {`#${idx}: ${mp.x.toFixed(0)}Å`}
+                      </text>
+                    )
+                  })}
+                </g>
+              </>
             )
-          })}
+          })()}
 
           <AxisBottom
             scale={wavelengthScale}

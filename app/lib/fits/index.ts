@@ -22,7 +22,7 @@ export type {
   ExtractedSpectrumFITSMetadata,
   PlateFITSMetadata,
   PlateMetadata,
-  SpectrumCropFITSMetadata,
+  SpectrumCropFITSMetadata
 } from "./sections"
 export { FITS_UNKNOWN }
 
@@ -165,7 +165,8 @@ export function observationToFITSFilename(
   plateNumber: string | undefined,
   objectName: string | undefined,
   suffix: string,
+  extention : boolean = true,
 ): string {
   const name = [plateNumber, objectName, suffix].filter(Boolean).join(".")
-  return `${sanitizeFilename(name) || suffix}.fits`
+  return `${sanitizeFilename(name) || suffix}${extention ? ".fits" : ""}`
 }

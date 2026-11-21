@@ -2,18 +2,21 @@ import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 import { db } from "~/db"
 import * as s from "~/db/schema"
+import { isUniqueConstraintError } from "~/lib/db-errors"
 
 export const addMaterial = createServerFn({ method: "POST" })
   .validator(
     z.object({
       name: z.string(),
-      arr: z.array(
-        z.object({
-          wavelength: z.number(),
-          material: z.string(),
-          intensity: z.number(),
-        }),
-      ),
+      arr: z
+        .array(
+          z.object({
+            wavelength: z.number(),
+            material: z.string(),
+            intensity: z.number(),
+          }),
+        )
+        .min(1, "A lamp needs at least one line"),
     }),
   )
   .handler(async ({ data }) => {
@@ -31,7 +34,7 @@ export const addMaterial = createServerFn({ method: "POST" })
         })
       return material
     } catch (err) {
-      if (err instanceof Error && err.message.includes("UNIQUE constraint failed")) {
+      if (isUniqueConstraintError(err)) {
         throw new Error(`Material with name "${data.name}" already exists`)
       }
       throw err

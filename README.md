@@ -27,6 +27,60 @@ pnpm db:init  # To initialize and seed the database
 pnpm dev      # To start the development server
 ```
 
+## Contributing
+
+Every change starts as a GitHub issue. Work happens on a dedicated branch and lands via a pull
+request — never commit directly to `main` or `dev`.
+
+1. Open an issue describing the problem before writing code.
+2. Branch off `dev`. Keep the branch scoped to that one issue.
+3. Open a PR **targeting `dev`**, not `main`. `dev` → `main` is batched separately by a maintainer,
+   who reviews and approves every PR.
+
+### Commit messages
+
+```
+<feat|fix>: [ID-XXX] <short description, emoji welcome>
+```
+
+`XXX` is the GitHub issue number the commit resolves. Keep commits small and single-purpose — if
+one commit mixes unrelated changes, split it into several.
+
+```
+feat: [ID-271] ✨ Autocompletar SCANRES desde placas del proyecto
+fix: [ID-268] 🐛 HA se formatea en horas, no en grados
+```
+
+### Releases
+
+Published versions are numbered `X.Y.Z`:
+
+| Part | Bump it when                                                                             |
+| ---- | ---------------------------------------------------------------------------------------- |
+| `X`  | The published version changes.                                                            |
+| `Y`  | Something breaks backwards compatibility.                                                 |
+| `Z`  | Nothing breaks the installation — no dependency reinstall, no migration on the user side. |
+
+The deployed rewrite is published as `2.0.0` (tag `v2.0.0`, release "2.0.0 - Reescritura"), and
+numbering continues from there. The `v1.0.x` tags already in the
+repository belong to the pre-React software; they are not ancestors of `main` and are not part of
+this sequence.
+
+Every release is published as a GitHub Release **linked to its own tag** (`vX.Y.Z`), created from
+`main` once the changes are merged there.
+
+**Title:** `X.Y.Z - CodenameInPascalCase` — for example `0.5.0 - OBBYComponentes`,
+`0.4.0 - UnSoloCanal`, `0.3.0 - AdiosShim`. The codename summarises the main change of the release,
+with no spaces.
+
+**Body:** written in Spanish, without accents, matching the rest of the codebase. Organise it in
+paragraphs — one per relevant feature or change, each opening with its main idea in bold. It is a
+description of what changed, not a list of commits. When a change lends itself to being measured,
+quote the actual numbers (`0.4.0`: "75 ms a 45 ms, 1.68x"; `0.5.0`: "IoU de 0.964 a 0.971").
+
+Anything that breaks backwards compatibility goes in its own `## Cambios incompatibles` section,
+explaining what stops working and what someone relying on it has to do now.
+
 ## Deployment
 
 As is, PlateUNLP can be deployed using any platform that supports Node.js applications. Right now, we are using [Railpack](https://railpack.com/) to deploy the application.

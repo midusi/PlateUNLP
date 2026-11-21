@@ -1,44 +1,103 @@
 import * as tf from "@tensorflow/tfjs"
-import { findPlateau, findXspacedPoints } from "~/lib/image"
-import { linearRegressionWhitDerived, splineCuadratic } from "~/lib/utils"
+import { median, robustSigma } from "~/lib/array-stats"
+import { findPlateau } from "~/lib/image"
+import { hardCutWeight, robustPolyFit, splineCuadratic } from "~/lib/utils"
 import type { Point } from "~/types/Point"
 
+/** Separacion, en pixeles, entre centros consecutivos (y ancho de cada segmento). */
+const CENTER_STEP = 8
+/** Multiplicador de sigma robusta (MAD) a partir del cual un centro se descarta. */
+const TRACE_MAD_K = 3
 /**
- * Parametros recibidos por extractScience
- * @interface extractScience
+ * Contraste minimo de un perfil (max-min), como fraccion de la mediana de
+ * contrastes, para fiarse de su centro. Sin linea ni continuo no hay senal.
  */
-export interface ExtractScienceProps {
-  /** Tensor de pixeles 4D Grey [1, height, width, 1]*/
-  science: tf.Tensor4D
-  /** Ancho de ciencia */
-  width: number
-  /** Alto de ciencia */
-  height: number
-  /** Cantidad de puntos intermedios a usar */
-  countCheckpoints: number
-  /** Ancho a considerar para el analisis de segmentos */
-  segmentWidth: number
-  /** Multiplicador de tamaño de apertura calculada. Default 1.0. */
-  percentAperture?: number
-  /** Funcion de ajuste a usar */
-  fitFunction?: "linal-regression" | "spline"
-  /**
-   * Funcion base a usar para la traza media (opcional). Si se usa, fitFunction
-   * no tiene efecto.
-   */
-  baseRectFunction?: (value: number) => number
-  /**
-   * Funcion base de derivadas a usar para la traza media (opcional). Solo se
-   * usa si se usa baseRectFunction.
-   */
-  baseDerivedFunction?: (value: number) => number
+const MIN_CONTRAST_RATIO = 0.25
+/**
+ * Percentil de los contrastes que se toma como "senal fuerte" de referencia.
+ * No es la mediana: en una lampara con lineas solo en un tramo, la mayoria de
+ * los segmentos son fondo y su mediana es ruido.
+ */
+const CONTRAST_REFERENCE_PERCENTILE = 0.9
+
+/** Centros vecinos, a cada lado, con los que se compara la continuidad de la traza. */
+const CONTINUITY_NEIGHBOURS = 5
+/**
+ * Cuanto puede apartarse un centro de lo que predicen sus vecinos, como
+ * fraccion de la apertura detectada, antes de considerarlo un salto.
+ */
+const CONTINUITY_TOLERANCE_RATIO = 0.2
+/** Tolerancia minima de continuidad, en pixeles: el centro de un altiplano vibra ~1 px. */
+const MIN_CONTINUITY_TOLERANCE = 1.5
+
+/** Z-score al que se recortan los outliers de cada perfil (~95% en una normal). */
+const OUTLIER_Z_THRESHOLD = 1.96
+/** Umbral, sobre el perfil normalizado, que separa espectro de fondo. */
+const PLATEAU_THRESHOLD = 0.5
+/** Ventana de suavizado, como fraccion del alto del recorte. */
+const SMOOTHING_WINDOW_RATIO = 0.15
+/** Exponente de la super-gaussiana de bordes: mas alto = techo mas plano y caida mas brusca. */
+const EDGE_WEIGHT_POWER = 4
+/**
+ * Peso minimo (en el borde exacto) de la super-gaussiana de bordes.
+ * No puede valer 0: en `EDGE_WEIGHT_MIN ** normalized ** (2*power)` la base
+ * en 0 da 0 en toda fila salvo la del centro geometrico exacto (que ademas
+ * no existe si `height` es par), asi que colapsa casi todo el perfil a cero
+ * antes de clampOutliers/binarizeProfiles. Ver #301.
+ */
+const EDGE_WEIGHT_MIN = 0.05
+
+/**
+ * Grado maximo con el que la traza se ajusta como polinomio. Por encima se
+ * usa un spline cuadratico, que interpola las anclas en vez de promediarlas.
+ */
+const MAX_POLYNOMIAL_DEGREE = 8
+
+/** Traza media del espectro y su derivada, en pixeles. */
+export interface TraceFunctions {
+  funct: (value: number) => number
+  derived: (value: number) => number
 }
 
-/** Respuesta de metodo extractScience */
+/** Parametros recibidos por extractSpectrum. */
+export interface ExtractSpectrumProps {
+  /** Tensor de pixeles 4D Grey [1, height, width, 1]. */
+  spectrum: tf.Tensor4D
+  /** Ancho del recorte. */
+  width: number
+  /** Alto del recorte. */
+  height: number
+  /**
+   * Separacion en pixeles entre centros consecutivos, que tambien es el ancho
+   * de cada segmento analizado (segmentos contiguos).
+   * @default 8
+   */
+  centerStep?: number
+  /** Multiplicador de la apertura calculada. */
+  percentAperture?: number
+  /**
+   * Grado de la traza: 1 es una recta y hasta MAX_POLYNOMIAL_DEGREE un
+   * polinomio de ese grado; mas alto usa un spline. Se ignora si se pasa baseTrace.
+   * @default 1
+   */
+  fitDegree?: number
+  /** Traza ya calculada en otro espectro. Si se pasa, se reusa en vez de ajustar una nueva. */
+  baseTrace?: TraceFunctions
+  /**
+   * Le resta peso a las filas cercanas al borde superior/inferior del recorte
+   * al buscar el centro de cada checkpoint, para que una fuga puntual de un
+   * espectro vecino no domine la deteccion. Solo afecta la busqueda del
+   * centro; transversalAvgs siempre promedia los pixeles reales, sin pesar.
+   * @default true
+   */
+  deemphasizeEdges?: boolean
+}
+
+/** Respuesta de extractSpectrum. */
 export interface ExtractSpectrumResponse {
-  /** Puntos medios elegidos para la extracción */
+  /** Centros que siguen la traza (los descartados por outliers o sin señal no figuran). */
   mediasPoints: Point[]
-  /** Apertura promedio detectada */
+  /** Apertura detectada (mediana de la de los centros que siguen la traza) */
   opening: number
   /** Funcion de la recta media del espectro medida en pixels */
   rectFunction: (value: number) => number
@@ -55,252 +114,379 @@ export interface ExtractSpectrumResponse {
    */
   spectrumMask: tf.Tensor4D
 }
-/** Extrae las caracteristicas de un espectro de ciencia. */
-export function extractScience({
-  science,
+
+/**
+ * Recorta un segmento vertical centrado en cada checkpoint y lo promedia
+ * horizontalmente, dejando un perfil por checkpoint.
+ * @returns Tensor [xpoints.length, height].
+ */
+function buildSegmentProfiles(
+  imgTensor: tf.Tensor4D,
+  xpoints: number[],
+  { width, height, segmentWidth }: { width: number; height: number; segmentWidth: number },
+): tf.Tensor2D {
+  return tf.tidy(() => {
+    const boxIdx = tf.tensor1d(new Array(xpoints.length).fill(0), "int32")
+    const boxes = tf.tensor2d(
+      xpoints.map((x) => {
+        const start = Math.max(0, x - Math.floor(segmentWidth / 2))
+        const end = Math.min(width, x + Math.ceil(segmentWidth / 2))
+        return [0, start / width, 1, end / width]
+      }),
+      [xpoints.length, 4],
+      "float32",
+    )
+    const segments = tf.image
+      .cropAndResize(imgTensor, boxes, boxIdx, [height, segmentWidth], "nearest")
+      .squeeze([3]) // saca solo el canal: [xpoints.length, height, segmentWidth]
+    return segments.mean(2) as tf.Tensor2D
+  })
+}
+
+/**
+ * Peso vertical tipo super-gaussiana: ~1 en el medio, techo casi plano, y
+ * caida pronunciada solo cerca de los dos bordes (fila 0 y fila height-1).
+ */
+function edgeWeights(height: number): number[] {
+  const center = (height - 1) / 2
+  const halfWidth = center || 1
+  return Array.from({ length: height }, (_, row) => {
+    const normalized = (row - center) / halfWidth // -1..1
+    return EDGE_WEIGHT_MIN ** (normalized ** (2 * EDGE_WEIGHT_POWER))
+  })
+}
+
+/** Aplica edgeWeights a cada fila de los perfiles, para restarle peso a los bordes. */
+function applyEdgeWeights(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
+  return tf.tidy(() => {
+    const weights = tf.tensor2d(edgeWeights(height), [1, height])
+    return profiles.mul(weights) as tf.Tensor2D
+  })
+}
+
+/** Recorta los outliers de cada perfil, por arriba y por abajo, al limite de ±z·σ. */
+function clampOutliers(profiles: tf.Tensor2D): tf.Tensor2D {
+  return tf.tidy(() => {
+    const mean = profiles.mean(1, true)
+    const std = profiles.sub(mean).square().mean(1, true).sqrt()
+    const lowerLimit = mean.sub(std.mul(OUTLIER_Z_THRESHOLD))
+    const upperLimit = mean.add(std.mul(OUTLIER_Z_THRESHOLD))
+    const clampedLower = profiles.where(profiles.greater(lowerLimit), lowerLimit)
+    return clampedLower.where(clampedLower.less(upperLimit), upperLimit) as tf.Tensor2D
+  })
+}
+
+/**
+ * Normaliza cada perfil, lo lleva a 0/1 segun el umbral y lo suaviza para
+ * borrar baches chicos.
+ */
+function binarizeProfiles(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
+  return tf.tidy(() => {
+    const min = profiles.min(1, true)
+    const max = profiles.max(1, true)
+    // Un perfil plano (max == min) daria 0/0; con el piso queda todo bajo el umbral.
+    const normalized = profiles.sub(min).div(max.sub(min).maximum(1e-6))
+
+    const pushed = tf
+      .onesLike(profiles)
+      .where(normalized.greater(PLATEAU_THRESHOLD), tf.zerosLike(profiles))
+
+    return movingAverage(pushed as tf.Tensor2D, height)
+  })
+}
+
+/** Ventana (impar) del suavizado de perfiles, en filas. */
+function smoothingWindow(height: number): number {
+  const window = Math.round(height * SMOOTHING_WINDOW_RATIO)
+  return window % 2 === 0 ? window + 1 : window
+}
+
+/** Promedio movil sobre las filas de cada perfil; los bordes se rellenan con ceros. */
+function movingAverage(profiles: tf.Tensor2D, height: number): tf.Tensor2D {
+  const window = smoothingWindow(height)
+  // El kernel se crea dentro del tidy: asi se libera junto con los intermedios.
+  return tf.tidy(() => {
+    const kernel = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
+    return profiles.expandDims(2).conv1d(kernel, 1, "same").squeeze([2])
+  }) as tf.Tensor2D
+}
+
+/**
+ * Contraste de cada perfil: rango (max - min) del perfil suavizado.
+ *
+ * Se mide sobre la imagen real y no sobre el perfil ponderado en los bordes:
+ * ahi el minimo siempre es ~0 por el peso, y el contraste termina siendo el
+ * brillo del fondo. Un segmento sin senal parecia tener tanto contraste como uno
+ * con lineas. Suavizar baja el ruido a una fraccion de su rango, mientras la
+ * banda del espectro (mas ancha que la ventana) casi no se toca. Se descartan
+ * las filas de los bordes, que el relleno con ceros de la media movil arrastra.
+ */
+function profileContrasts(profiles: tf.Tensor2D, height: number): number[] {
+  const margin = (smoothingWindow(height) - 1) / 2
+  const contrasts = tf.tidy(() => {
+    const smoothed = movingAverage(profiles, height).slice([0, margin], [-1, height - 2 * margin])
+    return smoothed.max(1).sub(smoothed.min(1))
+  })
+  const values = contrasts.arraySync() as number[]
+  contrasts.dispose()
+  return values
+}
+
+/** Valor en el percentil `q` (0..1) de una lista, por rango mas cercano. */
+function percentile(values: number[], q: number): number {
+  const sorted = [...values].sort((a, b) => a - b)
+  return sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))]
+}
+
+/** Centro de un segmento y apertura del altiplano que lo ubica. */
+interface Anchor extends Point {
+  opening: number
+}
+
+/**
+ * Centros contiguos de `step` px a lo largo de todo el ancho. Descarta el resto
+ * final (< step) y garantiza al menos 2 centros para poder ajustar una recta.
+ */
+function buildCenters(width: number, centerStep: number): { xpoints: number[]; step: number } {
+  const step = Math.max(1, Math.min(centerStep, Math.floor(width / 2)))
+  const count = Math.floor(width / step)
+  return { xpoints: Array.from({ length: count }, (_, i) => Math.round(i * step + step / 2)), step }
+}
+
+/**
+ * Centro y apertura del altiplano de cada perfil binarizado. Se descartan los
+ * perfiles sin senal (poco contraste o sin altiplano), que no ubican ningun
+ * centro. Si casi todos quedan afuera se usan todos, para poder ajustar igual.
+ */
+function findTraceAnchors(
+  binarized: tf.Tensor2D,
+  contrasts: number[],
+  xpoints: number[],
+): Anchor[] {
+  const profiles = binarized.arraySync() as number[][]
+  const plateaus = profiles.map((profile) => findPlateau(profile, PLATEAU_THRESHOLD))
+  const minContrast = percentile(contrasts, CONTRAST_REFERENCE_PERCENTILE) * MIN_CONTRAST_RATIO
+  const all = xpoints.map((x, i) => ({ x, y: plateaus[i].medium, opening: plateaus[i].opening }))
+  const withSignal = all.filter((_, i) => contrasts[i] >= minContrast && plateaus[i].opening > 0)
+  return withSignal.length >= 2 ? withSignal : all
+}
+
+/**
+ * Centros que siguen la tendencia de sus vecinos. Cada uno se compara con la
+ * recta (Theil-Sen, robusta) que ajustan los `CONTINUITY_NEIGHBOURS` centros
+ * de cada lado, sin contarlo: una traza real no salta de un centro al
+ * siguiente, y un centro aislado que lo hace es luz de otro espectro o ruido.
+ * El ajuste global no lo ve porque lo promedia con el resto.
+ */
+function continuousAnchors(anchors: Anchor[]): boolean[] {
+  const tolerance = Math.max(
+    MIN_CONTINUITY_TOLERANCE,
+    CONTINUITY_TOLERANCE_RATIO * median(anchors.map((a) => a.opening)),
+  )
+  return anchors.map((anchor, i) => {
+    const neighbours = anchors.filter((_, j) => j !== i && Math.abs(j - i) <= CONTINUITY_NEIGHBOURS)
+    if (neighbours.length < 3) return true
+    const slopes: number[] = []
+    for (let a = 0; a < neighbours.length; a++) {
+      for (let b = a + 1; b < neighbours.length; b++) {
+        const dx = neighbours[b].x - neighbours[a].x
+        if (dx !== 0) slopes.push((neighbours[b].y - neighbours[a].y) / dx)
+      }
+    }
+    const slope = median(slopes)
+    const intercept = median(neighbours.map((n) => n.y - slope * n.x))
+    return Math.abs(anchor.y - (slope * anchor.x + intercept)) <= tolerance
+  })
+}
+
+/**
+ * Reusa la traza base desplazada, o ajusta una nueva sobre los centros hallados.
+ * En ambos casos los centros que se alejan de la tendencia (defectos de la
+ * placa, fugas del espectro vecino) se marcan como no validos.
+ * @returns La traza y, por centro, si sigue esa traza.
+ */
+function buildTraceFunctions(
+  anchors: Anchor[],
+  fitDegree: number,
+  baseTrace?: TraceFunctions,
+): { trace: TraceFunctions; inliers: boolean[] } {
+  if (baseTrace) {
+    // Se ancla con la mediana del desplazamiento de todos los centros, no solo
+    // el primero: si alguno queda contaminado no arrastra la traza entera.
+    const offsets = anchors.map((p) => baseTrace.funct(p.x) - p.y)
+    const offset = median(offsets)
+    const sigma = robustSigma(offsets)
+    const weight = hardCutWeight(TRACE_MAD_K)
+    return {
+      trace: { funct: (x) => baseTrace.funct(x) - offset, derived: baseTrace.derived },
+      inliers: offsets.map((o) => sigma < 1e-9 || weight(Math.abs(o - offset) / sigma) > 0),
+    }
+  }
+  // Se ajusta solo con los centros continuos; el resto queda como no valido.
+  const continuous = continuousAnchors(anchors)
+  const useContinuous = continuous.filter(Boolean).length >= 2
+  const keep = anchors.map((_, i) => !useContinuous || continuous[i])
+  const xs = anchors.filter((_, i) => keep[i]).map((p) => p.x)
+  const ys = anchors.filter((_, i) => keep[i]).map((p) => p.y)
+  // Los outliers se buscan con un polinomio del grado pedido: una recta no
+  // describe un espectro curvo y deja pasar las anclas que se enganchan a las
+  // lineas de un espectro vecino. Con menos anclas que parametros no hay ajuste.
+  const degree = Math.min(fitDegree, MAX_POLYNOMIAL_DEGREE, xs.length - 1)
+  const fit = robustPolyFit(xs, ys, { degree, weight: hardCutWeight(TRACE_MAD_K) })
+  /** Vuelve del subconjunto ajustado a todos los centros. */
+  let next = 0
+  const inliers = keep.map((kept) => kept && fit.inliers[next++])
+  if (fitDegree <= MAX_POLYNOMIAL_DEGREE) return { trace: fit, inliers }
+  return {
+    trace: splineCuadratic(
+      xs.filter((_, i) => fit.inliers[i]),
+      ys.filter((_, i) => fit.inliers[i]),
+    ),
+    inliers,
+  }
+}
+
+/** Mascara booleana [height, width] de la banda de apertura alrededor de la traza. */
+function buildApertureMask(
+  trace: TraceFunctions,
+  { width, height, opening }: { width: number; height: number; opening: number },
+): tf.Tensor2D {
+  return tf.tidy(() => {
+    const xValues = tf.range(0, width, 1, "int32").arraySync() as number[]
+    const centers = tf.tensor1d(xValues.map((x) => trace.funct(x)))
+    const minYs = centers.sub(opening / 2)
+    const maxYs = centers.add(opening / 2)
+    /** Coordenada vertical de cada pixel: [height, width]. */
+    const rowMatrix = tf.tile(tf.range(0, height, 1, "int32").expandDims(1), [1, width])
+    return tf.logicalAnd(rowMatrix.greater(minYs), rowMatrix.less(maxYs)) as tf.Tensor2D
+  })
+}
+
+/**
+ * Punto de la normal a la traza en la columna `x`, a `t` pixeles del centro
+ * medidos sobre la normal (positivo hacia abajo). Es la geometria que usa
+ * `averageAcrossAperture`, exportada para que la interfaz dibuje lo mismo.
+ */
+export function pointOnNormal(trace: TraceFunctions, x: number, t: number): Point {
+  const slope = trace.derived(x)
+  const norm = Math.sqrt(1 + slope * slope)
+  return { x: x - (t * slope) / norm, y: trace.funct(x) + t / norm }
+}
+
+/**
+ * Semilongitud, sobre la normal en la columna `x`, de la banda de apertura.
+ * `opening` es el alto vertical de la banda, que sobre la normal mide
+ * `opening / sqrt(1 + y'^2)`.
+ */
+export function normalHalfLength(trace: TraceFunctions, x: number, opening: number): number {
+  const slope = trace.derived(x)
+  return opening / (2 * Math.sqrt(1 + slope * slope))
+}
+
+/** Valor interpolado bilinealmente en (x, y) de una imagen [height, width], o undefined si cae fuera. */
+function sampleBilinear(
+  data: Float32Array | Int32Array | Uint8Array,
+  { width, height }: { width: number; height: number },
+  x: number,
+  y: number,
+): number | undefined {
+  if (x < 0 || y < 0 || x > width - 1 || y > height - 1) return undefined
+  const x0 = Math.floor(x)
+  const y0 = Math.floor(y)
+  const x1 = Math.min(x0 + 1, width - 1)
+  const y1 = Math.min(y0 + 1, height - 1)
+  const fx = x - x0
+  const fy = y - y0
+  const top = data[y0 * width + x0] * (1 - fx) + data[y0 * width + x1] * fx
+  const bottom = data[y1 * width + x0] * (1 - fx) + data[y1 * width + x1] * fx
+  return top * (1 - fy) + bottom * fy
+}
+
+/**
+ * Promedia, para cada columna x de la traza, los pixeles de la apertura sobre
+ * la perpendicular a la traza en ese punto (la normal, que sale de su derivada).
+ * Asi las lineas espectrales, que cortan la traza en angulo recto, quedan
+ * dentro de una sola muestra aunque la traza este inclinada o curvada.
+ *
+ * `opening` es el alto vertical de la banda: sobre la normal mide
+ * `opening / sqrt(1 + y'^2)`, que es la misma banda que cubre la mascara.
+ * @returns Un valor por columna; NaN si ningun punto de la normal cae en el recorte.
+ */
+function averageAcrossAperture(
+  gray2d: tf.Tensor2D,
+  trace: TraceFunctions,
+  opening: number,
+  { width, height }: { width: number; height: number },
+): number[] {
+  const data = gray2d.dataSync()
+  return Array.from({ length: width }, (_, x) => {
+    const half = normalHalfLength(trace, x, opening)
+    /** Una muestra por pixel de espesor, tomadas en el medio de cada tramo. */
+    const count = Math.max(1, Math.round(2 * half))
+    let sum = 0
+    let valid = 0
+    for (let k = 0; k < count; k++) {
+      const t = -half + ((k + 0.5) * 2 * half) / count
+      const point = pointOnNormal(trace, x, t)
+      const value = sampleBilinear(data, { width, height }, point.x, point.y)
+      if (value === undefined) continue
+      sum += value
+      valid++
+    }
+    return valid > 0 ? sum / valid : Number.NaN
+  })
+}
+
+/**
+ * Extrae las caracteristicas de un espectro: la traza media, su apertura y la
+ * señal 1D que resulta de promediar dentro de esa apertura.
+ */
+export function extractSpectrum({
+  spectrum,
   width,
   height,
-  countCheckpoints,
-  segmentWidth,
+  centerStep = CENTER_STEP,
   percentAperture = 1.0,
-  fitFunction,
-  baseRectFunction,
-  baseDerivedFunction,
-}: ExtractScienceProps): ExtractSpectrumResponse {
-  //   /** Convertir a escala de grises */
-  //   const [r, g, b, _] = tf.split(science, 4, 3)
-  //   const imgTensor = r.mul(0.2989).add(g.mul(0.587)).add(b.mul(0.114)).cast("float32") as tf.Tensor4D
-  const imgTensor = science.toFloat()
+  fitDegree = 1,
+  baseTrace,
+  deemphasizeEdges = true,
+}: ExtractSpectrumProps): ExtractSpectrumResponse {
+  const imgTensor = spectrum.toFloat()
+  /** Coordenadas X de los centros, uno cada `segmentWidth` px a lo largo de toda la imagen. */
+  const { xpoints, step: segmentWidth } = buildCenters(width, centerStep)
 
-  /** Segmentar la imagen */
-  /** Coordenadas X medias a lo largo de toda la imagen de SCIENCE */
-  const xpoints = findXspacedPoints(width, countCheckpoints)
+  const profiles = buildSegmentProfiles(imgTensor, xpoints, { width, height, segmentWidth })
+  const weighted = deemphasizeEdges ? applyEdgeWeights(profiles, height) : profiles
+  const clamped = clampOutliers(weighted)
+  const binarized = binarizeProfiles(clamped, height)
 
-  /**
-   * Funciones de cada segmento promediado horizontalmente
-   * Osea, para cada pixel vertical se hace un avg de los pixeles
-   * horizontales. x=>pixelVertical, y=>avgHorizontal
-   */
-  const avgTensor = tf.tidy(() => {
-    /** Segmentos medios de imagen de SCIENCE */
-    const boxIdx = tf.tensor1d(new Array(countCheckpoints).fill(0), "int32")
-    const cropSize: [number, number] = [height, segmentWidth]
-    const boxesVals = xpoints.map((x) => {
-      const start = Math.max(0, x - Math.floor(segmentWidth / 2))
-      const end = Math.min(width, x + Math.ceil(segmentWidth / 2))
-      return [0 / height, start / width, height / height, end / width]
-    })
-    const boxes = tf.tensor2d(boxesVals, [countCheckpoints, 4], "float32")
+  const anchors = findTraceAnchors(binarized, profileContrasts(profiles, height), xpoints)
+  const { trace, inliers } = buildTraceFunctions(anchors, fitDegree, baseTrace)
+  const valid = anchors.filter((_, i) => inliers[i])
+  const mediasPoints = valid.map(({ x, y }) => ({ x, y }))
+  const avgOpening = median(valid.map((a) => a.opening)) * percentAperture
 
-    let segments = tf.image.cropAndResize(imgTensor, boxes, boxIdx, cropSize, "nearest") // [countCheckpoints, height, segmentWidth, 1]
-    segments = segments.squeeze() // Quita dimension de canal (countCheckpoints, height, segmentWidth)
+  const gray2d = imgTensor.squeeze([0, 3]) as tf.Tensor2D
+  const apertureMask = buildApertureMask(trace, { width, height, opening: avgOpening })
+  const transversalAvgs = averageAcrossAperture(gray2d, trace, avgOpening, { width, height })
+  // Un solo reshape en vez de dos expandDims encadenados: el resultado
+  // intermedio de expandDims(0) quedaba sin ninguna referencia para liberarlo.
+  const spectrumMask = apertureMask.reshape([1, height, width, 1]) as tf.Tensor4D
 
-    return segments.mean(2) // promediado horizontalmente, queda (segmentCount, height)
-  })
-
-  // Acotar outliers
-  const acoted_data = tf.tidy(() => {
-    const mean = avgTensor.mean(1, true) // promedio por funcion [numFunciones, 1]
-    const std = avgTensor.sub(mean).square().mean(1, true).sqrt() // desviacion estandar por funcion [numFunciones, 1]
-    //const z = avgTensor.sub(mean).div(std) // z-score por funcion [numFunciones, numPuntos]
-    const threshold = tf.scalar(1.96) // En una distribucion normal 2.5 representa que lo que cae fuera del ~98.8% de los valores, 1.96 ~95.0%
-    const lower_limit = mean.sub(std.mul(threshold))
-    const upper_limit = mean.add(std.mul(threshold))
-    const mask_below = avgTensor.greater(lower_limit)
-    const mask_above = avgTensor.less(upper_limit)
-    let acoted_data = avgTensor.where(mask_below, lower_limit)
-    acoted_data = avgTensor.where(mask_above, upper_limit)
-    return acoted_data
-  })
-
-  const umbral = 0.5
-
-  const avg_smoothed = tf.tidy(() => {
-    /** Normalizar min-max por fila*/
-    const min = acoted_data.min(1, true)
-    const max = acoted_data.max(1, true)
-    const avgNormalized = acoted_data.sub(min).div(max.sub(min))
-
-    /** Pronunciar las tendencias presentes en la funcion. */
-    const greaterMask = avgNormalized.greater(tf.scalar(umbral))
-    const ones = tf.onesLike(acoted_data)
-    const zeros = tf.zerosLike(acoted_data)
-    const pushed = ones.where(greaterMask, zeros)
-
-    /** Suavizar para eliminar baches pequeños. */
-    let window = Math.round(height * 0.15)
-    window = window % 2 === 1 ? window : window + 1
-    const k = tf.tensor3d(Array(window).fill(1 / window), [window, 1, 1])
-    const pushed_smoothed = pushed.expandDims(2).conv1d(k, 1, "same").squeeze()
-    return pushed_smoothed
-  })
-
-  /**
-   * Arreglo con informacion de para cada funcion de un segmento el
-   * punto vertical medio y la apertura que le corresponde.
-   */
-  const avgArrs: number[][] = avg_smoothed.arraySync() as number[][]
-  const plateauInfo: {
-    medium: number
-    opening: number
-  }[] = avgArrs.map((arr: number[]) => findPlateau(arr, umbral))
-
-  /** Guardar grafico de funciones */
-  // const i = 18;
-  // const original = avgTensor.slice([i, 0], [1, height]).dataSync();
-  // const original_acoted = acoted_data.slice([i, 0], [1, height]).dataSync();
-  // const original_pushed = pushed.slice([i, 0], [1, height]).squeeze();
-  // const original_pushed_smoothed = avg_smoothed
-  // 	.slice([i, 0], [1, height])
-  // 	.squeeze();
-  // guardarFuncion(
-  // 	[
-  // 		Array.from(original),
-  // 		//Array.from(original_acoted),
-  // 		//Array.from(original_pushed.dataSync()),
-  // 		//original_pushed_smoothed.arraySync() as number[],
-  // 	],
-  // 	`function${i}.png`,
-  // 	plateauInfo[i].medium,
-  // 	umbral,
-  // 	[
-  // 		"blue",
-  // 		//"skyblue",
-  // 		//"yellow",
-  // 		//"orange",
-  // 	],
-  // );
-
-  /** Apertura promedio */
-  const avgOpening =
-    (plateauInfo.reduce((sum, pi) => sum + pi.opening, 0) / plateauInfo.length) * percentAperture // percenntAperture para ajustar bordes
-  /**
-   * Conjuntos de cordenadas (x,y) de los puntos que trazan la recta
-   * media de la función.
-   */
-  const mediasPoints = xpoints.map((point, index) => ({
-    x: point,
-    y: plateauInfo[index].medium,
-  }))
-
-  /** Si se cuenta con una funcion a usar de base se usa, sino se infiere */
-  let interpolated: {
-    funct: (x: number) => number
-    derived: (x: number) => number
-  }
-  if (baseRectFunction) {
-    /** Desplazamiento vertical en el primer centro respecto a resultado de funcion base. */
-    const diff = baseRectFunction(mediasPoints[0].x) - mediasPoints[0].y
-    const interpolatedFunction = (x: number) => baseRectFunction(x) - diff
-    interpolated = {
-      funct: interpolatedFunction,
-      derived: baseDerivedFunction!,
-    }
-  } else {
-    interpolated =
-      fitFunction === "spline"
-        ? splineCuadratic(
-            xpoints,
-            mediasPoints.map((p) => p.y),
-          )
-        : linearRegressionWhitDerived(
-            xpoints,
-            mediasPoints.map((p) => p.y),
-          )
-  }
-
-  // /** Conseguir valores perpendiculares a promediar en cada punto */
-  // function demo() {
-  // 	//
-  // 	// const xVals = tf.range(0, width, 1, "int32");
-  // 	// const yVals = tf.tensor1d(
-  // 	// 	xVals.arraySync().map((x) => interpolated.funct(x)),
-  // 	// );
-  // 	// const sourceVals = tf.stack([xVals, yVals]);
-  // 	// const mVals = tf.tensor1d(
-  // 	// 	xVals.arraySync().map((x) => interpolated.derived(x)),
-  // 	// );
-  // 	// const angles = mVals.atan();
-  // 	// const anglesDeg = angles.mul(180 / Math.PI); // HAberiguar si es con angulos o radianes
-  // 	// const cos = angles.cos();
-  // 	// const sin = angles.sin();
-  // 	// const rotationMatrices = tf.stack(
-  // 	// 	[
-  // 	// 		tf.stack([cos, sin.neg()], 1), // fila 1: [cos, -sin]
-  // 	// 		tf.stack([sin, cos], 1), // fila 2: [sin, cos]
-  // 	// 	],
-  // 	// 	1,
-  // 	// );
-  // 	// const n = Math.floor(avgOpening);
-  // 	// let points = tf.stack([tf.linspace(-n / 2, n / 2, n), tf.zeros([n])], 1);
-  // 	// points = points.expandDims(0).tile([width, 1, 1]); // [n, n, 2]
-  // 	// // const rotatedPoints = tf.matMul(points, rotationMatrices); // [N, n, 2]
-  // 	// // rotatedPoints = rotatedPoints.add(sourceVals.transpose().expandDims(1));
-  // 	const xvals = tf.tensor1d([-2, -1, 0, 1, 2]);
-  // 	const yvals = tf.tensor1d([0, 0, 0, 0, 0]);
-  // 	const sourceVals = tf.stack([xVals, yVals]);
-
-  // 	guardarRectaYPuntos(sourceVals.arraySync() as [number, number][], {
-  // 		b: 0,
-  // 		m: 0.5,
-  // 	});
-  // }
-  // demo();
-
-  /** Promedio de pixeles que pasan por cada scienceTransversalFunction. Solo funciona con regresion lineal*/
-  const gray2d = imgTensor.squeeze([0, 3]) // [height, width]
-  /** Mascara donde se halla el espectro */
-  const fullMask = tf.tidy(() => {
-    /** Valores por pixel horizontal en eje X e Y */
-    const xValues = tf.range(0, width, 1, "int32").arraySync()
-    const yvalues = tf.tensor1d(xValues.map((x) => interpolated.funct(x)))
-    /** Minimo Y por pixel */
-    const minYs = yvalues.sub(tf.scalar(avgOpening / 2))
-    /** Maximo Y por pixel */
-    const maxYs = yvalues.add(tf.scalar(avgOpening / 2))
-    /** Tensor de coordenadas verticales: shape [height, width] => [0, 1, 2, ..., height-1]*/
-    const rowIndices = tf.range(0, height, 1, "int32")
-    const rowMatrix = tf.tile(rowIndices.expandDims(1), [1, width])
-    /** Filtrar valores por columna que no entran entre el min y max de la columna */
-    const maskLower = rowMatrix.greater(minYs)
-    const maskUpper = rowMatrix.less(maxYs)
-    const fullMask = tf.logicalAnd(maskLower, maskUpper)
-    return fullMask
-  })
-  /** Promedio transversal */
-  const avgPerColumn = tf.tidy(() => {
-    const imgMasked = tf.where(fullMask, gray2d, tf.fill([height, width], 0))
-    /** Rotar para que la pendiente quede horizontal */
-    const rad = Math.atan(interpolated.derived(0))
-    const imgMaskedRotated = tf.image
-      .rotateWithOffset(imgMasked.expandDims(0).expandDims(-1) as tf.Tensor4D, rad, 0, [0.5, 0.5])
-      .squeeze([0, 3])
-    const fullMaskRotated = tf.image
-      .rotateWithOffset(
-        fullMask.toFloat().expandDims(0).expandDims(-1) as tf.Tensor4D,
-        rad,
-        0,
-        [0.5, 0.5],
-      )
-      .toInt()
-      .squeeze([0, 3])
-
-    /** Promediar por columna */
-    const validPerColumn = fullMaskRotated.cast("int32").sum(0)
-    const avgPerColumn = imgMaskedRotated.sum(0).div(validPerColumn)
-    return avgPerColumn
-  })
-
-  avgTensor.dispose()
-  acoted_data.dispose()
-  avg_smoothed.dispose()
+  imgTensor.dispose()
+  profiles.dispose()
+  if (weighted !== profiles) weighted.dispose()
+  clamped.dispose()
+  binarized.dispose()
   gray2d.dispose()
+  apertureMask.dispose()
+
   return {
-    mediasPoints: mediasPoints,
+    mediasPoints,
     opening: avgOpening,
-    rectFunction: interpolated.funct,
-    derivedFunction: interpolated.derived,
-    transversalAvgs: avgPerColumn.arraySync() as number[],
-    spectrumMask: fullMask.expandDims(0).expandDims(-1),
+    rectFunction: trace.funct,
+    derivedFunction: trace.derived,
+    transversalAvgs,
+    spectrumMask,
   }
 }
