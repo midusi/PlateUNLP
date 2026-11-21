@@ -52,7 +52,7 @@ export const CalibrationSettingsUI = withForm({
       },
     ],
     materialsNamesList: ["Fe-Ne", "Fe-Ne-Ar"],
-    onDeleteIndex: undefined,
+    onDeleteIndex: undefined as ((index: number) => void) | undefined,
   },
   render: function Render({ form, materialArr, materialsNamesList, onDeleteIndex }) {
     const [isLoadLampModalOpen, setIsLoadLampModalOpen] = useState(false)
@@ -80,7 +80,10 @@ export const CalibrationSettingsUI = withForm({
                 className="w-full border-r-0 bg-white shadow-none hover:cursor-pointer hover:bg-white"
                 onClick={() => setIsLoadLampModalOpen(true)}
               >
-                <span className="icon-[ph--file-plus] size-5 text-black!" style={{ color: '#000' }}></span>
+                <span
+                  className="icon-[ph--file-plus] size-5 text-black!"
+                  style={{ color: "#000" }}
+                ></span>
               </Button>
               {isLoadLampModalOpen && (
                 <form.AppField name="material">
