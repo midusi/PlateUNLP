@@ -46,9 +46,9 @@ are zeros, not excluded from the averages. The extraction preview can show each 
 |---|-------|-------|-----|
 | 1 | Create project, upload plate | `/project/$projectId` | `upload-plate.ts` → `uploadFile()` |
 | 2 | Plate metadata | `/plate/$plateId` | `PlateMetadataForm`, autosaved |
-| 3 | **Observation detection** | `/plate/$plateId` | ONNX **server-side**, `get-observations-detections.ts` |
+| 3 | **Observation detection** | `/plate/$plateId` | ONNX **server-side**, `getObservationDetections` in `plate.$plateId/-actions/get-spectrums-detections.ts` (the file name says "spectrums" but it detects observations) |
 | 4 | Observation metadata + derived values | `/observation/$observationId` | `compute-observation-metadata.ts` (SIMBAD + astronomy) |
-| 5 | **Spectrum detection** (lamp vs science) | `/observation/$observationId` | ONNX **client-side**, `use-predict-BBs.ts` |
+| 5 | **Spectrum detection** (lamp vs science) | `/observation/$observationId` | ONNX **server-side**, `predictBoundingBoxes` (`app/routes/_app/-actions/predict-bounding-boxes.ts`), called from the `usePredictBBs` hook (`app/hooks/use-predict-BBs.ts`) |
 | 6 | Feature extraction → 1-D signals | `/observation/$observationId` | `SpectrumsExtractor` + `-utils/recalculate-spectrums-1d.ts` |
 | 7 | Wavelength calibration | `/observation/$observationId/calibrate` | user matches lamp peaks to a reference material |
 | 8 | FITS export | several routes ending in `fits` / `extracted-fits` / `calibrated-fits` | `fits2js` via `app/lib/fits/` |
@@ -60,8 +60,8 @@ in there are stale; the prose is correct.
 
 | Model | Runtime | File | Loaded by |
 |-------|---------|------|-----------|
-| Observation detector | `onnxruntime-node` (server) | `app/models/detect_observations/0.0.7.m.obb.observation.cont.onnx` | `get-observations-detections.ts`, path is **hardcoded relative to cwd** |
-| Spectrum-part detector | `onnxruntime-node` (server) | `app/models/detect_observations/0.0.9.m.obb.components.cont2.onnx` | `app/routes/_app/-actions/predict-bounding-boxes.ts` (via `use-predict-BBs.ts`), model name passed from `SpectrumsList.tsx` |
+| Observation detector | `onnxruntime-node` (server) | `app/models/detect_observations/0.0.7.m.obb.observation.cont.onnx` | `getObservationDetections` in `app/routes/_app/plate.$plateId/-actions/get-spectrums-detections.ts`, path is **hardcoded relative to cwd** |
+| Spectrum-part detector | `onnxruntime-node` (server) | `app/models/detect_observations/0.0.9.m.obb.components.cont2.onnx` | `predictBoundingBoxes` in `app/routes/_app/-actions/predict-bounding-boxes.ts` (via `app/hooks/use-predict-BBs.ts`); the model name is a parameter (default is the observation model) and `SpectrumsList.tsx` passes this one |
 
 The Dockerfile copies `app/models` into the runner image explicitly — if you move or rename the
 server model, update `Dockerfile` too.
