@@ -61,7 +61,7 @@ function RouteComponent() {
               fields={plateMetadataFields(values)}
             >
               <span className="icon-[ph--download-simple-bold]" />
-              Download FITS
+              Download Plate
             </FITSExportButton>
           </div>
         )}
