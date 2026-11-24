@@ -106,6 +106,13 @@
       "when": 1794964582056,
       "tag": "0015_oriented_boxes",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1795618795821,
+      "tag": "0016_add_lamp_offsets",
+      "breakpoints": true
     }
   ]
 }
