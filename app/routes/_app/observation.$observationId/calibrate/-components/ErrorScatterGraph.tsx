@@ -25,7 +25,7 @@ const formatNumber = new Intl.NumberFormat("en-US", {
 const getX = (p: { Å: number; E: number }) => p.Å
 const getY = (p: { Å: number; E: number }) => p.E
 
-const margin = { top: 20, right: 20, bottom: 40, left: 60 }
+const margin = { top: 8, right: 14, bottom: 28, left: 50 }
 
 interface ErrorScatterGraphProps {
   pixelToWavelengthFunction: CustomError | ((value: number) => number)
@@ -156,7 +156,7 @@ export function ErrorScatterGraph({
       <svg
         ref={containerRef}
         width={width}
-        height={200}
+        height={180}
         role="img"
         aria-label="Graph of dispersion error"
       >
@@ -164,7 +164,7 @@ export function ErrorScatterGraph({
           <GraphInErrorCase
             message={pixelToWavelengthFunction.message}
             dimensions={{ height, width }}
-            labels={{ x: "Wavelength (Å)", y: "Dispersion error" }}
+            labels={{ x: "Wavelength (Å)", y: yLabel }}
           />
         ) : (
           <Group left={margin.left - margin.right} top={margin.top}>

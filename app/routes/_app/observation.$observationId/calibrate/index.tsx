@@ -3,6 +3,7 @@ import { useRef, useState } from "react"
 import type { z } from "zod"
 import { FITSExportButton } from "~/components/FITSExportButton"
 import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
+import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
@@ -103,6 +104,9 @@ function RouteComponent() {
   >(materialData?.arr ?? [])
 
   const [unit, setUnit] = useState<Unit>("Å")
+  const [errorGraphStackPosition, setErrorGraphStackPosition] = useState<"above" | "below">(
+    "below",
+  )
 
   const [pixelToWavelengthFunction, setPixelToWavelengthFunction] = useGlobalStore((s) => [
     s.pixelToWavelengthFunction,
@@ -233,116 +237,166 @@ function RouteComponent() {
 
   return (
     <>
-      <Card className="mx-auto w-full px-8">
-        <CardContent>
-          <CardTitle className="mb-4">Teorical Comparison Lamp</CardTitle>
-          <CalibrationSettingsUI
-            form={form}
-            materialArr={materialArr}
-            materialsNamesList={listOfMaterials}
-            onDeleteIndex={handleDeletePointAtIndex}
-          />
-        </CardContent>
-        <CardContent>
-          {/* Grafico de interacción para calibrar respecto a lampara teorica */}
-          <form.Field name="lampPoints">
-            {(fieldLP) => (
-              <div className="flex flex-col gap-0">
-                {/* Grafico espectro calibrado para cada lampara */}
-                {lamps.map((lamp, idx) => (
-                  <form.AppField key={`TeoricalSpectrumLamp-${lamp.id}`} name={`lampOffsets[${idx}].offset`}>
-                    {(fieldOffset) => (
-                      <div>
-                        <CardTitle className="mb-1">
-                          Empirical Comparison Lamp {idx}
-                          <fieldOffset.StepperField
-                            className="shrink-0"
-                            label="Offset"
-                            min={-100}
-                            max={100}
-                            step={1}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="mx-auto w-full px-8 lg:col-span-2">
+          <CardContent>
+            <CardTitle className="mb-4">Teorical Comparison Lamp</CardTitle>
+            <CalibrationSettingsUI
+              form={form}
+              materialArr={materialArr}
+              materialsNamesList={listOfMaterials}
+              onDeleteIndex={handleDeletePointAtIndex}
+            />
+          </CardContent>
+          <CardContent>
+            {/* Grafico de interacción para calibrar respecto a lampara teorica */}
+            <form.Field name="lampPoints">
+              {(fieldLP) => (
+                <div className="flex flex-col gap-0">
+                  {/* Grafico espectro calibrado para cada lampara */}
+                  {lamps.map((lamp, idx) => (
+                    <form.AppField key={`TeoricalSpectrumLamp-${lamp.id}`} name={`lampOffsets[${idx}].offset`}>
+                      {(fieldOffset) => (
+                        <div>
+                          <CardTitle className="mb-1">
+                            Empirical Comparison Lamp {idx}
+                            {/* <fieldOffset.StepperField
+                              className="shrink-0"
+                              label="Offset"
+                              min={-100}
+                              max={100}
+                              step={1}
+                            /> */}
+                          </CardTitle>
+                          <EmpiricalSpectrum
+                            data={lamp.data.map((point) => ({
+                              pixel: point.pixel + (fieldOffset.state.value ?? 0),
+                              intensity: point.intensity,
+                            }))}
+                            lampPoints={fieldLP.state.value}
+                            setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                            onDeleteIndex={handleDeletePointAtIndex}
+                            pixelToWavelengthFunction={pixelToWavelengthFunction}
                           />
-                        </CardTitle>
-                        <EmpiricalSpectrum
-                          data={lamp.data.map((point) => ({
-                            pixel: point.pixel + (fieldOffset.state.value ?? 0),
-                            intensity: point.intensity,
-                          }))}
-                          lampPoints={fieldLP.state.value}
-                          setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
-                          onDeleteIndex={handleDeletePointAtIndex}
+                        </div>
+                      )}
+                    </form.AppField>
+                  ))}
+
+                  <hr className="my-8" />
+
+                  {/* Grafico espectro calibrado ciencia */}
+                  <div>
+                    <CardTitle className="mb-1">Empirical Science Spectrum</CardTitle>
+                    <EmpiricalSpectrum
+                      data={scienceSpectrum}
+                      lampPoints={fieldLP.state.value}
+                      setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                      onDeleteIndex={handleDeletePointAtIndex}
+                      pixelToWavelengthFunction={pixelToWavelengthFunction}
+                      showLines={false}
+                    />
+                  </div>
+                </div>
+              )}
+            </form.Field>
+          </CardContent>
+          <CardContent>
+            <TextAreaFieldWithKnown
+              form={form}
+              fields="CALNOTES"
+              label="CALNOTES"
+              placeholder="e.g. lamp lines blended near 4500Å; used Legendre fit of degree 3"
+              description="Calibration notes."
+              rows={3}
+            />
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            <form.Subscribe
+              selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+            >
+              {([isValid, isSubmitting, isDirty]) => (
+                <p className="flex items-center text-muted-foreground text-xs italic">
+                  {!isValid ? (
+                    <>
+                      <span>Changes aren't beign saved! Please fix the errors above</span>
+                      <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
+                    </>
+                  ) : isSubmitting || isDirty ? (
+                    <>
+                      <span>Saving changes...</span>
+                      <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Settings saved on database</span>
+                      <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
+                    </>
+                  )}
+                </p>
+              )}
+            </form.Subscribe>
+          </CardFooter>
+        </Card>
+
+        <Card className="hidden gap-1 py-2 pb-0 shadow-lg lg:sticky lg:top-2 lg:flex lg:col-span-1 lg:self-start">
+          <CardHeader className="flex flex-row items-center justify-between px-6 py-1">
+            <CardTitle className="text-sm">Inference analysis</CardTitle>
+            <div className="flex items-center gap-1 text-sm font-semibold text-slate-500">
+              Error unit: [
+              <select
+                value={unit}
+                className="rounded-lg bg-gray-100 text-sm"
+                style={{ textAlign: "center", textAlignLast: "center" }}
+                onChange={(e) => setUnit(e.target.value as Unit)}
+              >
+                <option value="Å">Å</option>
+                <option value="km/s">km/s</option>
+              </select>
+              ]
+            </div>
+          </CardHeader>
+          <CardContent className="px-6 pb-0">
+            <form.Field name="lampPoints">
+              {(fieldLP) => (
+                <form.Field name="materialPoints">
+                  {(fieldMP) => (
+                    <div className="flex flex-col gap-1.5">
+                      <div>
+                        <h2 className="mb-0 text-center font-bold text-xs leading-tight">Xpixel Vs Wavelength</h2>
+                        <InferenceBoxGraph
                           pixelToWavelengthFunction={pixelToWavelengthFunction}
+                          lampPoints={fieldLP.state.value}
+                          materialPoints={fieldMP.state.value}
                         />
                       </div>
-                    )}
-                  </form.AppField>
-                ))}
+                      <div>
+                        <h2 className="mb-0 text-center font-bold text-xs leading-tight">Graph of dispersion error</h2>
+                        <ErrorScatterGraph
+                          pixelToWavelengthFunction={pixelToWavelengthFunction}
+                          lampPoints={fieldLP.state.value}
+                          materialPoints={fieldMP.state.value}
+                          unit={unit}
+                          onDeleteIndex={handleDeletePointAtIndex}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </form.Field>
+              )}
+            </form.Field>
+          </CardContent>
+        </Card>
+      </div>
 
-                <hr className="my-8" />
-
-                {/* Grafico espectro calibrado ciencia */}
-                <div>
-                  <CardTitle className="mb-1">Empirical Science Spectrum</CardTitle>
-                  <EmpiricalSpectrum
-                    data={scienceSpectrum}
-                    lampPoints={fieldLP.state.value}
-                    setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
-                    onDeleteIndex={handleDeletePointAtIndex}
-                    pixelToWavelengthFunction={pixelToWavelengthFunction}
-                    showLines={false}
-                  />
-                </div>
-              </div>
-            )}
-          </form.Field>
-        </CardContent>
-        <CardContent>
-          <TextAreaFieldWithKnown
-            form={form}
-            fields="CALNOTES"
-            label="CALNOTES"
-            placeholder="e.g. lamp lines blended near 4500Å; used Legendre fit of degree 3"
-            description="Calibration notes."
-            rows={3}
-          />
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          <form.Subscribe
-            selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
-          >
-            {([isValid, isSubmitting, isDirty]) => (
-              <p className="flex items-center text-muted-foreground text-xs italic">
-                {!isValid ? (
-                  <>
-                    <span>Changes aren't beign saved! Please fix the errors above</span>
-                    <span className="icon-[ph--warning-circle-bold] ml-1 size-3" />
-                  </>
-                ) : isSubmitting || isDirty ? (
-                  <>
-                    <span>Saving changes...</span>
-                    <span className="icon-[ph--spinner-bold] ml-1 size-3 animate-spin" />
-                  </>
-                ) : (
-                  <>
-                    <span>Settings saved on database</span>
-                    <span className="icon-[ph--cloud-arrow-up-bold] ml-1 size-3" />
-                  </>
-                )}
-              </p>
-            )}
-          </form.Subscribe>
-        </CardFooter>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle className="px-8">Inference analysis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-1 flex justify-end items-center gap-2 text-lg font-semibold text-slate-500">
+      <Card className="sticky bottom-0 z-20 mb-0 gap-1 py-2 pb-0 shadow-lg lg:hidden">
+        <CardHeader className="flex flex-row items-center justify-between px-6 py-1">
+          <CardTitle className="text-sm">Inference analysis</CardTitle>
+          <div className="flex items-center gap-1 text-sm font-semibold text-slate-500">
             Error unit: [
             <select
               value={unit}
-              className="rounded-lg bg-gray-100"
+              className="rounded-lg bg-gray-100 text-sm"
               style={{ textAlign: "center", textAlignLast: "center" }}
               onChange={(e) => setUnit(e.target.value as Unit)}
             >
@@ -351,13 +405,21 @@ function RouteComponent() {
             </select>
             ]
           </div>
+        </CardHeader>
+        <CardContent className="px-6 pb-0">
           <form.Field name="lampPoints">
             {(fieldLP) => (
               <form.Field name="materialPoints">
                 {(fieldMP) => (
-                  <div className="grid grid-cols-1 items-center justify-center gap-4 px-8 md:grid-cols-2">
-                    <div>
-                      <h2 className="text-center font-bold text-lg">Xpixel Vs Wavelength</h2>
+                  <div className="grid grid-cols-1 items-center justify-center gap-1.5 sm:grid-cols-2">
+                    <div
+                      className={
+                        errorGraphStackPosition === "above"
+                          ? "order-2 sm:order-1"
+                          : "order-1 sm:order-1"
+                      }
+                    >
+                      <h2 className="mb-0 text-center font-bold text-xs leading-tight">Xpixel Vs Wavelength</h2>
 
                       <InferenceBoxGraph
                         pixelToWavelengthFunction={pixelToWavelengthFunction}
@@ -365,8 +427,28 @@ function RouteComponent() {
                         materialPoints={fieldMP.state.value}
                       />
                     </div>
-                    <div>
-                      <h2 className="text-center font-bold text-lg">Graph of dispersion error</h2>
+                    <div
+                      className={
+                        errorGraphStackPosition === "above"
+                          ? "order-1 sm:order-2"
+                          : "order-2 sm:order-2"
+                      }
+                    >
+                      <div className="mb-0 flex items-center justify-between">
+                        <h2 className="text-center font-bold text-xs leading-tight">Graph of dispersion error</h2>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] sm:hidden"
+                          onClick={() =>
+                            setErrorGraphStackPosition((prev) =>
+                              prev === "below" ? "above" : "below",
+                            )
+                          }
+                        >
+                          {errorGraphStackPosition === "below" ? "Mover arriba" : "Mover abajo"}
+                        </Button>
+                      </div>
                       <ErrorScatterGraph
                         pixelToWavelengthFunction={pixelToWavelengthFunction}
                         lampPoints={fieldLP.state.value}
