@@ -1,9 +1,11 @@
 import { useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
 import { useState } from "react"
+import type z from "zod"
 import { Button } from "~/components/ui/button"
 import { withForm } from "~/hooks/use-app-form"
 import { cn, legendreAlgoritm, linearRegression, piecewiseLinearRegression } from "~/lib/utils"
+import type { TeoricalSpectrumConfigSchema } from "~/types/calibrate"
 import { LoadLampFileModal } from "../-components/LoadLampFileModal"
 import { ReferenceLampRange } from "../-components/ReferenceLampRange"
 import { ReferenceLampSpectrum } from "../-components/ReferenceLampSpectrum"
@@ -41,8 +43,9 @@ export const CalibrationSettingsUI = withForm({
     deegre: 1,
     materialPoints: [{ x: 1, y: 2 }],
     lampPoints: [{ x: 1, y: 2 }],
+    lampOffsets: [{ lampSpectrumId: "", offset: 0 }],
     CALNOTES: { value: "", isKnown: true },
-  },
+  } as z.output<typeof TeoricalSpectrumConfigSchema>,
   props: {
     materialArr: [
       {

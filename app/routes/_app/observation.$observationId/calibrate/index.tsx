@@ -119,9 +119,15 @@ function RouteComponent() {
   const scienceSpectrumId = spectrums.find((s) => s.type === "science")?.id
   const lampSpectrumIds = spectrums.filter((s) => s.type === "lamp").map((s) => s.id)
 
+  const normalizedLampOffsets = lampSpectrumIds.map((lampSpectrumId) => {
+    const persistedOffset = calibration.lampOffsets.find((o) => o.lampSpectrumId === lampSpectrumId)
+    return persistedOffset ?? { lampSpectrumId, offset: 0 }
+  })
+
   const lamps = spectrums
     .filter((s) => s.type !== "science")
     .map((s, idx) => ({
+      spectrumId: s.id,
       id: idx,
       data: s.intensityArr.map((n, idx) => ({
         pixel: idx,
@@ -138,6 +144,7 @@ function RouteComponent() {
     deegre: calibration.deegre,
     materialPoints: calibration.materialPoints,
     lampPoints: calibration.lampPoints,
+    lampOffsets: normalizedLampOffsets,
     CALNOTES: { value: calibration.CALNOTES, isKnown: calibration["CALNOTES?"] },
   }
 
@@ -161,6 +168,7 @@ function RouteComponent() {
               deegre: value.deegre,
               materialPoints: value.materialPoints,
               lampPoints: value.lampPoints,
+              lampOffsets: value.lampOffsets,
               CALNOTES: value.CALNOTES,
             },
           })
@@ -242,16 +250,32 @@ function RouteComponent() {
               <div className="flex flex-col gap-0">
                 {/* Grafico espectro calibrado para cada lampara */}
                 {lamps.map((lamp, idx) => (
-                  <div key={`TeoricalSpectrumLamp-${lamp.id}`}>
-                    <CardTitle className="mb-1">Empirical Comparison Lamp {idx}</CardTitle>
-                    <EmpiricalSpectrum
-                      data={lamp.data}
-                      lampPoints={fieldLP.state.value}
-                      setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
-                      onDeleteIndex={handleDeletePointAtIndex}
-                      pixelToWavelengthFunction={pixelToWavelengthFunction}
-                    />
-                  </div>
+                  <form.AppField key={`TeoricalSpectrumLamp-${lamp.id}`} name={`lampOffsets[${idx}].offset`}>
+                    {(fieldOffset) => (
+                      <div>
+                        <CardTitle className="mb-1">
+                          Empirical Comparison Lamp {idx}
+                          <fieldOffset.StepperField
+                            className="shrink-0"
+                            label="Offset"
+                            min={-100}
+                            max={100}
+                            step={1}
+                          />
+                        </CardTitle>
+                        <EmpiricalSpectrum
+                          data={lamp.data.map((point) => ({
+                            pixel: point.pixel + (fieldOffset.state.value ?? 0),
+                            intensity: point.intensity,
+                          }))}
+                          lampPoints={fieldLP.state.value}
+                          setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                          onDeleteIndex={handleDeletePointAtIndex}
+                          pixelToWavelengthFunction={pixelToWavelengthFunction}
+                        />
+                      </div>
+                    )}
+                  </form.AppField>
                 ))}
 
                 <hr className="my-8" />

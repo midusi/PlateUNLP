@@ -26,6 +26,10 @@ export const calibration = sqliteTable(
       .notNull()
       .$type<{ x: number; y: number }[]>()
       .default(sql`'[]'`),
+    lampOffsets: text("lampOffsets", { mode: "json" })
+      .notNull()
+      .$type<{ lampSpectrumId: string; offset: number }[]>()
+      .default(sql`'[]'`),
     materialPoints: text("materialPoints", { mode: "json" })
       .notNull()
       .$type<{ x: number; y: number }[]>()

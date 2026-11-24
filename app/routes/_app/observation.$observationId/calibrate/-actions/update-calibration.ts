@@ -18,6 +18,9 @@ export const updateCalibration = createServerFn()
       deegre: z.number().min(1, "Degre must be positive integer").optional(),
       materialPoints: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
       lampPoints: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
+      lampOffsets: z
+        .array(z.object({ lampSpectrumId: z.string(), offset: z.number().int() }))
+        .optional(),
       CALNOTES: z.object({ value: z.string(), isKnown: z.boolean() }).optional(),
     }),
   )
@@ -41,6 +44,7 @@ export const updateCalibration = createServerFn()
         deegre: data.deegre,
         materialPoints: data.materialPoints,
         lampPoints: data.lampPoints,
+        lampOffsets: data.lampOffsets,
         CALNOTES: data.CALNOTES?.value,
         "CALNOTES?": data.CALNOTES?.isKnown,
       })
@@ -55,6 +59,7 @@ export const updateCalibration = createServerFn()
         deegre: s.calibration.deegre,
         materialPoints: s.calibration.materialPoints,
         lampPoints: s.calibration.lampPoints,
+        lampOffsets: s.calibration.lampOffsets,
         CALNOTES: s.calibration.CALNOTES,
         "CALNOTES?": s.calibration["CALNOTES?"],
       })

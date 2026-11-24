@@ -1,0 +1,1 @@
+ALTER TABLE `calibration` ADD `lampOffsets` text DEFAULT '[]' NOT NULL;

@@ -13,6 +13,7 @@ export const TeoricalSpectrumConfigSchema = z
     deegre: z.number().min(1, "Degre must be positive integer"),
     materialPoints: z.array(z.object({ x: z.number(), y: z.number() })),
     lampPoints: z.array(z.object({ x: z.number(), y: z.number() })),
+    lampOffsets: z.array(z.object({ lampSpectrumId: z.string(), offset: z.number().int() })),
     CALNOTES: z.object({
       value: z.string(),
       isKnown: z.boolean(),

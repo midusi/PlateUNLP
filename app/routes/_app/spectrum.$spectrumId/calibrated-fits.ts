@@ -43,7 +43,12 @@ export const Route = createFileRoute("/_app/spectrum/$spectrumId/calibrated-fits
           return new Response("Calibration points not found", { status: 400 })
         }
 
-        const x = matches.map((match) => match.lamp.x)
+        const lampOffset =
+          spectrum.type === "lamp"
+            ? (calibration.lampOffsets.find((offset) => offset.lampSpectrumId === spectrum.id)?.offset ?? 0)
+            : 0
+
+        const x = matches.map((match) => match.lamp.x + lampOffset)
         const y = matches.map((match) => match.material.x)
         let calibrate: (value: number) => number
         try {
