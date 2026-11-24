@@ -21,7 +21,7 @@ const formatNumber = new Intl.NumberFormat("en-US", {
 const getX = (p: { P: number; Å: number }) => p.P
 const getY = (p: { P: number; Å: number }) => p.Å
 
-const margin = { top: 20, right: 20, bottom: 40, left: 60 }
+const margin = { top: 8, right: 14, bottom: 28, left: 50 }
 
 interface InferenceBoxGraphProps {
   pixelToWavelengthFunction: CustomError | ((value: number) => number)
@@ -131,7 +131,7 @@ export function InferenceBoxGraph({
       <svg
         ref={containerRef}
         width={width}
-        height={400}
+        height={280}
         role="img"
         aria-label="Xpixel Vs Wavelength"
       >
@@ -139,7 +139,7 @@ export function InferenceBoxGraph({
           <GraphInErrorCase
             message={pixelToWavelengthFunction.message}
             dimensions={{ height, width }}
-            labels={{ x: "Pixel", y: "Wavelength (Å)" }}
+            labels={{ x: "Pixel (px)", y: "Wavelength (Å)" }}
           />
         ) : (
           <Group left={margin.left - margin.right} top={margin.top}>
@@ -190,7 +190,7 @@ export function InferenceBoxGraph({
             <AxisBottom
               scale={xScale}
               top={height - margin.bottom - margin.top}
-              label="Pixel"
+              label="Pixel (px)"
               numTicks={Math.floor(width / 80)}
               tickFormat={(value: NumberValue) => formatNumber(Number(value))}
             />
