@@ -15,7 +15,6 @@ import {
 import clsx from "clsx"
 import { useState } from "react"
 import { Button } from "~/components/ui/button"
-import { Checkbox } from "~/components/ui/checkbox"
 import { Input } from "~/components/ui/input"
 import {
   Table,
@@ -34,7 +33,6 @@ import {
   getProjectPlatesStatus,
   type PlateStatus,
 } from "./-actions/get-project-plates-status"
-import { DeletePlates } from "./-components/DeletePlates"
 import { UploadPlate } from "./-components/UploadPlate"
 
 export const Route = createFileRoute("/_app/project/$projectId/")({
@@ -271,8 +269,6 @@ function matchesStatusFilter(status: PlateStatus, filter: StatusFilterValue): bo
 }
 
 const columnWidthById: Record<string, string> = {
-  delete: "44px",
-  select: "44px",
   "PLATE-N": "23%",
   observations: "50%",
   status: "20%",
@@ -280,34 +276,6 @@ const columnWidthById: Record<string, string> = {
 
 const columnHelper = createColumnHelper<Plate>()
 const columns = [
-  columnHelper.display({
-    id: "delete",
-    size: 44,
-    enableSorting: false,
-    header: () => <span className="sr-only">Delete</span>,
-    cell: ({ row }) => <DeletePlates plateIds={[row.original.id]} iconOnly />,
-  }),
-  columnHelper.display({
-    id: "select",
-    size: 44,
-    enableHiding: false,
-    enableSorting: false,
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        indeterminate={table.getIsSomePageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select plate"
-      />
-    ),
-  }),
   columnHelper.accessor("PLATE-N", {
     size: 260,
     header: "Plate",
@@ -383,8 +351,7 @@ function RouteComponent() {
   const [sorting, setSorting] = useState<SortingState>([{ id: "status", desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
-
+  
   const table = useReactTable({
     data: project.plates,
     columns,
@@ -396,7 +363,6 @@ function RouteComponent() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     getExpandedRowModel: getExpandedRowModel(),
     defaultColumn: {
       minSize: 0,
@@ -407,14 +373,8 @@ function RouteComponent() {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
     },
   })
-
-  const selectedIds = Object.entries(rowSelection)
-    .filter(([_, selected]) => selected)
-    .map(([id]) => id)
-
   return (
     <div className="w-full">
       <div className="flex flex-row items-center gap-4">
@@ -453,11 +413,7 @@ function RouteComponent() {
           ))}
         </select>
         <div className="grow" />
-        {selectedIds.length > 0 ? (
-          <DeletePlates plateIds={selectedIds} onDeleted={() => table.resetRowSelection()} />
-        ) : (
-          <UploadPlate projectId={project.id} />
-        )}
+        <UploadPlate projectId={project.id} />
       </div>
       <div className="overflow-hidden rounded-sm border border-olive-300 bg-background">
         <Table className="table-fixed">
