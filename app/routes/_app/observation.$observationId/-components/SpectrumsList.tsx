@@ -153,6 +153,8 @@ function shareEnds(
   })
 }
 
+type SpectrumType = "lamp" | "science"
+
 export function SpectrumsList({
   observationId,
   initialSpectrums,
@@ -174,6 +176,40 @@ export function SpectrumsList({
       .length + 1
     return spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampIndex : undefined)
     }),
+  )
+
+  const [visibleTypes, setVisibleTypes] = useState<Set<SpectrumType>>(
+    new Set(["lamp", "science"]),
+  )
+
+  /** Alterna la visibilidad de un tipo. */
+  const toggleType = (type: SpectrumType) => {
+    setVisibleTypes((prev) => {
+      const next = new Set(prev)
+      if (next.has(type)) {
+        next.delete(type)
+      } else {
+        next.add(type)
+      }
+      return next
+    })
+  }
+
+  const toggleButtonClass = (type: SpectrumType) =>
+    cn(
+      "h-7 gap-1.5 font-medium",
+      type === "lamp"
+        ? visibleTypes.has("lamp")
+          ? "bg-red-500/20 text-red-700 border-red-400 hover:bg-red-500/30 dark:text-red-400 dark:border-red-500"
+          : "opacity-50"
+        : visibleTypes.has("science")
+          ? "bg-green-500/20 text-green-700 border-green-400 hover:bg-green-500/30 dark:text-green-400 dark:border-green-500"
+          : "opacity-50",
+    )
+
+  const visibleBoxes = boundingBoxes.filter((box) =>
+    (box.color === "red" && visibleTypes.has("lamp")) ||
+    (box.color === "green" && visibleTypes.has("science")),
   )
 
   useEffect(() => {
@@ -241,6 +277,7 @@ export function SpectrumsList({
         spectrumToBoundingBox(newSpectrums.lamp2, 2),
       ]
       setBoundingBoxes((prev) => [...boundingBoxesFormated])
+      setVisibleTypes(new Set(["lamp", "science"]))
     },
     onError: (error) => notifyError("Error determine bounding boxes", error),
   })
@@ -253,6 +290,13 @@ export function SpectrumsList({
       setBoundingBoxes((prev) => {
         const lampCount = prev.filter((b) => b.color === 'red').length + 1
         return [spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampCount : undefined), ...prev]
+      })
+      setVisibleTypes((prev) => {
+        const type: SpectrumType = spectrum.type === "lamp" ? "lamp" : "science"
+        if (prev.has(type)) return prev
+        const next = new Set(prev)
+        next.add(type)
+        return next
       })
     },
     onSuccess: () => router.invalidate(),
@@ -311,7 +355,7 @@ export function SpectrumsList({
       <CardContent className="h-[500px] p-0">
         <BoundingBoxer
           imageSrc={`/api/observation/${observationId}/preview`}
-          boundingBoxes={boundingBoxes}
+          boundingBoxes={visibleBoxes}
           showBBList={false}
           keepEndLines
           showImageAdjustActions
@@ -350,6 +394,36 @@ export function SpectrumsList({
           onBoundingBoxAdd={(boundingBox) => addSpectrumMut.mutate(boundingBox)}
           onBoundingBoxDelete={(id) => deleteSpectrumMut.mutate(id)}
         >
+          <Button
+            size="sm"
+            variant="outline"
+            title={visibleTypes.has("lamp") ? "Hide lamps" : "Show lamps"}
+            onClick={() => toggleType("lamp")}
+            className={cn(
+              "h-7 gap-1.5 font-medium",
+              visibleTypes.has("lamp")
+                ? "border-[red] text-[red] hover:bg-[red]/10"
+                : "opacity-50",
+            )}
+          >
+            <span className="size-2.5 rounded-full bg-[red] shrink-0" />
+            Lamps
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            title={visibleTypes.has("science") ? "Hide science" : "Show science"}
+            onClick={() => toggleType("science")}
+              className={cn(
+                "h-7 gap-1.5 font-medium",
+                visibleTypes.has("science")
+                  ? "border-[green] text-[green] hover:bg-[green]/10"
+                  : "opacity-50",
+              )}
+          >
+            <span className="size-2.5 rounded-full bg-[green] shrink-0" />
+            Science
+          </Button>
           <Button
             size="sm"
             variant="default"
