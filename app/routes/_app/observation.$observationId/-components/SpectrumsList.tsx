@@ -255,6 +255,7 @@ export function SpectrumsList({
         return [spectrumToBoundingBox(spectrum, spectrum.type === 'lamp' ? lampCount : undefined), ...prev]
       })
     },
+    onSuccess: () => router.invalidate(),
     onError: (error) => notifyError("Error adding spectrum", error),
   })
 
