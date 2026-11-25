@@ -3,8 +3,7 @@ import { useRef, useState } from "react"
 import type { z } from "zod"
 import { FITSExportButton } from "~/components/FITSExportButton"
 import { TextAreaFieldWithKnown } from "~/components/forms/textarea-field-with-known"
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
+import { Card, CardContent, CardFooter, CardTitle } from "~/components/ui/card"
 import { useAppForm } from "~/hooks/use-app-form"
 import { useGlobalStore } from "~/hooks/use-global-store"
 import { breadcrumb } from "~/lib/breadcrumbs"
@@ -28,11 +27,8 @@ import { getSpectrums } from "./-actions/get-spectrums"
 import { updateCalibration } from "./-actions/update-calibration"
 import { CalibrationSettingsUI, inferenceOptions } from "./-child-forms/CalibrationSettingsUI"
 import { EmpiricalSpectrum } from "./-components/EmpiricalSpectrum"
-import { ErrorScatterGraph } from "./-components/ErrorScatterGraph"
-import { InferenceBoxGraph } from "./-components/InferenceBoxGraph"
+import { InferenceAnalysisPanel } from "./-components/InferenceAnalysisPanel"
 import { updateInferenceFuntionInStore } from "./-utils/updateInferenceFunctionInStore"
-
-type Unit = "Å" | "km/s"
 
 export const Route = createFileRoute("/_app/observation/$observationId/calibrate/")({
   component: RouteComponent,
@@ -102,11 +98,6 @@ function RouteComponent() {
   const [materialArr, setMaterialArr] = useState<
     { wavelength: number; material: string; intensity: number }[]
   >(materialData?.arr ?? [])
-
-  const [unit, setUnit] = useState<Unit>("Å")
-  const [errorGraphStackPosition, setErrorGraphStackPosition] = useState<"above" | "below">(
-    "below",
-  )
 
   const [pixelToWavelengthFunction, setPixelToWavelengthFunction] = useGlobalStore((s) => [
     s.pixelToWavelengthFunction,
@@ -226,7 +217,8 @@ function RouteComponent() {
 
   function handleDeletePointAtIndex(index: number) {
     const lampPoints = (form.getFieldValue("lampPoints") as { x: number; y: number }[]) || []
-    const materialPoints = (form.getFieldValue("materialPoints") as { x: number; y: number }[]) || []
+    const materialPoints =
+      (form.getFieldValue("materialPoints") as { x: number; y: number }[]) || []
 
     const newLampPoints = lampPoints.filter((_, i) => i !== index)
     const newMaterialPoints = materialPoints.filter((_, i) => i !== index)
@@ -237,7 +229,7 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3">
         <Card className="mx-auto w-full px-8 lg:col-span-2">
           <CardContent>
             <CardTitle className="mb-4">Teorical Comparison Lamp</CardTitle>
@@ -255,7 +247,10 @@ function RouteComponent() {
                 <div className="flex flex-col gap-0">
                   {/* Grafico espectro calibrado para cada lampara */}
                   {lamps.map((lamp, idx) => (
-                    <form.AppField key={`TeoricalSpectrumLamp-${lamp.id}`} name={`lampOffsets[${idx}].offset`}>
+                    <form.AppField
+                      key={`TeoricalSpectrumLamp-${lamp.id}`}
+                      name={`lampOffsets[${idx}].offset`}
+                    >
                       {(fieldOffset) => (
                         <div>
                           <CardTitle className="mb-1">
@@ -274,7 +269,9 @@ function RouteComponent() {
                               intensity: point.intensity,
                             }))}
                             lampPoints={fieldLP.state.value}
-                            setLampPoints={(arr: { x: number; y: number }[]) => fieldLP.handleChange(arr)}
+                            setLampPoints={(arr: { x: number; y: number }[]) =>
+                              fieldLP.handleChange(arr)
+                            }
                             onDeleteIndex={handleDeletePointAtIndex}
                             pixelToWavelengthFunction={pixelToWavelengthFunction}
                           />
@@ -313,7 +310,11 @@ function RouteComponent() {
           </CardContent>
           <CardFooter className="flex justify-end">
             <form.Subscribe
-              selector={(formState) => [formState.isValid, formState.isSubmitting, formState.isDirty]}
+              selector={(formState) => [
+                formState.isValid,
+                formState.isSubmitting,
+                formState.isDirty,
+              ]}
             >
               {([isValid, isSubmitting, isDirty]) => (
                 <p className="flex items-center text-muted-foreground text-xs italic">
@@ -339,131 +340,21 @@ function RouteComponent() {
           </CardFooter>
         </Card>
 
-        <Card className="hidden gap-1 py-2 pb-0 shadow-lg lg:sticky lg:top-2 lg:flex lg:col-span-1 lg:self-start">
-          <CardHeader className="flex flex-row items-center justify-between px-6 py-1">
-            <CardTitle className="text-sm">Inference analysis</CardTitle>
-            <div className="flex items-center gap-1 text-sm font-semibold text-slate-500">
-              Error unit: [
-              <select
-                value={unit}
-                className="rounded-lg bg-gray-100 text-sm"
-                style={{ textAlign: "center", textAlignLast: "center" }}
-                onChange={(e) => setUnit(e.target.value as Unit)}
-              >
-                <option value="Å">Å</option>
-                <option value="km/s">km/s</option>
-              </select>
-              ]
-            </div>
-          </CardHeader>
-          <CardContent className="px-6 pb-0">
-            <form.Field name="lampPoints">
-              {(fieldLP) => (
-                <form.Field name="materialPoints">
-                  {(fieldMP) => (
-                    <div className="flex flex-col gap-1.5">
-                      <div>
-                        <h2 className="mb-0 text-center font-bold text-xs leading-tight">Xpixel Vs Wavelength</h2>
-                        <InferenceBoxGraph
-                          pixelToWavelengthFunction={pixelToWavelengthFunction}
-                          lampPoints={fieldLP.state.value}
-                          materialPoints={fieldMP.state.value}
-                        />
-                      </div>
-                      <div>
-                        <h2 className="mb-0 text-center font-bold text-xs leading-tight">Graph of dispersion error</h2>
-                        <ErrorScatterGraph
-                          pixelToWavelengthFunction={pixelToWavelengthFunction}
-                          lampPoints={fieldLP.state.value}
-                          materialPoints={fieldMP.state.value}
-                          unit={unit}
-                          onDeleteIndex={handleDeletePointAtIndex}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </form.Field>
+        <form.Field name="lampPoints">
+          {(fieldLP) => (
+            <form.Field name="materialPoints">
+              {(fieldMP) => (
+                <InferenceAnalysisPanel
+                  pixelToWavelengthFunction={pixelToWavelengthFunction}
+                  lampPoints={fieldLP.state.value}
+                  materialPoints={fieldMP.state.value}
+                  onDeleteIndex={handleDeletePointAtIndex}
+                />
               )}
             </form.Field>
-          </CardContent>
-        </Card>
+          )}
+        </form.Field>
       </div>
-
-      <Card className="sticky bottom-0 z-20 mb-0 gap-1 py-2 pb-0 shadow-lg lg:hidden">
-        <CardHeader className="flex flex-row items-center justify-between px-6 py-1">
-          <CardTitle className="text-sm">Inference analysis</CardTitle>
-          <div className="flex items-center gap-1 text-sm font-semibold text-slate-500">
-            Error unit: [
-            <select
-              value={unit}
-              className="rounded-lg bg-gray-100 text-sm"
-              style={{ textAlign: "center", textAlignLast: "center" }}
-              onChange={(e) => setUnit(e.target.value as Unit)}
-            >
-              <option value="Å">Å</option>
-              <option value="km/s">km/s</option>
-            </select>
-            ]
-          </div>
-        </CardHeader>
-        <CardContent className="px-6 pb-0">
-          <form.Field name="lampPoints">
-            {(fieldLP) => (
-              <form.Field name="materialPoints">
-                {(fieldMP) => (
-                  <div className="grid grid-cols-1 items-center justify-center gap-1.5 sm:grid-cols-2">
-                    <div
-                      className={
-                        errorGraphStackPosition === "above"
-                          ? "order-2 sm:order-1"
-                          : "order-1 sm:order-1"
-                      }
-                    >
-                      <h2 className="mb-0 text-center font-bold text-xs leading-tight">Xpixel Vs Wavelength</h2>
-
-                      <InferenceBoxGraph
-                        pixelToWavelengthFunction={pixelToWavelengthFunction}
-                        lampPoints={fieldLP.state.value}
-                        materialPoints={fieldMP.state.value}
-                      />
-                    </div>
-                    <div
-                      className={
-                        errorGraphStackPosition === "above"
-                          ? "order-1 sm:order-2"
-                          : "order-2 sm:order-2"
-                      }
-                    >
-                      <div className="mb-0 flex items-center justify-between">
-                        <h2 className="text-center font-bold text-xs leading-tight">Graph of dispersion error</h2>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 px-2 text-[10px] sm:hidden"
-                          onClick={() =>
-                            setErrorGraphStackPosition((prev) =>
-                              prev === "below" ? "above" : "below",
-                            )
-                          }
-                        >
-                          {errorGraphStackPosition === "below" ? "Mover arriba" : "Mover abajo"}
-                        </Button>
-                      </div>
-                      <ErrorScatterGraph
-                        pixelToWavelengthFunction={pixelToWavelengthFunction}
-                        lampPoints={fieldLP.state.value}
-                        materialPoints={fieldMP.state.value}
-                        unit={unit}
-                        onDeleteIndex={handleDeletePointAtIndex}
-                      />
-                    </div>
-                  </div>
-                )}
-              </form.Field>
-            )}
-          </form.Field>
-        </CardContent>
-      </Card>
 
       <form.Subscribe
         selector={(formState) => ({
