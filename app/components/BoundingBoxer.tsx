@@ -18,8 +18,8 @@ import {
   endLinesOf,
   extendBoxToLines,
   orientedBoxExtent,
-  rotatePlacedBox,
   type PlacedBox,
+  rotatePlacedBox,
   toStoredGeometry,
 } from "~/lib/oriented-box"
 import { cn } from "~/lib/utils"
@@ -1449,7 +1449,7 @@ function BoundingBoxDraw({
           height: boundingBox.height,
           borderWidth: handleWidth,
         }}
-        className="absolute box-border border-primary border-solid"
+        className="absolute box-border border-dashed border-sky-400 bg-sky-400/10"
       />
     )
   } else if (enabled) {
