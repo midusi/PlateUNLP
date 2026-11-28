@@ -5,7 +5,11 @@ import sharp from "sharp"
 import { z } from "zod"
 import { db } from "~/db"
 import { obsNFromIndex } from "~/lib/obs-n"
-import { normalizeOrientedBoxRadians, toStoredGeometry } from "~/lib/oriented-box"
+import {
+  normalizeOrientedBoxRadians,
+  suppressDuplicates,
+  toStoredGeometry,
+} from "~/lib/oriented-box"
 import { readEditedFile } from "~/lib/uploads"
 
 /**
@@ -93,31 +97,34 @@ export const getObservationDetections = createServerFn()
 
     // console.log("Valid predictions after filtering:", validPredictions)
 
-    const formattedPredictions = validPredictions
-      .map((pred) => {
-        // x1, y1 coordendas del centro
-        // w es ancho
-        // h es alto
-        // score es la confianza
-        // class es la clase predicha (0 = observación)
-        // inc es la inclinación de la caja, en radianes y sin normalizar
+    const detections = validPredictions.map((pred) => {
+      // x1, y1 coordendas del centro
+      // w es ancho
+      // h es alto
+      // score es la confianza
+      // class es la clase predicha (0 = observación)
+      // inc es la inclinación de la caja, en radianes y sin normalizar
 
-        const [x1, y1, w, h, _score, _class, inc] = pred
+      const [x1, y1, w, h, score, _class, inc] = pred
 
-        // Mapear de vuelta al espacio original:
-        // 1. Restar el padding (offset)
-        // 2. Dividir por la escala aplicada
-        // 3. Normalizar la inclinación a (-45°, 45°] intercambiando ancho y alto si hace falta
-        // 4. Guardar el rectángulo envolvente (el que se recorta) junto con la caja
-        //    orientada. El rectángulo se acota a los bordes: el modelo puede predecir
-        //    cajas que se salen unos píxeles de la imagen (p. ej. left = -0.88 en una
-        //    placa rotada).
-        const box = normalizeOrientedBoxRadians(w / scale, h / scale, inc)
-        return toStoredGeometry(
-          { ...box, centerX: (x1 - offsetX) / scale, centerY: (y1 - offsetY) / scale },
-          { x: origW, y: origH },
-        )
-      })
+      // Mapear de vuelta al espacio original:
+      // 1. Restar el padding (offset)
+      // 2. Dividir por la escala aplicada
+      // 3. Normalizar la inclinación a (-45°, 45°] intercambiando ancho y alto si hace falta
+      const box = normalizeOrientedBoxRadians(w / scale, h / scale, inc)
+      return {
+        score,
+        box: { ...box, centerX: (x1 - offsetX) / scale, centerY: (y1 - offsetY) / scale },
+      }
+    })
+
+    // 4. Descartar las detecciones duplicadas de una misma observación
+    // 5. Guardar el rectángulo envolvente (el que se recorta) junto con la caja
+    //    orientada. El rectángulo se acota a los bordes: el modelo puede predecir
+    //    cajas que se salen unos píxeles de la imagen (p. ej. left = -0.88 en una
+    //    placa rotada).
+    const formattedPredictions = suppressDuplicates(detections)
+      .map(({ box }) => toStoredGeometry(box, { x: origW, y: origH }))
       // Descartar cajas que tras el recorte quedan sin área (predichas fuera de la imagen)
       .filter((box) => box.imageWidth >= 1 && box.imageHeight >= 1)
       .map((box, idx) => ({

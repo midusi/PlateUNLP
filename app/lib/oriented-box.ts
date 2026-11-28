@@ -352,6 +352,88 @@ export function endLinesWithin(boxes: PlacedBox[], totalWidth: number): EndLines
   return { angle, start, end }
 }
 
+type Point = [number, number]
+
+/** Vertices de la caja, siempre en el mismo sentido de recorrido (area con signo positiva). */
+function orientedBoxCorners(box: PlacedBox): Point[] {
+  const [dx, dy] = directionOf(box.angle)
+  const halfW = box.width / 2
+  const halfH = box.height / 2
+  const corner = (along: number, across: number): Point => [
+    box.centerX + along * dx - across * dy,
+    box.centerY + along * dy + across * dx,
+  ]
+  return [
+    corner(-halfW, -halfH),
+    corner(halfW, -halfH),
+    corner(halfW, halfH),
+    corner(-halfW, halfH),
+  ]
+}
+
+/** Parte del poligono `subject` que cae dentro del convexo `clip` (Sutherland-Hodgman). */
+function clipPolygon(subject: Point[], clip: Point[]): Point[] {
+  let output = subject
+  for (let i = 0; i < clip.length && output.length > 0; i++) {
+    const [ax, ay] = clip[i]
+    const [bx, by] = clip[(i + 1) % clip.length]
+    // Positivo del lado interior de la arista a -> b, negativo del exterior.
+    const side = ([x, y]: Point) => (bx - ax) * (y - ay) - (by - ay) * (x - ax)
+    const input = output
+    output = []
+    for (let j = 0; j < input.length; j++) {
+      const from = input[j]
+      const to = input[(j + 1) % input.length]
+      const fromSide = side(from)
+      const toSide = side(to)
+      if (fromSide >= 0) output.push(from)
+      if (fromSide >= 0 !== toSide >= 0) {
+        const t = fromSide / (fromSide - toSide)
+        output.push([from[0] + t * (to[0] - from[0]), from[1] + t * (to[1] - from[1])])
+      }
+    }
+  }
+  return output
+}
+
+/** Area de un poligono simple (formula del cordon). */
+function polygonArea(points: Point[]): number {
+  let twice = 0
+  for (let i = 0; i < points.length; i++) {
+    const [x1, y1] = points[i]
+    const [x2, y2] = points[(i + 1) % points.length]
+    twice += x1 * y2 - x2 * y1
+  }
+  return Math.abs(twice) / 2
+}
+
+/** Interseccion sobre union de dos cajas orientadas, entre 0 (no se tocan) y 1 (la misma). */
+export function orientedIou(a: PlacedBox, b: PlacedBox): number {
+  const intersection = polygonArea(clipPolygon(orientedBoxCorners(a), orientedBoxCorners(b)))
+  const union = a.width * a.height + b.width * b.height - intersection
+  return union > 0 ? intersection / union : 0
+}
+
+/** IoU a partir del cual dos detecciones se consideran el mismo objeto. */
+export const DUPLICATE_IOU = 0.5
+
+/**
+ * Supresion de no maximos (NMS) sobre cajas orientadas: de cada grupo de detecciones
+ * superpuestas queda la de mayor `score`. Los modelos son NMS-free pero no lo garantizan.
+ * Se compara la caja orientada y no su rectangulo envolvente, que en cajas inclinadas se
+ * superpone con el de los vecinos. Devuelve las que quedan, de mayor a menor score.
+ */
+export function suppressDuplicates<T extends { box: PlacedBox; score: number }>(
+  detections: T[],
+): T[] {
+  const kept: T[] = []
+  for (const detection of [...detections].sort((a, b) => b.score - a.score)) {
+    const isDuplicate = kept.some((other) => orientedIou(detection.box, other.box) > DUPLICATE_IOU)
+    if (!isDuplicate) kept.push(detection)
+  }
+  return kept
+}
+
 /** Valores que se guardan en `observation` / `spectrum` para una caja ubicada. */
 export interface StoredGeometry {
   imageLeft: number
